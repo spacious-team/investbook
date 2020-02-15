@@ -27,6 +27,5 @@ public class TransactionEntity {
     private int count;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "transaction_id", referencedColumnName = "id")
     private Set<TransactionCashFlowEntity> transactionCashFlows;
 }

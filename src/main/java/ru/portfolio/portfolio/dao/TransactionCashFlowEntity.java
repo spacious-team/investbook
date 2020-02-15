@@ -6,19 +6,17 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "transaction_cash_flow")
-@IdClass(TransactionCashFlowEntityPK.class)
 @Data
 public class TransactionCashFlowEntity {
-
     @EmbeddedId
     private TransactionCashFlowEntityPK TransactionCashFlowId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "transaction_id", referencedColumnName = "id")
+    @JoinColumn(name = "transaction_id", referencedColumnName = "id", insertable = false, updatable = false)
     private TransactionEntity transaction;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type", referencedColumnName = "id")
+    @JoinColumn(name = "type", referencedColumnName = "id", insertable = false, updatable = false)
     private CashFlowTypeEntity type;
 
     @Basic
