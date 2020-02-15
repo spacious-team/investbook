@@ -9,16 +9,16 @@ import javax.persistence.*;
 @Data
 public class SecurityEntity {
     @Id
+    @Basic
+    @Column(name = "isin")
+    private String isin;
+
     @Column(name = "ticker")
     private String ticker;
 
     @Basic
     @Column(name = "name")
     private String name;
-
-    @Basic
-    @Column(name = "isin")
-    private String isin;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "issuer_inn", referencedColumnName = "inn")

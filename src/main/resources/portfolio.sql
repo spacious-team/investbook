@@ -44,14 +44,14 @@ INSERT IGNORE INTO `cash_flow_type` (`id`, `name`) VALUES
 CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `ticker` varchar(16) NOT NULL COMMENT 'Тикер инструмента, по которому произошло событие',
+  `isin` char(12) NOT NULL COMMENT 'ISIN инструмента, по которому произошло событие',
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` int(10) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
   PRIMARY KEY (`id`),
   KEY `event_cash_flow_type_ix` (`type`),
-  KEY `event_cash_flow_ticker_ix` (`ticker`),
-  CONSTRAINT `event_cash_flow_ticker_fkey` FOREIGN KEY (`ticker`) REFERENCES `security` (`ticker`) ON UPDATE CASCADE,
+  KEY `event_cash_flow_ticker_ix` (`isin`),
+  CONSTRAINT `event_cash_flow_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE,
   CONSTRAINT `event_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств';
 
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS `event_cash_flow` (
 
 -- Дамп структуры для таблица portfolio.issuer
 CREATE TABLE IF NOT EXISTS `issuer` (
-  `inn` int(10) unsigned zerofill NOT NULL COMMENT 'ИНН',
+  `inn` bigint(10) unsigned zerofill NOT NULL COMMENT 'ИНН',
   `name` varchar(100) NOT NULL COMMENT 'Наименование',
   PRIMARY KEY (`inn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Эмитенты';
@@ -72,11 +72,11 @@ CREATE TABLE IF NOT EXISTS `issuer` (
 
 -- Дамп структуры для таблица portfolio.security
 CREATE TABLE IF NOT EXISTS `security` (
-  `ticker` varchar(16) NOT NULL COMMENT 'Тикер',
+  `isin` char(12) NOT NULL COMMENT 'ISIN код ценной бумаги',
+  `ticker` varchar(16) DEFAULT NULL COMMENT 'Тикер',
   `name` varchar(100) DEFAULT NULL COMMENT 'Полное наименование ценной бумаги или дериватива',
-  `isin` char(12) DEFAULT NULL COMMENT 'ISIN код ценной бумаги',
-  `issuer_inn` int(10) unsigned zerofill DEFAULT NULL COMMENT 'Эмитент (ИНН)',
-  PRIMARY KEY (`ticker`),
+  `issuer_inn` bigint(10) unsigned zerofill DEFAULT NULL COMMENT 'Эмитент (ИНН)',
+  PRIMARY KEY (`isin`),
   KEY `security_issuer_inn_ix` (`issuer_inn`),
   CONSTRAINT `security_issuer_inn_fkey` FOREIGN KEY (`issuer_inn`) REFERENCES `issuer` (`inn`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Общая информация по ценным бумагам';
@@ -88,12 +88,12 @@ CREATE TABLE IF NOT EXISTS `security` (
 -- Дамп структуры для таблица portfolio.transaction
 CREATE TABLE IF NOT EXISTS `transaction` (
   `id` int(10) unsigned NOT NULL COMMENT 'Номер транзакции',
-  `ticker` varchar(16) NOT NULL COMMENT 'Ценная бумага',
+  `isin` char(12) NOT NULL DEFAULT '' COMMENT 'Ценная бумага',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Время совершения сделки',
   `count` int(10) unsigned zerofill NOT NULL COMMENT 'Время сделки',
   PRIMARY KEY (`id`),
-  KEY `transaction_ticker_ix` (`ticker`),
-  CONSTRAINT `transaction_ticker_fkey` FOREIGN KEY (`ticker`) REFERENCES `security` (`ticker`) ON UPDATE CASCADE
+  KEY `transaction_ticker_ix` (`isin`),
+  CONSTRAINT `transaction_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Сделки';
 
 -- Дамп данных таблицы portfolio.transaction: ~0 rows (приблизительно)

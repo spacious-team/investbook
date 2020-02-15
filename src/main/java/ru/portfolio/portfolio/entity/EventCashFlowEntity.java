@@ -20,7 +20,7 @@ public class EventCashFlowEntity {
     private Timestamp timestamp;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ticker", referencedColumnName = "ticker")
+    @JoinColumn(name = "isin", referencedColumnName = "ticker")
     private SecurityEntity security;
 
     @ManyToOne(fetch = FetchType.LAZY)

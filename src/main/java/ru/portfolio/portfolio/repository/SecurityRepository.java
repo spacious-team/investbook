@@ -6,5 +6,5 @@ import ru.portfolio.portfolio.entity.SecurityEntity;
 import java.util.Optional;
 
 public interface SecurityRepository extends JpaRepository<SecurityEntity, String> {
-    Optional<SecurityEntity> findByTicker(String ticker);
+    Optional<SecurityEntity> findByIsin(String isin);
 }
