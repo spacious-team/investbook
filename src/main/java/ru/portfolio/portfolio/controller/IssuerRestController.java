@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.portfolio.portfolio.converter.IssuerEntityConverter;
 import ru.portfolio.portfolio.dao.IssuerEntity;
 import ru.portfolio.portfolio.pojo.Issuer;
 import ru.portfolio.portfolio.repository.IssuerRepository;
@@ -18,6 +19,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class IssuerRestController {
     private final IssuerRepository issuerRepository;
+    private final IssuerEntityConverter issuerEntityConverter;
 
     @GetMapping("/issuers")
     public List<IssuerEntity> getIssuers() {
@@ -69,10 +71,14 @@ public class IssuerRestController {
         }
         Optional<IssuerEntity> result = issuerRepository.findByInn(inn);
         if (result.isPresent()) {
-            return ResponseEntity.ok(issuerRepository.saveAndFlush(issuer.toEntity()));
+            return ResponseEntity.ok(saveAndFlush(issuer));
         } else {
             return createEntity(issuer);
         }
+    }
+
+    private IssuerEntity saveAndFlush(Issuer issuer) {
+        return issuerRepository.saveAndFlush(issuerEntityConverter.toEntity(issuer));
     }
 
     /**
@@ -81,7 +87,7 @@ public class IssuerRestController {
     private ResponseEntity<IssuerEntity> createEntity(Issuer issuer) throws URISyntaxException {
         return ResponseEntity
                 .created(getLocation(issuer))
-                .body(issuerRepository.saveAndFlush(issuer.toEntity()));
+                .body(saveAndFlush(issuer));
     }
 
     private URI getLocation(Issuer issuer) throws URISyntaxException {

@@ -7,9 +7,16 @@ import javax.validation.constraints.NotNull;
 
 @Getter
 @Builder
-public class Issuer {
+public class Security {
     @NotNull
-    private final Long inn;
+    private final String ticker;
+
     @NotNull
     private final String name;
+
+    @NotNull
+    private final String isin;
+
+    @NotNull
+    private final Long inn;
 }
