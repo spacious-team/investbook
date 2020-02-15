@@ -1,7 +1,7 @@
 package ru.portfolio.portfolio.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.portfolio.portfolio.dao.CashFlowTypeEntity;
+import ru.portfolio.portfolio.entity.CashFlowTypeEntity;
 
 import java.util.Optional;
 

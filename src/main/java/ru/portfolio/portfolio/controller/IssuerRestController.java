@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.portfolio.portfolio.converter.IssuerEntityConverter;
-import ru.portfolio.portfolio.dao.IssuerEntity;
+import ru.portfolio.portfolio.entity.IssuerEntity;
 import ru.portfolio.portfolio.pojo.Issuer;
 import ru.portfolio.portfolio.repository.IssuerRepository;
 

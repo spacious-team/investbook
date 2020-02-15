@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import ru.portfolio.portfolio.dao.CashFlowTypeEntity;
+import ru.portfolio.portfolio.entity.CashFlowTypeEntity;
 import ru.portfolio.portfolio.repository.CashFlowTypeRepository;
 
 import java.util.Optional;

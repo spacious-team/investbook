@@ -1,4 +1,4 @@
-package ru.portfolio.portfolio.dao;
+package ru.portfolio.portfolio.entity;
 
 import lombok.Data;
 

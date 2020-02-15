@@ -2,8 +2,8 @@ package ru.portfolio.portfolio.converter;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.dao.IssuerEntity;
-import ru.portfolio.portfolio.dao.SecurityEntity;
+import ru.portfolio.portfolio.entity.IssuerEntity;
+import ru.portfolio.portfolio.entity.SecurityEntity;
 import ru.portfolio.portfolio.pojo.Security;
 import ru.portfolio.portfolio.repository.IssuerRepository;
 

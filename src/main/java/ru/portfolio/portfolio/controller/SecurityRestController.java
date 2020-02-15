@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.portfolio.portfolio.converter.SecurityEntityConverter;
-import ru.portfolio.portfolio.dao.SecurityEntity;
+import ru.portfolio.portfolio.entity.SecurityEntity;
 import ru.portfolio.portfolio.pojo.Security;
 import ru.portfolio.portfolio.repository.SecurityRepository;
 

@@ -1,7 +1,7 @@
 package ru.portfolio.portfolio.converter;
 
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.dao.IssuerEntity;
+import ru.portfolio.portfolio.entity.IssuerEntity;
 import ru.portfolio.portfolio.pojo.Issuer;
 
 @Component
