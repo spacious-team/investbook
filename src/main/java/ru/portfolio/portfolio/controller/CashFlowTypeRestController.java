@@ -12,16 +12,16 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-public class CashFlowTypeController {
+public class CashFlowTypeRestController {
 
     private final CashFlowTypeRepository cashFlowTypeRepository;
 
-    @GetMapping("/cash-flow-type")
+    @GetMapping("/cash-flow-types")
     public Iterable<CashFlowTypeEntity> getCashFlowType() {
         return cashFlowTypeRepository.findAll();
     }
 
-    @GetMapping("/cash-flow-type/{id}")
+    @GetMapping("/cash-flow-types/{id}")
     public ResponseEntity<CashFlowTypeEntity> getCashFlowType(@PathVariable("id") Integer id) {
         Optional<CashFlowTypeEntity> result = cashFlowTypeRepository.findById(id);
         return result

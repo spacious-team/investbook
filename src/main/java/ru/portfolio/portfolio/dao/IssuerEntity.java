@@ -10,7 +10,7 @@ import javax.persistence.*;
 public class IssuerEntity {
     @Id
     @Column(name = "inn")
-    private int inn;
+    private long inn;
 
     @Basic
     @Column(name = "name")
