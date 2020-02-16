@@ -67,7 +67,7 @@ public class SecurityRestController {
     @PutMapping("/securities/{isin}")
     public ResponseEntity<SecurityEntity> putEntity(@PathVariable("isin") String isin, @Valid @RequestBody Security security) throws URISyntaxException {
         if (!security.getIsin().equals(isin)) {
-            throw new BadRequestException("Ticker бумаги в URL и теле запроса отличаются");
+            throw new BadRequestException("ISIN код бумаги задан не верно");
         }
         Optional<SecurityEntity> result = securityRepository.findByIsin(isin);
         if (result.isPresent()) {

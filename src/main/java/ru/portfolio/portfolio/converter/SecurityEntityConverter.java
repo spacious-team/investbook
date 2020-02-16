@@ -7,8 +7,6 @@ import ru.portfolio.portfolio.entity.SecurityEntity;
 import ru.portfolio.portfolio.pojo.Security;
 import ru.portfolio.portfolio.repository.IssuerRepository;
 
-import java.util.Optional;
-
 @Component
 @RequiredArgsConstructor
 public class SecurityEntityConverter implements EntityConverter<SecurityEntity, Security> {
@@ -17,8 +15,7 @@ public class SecurityEntityConverter implements EntityConverter<SecurityEntity, 
 
     @Override
     public SecurityEntity toEntity(Security security) {
-        Optional<IssuerEntity> optionalIssuerEntity = issuerRepository.findByInn(security.getInn());
-        IssuerEntity issuerEntity = optionalIssuerEntity
+        IssuerEntity issuerEntity = issuerRepository.findByInn(security.getInn())
                 .orElseGet(() -> {throw new IllegalArgumentException("Эмитетнт с ИНН не найден: " + security.getInn());});
 
         SecurityEntity entity = new SecurityEntity();

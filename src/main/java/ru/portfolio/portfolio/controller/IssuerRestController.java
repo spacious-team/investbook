@@ -67,7 +67,7 @@ public class IssuerRestController {
     @PutMapping("/issuers/{inn}")
     public ResponseEntity<IssuerEntity> putEntity(@PathVariable("inn") long inn, @Valid @RequestBody Issuer issuer) throws URISyntaxException {
         if (!issuer.getInn().equals(inn)) {
-            throw new BadRequestException("ИНН в URL и теле запроса отличаются");
+            throw new BadRequestException("ИНН код организации задан неверно");
         }
         Optional<IssuerEntity> result = issuerRepository.findByInn(inn);
         if (result.isPresent()) {
