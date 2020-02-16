@@ -1,9 +1,12 @@
 package ru.portfolio.portfolio.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.math.BigDecimal;
+import java.time.Instant;
 
 
 @Entity
@@ -11,27 +14,30 @@ import java.sql.Timestamp;
 @Data
 public class EventCashFlowEntity {
     @Id
-    @GeneratedValue
+    @GenericGenerator(name = "UseExistingOrGenerateIdGenerator", strategy = "ru.portfolio.portfolio.entity.UseExistingOrGenerateIdGenerator")
+    @GeneratedValue(generator = "UseExistingOrGenerateIdGenerator")
     @Column(name = "id")
-    private int id;
+    private Integer id;
 
     @Basic
     @Column(name = "timestamp")
-    private Timestamp timestamp;
+    private Instant timestamp;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "isin", referencedColumnName = "ticker")
+    @JoinColumn(name = "isin", referencedColumnName = "isin")
+    @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private SecurityEntity security;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type", referencedColumnName = "id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private CashFlowTypeEntity cashFlowType;
 
     @Basic
     @Column(name = "value")
-    private int value;
+    private BigDecimal value;
 
     @Basic
     @Column(name = "currency")
-    private String currency;
+    private String currency = "RUR";
 }

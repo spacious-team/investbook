@@ -1,5 +1,6 @@
 package ru.portfolio.portfolio.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -22,5 +23,6 @@ public class SecurityEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "issuer_inn", referencedColumnName = "inn")
+    @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private IssuerEntity issuer;
 }
