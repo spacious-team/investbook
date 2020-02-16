@@ -20,4 +20,13 @@ public enum CashFlowEvent {
 
     @Getter
     private final int type;
+
+    public static CashFlowEvent valueOf(int type) {
+        for (CashFlowEvent e : values()) {
+            if (e.getType() == type) {
+                return e;
+            }
+        }
+        throw new IllegalArgumentException("Не верный тип события: " + type);
+    }
 }

@@ -1,6 +1,6 @@
 package ru.portfolio.portfolio.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -15,13 +15,13 @@ public class TransactionCashFlowEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transaction_id", referencedColumnName = "id", insertable = false, updatable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer"})
+    @JsonIgnore
     private TransactionEntity transaction;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type", referencedColumnName = "id", insertable = false, updatable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer"})
-    private CashFlowTypeEntity type;
+    @JsonIgnore
+    private CashFlowTypeEntity cashFlowType;
 
     @Basic
     @Column(name = "value")

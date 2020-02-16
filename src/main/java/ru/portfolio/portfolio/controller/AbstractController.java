@@ -65,6 +65,10 @@ public abstract class AbstractController<ID, Pojo, Entity> {
      */
     public ResponseEntity<Entity> put(ID id, Pojo object) throws URISyntaxException {
         object = (getId(object) != null) ? object : updateId(id, object);
+        if (!getId(object).equals(id)) {
+            throw new BadRequestException("Идентификатор объекта, переданный в URI [" + id + "] и в теле " +
+                    "запроса [" + getId(object) + "] не совпадают");
+        }
         Optional<Entity> result = getById(id);
         if (result.isPresent()) {
             return ResponseEntity.ok(saveAndFlush(object));
@@ -88,12 +92,15 @@ public abstract class AbstractController<ID, Pojo, Entity> {
                 .body(saveAndFlush(object));
     }
 
-    private URI getLocationURI(Pojo object) throws URISyntaxException {
+    protected URI getLocationURI(Pojo object) throws URISyntaxException {
         return new URI(getLocation() + "/" + getId(object));
     }
 
     protected abstract String getLocation();
 
+    /**
+     * Delete object from storage. Always return OK http status with empty body.
+     */
     public void delete(ID id) {
         getById(id).ifPresent(repository::delete);
     }
