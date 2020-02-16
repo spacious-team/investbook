@@ -53,9 +53,9 @@ CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   KEY `event_cash_flow_ticker_ix` (`isin`),
   CONSTRAINT `event_cash_flow_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE,
   CONSTRAINT `event_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств';
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств';
 
--- Дамп данных таблицы portfolio.event_cash_flow: ~1 rows (приблизительно)
+-- Дамп данных таблицы portfolio.event_cash_flow: ~9 rows (приблизительно)
 /*!40000 ALTER TABLE `event_cash_flow` DISABLE KEYS */;
 INSERT IGNORE INTO `event_cash_flow` (`id`, `timestamp`, `isin`, `type`, `value`, `currency`) VALUES
 	(1, '2020-02-16 20:09:22', 'RU000A1015S0', 1, -20.00, 'RUR');
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `issuer` (
   PRIMARY KEY (`inn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Эмитенты';
 
--- Дамп данных таблицы portfolio.issuer: ~1 rows (приблизительно)
+-- Дамп данных таблицы portfolio.issuer: ~0 rows (приблизительно)
 /*!40000 ALTER TABLE `issuer` DISABLE KEYS */;
 INSERT IGNORE INTO `issuer` (`inn`, `name`) VALUES
 	(7203126844, '"Энерготехсервис", ООО');
@@ -100,9 +100,9 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   PRIMARY KEY (`id`),
   KEY `transaction_ticker_ix` (`isin`),
   CONSTRAINT `transaction_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Сделки';
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 COMMENT='Сделки';
 
--- Дамп данных таблицы portfolio.transaction: ~0 rows (приблизительно)
+-- Дамп данных таблицы portfolio.transaction: ~1 rows (приблизительно)
 /*!40000 ALTER TABLE `transaction` DISABLE KEYS */;
 INSERT IGNORE INTO `transaction` (`id`, `isin`, `timestamp`, `count`) VALUES
 	(7, 'RU000A1015S0', '2020-02-16 16:21:02', 0000000001);
@@ -123,6 +123,8 @@ CREATE TABLE IF NOT EXISTS `transaction_cash_flow` (
 
 -- Дамп данных таблицы portfolio.transaction_cash_flow: ~0 rows (приблизительно)
 /*!40000 ALTER TABLE `transaction_cash_flow` DISABLE KEYS */;
+INSERT IGNORE INTO `transaction_cash_flow` (`transaction_id`, `type`, `value`, `currency`) VALUES
+	(7, 1, -30, 'RUR');
 /*!40000 ALTER TABLE `transaction_cash_flow` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
