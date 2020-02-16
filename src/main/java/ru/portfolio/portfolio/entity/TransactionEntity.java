@@ -36,4 +36,19 @@ public class TransactionEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private Set<TransactionCashFlowEntity> transactionCashFlows = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+    public void addTransactionCashFlow(TransactionCashFlowEntity cash) {
+        this.transactionCashFlows.add(cash);
+        cash.setTransaction(this);
+    }
+
+    public void removeTransactionCashFlow(TransactionCashFlowEntity cash) {
+        this.transactionCashFlows.remove(cash);
+        cash.setTransaction(null);
+    }
+
+    @Override
+    public int hashCode() { ;
+        return 59 * this.getId() + 43 * this.getTimestamp().hashCode();
+    }
 }

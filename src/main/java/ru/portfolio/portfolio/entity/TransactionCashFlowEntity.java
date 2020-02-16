@@ -29,4 +29,9 @@ public class TransactionCashFlowEntity {
     @Basic
     @Column(name = "currency")
     private String currency = "RUR";
+
+    @Override
+    public int hashCode() {
+        return this.getTransactionCashFlowId().hashCode();
+    }
 }
