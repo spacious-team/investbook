@@ -25,4 +25,9 @@ public class SecurityEntity {
     @JoinColumn(name = "issuer_inn", referencedColumnName = "inn")
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private IssuerEntity issuer;
+
+    @Override
+    public int hashCode() {
+        return getIsin().hashCode();
+    }
 }

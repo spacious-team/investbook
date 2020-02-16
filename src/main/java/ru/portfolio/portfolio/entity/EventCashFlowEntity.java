@@ -40,4 +40,9 @@ public class EventCashFlowEntity {
     @Basic
     @Column(name = "currency")
     private String currency = "RUR";
+
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
 }
