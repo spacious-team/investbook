@@ -23,8 +23,8 @@ public class TransactionCashFlowController extends AbstractController<Transactio
         super(repository, converter);
     }
 
-    @Override
     @GetMapping("/transaction-cash-flows")
+    @Override
     protected List<TransactionCashFlowEntity> get() {
         return super.get();
     }
@@ -38,8 +38,8 @@ public class TransactionCashFlowController extends AbstractController<Transactio
         return super.get(getId(transactionId, eventType));
     }
 
-    @Override
     @PostMapping("/transaction-cash-flows")
+    @Override
     protected ResponseEntity<TransactionCashFlowEntity> post(@RequestBody TransactionCashFlow object) throws URISyntaxException {
         return super.post(object);
     }
