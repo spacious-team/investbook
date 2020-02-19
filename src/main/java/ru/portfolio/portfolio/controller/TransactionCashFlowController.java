@@ -32,7 +32,7 @@ public class TransactionCashFlowController extends AbstractController<Transactio
     /**
      * see {@link AbstractController#get(Object)}
      */
-    @GetMapping("/transaction-cash-flows/{transaction-id}/{event-type}")
+    @GetMapping("/transaction-cash-flows/{transaction-id}/events/{event-type}")
     public ResponseEntity<TransactionCashFlowEntity> get(@PathVariable("transaction-id") int transactionId,
                                                          @PathVariable("event-type") int eventType) {
         return super.get(getId(transactionId, eventType));
@@ -47,7 +47,7 @@ public class TransactionCashFlowController extends AbstractController<Transactio
     /**
      * see {@link AbstractController#put(Object, Object)}
      */
-    @PutMapping("/transaction-cash-flows/{transaction-id}/{event-type}")
+    @PutMapping("/transaction-cash-flows/{transaction-id}/events/{event-type}")
     public ResponseEntity<TransactionCashFlowEntity> put(@PathVariable("transaction-id") int transactionId,
                                                          @PathVariable("event-type") int eventType,
                                                          @RequestBody TransactionCashFlow object) throws URISyntaxException {
@@ -57,7 +57,7 @@ public class TransactionCashFlowController extends AbstractController<Transactio
     /**
      * see {@link AbstractController#delete(Object)}
      */
-    @DeleteMapping("/transaction-cash-flows/{transaction-id}/{event-type}")
+    @DeleteMapping("/transaction-cash-flows/{transaction-id}/events/{event-type}")
     public void delete(@PathVariable("transaction-id") int transactionId, @PathVariable("event-type") int eventType) {
         super.delete(getId(transactionId, eventType));
     }
@@ -89,7 +89,7 @@ public class TransactionCashFlowController extends AbstractController<Transactio
 
     @Override
     protected URI getLocationURI(TransactionCashFlow object) throws URISyntaxException {
-        return new URI(getLocation() + "/" + object.getTransactionId() + "/" + object.getEventType().getType());
+        return new URI(getLocation() + "/" + object.getTransactionId() + "/events/" + object.getEventType().getType());
     }
 
     @Override
