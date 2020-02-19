@@ -1,13 +1,13 @@
 package ru.portfolio.portfolio.controller;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.portfolio.portfolio.converter.EntityConverter;
+import ru.portfolio.portfolio.converter.TransactionCashFlowEntityConverter;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntity;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntityPK;
 import ru.portfolio.portfolio.pojo.CashFlowEvent;
 import ru.portfolio.portfolio.pojo.TransactionCashFlow;
+import ru.portfolio.portfolio.repository.TransactionCashFlowRepository;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -16,17 +16,23 @@ import java.util.Optional;
 
 @RestController
 public class TransactionCashFlowController extends AbstractController<TransactionCashFlowEntityPK, TransactionCashFlow, TransactionCashFlowEntity> {
+    private final TransactionCashFlowRepository transactionCashFlowRepository;
 
-
-    public TransactionCashFlowController(JpaRepository<TransactionCashFlowEntity, TransactionCashFlowEntityPK> repository,
-                                         EntityConverter<TransactionCashFlowEntity, TransactionCashFlow> converter) {
+    public TransactionCashFlowController(TransactionCashFlowRepository repository,
+                                         TransactionCashFlowEntityConverter converter) {
         super(repository, converter);
+        this.transactionCashFlowRepository = repository;
     }
 
     @GetMapping("/transaction-cash-flows")
     @Override
     protected List<TransactionCashFlowEntity> get() {
         return super.get();
+    }
+
+    @GetMapping("/transaction-cash-flows/{transaction-id}")
+    protected List<TransactionCashFlowEntity> get(@PathVariable("transaction-id") int transactionId) {
+        return transactionCashFlowRepository.findByTransactionId(transactionId);
     }
 
     /**
