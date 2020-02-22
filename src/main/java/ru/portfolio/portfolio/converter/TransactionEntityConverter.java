@@ -15,7 +15,7 @@ public class TransactionEntityConverter implements EntityConverter<TransactionEn
     @Override
     public TransactionEntity toEntity(Transaction transaction) {
         SecurityEntity securityEntity = securityRepository.findByIsin(transaction.getIsin())
-                .orElseGet(() -> {throw new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + transaction.getIsin());});
+                .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + transaction.getIsin()));
 
         TransactionEntity entity = new TransactionEntity();
         entity.setId(transaction.getId());

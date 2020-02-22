@@ -16,7 +16,7 @@ public class SecurityEntityConverter implements EntityConverter<SecurityEntity, 
     @Override
     public SecurityEntity toEntity(Security security) {
         IssuerEntity issuerEntity = issuerRepository.findByInn(security.getInn())
-                .orElseGet(() -> {throw new IllegalArgumentException("Эмитетнт с ИНН не найден: " + security.getInn());});
+                .orElseThrow(() -> new IllegalArgumentException("Эмитетнт с ИНН не найден: " + security.getInn()));
 
         SecurityEntity entity = new SecurityEntity();
         entity.setTicker(security.getTicker());
