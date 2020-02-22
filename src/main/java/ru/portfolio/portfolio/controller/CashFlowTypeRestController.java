@@ -5,23 +5,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import ru.portfolio.portfolio.dao.CashFlowTypeEntity;
+import ru.portfolio.portfolio.entity.CashFlowTypeEntity;
 import ru.portfolio.portfolio.repository.CashFlowTypeRepository;
 
 import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-public class CashFlowTypeController {
+public class CashFlowTypeRestController {
 
     private final CashFlowTypeRepository cashFlowTypeRepository;
 
-    @GetMapping("/cash-flow-type")
+    @GetMapping("/cash-flow-types")
     public Iterable<CashFlowTypeEntity> getCashFlowType() {
         return cashFlowTypeRepository.findAll();
     }
 
-    @GetMapping("/cash-flow-type/{id}")
+    @GetMapping("/cash-flow-types/{id}")
     public ResponseEntity<CashFlowTypeEntity> getCashFlowType(@PathVariable("id") Integer id) {
         Optional<CashFlowTypeEntity> result = cashFlowTypeRepository.findById(id);
         return result
