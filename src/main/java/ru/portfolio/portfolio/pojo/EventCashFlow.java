@@ -12,7 +12,7 @@ import java.time.Instant;
 @Getter
 @Builder(toBuilder = true)
 public class EventCashFlow {
-    @Nullable
+    @Nullable // autoincrement
     private Integer id;
 
     @NotNull

@@ -36,7 +36,7 @@ public abstract class AbstractController<ID, Pojo, Entity> {
      * Create a new entity.
      * In create case  method returns CREATE http status, Location header and updated version of entity in body.
      * If entiry already exists CONFLICT http status and Location header was returned.
-     * @param object new entity
+     * @param object new entity (ID may not be provided if it AUTOINCREMENT)
      */
     protected ResponseEntity<Entity> post(Pojo object) throws URISyntaxException {
         if (getId(object) == null) {

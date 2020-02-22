@@ -10,7 +10,7 @@ import java.time.Instant;
 @Getter
 @Builder(toBuilder = true)
 public class Transaction {
-    @Nullable
+    @Nullable // autoincrement
     private Integer id;
 
     @NotNull
