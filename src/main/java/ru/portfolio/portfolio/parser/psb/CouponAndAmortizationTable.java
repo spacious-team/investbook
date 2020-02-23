@@ -47,18 +47,24 @@ public class CouponAndAmortizationTable {
 
     private static Collection<Row> getCouponOrAmortizationOrTax(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
         try {
+            BigDecimal value, tax;
             boolean isCoupon = row.getCell(leftColumn + 1).getStringCellValue().equals("Погашение купона");
-            BigDecimal tax = BigDecimal.valueOf(row.getCell(leftColumn + 13).getNumericCellValue()).negate();
+            double cellValue = row.getCell(leftColumn + (isCoupon ? 11 : 12)).getNumericCellValue();
+            value = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
+            cellValue = row.getCell(leftColumn + 13).getNumericCellValue();
+            tax = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue).negate();
             Row.RowBuilder builder = Row.builder()
                     .timestamp(convertToInstant(row.getCell(leftColumn).getStringCellValue()))
                     .event(isCoupon ? CashFlowEvent.COUPON : CashFlowEvent.AMORTIZATION)
                     .isin(row.getCell(leftColumn + 7).getStringCellValue())
                     .count(Double.valueOf(row.getCell(leftColumn + 9).getNumericCellValue()).intValue())
-                    .value(BigDecimal.valueOf(row.getCell(leftColumn + (isCoupon ? 11 : 12)).getNumericCellValue()))
+                    .value(value)
                     .currency(row.getCell(leftColumn + 15).getStringCellValue());
             Collection<Row> data = new ArrayList<>();
             data.add(builder.build());
-            data.add(builder.event(CashFlowEvent.TAX).value(tax).build());
+            if (!tax.equals(BigDecimal.ZERO)) {
+                data.add(builder.event(CashFlowEvent.TAX).value(tax).build());
+            }
             return data;
         } catch (Exception e) {
             log.warn("Не могу распарсить таблицу 'Погашения купонов и ЦБ' в строке {}", row.getRowNum(), e);

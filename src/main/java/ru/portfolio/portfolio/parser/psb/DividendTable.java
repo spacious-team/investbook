@@ -46,20 +46,27 @@ public class DividendTable {
 
     private static Collection<Row> getDividendAndTax(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
         try {
+            BigDecimal value, tax;
+            double cellValue = row.getCell(leftColumn + 10).getNumericCellValue();
+            value = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
+            cellValue = row.getCell(leftColumn + 11).getNumericCellValue();
+            tax = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue).negate();
             Row.RowBuilder builder = Row.builder()
                     .timestamp(convertToInstant(row.getCell(leftColumn).getStringCellValue()))
                     .event(CashFlowEvent.DIVIDEND)
                     .isin(row.getCell(leftColumn + 5).getStringCellValue())
                     .count(Double.valueOf(row.getCell(leftColumn + 7).getNumericCellValue()).intValue())
-                    .value(BigDecimal.valueOf(row.getCell(leftColumn + 10).getNumericCellValue()))
+                    .value(value)
                     .currency(row.getCell(leftColumn + 14).getStringCellValue());
             Collection<Row> data = new ArrayList<>();
             data.add(builder.build());
-            data.add(builder
-                    .event(CashFlowEvent.TAX)
-                    .value(BigDecimal.valueOf(row.getCell(leftColumn + 11).getNumericCellValue()).negate())
-                    .currency(row.getCell(leftColumn + 12).getStringCellValue())
-                    .build());
+            if (!tax.equals(BigDecimal.ZERO)) {
+                data.add(builder
+                        .event(CashFlowEvent.TAX)
+                        .value(tax)
+                        .currency(row.getCell(leftColumn + 12).getStringCellValue())
+                        .build());
+            }
             return data;
         } catch (Exception e) {
             log.warn("Не могу распарсить таблицу 'Погашения купонов и ЦБ' в строке {}", row.getRowNum(), e);
