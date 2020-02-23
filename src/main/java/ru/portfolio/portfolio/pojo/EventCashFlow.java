@@ -18,7 +18,7 @@ public class EventCashFlow {
     @NotNull
     private Instant timestamp;
 
-    @NotNull
+    @Nullable
     private String isin;
 
     @NotNull

@@ -17,8 +17,11 @@ public class EventCashFlowEntityConverter implements EntityConverter<EventCashFl
 
     @Override
     public EventCashFlowEntity toEntity(EventCashFlow eventCashFlow) {
-        SecurityEntity securityEntity = securityRepository.findByIsin(eventCashFlow.getIsin())
-                .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + eventCashFlow.getIsin()));
+        SecurityEntity securityEntity = null;
+        if (eventCashFlow.getIsin() != null) {
+            securityEntity = securityRepository.findByIsin(eventCashFlow.getIsin())
+                    .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + eventCashFlow.getIsin()));
+        }
         CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.findById(eventCashFlow.getEventType().getType())
                 .orElseThrow(() -> new IllegalArgumentException("В справочнике не найдено событие с типом: " + eventCashFlow.getEventType().getType()));
 

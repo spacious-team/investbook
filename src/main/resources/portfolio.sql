@@ -44,7 +44,7 @@ INSERT IGNORE INTO `cash_flow_type` (`id`, `name`) VALUES
 CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `isin` char(12) NOT NULL COMMENT 'ISIN инструмента, по которому произошло событие',
+  `isin` char(12) DEFAULT NULL COMMENT 'ISIN инструмента, по которому произошло событие',
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
