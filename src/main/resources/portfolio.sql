@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
   PRIMARY KEY (`id`),
+  UNIQUE KEY `event_cash_flow_timestamp_type_value_currency_uniq_ix` (`timestamp`,`type`,`value`,`currency`),
   KEY `event_cash_flow_type_ix` (`type`),
   KEY `event_cash_flow_ticker_ix` (`isin`),
   CONSTRAINT `event_cash_flow_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE,
