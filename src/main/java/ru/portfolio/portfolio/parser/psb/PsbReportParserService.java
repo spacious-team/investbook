@@ -30,12 +30,14 @@ public class PsbReportParserService {
             TransactionTable transactionTable = new TransactionTable(report);
             CouponAndAmortizationTable couponAndAmortizationTable = new CouponAndAmortizationTable(report);
             DividendTable dividendTable = new DividendTable(report);
+            DerivativeTransactionTable derivativeTransactionTable = new DerivativeTransactionTable(report);
 
             addSecurities(portfolioTable);
             addCashInAndOutFlows(cashFlowTable);
             addTransaction(transactionTable);
             addCouponAndAmortizationCashFlows(couponAndAmortizationTable);
             addDividendCashFlows(dividendTable);
+            addDerivativeTransaction(derivativeTransactionTable);
         } catch (Exception e) {
             log.warn("Не могу открыть/закрыть отчет {}", reportFile, e);
         }
@@ -73,7 +75,7 @@ public class PsbReportParserService {
                 }
             } catch (Exception e) {
                 if (!NestedExceptionUtils.getMostSpecificCause(e).getMessage().toLowerCase().contains("duplicate")) {
-                    log.warn("Не могу добавить информацию о движении денежных средств {}", row);
+                    log.warn("Не могу добавить информацию о движении денежных средств {}", row, e);
                 }
             }
         }
@@ -130,7 +132,7 @@ public class PsbReportParserService {
                     }
                 }
             } catch (Exception e) {
-                log.warn("Не могу добавить транзакцию {}", row);
+                log.warn("Не могу добавить транзакцию {}", row, e);
             }
         }
     }
@@ -151,7 +153,7 @@ public class PsbReportParserService {
                     log.warn("Не могу добавить информацию о движении денежных средств {}", row);
                 }
             } catch (Exception e) {
-                log.warn("Не могу добавить информацию о движении денежных средств {}", row);
+                log.warn("Не могу добавить информацию о движении денежных средств {}", row, e);
             }
         }
     }
@@ -172,7 +174,65 @@ public class PsbReportParserService {
                     log.warn("Не могу добавить информацию о движении денежных средств {}", row);
                 }
             } catch (Exception e) {
-                log.warn("Не могу добавить информацию о движении денежных средств {}", row);
+                log.warn("Не могу добавить информацию о движении денежных средств {}", row, e);
+            }
+        }
+    }
+
+    private void addDerivativeTransaction(DerivativeTransactionTable derivativeTransactionTable) {
+        for (DerivativeTransactionTable.Row row : derivativeTransactionTable.getData()) {
+            try {
+                Security security = Security.builder()
+                        .isin(row.getIsin())
+                        .name(row.getIsin())
+                        .build();
+                HttpStatus status = securityRestController.post(security).getStatusCode();
+                if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
+                    log.warn("Не могу добавить ЦБ {} в список", row);
+                }
+            } catch (Exception e) {
+                log.warn("Не могу добавить ЦБ {} в список", row, e);
+            }
+
+            try {
+                Transaction transaction = Transaction.builder()
+                        .id(row.getTransactionId())
+                        .isin(row.getIsin())
+                        .timestamp(row.getTimestamp())
+                        .count(row.getCount())
+                        .build();
+                HttpStatus status = transactionRestController.post(transaction).getStatusCode();
+                if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
+                    log.warn("Не могу добавить транзакцию {}", row);
+                }
+
+                TransactionCashFlow.TransactionCashFlowBuilder builder = TransactionCashFlow.builder()
+                        .transactionId(row.getTransactionId())
+                        .currency(row.getCurrency());
+
+                if (!row.getValue().equals(BigDecimal.ZERO)) {
+                    TransactionCashFlow transactionCashFlow = builder
+                            .eventType(CashFlowEvent.DERIVATIVE_PRICE)
+                            .value(row.getValue())
+                            .build();
+                    status = transactionCashFlowRestController.post(transactionCashFlow).getStatusCode();
+                    if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
+                        log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow);
+                    }
+                }
+
+                if (!row.getCommission().equals(BigDecimal.ZERO)) {
+                    TransactionCashFlow transactionCashFlow = builder
+                            .eventType(CashFlowEvent.COMMISSION)
+                            .value(row.getCommission())
+                            .build();
+                    status = transactionCashFlowRestController.post(transactionCashFlow).getStatusCode();
+                    if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
+                        log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow);
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Не могу добавить транзакцию {}", row, e);
             }
         }
     }

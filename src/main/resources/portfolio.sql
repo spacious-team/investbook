@@ -45,7 +45,7 @@ INSERT IGNORE INTO `cash_flow_type` (`id`, `name`) VALUES
 CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `isin` char(12) DEFAULT NULL COMMENT 'ISIN инструмента, по которому произошло событие',
+  `isin` varchar(64) DEFAULT NULL COMMENT 'ISIN инструмента, по которому произошло событие',
   `count` int(1) DEFAULT NULL COMMENT 'Количество ЦБ, по которым произошло событие',
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
@@ -79,7 +79,7 @@ INSERT IGNORE INTO `issuer` (`inn`, `name`) VALUES
 
 -- Дамп структуры для таблица portfolio.security
 CREATE TABLE IF NOT EXISTS `security` (
-  `isin` char(12) NOT NULL COMMENT 'ISIN код ценной бумаги',
+  `isin` varchar(64) NOT NULL COMMENT 'ISIN код ценной бумаги',
   `ticker` varchar(16) DEFAULT NULL COMMENT 'Тикер',
   `name` varchar(100) DEFAULT NULL COMMENT 'Полное наименование ценной бумаги или дериватива',
   `issuer_inn` bigint(10) unsigned zerofill DEFAULT NULL COMMENT 'Эмитент (ИНН)',
@@ -97,7 +97,7 @@ INSERT IGNORE INTO `security` (`isin`, `ticker`, `name`, `issuer_inn`) VALUES
 -- Дамп структуры для таблица portfolio.transaction
 CREATE TABLE IF NOT EXISTS `transaction` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Номер транзакции',
-  `isin` char(12) NOT NULL DEFAULT '' COMMENT 'Ценная бумага',
+  `isin` varchar(64) NOT NULL COMMENT 'Ценная бумага',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Время совершения сделки',
   `count` int(1) unsigned zerofill NOT NULL,
   PRIMARY KEY (`id`),
