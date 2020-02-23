@@ -28,6 +28,10 @@ public class EventCashFlowEntity {
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private SecurityEntity security;
 
+    @Basic
+    @Column(name = "count")
+    private Integer count;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type", referencedColumnName = "id")
     @JsonIgnoreProperties({"hibernateLazyInitializer"})

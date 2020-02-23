@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `isin` char(12) DEFAULT NULL COMMENT 'ISIN инструмента, по которому произошло событие',
+  `count` int(1) DEFAULT NULL COMMENT 'Количество ЦБ, по которым произошло событие',
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
@@ -58,8 +59,8 @@ CREATE TABLE IF NOT EXISTS `event_cash_flow` (
 
 -- Дамп данных таблицы portfolio.event_cash_flow: ~9 rows (приблизительно)
 /*!40000 ALTER TABLE `event_cash_flow` DISABLE KEYS */;
-INSERT IGNORE INTO `event_cash_flow` (`id`, `timestamp`, `isin`, `type`, `value`, `currency`) VALUES
-	(1, '2020-02-16 20:09:22', 'RU000A1015S0', 1, -20.00, 'RUR');
+INSERT IGNORE INTO `event_cash_flow` (`id`, `timestamp`, `isin`, `count`, `type`, `value`, `currency`) VALUES
+	(1, '2020-02-23 21:13:55', 'RU000A1015S0', 1, 1, -20.00, 'RUR');
 /*!40000 ALTER TABLE `event_cash_flow` ENABLE KEYS */;
 
 -- Дамп структуры для таблица portfolio.issuer

@@ -29,6 +29,7 @@ public class EventCashFlowEntityConverter implements EntityConverter<EventCashFl
         entity.setId(eventCashFlow.getId());
         entity.setTimestamp(eventCashFlow.getTimestamp());
         entity.setSecurity(securityEntity);
+        entity.setCount(eventCashFlow.getCount());
         entity.setCashFlowType(cashFlowTypeEntity);
         entity.setValue(eventCashFlow.getValue());
         if(eventCashFlow.getCurrency() != null) entity.setCurrency(eventCashFlow.getCurrency());

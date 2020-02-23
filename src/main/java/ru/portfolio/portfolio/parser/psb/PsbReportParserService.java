@@ -140,6 +140,7 @@ public class PsbReportParserService {
             try {
                 EventCashFlow eventCashFlow = EventCashFlow.builder()
                         .isin(row.getIsin())
+                        .count(row.getCount())
                         .eventType(row.getEvent())
                         .timestamp(row.getTimestamp())
                         .value(row.getValue())
@@ -160,6 +161,7 @@ public class PsbReportParserService {
             try {
                 EventCashFlow eventCashFlow = EventCashFlow.builder()
                         .isin(row.getIsin())
+                        .count(row.getCount())
                         .eventType(row.getEvent())
                         .timestamp(row.getTimestamp())
                         .value(row.getValue())

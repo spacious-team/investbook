@@ -21,6 +21,9 @@ public class EventCashFlow {
     @Nullable
     private String isin;
 
+    @Nullable
+    private Integer count;
+
     @NotNull
     @JsonProperty("event-type")
     private CashFlowEvent eventType;
