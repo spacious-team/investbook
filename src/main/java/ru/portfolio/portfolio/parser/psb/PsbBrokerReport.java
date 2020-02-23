@@ -140,6 +140,37 @@ public class PsbBrokerReport implements AutoCloseable {
                 getSheet().getRow(endAddress.getRow()).getLastCellNum());
     }
 
+    /**
+     * Get table ragne, table ends with empty line
+     */
+    public CellRangeAddress getTableCellRange(String tableName) {
+        CellAddress startAddress = find(tableName);
+        if (startAddress.equals(NOT_ADDRESS)) {
+            return EMTPY_RANGE;
+        }
+        int lastRowNum = startAddress.getRow() + 1;
+        LAST_ROW:
+        for(; lastRowNum < getSheet().getLastRowNum(); lastRowNum++) {
+            Row row = sheet.getRow(lastRowNum);
+            if (row == null || row.getLastCellNum() == 0) {
+                break;
+            }
+            for (Cell cell : row) {
+                if (cell != null && cell.getCellType() != CellType.BLANK) {
+                    continue LAST_ROW;
+                }
+            }
+            break; // is all row cells blank
+        }
+        lastRowNum--; // exclude last row from table
+        if (lastRowNum < startAddress.getRow()) lastRowNum = startAddress.getRow();
+        return new CellRangeAddress(
+                startAddress.getRow(),
+                lastRowNum,
+                getSheet().getRow(startAddress.getRow()).getFirstCellNum(),
+                getSheet().getRow(lastRowNum).getLastCellNum());
+    }
+
     @Override
     public void close() throws Exception {
         this.book.close();
