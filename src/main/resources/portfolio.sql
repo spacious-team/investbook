@@ -94,10 +94,10 @@ INSERT IGNORE INTO `security` (`isin`, `ticker`, `name`, `issuer_inn`) VALUES
 
 -- Дамп структуры для таблица portfolio.transaction
 CREATE TABLE IF NOT EXISTS `transaction` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Номер транзакции',
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Номер транзакции',
   `isin` char(12) NOT NULL DEFAULT '' COMMENT 'Ценная бумага',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Время совершения сделки',
-  `count` int(10) unsigned zerofill NOT NULL COMMENT 'Время сделки',
+  `count` int(1) unsigned zerofill NOT NULL,
   PRIMARY KEY (`id`),
   KEY `transaction_ticker_ix` (`isin`),
   CONSTRAINT `transaction_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE
@@ -106,14 +106,14 @@ CREATE TABLE IF NOT EXISTS `transaction` (
 -- Дамп данных таблицы portfolio.transaction: ~1 rows (приблизительно)
 /*!40000 ALTER TABLE `transaction` DISABLE KEYS */;
 INSERT IGNORE INTO `transaction` (`id`, `isin`, `timestamp`, `count`) VALUES
-	(7, 'RU000A1015S0', '2020-02-16 16:21:02', 0000000001);
+	(7, 'RU000A1015S0', '2020-02-16 16:21:02', 1);
 /*!40000 ALTER TABLE `transaction` ENABLE KEYS */;
 
 -- Дамп структуры для таблица portfolio.transaction_cash_flow
 CREATE TABLE IF NOT EXISTS `transaction_cash_flow` (
-  `transaction_id` int(10) unsigned NOT NULL COMMENT 'ID транзакции',
+  `transaction_id` bigint(20) unsigned NOT NULL COMMENT 'ID транзакции',
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
-  `value` int(10) NOT NULL COMMENT 'Размер',
+  `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
   PRIMARY KEY (`transaction_id`,`type`),
   KEY `transaction_cash_flow_type_key` (`type`),
@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS `transaction_cash_flow` (
 -- Дамп данных таблицы portfolio.transaction_cash_flow: ~0 rows (приблизительно)
 /*!40000 ALTER TABLE `transaction_cash_flow` DISABLE KEYS */;
 INSERT IGNORE INTO `transaction_cash_flow` (`transaction_id`, `type`, `value`, `currency`) VALUES
-	(7, 1, -30, 'RUR');
+	(7, 1, -30.00, 'RUR');
 /*!40000 ALTER TABLE `transaction_cash_flow` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

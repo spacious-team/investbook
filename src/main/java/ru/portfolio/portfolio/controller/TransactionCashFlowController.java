@@ -46,7 +46,7 @@ public class TransactionCashFlowController extends AbstractController<Transactio
 
     @PostMapping("/transaction-cash-flows")
     @Override
-    protected ResponseEntity<TransactionCashFlowEntity> post(@RequestBody TransactionCashFlow object) {
+    public ResponseEntity<TransactionCashFlowEntity> post(@RequestBody TransactionCashFlow object) {
         return super.post(object);
     }
 
@@ -78,7 +78,7 @@ public class TransactionCashFlowController extends AbstractController<Transactio
         return getId(object.getTransactionId(), object.getEventType().getType());
     }
 
-    private TransactionCashFlowEntityPK getId(int transactionId, int eventType) {
+    private TransactionCashFlowEntityPK getId(long transactionId, int eventType) {
         TransactionCashFlowEntityPK pk = new TransactionCashFlowEntityPK();
         pk.setTransactionId(transactionId);
         pk.setType(eventType);

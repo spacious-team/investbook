@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Data
 public class TransactionCashFlowEntityPK implements Serializable {
     @Column(name = "transaction_id")
-    private int transactionId;
+    private long transactionId;
 
     @Column(name = "type")
     private int type;

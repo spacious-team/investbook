@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 public class TransactionCashFlow {
     @NotNull
     @JsonProperty("transaction-id")
-    private Integer transactionId;
+    private Long transactionId;
 
     @NotNull
     @JsonProperty("event-type")
