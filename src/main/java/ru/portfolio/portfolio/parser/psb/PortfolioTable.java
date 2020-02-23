@@ -3,15 +3,14 @@ package ru.portfolio.portfolio.parser.psb;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.EMTPY_RANGE;
-import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.NOT_ADDRESS;
 
 @Slf4j
 public class PortfolioTable {
@@ -22,39 +21,28 @@ public class PortfolioTable {
     private final List<Row> data = new ArrayList<>();
 
     public PortfolioTable(PsbBrokerReport report) {
-        CellRangeAddress address = getPortfolioTableAddress(report);
+        this.data.addAll(pasreTable(report));
+    }
+
+    private static List<Row> pasreTable(PsbBrokerReport report) {
+        CellRangeAddress address =  report.getTableCellRange(TABLE_START_TEXT, TABLE_END_TEXT);
         if (address == EMTPY_RANGE) {
-            return;
+            return Collections.emptyList();
         }
+        List<Row> data = new ArrayList<>();
         for (int rowNum = address.getFirstRow() + 2; rowNum < address.getLastRow(); rowNum++) {
             org.apache.poi.ss.usermodel.Row row = report.getSheet().getRow(rowNum);
             if (row != null && !report.rowContains(rowNum, INVALID_TEXT)) {
-                Row position = cast(row);
+                Row position = getPosition(row);
                 if (position != null) {
                     data.add(position);
                 }
             }
         }
+        return data;
     }
 
-    private static CellRangeAddress getPortfolioTableAddress(PsbBrokerReport report) {
-        CellAddress startAddress = report.find(TABLE_START_TEXT);
-        if (startAddress.equals(NOT_ADDRESS)) {
-            return EMTPY_RANGE;
-        }
-        CellAddress endAddress = report.find(TABLE_END_TEXT, startAddress.getRow() + 2,
-                report.getSheet().getLastRowNum(), (cell , prefix) -> cell.startsWith(prefix.toString()));
-        if (endAddress.equals(NOT_ADDRESS)) {
-            return EMTPY_RANGE;
-        }
-        return new CellRangeAddress(
-                startAddress.getRow(),
-                endAddress.getRow(),
-                report.getSheet().getRow(startAddress.getRow()).getFirstCellNum(),
-                report.getSheet().getRow(endAddress.getRow()).getLastCellNum());
-    }
-
-    private static Row cast(org.apache.poi.ss.usermodel.Row row) {
+    private static Row getPosition(org.apache.poi.ss.usermodel.Row row) {
         try {
             return Row.builder()
                     .name(row.getCell(1).getStringCellValue())

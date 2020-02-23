@@ -11,11 +11,19 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.function.BiPredicate;
 
 public class PsbBrokerReport implements AutoCloseable {
-    public static final CellRangeAddress EMTPY_RANGE = new CellRangeAddress(-1, -1, -1, -1);
-    public static final CellAddress NOT_ADDRESS = new CellAddress(-1, -1);
+    static final CellRangeAddress EMTPY_RANGE = new CellRangeAddress(-1, -1, -1, -1);
+    private static final CellAddress NOT_ADDRESS = new CellAddress(-1, -1);
+    private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
+    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
     private final XSSFWorkbook book;
     @Getter
@@ -105,6 +113,31 @@ public class PsbBrokerReport implements AutoCloseable {
 
     public boolean rowContains(int rowNum, Object value) {
         return find(value, rowNum, rowNum + 1, String::equals) != NOT_ADDRESS;
+    }
+
+    public static Instant convertToInstant(String value) {
+        if (value.contains(":")) {
+            return LocalDateTime.parse(value, PsbBrokerReport.dateTimeFormatter).atZone(PsbBrokerReport.zoneId).toInstant();
+        } else {
+            return LocalDate.parse(value, PsbBrokerReport.dateFormatter).atStartOfDay(PsbBrokerReport.zoneId).toInstant();
+        }
+    }
+
+    public CellRangeAddress getTableCellRange(String tableName, String tableFooterString) {
+        CellAddress startAddress = find(tableName);
+        if (startAddress.equals(NOT_ADDRESS)) {
+            return EMTPY_RANGE;
+        }
+        CellAddress endAddress = find(tableFooterString, startAddress.getRow() + 2,
+                getSheet().getLastRowNum(), (cell , prefix) -> cell.startsWith(prefix.toString()));
+        if (endAddress.equals(NOT_ADDRESS)) {
+            return EMTPY_RANGE;
+        }
+        return new CellRangeAddress(
+                startAddress.getRow(),
+                endAddress.getRow(),
+                getSheet().getRow(startAddress.getRow()).getFirstCellNum(),
+                getSheet().getRow(endAddress.getRow()).getLastCellNum());
     }
 
     @Override
