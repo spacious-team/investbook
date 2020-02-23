@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-public class SecurityRestController extends AbstractController<String, Security, SecurityEntity> {
+public class SecurityRestController extends AbstractRestController<String, Security, SecurityEntity> {
     private final SecurityRepository repository;
 
     public SecurityRestController(SecurityRepository repository, SecurityEntityConverter converter) {

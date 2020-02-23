@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-public abstract class AbstractController<ID, Pojo, Entity> {
+public abstract class AbstractRestController<ID, Pojo, Entity> {
     protected final JpaRepository<Entity, ID> repository;
     private final EntityConverter<Entity, Pojo> converter;
 

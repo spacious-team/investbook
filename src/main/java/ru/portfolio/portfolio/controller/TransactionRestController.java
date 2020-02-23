@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-public class TransactionController extends AbstractController<Long, Transaction, TransactionEntity> {
+public class TransactionRestController extends AbstractRestController<Long, Transaction, TransactionEntity> {
 
-    public TransactionController(JpaRepository<TransactionEntity, Long> repository,
-                                 EntityConverter<TransactionEntity, Transaction> converter) {
+    public TransactionRestController(JpaRepository<TransactionEntity, Long> repository,
+                                     EntityConverter<TransactionEntity, Transaction> converter) {
         super(repository, converter);
     }
 

@@ -5,10 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import ru.portfolio.portfolio.controller.EventCashFlowController;
+import ru.portfolio.portfolio.controller.EventCashFlowRestController;
 import ru.portfolio.portfolio.controller.SecurityRestController;
-import ru.portfolio.portfolio.controller.TransactionCashFlowController;
-import ru.portfolio.portfolio.controller.TransactionController;
+import ru.portfolio.portfolio.controller.TransactionCashFlowRestController;
+import ru.portfolio.portfolio.controller.TransactionRestController;
 import ru.portfolio.portfolio.pojo.*;
 
 import java.math.BigDecimal;
@@ -18,9 +18,9 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class PsbReportParserService {
     private final SecurityRestController securityRestController;
-    private final EventCashFlowController eventCashFlowController;
-    private final TransactionController transactionController;
-    private final TransactionCashFlowController transactionCashFlowController;
+    private final EventCashFlowRestController eventCashFlowRestController;
+    private final TransactionRestController transactionRestController;
+    private final TransactionCashFlowRestController transactionCashFlowRestController;
 
     public void parse(String reportFile) {
         try (PsbBrokerReport report = new PsbBrokerReport(reportFile)) {
@@ -67,7 +67,7 @@ public class PsbReportParserService {
                         .value(row.getValue())
                         .currency(row.getCurrency())
                         .build();
-                HttpStatus status = eventCashFlowController.post(eventCashFlow).getStatusCode();
+                HttpStatus status = eventCashFlowRestController.post(eventCashFlow).getStatusCode();
                 if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                     log.warn("Не могу добавить информацию о движении денежных средств {}", row);
                 }
@@ -88,7 +88,7 @@ public class PsbReportParserService {
                         .timestamp(row.getTimestamp())
                         .count(row.getCount())
                         .build();
-                HttpStatus status = transactionController.post(transaction).getStatusCode();
+                HttpStatus status = transactionRestController.post(transaction).getStatusCode();
                 if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                     log.warn("Не могу добавить транзакцию {}", row);
                 }
@@ -102,7 +102,7 @@ public class PsbReportParserService {
                             .eventType(CashFlowEvent.PRICE)
                             .value(row.getValue())
                             .build();
-                    status = transactionCashFlowController.post(transactionCashFlow).getStatusCode();
+                    status = transactionCashFlowRestController.post(transactionCashFlow).getStatusCode();
                     if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                         log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow);
                     }
@@ -113,7 +113,7 @@ public class PsbReportParserService {
                             .eventType(CashFlowEvent.ACCRUED_INTEREST)
                             .value(row.getAccruedInterest())
                             .build();
-                    status = transactionCashFlowController.post(transactionCashFlow).getStatusCode();
+                    status = transactionCashFlowRestController.post(transactionCashFlow).getStatusCode();
                     if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                         log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow);
                     }
@@ -124,7 +124,7 @@ public class PsbReportParserService {
                             .eventType(CashFlowEvent.COMMISSION)
                             .value(row.getCommission())
                             .build();
-                    status = transactionCashFlowController.post(transactionCashFlow).getStatusCode();
+                    status = transactionCashFlowRestController.post(transactionCashFlow).getStatusCode();
                     if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                         log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow);
                     }
@@ -145,7 +145,7 @@ public class PsbReportParserService {
                         .value(row.getValue())
                         .currency(row.getCurrency())
                         .build();
-                HttpStatus status = eventCashFlowController.post(eventCashFlow).getStatusCode();
+                HttpStatus status = eventCashFlowRestController.post(eventCashFlow).getStatusCode();
                 if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                     log.warn("Не могу добавить информацию о движении денежных средств {}", row);
                 }
@@ -165,7 +165,7 @@ public class PsbReportParserService {
                         .value(row.getValue())
                         .currency(row.getCurrency())
                         .build();
-                HttpStatus status = eventCashFlowController.post(eventCashFlow).getStatusCode();
+                HttpStatus status = eventCashFlowRestController.post(eventCashFlow).getStatusCode();
                 if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                     log.warn("Не могу добавить информацию о движении денежных средств {}", row);
                 }

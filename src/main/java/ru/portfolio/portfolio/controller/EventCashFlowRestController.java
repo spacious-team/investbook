@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-public class EventCashFlowController extends AbstractController<Integer, EventCashFlow, EventCashFlowEntity> {
+public class EventCashFlowRestController extends AbstractRestController<Integer, EventCashFlow, EventCashFlowEntity> {
 
-    public EventCashFlowController(JpaRepository<EventCashFlowEntity, Integer> repository,
-                                   EntityConverter<EventCashFlowEntity, EventCashFlow> converter) {
+    public EventCashFlowRestController(JpaRepository<EventCashFlowEntity, Integer> repository,
+                                       EntityConverter<EventCashFlowEntity, EventCashFlow> converter) {
         super(repository, converter);
     }
 

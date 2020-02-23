@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-public class TransactionCashFlowController extends AbstractController<TransactionCashFlowEntityPK, TransactionCashFlow, TransactionCashFlowEntity> {
+public class TransactionCashFlowRestController extends AbstractRestController<TransactionCashFlowEntityPK, TransactionCashFlow, TransactionCashFlowEntity> {
     private final TransactionCashFlowRepository transactionCashFlowRepository;
 
-    public TransactionCashFlowController(TransactionCashFlowRepository repository,
-                                         TransactionCashFlowEntityConverter converter) {
+    public TransactionCashFlowRestController(TransactionCashFlowRepository repository,
+                                             TransactionCashFlowEntityConverter converter) {
         super(repository, converter);
         this.transactionCashFlowRepository = repository;
     }
@@ -36,7 +36,7 @@ public class TransactionCashFlowController extends AbstractController<Transactio
     }
 
     /**
-     * see {@link AbstractController#get(Object)}
+     * see {@link AbstractRestController#get(Object)}
      */
     @GetMapping("/transaction-cash-flows/{transaction-id}/events/{event-type}")
     public ResponseEntity<TransactionCashFlowEntity> get(@PathVariable("transaction-id") int transactionId,
@@ -51,7 +51,7 @@ public class TransactionCashFlowController extends AbstractController<Transactio
     }
 
     /**
-     * see {@link AbstractController#put(Object, Object)}
+     * see {@link AbstractRestController#put(Object, Object)}
      */
     @PutMapping("/transaction-cash-flows/{transaction-id}/events/{event-type}")
     public ResponseEntity<TransactionCashFlowEntity> put(@PathVariable("transaction-id") int transactionId,
@@ -61,7 +61,7 @@ public class TransactionCashFlowController extends AbstractController<Transactio
     }
 
     /**
-     * see {@link AbstractController#delete(Object)}
+     * see {@link AbstractRestController#delete(Object)}
      */
     @DeleteMapping("/transaction-cash-flows/{transaction-id}/events/{event-type}")
     public void delete(@PathVariable("transaction-id") int transactionId, @PathVariable("event-type") int eventType) {

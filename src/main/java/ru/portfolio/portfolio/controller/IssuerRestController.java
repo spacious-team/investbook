@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-public class IssuerRestController extends AbstractController<Long, Issuer, IssuerEntity> {
+public class IssuerRestController extends AbstractRestController<Long, Issuer, IssuerEntity> {
 
     public IssuerRestController(JpaRepository<IssuerEntity, Long> repository, EntityConverter<IssuerEntity, Issuer> converter) {
         super(repository, converter);
