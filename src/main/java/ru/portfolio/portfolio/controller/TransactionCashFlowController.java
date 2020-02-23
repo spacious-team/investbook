@@ -46,7 +46,7 @@ public class TransactionCashFlowController extends AbstractController<Transactio
 
     @PostMapping("/transaction-cash-flows")
     @Override
-    protected ResponseEntity<TransactionCashFlowEntity> post(@RequestBody TransactionCashFlow object) throws URISyntaxException {
+    protected ResponseEntity<TransactionCashFlowEntity> post(@RequestBody TransactionCashFlow object) {
         return super.post(object);
     }
 
@@ -56,7 +56,7 @@ public class TransactionCashFlowController extends AbstractController<Transactio
     @PutMapping("/transaction-cash-flows/{transaction-id}/events/{event-type}")
     public ResponseEntity<TransactionCashFlowEntity> put(@PathVariable("transaction-id") int transactionId,
                                                          @PathVariable("event-type") int eventType,
-                                                         @RequestBody TransactionCashFlow object) throws URISyntaxException {
+                                                         @RequestBody TransactionCashFlow object) {
         return super.put(getId(transactionId, eventType), object);
     }
 

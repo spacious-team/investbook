@@ -8,7 +8,6 @@ import ru.portfolio.portfolio.entity.EventCashFlowEntity;
 import ru.portfolio.portfolio.pojo.EventCashFlow;
 
 import javax.validation.Valid;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,14 +33,14 @@ public class EventCashFlowController extends AbstractController<Integer, EventCa
 
     @PostMapping("/event-cash-flows")
     @Override
-    public ResponseEntity<EventCashFlowEntity> post(@Valid @RequestBody EventCashFlow event) throws URISyntaxException {
+    public ResponseEntity<EventCashFlowEntity> post(@Valid @RequestBody EventCashFlow event) {
         return super.post(event);
     }
 
     @PutMapping("/event-cash-flows/{id}")
     @Override
     public ResponseEntity<EventCashFlowEntity> put(@PathVariable("id") Integer id,
-                                                   @Valid @RequestBody EventCashFlow event) throws URISyntaxException {
+                                                   @Valid @RequestBody EventCashFlow event) {
         return super.put(id, event);
     }
 

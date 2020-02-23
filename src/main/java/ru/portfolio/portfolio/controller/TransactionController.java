@@ -8,7 +8,6 @@ import ru.portfolio.portfolio.entity.TransactionEntity;
 import ru.portfolio.portfolio.pojo.Transaction;
 
 import javax.validation.Valid;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,14 +33,14 @@ public class TransactionController extends AbstractController<Integer, Transacti
 
     @Override
     @PostMapping("/transactions")
-    protected ResponseEntity<TransactionEntity> post(@Valid @RequestBody Transaction object) throws URISyntaxException {
+    protected ResponseEntity<TransactionEntity> post(@Valid @RequestBody Transaction object) {
         return super.post(object);
     }
 
     @Override
     @PutMapping("/transactions/{id}")
     public ResponseEntity<TransactionEntity> put(@PathVariable("id") Integer id,
-                                                 @Valid @RequestBody Transaction object) throws URISyntaxException {
+                                                 @Valid @RequestBody Transaction object) {
         return super.put(id, object);
     }
 
