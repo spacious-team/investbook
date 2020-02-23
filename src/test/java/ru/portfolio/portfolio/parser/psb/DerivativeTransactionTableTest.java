@@ -8,16 +8,16 @@ import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 
-public class TransactionTableTest {
+public class DerivativeTransactionTableTest {
 
     @DataProvider(name = "isin")
     Object[][] getData() {
-        return new Object[][] {{"E:\\1.xlsx", "RU000A0ZZYP6", "RU000A0JV4L2" }};
+        return new Object[][] {{"E:\\Исполнение фьючерса.xlsx", "RU000A1015P6", "Si-12.19" }};
     }
 
     @Test(dataProvider = "isin")
     void testIsin(String report, String firstIsin, String lastIsin) throws IOException {
-        List<TransactionTable.Row> data = new TransactionTable(new PsbBrokerReport(report)).getData();
+        List<DerivativeTransactionTable.Row> data = new DerivativeTransactionTable(new PsbBrokerReport(report)).getData();
         assertEquals(data.get(0).getIsin(), firstIsin);
         assertEquals(data.get(data.size() - 1).getIsin(), lastIsin);
     }

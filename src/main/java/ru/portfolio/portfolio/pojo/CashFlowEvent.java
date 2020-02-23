@@ -16,7 +16,8 @@ public enum CashFlowEvent {
     DERIVATIVE_PROFIT(8),// вариационная маржа
     MARGIN(9), // гарантийное обеспечение
     TAX(10), // налог уплаченный
-    FORECAST_TAX(11); // прогнозируемый налог
+    FORECAST_TAX(11), // прогнозируемый налог
+    DERIVATIVE_PRICE(12); // стоимость сделки с деривативом
 
     @Getter
     private final int type;

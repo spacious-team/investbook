@@ -47,7 +47,7 @@ public class TransactionTable {
 
     private static Row getTransaction(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
         try {
-            boolean isBuy = row.getCell(leftColumn + 8).getStringCellValue().equals("покупка");
+            boolean isBuy = row.getCell(leftColumn + 8).getStringCellValue().equalsIgnoreCase("покупка");
             BigDecimal value, accruedInterest;
             double cellValue = row.getCell(leftColumn + 12).getNumericCellValue();
             if (cellValue - 0.01d < 0) {
