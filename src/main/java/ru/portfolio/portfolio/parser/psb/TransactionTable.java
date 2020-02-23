@@ -54,6 +54,7 @@ public class TransactionTable {
                     .add(BigDecimal.valueOf(row.getCell(leftColumn + 18).getNumericCellValue()));
         return Row.builder()
                 .timestamp(convertToInstant( row.getCell(leftColumn).getStringCellValue()))
+                .transactionId(Long.parseLong(row.getCell(leftColumn + 1).getStringCellValue()))
                 .isin(row.getCell(leftColumn + 6).getStringCellValue())
                 .count((isBuy ? 1 : -1) * Double.valueOf(row.getCell(leftColumn + 9).getNumericCellValue()).intValue())
                 .amount(BigDecimal.valueOf(row.getCell(leftColumn + 12).getNumericCellValue()))
@@ -70,6 +71,7 @@ public class TransactionTable {
     @Getter
     @Builder
     public static class Row {
+        private long transactionId;
         private String isin;
         private Instant timestamp;
         private int count;

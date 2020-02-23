@@ -8,7 +8,6 @@ import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 
-@Test(enabled = false)
 public class TransactionTableTest {
     PsbBrokerReport report;
 
