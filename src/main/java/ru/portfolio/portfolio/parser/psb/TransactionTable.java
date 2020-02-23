@@ -48,17 +48,33 @@ public class TransactionTable {
     private static Row getTransaction(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
         try {
             boolean isBuy = row.getCell(leftColumn + 8).getStringCellValue().equals("покупка");
+            BigDecimal value, accruedInterest;
+            double cellValue = row.getCell(leftColumn + 12).getNumericCellValue();
+            if (cellValue - 0.01d < 0) {
+                value = BigDecimal.ZERO;
+            } else {
+                value = BigDecimal.valueOf(cellValue);
+                if (isBuy) value = value.negate();
+            }
+            cellValue = row.getCell(leftColumn + 13).getNumericCellValue();
+            if (cellValue - 0.01d < 0) {
+                accruedInterest = BigDecimal.ZERO;
+            } else {
+                accruedInterest = BigDecimal.valueOf(cellValue);
+                if (isBuy) accruedInterest = accruedInterest.negate();
+            }
             BigDecimal commission = BigDecimal.valueOf(row.getCell(leftColumn + 14).getNumericCellValue())
                     .add(BigDecimal.valueOf(row.getCell(leftColumn + 15).getNumericCellValue()))
                     .add(BigDecimal.valueOf(row.getCell(leftColumn + 16).getNumericCellValue()))
-                    .add(BigDecimal.valueOf(row.getCell(leftColumn + 18).getNumericCellValue()));
-        return Row.builder()
+                    .add(BigDecimal.valueOf(row.getCell(leftColumn + 18).getNumericCellValue()))
+                    .negate();
+            return Row.builder()
                 .timestamp(convertToInstant( row.getCell(leftColumn).getStringCellValue()))
                 .transactionId(Long.parseLong(row.getCell(leftColumn + 1).getStringCellValue()))
                 .isin(row.getCell(leftColumn + 6).getStringCellValue())
-                .count((isBuy ? 1 : -1) * Double.valueOf(row.getCell(leftColumn + 9).getNumericCellValue()).intValue())
-                .amount(BigDecimal.valueOf(row.getCell(leftColumn + 12).getNumericCellValue()))
-                .accruedInterest(BigDecimal.valueOf(row.getCell(leftColumn + 13).getNumericCellValue()))
+                .count(Double.valueOf(row.getCell(leftColumn + 9).getNumericCellValue()).intValue())
+                .value(value)
+                .accruedInterest(accruedInterest)
                 .commission(commission)
                 .currency(row.getCell(leftColumn + 10).getStringCellValue().replace(" ", "").split("/")[1])
                 .build();
@@ -75,7 +91,7 @@ public class TransactionTable {
         private String isin;
         private Instant timestamp;
         private int count;
-        private BigDecimal amount; // оценочная стоиомсть в валюце цены
+        private BigDecimal value; // оценочная стоиомсть в валюце цены
         private BigDecimal accruedInterest; // НКД, в валюте бумаги
         private BigDecimal commission;
         private String currency; // валюта
