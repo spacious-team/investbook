@@ -24,7 +24,7 @@ public class PsbReportParserService {
 
     public void parse(String reportFile) {
         try (PsbBrokerReport report = new PsbBrokerReport(reportFile)) {
-            CashTable cashTable = new CashTable(report);
+            //CashTable cashTable = new CashTable(report);
             CashFlowTable cashFlowTable = new CashFlowTable(report);
             PortfolioTable portfolioTable = new PortfolioTable(report);
             TransactionTable transactionTable = new TransactionTable(report);
@@ -35,6 +35,7 @@ public class PsbReportParserService {
             addCashInAndOutFlows(cashFlowTable);
             addTransaction(transactionTable);
             addCouponAndAmortizationCashFlows(couponAndAmortizationTable);
+            addDividendCashFlows(dividendTable);
         } catch (Exception e) {
             log.warn("Не могу открыть/закрыть отчет {}", reportFile, e);
         }
@@ -136,6 +137,26 @@ public class PsbReportParserService {
 
     private void addCouponAndAmortizationCashFlows(CouponAndAmortizationTable couponAndAmortizationTable) {
         for (CouponAndAmortizationTable.Row row : couponAndAmortizationTable.getData()) {
+            try {
+                EventCashFlow eventCashFlow = EventCashFlow.builder()
+                        .isin(row.getIsin())
+                        .eventType(row.getEvent())
+                        .timestamp(row.getTimestamp())
+                        .value(row.getValue())
+                        .currency(row.getCurrency())
+                        .build();
+                HttpStatus status = eventCashFlowController.post(eventCashFlow).getStatusCode();
+                if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
+                    log.warn("Не могу добавить информацию о движении денежных средств {}", row);
+                }
+            } catch (Exception e) {
+                log.warn("Не могу добавить информацию о движении денежных средств {}", row);
+            }
+        }
+    }
+
+    private void addDividendCashFlows(DividendTable dividendTable) {
+        for (DividendTable.Row row : dividendTable.getData()) {
             try {
                 EventCashFlow eventCashFlow = EventCashFlow.builder()
                         .isin(row.getIsin())
