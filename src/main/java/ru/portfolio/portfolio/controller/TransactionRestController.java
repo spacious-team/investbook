@@ -8,15 +8,14 @@ import ru.portfolio.portfolio.entity.TransactionEntity;
 import ru.portfolio.portfolio.pojo.Transaction;
 
 import javax.validation.Valid;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-public class TransactionController extends AbstractController<Integer, Transaction, TransactionEntity> {
+public class TransactionRestController extends AbstractRestController<Long, Transaction, TransactionEntity> {
 
-    public TransactionController(JpaRepository<TransactionEntity, Integer> repository,
-                                 EntityConverter<TransactionEntity, Transaction> converter) {
+    public TransactionRestController(JpaRepository<TransactionEntity, Long> repository,
+                                     EntityConverter<TransactionEntity, Transaction> converter) {
         super(repository, converter);
     }
 
@@ -28,41 +27,41 @@ public class TransactionController extends AbstractController<Integer, Transacti
 
     @Override
     @GetMapping("/transactions/{id}")
-    public ResponseEntity<TransactionEntity> get(@PathVariable("id") Integer id) {
+    public ResponseEntity<TransactionEntity> get(@PathVariable("id") Long id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping("/transactions")
-    protected ResponseEntity<TransactionEntity> post(@Valid @RequestBody Transaction object) throws URISyntaxException {
+    public ResponseEntity<TransactionEntity> post(@Valid @RequestBody Transaction object) {
         return super.post(object);
     }
 
     @Override
     @PutMapping("/transactions/{id}")
-    public ResponseEntity<TransactionEntity> put(@PathVariable("id") Integer id,
-                                                 @Valid @RequestBody Transaction object) throws URISyntaxException {
+    public ResponseEntity<TransactionEntity> put(@PathVariable("id") Long id,
+                                                 @Valid @RequestBody Transaction object) {
         return super.put(id, object);
     }
 
     @Override
     @DeleteMapping("/transactions/{id}")
-    public void delete(@PathVariable("id") Integer id) {
+    public void delete(@PathVariable("id") Long id) {
         super.delete(id);
     }
 
     @Override
-    protected Optional<TransactionEntity> getById(Integer id) {
+    protected Optional<TransactionEntity> getById(Long id) {
         return repository.findById(id);
     }
 
     @Override
-    protected Integer getId(Transaction object) {
+    protected Long getId(Transaction object) {
         return object.getId();
     }
 
     @Override
-    protected Transaction updateId(Integer id, Transaction object) {
+    protected Transaction updateId(Long id, Transaction object) {
         return object.toBuilder().id(id).build();
     }
 

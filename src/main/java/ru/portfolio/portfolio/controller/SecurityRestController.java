@@ -8,12 +8,11 @@ import ru.portfolio.portfolio.pojo.Security;
 import ru.portfolio.portfolio.repository.SecurityRepository;
 
 import javax.validation.Valid;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-public class SecurityRestController extends AbstractController<String, Security, SecurityEntity> {
+public class SecurityRestController extends AbstractRestController<String, Security, SecurityEntity> {
     private final SecurityRepository repository;
 
     public SecurityRestController(SecurityRepository repository, SecurityEntityConverter converter) {
@@ -35,13 +34,13 @@ public class SecurityRestController extends AbstractController<String, Security,
 
     @PostMapping("/securities")
     @Override
-    public ResponseEntity<SecurityEntity> post(@Valid @RequestBody Security security) throws URISyntaxException {
+    public ResponseEntity<SecurityEntity> post(@Valid @RequestBody Security security) {
         return super.post(security);
     }
 
     @PutMapping("/securities/{isin}")
     @Override
-    public ResponseEntity<SecurityEntity> put(@PathVariable("isin") String isin, @Valid @RequestBody Security security) throws URISyntaxException {
+    public ResponseEntity<SecurityEntity> put(@PathVariable("isin") String isin, @Valid @RequestBody Security security) {
         return super.put(isin, security);
     }
 

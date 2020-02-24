@@ -8,12 +8,11 @@ import ru.portfolio.portfolio.entity.IssuerEntity;
 import ru.portfolio.portfolio.pojo.Issuer;
 
 import javax.validation.Valid;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-public class IssuerRestController extends AbstractController<Long, Issuer, IssuerEntity> {
+public class IssuerRestController extends AbstractRestController<Long, Issuer, IssuerEntity> {
 
     public IssuerRestController(JpaRepository<IssuerEntity, Long> repository, EntityConverter<IssuerEntity, Issuer> converter) {
         super(repository, converter);
@@ -33,14 +32,14 @@ public class IssuerRestController extends AbstractController<Long, Issuer, Issue
 
     @PostMapping("/issuers")
     @Override
-    public ResponseEntity<IssuerEntity> post(@Valid @RequestBody Issuer issuer) throws URISyntaxException {
+    public ResponseEntity<IssuerEntity> post(@Valid @RequestBody Issuer issuer) {
         return super.post(issuer);
     }
 
     @PutMapping("/issuers/{inn}")
     @Override
     public ResponseEntity<IssuerEntity> put(@PathVariable("inn") Long inn,
-                                                  @Valid @RequestBody Issuer issuer) throws URISyntaxException {
+                                                  @Valid @RequestBody Issuer issuer) {
         return super.put(inn, issuer);
     }
 

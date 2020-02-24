@@ -11,12 +11,18 @@ import java.time.Instant;
 
 @Getter
 @Builder(toBuilder = true)
-public class EventCashFlow {
+public class SecurityEventCashFlow {
     @Nullable // autoincrement
     private Integer id;
 
     @NotNull
     private Instant timestamp;
+
+    @NotNull
+    private String isin;
+
+    @NotNull
+    private Integer count;
 
     @NotNull
     @JsonProperty("event-type")

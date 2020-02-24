@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `cash_flow_type` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Тип движения средств';
 
--- Дамп данных таблицы portfolio.cash_flow_type: ~12 rows (приблизительно)
+-- Дамп данных таблицы portfolio.cash_flow_type: ~13 rows (приблизительно)
 /*!40000 ALTER TABLE `cash_flow_type` DISABLE KEYS */;
 INSERT IGNORE INTO `cash_flow_type` (`id`, `name`) VALUES
 	(0, 'Пополнение и снятие'),
@@ -37,28 +37,25 @@ INSERT IGNORE INTO `cash_flow_type` (`id`, `name`) VALUES
 	(8, 'Вариационная маржа'),
 	(9, 'Гарантийное обеспечение'),
 	(10, 'Налог уплаченный (с купона, с дивидендов)'),
-	(11, 'Прогнозируемый налог');
+	(11, 'Прогнозируемый налог'),
+	(12, 'Стоимость сделки с деривативом');
 /*!40000 ALTER TABLE `cash_flow_type` ENABLE KEYS */;
 
 -- Дамп структуры для таблица portfolio.event_cash_flow
 CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `isin` char(12) NOT NULL COMMENT 'ISIN инструмента, по которому произошло событие',
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
   PRIMARY KEY (`id`),
+  UNIQUE KEY `event_cash_flow_timestamp_type_value_currency_uniq_ix` (`timestamp`,`type`,`value`,`currency`),
   KEY `event_cash_flow_type_ix` (`type`),
-  KEY `event_cash_flow_ticker_ix` (`isin`),
-  CONSTRAINT `event_cash_flow_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE,
   CONSTRAINT `event_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств, не связанное с ЦБ';
 
--- Дамп данных таблицы portfolio.event_cash_flow: ~9 rows (приблизительно)
+-- Дамп данных таблицы portfolio.event_cash_flow: ~0 rows (приблизительно)
 /*!40000 ALTER TABLE `event_cash_flow` DISABLE KEYS */;
-INSERT IGNORE INTO `event_cash_flow` (`id`, `timestamp`, `isin`, `type`, `value`, `currency`) VALUES
-	(1, '2020-02-16 20:09:22', 'RU000A1015S0', 1, -20.00, 'RUR');
 /*!40000 ALTER TABLE `event_cash_flow` ENABLE KEYS */;
 
 -- Дамп структуры для таблица portfolio.issuer
@@ -70,13 +67,11 @@ CREATE TABLE IF NOT EXISTS `issuer` (
 
 -- Дамп данных таблицы portfolio.issuer: ~0 rows (приблизительно)
 /*!40000 ALTER TABLE `issuer` DISABLE KEYS */;
-INSERT IGNORE INTO `issuer` (`inn`, `name`) VALUES
-	(7203126844, '"Энерготехсервис", ООО');
 /*!40000 ALTER TABLE `issuer` ENABLE KEYS */;
 
 -- Дамп структуры для таблица portfolio.security
 CREATE TABLE IF NOT EXISTS `security` (
-  `isin` char(12) NOT NULL COMMENT 'ISIN код ценной бумаги',
+  `isin` varchar(64) NOT NULL COMMENT 'ISIN код ценной бумаги',
   `ticker` varchar(16) DEFAULT NULL COMMENT 'Тикер',
   `name` varchar(100) DEFAULT NULL COMMENT 'Полное наименование ценной бумаги или дериватива',
   `issuer_inn` bigint(10) unsigned zerofill DEFAULT NULL COMMENT 'Эмитент (ИНН)',
@@ -85,34 +80,51 @@ CREATE TABLE IF NOT EXISTS `security` (
   CONSTRAINT `security_issuer_inn_fkey` FOREIGN KEY (`issuer_inn`) REFERENCES `issuer` (`inn`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Общая информация по ценным бумагам';
 
--- Дамп данных таблицы portfolio.security: ~1 rows (приблизительно)
+-- Дамп данных таблицы portfolio.security: ~0 rows (приблизительно)
 /*!40000 ALTER TABLE `security` DISABLE KEYS */;
-INSERT IGNORE INTO `security` (`isin`, `ticker`, `name`, `issuer_inn`) VALUES
-	('RU000A1015S0', 'ЭТС1 Р01', 'Энерготехсервис серии 001Р-01', 7203126844);
 /*!40000 ALTER TABLE `security` ENABLE KEYS */;
+
+-- Дамп структуры для таблица portfolio.security_event_cash_flow
+CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `isin` varchar(64) NOT NULL COMMENT 'ISIN инструмента, по которому произошло событие',
+  `count` int(1) unsigned zerofill NOT NULL COMMENT 'Количество ЦБ, по которым произошло событие',
+  `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
+  `value` decimal(8,2) NOT NULL COMMENT 'Размер',
+  `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `security_event_cash_flow_timestamp_isin_type_uniq_ix` (`timestamp`,`isin`,`type`),
+  KEY `security_event_cash_flow_type_ix` (`type`),
+  KEY `security_event_cash_flow_ticker_ix` (`isin`),
+  CONSTRAINT `security_event_cash_flow_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE,
+  CONSTRAINT `security_event_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств, связанное с ЦБ';
+
+-- Дамп данных таблицы portfolio.security_event_cash_flow: ~0 rows (приблизительно)
+/*!40000 ALTER TABLE `security_event_cash_flow` DISABLE KEYS */;
+/*!40000 ALTER TABLE `security_event_cash_flow` ENABLE KEYS */;
 
 -- Дамп структуры для таблица portfolio.transaction
 CREATE TABLE IF NOT EXISTS `transaction` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Номер транзакции',
-  `isin` char(12) NOT NULL DEFAULT '' COMMENT 'Ценная бумага',
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Номер транзакции',
+  `isin` varchar(64) NOT NULL COMMENT 'Ценная бумага',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Время совершения сделки',
-  `count` int(10) unsigned zerofill NOT NULL COMMENT 'Время сделки',
+  `count` int(1) unsigned zerofill NOT NULL,
   PRIMARY KEY (`id`),
   KEY `transaction_ticker_ix` (`isin`),
   CONSTRAINT `transaction_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 COMMENT='Сделки';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Сделки';
 
--- Дамп данных таблицы portfolio.transaction: ~1 rows (приблизительно)
+-- Дамп данных таблицы portfolio.transaction: ~0 rows (приблизительно)
 /*!40000 ALTER TABLE `transaction` DISABLE KEYS */;
-INSERT IGNORE INTO `transaction` (`id`, `isin`, `timestamp`, `count`) VALUES
-	(7, 'RU000A1015S0', '2020-02-16 16:21:02', 0000000001);
 /*!40000 ALTER TABLE `transaction` ENABLE KEYS */;
 
 -- Дамп структуры для таблица portfolio.transaction_cash_flow
 CREATE TABLE IF NOT EXISTS `transaction_cash_flow` (
-  `transaction_id` int(10) unsigned NOT NULL COMMENT 'ID транзакции',
+  `transaction_id` bigint(20) unsigned NOT NULL COMMENT 'ID транзакции',
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
-  `value` int(10) NOT NULL COMMENT 'Размер',
+  `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
   PRIMARY KEY (`transaction_id`,`type`),
   KEY `transaction_cash_flow_type_key` (`type`),
@@ -123,8 +135,6 @@ CREATE TABLE IF NOT EXISTS `transaction_cash_flow` (
 
 -- Дамп данных таблицы portfolio.transaction_cash_flow: ~0 rows (приблизительно)
 /*!40000 ALTER TABLE `transaction_cash_flow` DISABLE KEYS */;
-INSERT IGNORE INTO `transaction_cash_flow` (`transaction_id`, `type`, `value`, `currency`) VALUES
-	(7, 1, -30, 'RUR');
 /*!40000 ALTER TABLE `transaction_cash_flow` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

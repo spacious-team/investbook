@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-public abstract class AbstractController<ID, Pojo, Entity> {
+public abstract class AbstractRestController<ID, Pojo, Entity> {
     protected final JpaRepository<Entity, ID> repository;
     private final EntityConverter<Entity, Pojo> converter;
 
@@ -38,18 +38,22 @@ public abstract class AbstractController<ID, Pojo, Entity> {
      * If entiry already exists CONFLICT http status and Location header was returned.
      * @param object new entity (ID may not be provided if it AUTOINCREMENT)
      */
-    protected ResponseEntity<Entity> post(Pojo object) throws URISyntaxException {
-        if (getId(object) == null) {
-            return createEntity(object);
-        }
-        Optional<Entity> result = getById(getId(object));
-        if (result.isPresent()) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .location(getLocationURI(object))
-                    .build();
-        } else {
-            return createEntity(object);
+    protected ResponseEntity<Entity> post(Pojo object) {
+        try {
+            if (getId(object) == null) {
+                return createEntity(object);
+            }
+            Optional<Entity> result = getById(getId(object));
+            if (result.isPresent()) {
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .location(getLocationURI(object))
+                        .build();
+            } else {
+                return createEntity(object);
+            }
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Не могу создать объект", e);
         }
     }
 
@@ -63,17 +67,21 @@ public abstract class AbstractController<ID, Pojo, Entity> {
      * @param object new version of entity
      * @throws URISyntaxException
      */
-    public ResponseEntity<Entity> put(ID id, Pojo object) throws URISyntaxException {
-        object = (getId(object) != null) ? object : updateId(id, object);
-        if (!getId(object).equals(id)) {
-            throw new BadRequestException("Идентификатор объекта, переданный в URI [" + id + "] и в теле " +
-                    "запроса [" + getId(object) + "] не совпадают");
-        }
-        Optional<Entity> result = getById(id);
-        if (result.isPresent()) {
-            return ResponseEntity.ok(saveAndFlush(object));
-        } else {
-            return createEntity(object);
+    public ResponseEntity<Entity> put(ID id, Pojo object) {
+        try {
+            object = (getId(object) != null) ? object : updateId(id, object);
+            if (!getId(object).equals(id)) {
+                throw new BadRequestException("Идентификатор объекта, переданный в URI [" + id + "] и в теле " +
+                        "запроса [" + getId(object) + "] не совпадают");
+            }
+            Optional<Entity> result = getById(id);
+            if (result.isPresent()) {
+                return ResponseEntity.ok(saveAndFlush(object));
+            } else {
+                return createEntity(object);
+            }
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Не могу создать объект", e);
         }
     }
 

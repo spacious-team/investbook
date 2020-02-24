@@ -3,25 +3,33 @@ package ru.portfolio.portfolio.converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.entity.CashFlowTypeEntity;
-import ru.portfolio.portfolio.entity.EventCashFlowEntity;
-import ru.portfolio.portfolio.pojo.EventCashFlow;
+import ru.portfolio.portfolio.entity.SecurityEntity;
+import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
+import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 import ru.portfolio.portfolio.repository.CashFlowTypeRepository;
 import ru.portfolio.portfolio.repository.SecurityRepository;
 
 @Component
 @RequiredArgsConstructor
-public class EventCashFlowEntityConverter implements EntityConverter<EventCashFlowEntity, EventCashFlow> {
+public class SecurityEventCashFlowEntityConverter implements EntityConverter<SecurityEventCashFlowEntity, SecurityEventCashFlow> {
     private final SecurityRepository securityRepository;
     private final CashFlowTypeRepository cashFlowTypeRepository;
 
     @Override
-    public EventCashFlowEntity toEntity(EventCashFlow eventCashFlow) {
+    public SecurityEventCashFlowEntity toEntity(SecurityEventCashFlow eventCashFlow) {
+        SecurityEntity securityEntity = null;
+        if (eventCashFlow.getIsin() != null) {
+            securityEntity = securityRepository.findByIsin(eventCashFlow.getIsin())
+                    .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + eventCashFlow.getIsin()));
+        }
         CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.findById(eventCashFlow.getEventType().getType())
                 .orElseThrow(() -> new IllegalArgumentException("В справочнике не найдено событие с типом: " + eventCashFlow.getEventType().getType()));
 
-        EventCashFlowEntity entity = new EventCashFlowEntity();
+        SecurityEventCashFlowEntity entity = new SecurityEventCashFlowEntity();
         entity.setId(eventCashFlow.getId());
         entity.setTimestamp(eventCashFlow.getTimestamp());
+        entity.setSecurity(securityEntity);
+        entity.setCount(eventCashFlow.getCount());
         entity.setCashFlowType(cashFlowTypeEntity);
         entity.setValue(eventCashFlow.getValue());
         if(eventCashFlow.getCurrency() != null) entity.setCurrency(eventCashFlow.getCurrency());

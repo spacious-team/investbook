@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.portfolio.portfolio.converter.TransactionCashFlowEntityConverter;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntity;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntityPK;
-import ru.portfolio.portfolio.pojo.CashFlowEvent;
+import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.TransactionCashFlow;
 import ru.portfolio.portfolio.repository.TransactionCashFlowRepository;
 
@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-public class TransactionCashFlowController extends AbstractController<TransactionCashFlowEntityPK, TransactionCashFlow, TransactionCashFlowEntity> {
+public class TransactionCashFlowRestController extends AbstractRestController<TransactionCashFlowEntityPK, TransactionCashFlow, TransactionCashFlowEntity> {
     private final TransactionCashFlowRepository transactionCashFlowRepository;
 
-    public TransactionCashFlowController(TransactionCashFlowRepository repository,
-                                         TransactionCashFlowEntityConverter converter) {
+    public TransactionCashFlowRestController(TransactionCashFlowRepository repository,
+                                             TransactionCashFlowEntityConverter converter) {
         super(repository, converter);
         this.transactionCashFlowRepository = repository;
     }
@@ -36,7 +36,7 @@ public class TransactionCashFlowController extends AbstractController<Transactio
     }
 
     /**
-     * see {@link AbstractController#get(Object)}
+     * see {@link AbstractRestController#get(Object)}
      */
     @GetMapping("/transaction-cash-flows/{transaction-id}/events/{event-type}")
     public ResponseEntity<TransactionCashFlowEntity> get(@PathVariable("transaction-id") int transactionId,
@@ -46,22 +46,22 @@ public class TransactionCashFlowController extends AbstractController<Transactio
 
     @PostMapping("/transaction-cash-flows")
     @Override
-    protected ResponseEntity<TransactionCashFlowEntity> post(@RequestBody TransactionCashFlow object) throws URISyntaxException {
+    public ResponseEntity<TransactionCashFlowEntity> post(@RequestBody TransactionCashFlow object) {
         return super.post(object);
     }
 
     /**
-     * see {@link AbstractController#put(Object, Object)}
+     * see {@link AbstractRestController#put(Object, Object)}
      */
     @PutMapping("/transaction-cash-flows/{transaction-id}/events/{event-type}")
     public ResponseEntity<TransactionCashFlowEntity> put(@PathVariable("transaction-id") int transactionId,
                                                          @PathVariable("event-type") int eventType,
-                                                         @RequestBody TransactionCashFlow object) throws URISyntaxException {
+                                                         @RequestBody TransactionCashFlow object) {
         return super.put(getId(transactionId, eventType), object);
     }
 
     /**
-     * see {@link AbstractController#delete(Object)}
+     * see {@link AbstractRestController#delete(Object)}
      */
     @DeleteMapping("/transaction-cash-flows/{transaction-id}/events/{event-type}")
     public void delete(@PathVariable("transaction-id") int transactionId, @PathVariable("event-type") int eventType) {
@@ -78,7 +78,7 @@ public class TransactionCashFlowController extends AbstractController<Transactio
         return getId(object.getTransactionId(), object.getEventType().getType());
     }
 
-    private TransactionCashFlowEntityPK getId(int transactionId, int eventType) {
+    private TransactionCashFlowEntityPK getId(long transactionId, int eventType) {
         TransactionCashFlowEntityPK pk = new TransactionCashFlowEntityPK();
         pk.setTransactionId(transactionId);
         pk.setType(eventType);
@@ -89,7 +89,7 @@ public class TransactionCashFlowController extends AbstractController<Transactio
     protected TransactionCashFlow updateId(TransactionCashFlowEntityPK id, TransactionCashFlow object) {
         return object.toBuilder()
                 .transactionId(id.getTransactionId())
-                .eventType(CashFlowEvent.valueOf(id.getType()))
+                .eventType(CashFlowType.valueOf(id.getType()))
                 .build();
     }
 

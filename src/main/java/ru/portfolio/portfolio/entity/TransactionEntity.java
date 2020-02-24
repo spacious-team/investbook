@@ -18,7 +18,7 @@ public class TransactionEntity {
     @GenericGenerator(name = "UseExistingOrGenerateIdGenerator", strategy = "ru.portfolio.portfolio.entity.UseExistingOrGenerateIdGenerator")
     @GeneratedValue(generator = "UseExistingOrGenerateIdGenerator")
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "isin", referencedColumnName = "isin")
@@ -49,6 +49,6 @@ public class TransactionEntity {
 
     @Override
     public int hashCode() { ;
-        return 59 * this.getId() + 43 * this.getTimestamp().hashCode();
+        return (int) (59 * this.getId() + 43 * this.getTimestamp().hashCode());
     }
 }

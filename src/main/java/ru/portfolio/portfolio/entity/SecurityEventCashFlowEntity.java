@@ -10,9 +10,9 @@ import java.time.Instant;
 
 
 @Entity
-@Table(name = "event_cash_flow")
+@Table(name = "security_event_cash_flow")
 @Data
-public class EventCashFlowEntity {
+public class SecurityEventCashFlowEntity {
     @Id
     @GenericGenerator(name = "UseExistingOrGenerateIdGenerator", strategy = "ru.portfolio.portfolio.entity.UseExistingOrGenerateIdGenerator")
     @GeneratedValue(generator = "UseExistingOrGenerateIdGenerator")
@@ -22,6 +22,15 @@ public class EventCashFlowEntity {
     @Basic
     @Column(name = "timestamp")
     private Instant timestamp;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "isin", referencedColumnName = "isin")
+    @JsonIgnoreProperties({"hibernateLazyInitializer"})
+    private SecurityEntity security;
+
+    @Basic
+    @Column(name = "count")
+    private Integer count;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type", referencedColumnName = "id")

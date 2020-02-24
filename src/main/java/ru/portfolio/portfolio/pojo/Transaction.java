@@ -11,7 +11,7 @@ import java.time.Instant;
 @Builder(toBuilder = true)
 public class Transaction {
     @Nullable // autoincrement
-    private Integer id;
+    private Long id;
 
     @NotNull
     private String isin;
