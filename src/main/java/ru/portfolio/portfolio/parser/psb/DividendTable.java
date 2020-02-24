@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.util.CellRangeAddress;
-import ru.portfolio.portfolio.pojo.CashFlowEvent;
+import ru.portfolio.portfolio.pojo.CashFlowType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -53,7 +53,7 @@ public class DividendTable {
             tax = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue).negate();
             Row.RowBuilder builder = Row.builder()
                     .timestamp(convertToInstant(row.getCell(leftColumn).getStringCellValue()))
-                    .event(CashFlowEvent.DIVIDEND)
+                    .event(CashFlowType.DIVIDEND)
                     .isin(row.getCell(leftColumn + 5).getStringCellValue())
                     .count(Double.valueOf(row.getCell(leftColumn + 7).getNumericCellValue()).intValue())
                     .value(value)
@@ -62,7 +62,7 @@ public class DividendTable {
             data.add(builder.build());
             if (!tax.equals(BigDecimal.ZERO)) {
                 data.add(builder
-                        .event(CashFlowEvent.TAX)
+                        .event(CashFlowType.TAX)
                         .value(tax)
                         .currency(row.getCell(leftColumn + 12).getStringCellValue())
                         .build());
@@ -79,7 +79,7 @@ public class DividendTable {
     public static class Row {
         private String isin;
         private Instant timestamp;
-        private CashFlowEvent event;
+        private CashFlowType event;
         private int count;
         private BigDecimal value; // НКД, амортизация или налог
         private String currency; // валюта

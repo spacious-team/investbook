@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.util.CellRangeAddress;
-import ru.portfolio.portfolio.pojo.CashFlowEvent;
+import ru.portfolio.portfolio.pojo.CashFlowType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -55,7 +55,7 @@ public class CouponAndAmortizationTable {
             tax = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue).negate();
             Row.RowBuilder builder = Row.builder()
                     .timestamp(convertToInstant(row.getCell(leftColumn).getStringCellValue()))
-                    .event(isCoupon ? CashFlowEvent.COUPON : CashFlowEvent.AMORTIZATION)
+                    .event(isCoupon ? CashFlowType.COUPON : CashFlowType.AMORTIZATION)
                     .isin(row.getCell(leftColumn + 7).getStringCellValue())
                     .count(Double.valueOf(row.getCell(leftColumn + 9).getNumericCellValue()).intValue())
                     .value(value)
@@ -63,7 +63,7 @@ public class CouponAndAmortizationTable {
             Collection<Row> data = new ArrayList<>();
             data.add(builder.build());
             if (!tax.equals(BigDecimal.ZERO)) {
-                data.add(builder.event(CashFlowEvent.TAX).value(tax).build());
+                data.add(builder.event(CashFlowType.TAX).value(tax).build());
             }
             return data;
         } catch (Exception e) {
@@ -77,7 +77,7 @@ public class CouponAndAmortizationTable {
     public static class Row {
         private String isin;
         private Instant timestamp;
-        private CashFlowEvent event;
+        private CashFlowType event;
         private int count;
         private BigDecimal value; // НКД, амортизация или налог
         private String currency; // валюта

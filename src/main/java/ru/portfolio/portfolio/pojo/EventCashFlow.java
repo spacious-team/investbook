@@ -26,7 +26,7 @@ public class EventCashFlow {
 
     @NotNull
     @JsonProperty("event-type")
-    private CashFlowEvent eventType;
+    private CashFlowType eventType;
 
     @NotNull
     private BigDecimal value;

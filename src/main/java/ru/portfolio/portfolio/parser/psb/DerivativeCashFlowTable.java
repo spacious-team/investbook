@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.util.CellRangeAddress;
-import ru.portfolio.portfolio.pojo.CashFlowEvent;
+import ru.portfolio.portfolio.pojo.CashFlowType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -89,12 +89,12 @@ public class DerivativeCashFlowTable {
                     if (count == null) {
                         throw new IllegalArgumentException("Количество открытых контрактов не найдено");
                     }
-                    return builder.event(CashFlowEvent.DERIVATIVE_PROFIT)
+                    return builder.event(CashFlowType.DERIVATIVE_PROFIT)
                             .contract(contract)
                             .count(count)
                             .build();
                 case "биржевой сбор":
-                    return builder.event(CashFlowEvent.COMMISSION).build();
+                    return builder.event(CashFlowType.COMMISSION).build();
                 case "заблокированo / разблокировано средств под го":
                     return null; // не влияет на размер собственных денежных средств
                 default:
@@ -115,7 +115,7 @@ public class DerivativeCashFlowTable {
     public static class Row {
         private String contract;
         private Instant timestamp;
-        private CashFlowEvent event;
+        private CashFlowType event;
         private Integer count;
         private BigDecimal value;
         private String currency; // валюта

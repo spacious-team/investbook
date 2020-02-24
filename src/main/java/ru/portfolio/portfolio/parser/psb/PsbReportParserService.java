@@ -75,17 +75,17 @@ public class PsbReportParserService {
                             .build();
                     if (!row.getValue().equals(BigDecimal.ZERO)) {
                         addTransactionCashFlow(cashFlow.toBuilder()
-                                .eventType(CashFlowEvent.PRICE)
+                                .eventType(CashFlowType.PRICE)
                                 .value(row.getValue()));
                     }
                     if (!row.getAccruedInterest().equals(BigDecimal.ZERO)) {
                         addTransactionCashFlow(cashFlow.toBuilder()
-                                .eventType(CashFlowEvent.ACCRUED_INTEREST)
+                                .eventType(CashFlowType.ACCRUED_INTEREST)
                                 .value(row.getAccruedInterest()));
                     }
                     if (!row.getCommission().equals(BigDecimal.ZERO)) {
                         addTransactionCashFlow(cashFlow.toBuilder()
-                                .eventType(CashFlowEvent.COMMISSION)
+                                .eventType(CashFlowType.COMMISSION)
                                 .value(row.getCommission()));
                     }
                 }
@@ -136,12 +136,12 @@ public class PsbReportParserService {
                             .build();
                     if (!row.getValue().equals(BigDecimal.ZERO)) {
                         addTransactionCashFlow(cashFlow.toBuilder()
-                                .eventType(CashFlowEvent.DERIVATIVE_PRICE)
+                                .eventType(CashFlowType.DERIVATIVE_PRICE)
                                 .value(row.getValue()));
                     }
                     if (!row.getCommission().equals(BigDecimal.ZERO)) {
                         addTransactionCashFlow(cashFlow.toBuilder()
-                                .eventType(CashFlowEvent.COMMISSION)
+                                .eventType(CashFlowType.COMMISSION)
                                 .value(row.getCommission()));
                     }
                 }

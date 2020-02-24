@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.util.CellRangeAddress;
-import ru.portfolio.portfolio.pojo.CashFlowEvent;
+import ru.portfolio.portfolio.pojo.CashFlowType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -48,7 +48,7 @@ public class CashFlowTable {
     private static Row getCash(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
         try {
             String action = row.getCell(leftColumn + 4).getStringCellValue();
-            CashFlowEvent type = CashFlowEvent.CASH;
+            CashFlowType type = CashFlowType.CASH;
             boolean isPositive;
             if (action.equalsIgnoreCase("Зачислено на счет")) {
                 isPositive = true;
@@ -56,11 +56,11 @@ public class CashFlowTable {
                 isPositive = false;
             } else if (action.equalsIgnoreCase("Налог удержанный")) {
                 isPositive = false;
-                type = CashFlowEvent.TAX;
+                type = CashFlowType.TAX;
             } else {
                 return null;
             }
-            if (type == CashFlowEvent.CASH && !isDescriptionEmpty(row, leftColumn)) {
+            if (type == CashFlowType.CASH && !isDescriptionEmpty(row, leftColumn)) {
                 return null; // cash in/out records has no description
             }
             return Row.builder()
@@ -86,7 +86,7 @@ public class CashFlowTable {
     @Builder
     public static class Row {
         private Instant timestamp;
-        private CashFlowEvent type;
+        private CashFlowType type;
         private BigDecimal value;
         private String currency; // валюта
     }

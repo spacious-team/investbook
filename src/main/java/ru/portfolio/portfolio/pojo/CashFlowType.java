@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum CashFlowEvent {
+public enum CashFlowType {
     CASH(0),   // пополнение и снятие
     PRICE(1),  // чистая стоимость (без НКД)
     ACCRUED_INTEREST(2), // НКД
@@ -22,8 +22,8 @@ public enum CashFlowEvent {
     @Getter
     private final int type;
 
-    public static CashFlowEvent valueOf(int type) {
-        for (CashFlowEvent e : values()) {
+    public static CashFlowType valueOf(int type) {
+        for (CashFlowType e : values()) {
             if (e.getType() == type) {
                 return e;
             }

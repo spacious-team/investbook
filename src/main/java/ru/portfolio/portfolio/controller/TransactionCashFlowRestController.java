@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.portfolio.portfolio.converter.TransactionCashFlowEntityConverter;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntity;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntityPK;
-import ru.portfolio.portfolio.pojo.CashFlowEvent;
+import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.TransactionCashFlow;
 import ru.portfolio.portfolio.repository.TransactionCashFlowRepository;
 
@@ -89,7 +89,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
     protected TransactionCashFlow updateId(TransactionCashFlowEntityPK id, TransactionCashFlow object) {
         return object.toBuilder()
                 .transactionId(id.getTransactionId())
-                .eventType(CashFlowEvent.valueOf(id.getType()))
+                .eventType(CashFlowType.valueOf(id.getType()))
                 .build();
     }
 
