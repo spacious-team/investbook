@@ -69,7 +69,7 @@ public class DividendTable {
             }
             return data;
         } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу 'Погашения купонов и ЦБ' в строке {}", row.getRowNum(), e);
+            log.warn("Не могу распарсить таблицу '{}' в строке {}", TABLE_START_TEXT, row.getRowNum(), e);
             return null;
         }
     }

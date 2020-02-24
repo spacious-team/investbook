@@ -48,7 +48,7 @@ public class CouponAndAmortizationTable {
     private static Collection<Row> getCouponOrAmortizationOrTax(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
         try {
             BigDecimal value, tax;
-            boolean isCoupon = row.getCell(leftColumn + 1).getStringCellValue().equals("Погашение купона");
+            boolean isCoupon = row.getCell(leftColumn + 1).getStringCellValue().equalsIgnoreCase("Погашение купона");
             double cellValue = row.getCell(leftColumn + (isCoupon ? 11 : 12)).getNumericCellValue();
             value = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
             cellValue = row.getCell(leftColumn + 13).getNumericCellValue();
@@ -67,7 +67,7 @@ public class CouponAndAmortizationTable {
             }
             return data;
         } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу 'Погашения купонов и ЦБ' в строке {}", row.getRowNum(), e);
+            log.warn("Не могу распарсить таблицу '{}' в строке {}", TABLE_START_TEXT, row.getRowNum(), e);
             return null;
         }
     }

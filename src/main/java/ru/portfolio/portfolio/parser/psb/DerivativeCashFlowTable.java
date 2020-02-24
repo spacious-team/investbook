@@ -95,7 +95,7 @@ public class DerivativeCashFlowTable {
                             .build();
                 case "биржевой сбор":
                     return builder.event(CashFlowEvent.COMMISSION).build();
-                case "заблокированo / Разблокировано средств под ГО":
+                case "заблокированo / разблокировано средств под го":
                     return null; // не влияет на размер собственных денежных средств
                 default:
                     throw new IllegalArgumentException("Неизвестный вид операции " + action);

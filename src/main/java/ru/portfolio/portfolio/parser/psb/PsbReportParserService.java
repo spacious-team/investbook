@@ -2,7 +2,6 @@ package ru.portfolio.portfolio.parser.psb;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.NestedExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ru.portfolio.portfolio.controller.EventCashFlowRestController;
@@ -53,73 +52,41 @@ public class PsbReportParserService {
 
     private void addCashInAndOutFlows(CashFlowTable cashFlowTable) {
         for (CashFlowTable.Row row : cashFlowTable.getData()) {
-            try {
-                EventCashFlow eventCashFlow = EventCashFlow.builder()
-                        .eventType(row.getType())
-                        .timestamp(row.getTimestamp())
-                        .value(row.getValue())
-                        .currency(row.getCurrency())
-                        .build();
-                HttpStatus status = eventCashFlowRestController.post(eventCashFlow).getStatusCode();
-                if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                    log.warn("Не могу добавить информацию о движении денежных средств {}", row);
-                }
-            } catch (Exception e) {
-                if (!NestedExceptionUtils.getMostSpecificCause(e).getMessage().toLowerCase().contains("duplicate")) {
-                    log.warn("Не могу добавить информацию о движении денежных средств {}", row, e);
-                }
-            }
+            addEventCashFlow(EventCashFlow.builder()
+                    .eventType(row.getType())
+                    .timestamp(row.getTimestamp())
+                    .value(row.getValue())
+                    .currency(row.getCurrency()));
         }
     }
 
     private void addTransaction(TransactionTable transactionTable) {
         for (TransactionTable.Row row : transactionTable.getData()) {
             try {
-                Transaction transaction = Transaction.builder()
+                boolean isAdded = addTransaction(Transaction.builder()
                         .id(row.getTransactionId())
                         .isin(row.getIsin())
                         .timestamp(row.getTimestamp())
-                        .count(row.getCount())
-                        .build();
-                HttpStatus status = transactionRestController.post(transaction).getStatusCode();
-                if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                    log.warn("Не могу добавить транзакцию {}", row);
-                }
-
-                TransactionCashFlow.TransactionCashFlowBuilder builder = TransactionCashFlow.builder()
-                        .transactionId(row.getTransactionId())
-                        .currency(row.getCurrency());
-
-                if (!row.getValue().equals(BigDecimal.ZERO)) {
-                    TransactionCashFlow transactionCashFlow = builder
-                            .eventType(CashFlowEvent.PRICE)
-                            .value(row.getValue())
+                        .count(row.getCount()));
+                if (isAdded) {
+                    TransactionCashFlow cashFlow = TransactionCashFlow.builder()
+                            .transactionId(row.getTransactionId())
+                            .currency(row.getCurrency())
                             .build();
-                    status = transactionCashFlowRestController.post(transactionCashFlow).getStatusCode();
-                    if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                        log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow);
+                    if (!row.getValue().equals(BigDecimal.ZERO)) {
+                        addTransactionCashFlow(cashFlow.toBuilder()
+                                .eventType(CashFlowEvent.PRICE)
+                                .value(row.getValue()));
                     }
-                }
-
-                if (!row.getAccruedInterest().equals(BigDecimal.ZERO)) {
-                    TransactionCashFlow transactionCashFlow = builder
-                            .eventType(CashFlowEvent.ACCRUED_INTEREST)
-                            .value(row.getAccruedInterest())
-                            .build();
-                    status = transactionCashFlowRestController.post(transactionCashFlow).getStatusCode();
-                    if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                        log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow);
+                    if (!row.getAccruedInterest().equals(BigDecimal.ZERO)) {
+                        addTransactionCashFlow(cashFlow.toBuilder()
+                                .eventType(CashFlowEvent.ACCRUED_INTEREST)
+                                .value(row.getAccruedInterest()));
                     }
-                }
-
-                if (!row.getCommission().equals(BigDecimal.ZERO)) {
-                    TransactionCashFlow transactionCashFlow = builder
-                            .eventType(CashFlowEvent.COMMISSION)
-                            .value(row.getCommission())
-                            .build();
-                    status = transactionCashFlowRestController.post(transactionCashFlow).getStatusCode();
-                    if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                        log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow);
+                    if (!row.getCommission().equals(BigDecimal.ZERO)) {
+                        addTransactionCashFlow(cashFlow.toBuilder()
+                                .eventType(CashFlowEvent.COMMISSION)
+                                .value(row.getCommission()));
                     }
                 }
             } catch (Exception e) {
@@ -130,43 +97,26 @@ public class PsbReportParserService {
 
     private void addCouponAndAmortizationCashFlows(CouponAndAmortizationTable couponAndAmortizationTable) {
         for (CouponAndAmortizationTable.Row row : couponAndAmortizationTable.getData()) {
-            try {
-                EventCashFlow eventCashFlow = EventCashFlow.builder()
-                        .isin(row.getIsin())
-                        .count(row.getCount())
-                        .eventType(row.getEvent())
-                        .timestamp(row.getTimestamp())
-                        .value(row.getValue())
-                        .currency(row.getCurrency())
-                        .build();
-                HttpStatus status = eventCashFlowRestController.post(eventCashFlow).getStatusCode();
-                if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                    log.warn("Не могу добавить информацию о движении денежных средств {}", row);
-                }
-            } catch (Exception e) {
-                log.warn("Не могу добавить информацию о движении денежных средств {}", row, e);
-            }
+            addSecurity(row.getIsin()); // required for amortization
+            addEventCashFlow(EventCashFlow.builder()
+                    .isin(row.getIsin())
+                    .count(row.getCount())
+                    .eventType(row.getEvent())
+                    .timestamp(row.getTimestamp())
+                    .value(row.getValue())
+                    .currency(row.getCurrency()));
         }
     }
 
     private void addDividendCashFlows(DividendTable dividendTable) {
         for (DividendTable.Row row : dividendTable.getData()) {
-            try {
-                EventCashFlow eventCashFlow = EventCashFlow.builder()
-                        .isin(row.getIsin())
-                        .count(row.getCount())
-                        .eventType(row.getEvent())
-                        .timestamp(row.getTimestamp())
-                        .value(row.getValue())
-                        .currency(row.getCurrency())
-                        .build();
-                HttpStatus status = eventCashFlowRestController.post(eventCashFlow).getStatusCode();
-                if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                    log.warn("Не могу добавить информацию о движении денежных средств {}", row);
-                }
-            } catch (Exception e) {
-                log.warn("Не могу добавить информацию о движении денежных средств {}", row, e);
-            }
+            addEventCashFlow(EventCashFlow.builder()
+                    .isin(row.getIsin())
+                    .count(row.getCount())
+                    .eventType(row.getEvent())
+                    .timestamp(row.getTimestamp())
+                    .value(row.getValue())
+                    .currency(row.getCurrency()));
         }
     }
 
@@ -174,40 +124,25 @@ public class PsbReportParserService {
         for (DerivativeTransactionTable.Row row : derivativeTransactionTable.getData()) {
             addSecurity(row.getIsin());
             try {
-                Transaction transaction = Transaction.builder()
+                boolean isAdded = addTransaction(Transaction.builder()
                         .id(row.getTransactionId())
                         .isin(row.getIsin())
                         .timestamp(row.getTimestamp())
-                        .count(row.getCount())
-                        .build();
-                HttpStatus status = transactionRestController.post(transaction).getStatusCode();
-                if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                    log.warn("Не могу добавить транзакцию {}", row);
-                }
-
-                TransactionCashFlow.TransactionCashFlowBuilder builder = TransactionCashFlow.builder()
-                        .transactionId(row.getTransactionId())
-                        .currency(row.getCurrency());
-
-                if (!row.getValue().equals(BigDecimal.ZERO)) {
-                    TransactionCashFlow transactionCashFlow = builder
-                            .eventType(CashFlowEvent.DERIVATIVE_PRICE)
-                            .value(row.getValue())
+                        .count(row.getCount()));
+                if (isAdded) {
+                    TransactionCashFlow cashFlow = TransactionCashFlow.builder()
+                            .transactionId(row.getTransactionId())
+                            .currency(row.getCurrency())
                             .build();
-                    status = transactionCashFlowRestController.post(transactionCashFlow).getStatusCode();
-                    if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                        log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow);
+                    if (!row.getValue().equals(BigDecimal.ZERO)) {
+                        addTransactionCashFlow(cashFlow.toBuilder()
+                                .eventType(CashFlowEvent.DERIVATIVE_PRICE)
+                                .value(row.getValue()));
                     }
-                }
-
-                if (!row.getCommission().equals(BigDecimal.ZERO)) {
-                    TransactionCashFlow transactionCashFlow = builder
-                            .eventType(CashFlowEvent.COMMISSION)
-                            .value(row.getCommission())
-                            .build();
-                    status = transactionCashFlowRestController.post(transactionCashFlow).getStatusCode();
-                    if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                        log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow);
+                    if (!row.getCommission().equals(BigDecimal.ZERO)) {
+                        addTransactionCashFlow(cashFlow.toBuilder()
+                                .eventType(CashFlowEvent.COMMISSION)
+                                .value(row.getCommission()));
                     }
                 }
             } catch (Exception e) {
@@ -219,46 +154,76 @@ public class PsbReportParserService {
     private void addDerivativeCashFlows(DerivativeCashFlowTable derivativeCashFlowTable) {
         for (DerivativeCashFlowTable.Row row : derivativeCashFlowTable.getData()) {
             if (row.getContract() != null) {
-                addSecurity(row.getContract());
+                boolean isAdded = addSecurity(row.getContract());
+                if (!isAdded) continue;
             }
-            try {
-                EventCashFlow eventCashFlow = EventCashFlow.builder()
-                        .isin(row.getContract())
-                        .count(row.getCount())
-                        .eventType(row.getEvent())
-                        .timestamp(row.getTimestamp())
-                        .value(row.getValue())
-                        .currency(row.getCurrency())
-                        .build();
-                HttpStatus status = eventCashFlowRestController.post(eventCashFlow).getStatusCode();
-                if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                    log.warn("Не могу добавить информацию о движении денежных средств {}", row);
-                }
-            } catch (Exception e) {
-                log.warn("Не могу добавить информацию о движении денежных средств {}", row, e);
-            }
+            addEventCashFlow(EventCashFlow.builder()
+                    .isin(row.getContract())
+                    .count(row.getCount())
+                    .eventType(row.getEvent())
+                    .timestamp(row.getTimestamp())
+                    .value(row.getValue())
+                    .currency(row.getCurrency()));
         }
     }
 
-    private void addSecurity(String isin) {
-        addSecurity(isin, null);
+    private boolean addSecurity(String isin) {
+        return addSecurity(isin, null);
     }
 
-    private void addSecurity(String isin, String name) {
-        addSecurity(Security.builder()
+    private boolean addSecurity(String isin, String name) {
+        return addSecurity(Security.builder()
                 .isin(isin)
-                .name(name)
-                .build());
+                .name(name));
     }
 
-    private void addSecurity(Security security) {
+    private boolean addSecurity(Security.SecurityBuilder security) {
         try {
-            HttpStatus status = securityRestController.post(security).getStatusCode();
+            HttpStatus status = securityRestController.post(security.build()).getStatusCode();
             if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                 log.warn("Не могу добавить ЦБ {} в список", security);
+                return false;
             }
         } catch (Exception e) {
             log.warn("Не могу добавить ЦБ {} в список", security, e);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean addTransaction(Transaction.TransactionBuilder transaction) {
+        try {
+            HttpStatus status = transactionRestController.post(transaction.build()).getStatusCode();
+            if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
+                log.warn("Не могу добавить транзакцию {}", transaction);
+                return false;
+            }
+        } catch (Exception e) {
+            log.warn("Не могу добавить транзакцию {}", transaction, e);
+            return false;
+        }
+        return true;
+    }
+
+    private void addTransactionCashFlow(TransactionCashFlow.TransactionCashFlowBuilder transactionCashFlow) {
+        try {
+            HttpStatus status = transactionCashFlowRestController.post(transactionCashFlow.build()).getStatusCode();
+            if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
+                log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow);
+            }
+        } catch (Exception e) {
+            log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow, e);
+        }
+    }
+
+    private void addEventCashFlow(EventCashFlow.EventCashFlowBuilder eventCashFlow) {
+        try {
+            HttpStatus status = eventCashFlowRestController.post(eventCashFlow.build()).getStatusCode();
+            if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
+                log.warn("Не могу добавить информацию о движении денежных средств {}", eventCashFlow);
+            }
+        } catch (Exception e) {
+            log.warn("Не могу добавить информацию о движении денежных средств {}", eventCashFlow, e);
         }
     }
 }

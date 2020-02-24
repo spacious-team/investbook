@@ -70,7 +70,7 @@ public class CashFlowTable {
                     .currency(row.getCell(leftColumn + 1).getStringCellValue())
                     .build();
         } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу 'Движение денежных средств' в строке {}", row.getRowNum(), e);
+            log.warn("Не могу распарсить таблицу '{}' в строке {}", TABLE_START_TEXT, row.getRowNum(), e);
             return null;
         }
     }

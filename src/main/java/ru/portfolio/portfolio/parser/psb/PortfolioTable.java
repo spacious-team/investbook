@@ -55,7 +55,7 @@ public class PortfolioTable {
                     .accruedInterest(BigDecimal.valueOf(row.getCell(14).getNumericCellValue()))
                     .build();
         } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу 'Портфеля' в строке {}", row.getRowNum(), e);
+            log.warn("Не могу распарсить таблицу '{}' в строке {}", TABLE_START_TEXT, row.getRowNum(), e);
             return null;
         }
     }

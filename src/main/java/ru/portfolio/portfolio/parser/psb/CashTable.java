@@ -49,7 +49,7 @@ public class CashTable {
                     .currency(row.getCell(leftColumn + 7).getStringCellValue())
                     .build();
         } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу 'Позиция денежных средств' в строке {}", row.getRowNum(), e);
+            log.warn("Не могу распарсить таблицу '{}' в строке {}", TABLE_START_TEXT, row.getRowNum(), e);
             return null;
         }
     }

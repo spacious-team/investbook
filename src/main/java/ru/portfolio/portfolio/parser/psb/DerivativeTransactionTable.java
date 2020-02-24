@@ -77,6 +77,8 @@ public class DerivativeTransactionTable {
                 case "фьючерс":
                     cellValue = row.getCell(leftColumn + 13).getNumericCellValue();
                     break;
+                default:
+                    throw new IllegalArgumentException("Не известный контракт " + type);
             }
             if (cellValue - 0.01d > 0) {
                 value = BigDecimal.valueOf(cellValue);
@@ -95,7 +97,7 @@ public class DerivativeTransactionTable {
                     .currency("RUB") // FORTS, only RUB
                     .build();
         } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу 'Сделки c деривативами' в строке {}", row.getRowNum(), e);
+            log.warn("Не могу распарсить таблицу '{}' в строке {}", TABLE1_START_TEXT, row.getRowNum(), e);
             return null;
         }
     }
@@ -110,7 +112,7 @@ public class DerivativeTransactionTable {
             if ("фьючерс".equals(type)) {
                 cellValue = row.getCell(leftColumn + 8).getNumericCellValue();
             } else {
-                return null; // unexpected contract
+                throw new IllegalArgumentException("Не известный контракт " + type); // unexpected contract
             }
             if (cellValue - 0.01d > 0) {
                 value = BigDecimal.valueOf(cellValue);
@@ -129,7 +131,7 @@ public class DerivativeTransactionTable {
                     .currency("RUB") // FORTS, only RUB
                     .build();
         } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу 'Исполнение контрактов' в строке {}", row.getRowNum(), e);
+            log.warn("Не могу распарсить таблицу '{}' в строке {}", TABLE2_START_TEXT, row.getRowNum(), e);
             return null;
         }
     }
