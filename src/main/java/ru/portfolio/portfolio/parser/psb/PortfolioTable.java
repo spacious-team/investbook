@@ -18,9 +18,12 @@ public class PortfolioTable {
     private static final String INVALID_TEXT = "Итого в валюте цены";
     private static final String TABLE_END_TEXT = "* цена последней сделки (на организованных торгах)";
     @Getter
+    private final PsbBrokerReport report;
+    @Getter
     private final List<Row> data = new ArrayList<>();
 
     public PortfolioTable(PsbBrokerReport report) {
+        this.report = report;
         this.data.addAll(pasreTable(report));
     }
 

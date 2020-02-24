@@ -19,9 +19,12 @@ public class DerivativeCashFlowTable {
     private static final String TABLE2_START_TEXT = "Прочие операции";
     private static final String TABLE_END_TEXT = "Итого";
     @Getter
+    private final PsbBrokerReport report;
+    @Getter
     private final List<Row> data = new ArrayList<>();
 
     public DerivativeCashFlowTable(PsbBrokerReport report) {
+        this.report = report;
         Map<String, Integer> contractCount = pasreDerivativeCountTable(report, TABLE1_START_TEXT, TABLE_END_TEXT, 1);
         if (!contractCount.isEmpty()) {
             this.data.addAll(pasreDerivativeCashFlowTable(report, TABLE2_START_TEXT, TABLE_END_TEXT, 1, contractCount));

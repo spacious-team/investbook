@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 @Slf4j
 @RequiredArgsConstructor
 public class PsbReportParserService {
+    private final PortfolioRestController portfolioRestController;
     private final SecurityRestController securityRestController;
     private final SecurityEventCashFlowRestController securityEventCashFlowRestController;
     private final EventCashFlowRestController eventCashFlowRestController;
@@ -22,22 +23,25 @@ public class PsbReportParserService {
 
     public void parse(String reportFile) {
         try (PsbBrokerReport report = new PsbBrokerReport(reportFile)) {
-            //CashTable cashTable = new CashTable(report);
-            CashFlowTable cashFlowTable = new CashFlowTable(report);
-            PortfolioTable portfolioTable = new PortfolioTable(report);
-            TransactionTable transactionTable = new TransactionTable(report);
-            CouponAndAmortizationTable couponAndAmortizationTable = new CouponAndAmortizationTable(report);
-            DividendTable dividendTable = new DividendTable(report);
-            DerivativeTransactionTable derivativeTransactionTable = new DerivativeTransactionTable(report);
-            DerivativeCashFlowTable derivativeCashFlowTable = new DerivativeCashFlowTable(report);
+            boolean isAdded = addPortfolio(Portfolio.builder().portfolio(report.getPortfolio()));
+            if (isAdded) {
+                //CashTable cashTable = new CashTable(report);
+                CashFlowTable cashFlowTable = new CashFlowTable(report);
+                PortfolioTable portfolioTable = new PortfolioTable(report);
+                TransactionTable transactionTable = new TransactionTable(report);
+                CouponAndAmortizationTable couponAndAmortizationTable = new CouponAndAmortizationTable(report);
+                DividendTable dividendTable = new DividendTable(report);
+                DerivativeTransactionTable derivativeTransactionTable = new DerivativeTransactionTable(report);
+                DerivativeCashFlowTable derivativeCashFlowTable = new DerivativeCashFlowTable(report);
 
-            addSecurities(portfolioTable);
-            addCashInAndOutFlows(cashFlowTable);
-            addTransaction(transactionTable);
-            addCouponAndAmortizationCashFlows(couponAndAmortizationTable);
-            addDividendCashFlows(dividendTable);
-            addDerivativeTransaction(derivativeTransactionTable);
-            addDerivativeCashFlows(derivativeCashFlowTable);
+                addSecurities(portfolioTable);
+                addCashInAndOutFlows(cashFlowTable);
+                addTransaction(transactionTable);
+                addCouponAndAmortizationCashFlows(couponAndAmortizationTable);
+                addDividendCashFlows(dividendTable);
+                addDerivativeTransaction(derivativeTransactionTable);
+                addDerivativeCashFlows(derivativeCashFlowTable);
+            }
         } catch (Exception e) {
             log.warn("Не могу открыть/закрыть отчет {}", reportFile, e);
         }
@@ -52,6 +56,7 @@ public class PsbReportParserService {
     private void addCashInAndOutFlows(CashFlowTable cashFlowTable) {
         for (CashFlowTable.Row row : cashFlowTable.getData()) {
             addEventCashFlow(EventCashFlow.builder()
+                    .portfolio(cashFlowTable.getReport().getPortfolio())
                     .eventType(row.getType())
                     .timestamp(row.getTimestamp())
                     .value(row.getValue())
@@ -64,6 +69,7 @@ public class PsbReportParserService {
             try {
                 boolean isAdded = addTransaction(Transaction.builder()
                         .id(row.getTransactionId())
+                        .portfolio(transactionTable.getReport().getPortfolio())
                         .isin(row.getIsin())
                         .timestamp(row.getTimestamp())
                         .count(row.getCount()));
@@ -99,6 +105,7 @@ public class PsbReportParserService {
             addSecurity(row.getIsin()); // required for amortization
             addSecurityEventCashFlow(SecurityEventCashFlow.builder()
                     .isin(row.getIsin())
+                    .portfolio(couponAndAmortizationTable.getReport().getPortfolio())
                     .count(row.getCount())
                     .eventType(row.getEvent())
                     .timestamp(row.getTimestamp())
@@ -111,6 +118,7 @@ public class PsbReportParserService {
         for (DividendTable.Row row : dividendTable.getData()) {
             addSecurityEventCashFlow(SecurityEventCashFlow.builder()
                     .isin(row.getIsin())
+                    .portfolio(dividendTable.getReport().getPortfolio())
                     .count(row.getCount())
                     .eventType(row.getEvent())
                     .timestamp(row.getTimestamp())
@@ -125,6 +133,7 @@ public class PsbReportParserService {
             try {
                 boolean isAdded = addTransaction(Transaction.builder()
                         .id(row.getTransactionId())
+                        .portfolio(derivativeTransactionTable.getReport().getPortfolio())
                         .isin(row.getIsin())
                         .timestamp(row.getTimestamp())
                         .count(row.getCount()));
@@ -157,6 +166,7 @@ public class PsbReportParserService {
                 if (!isAdded) continue;
                 addSecurityEventCashFlow(SecurityEventCashFlow.builder()
                         .isin(row.getContract())
+                        .portfolio(derivativeCashFlowTable.getReport().getPortfolio())
                         .count(row.getCount())
                         .eventType(row.getEvent())
                         .timestamp(row.getTimestamp())
@@ -165,6 +175,7 @@ public class PsbReportParserService {
             } else {
                 // Событие "Биржевой сбор"
                 addEventCashFlow(EventCashFlow.builder()
+                        .portfolio(derivativeCashFlowTable.getReport().getPortfolio())
                         .eventType(row.getEvent())
                         .timestamp(row.getTimestamp())
                         .value(row.getValue())
@@ -181,6 +192,24 @@ public class PsbReportParserService {
         return addSecurity(Security.builder()
                 .isin(isin)
                 .name(name));
+    }
+
+    private boolean addPortfolio(Portfolio.PortfolioBuilder portfolio) {
+        try {
+            HttpStatus status = portfolioRestController.post(portfolio.build()).getStatusCode();
+            if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
+                log.warn("Не могу сохранить Портфель {}", portfolio);
+                return false;
+            }
+        } catch (Exception e) {
+            if (NestedExceptionUtils.getMostSpecificCause(e).getMessage().toLowerCase().contains("duplicate")) {
+                log.debug("Дублирование информации: не могу сохранить Портфель {}", portfolio, e);
+            } else {
+                log.warn("Не могу сохранить Портфель {}", portfolio, e);
+            }
+            return false;
+        }
+        return true;
     }
 
     private boolean addSecurity(Security.SecurityBuilder security) {

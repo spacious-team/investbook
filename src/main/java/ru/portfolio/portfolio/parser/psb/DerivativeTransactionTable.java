@@ -20,9 +20,12 @@ public class DerivativeTransactionTable {
     private static final String TABLE2_START_TEXT = "Исполнение контрактов";
     private static final String TABLE_END_TEXT = "Итого";
     @Getter
+    private final PsbBrokerReport report;
+    @Getter
     private final List<Row> data = new ArrayList<>();
 
     public DerivativeTransactionTable(PsbBrokerReport report) {
+        this.report = report;
         this.data.addAll(parseFortsTable(report, TABLE1_START_TEXT, TABLE_END_TEXT, 1));
         this.data.addAll(parseFortsExpirationTable(report, TABLE2_START_TEXT, TABLE_END_TEXT, 1));
     }

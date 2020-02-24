@@ -14,6 +14,9 @@ public class Transaction {
     private Long id;
 
     @NotNull
+    private String portfolio;
+
+    @NotNull
     private String isin;
 
     @NotNull

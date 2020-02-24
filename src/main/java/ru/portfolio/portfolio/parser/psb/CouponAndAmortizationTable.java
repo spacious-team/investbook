@@ -21,9 +21,12 @@ public class CouponAndAmortizationTable {
     private static final String TABLE_START_TEXT = "Погашение купонов и ЦБ";
     private static final String TABLE_END_TEXT = "*Налог удерживается с рублевого брокерского счета";
     @Getter
+    private final PsbBrokerReport report;
+    @Getter
     private final List<Row> data = new ArrayList<>();
 
     public CouponAndAmortizationTable(PsbBrokerReport report) {
+        this.report = report;
         this.data.addAll(pasreTable(report, TABLE_START_TEXT, TABLE_END_TEXT,1));
     }
 
