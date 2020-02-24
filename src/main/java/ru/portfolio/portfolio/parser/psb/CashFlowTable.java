@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.util.CellRangeAddress;
+import ru.portfolio.portfolio.pojo.CashFlowEvent;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -34,7 +35,7 @@ public class CashFlowTable {
         List<Row> data = new ArrayList<>();
         for (int rowNum = address.getFirstRow() + 2; rowNum <= address.getLastRow(); rowNum++) {
             org.apache.poi.ss.usermodel.Row row = report.getSheet().getRow(rowNum);
-            if (row != null && isDescriptionEmpty(row, leftColumn)) {
+            if (row != null) {
                 Row cash = getCash(row, leftColumn);
                 if (cash != null) {
                     data.add(cash);
@@ -44,26 +45,27 @@ public class CashFlowTable {
         return data;
     }
 
-    private static boolean isDescriptionEmpty(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
-        Cell cell = row.getCell(leftColumn + 6);
-        return cell == null ||
-                cell.getCellType() == CellType.BLANK ||
-                (cell.getCellType() == CellType.STRING && cell.getStringCellValue().isEmpty());
-    }
-
     private static Row getCash(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
         try {
             String action = row.getCell(leftColumn + 4).getStringCellValue();
+            CashFlowEvent type = CashFlowEvent.CASH;
             boolean isPositive;
-            if (action.equals("Зачислено на счет")) {
+            if (action.equalsIgnoreCase("Зачислено на счет")) {
                 isPositive = true;
-            } else if (action.equals("Списано со счета")) {
+            } else if (action.equalsIgnoreCase("Списано со счета")) {
                 isPositive = false;
+            } else if (action.equalsIgnoreCase("Налог удержанный")) {
+                isPositive = false;
+                type = CashFlowEvent.TAX;
             } else {
                 return null;
             }
+            if (type == CashFlowEvent.CASH && !isDescriptionEmpty(row, leftColumn)) {
+                return null; // cash in/out records has no description
+            }
             return Row.builder()
                     .timestamp(convertToInstant(row.getCell(leftColumn).getStringCellValue()))
+                    .type(type)
                     .value(BigDecimal.valueOf((isPositive ? 1 : -1) * row.getCell(leftColumn + 2).getNumericCellValue()))
                     .currency(row.getCell(leftColumn + 1).getStringCellValue())
                     .build();
@@ -73,10 +75,18 @@ public class CashFlowTable {
         }
     }
 
+    private static boolean isDescriptionEmpty(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
+        Cell cell = row.getCell(leftColumn + 6);
+        return cell == null ||
+                cell.getCellType() == CellType.BLANK ||
+                (cell.getCellType() == CellType.STRING && cell.getStringCellValue().isEmpty());
+    }
+
     @Getter
     @Builder
     public static class Row {
         private Instant timestamp;
+        private CashFlowEvent type;
         private BigDecimal value;
         private String currency; // валюта
     }

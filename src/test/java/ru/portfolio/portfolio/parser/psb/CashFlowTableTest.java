@@ -10,21 +10,18 @@ import java.util.List;
 import static org.testng.Assert.assertEquals;
 
 public class CashFlowTableTest {
-    PsbBrokerReport report;
 
-    CashFlowTableTest() throws IOException {
-        this.report = new PsbBrokerReport("E:\\1.xlsx");
-    }
-
-    @DataProvider(name = "cash_in")
+    @DataProvider(name = "cash")
     Object[][] getData() {
-        return new Object[][] {{BigDecimal.valueOf(1)}};
+        return new Object[][]{{"E:\\1.xlsx", BigDecimal.valueOf(400 - 760.77)},
+                {"E:\\Налог.xlsx", BigDecimal.valueOf(-542.0)}};
     }
 
-    @Test(dataProvider = "cash_in")
-    void testIsin(BigDecimal expectedCashIn) {
-        List<CashFlowTable.Row> data = new CashFlowTable(this.report).getData();
-        BigDecimal sum = BigDecimal.valueOf(0);
+    @Test(dataProvider = "cash")
+    void testIsin(String reportFile, BigDecimal expectedCashIn) throws IOException {
+        PsbBrokerReport report = new PsbBrokerReport(reportFile);
+        List<CashFlowTable.Row> data = new CashFlowTable(report).getData();
+        BigDecimal sum = BigDecimal.ZERO;
         for (CashFlowTable.Row r : data) {
             sum = sum.add(r.getValue());
         }

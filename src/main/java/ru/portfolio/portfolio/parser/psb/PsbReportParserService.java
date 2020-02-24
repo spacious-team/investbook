@@ -64,7 +64,7 @@ public class PsbReportParserService {
         for (CashFlowTable.Row row : cashFlowTable.getData()) {
             try {
                 EventCashFlow eventCashFlow = EventCashFlow.builder()
-                        .eventType(CashFlowEvent.CASH)
+                        .eventType(row.getType())
                         .timestamp(row.getTimestamp())
                         .value(row.getValue())
                         .currency(row.getCurrency())
