@@ -27,14 +27,14 @@ public class PsbReportParserService {
             if (isAdded) {
                 //CashTable cashTable = new CashTable(report);
                 CashFlowTable cashFlowTable = new CashFlowTable(report);
-                PortfolioTable portfolioTable = new PortfolioTable(report);
+                PortfolioSecuritiesTable portfolioSecuritiesTable = new PortfolioSecuritiesTable(report);
                 TransactionTable transactionTable = new TransactionTable(report);
                 CouponAndAmortizationTable couponAndAmortizationTable = new CouponAndAmortizationTable(report);
                 DividendTable dividendTable = new DividendTable(report);
                 DerivativeTransactionTable derivativeTransactionTable = new DerivativeTransactionTable(report);
                 DerivativeCashFlowTable derivativeCashFlowTable = new DerivativeCashFlowTable(report);
 
-                addSecurities(portfolioTable);
+                addSecurities(portfolioSecuritiesTable);
                 addCashInAndOutFlows(cashFlowTable);
                 addTransaction(transactionTable);
                 addCouponAndAmortizationCashFlows(couponAndAmortizationTable);
@@ -47,8 +47,8 @@ public class PsbReportParserService {
         }
     }
 
-    private void addSecurities(PortfolioTable portfolioTable) {
-        for (PortfolioTable.Row row : portfolioTable.getData()) {
+    private void addSecurities(PortfolioSecuritiesTable portfolioSecuritiesTable) {
+        for (PortfolioSecuritiesTable.Row row : portfolioSecuritiesTable.getData()) {
             addSecurity(row.getIsin(), row.getName());
         }
     }
