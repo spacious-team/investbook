@@ -1,0 +1,21 @@
+<html lang="ru">
+<head>
+    <title>Загрузка отчета брокера</title>
+    <meta charset="utf-8">
+</head>
+<body>
+<form action="/reports" enctype="multipart/form-data" method="POST">
+    <label>
+        Отчет
+        <input multiple name="reports" type="file"/>
+    </label>
+    <label>
+        в формате
+        <select name="format">
+            <option selected value="psb">промсвязьбанка</option>
+        </select>
+    </label>
+    <input type="submit" value="загрузить"/>
+</form>
+</body>
+</html>

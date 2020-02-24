@@ -9,6 +9,8 @@ import ru.portfolio.portfolio.controller.*;
 import ru.portfolio.portfolio.pojo.*;
 
 import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Service
 @Slf4j
@@ -22,6 +24,10 @@ public class PsbReportParserService {
     private final TransactionCashFlowRestController transactionCashFlowRestController;
 
     public void parse(String reportFile) {
+        parse(Paths.get(reportFile));
+    }
+
+    public void parse(Path reportFile) {
         try (PsbBrokerReport report = new PsbBrokerReport(reportFile)) {
             boolean isAdded = addPortfolio(Portfolio.builder().portfolio(report.getPortfolio()));
             if (isAdded) {
@@ -44,6 +50,7 @@ public class PsbReportParserService {
             }
         } catch (Exception e) {
             log.warn("Не могу открыть/закрыть отчет {}", reportFile, e);
+            throw new RuntimeException(e);
         }
     }
 

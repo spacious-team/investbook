@@ -9,8 +9,10 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,7 +34,11 @@ public class PsbBrokerReport implements AutoCloseable {
     private final String portfolio;
 
     public PsbBrokerReport(String exelFileName) throws IOException {
-        this.book = new XSSFWorkbook(new FileInputStream(exelFileName));
+        this(Paths.get(exelFileName));
+    }
+
+    public PsbBrokerReport(Path exelFileName) throws IOException {
+        this.book = new XSSFWorkbook(Files.newInputStream(exelFileName));
         this.sheet = book.getSheetAt(0);
         this.portfolio = getPortfolio(this.sheet);
     }
