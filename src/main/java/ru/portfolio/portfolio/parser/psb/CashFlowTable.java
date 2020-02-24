@@ -21,9 +21,12 @@ import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.convertToInstant
 public class CashFlowTable {
     private static final String TABLE_START_TEXT = "Внешнее движение денежных средств в валюте счета";
     @Getter
+    private final PsbBrokerReport report;
+    @Getter
     private final List<Row> data = new ArrayList<>();
 
     public CashFlowTable(PsbBrokerReport report) {
+        this.report = report;
         this.data.addAll(pasreTable(report, TABLE_START_TEXT, 1));
     }
 

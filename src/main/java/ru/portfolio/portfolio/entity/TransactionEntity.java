@@ -21,6 +21,11 @@ public class TransactionEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "portfolio", referencedColumnName = "portfolio")
+    @JsonIgnoreProperties({"hibernateLazyInitializer"})
+    private PortfolioEntity portfolio;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "isin", referencedColumnName = "isin")
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private SecurityEntity security;

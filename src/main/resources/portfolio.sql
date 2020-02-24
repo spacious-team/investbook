@@ -44,15 +44,18 @@ INSERT IGNORE INTO `cash_flow_type` (`id`, `name`) VALUES
 -- Дамп структуры для таблица portfolio.event_cash_flow
 CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `portfolio` varchar(32) NOT NULL COMMENT 'Портфель (номер брокерского счета)',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `event_cash_flow_timestamp_type_value_currency_uniq_ix` (`timestamp`,`type`,`value`,`currency`),
+  UNIQUE KEY `event_cash_flow_timestamp_type_value_currency_portfolio_uniq_ix` (`timestamp`,`type`,`value`,`currency`,`portfolio`),
   KEY `event_cash_flow_type_ix` (`type`),
+  KEY `event_cash_flow_portfolio_fkey` (`portfolio`),
+  CONSTRAINT `event_cash_flow_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`portfolio`) ON UPDATE CASCADE,
   CONSTRAINT `event_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств, не связанное с ЦБ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств, не связанное с ЦБ';
 
 -- Дамп данных таблицы portfolio.event_cash_flow: ~0 rows (приблизительно)
 /*!40000 ALTER TABLE `event_cash_flow` DISABLE KEYS */;
@@ -68,6 +71,16 @@ CREATE TABLE IF NOT EXISTS `issuer` (
 -- Дамп данных таблицы portfolio.issuer: ~0 rows (приблизительно)
 /*!40000 ALTER TABLE `issuer` DISABLE KEYS */;
 /*!40000 ALTER TABLE `issuer` ENABLE KEYS */;
+
+-- Дамп структуры для таблица portfolio.portfolio
+CREATE TABLE IF NOT EXISTS `portfolio` (
+  `portfolio` varchar(32) NOT NULL COMMENT 'Портфель (номер брокерского счета)',
+  PRIMARY KEY (`portfolio`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Таблица пользователей';
+
+-- Дамп данных таблицы portfolio.portfolio: ~0 rows (приблизительно)
+/*!40000 ALTER TABLE `portfolio` DISABLE KEYS */;
+/*!40000 ALTER TABLE `portfolio` ENABLE KEYS */;
 
 -- Дамп структуры для таблица portfolio.security
 CREATE TABLE IF NOT EXISTS `security` (
@@ -87,6 +100,7 @@ CREATE TABLE IF NOT EXISTS `security` (
 -- Дамп структуры для таблица portfolio.security_event_cash_flow
 CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `portfolio` varchar(32) NOT NULL COMMENT 'Портфель (номер брокерского счета)',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `isin` varchar(64) NOT NULL COMMENT 'ISIN инструмента, по которому произошло событие',
   `count` int(1) unsigned zerofill NOT NULL COMMENT 'Количество ЦБ, по которым произошло событие',
@@ -94,10 +108,12 @@ CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `security_event_cash_flow_timestamp_isin_type_uniq_ix` (`timestamp`,`isin`,`type`),
+  UNIQUE KEY `security_event_cash_flow_timestamp_isin_type_portfolio_uniq_ix` (`timestamp`,`isin`,`type`,`portfolio`),
   KEY `security_event_cash_flow_type_ix` (`type`),
   KEY `security_event_cash_flow_ticker_ix` (`isin`),
+  KEY `security_event_cash_flow_portfolio_fkey` (`portfolio`),
   CONSTRAINT `security_event_cash_flow_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE,
+  CONSTRAINT `security_event_cash_flow_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`portfolio`) ON UPDATE CASCADE,
   CONSTRAINT `security_event_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств, связанное с ЦБ';
 
@@ -108,13 +124,16 @@ CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
 -- Дамп структуры для таблица portfolio.transaction
 CREATE TABLE IF NOT EXISTS `transaction` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Номер транзакции',
+  `portfolio` varchar(32) NOT NULL COMMENT 'Портфель (номер брокерского счета)',
   `isin` varchar(64) NOT NULL COMMENT 'Ценная бумага',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Время совершения сделки',
   `count` int(1) unsigned zerofill NOT NULL,
   PRIMARY KEY (`id`),
   KEY `transaction_ticker_ix` (`isin`),
-  CONSTRAINT `transaction_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Сделки';
+  KEY `transaction_portfolio_fkey` (`portfolio`),
+  CONSTRAINT `transaction_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE,
+  CONSTRAINT `transaction_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`portfolio`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Сделки';
 
 -- Дамп данных таблицы portfolio.transaction: ~0 rows (приблизительно)
 /*!40000 ALTER TABLE `transaction` DISABLE KEYS */;

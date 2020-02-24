@@ -20,9 +20,12 @@ public class TransactionTable {
     private static final String TABLE2_START_TEXT = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами Т+, рассчитанные в отчетном периоде";
     private static final String TABLE_END_TEXT = "Итого оборот";
     @Getter
+    private final PsbBrokerReport report;
+    @Getter
     private final List<Row> data = new ArrayList<>();
 
     public TransactionTable(PsbBrokerReport report) {
+        this.report = report;
         this.data.addAll(parseTable(report, TABLE1_START_TEXT, TABLE_END_TEXT,1));
         this.data.addAll(parseTable(report, TABLE2_START_TEXT, TABLE_END_TEXT,2));
     }

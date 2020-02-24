@@ -16,6 +16,9 @@ public class SecurityEventCashFlow {
     private Integer id;
 
     @NotNull
+    private String portfolio;
+
+    @NotNull
     private Instant timestamp;
 
     @NotNull

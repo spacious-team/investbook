@@ -20,9 +20,12 @@ import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.convertToInstant
 public class DividendTable {
     private static final String TABLE_START_TEXT = "Выплата дивидендов";
     @Getter
+    private final PsbBrokerReport report;
+    @Getter
     private final List<Row> data = new ArrayList<>();
 
     public DividendTable(PsbBrokerReport report) {
+        this.report = report;
         this.data.addAll(pasreTable(report, TABLE_START_TEXT, 1));
     }
 

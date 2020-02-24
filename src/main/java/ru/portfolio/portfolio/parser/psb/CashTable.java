@@ -17,9 +17,12 @@ public class CashTable {
     private static final String TABLE_START_TEXT = "Позиция денежных средств по биржевым площадкам";
     private static final String TABLE_END_TEXT = "ИТОГО:";
     @Getter
+    private final PsbBrokerReport report;
+    @Getter
     private final List<Row> data = new ArrayList<>();
 
     public CashTable(PsbBrokerReport report) {
+        this.report = report;
         this.data.addAll(pasreTable(report, TABLE_START_TEXT, TABLE_END_TEXT, 1));
     }
 

@@ -19,6 +19,11 @@ public class EventCashFlowEntity {
     @Column(name = "id")
     private Integer id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "portfolio", referencedColumnName = "portfolio")
+    @JsonIgnoreProperties({"hibernateLazyInitializer"})
+    private PortfolioEntity portfolio;
+
     @Basic
     @Column(name = "timestamp")
     private Instant timestamp;

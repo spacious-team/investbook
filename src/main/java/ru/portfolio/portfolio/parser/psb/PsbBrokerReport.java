@@ -28,10 +28,21 @@ public class PsbBrokerReport implements AutoCloseable {
     private final XSSFWorkbook book;
     @Getter
     private final XSSFSheet sheet;
+    @Getter
+    private final String portfolio;
 
     public PsbBrokerReport(String exelFileName) throws IOException {
         this.book = new XSSFWorkbook(new FileInputStream(exelFileName));
         this.sheet = book.getSheetAt(0);
+        this.portfolio = getPortfolio(this.sheet);
+    }
+
+    private static String getPortfolio(XSSFSheet sheet) {
+        try {
+            return sheet.getRow(9).getCell(3).getStringCellValue().split("/")[0];
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка поиска номера Брокерского счета в отчете");
+        }
     }
 
     public CellAddress find(Object value) {
