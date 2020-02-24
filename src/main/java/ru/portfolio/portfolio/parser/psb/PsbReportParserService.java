@@ -2,6 +2,7 @@ package ru.portfolio.portfolio.parser.psb;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ru.portfolio.portfolio.controller.*;
@@ -190,7 +191,11 @@ public class PsbReportParserService {
                 return false;
             }
         } catch (Exception e) {
-            log.warn("Не могу добавить ЦБ {} в список", security, e);
+            if (NestedExceptionUtils.getMostSpecificCause(e).getMessage().toLowerCase().contains("duplicate")) {
+                log.debug("Дублирование информации: не могу добавить ЦБ {} в список", security, e);
+            } else {
+                log.warn("Не могу добавить ЦБ {} в список", security, e);
+            }
             return false;
         }
         return true;
@@ -204,7 +209,11 @@ public class PsbReportParserService {
                 return false;
             }
         } catch (Exception e) {
-            log.warn("Не могу добавить транзакцию {}", transaction, e);
+            if (NestedExceptionUtils.getMostSpecificCause(e).getMessage().toLowerCase().contains("duplicate")) {
+                log.debug("Дублирование информации: не могу добавить транзакцию {}", transaction, e);
+            } else {
+                log.warn("Не могу добавить транзакцию {}", transaction, e);
+            }
             return false;
         }
         return true;
@@ -217,7 +226,11 @@ public class PsbReportParserService {
                 log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow);
             }
         } catch (Exception e) {
-            log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow, e);
+            if (NestedExceptionUtils.getMostSpecificCause(e).getMessage().toLowerCase().contains("duplicate")) {
+                log.debug("Дублирование информации: не могу добавить информацию о передвижении средств {}", transactionCashFlow, e);
+            } else {
+                log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow, e);
+            }
         }
     }
 
@@ -228,7 +241,11 @@ public class PsbReportParserService {
                 log.warn("Не могу добавить информацию о движении денежных средств {}", eventCashFlow);
             }
         } catch (Exception e) {
-            log.warn("Не могу добавить информацию о движении денежных средств {}", eventCashFlow, e);
+            if (NestedExceptionUtils.getMostSpecificCause(e).getMessage().toLowerCase().contains("duplicate")) {
+                log.debug("Дублирование информации: не могу добавить информацию о движении денежных средств {}", eventCashFlow, e);
+            } else {
+                log.warn("Не могу добавить информацию о движении денежных средств {}", eventCashFlow, e);
+            }
         }
     }
 
@@ -239,7 +256,11 @@ public class PsbReportParserService {
                 log.warn("Не могу добавить информацию о движении денежных средств {}", securityEventCashFlow);
             }
         } catch (Exception e) {
-            log.warn("Не могу добавить информацию о движении денежных средств {}", securityEventCashFlow, e);
+            if (NestedExceptionUtils.getMostSpecificCause(e).getMessage().toLowerCase().contains("duplicate")) {
+                log.debug("Дублирование информации: не могу добавить информацию о движении денежных средств {}", securityEventCashFlow, e);
+            } else {
+                log.warn("Не могу добавить информацию о движении денежных средств {}", securityEventCashFlow, e);
+            }
         }
     }
 }
