@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `cash_flow_type` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Тип движения средств';
 
--- Дамп данных таблицы portfolio.cash_flow_type: ~12 rows (приблизительно)
+-- Дамп данных таблицы portfolio.cash_flow_type: ~13 rows (приблизительно)
 /*!40000 ALTER TABLE `cash_flow_type` DISABLE KEYS */;
 INSERT IGNORE INTO `cash_flow_type` (`id`, `name`) VALUES
 	(0, 'Пополнение и снятие'),
@@ -45,18 +45,14 @@ INSERT IGNORE INTO `cash_flow_type` (`id`, `name`) VALUES
 CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `isin` varchar(64) DEFAULT NULL COMMENT 'ISIN инструмента, по которому произошло событие',
-  `count` int(1) unsigned zerofill DEFAULT NULL COMMENT 'Количество ЦБ, по которым произошло событие',
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
   PRIMARY KEY (`id`),
   UNIQUE KEY `event_cash_flow_timestamp_type_value_currency_uniq_ix` (`timestamp`,`type`,`value`,`currency`),
   KEY `event_cash_flow_type_ix` (`type`),
-  KEY `event_cash_flow_ticker_ix` (`isin`),
-  CONSTRAINT `event_cash_flow_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE,
   CONSTRAINT `event_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств, не связанное с ЦБ';
 
 -- Дамп данных таблицы portfolio.event_cash_flow: ~0 rows (приблизительно)
 /*!40000 ALTER TABLE `event_cash_flow` DISABLE KEYS */;
@@ -88,6 +84,27 @@ CREATE TABLE IF NOT EXISTS `security` (
 /*!40000 ALTER TABLE `security` DISABLE KEYS */;
 /*!40000 ALTER TABLE `security` ENABLE KEYS */;
 
+-- Дамп структуры для таблица portfolio.security_event_cash_flow
+CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `isin` varchar(64) NOT NULL COMMENT 'ISIN инструмента, по которому произошло событие',
+  `count` int(1) unsigned zerofill NOT NULL COMMENT 'Количество ЦБ, по которым произошло событие',
+  `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
+  `value` decimal(8,2) NOT NULL COMMENT 'Размер',
+  `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `security_event_cash_flow_timestamp_isin_type_uniq_ix` (`timestamp`,`isin`,`type`),
+  KEY `security_event_cash_flow_type_ix` (`type`),
+  KEY `security_event_cash_flow_ticker_ix` (`isin`),
+  CONSTRAINT `security_event_cash_flow_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE,
+  CONSTRAINT `security_event_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств, связанное с ЦБ';
+
+-- Дамп данных таблицы portfolio.security_event_cash_flow: ~0 rows (приблизительно)
+/*!40000 ALTER TABLE `security_event_cash_flow` DISABLE KEYS */;
+/*!40000 ALTER TABLE `security_event_cash_flow` ENABLE KEYS */;
+
 -- Дамп структуры для таблица portfolio.transaction
 CREATE TABLE IF NOT EXISTS `transaction` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Номер транзакции',
@@ -99,7 +116,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   CONSTRAINT `transaction_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Сделки';
 
--- Дамп данных таблицы portfolio.transaction: ~1 rows (приблизительно)
+-- Дамп данных таблицы portfolio.transaction: ~0 rows (приблизительно)
 /*!40000 ALTER TABLE `transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `transaction` ENABLE KEYS */;
 

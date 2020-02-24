@@ -15,8 +15,10 @@ public class PsbReportParserServiceTest extends AbstractTestNGSpringContextTests
 
     @DataProvider(name = "report")
     Object[][] getData() {
-        return new Object[][] {/*{"E:\\1.xlsx"}, */
-                {"E:\\2.xlsx"}};
+        return new Object[][] {{"E:\\1.xlsx"},
+                {"E:\\2.xlsx"},
+                {"E:\\Исполнение фьючерса.xlsx"},
+                {"E:\\Налог.xlsx"}};
     }
 
     @Test(dataProvider = "report")

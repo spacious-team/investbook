@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import ru.portfolio.portfolio.controller.EventCashFlowRestController;
-import ru.portfolio.portfolio.controller.SecurityRestController;
-import ru.portfolio.portfolio.controller.TransactionCashFlowRestController;
-import ru.portfolio.portfolio.controller.TransactionRestController;
+import ru.portfolio.portfolio.controller.*;
 import ru.portfolio.portfolio.pojo.*;
 
 import java.math.BigDecimal;
@@ -17,6 +14,7 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class PsbReportParserService {
     private final SecurityRestController securityRestController;
+    private final SecurityEventCashFlowRestController securityEventCashFlowRestController;
     private final EventCashFlowRestController eventCashFlowRestController;
     private final TransactionRestController transactionRestController;
     private final TransactionCashFlowRestController transactionCashFlowRestController;
@@ -98,7 +96,7 @@ public class PsbReportParserService {
     private void addCouponAndAmortizationCashFlows(CouponAndAmortizationTable couponAndAmortizationTable) {
         for (CouponAndAmortizationTable.Row row : couponAndAmortizationTable.getData()) {
             addSecurity(row.getIsin()); // required for amortization
-            addEventCashFlow(EventCashFlow.builder()
+            addSecurityEventCashFlow(SecurityEventCashFlow.builder()
                     .isin(row.getIsin())
                     .count(row.getCount())
                     .eventType(row.getEvent())
@@ -110,7 +108,7 @@ public class PsbReportParserService {
 
     private void addDividendCashFlows(DividendTable dividendTable) {
         for (DividendTable.Row row : dividendTable.getData()) {
-            addEventCashFlow(EventCashFlow.builder()
+            addSecurityEventCashFlow(SecurityEventCashFlow.builder()
                     .isin(row.getIsin())
                     .count(row.getCount())
                     .eventType(row.getEvent())
@@ -156,14 +154,21 @@ public class PsbReportParserService {
             if (row.getContract() != null) {
                 boolean isAdded = addSecurity(row.getContract());
                 if (!isAdded) continue;
+                addSecurityEventCashFlow(SecurityEventCashFlow.builder()
+                        .isin(row.getContract())
+                        .count(row.getCount())
+                        .eventType(row.getEvent())
+                        .timestamp(row.getTimestamp())
+                        .value(row.getValue())
+                        .currency(row.getCurrency()));
+            } else {
+                // Событие "Биржевой сбор"
+                addEventCashFlow(EventCashFlow.builder()
+                        .eventType(row.getEvent())
+                        .timestamp(row.getTimestamp())
+                        .value(row.getValue())
+                        .currency(row.getCurrency()));
             }
-            addEventCashFlow(EventCashFlow.builder()
-                    .isin(row.getContract())
-                    .count(row.getCount())
-                    .eventType(row.getEvent())
-                    .timestamp(row.getTimestamp())
-                    .value(row.getValue())
-                    .currency(row.getCurrency()));
         }
     }
 
@@ -224,6 +229,17 @@ public class PsbReportParserService {
             }
         } catch (Exception e) {
             log.warn("Не могу добавить информацию о движении денежных средств {}", eventCashFlow, e);
+        }
+    }
+
+    private void addSecurityEventCashFlow(SecurityEventCashFlow.SecurityEventCashFlowBuilder securityEventCashFlow) {
+        try {
+            HttpStatus status = securityEventCashFlowRestController.post(securityEventCashFlow.build()).getStatusCode();
+            if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
+                log.warn("Не могу добавить информацию о движении денежных средств {}", securityEventCashFlow);
+            }
+        } catch (Exception e) {
+            log.warn("Не могу добавить информацию о движении денежных средств {}", securityEventCashFlow, e);
         }
     }
 }
