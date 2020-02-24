@@ -31,6 +31,7 @@ public class PsbReportParserService {
             CouponAndAmortizationTable couponAndAmortizationTable = new CouponAndAmortizationTable(report);
             DividendTable dividendTable = new DividendTable(report);
             DerivativeTransactionTable derivativeTransactionTable = new DerivativeTransactionTable(report);
+            DerivativeCashFlowTable derivativeCashFlowTable = new DerivativeCashFlowTable(report);
 
             addSecurities(portfolioTable);
             addCashInAndOutFlows(cashFlowTable);
@@ -38,6 +39,7 @@ public class PsbReportParserService {
             addCouponAndAmortizationCashFlows(couponAndAmortizationTable);
             addDividendCashFlows(dividendTable);
             addDerivativeTransaction(derivativeTransactionTable);
+            addDerivativeCashFlows(derivativeCashFlowTable);
         } catch (Exception e) {
             log.warn("Не могу открыть/закрыть отчет {}", reportFile, e);
         }
@@ -45,18 +47,7 @@ public class PsbReportParserService {
 
     private void addSecurities(PortfolioTable portfolioTable) {
         for (PortfolioTable.Row row : portfolioTable.getData()) {
-            try {
-                Security security = Security.builder()
-                        .isin(row.getIsin())
-                        .name(row.getName())
-                        .build();
-                HttpStatus status = securityRestController.post(security).getStatusCode();
-                if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                    log.warn("Не могу добавить ЦБ {} в список", row);
-                }
-            } catch (Exception e) {
-                log.warn("Не могу добавить ЦБ {} в список", row, e);
-            }
+            addSecurity(row.getIsin(), row.getName());
         }
     }
 
@@ -181,19 +172,7 @@ public class PsbReportParserService {
 
     private void addDerivativeTransaction(DerivativeTransactionTable derivativeTransactionTable) {
         for (DerivativeTransactionTable.Row row : derivativeTransactionTable.getData()) {
-            try {
-                Security security = Security.builder()
-                        .isin(row.getIsin())
-                        .name(row.getIsin())
-                        .build();
-                HttpStatus status = securityRestController.post(security).getStatusCode();
-                if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                    log.warn("Не могу добавить ЦБ {} в список", row);
-                }
-            } catch (Exception e) {
-                log.warn("Не могу добавить ЦБ {} в список", row, e);
-            }
-
+            addSecurity(row.getIsin());
             try {
                 Transaction transaction = Transaction.builder()
                         .id(row.getTransactionId())
@@ -234,6 +213,52 @@ public class PsbReportParserService {
             } catch (Exception e) {
                 log.warn("Не могу добавить транзакцию {}", row, e);
             }
+        }
+    }
+
+    private void addDerivativeCashFlows(DerivativeCashFlowTable derivativeCashFlowTable) {
+        for (DerivativeCashFlowTable.Row row : derivativeCashFlowTable.getData()) {
+            if (row.getContract() != null) {
+                addSecurity(row.getContract());
+            }
+            try {
+                EventCashFlow eventCashFlow = EventCashFlow.builder()
+                        .isin(row.getContract())
+                        .count(row.getCount())
+                        .eventType(row.getEvent())
+                        .timestamp(row.getTimestamp())
+                        .value(row.getValue())
+                        .currency(row.getCurrency())
+                        .build();
+                HttpStatus status = eventCashFlowRestController.post(eventCashFlow).getStatusCode();
+                if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
+                    log.warn("Не могу добавить информацию о движении денежных средств {}", row);
+                }
+            } catch (Exception e) {
+                log.warn("Не могу добавить информацию о движении денежных средств {}", row, e);
+            }
+        }
+    }
+
+    private void addSecurity(String isin) {
+        addSecurity(isin, null);
+    }
+
+    private void addSecurity(String isin, String name) {
+        addSecurity(Security.builder()
+                .isin(isin)
+                .name(name)
+                .build());
+    }
+
+    private void addSecurity(Security security) {
+        try {
+            HttpStatus status = securityRestController.post(security).getStatusCode();
+            if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
+                log.warn("Не могу добавить ЦБ {} в список", security);
+            }
+        } catch (Exception e) {
+            log.warn("Не могу добавить ЦБ {} в список", security, e);
         }
     }
 }

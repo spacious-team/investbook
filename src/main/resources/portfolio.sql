@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `isin` varchar(64) DEFAULT NULL COMMENT 'ISIN инструмента, по которому произошло событие',
-  `count` int(1) DEFAULT NULL COMMENT 'Количество ЦБ, по которым произошло событие',
+  `count` int(1) unsigned zerofill DEFAULT NULL COMMENT 'Количество ЦБ, по которым произошло событие',
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
