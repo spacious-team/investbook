@@ -75,7 +75,7 @@ public class TransactionTable {
                 .timestamp(convertToInstant( row.getCell(leftColumn).getStringCellValue()))
                 .transactionId(Long.parseLong(row.getCell(leftColumn + 1).getStringCellValue()))
                 .isin(row.getCell(leftColumn + 6).getStringCellValue())
-                .count(Double.valueOf(row.getCell(leftColumn + 9).getNumericCellValue()).intValue())
+                .count((isBuy ? 1 : -1) * Double.valueOf(row.getCell(leftColumn + 9).getNumericCellValue()).intValue())
                 .value(value)
                 .accruedInterest(accruedInterest)
                 .commission(commission)

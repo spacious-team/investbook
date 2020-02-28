@@ -94,7 +94,7 @@ public class DerivativeTransactionTable {
                     .timestamp(convertToInstant( row.getCell(leftColumn).getStringCellValue()))
                     .transactionId(Long.parseLong(row.getCell(leftColumn + 1).getStringCellValue()))
                     .isin(row.getCell(leftColumn + 3).getStringCellValue())
-                    .count(count)
+                    .count((isBuy ? 1 : -1) * count)
                     .value(value)
                     .commission(commission)
                     .currency("RUB") // FORTS, only RUB

@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   `portfolio` varchar(32) NOT NULL COMMENT 'Портфель (номер брокерского счета)',
   `isin` varchar(64) NOT NULL COMMENT 'Ценная бумага',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Время совершения сделки',
-  `count` int(1) unsigned zerofill NOT NULL,
+  `count` int(1) NOT NULL COMMENT 'Покупка (+), продажа (-)',
   PRIMARY KEY (`id`),
   KEY `transaction_ticker_ix` (`isin`),
   KEY `transaction_portfolio_fkey` (`portfolio`),
