@@ -30,4 +30,15 @@ public class TransactionEntityConverter implements EntityConverter<TransactionEn
         entity.setCount(transaction.getCount());
         return entity;
     }
+
+    @Override
+    public Transaction fromEntity(TransactionEntity entity) {
+        return Transaction.builder()
+                .id(entity.getId())
+                .portfolio(entity.getPortfolio().getPortfolio())
+                .isin(entity.getSecurity().getIsin())
+                .timestamp(entity.getTimestamp())
+                .count(entity.getCount())
+                .build();
+    }
 }
