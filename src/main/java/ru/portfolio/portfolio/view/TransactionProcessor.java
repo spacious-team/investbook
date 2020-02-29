@@ -19,7 +19,6 @@ class TransactionProcessor {
     @Getter
     private final ArrayList<ClosedPosition> closedPositions = new ArrayList<>();
 
-
     TransactionProcessor(ArrayList<Transaction> transactions) {
         for (Transaction transaction : transactions) {
             if (isIncreasePosition(transaction)) {
