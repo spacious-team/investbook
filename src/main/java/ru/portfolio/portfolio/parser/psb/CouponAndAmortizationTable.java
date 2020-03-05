@@ -51,14 +51,25 @@ public class CouponAndAmortizationTable {
     private static Collection<Row> getCouponOrAmortizationOrTax(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
         try {
             BigDecimal value, tax;
-            boolean isCoupon = row.getCell(leftColumn + 1).getStringCellValue().equalsIgnoreCase("Погашение купона");
-            double cellValue = row.getCell(leftColumn + (isCoupon ? 11 : 12)).getNumericCellValue();
+            CashFlowType event;
+            String action = row.getCell(leftColumn + 1).getStringCellValue();
+            if (action.equalsIgnoreCase("Погашение купона")) {
+                event = CashFlowType.COUPON;
+            } else if (action.equalsIgnoreCase("Амортизация")) {
+                event = CashFlowType.AMORTIZATION;
+            } else if (action.equalsIgnoreCase("Погашение бумаг")) {
+                event = CashFlowType.REDEMPTION;
+            } else {
+                throw new RuntimeException("Обработчик события " + action + " не реализован");
+            }
+
+            double cellValue = row.getCell(leftColumn + ((event == CashFlowType.COUPON) ? 11 : 12)).getNumericCellValue();
             value = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
             cellValue = row.getCell(leftColumn + 13).getNumericCellValue();
             tax = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue).negate();
             Row.RowBuilder builder = Row.builder()
                     .timestamp(convertToInstant(row.getCell(leftColumn).getStringCellValue()))
-                    .event(isCoupon ? CashFlowType.COUPON : CashFlowType.AMORTIZATION)
+                    .event(event)
                     .isin(row.getCell(leftColumn + 7).getStringCellValue())
                     .count(Double.valueOf(row.getCell(leftColumn + 9).getNumericCellValue()).intValue())
                     .value(value)
