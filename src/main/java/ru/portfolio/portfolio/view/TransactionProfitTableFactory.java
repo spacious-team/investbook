@@ -2,12 +2,18 @@ package ru.portfolio.portfolio.view;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.portfolio.portfolio.converter.SecurityEntityConverter;
+import ru.portfolio.portfolio.converter.SecurityEventCashFlowEntityConverter;
 import ru.portfolio.portfolio.converter.TransactionEntityConverter;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.entity.SecurityEntity;
+import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntity;
 import ru.portfolio.portfolio.pojo.CashFlowType;
+import ru.portfolio.portfolio.pojo.Security;
+import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 import ru.portfolio.portfolio.pojo.Transaction;
+import ru.portfolio.portfolio.repository.SecurityEventCashFlowRepository;
 import ru.portfolio.portfolio.repository.SecurityRepository;
 import ru.portfolio.portfolio.repository.TransactionCashFlowRepository;
 import ru.portfolio.portfolio.repository.TransactionRepository;
@@ -15,6 +21,7 @@ import ru.portfolio.portfolio.repository.TransactionRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
@@ -37,93 +44,98 @@ public class TransactionProfitTableFactory {
     static final String TAX = "Налог (с разницы курсов)";
     static final String PROFIT = "Доходность годовых, %";
 
-    static {
-
-    }
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
-
+    private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final TransactionEntityConverter transactionEntityConverter;
+    private final SecurityEntityConverter securityEntityConverter;
+    private final SecurityEventCashFlowEntityConverter securityEventCashFlowEntityConverter;
+    private final PaidInterestFactory paidInterestFactory;
 
     public List<Map<String, Object>> calculatePortfolioProfit(PortfolioEntity portfolio) {
-        ArrayList<Map<String, Object>> positions = new ArrayList<>();
+        ArrayList<Map<String, Object>> openPositionsProfit = new ArrayList<>();
+        ArrayList<Map<String, Object>> closedPositionsProfit = new ArrayList<>();
         for (String isin : transactionRepository.findDistinctIsinByPortfolioOrderByTimestamp(portfolio)) {
-            Optional<SecurityEntity> security = securityRepository.findByIsin(isin);
-            if (security.isPresent()) {
-                ArrayList<Transaction> transactions = transactionRepository
-                        .findBySecurityAndPortfolioOrderByTimestampAsc(security.get(), portfolio)
+            Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
+            if (securityEntity.isPresent()) {
+                Security security = securityEntityConverter.fromEntity(securityEntity.get());
+                Deque<Transaction> transactions = transactionRepository
+                        .findBySecurityAndPortfolioOrderByTimestampAsc(securityEntity.get(), portfolio)
                         .stream()
                         .map(transactionEntityConverter::fromEntity)
-                        .collect(Collectors.toCollection(ArrayList::new));
-                TransactionProcessor transactionProcessor = new TransactionProcessor(transactions);
-                positions.addAll(getClosedPositions(security.get(), transactionProcessor));
-                positions.addAll(getUnclosedPositions(security.get(), transactionProcessor));
+                        .collect(Collectors.toCollection(LinkedList::new));
+                Deque<SecurityEventCashFlow> redemption = securityEventCashFlowRepository
+                        .findByIsinAndCashFlowTypeOOrderByTimestampAsc(isin, CashFlowType.REDEMPTION)
+                        .stream()
+                        .map(securityEventCashFlowEntityConverter::fromEntity)
+                        .collect(Collectors.toCollection(LinkedList::new));
+                Positions positions = new Positions(transactions, redemption);
+                PaidInterest paidInterest = paidInterestFactory.getPayedInterestFor(security, positions);
+                closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(), paidInterest,this::getClosedPositionProfit));
+                openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(), paidInterest, this::getOpenedPositionProfit));
             }
         }
-        return positions;
+        ArrayList<Map<String, Object>> profit = new ArrayList<>(closedPositionsProfit);
+        profit.addAll(openPositionsProfit);
+        return profit;
     }
 
-    private List<Map<String, Object>> getClosedPositions(SecurityEntity security, TransactionProcessor transactionProcessor) {
-        List<Map<String, Object>> closedPositions = new ArrayList<>();
-        for (ClosedPosition position : transactionProcessor.getClosedPositions()) {
-            Map<String, Object> row = getClosedPositionProfit(position);
+    private <T extends Position> List<Map<String, Object>> getPositionProfit(Security security,
+                                                                             Deque<T> positions,
+                                                                             PaidInterest paidInterest,
+                                                                             Function<T, Map<String, Object>> profitBuilder) {
+        List<Map<String, Object>> rows = new ArrayList<>();
+        for (T position : positions) {
+            Map<String, Object> row = profitBuilder.apply(position);
             row.put(SECURITY, security.getName());
-            closedPositions.add(row);
+            row.put(ACCRUED_INTEREST, paidInterest.get(CashFlowType.ACCRUED_INTEREST, position));
+            row.put(AMORTIZATION, paidInterest.get(CashFlowType.AMORTIZATION, position));
+            row.put(DIVIDEND, paidInterest.get(CashFlowType.DIVIDEND, position));
+            rows.add(row);
         }
-        return closedPositions;
-    }
-
-    private List<Map<String, Object>> getUnclosedPositions(SecurityEntity security, TransactionProcessor transactionProcessor) {
-        List<Map<String, Object>> unClosedPositions = new ArrayList<>();
-        for (OpenedPosition position : transactionProcessor.getOpenedPositions()) {
-            Map<String, Object> row = getOpenedPositionProfit(position);
-            row.put(SECURITY, security.getName());
-            unClosedPositions.add(row);
-        }
-        return unClosedPositions;
-    }
-
-    private Map<String, Object> getClosedPositionProfit(ClosedPosition position) {
-        Map<String, Object> row = new HashMap<>();
-
-        // open transaction info
-        Transaction transaction = position.getOpenTransaction();
-        row.put(BUY_DATE, transaction.getTimestamp());
-        row.put(COUNT, position.getCount());
-        row.put(BUY_PRICE, getCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount()));
-        double multipier = Math.abs(1d * position.getCount() / transaction.getCount());
-        row.put(BUY_AMOUNT, getCashFlow(transaction, CashFlowType.PRICE, multipier));
-        row.put(BUY_ACCRUED_INTEREST, getCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
-        row.put(BUY_COMMISSION, getCashFlow(transaction, CashFlowType.COMMISSION, multipier));
-
-        // close transaction info
-        transaction = position.getCloseTransaction();
-        multipier = Math.abs(1d * position.getCount() / transaction.getCount());
-        row.put(CELL_DATE, transaction.getTimestamp());
-        row.put(CELL_AMOUNT, getCashFlow(transaction, CashFlowType.PRICE, multipier));
-        row.put(CELL_ACCRUED_INTEREST, getCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
-        row.put(CELL_COMMISSION, getCashFlow(transaction, CashFlowType.COMMISSION, multipier));
-        return row;
+        return rows;
     }
 
     private Map<String, Object> getOpenedPositionProfit(OpenedPosition position) {
         Map<String, Object> row = new HashMap<>();
-
-        // open transaction info
-        Transaction transaction = position.getTransaction();
+        Transaction transaction = position.getOpenTransaction();
         row.put(BUY_DATE, transaction.getTimestamp());
-        row.put(COUNT, position.getUnclosedPositions());
-        row.put(BUY_PRICE, getCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount()));
-        double multipier = Math.abs(1d * position.getUnclosedPositions() / transaction.getCount());
-        row.put(BUY_AMOUNT, getCashFlow(transaction, CashFlowType.PRICE, multipier));
-        row.put(BUY_ACCRUED_INTEREST, getCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
-        row.put(BUY_COMMISSION, getCashFlow(transaction, CashFlowType.COMMISSION, multipier));
-
+        row.put(COUNT, position.getCount());
+        row.put(BUY_PRICE, getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount()));
+        double multipier = Math.abs(1d * position.getCount() / transaction.getCount());
+        row.put(BUY_AMOUNT, getTransactionCashFlow(transaction, CashFlowType.PRICE, multipier));
+        row.put(BUY_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
+        row.put(BUY_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multipier));
         return row;
     }
 
-    private BigDecimal getCashFlow(Transaction transaction, CashFlowType type, double multiplier) {
+    private Map<String, Object> getClosedPositionProfit(ClosedPosition position) {
+        // open transaction info
+        Map<String, Object> row = new HashMap<>(getOpenedPositionProfit(position));
+        // close transaction info
+        Transaction transaction = position.getCloseTransaction();
+        double multipier = Math.abs(1d * position.getCount() / transaction.getCount());
+        row.put(CELL_DATE, transaction.getTimestamp());
+        BigDecimal cellAmount;
+        switch (position.getClosingEvent()) {
+            case PRICE:
+                cellAmount = getTransactionCashFlow(transaction, CashFlowType.PRICE, multipier);
+                break;
+            case REDEMPTION:
+                cellAmount =getRedemptionCashFlow(transaction.getIsin(), multipier);
+                break;
+            default:
+                throw new IllegalArgumentException("ЦБ " + transaction.getIsin() +
+                        " не может быть закрыта событием типа " + position.getClosingEvent());
+        }
+        row.put(CELL_AMOUNT, cellAmount);
+        row.put(CELL_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
+        row.put(CELL_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multipier));
+        return row;
+    }
+
+    private BigDecimal getTransactionCashFlow(Transaction transaction, CashFlowType type, double multiplier) {
         if (transaction.getId() == null) {
             return null;
         }
@@ -136,6 +148,20 @@ public class TransactionProfitTableFactory {
                 .setScale(2, RoundingMode.HALF_UP))
                 .orElse(null);
     }
+
+    private BigDecimal getRedemptionCashFlow(String isin, double multiplier) {
+        List<SecurityEventCashFlowEntity> cashFlows = securityEventCashFlowRepository
+                .findByIsinAndCashFlowType(isin, CashFlowType.REDEMPTION);
+        if (cashFlows.isEmpty()) {
+            return null;
+        } else if (cashFlows.size() != 1) {
+            throw new IllegalArgumentException("По ЦБ может быть не более одного события погашения, по бумаге " + isin +
+                    " найдено " + cashFlows.size() + " событий погашения: " + cashFlows);
+        }
+        return cashFlows.get(0)
+                .getValue()
+                .multiply(BigDecimal.valueOf(multiplier))
+                .abs()
+                .setScale(2, RoundingMode.HALF_UP);
+    }
 }
-
-

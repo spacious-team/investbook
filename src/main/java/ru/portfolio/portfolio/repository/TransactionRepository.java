@@ -7,6 +7,7 @@ import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.entity.SecurityEntity;
 import ru.portfolio.portfolio.entity.TransactionEntity;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public interface TransactionRepository extends JpaRepository<TransactionEntity, Long> {
@@ -14,5 +15,5 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     @Query(nativeQuery = true, value = "SELECT distinct isin FROM transaction WHERE portfolio = :portfolio ORDER BY timestamp")
     Collection<String> findDistinctIsinByPortfolioOrderByTimestamp(@Param("portfolio") PortfolioEntity portfolio);
 
-    Collection<TransactionEntity> findBySecurityAndPortfolioOrderByTimestampAsc(SecurityEntity security, PortfolioEntity portfolio);
+    ArrayList<TransactionEntity> findBySecurityAndPortfolioOrderByTimestampAsc(SecurityEntity security, PortfolioEntity portfolio);
 }
