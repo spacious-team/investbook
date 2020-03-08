@@ -17,7 +17,7 @@ import static ru.portfolio.portfolio.pojo.CashFlowType.*;
 @Component
 @RequiredArgsConstructor
 public class PaidInterestFactory {
-    private static final CashFlowType[] PAY_TYPES =  new CashFlowType[]{ACCRUED_INTEREST, AMORTIZATION, REDEMPTION, DIVIDEND};
+    private static final CashFlowType[] PAY_TYPES =  new CashFlowType[]{COUPON, AMORTIZATION, DIVIDEND};
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
 
     PaidInterest getPayedInterestFor(Security security, Positions positions) {

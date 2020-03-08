@@ -37,7 +37,7 @@ public class TransactionProfitTableFactory {
     static final String CELL_DATE = "Дата продажи";
     static final String CELL_AMOUNT = "Стоимость прод/погаш";
     static final String CELL_ACCRUED_INTEREST = "НКД при продаже" ;
-    static final String ACCRUED_INTEREST = "Выплачены купоны (после налога)";
+    static final String COUPON = "Выплачены купоны (после налога)";
     static final String AMORTIZATION = "Амортизация облигации";
     static final String DIVIDEND = "Дивиденды (после налога)";
     static final String CELL_COMMISSION = "Комиссия продажи/погашения";
@@ -61,7 +61,7 @@ public class TransactionProfitTableFactory {
             if (securityEntity.isPresent()) {
                 Security security = securityEntityConverter.fromEntity(securityEntity.get());
                 Deque<Transaction> transactions = transactionRepository
-                        .findBySecurityAndPortfolioOrderByTimestampAsc(securityEntity.get(), portfolio)
+                        .findBySecurityAndPortfolioOrderByTimestampAscIdAsc(securityEntity.get(), portfolio)
                         .stream()
                         .map(transactionEntityConverter::fromEntity)
                         .collect(Collectors.toCollection(LinkedList::new));
@@ -89,7 +89,7 @@ public class TransactionProfitTableFactory {
         for (T position : positions) {
             Map<String, Object> row = profitBuilder.apply(position);
             row.put(SECURITY, security.getName());
-            row.put(ACCRUED_INTEREST, paidInterest.get(CashFlowType.ACCRUED_INTEREST, position));
+            row.put(COUPON, paidInterest.get(CashFlowType.COUPON, position));
             row.put(AMORTIZATION, paidInterest.get(CashFlowType.AMORTIZATION, position));
             row.put(DIVIDEND, paidInterest.get(CashFlowType.DIVIDEND, position));
             rows.add(row);

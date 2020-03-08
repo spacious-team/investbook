@@ -18,11 +18,7 @@ class ClosedPosition extends OpenedPosition {
      */
     private final int count;
 
-    ClosedPosition(OpenedPosition opening, Transaction closing, CashFlowType closingEvent) {
-        this(opening, closing, min(abs(opening.getUnclosedPositions()), abs(closing.getCount())), closingEvent);
-    }
-
-    private ClosedPosition(OpenedPosition opened, Transaction closing, int count, CashFlowType closingEvent) {
+    ClosedPosition(OpenedPosition opened, Transaction closing, int count, CashFlowType closingEvent) {
         super(opened.getOpenTransaction(), 0);
         this.closeTransaction = closing;
         this.count = count;

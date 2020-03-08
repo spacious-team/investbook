@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
+import static java.lang.Integer.min;
 import static java.lang.Integer.signum;
 import static java.lang.Math.abs;
 
@@ -28,7 +29,7 @@ class Positions {
         updateSecuritiesPastPositions(transactions);
         for (Transaction transaction : transactions) {
             if (isIncreasePosition(transaction)) {
-                openedPositions.add(new OpenedPosition(transaction));
+                this.openedPositions.add(new OpenedPosition(transaction));
             } else {
                 closePositions(transaction, CashFlowType.PRICE);
             }
@@ -77,7 +78,7 @@ class Positions {
             } else {
                 opening.closePositions(closingCount * signum(closing.getCount()));
             }
-            ClosedPosition closed = new ClosedPosition(opening, closing, closingEvent);
+            ClosedPosition closed = new ClosedPosition(opening, closing, min(openedCount, closingCount), closingEvent);
             closingCount -= closed.getCount();
             closedPositions.add(closed);
         }

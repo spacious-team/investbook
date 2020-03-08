@@ -15,5 +15,5 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     @Query(nativeQuery = true, value = "SELECT distinct isin FROM transaction WHERE portfolio = :portfolio ORDER BY timestamp")
     Collection<String> findDistinctIsinByPortfolioOrderByTimestamp(@Param("portfolio") PortfolioEntity portfolio);
 
-    ArrayList<TransactionEntity> findBySecurityAndPortfolioOrderByTimestampAsc(SecurityEntity security, PortfolioEntity portfolio);
+    ArrayList<TransactionEntity> findBySecurityAndPortfolioOrderByTimestampAscIdAsc(SecurityEntity security, PortfolioEntity portfolio);
 }

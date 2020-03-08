@@ -30,7 +30,7 @@ public class PortfolioExelView {
     private static final String[] HEADER = new String[]{
             SECURITY, BUY_DATE, COUNT, BUY_PRICE, BUY_AMOUNT,
             BUY_ACCRUED_INTEREST, BUY_COMMISSION, CELL_DATE, CELL_AMOUNT, CELL_ACCRUED_INTEREST,
-            ACCRUED_INTEREST, AMORTIZATION, DIVIDEND,
+            COUPON, AMORTIZATION, DIVIDEND,
             CELL_COMMISSION, TAX, PROFIT};
     private final TransactionProfitTableFactory transactionProfitTableFactory;
 
