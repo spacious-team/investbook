@@ -1,6 +1,7 @@
 package ru.portfolio.portfolio.view;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
@@ -25,13 +26,6 @@ import static ru.portfolio.portfolio.view.TransactionProfitTableFactory.*;
 @RequiredArgsConstructor
 public class PortfolioExelView {
     private final PortfolioRepository portfolioRepository;
-    private final TransactionRepository transactionRepository;
-    private final SecurityRepository securityRepository;
-    private static final String[] HEADER = new String[]{
-            SECURITY, BUY_DATE, COUNT, BUY_PRICE, BUY_AMOUNT,
-            BUY_ACCRUED_INTEREST, BUY_COMMISSION, CELL_DATE, CELL_AMOUNT, CELL_ACCRUED_INTEREST,
-            COUPON, AMORTIZATION, DIVIDEND,
-            CELL_COMMISSION, TAX, PROFIT};
     private final TransactionProfitTableFactory transactionProfitTableFactory;
 
     public void writeTo(Path path) throws IOException {
@@ -43,21 +37,28 @@ public class PortfolioExelView {
         XSSFCellStyle moneyStyle = createMoneyStyle(book);
         XSSFCellStyle intStyle = createIntegerStyle(book);
         for (PortfolioEntity portfolio : portfolioRepository.findAll()) {
-            List<Map<String, Object>> profitTable = transactionProfitTableFactory.calculatePortfolioProfit(portfolio);
+            List<Map<ExcelProfitSheetHeader, Object>> profitTable = transactionProfitTableFactory.calculatePortfolioProfit(portfolio);
             XSSFSheet sheet = book.createSheet(portfolio.getPortfolio());
             writeHeader(sheet, headerStyle);
             int rowNum = 1;
-            for (Map<String, Object> transactionProfit : profitTable) {
+            for (Map<ExcelProfitSheetHeader, Object> transactionProfit : profitTable) {
                 XSSFRow row = sheet.createRow(rowNum++);
-                for (int i = 0; i < HEADER.length; i++) {
-                    Object value = transactionProfit.get(HEADER[i]);
+                for (ExcelProfitSheetHeader header : ExcelProfitSheetHeader.values()) {
+                    Object value = transactionProfit.get(header);
                     if (value == null) {
                         continue;
                     }
-                    XSSFCell cell = row.createCell(i);
+                    XSSFCell cell = row.createCell(header.ordinal());
                     if (value instanceof String) {
-                        cell.setCellValue((String) value);
-                        cell.setCellStyle(defaultStyle);
+                        String string = (String) value;
+                        if (string.startsWith("=")) {
+                            cell.setCellFormula(string.substring(1));
+                            cell.setCellType(CellType.FORMULA);
+                            cell.setCellStyle(moneyStyle);
+                        } else {
+                            cell.setCellValue(string);
+                            cell.setCellStyle(defaultStyle);
+                        }
                     } else if (value instanceof Number) {
                         cell.setCellValue(((Number) value).doubleValue());
                         cell.setCellStyle(moneyStyle);
@@ -68,9 +69,9 @@ public class PortfolioExelView {
                         cell.setCellValue((Boolean) value);
                         cell.setCellStyle(defaultStyle);
                     }
-                    if (i == 0) {
+                    if (header == ExcelProfitSheetHeader.SECURITY) {
                         cell.setCellStyle(securityNameStyle);
-                    } else if (i == 2) {
+                    } else if (header == ExcelProfitSheetHeader.COUNT) {
                         cell.setCellStyle(intStyle);
                     }
                 }
@@ -83,11 +84,12 @@ public class PortfolioExelView {
     private void writeHeader(XSSFSheet sheet, XSSFCellStyle style) {
         XSSFRow row = sheet.createRow(0);
         row.setHeight((short)-1);
-        for (int i = 0; i < HEADER.length; i++) {
-            XSSFCell cell = row.createCell(i);
-            cell.setCellValue(HEADER[i]);
+        int cnt = 0;
+        for (ExcelProfitSheetHeader header : ExcelProfitSheetHeader.values()) {
+            XSSFCell cell = row.createCell(header.ordinal());
+            cell.setCellValue(header.getDescription());
             cell.setCellStyle(style);
-            sheet.setColumnWidth(i, 14 * 256);
+            sheet.setColumnWidth(header.ordinal(), 14 * 256);
         }
         sheet.setColumnWidth(0, 45 * 256);
     }
