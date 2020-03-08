@@ -9,18 +9,15 @@ import org.apache.poi.xssf.usermodel.*;
 import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
-import ru.portfolio.portfolio.repository.SecurityRepository;
-import ru.portfolio.portfolio.repository.TransactionRepository;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.List;
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.Map;
-
-import static ru.portfolio.portfolio.view.TransactionProfitTableFactory.*;
 
 @Component
 @RequiredArgsConstructor
@@ -32,17 +29,20 @@ public class PortfolioExelView {
         XSSFWorkbook book = new XSSFWorkbook();
         XSSFCellStyle defaultStyle = createDefalutStyle(book);
         XSSFCellStyle headerStyle = createHeaderStyle(book);
+        XSSFCellStyle totalTextStyle = createLeftAlignedItalicTextStyle(book);
+        XSSFCellStyle totalRowStyle = createTotalRowStyle(book);
         XSSFCellStyle securityNameStyle = createLeftAlignedTextStyle(book);
         XSSFCellStyle dateStyle = createDateStyle(book);
         XSSFCellStyle moneyStyle = createMoneyStyle(book);
         XSSFCellStyle intStyle = createIntegerStyle(book);
         for (PortfolioEntity portfolio : portfolioRepository.findAll()) {
-            List<Map<ExcelProfitSheetHeader, Object>> profitTable = transactionProfitTableFactory.calculatePortfolioProfit(portfolio);
+            Deque<Map<ExcelProfitSheetHeader, Object>> profitTable = transactionProfitTableFactory.calculatePortfolioProfit(portfolio);
             XSSFSheet sheet = book.createSheet(portfolio.getPortfolio());
             writeHeader(sheet, headerStyle);
-            int rowNum = 1;
+            profitTable.addFirst(getTotalRow());
+            int rowNum = 0;
             for (Map<ExcelProfitSheetHeader, Object> transactionProfit : profitTable) {
-                XSSFRow row = sheet.createRow(rowNum++);
+                XSSFRow row = sheet.createRow(++rowNum);
                 for (ExcelProfitSheetHeader header : ExcelProfitSheetHeader.values()) {
                     Object value = transactionProfit.get(header);
                     if (value == null) {
@@ -69,7 +69,13 @@ public class PortfolioExelView {
                         cell.setCellValue((Boolean) value);
                         cell.setCellStyle(defaultStyle);
                     }
-                    if (header == ExcelProfitSheetHeader.SECURITY) {
+                    if (rowNum == 1) {
+                        if (header == ExcelProfitSheetHeader.SECURITY) {
+                            cell.setCellStyle(totalTextStyle);
+                        } else {
+                            cell.setCellStyle(totalRowStyle);
+                        }
+                    } else if (header == ExcelProfitSheetHeader.SECURITY) {
                         cell.setCellStyle(securityNameStyle);
                     } else if (header == ExcelProfitSheetHeader.COUNT) {
                         cell.setCellStyle(intStyle);
@@ -84,7 +90,6 @@ public class PortfolioExelView {
     private void writeHeader(XSSFSheet sheet, XSSFCellStyle style) {
         XSSFRow row = sheet.createRow(0);
         row.setHeight((short)-1);
-        int cnt = 0;
         for (ExcelProfitSheetHeader header : ExcelProfitSheetHeader.values()) {
             XSSFCell cell = row.createCell(header.ordinal());
             cell.setCellValue(header.getDescription());
@@ -94,15 +99,42 @@ public class PortfolioExelView {
         sheet.setColumnWidth(0, 45 * 256);
     }
 
+    private Map<ExcelProfitSheetHeader, Object> getTotalRow() {
+        Map<ExcelProfitSheetHeader, Object> totalRow = new HashMap<>();
+        for (ExcelProfitSheetHeader column : ExcelProfitSheetHeader.values()) {
+            totalRow.put(column, "=SUM(" +
+                    column.getColumnIndex() + "3:" +
+                    column.getColumnIndex() + "100000)");
+        }
+        totalRow.put(ExcelProfitSheetHeader.SECURITY, "Итого:");
+        totalRow.remove(ExcelProfitSheetHeader.BUY_DATE);
+        totalRow.remove(ExcelProfitSheetHeader.CELL_DATE);
+        totalRow.remove(ExcelProfitSheetHeader.BUY_PRICE);
+        totalRow.remove(ExcelProfitSheetHeader.PROFIT);
+        return totalRow;
+    }
+
     private static XSSFCellStyle createHeaderStyle(XSSFWorkbook book) {
         XSSFCellStyle style = createDefalutStyle(book);
         style.getFont().setBold(true);
         return style;
     }
 
+    private static XSSFCellStyle createLeftAlignedItalicTextStyle(XSSFWorkbook book) {
+        XSSFCellStyle style = createLeftAlignedTextStyle(book);
+        style.getFont().setItalic(true);
+        return style;
+    }
+
     private static XSSFCellStyle createLeftAlignedTextStyle(XSSFWorkbook book) {
         XSSFCellStyle style = createDefalutStyle(book);
         style.setAlignment(HorizontalAlignment.LEFT);
+        return style;
+    }
+
+    private static XSSFCellStyle createTotalRowStyle(XSSFWorkbook book) {
+        XSSFCellStyle style = createMoneyStyle(book);
+        style.getFont().setItalic(true);
         return style;
     }
 

@@ -25,4 +25,8 @@ public enum ExcelProfitSheetHeader {
     PROFIT("Доходность годовых, %");
     
     private final String description;
+
+    char getColumnIndex() {
+        return  (char) ('A' + this.ordinal());
+    }
 }

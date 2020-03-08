@@ -36,7 +36,7 @@ public class TransactionProfitTableFactory {
     private final SecurityEventCashFlowEntityConverter securityEventCashFlowEntityConverter;
     private final PaidInterestFactory paidInterestFactory;
 
-    public List<Map<ExcelProfitSheetHeader, Object>> calculatePortfolioProfit(PortfolioEntity portfolio) {
+    public Deque<Map<ExcelProfitSheetHeader, Object>> calculatePortfolioProfit(PortfolioEntity portfolio) {
         ArrayList<Map<ExcelProfitSheetHeader, Object>> openPositionsProfit = new ArrayList<>();
         ArrayList<Map<ExcelProfitSheetHeader, Object>> closedPositionsProfit = new ArrayList<>();
         for (String isin : transactionRepository.findDistinctIsinByPortfolioOrderByTimestamp(portfolio)) {
@@ -59,7 +59,7 @@ public class TransactionProfitTableFactory {
                 openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(), paidInterest, this::getOpenedPositionProfit));
             }
         }
-        ArrayList<Map<ExcelProfitSheetHeader, Object>> profit = new ArrayList<>(closedPositionsProfit);
+        Deque<Map<ExcelProfitSheetHeader, Object>> profit = new LinkedList<>(closedPositionsProfit);
         profit.addAll(openPositionsProfit);
         return profit;
     }
