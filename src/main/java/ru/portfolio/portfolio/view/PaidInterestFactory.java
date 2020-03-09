@@ -28,11 +28,11 @@ public class PaidInterestFactory {
         return paidInterest;
     }
 
-    private Map<Position, BigDecimal> getPositionWithPayments(String isin, Positions positions, CashFlowType event) {
+    private Map<Position, List<BigDecimal>> getPositionWithPayments(String isin, Positions positions, CashFlowType event) {
         List<SecurityEventCashFlowEntity> accruedInterests = securityEventCashFlowRepository
                 .findByIsinAndCashFlowType(isin, event);
 
-        Map<Position, BigDecimal> payments = new HashMap<>();
+        Map<Position, List<BigDecimal>> payments = new HashMap<>();
         for (SecurityEventCashFlowEntity cash : accruedInterests) {
             BigDecimal payPerOne =  cash.getValue()
                     .divide(BigDecimal.valueOf(cash.getCount()), 6, RoundingMode.HALF_UP);
@@ -49,7 +49,7 @@ public class PaidInterestFactory {
                 BigDecimal pay = payPerOne
                         .multiply(BigDecimal.valueOf(count))
                         .setScale(2, RoundingMode.HALF_UP);
-                payments.put(position, pay);
+                payments.computeIfAbsent(position, key -> new ArrayList<>()).add(pay);
             }
         }
         return payments;

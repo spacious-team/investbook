@@ -74,13 +74,10 @@ public class TransactionProfitTableFactory {
         for (T position : positions) {
             Map<ExcelProfitSheetHeader, Object> row = profitBuilder.apply(position);
             row.put(SECURITY, security.getName());
-            row.put(COUPON, paidInterest.get(CashFlowType.COUPON, position));
-            row.put(AMORTIZATION, paidInterest.get(CashFlowType.AMORTIZATION, position));
-            row.put(DIVIDEND, paidInterest.get(CashFlowType.DIVIDEND, position));
-            row.put(TAX,
-                    Optional.ofNullable(paidInterest.get(CashFlowType.TAX, position))
-                            .map(BigDecimal::abs)
-                            .orElse(null));
+            row.put(COUPON, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.COUPON, position)));
+            row.put(AMORTIZATION, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.AMORTIZATION, position)));
+            row.put(DIVIDEND, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.DIVIDEND, position)));
+            row.put(TAX, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.TAX, position)));
             rows.add(row);
         }
         return rows;
@@ -154,6 +151,16 @@ public class TransactionProfitTableFactory {
                 .multiply(BigDecimal.valueOf(multiplier))
                 .abs()
                 .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private <T extends Position> String convertPaidInterestToExcelFormula(List<BigDecimal> pays) {
+        if (pays == null || pays.isEmpty()) {
+            return null;
+        }
+        return pays.stream()
+                .map(BigDecimal::abs)
+                .map(String::valueOf)
+                .collect(Collectors.joining("+", "=", ""));
     }
 
     private String getForecastTax() {
