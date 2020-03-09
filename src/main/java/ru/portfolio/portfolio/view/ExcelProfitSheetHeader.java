@@ -23,8 +23,13 @@ public enum ExcelProfitSheetHeader {
     TAX("Налог с купонов и дивидендов"),
     FORECAST_TAX("Налог (с разницы курсов)"),
     PROFIT("Доходность годовых, %");
-    
+
+    static final String ROW_NUM_PLACE_HOLDER = "{rowNum}";
     private final String description;
+
+    String getCellAddr() {
+        return getColumnIndex() + ROW_NUM_PLACE_HOLDER;
+    }
 
     char getColumnIndex() {
         return  (char) ('A' + this.ordinal());

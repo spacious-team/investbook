@@ -19,6 +19,8 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 
+import static ru.portfolio.portfolio.view.ExcelProfitSheetHeader.ROW_NUM_PLACE_HOLDER;
+
 @Component
 @RequiredArgsConstructor
 public class PortfolioExelView {
@@ -52,7 +54,8 @@ public class PortfolioExelView {
                     if (value instanceof String) {
                         String string = (String) value;
                         if (string.startsWith("=")) {
-                            cell.setCellFormula(string.substring(1));
+                            cell.setCellFormula(string.substring(1)
+                                    .replace(ROW_NUM_PLACE_HOLDER, String.valueOf(rowNum + 1)));
                             cell.setCellType(CellType.FORMULA);
                             cell.setCellStyle(moneyStyle);
                         } else {

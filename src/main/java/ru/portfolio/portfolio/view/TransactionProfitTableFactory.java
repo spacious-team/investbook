@@ -24,6 +24,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static ru.portfolio.portfolio.view.ExcelProfitSheetHeader.*;
+
 @Component
 @RequiredArgsConstructor
 public class TransactionProfitTableFactory {
@@ -119,7 +121,16 @@ public class TransactionProfitTableFactory {
         row.put(ExcelProfitSheetHeader.CELL_AMOUNT, cellAmount);
         row.put(ExcelProfitSheetHeader.CELL_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
         row.put(ExcelProfitSheetHeader.CELL_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multipier));
+        row.put(ExcelProfitSheetHeader.FORECAST_TAX, getForecastTax());
         return row;
+    }
+
+    private String getForecastTax() {
+        String forecastTaxFormula =
+                "(" + CELL_AMOUNT.getCellAddr() + "+" + CELL_ACCRUED_INTEREST.getCellAddr() + "+" +AMORTIZATION.getCellAddr() + ")" +
+                "-(" + BUY_AMOUNT.getCellAddr() + "+" + BUY_ACCRUED_INTEREST.getCellAddr() + ")" +
+                "-" + BUY_COMMISSION.getCellAddr() + "-" + CELL_COMMISSION.getCellAddr();
+        return "=IF(" + forecastTaxFormula + "<0,0,0.13*(" + forecastTaxFormula + "))";
     }
 
     private BigDecimal getTransactionCashFlow(Transaction transaction, CashFlowType type, double multiplier) {
