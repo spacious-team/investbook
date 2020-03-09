@@ -73,11 +73,11 @@ public class TransactionProfitTableFactory {
         List<Map<ExcelProfitSheetHeader, Object>> rows = new ArrayList<>();
         for (T position : positions) {
             Map<ExcelProfitSheetHeader, Object> row = profitBuilder.apply(position);
-            row.put(ExcelProfitSheetHeader.SECURITY, security.getName());
-            row.put(ExcelProfitSheetHeader.COUPON, paidInterest.get(CashFlowType.COUPON, position));
-            row.put(ExcelProfitSheetHeader.AMORTIZATION, paidInterest.get(CashFlowType.AMORTIZATION, position));
-            row.put(ExcelProfitSheetHeader.DIVIDEND, paidInterest.get(CashFlowType.DIVIDEND, position));
-            row.put(ExcelProfitSheetHeader.TAX,
+            row.put(SECURITY, security.getName());
+            row.put(COUPON, paidInterest.get(CashFlowType.COUPON, position));
+            row.put(AMORTIZATION, paidInterest.get(CashFlowType.AMORTIZATION, position));
+            row.put(DIVIDEND, paidInterest.get(CashFlowType.DIVIDEND, position));
+            row.put(TAX,
                     Optional.ofNullable(paidInterest.get(CashFlowType.TAX, position))
                             .map(BigDecimal::abs)
                             .orElse(null));
@@ -89,13 +89,13 @@ public class TransactionProfitTableFactory {
     private Map<ExcelProfitSheetHeader, Object> getOpenedPositionProfit(OpenedPosition position) {
         Map<ExcelProfitSheetHeader, Object> row = new HashMap<>();
         Transaction transaction = position.getOpenTransaction();
-        row.put(ExcelProfitSheetHeader.BUY_DATE, transaction.getTimestamp());
-        row.put(ExcelProfitSheetHeader.COUNT, position.getCount());
-        row.put(ExcelProfitSheetHeader.BUY_PRICE, getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount()));
+        row.put(BUY_DATE, transaction.getTimestamp());
+        row.put(COUNT, position.getCount());
+        row.put(BUY_PRICE, getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount()));
         double multipier = Math.abs(1d * position.getCount() / transaction.getCount());
-        row.put(ExcelProfitSheetHeader.BUY_AMOUNT, getTransactionCashFlow(transaction, CashFlowType.PRICE, multipier));
-        row.put(ExcelProfitSheetHeader.BUY_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
-        row.put(ExcelProfitSheetHeader.BUY_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multipier));
+        row.put(BUY_AMOUNT, getTransactionCashFlow(transaction, CashFlowType.PRICE, multipier));
+        row.put(BUY_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
+        row.put(BUY_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multipier));
         return row;
     }
 
@@ -105,7 +105,7 @@ public class TransactionProfitTableFactory {
         // close transaction info
         Transaction transaction = position.getCloseTransaction();
         double multipier = Math.abs(1d * position.getCount() / transaction.getCount());
-        row.put(ExcelProfitSheetHeader.CELL_DATE, transaction.getTimestamp());
+        row.put(CELL_DATE, transaction.getTimestamp());
         BigDecimal cellAmount;
         switch (position.getClosingEvent()) {
             case PRICE:
@@ -118,19 +118,12 @@ public class TransactionProfitTableFactory {
                 throw new IllegalArgumentException("ЦБ " + transaction.getIsin() +
                         " не может быть закрыта событием типа " + position.getClosingEvent());
         }
-        row.put(ExcelProfitSheetHeader.CELL_AMOUNT, cellAmount);
-        row.put(ExcelProfitSheetHeader.CELL_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
-        row.put(ExcelProfitSheetHeader.CELL_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multipier));
-        row.put(ExcelProfitSheetHeader.FORECAST_TAX, getForecastTax());
+        row.put(CELL_AMOUNT, cellAmount);
+        row.put(CELL_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
+        row.put(CELL_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multipier));
+        row.put(FORECAST_TAX, getForecastTax());
+        row.put(PROFIT, getClosedPositionProfit());
         return row;
-    }
-
-    private String getForecastTax() {
-        String forecastTaxFormula =
-                "(" + CELL_AMOUNT.getCellAddr() + "+" + CELL_ACCRUED_INTEREST.getCellAddr() + "+" +AMORTIZATION.getCellAddr() + ")" +
-                "-(" + BUY_AMOUNT.getCellAddr() + "+" + BUY_ACCRUED_INTEREST.getCellAddr() + ")" +
-                "-" + BUY_COMMISSION.getCellAddr() + "-" + CELL_COMMISSION.getCellAddr();
-        return "=IF(" + forecastTaxFormula + "<0,0,0.13*(" + forecastTaxFormula + "))";
     }
 
     private BigDecimal getTransactionCashFlow(Transaction transaction, CashFlowType type, double multiplier) {
@@ -161,5 +154,22 @@ public class TransactionProfitTableFactory {
                 .multiply(BigDecimal.valueOf(multiplier))
                 .abs()
                 .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private String getForecastTax() {
+        String forecastTaxFormula =
+                "(" + CELL_AMOUNT.getCellAddr() + "+" + CELL_ACCRUED_INTEREST.getCellAddr() + "+" +AMORTIZATION.getCellAddr() + ")" +
+                        "-(" + BUY_AMOUNT.getCellAddr() + "+" + BUY_ACCRUED_INTEREST.getCellAddr() + ")" +
+                        "-" + BUY_COMMISSION.getCellAddr() + "-" + CELL_COMMISSION.getCellAddr();
+        return "=IF(" + forecastTaxFormula + "<0,0,0.13*(" + forecastTaxFormula + "))";
+    }
+
+    private String getClosedPositionProfit() {
+        String buy = "(" + BUY_AMOUNT.getCellAddr() + "+" + BUY_ACCRUED_INTEREST.getCellAddr() + "+" + BUY_COMMISSION.getCellAddr() + ")";
+        String cell = "(" + CELL_AMOUNT.getCellAddr() + "+" + CELL_ACCRUED_INTEREST.getCellAddr() + "+" +
+                COUPON.getCellAddr() + "+" + AMORTIZATION.getCellAddr() + "+" + DIVIDEND.getCellAddr() +
+                "-(" + CELL_COMMISSION.getCellAddr() + "+" + TAX.getCellAddr() + "+" + FORECAST_TAX.getCellAddr() + "))";
+        String multiplicator = "100*365/DAYS360(" + BUY_DATE.getCellAddr() + "," + CELL_DATE.getCellAddr() + ")";
+        return "=((" + cell + "-" + buy + ")/" + buy + ")*" + multiplicator;
     }
 }

@@ -100,6 +100,8 @@ public class PortfolioExelView {
             sheet.setColumnWidth(header.ordinal(), 14 * 256);
         }
         sheet.setColumnWidth(0, 45 * 256);
+        sheet.setColumnWidth(4, 16 * 256);
+        sheet.setColumnWidth(8, 16 * 256);
     }
 
     private Map<ExcelProfitSheetHeader, Object> getTotalRow() {
