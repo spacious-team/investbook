@@ -26,7 +26,7 @@ public class CashTable {
         this.data.addAll(pasreTable(report, TABLE_START_TEXT, TABLE_END_TEXT, 1));
     }
 
-    private static List<Row> pasreTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
+    private List<Row> pasreTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
         CellRangeAddress address = report.getTableCellRange(tableName, tableFooterString);
         if (address == EMTPY_RANGE) {
             return Collections.emptyList();
@@ -44,7 +44,7 @@ public class CashTable {
         return data;
     }
 
-    private static Row getCash(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
+    private Row getCash(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
         try {
             return Row.builder()
                     .section(row.getCell(leftColumn).getStringCellValue())
@@ -52,7 +52,7 @@ public class CashTable {
                     .currency(row.getCell(leftColumn + 7).getStringCellValue())
                     .build();
         } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу '{}' в строке {}", TABLE_START_TEXT, row.getRowNum(), e);
+            log.warn("Не могу распарсить таблицу '{}' в файле {}, строка {}", TABLE_START_TEXT, report.getPath(), row.getRowNum(), e);
             return null;
         }
     }

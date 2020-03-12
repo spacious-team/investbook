@@ -56,7 +56,7 @@ public class DerivativeCashFlowTable {
         return contractCount;
     }
 
-    private static List<Row> pasreDerivativeCashFlowTable(PsbBrokerReport report, String tableName,
+    private List<Row> pasreDerivativeCashFlowTable(PsbBrokerReport report, String tableName,
                                                           String tableFooterString, int leftColumn,
                                                           Map<String, Integer> contractCount) {
         CellRangeAddress address = report.getTableCellRange(tableName, tableFooterString);
@@ -76,7 +76,7 @@ public class DerivativeCashFlowTable {
         return data;
     }
 
-    private static Row getDerivativeCashFlow(org.apache.poi.ss.usermodel.Row row, int leftColumn, Map<String, Integer> contractCount) {
+    private Row getDerivativeCashFlow(org.apache.poi.ss.usermodel.Row row, int leftColumn, Map<String, Integer> contractCount) {
         try {
             BigDecimal value = BigDecimal.valueOf(row.getCell(leftColumn + 6).getNumericCellValue())
                     .subtract(BigDecimal.valueOf(row.getCell(leftColumn + 5).getNumericCellValue()));
@@ -104,7 +104,7 @@ public class DerivativeCashFlowTable {
                     throw new IllegalArgumentException("Неизвестный вид операции " + action);
             }
         } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу деривативов '{}' в строке {}", TABLE2_START_TEXT, row.getRowNum(), e);
+            log.warn("Не могу распарсить таблицу деривативов '{}' в файле {}, строка {}", TABLE2_START_TEXT, report.getPath(), row.getRowNum(), e);
             return null;
         }
     }

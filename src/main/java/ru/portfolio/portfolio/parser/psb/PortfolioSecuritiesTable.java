@@ -27,7 +27,7 @@ public class PortfolioSecuritiesTable {
         this.data.addAll(pasreTable(report));
     }
 
-    private static List<Row> pasreTable(PsbBrokerReport report) {
+    private List<Row> pasreTable(PsbBrokerReport report) {
         CellRangeAddress address =  report.getTableCellRange(TABLE_START_TEXT, TABLE_END_TEXT);
         if (address == EMTPY_RANGE) {
             return Collections.emptyList();
@@ -45,7 +45,7 @@ public class PortfolioSecuritiesTable {
         return data;
     }
 
-    private static Row getPosition(org.apache.poi.ss.usermodel.Row row) {
+    private Row getPosition(org.apache.poi.ss.usermodel.Row row) {
         try {
             return Row.builder()
                     .name(row.getCell(1).getStringCellValue())
@@ -58,7 +58,7 @@ public class PortfolioSecuritiesTable {
                     .accruedInterest(BigDecimal.valueOf(row.getCell(14).getNumericCellValue()))
                     .build();
         } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу '{}' в строке {}", TABLE_START_TEXT, row.getRowNum(), e);
+            log.warn("Не могу распарсить таблицу '{}' в файле {}, строка {}", TABLE_START_TEXT, report.getPath(), row.getRowNum(), e);
             return null;
         }
     }

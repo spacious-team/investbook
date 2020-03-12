@@ -30,7 +30,7 @@ public class TransactionTable {
         this.data.addAll(parseTable(report, TABLE2_START_TEXT, TABLE_END_TEXT,2));
     }
 
-    private static List<Row> parseTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
+    private List<Row> parseTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
         CellRangeAddress address = report.getTableCellRange(tableName, tableFooterString);
         if (address == EMTPY_RANGE) {
             return Collections.emptyList();
@@ -48,7 +48,7 @@ public class TransactionTable {
         return data;
     }
 
-    private static Row getTransaction(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
+    private Row getTransaction(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
         try {
             boolean isBuy = row.getCell(leftColumn + 8).getStringCellValue().equalsIgnoreCase("покупка");
             BigDecimal value, accruedInterest;
@@ -82,7 +82,7 @@ public class TransactionTable {
                 .currency(row.getCell(leftColumn + 10).getStringCellValue().replace(" ", "").split("/")[1])
                 .build();
         } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу 'Сделки' в строке {}", row.getRowNum(), e);
+            log.warn("Не могу распарсить таблицу 'Сделки' в файле {}, строка {}", report.getPath(), row.getRowNum(), e);
             return null;
         }
     }

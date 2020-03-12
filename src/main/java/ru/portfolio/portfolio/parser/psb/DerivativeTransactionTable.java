@@ -30,7 +30,7 @@ public class DerivativeTransactionTable {
         this.data.addAll(parseFortsExpirationTable(report, TABLE2_START_TEXT, TABLE_END_TEXT, 1));
     }
 
-    private static List<Row> parseFortsTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
+    private List<Row> parseFortsTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
         CellRangeAddress address = report.getTableCellRange(tableName, tableFooterString);
         if (address == EMTPY_RANGE) {
             return Collections.emptyList();
@@ -48,7 +48,7 @@ public class DerivativeTransactionTable {
         return data;
     }
 
-    private static List<Row> parseFortsExpirationTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
+    private List<Row> parseFortsExpirationTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
         CellRangeAddress address = report.getTableCellRange(tableName, tableFooterString);
         if (address == EMTPY_RANGE) {
             return Collections.emptyList();
@@ -66,7 +66,7 @@ public class DerivativeTransactionTable {
         return data;
     }
 
-    private static Row getFortsTransaction(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
+    private Row getFortsTransaction(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
         try {
             boolean isBuy = row.getCell(leftColumn + 4).getStringCellValue().equalsIgnoreCase("покупка");
             int count = Double.valueOf(row.getCell(leftColumn + 12).getNumericCellValue()).intValue();
@@ -100,12 +100,12 @@ public class DerivativeTransactionTable {
                     .currency("RUB") // FORTS, only RUB
                     .build();
         } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу '{}' в строке {}", TABLE1_START_TEXT, row.getRowNum(), e);
+            log.warn("Не могу распарсить таблицу '{}' в файле {}, строка {}", TABLE1_START_TEXT, report.getPath(), row.getRowNum(), e);
             return null;
         }
     }
 
-    private static Row getFortsExpirationTransaction(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
+    private Row getFortsExpirationTransaction(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
         try {
             boolean isBuy = row.getCell(leftColumn + 4).getStringCellValue().equalsIgnoreCase("покупка");
             int count = Double.valueOf(row.getCell(leftColumn + 7).getNumericCellValue()).intValue();
@@ -134,7 +134,7 @@ public class DerivativeTransactionTable {
                     .currency("RUB") // FORTS, only RUB
                     .build();
         } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу '{}' в строке {}", TABLE2_START_TEXT, row.getRowNum(), e);
+            log.warn("Не могу распарсить таблицу '{}' в файле {}, строка {}", TABLE2_START_TEXT, report.getPath(), row.getRowNum(), e);
             return null;
         }
     }

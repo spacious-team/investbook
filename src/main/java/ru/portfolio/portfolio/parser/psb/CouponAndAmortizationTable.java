@@ -30,7 +30,7 @@ public class CouponAndAmortizationTable {
         this.data.addAll(pasreTable(report, TABLE_START_TEXT, TABLE_END_TEXT,1));
     }
 
-    private static List<Row> pasreTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
+    private List<Row> pasreTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
         CellRangeAddress address = report.getTableCellRange(tableName, tableFooterString);
         if (address == EMTPY_RANGE) {
             return Collections.emptyList();
@@ -48,7 +48,7 @@ public class CouponAndAmortizationTable {
         return data;
     }
 
-    private static Collection<Row> getCouponOrAmortizationOrTax(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
+    private Collection<Row> getCouponOrAmortizationOrTax(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
         try {
             BigDecimal value, tax;
             CashFlowType event;
@@ -81,7 +81,7 @@ public class CouponAndAmortizationTable {
             }
             return data;
         } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу '{}' в строке {}", TABLE_START_TEXT, row.getRowNum(), e);
+            log.warn("Не могу распарсить таблицу '{}' в файле {}, строка {}", TABLE_START_TEXT, report.getPath(), row.getRowNum(), e);
             return null;
         }
     }

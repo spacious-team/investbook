@@ -29,7 +29,7 @@ public class DividendTable {
         this.data.addAll(pasreTable(report, TABLE_START_TEXT, 1));
     }
 
-    private static List<Row> pasreTable(PsbBrokerReport report, String tableName, int leftColumn) {
+    private List<Row> pasreTable(PsbBrokerReport report, String tableName, int leftColumn) {
         CellRangeAddress address = report.getTableCellRange(tableName);
         if (address == EMTPY_RANGE) {
             return Collections.emptyList();
@@ -47,7 +47,7 @@ public class DividendTable {
         return data;
     }
 
-    private static Collection<Row> getDividendAndTax(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
+    private Collection<Row> getDividendAndTax(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
         try {
             BigDecimal value, tax;
             double cellValue = row.getCell(leftColumn + 10).getNumericCellValue();
@@ -60,19 +60,19 @@ public class DividendTable {
                     .isin(row.getCell(leftColumn + 5).getStringCellValue())
                     .count(Double.valueOf(row.getCell(leftColumn + 7).getNumericCellValue()).intValue())
                     .value(value)
-                    .currency(row.getCell(leftColumn + 14).getStringCellValue());
+                    .currency(row.getCell(leftColumn + 8).getStringCellValue());
             Collection<Row> data = new ArrayList<>();
             data.add(builder.build());
             if (!tax.equals(BigDecimal.ZERO)) {
                 data.add(builder
                         .event(CashFlowType.TAX)
                         .value(tax)
-                        .currency(row.getCell(leftColumn + 12).getStringCellValue())
+                        .currency(row.getCell(leftColumn + 8).getStringCellValue())
                         .build());
             }
             return data;
         } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу '{}' в строке {}", TABLE_START_TEXT, row.getRowNum(), e);
+            log.warn("Не могу распарсить таблицу '{}' в файле {}, строка {}", TABLE_START_TEXT, report.getPath(), row.getRowNum(), e);
             return null;
         }
     }

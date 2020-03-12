@@ -32,12 +32,15 @@ public class PsbBrokerReport implements AutoCloseable {
     private final XSSFSheet sheet;
     @Getter
     private final String portfolio;
+    @Getter
+    private final Path path;
 
     public PsbBrokerReport(String exelFileName) throws IOException {
         this(Paths.get(exelFileName));
     }
 
     public PsbBrokerReport(Path exelFileName) throws IOException {
+        this.path = exelFileName;
         this.book = new XSSFWorkbook(Files.newInputStream(exelFileName));
         this.sheet = book.getSheetAt(0);
         this.portfolio = getPortfolio(this.sheet);
