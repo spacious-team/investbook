@@ -3,7 +3,11 @@ package ru.portfolio.portfolio.parser.psb;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
+import ru.portfolio.portfolio.parser.ExcelTable;
+import ru.portfolio.portfolio.parser.TableColumn;
+import ru.portfolio.portfolio.parser.TableColumnDescription;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -11,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static ru.portfolio.portfolio.parser.psb.DerivativeTransactionTable.FortsTableHeader.*;
 import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.EMTPY_RANGE;
 import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.convertToInstant;
 
@@ -22,24 +27,23 @@ public class DerivativeTransactionTable {
     @Getter
     private final PsbBrokerReport report;
     @Getter
-    private final List<Row> data = new ArrayList<>();
+    private final List<FortsTableRow> data = new ArrayList<>();
 
     public DerivativeTransactionTable(PsbBrokerReport report) {
         this.report = report;
-        this.data.addAll(parseFortsTable(report, TABLE1_START_TEXT, TABLE_END_TEXT, 1));
+        this.data.addAll(parseFortsTable(report));
         this.data.addAll(parseFortsExpirationTable(report, TABLE2_START_TEXT, TABLE_END_TEXT, 1));
     }
 
-    private List<Row> parseFortsTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
-        CellRangeAddress address = report.getTableCellRange(tableName, tableFooterString);
-        if (address == EMTPY_RANGE) {
+    private List<FortsTableRow> parseFortsTable(PsbBrokerReport report) {
+        ExcelTable table = ExcelTable.of(report.getSheet(), TABLE1_START_TEXT, TABLE_END_TEXT, FortsTableHeader.class);
+        if (table.isEmpty()) {
             return Collections.emptyList();
         }
-        List<Row> data = new ArrayList<>();
-        for (int rowNum = address.getFirstRow() + 2; rowNum < address.getLastRow(); rowNum++) {
-            org.apache.poi.ss.usermodel.Row row = report.getSheet().getRow(rowNum);
+        List<FortsTableRow> data = new ArrayList<>();
+        for (Row row : table) {
             if (row != null) {
-                Row transaction = getFortsTransaction(row, leftColumn);
+                FortsTableRow transaction = getFortsTransaction(table, row);
                 if (transaction != null) {
                     data.add(transaction);
                 }
@@ -48,16 +52,17 @@ public class DerivativeTransactionTable {
         return data;
     }
 
-    private List<Row> parseFortsExpirationTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
+    private List<FortsTableRow> parseFortsExpirationTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
         CellRangeAddress address = report.getTableCellRange(tableName, tableFooterString);
         if (address == EMTPY_RANGE) {
             return Collections.emptyList();
         }
-        List<Row> data = new ArrayList<>();
+        List<FortsTableRow> data = new ArrayList<>();
+
         for (int rowNum = address.getFirstRow() + 2; rowNum < address.getLastRow(); rowNum++) {
-            org.apache.poi.ss.usermodel.Row row = report.getSheet().getRow(rowNum);
+            Row row = report.getSheet().getRow(rowNum);
             if (row != null) {
-                Row transaction = getFortsExpirationTransaction(row, leftColumn);
+                FortsTableRow transaction = getFortsExpirationTransaction(row, leftColumn);
                 if (transaction != null) {
                     data.add(transaction);
                 }
@@ -66,19 +71,19 @@ public class DerivativeTransactionTable {
         return data;
     }
 
-    private Row getFortsTransaction(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
+    private FortsTableRow getFortsTransaction(ExcelTable table, Row row) {
         try {
-            boolean isBuy = row.getCell(leftColumn + 4).getStringCellValue().equalsIgnoreCase("покупка");
-            int count = Double.valueOf(row.getCell(leftColumn + 12).getNumericCellValue()).intValue();
-            String type = row.getCell(leftColumn + 2).getStringCellValue().toLowerCase();
+            boolean isBuy = table.getCell(row, DIRECTION).getStringCellValue().equalsIgnoreCase("покупка");
+            int count = Double.valueOf(table.getCell(row, COUNT).getNumericCellValue()).intValue();
+            String type = table.getCell(row, TYPE).getStringCellValue().toLowerCase();
             BigDecimal value = BigDecimal.ZERO;
             double cellValue = 0;
             switch (type) {
                 case "опцион":
-                    cellValue = count * row.getCell(leftColumn + 11).getNumericCellValue();
+                    cellValue = count * table.getCell(row, OPTION_PRICE).getNumericCellValue();
                     break;
                 case "фьючерс":
-                    cellValue = row.getCell(leftColumn + 13).getNumericCellValue();
+                    cellValue = table.getCell(row, FUTURES_PRICE).getNumericCellValue();
                     break;
                 default:
                     throw new IllegalArgumentException("Не известный контракт " + type);
@@ -87,13 +92,13 @@ public class DerivativeTransactionTable {
                 value = BigDecimal.valueOf(cellValue);
                 if (isBuy) value = value.negate();
             }
-            BigDecimal commission = BigDecimal.valueOf(row.getCell(leftColumn + 15).getNumericCellValue())
-                    .add(BigDecimal.valueOf(row.getCell(leftColumn + 16).getNumericCellValue()))
+            BigDecimal commission = BigDecimal.valueOf(table.getCell(row, MARKET_COMMISSION).getNumericCellValue())
+                    .add(BigDecimal.valueOf(table.getCell(row, BROKER_COMMISSION).getNumericCellValue()))
                     .negate();
-            return Row.builder()
-                    .timestamp(convertToInstant( row.getCell(leftColumn).getStringCellValue()))
-                    .transactionId(Long.parseLong(row.getCell(leftColumn + 1).getStringCellValue()))
-                    .isin(row.getCell(leftColumn + 3).getStringCellValue())
+            return FortsTableRow.builder()
+                    .timestamp(convertToInstant(table.getCell(row, DATE_TIME).getStringCellValue()))
+                    .transactionId(Long.parseLong(table.getCell(row, TRANSACTION).getStringCellValue()))
+                    .isin(table.getCell(row, CONTRACT).getStringCellValue())
                     .count((isBuy ? 1 : -1) * count)
                     .value(value)
                     .commission(commission)
@@ -105,7 +110,7 @@ public class DerivativeTransactionTable {
         }
     }
 
-    private Row getFortsExpirationTransaction(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
+    private FortsTableRow getFortsExpirationTransaction(Row row, int leftColumn) {
         try {
             boolean isBuy = row.getCell(leftColumn + 4).getStringCellValue().equalsIgnoreCase("покупка");
             int count = Double.valueOf(row.getCell(leftColumn + 7).getNumericCellValue()).intValue();
@@ -124,7 +129,7 @@ public class DerivativeTransactionTable {
             BigDecimal commission = BigDecimal.valueOf(row.getCell(leftColumn + 9).getNumericCellValue())
                     .add(BigDecimal.valueOf(row.getCell(leftColumn + 10).getNumericCellValue()))
                     .negate();
-            return Row.builder()
+            return FortsTableRow.builder()
                     .timestamp(convertToInstant( row.getCell(leftColumn).getStringCellValue()))
                     .transactionId(Long.parseLong(row.getCell(leftColumn + 1).getStringCellValue()))
                     .isin(row.getCell(leftColumn + 3).getStringCellValue())
@@ -139,9 +144,29 @@ public class DerivativeTransactionTable {
         }
     }
 
+    enum FortsTableHeader implements TableColumnDescription {
+        DATE_TIME("дата и время"),
+        TRANSACTION("№"),
+        TYPE("вид контракта"),
+        CONTRACT("контракт"),
+        DIRECTION("покупка", "продажа"),
+        COUNT("кол-во"),
+        FUTURES_PRICE("сумма срочной сделки"),
+        OPTION_PRICE("цена опциона"),
+        MARKET_COMMISSION("комиссия торговой системы"),
+        BROKER_COMMISSION("комиссия брокера");
+
+        @Getter
+        private final TableColumn column;
+
+        FortsTableHeader(String ... words) {
+            this.column = TableColumn.of(words);
+        }
+    }
+
     @Getter
     @Builder
-    public static class Row {
+    static class FortsTableRow {
         private long transactionId;
         private String isin;
         private Instant timestamp;
@@ -149,5 +174,6 @@ public class DerivativeTransactionTable {
         private BigDecimal value; // оценочная стоиомсть в валюце цены
         private BigDecimal commission;
         private String currency; // валюта
+
     }
 }
