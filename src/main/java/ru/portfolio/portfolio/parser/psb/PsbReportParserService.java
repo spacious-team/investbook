@@ -108,7 +108,7 @@ public class PsbReportParserService {
     }
 
     private void addCouponAndAmortizationCashFlows(CouponAndAmortizationTable couponAndAmortizationTable) {
-        for (CouponAndAmortizationTable.Row row : couponAndAmortizationTable.getData()) {
+        for (CouponAndAmortizationTable.CouponAndAmortizationTableRow row : couponAndAmortizationTable.getData()) {
             addSecurity(row.getIsin()); // required for amortization
             addSecurityEventCashFlow(SecurityEventCashFlow.builder()
                     .isin(row.getIsin())

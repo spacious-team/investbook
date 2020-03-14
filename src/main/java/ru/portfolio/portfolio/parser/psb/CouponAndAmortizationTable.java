@@ -3,7 +3,10 @@ package ru.portfolio.portfolio.parser.psb;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.usermodel.Row;
+import ru.portfolio.portfolio.parser.ExcelTable;
+import ru.portfolio.portfolio.parser.TableColumn;
+import ru.portfolio.portfolio.parser.TableColumnDescription;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 
 import java.math.BigDecimal;
@@ -13,7 +16,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.EMTPY_RANGE;
+import static ru.portfolio.portfolio.parser.psb.CouponAndAmortizationTable.CouponAndAmortizationTableHeader.*;
 import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.convertToInstant;
 
 @Slf4j
@@ -23,72 +26,77 @@ public class CouponAndAmortizationTable {
     @Getter
     private final PsbBrokerReport report;
     @Getter
-    private final List<Row> data = new ArrayList<>();
+    private final List<CouponAndAmortizationTableRow> data = new ArrayList<>();
 
     public CouponAndAmortizationTable(PsbBrokerReport report) {
         this.report = report;
-        this.data.addAll(pasreTable(report, TABLE_START_TEXT, TABLE_END_TEXT,1));
+        this.data.addAll(pasreTable(report));
     }
 
-    private List<Row> pasreTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
-        CellRangeAddress address = report.getTableCellRange(tableName, tableFooterString);
-        if (address == EMTPY_RANGE) {
-            return Collections.emptyList();
+    private List<CouponAndAmortizationTableRow> pasreTable(PsbBrokerReport report) {
+        ExcelTable table = ExcelTable.of(report.getSheet(), TABLE_START_TEXT, TABLE_END_TEXT, CouponAndAmortizationTableHeader.class);
+        return table.isEmpty() ?
+                Collections.emptyList() :
+                table.getDataCollection(report.getPath(), CouponAndAmortizationTable::getCouponOrAmortizationOrTax);
+    }
+
+    private static Collection<CouponAndAmortizationTableRow> getCouponOrAmortizationOrTax(ExcelTable table, Row row) {
+        BigDecimal value, tax;
+        CashFlowType event;
+        String action = table.getCell(row, TYPE).getStringCellValue();
+        if (action.equalsIgnoreCase("Погашение купона")) {
+            event = CashFlowType.COUPON;
+        } else if (action.equalsIgnoreCase("Амортизация")) {
+            event = CashFlowType.AMORTIZATION;
+        } else if (action.equalsIgnoreCase("Погашение бумаг")) {
+            event = CashFlowType.REDEMPTION;
+        } else {
+            throw new RuntimeException("Обработчик события " + action + " не реализован");
         }
-        List<Row> data = new ArrayList<>();
-        for (int rowNum = address.getFirstRow() + 2; rowNum < address.getLastRow(); rowNum++) {
-            org.apache.poi.ss.usermodel.Row row = report.getSheet().getRow(rowNum);
-            if (row != null) {
-                Collection<Row> couponOrAmortizationOrTax = getCouponOrAmortizationOrTax(row, leftColumn);
-                if (couponOrAmortizationOrTax != null) {
-                    data.addAll(couponOrAmortizationOrTax);
-                }
-            }
+
+        double cellValue = ((event == CashFlowType.COUPON) ?
+                table.getCell(row, COUPON) :
+                table.getCell(row, VALUE))
+                .getNumericCellValue();
+        value = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
+        cellValue = table.getCell(row, TAX).getNumericCellValue();
+        tax = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue).negate();
+        CouponAndAmortizationTableRow.CouponAndAmortizationTableRowBuilder builder = CouponAndAmortizationTableRow.builder()
+                .timestamp(convertToInstant(table.getCell(row, DATE).getStringCellValue()))
+                .event(event)
+                .isin(table.getCell(row, ISIN).getStringCellValue())
+                .count(Double.valueOf(table.getCell(row, COUNT).getNumericCellValue()).intValue())
+                .value(value)
+                .currency(table.getCell(row, CURRENCY).getStringCellValue());
+        Collection<CouponAndAmortizationTableRow> data = new ArrayList<>();
+        data.add(builder.build());
+        if (!tax.equals(BigDecimal.ZERO)) {
+            data.add(builder.event(CashFlowType.TAX).value(tax).build());
         }
         return data;
     }
 
-    private Collection<Row> getCouponOrAmortizationOrTax(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
-        try {
-            BigDecimal value, tax;
-            CashFlowType event;
-            String action = row.getCell(leftColumn + 1).getStringCellValue();
-            if (action.equalsIgnoreCase("Погашение купона")) {
-                event = CashFlowType.COUPON;
-            } else if (action.equalsIgnoreCase("Амортизация")) {
-                event = CashFlowType.AMORTIZATION;
-            } else if (action.equalsIgnoreCase("Погашение бумаг")) {
-                event = CashFlowType.REDEMPTION;
-            } else {
-                throw new RuntimeException("Обработчик события " + action + " не реализован");
-            }
+    enum CouponAndAmortizationTableHeader implements TableColumnDescription {
+        DATE("дата"),
+        TYPE("вид операции"),
+        ISIN("isin"),
+        COUNT("кол-во"),
+        COUPON("нкд"),
+        VALUE("сумма амортизации"),
+        TAX("удержанного налога"),
+        CURRENCY("валюта выплаты");
 
-            double cellValue = row.getCell(leftColumn + ((event == CashFlowType.COUPON) ? 11 : 12)).getNumericCellValue();
-            value = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
-            cellValue = row.getCell(leftColumn + 13).getNumericCellValue();
-            tax = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue).negate();
-            Row.RowBuilder builder = Row.builder()
-                    .timestamp(convertToInstant(row.getCell(leftColumn).getStringCellValue()))
-                    .event(event)
-                    .isin(row.getCell(leftColumn + 7).getStringCellValue())
-                    .count(Double.valueOf(row.getCell(leftColumn + 9).getNumericCellValue()).intValue())
-                    .value(value)
-                    .currency(row.getCell(leftColumn + 15).getStringCellValue());
-            Collection<Row> data = new ArrayList<>();
-            data.add(builder.build());
-            if (!tax.equals(BigDecimal.ZERO)) {
-                data.add(builder.event(CashFlowType.TAX).value(tax).build());
-            }
-            return data;
-        } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу '{}' в файле {}, строка {}", TABLE_START_TEXT, report.getPath(), row.getRowNum(), e);
-            return null;
+        @Getter
+        private final TableColumn column;
+
+        CouponAndAmortizationTableHeader(String... words) {
+            this.column = TableColumn.of(words);
         }
     }
 
     @Getter
     @Builder(toBuilder = true)
-    public static class Row {
+    public static class CouponAndAmortizationTableRow {
         private String isin;
         private Instant timestamp;
         private CashFlowType event;

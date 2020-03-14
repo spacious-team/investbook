@@ -22,7 +22,7 @@ public class CouponAndAmortizationTableTest {
 
     @Test(dataProvider = "isin")
     void testIsin(String firstIsin, String lastIsin) {
-        List<CouponAndAmortizationTable.Row> data = new CouponAndAmortizationTable(this.report).getData();
+        List<CouponAndAmortizationTable.CouponAndAmortizationTableRow> data = new CouponAndAmortizationTable(this.report).getData();
         assertEquals(data.get(0).getIsin(), firstIsin);
         assertEquals(data.get(data.size() - 1).getIsin(), lastIsin);
     }

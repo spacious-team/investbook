@@ -92,6 +92,23 @@ public class ExcelTable implements Iterable<Row> {
         return data;
     }
 
+    public <T> List<T> getDataCollection(Path file, BiFunction<ExcelTable, Row, Collection<T>> rowExtractor) {
+        List<T> data = new ArrayList<>();
+        for (Row row : this) {
+            if (row != null) {
+                try {
+                    Collection<T> transaction = rowExtractor.apply(this, row);
+                    if (transaction != null) {
+                        data.addAll(transaction);
+                    }
+                } catch (Exception e) {
+                    log.warn("Не могу распарсить таблицу '{}' в файле {}, строка {}", tableName, file.getFileName(), row.getRowNum(), e);
+                }
+            }
+        }
+        return data;
+    }
+
     public Cell getCell(Row row, TableColumnDescription columnDescription) {
         return row.getCell(columnIndices.get(columnDescription.getColumn()));
     }
