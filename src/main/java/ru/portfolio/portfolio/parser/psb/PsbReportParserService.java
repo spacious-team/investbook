@@ -61,7 +61,7 @@ public class PsbReportParserService {
     }
 
     private void addCashInAndOutFlows(CashFlowTable cashFlowTable) {
-        for (CashFlowTable.Row row : cashFlowTable.getData()) {
+        for (CashFlowTable.CashFlowTableRow row : cashFlowTable.getData()) {
             addEventCashFlow(EventCashFlow.builder()
                     .portfolio(cashFlowTable.getReport().getPortfolio())
                     .eventType(row.getType())
@@ -135,7 +135,7 @@ public class PsbReportParserService {
     }
 
     private void addDerivativeTransaction(DerivativeTransactionTable derivativeTransactionTable) {
-        for (DerivativeTransactionTable.Row row : derivativeTransactionTable.getData()) {
+        for (DerivativeTransactionTable.FortsTableRow row : derivativeTransactionTable.getData()) {
             addSecurity(row.getIsin());
             try {
                 boolean isAdded = addTransaction(Transaction.builder()
