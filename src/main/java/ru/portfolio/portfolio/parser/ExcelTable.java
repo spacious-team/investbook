@@ -21,19 +21,35 @@ public class ExcelTable implements Iterable<Row> {
     @Getter
     private final CellRangeAddress tableRange;
     private final Map<TableColumn, Integer> columnIndices;
-    @Setter
-    private int dataRowOffset = 2;
     @Getter
     private final boolean empty;
-    
+    /**
+     * Offset of first data row. First table row is a header. Default is 2.
+     */
+    @Setter
+    private int dataRowOffset = 2;
+    /**
+     * Set to true if last table row contains total information. Default is false.
+     */
+    @Setter
+    private boolean isLastTableRowContainsTotalData = false;
+
     public static ExcelTable of(Sheet sheet, String tableName, String tableFooterString,
                          Class<? extends TableColumnDescription> headerDescription) {
-       return new ExcelTable(sheet, tableName, ExcelTableHelper.getTableCellRange(sheet, tableName, tableFooterString), headerDescription);
+        ExcelTable table = new ExcelTable(sheet, tableName,
+                ExcelTableHelper.getTableCellRange(sheet, tableName, tableFooterString),
+                headerDescription);
+        table.setLastTableRowContainsTotalData(true);
+        return table;
     }
 
     public static ExcelTable of(Sheet sheet, String tableName,
                          Class<? extends TableColumnDescription> headerDescription) {
-        return new ExcelTable(sheet, tableName, ExcelTableHelper.getTableCellRange(sheet, tableName), headerDescription);
+        ExcelTable table = new ExcelTable(sheet, tableName,
+                ExcelTableHelper.getTableCellRange(sheet, tableName),
+                headerDescription);
+        table.setLastTableRowContainsTotalData(false);
+        return table;
     }
 
     private ExcelTable(Sheet sheet, String tableName, CellRangeAddress tableRange, Class<? extends TableColumnDescription> headerDescription) {
@@ -90,7 +106,10 @@ public class ExcelTable implements Iterable<Row> {
 
         @Override
         public boolean hasNext() {
-            return cnt < (tableRange.getLastRow() - tableRange.getFirstRow() - dataRowOffset);
+            int dataRowsCount = tableRange.getLastRow() - tableRange.getFirstRow()
+                    - dataRowOffset
+                    + (isLastTableRowContainsTotalData ? 0 : 1);
+            return cnt < dataRowsCount;
         }
 
         @Override

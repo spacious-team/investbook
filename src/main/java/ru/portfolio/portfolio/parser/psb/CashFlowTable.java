@@ -5,7 +5,10 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.usermodel.Row;
+import ru.portfolio.portfolio.parser.ExcelTable;
+import ru.portfolio.portfolio.parser.TableColumn;
+import ru.portfolio.portfolio.parser.TableColumnDescription;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 
 import java.math.BigDecimal;
@@ -14,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.EMTPY_RANGE;
+import static ru.portfolio.portfolio.parser.psb.CashFlowTable.CashFlowTableHeader.*;
 import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.convertToInstant;
 
 @Slf4j
@@ -23,71 +26,69 @@ public class CashFlowTable {
     @Getter
     private final PsbBrokerReport report;
     @Getter
-    private final List<Row> data = new ArrayList<>();
+    private final List<CashFlowTableRow> data = new ArrayList<>();
 
     public CashFlowTable(PsbBrokerReport report) {
         this.report = report;
-        this.data.addAll(pasreTable(report, TABLE_START_TEXT, 1));
+        this.data.addAll(pasreTable(report));
     }
 
-    private List<Row> pasreTable(PsbBrokerReport report, String tableName, int leftColumn) {
-        CellRangeAddress address = report.getTableCellRange(tableName);
-        if (address == EMTPY_RANGE) {
-            return Collections.emptyList();
-        }
-        List<Row> data = new ArrayList<>();
-        for (int rowNum = address.getFirstRow() + 2; rowNum <= address.getLastRow(); rowNum++) {
-            org.apache.poi.ss.usermodel.Row row = report.getSheet().getRow(rowNum);
-            if (row != null) {
-                Row cash = getCash(row, leftColumn);
-                if (cash != null) {
-                    data.add(cash);
-                }
-            }
-        }
-        return data;
+    private List<CashFlowTableRow> pasreTable(PsbBrokerReport report) {
+        ExcelTable table = ExcelTable.of(report.getSheet(), TABLE_START_TEXT, CashFlowTableHeader.class);
+        return table.isEmpty() ?
+                Collections.emptyList() :
+                table.getData(report.getPath(), CashFlowTable::getCash);
     }
 
-    private Row getCash(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
-        try {
-            String action = row.getCell(leftColumn + 4).getStringCellValue();
-            CashFlowType type = CashFlowType.CASH;
-            boolean isPositive;
-            if (action.equalsIgnoreCase("Зачислено на счет")) {
-                isPositive = true;
-            } else if (action.equalsIgnoreCase("Списано со счета")) {
-                isPositive = false;
-            } else if (action.equalsIgnoreCase("Налог удержанный")) {
-                isPositive = false;
-                type = CashFlowType.TAX;
-            } else {
-                return null;
-            }
-            if (type == CashFlowType.CASH && !isDescriptionEmpty(row, leftColumn)) {
-                return null; // cash in/out records has no description
-            }
-            return Row.builder()
-                    .timestamp(convertToInstant(row.getCell(leftColumn).getStringCellValue()))
-                    .type(type)
-                    .value(BigDecimal.valueOf((isPositive ? 1 : -1) * row.getCell(leftColumn + 2).getNumericCellValue()))
-                    .currency(row.getCell(leftColumn + 1).getStringCellValue())
-                    .build();
-        } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу '{}' в файле {}, строка {}", TABLE_START_TEXT, report.getPath(), row.getRowNum(), e);
+    private static CashFlowTableRow getCash(ExcelTable table, Row row) {
+        String action = table.getCell(row, OPERATION).getStringCellValue();
+        CashFlowType type = CashFlowType.CASH;
+        boolean isPositive;
+        if (action.equalsIgnoreCase("Зачислено на счет")) {
+            isPositive = true;
+        } else if (action.equalsIgnoreCase("Списано со счета")) {
+            isPositive = false;
+        } else if (action.equalsIgnoreCase("Налог удержанный")) {
+            isPositive = false;
+            type = CashFlowType.TAX;
+        } else {
             return null;
         }
+        if (type == CashFlowType.CASH && !isDescriptionEmpty(table, row)) {
+            return null; // cash in/out records has no description
+        }
+        return CashFlowTableRow.builder()
+                .timestamp(convertToInstant(table.getCell(row, DATE).getStringCellValue()))
+                .type(type)
+                .value(BigDecimal.valueOf((isPositive ? 1 : -1) * table.getCell(row, VALUE).getNumericCellValue()))
+                .currency(table.getCell(row, CURRENCY).getStringCellValue())
+                .build();
     }
 
-    private static boolean isDescriptionEmpty(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
-        Cell cell = row.getCell(leftColumn + 6);
+    private static boolean isDescriptionEmpty(ExcelTable table, Row row) {
+        Cell cell = table.getCell(row, DESCRIPTION);
         return cell == null ||
                 cell.getCellType() == CellType.BLANK ||
                 (cell.getCellType() == CellType.STRING && cell.getStringCellValue().isEmpty());
     }
 
+    enum CashFlowTableHeader implements TableColumnDescription {
+        DATE("дата"),
+        OPERATION("операция"),
+        VALUE("сумма"),
+        CURRENCY("валюта счета"),
+        DESCRIPTION("комментарий");
+
+        @Getter
+        private final TableColumn column;
+        CashFlowTableHeader(String ... words) {
+            this.column = ru.portfolio.portfolio.parser.TableColumn.of(words);
+        }
+    }
+
     @Getter
     @Builder
-    public static class Row {
+    public static class CashFlowTableRow {
         private Instant timestamp;
         private CashFlowType type;
         private BigDecimal value;

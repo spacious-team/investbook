@@ -20,9 +20,9 @@ public class CashFlowTableTest {
     @Test(dataProvider = "cash")
     void testIsin(String reportFile, BigDecimal expectedCashIn) throws IOException {
         PsbBrokerReport report = new PsbBrokerReport(reportFile);
-        List<CashFlowTable.Row> data = new CashFlowTable(report).getData();
+        List<CashFlowTable.CashFlowTableRow> data = new CashFlowTable(report).getData();
         BigDecimal sum = BigDecimal.ZERO;
-        for (CashFlowTable.Row r : data) {
+        for (CashFlowTable.CashFlowTableRow r : data) {
             sum = sum.add(r.getValue());
         }
         assertEquals(sum, expectedCashIn);
