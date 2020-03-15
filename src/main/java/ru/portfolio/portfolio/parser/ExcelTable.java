@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static java.util.Collections.emptyList;
 
@@ -82,19 +83,31 @@ public class ExcelTable implements Iterable<Row> {
 
     public <T> List<T> getData(Path file, BiFunction<ExcelTable, Row, T> rowExtractor) {
         return getDataCollection(file, (table, row) ->
-                Optional.ofNullable(rowExtractor.apply(table, row))
-                        .map(Collections::singletonList)
-                        .orElse(emptyList()));
+                        Optional.ofNullable(rowExtractor.apply(table, row))
+                                .map(Collections::singletonList)
+                                .orElse(emptyList()));
     }
 
     public <T> List<T> getDataCollection(Path file, BiFunction<ExcelTable, Row, Collection<T>> rowExtractor) {
+        return getDataCollection(file, rowExtractor, e -> Arrays.asList(e, e));
+    }
+
+    public <T> List<T> getDataCollection(Path file, BiFunction<ExcelTable, Row, Collection<T>> rowExtractor,
+                                         Function<T, Collection<T>> mergeDuplicates) {
         List<T> data = new ArrayList<>();
         for (Row row : this) {
             if (row != null) {
                 try {
-                    Collection<T> transaction = rowExtractor.apply(this, row);
-                    if (transaction != null) {
-                        data.addAll(transaction);
+                    Collection<T> result = rowExtractor.apply(this, row);
+                    if (result != null) {
+                        for (T r : result) {
+                            if (data.contains(r)) {
+                                data.remove(r);
+                                data.addAll(mergeDuplicates.apply(r));
+                            } else {
+                                data.add(r);
+                            }
+                        }
                     }
                 } catch (Exception e) {
                     log.warn("Не могу распарсить таблицу '{}' в файле {}, строка {}", tableName, file.getFileName(), row.getRowNum(), e);

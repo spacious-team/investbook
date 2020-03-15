@@ -1,6 +1,7 @@
 package ru.portfolio.portfolio.parser.psb;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
@@ -15,6 +16,7 @@ import ru.portfolio.portfolio.pojo.CashFlowType;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Collections;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -27,6 +29,16 @@ public class CashFlowTable extends AbstractReportTable<CashFlowTable.CashFlowTab
 
     public CashFlowTable(PsbBrokerReport report) {
         super(report, TABLE_NAME, "", CashFlowTableHeader.class);
+    }
+
+    @Override
+    protected Collection<CashFlowTableRow> pasreTable(ExcelTable table) {
+        return table.getDataCollection(getReport().getPath(), this::getRow, e ->
+                // SQL db restricts storing duplicate rows. Join rows by summing they values.
+                Collections.singletonList(e.toBuilder()
+                        .value(e.getValue()
+                                .multiply(BigDecimal.valueOf(2)))
+                        .build()));
     }
 
     @Override
@@ -78,7 +90,8 @@ public class CashFlowTable extends AbstractReportTable<CashFlowTable.CashFlowTab
     }
 
     @Getter
-    @Builder
+    @Builder(toBuilder = true)
+    @EqualsAndHashCode
     public static class CashFlowTableRow {
         private Instant timestamp;
         private CashFlowType type;

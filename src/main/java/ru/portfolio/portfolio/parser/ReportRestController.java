@@ -3,6 +3,7 @@ package ru.portfolio.portfolio.parser;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class ReportRestController {
     private final PsbReportParserService psbReportParserService;
     private FileSystem jimfs = Jimfs.newFileSystem(Configuration.unix());
@@ -45,6 +47,7 @@ public class ReportRestController {
                 String originalFilename = report.getOriginalFilename();
                 Path path = jimfs.getPath(originalFilename != null ? originalFilename : UUID.randomUUID().toString());
                 Files.write(path, bytes);
+                log.info("Загрузка отчета " + path);
                 if ("psb".equals(format)) {
                     psbReportParserService.parse(path);
                 } else {
