@@ -29,10 +29,15 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
         int count = table.getIntCellValue(row, COUNT);
         String type = table.getStringCellValue(row, TYPE).toLowerCase();
         BigDecimal value;
-        if ("фьючерс".equals(type)) {
-            value = table.getCurrencyCellValue(row, VALUE);
-        } else {
-            throw new IllegalArgumentException("Не известный контракт '" + type + "'"); // unexpected contract
+        switch (type) {
+            case "фьючерс":
+                value = table.getCurrencyCellValue(row, VALUE);
+                break;
+            case "опцион":
+                value = BigDecimal.ZERO;
+                break;
+            default:
+                throw new IllegalArgumentException("Не известный контракт '" + type + "'"); // unexpected contract
         }
         if (isBuy) value = value.negate();
         BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
