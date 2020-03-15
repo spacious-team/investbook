@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
+import ru.portfolio.portfolio.parser.AbstractReportTable;
 import ru.portfolio.portfolio.parser.ExcelTable;
 import ru.portfolio.portfolio.parser.TableColumn;
 import ru.portfolio.portfolio.parser.TableColumnDescription;
@@ -13,30 +14,19 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import static ru.portfolio.portfolio.parser.psb.DividendTable.DividendTableHeader.*;
-import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.convertToInstant;
 
 @Slf4j
-public class DividendTable {
-    private static final String TABLE_START_TEXT = "Выплата дивидендов";
-    @Getter
-    private final PsbBrokerReport report;
-    @Getter
-    private final List<DividendTableRow> data = new ArrayList<>();
+public class DividendTable extends AbstractReportTable<DividendTable.DividendTableRow> {
+    private static final String TABLE_NAME = "Выплата дивидендов";
 
     public DividendTable(PsbBrokerReport report) {
-        this.report = report;
-        this.data.addAll(pasreTable(report));
+        super(report, TABLE_NAME, "", DividendTableHeader.class);
     }
 
-    private List<DividendTableRow> pasreTable(PsbBrokerReport report) {
-        ExcelTable table = ExcelTable.of(report.getSheet(), TABLE_START_TEXT, DividendTableHeader.class);
-        return table.getDataCollection(report.getPath(), DividendTable::getDividendAndTax);
-    }
-
-    private static Collection<DividendTableRow> getDividendAndTax(ExcelTable table, Row row) {
+    @Override
+    protected Collection<DividendTableRow> getRow(ExcelTable table, Row row) {
         DividendTableRow.DividendTableRowBuilder builder = DividendTableRow.builder()
                 .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
                 .event(CashFlowType.DIVIDEND)
@@ -46,7 +36,7 @@ public class DividendTable {
                 .currency(table.getStringCellValue(row, VALUE_CURRENCY));
         Collection<DividendTableRow> data = new ArrayList<>();
         data.add(builder.build());
-        BigDecimal tax = table.getCurrencyCellValue(row, TAX);
+        BigDecimal tax = table.getCurrencyCellValue(row, TAX).negate();
         if (!tax.equals(BigDecimal.ZERO)) {
             data.add(builder
                     .event(CashFlowType.TAX)

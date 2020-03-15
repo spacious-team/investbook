@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
+import ru.portfolio.portfolio.parser.AbstractReportTable;
 import ru.portfolio.portfolio.parser.ExcelTable;
 import ru.portfolio.portfolio.parser.TableColumn;
 import ru.portfolio.portfolio.parser.TableColumnDescription;
@@ -13,31 +14,21 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import static ru.portfolio.portfolio.parser.psb.CouponAndAmortizationTable.CouponAndAmortizationTableHeader.*;
-import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.convertToInstant;
 
 @Slf4j
-public class CouponAndAmortizationTable {
-    private static final String TABLE_START_TEXT = "Погашение купонов и ЦБ";
+public class CouponAndAmortizationTable extends AbstractReportTable<CouponAndAmortizationTable.CouponAndAmortizationTableRow> {
+
+    private static final String TABLE_NAME = "Погашение купонов и ЦБ";
     private static final String TABLE_END_TEXT = "*Налог удерживается с рублевого брокерского счета";
-    @Getter
-    private final PsbBrokerReport report;
-    @Getter
-    private final List<CouponAndAmortizationTableRow> data = new ArrayList<>();
 
     public CouponAndAmortizationTable(PsbBrokerReport report) {
-        this.report = report;
-        this.data.addAll(pasreTable(report));
+        super(report, TABLE_NAME, TABLE_END_TEXT, CouponAndAmortizationTableHeader.class);
     }
 
-    private List<CouponAndAmortizationTableRow> pasreTable(PsbBrokerReport report) {
-        ExcelTable table = ExcelTable.of(report.getSheet(), TABLE_START_TEXT, TABLE_END_TEXT, CouponAndAmortizationTableHeader.class);
-        return table.getDataCollection(report.getPath(), CouponAndAmortizationTable::getCouponOrAmortizationOrTax);
-    }
-
-    private static Collection<CouponAndAmortizationTableRow> getCouponOrAmortizationOrTax(ExcelTable table, Row row) {
+    @Override
+    protected Collection<CouponAndAmortizationTableRow> getRow(ExcelTable table, Row row) {
         CashFlowType event;
         String action = table.getStringCellValue(row, TYPE);
         if (action.equalsIgnoreCase("Погашение купона")) {

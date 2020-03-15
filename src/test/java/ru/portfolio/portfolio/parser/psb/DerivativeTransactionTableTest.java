@@ -12,7 +12,7 @@ public class DerivativeTransactionTableTest {
 
     @DataProvider(name = "isin")
     Object[][] getData() {
-        return new Object[][] {{"E:\\Исполнение фьючерса.xlsx", "RU000A1015P6", "Si-12.19" }};
+        return new Object[][] {{"E:\\Исполнение фьючерса.xlsx", "Si-12.19M191219CA65500", "Si-12.19" }};
     }
 
     @Test(dataProvider = "isin")

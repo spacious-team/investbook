@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import ru.portfolio.portfolio.parser.ExcelTable;
+import ru.portfolio.portfolio.parser.ReportTable;
 import ru.portfolio.portfolio.parser.TableColumn;
 import ru.portfolio.portfolio.parser.TableColumnDescription;
 
@@ -14,11 +15,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.convertToInstant;
-import static ru.portfolio.portfolio.parser.psb.TransactionTable.TransactionTablHeader.*;
+import static ru.portfolio.portfolio.parser.psb.TransactionTable.TransactionTableHeader.*;
 
 @Slf4j
-public class TransactionTable {
+public class TransactionTable implements ReportTable<TransactionTable.TransactionTableRow> {
     private static final String TABLE1_START_TEXT = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами в дату заключения";
     private static final String TABLE2_START_TEXT = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами Т+, рассчитанные в отчетном периоде";
     private static final String TABLE_END_TEXT = "Итого оборот";
@@ -34,11 +34,11 @@ public class TransactionTable {
     }
 
     private List<TransactionTableRow> parseTable(PsbBrokerReport report, String tableName) {
-        ExcelTable table = ExcelTable.of(report.getSheet(), tableName, TABLE_END_TEXT, TransactionTablHeader.class);
-        return table.getDataCollection(report.getPath(), TransactionTable::getTransaction);
+        ExcelTable table = ExcelTable.of(report.getSheet(), tableName, TABLE_END_TEXT, TransactionTableHeader.class);
+        return table.getDataCollection(report.getPath(), this::getTransaction);
     }
 
-    private static Collection<TransactionTableRow> getTransaction(ExcelTable table, org.apache.poi.ss.usermodel.Row row) {
+    private Collection<TransactionTableRow> getTransaction(ExcelTable table, org.apache.poi.ss.usermodel.Row row) {
         boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
         BigDecimal value = table.getCurrencyCellValue(row, VALUE);
         BigDecimal accruedInterest = table.getCurrencyCellValue(row, ACCRUED_INTEREST);
@@ -52,7 +52,7 @@ public class TransactionTable {
                 .add(table.getCurrencyCellValue(row, ITS_COMMISSION))
                 .negate();
         return Collections.singletonList(TransactionTableRow.builder()
-                .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
+                .timestamp(report.convertToInstant(table.getStringCellValue(row, DATE_TIME)))
                 .transactionId(table.getLongCellValue(row, TRANSACTION))
                 .isin(table.getStringCellValue(row, ISIN))
                 .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
@@ -64,7 +64,7 @@ public class TransactionTable {
                 .build());
     }
 
-    enum TransactionTablHeader implements TableColumnDescription {
+    enum TransactionTableHeader implements TableColumnDescription {
         DATE_TIME("дата и время"),
         TRANSACTION("номер сделки"),
         ISIN("isin"),
@@ -81,7 +81,7 @@ public class TransactionTable {
 
         @Getter
         private final TableColumn column;
-        TransactionTablHeader(String ... words) {
+        TransactionTableHeader(String ... words) {
             this.column = TableColumn.of(words);
         }
     }

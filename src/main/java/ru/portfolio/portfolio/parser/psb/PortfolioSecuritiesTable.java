@@ -4,41 +4,34 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
+import ru.portfolio.portfolio.parser.AbstractReportTable;
 import ru.portfolio.portfolio.parser.ExcelTable;
 import ru.portfolio.portfolio.parser.TableColumn;
 import ru.portfolio.portfolio.parser.TableColumnDescription;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static ru.portfolio.portfolio.parser.ExcelTableHelper.rowContains;
 import static ru.portfolio.portfolio.parser.psb.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.*;
 
 @Slf4j
-public class PortfolioSecuritiesTable {
-    private static final String TABLE_START_TEXT = "Портфель на конец дня на биржевом рынке";
+public class PortfolioSecuritiesTable extends AbstractReportTable<PortfolioSecuritiesTable.PortfolioSecuritiesTableRow> {
+    private static final String TABLE_NAME = "Портфель на конец дня на биржевом рынке";
     private static final String TABLE_END_TEXT = "* цена последней сделки (на организованных торгах)";
     private static final String INVALID_TEXT = "Итого в валюте цены";
-    @Getter
-    private final PsbBrokerReport report;
-    @Getter
-    private final List<PortfolioSecuritiesTableRow> data = new ArrayList<>();
 
     public PortfolioSecuritiesTable(PsbBrokerReport report) {
-        this.report = report;
-        this.data.addAll(pasreTable(report));
+        super(report, TABLE_NAME, TABLE_END_TEXT, PortfolioSecuritiesTableHeader.class);
     }
 
-    private List<PortfolioSecuritiesTableRow> pasreTable(PsbBrokerReport report) {
-        ExcelTable table = ExcelTable.of(report.getSheet(), TABLE_START_TEXT, TABLE_END_TEXT, PortfolioSecuritiesTableHeader.class);
-        return table.getDataCollection(report.getPath(), (tab, row) ->
-            rowContains(tab.getSheet(), row.getRowNum(), INVALID_TEXT) ?
-                    emptyList() :
-                    getPosition(tab, row));
+    @Override
+    protected Collection<PortfolioSecuritiesTableRow> getRow(ExcelTable table, Row row) {
+        return rowContains(table.getSheet(), row.getRowNum(), INVALID_TEXT) ?
+                emptyList() :
+                getPosition(table, row);
     }
 
     private static Collection<PortfolioSecuritiesTableRow> getPosition(ExcelTable table, Row row) {

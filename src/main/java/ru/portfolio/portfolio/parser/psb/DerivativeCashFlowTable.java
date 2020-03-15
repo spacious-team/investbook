@@ -1,9 +1,11 @@
 package ru.portfolio.portfolio.parser.psb;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
+import ru.portfolio.portfolio.parser.AbstractReportTable;
 import ru.portfolio.portfolio.parser.ExcelTable;
 import ru.portfolio.portfolio.parser.TableColumn;
 import ru.portfolio.portfolio.parser.TableColumnDescription;
@@ -17,32 +19,32 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static ru.portfolio.portfolio.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.*;
-import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.convertToInstant;
 
 @Slf4j
-public class DerivativeCashFlowTable {
-    private static final String TABLE1_START_TEXT = "Движение стандартных контрактов";
-    private static final String TABLE2_START_TEXT = "Прочие операции";
+public class DerivativeCashFlowTable extends AbstractReportTable<DerivativeCashFlowTable.DerivativeCashFlowTableRow> {
+
+    private static final String TABLE1_NAME = "Прочие операции";
+    private static final String TABLE2_NAME = "Движение стандартных контрактов";
     private static final String TABLE_END_TEXT = "Итого";
-    @Getter
-    private final PsbBrokerReport report;
-    @Getter
-    private final List<DerivativeCashFlowTableRow> data = new ArrayList<>();
+    @Getter(AccessLevel.PRIVATE)
+    private Map<String, Integer> contractCount = Collections.emptyMap();
 
     public DerivativeCashFlowTable(PsbBrokerReport report) {
-        this.report = report;
-        Map<String, Integer> contractCount = pasreDerivativeCountTable(report);
-        if (!contractCount.isEmpty()) {
-            this.data.addAll(pasreDerivativeCashFlowTable(report, contractCount));
-        }
+        super(report, TABLE1_NAME, TABLE_END_TEXT, DerivativeCashFlowTableHeader.class);
     }
 
-    private static Map<String, Integer> pasreDerivativeCountTable(PsbBrokerReport report) {
-        ExcelTable table = ExcelTable.of(report.getSheet(), TABLE1_START_TEXT, TABLE_END_TEXT, ContractCountTableHeader.class);
-        List<AbstractMap.SimpleEntry<String, Integer>> data = table.getData(report.getPath(), DerivativeCashFlowTable::getCount);
-        return data.stream()
+    @Override
+    protected Collection<DerivativeCashFlowTableRow> pasreTable(ExcelTable table) {
+        return hasOpenContract() ? super.pasreTable(table) : Collections.emptyList();
+    }
+
+    private boolean hasOpenContract() {
+        ExcelTable countTable = ExcelTable.of(getReport().getSheet(), TABLE2_NAME, TABLE_END_TEXT, ContractCountTableHeader.class);
+        List<AbstractMap.SimpleEntry<String, Integer>> counts = countTable.getData(getReport().getPath(), DerivativeCashFlowTable::getCount);
+        this.contractCount = counts.stream()
                 .filter(e -> e.getValue() != 0)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return !this.contractCount.isEmpty();
     }
 
     private static AbstractMap.SimpleEntry<String, Integer> getCount(ExcelTable table, Row row) {
@@ -56,13 +58,8 @@ public class DerivativeCashFlowTable {
         return new AbstractMap.SimpleEntry<>(contract, count);
     }
 
-    private List<DerivativeCashFlowTableRow> pasreDerivativeCashFlowTable(PsbBrokerReport report,
-                                                                          Map<String, Integer> contractCount) {
-        ExcelTable table = ExcelTable.of(report.getSheet(), TABLE2_START_TEXT, TABLE_END_TEXT, DerivativeCashFlowTableHeader.class);
-        return table.getDataCollection(report.getPath(), (tab, row) -> getDerivativeCashFlow(tab, row, contractCount));
-    }
-
-    private static Collection<DerivativeCashFlowTableRow> getDerivativeCashFlow(ExcelTable table, Row row, Map<String, Integer> contractCount) {
+    @Override
+    protected Collection<DerivativeCashFlowTableRow> getRow(ExcelTable table, Row row) {
         BigDecimal value = table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.INCOUMING)
                 .subtract(table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.OUTGOING));
         DerivativeCashFlowTableRow.DerivativeCashFlowTableRowBuilder builder = DerivativeCashFlowTableRow.builder()
@@ -74,9 +71,9 @@ public class DerivativeCashFlowTable {
             case "вариационная маржа":
                 String contract = table.getStringCellValue(row, DerivativeCashFlowTableHeader.CONTRACT)
                         .split("/")[1].trim();
-                Integer count = contractCount.get(contract);
+                Integer count = getContractCount().get(contract);
                 if (count == null) {
-                    throw new IllegalArgumentException("Количество открытых контрактов не найдено");
+                    throw new IllegalArgumentException("Открытых контрактов не найдено");
                 }
                 return singletonList(builder.event(CashFlowType.DERIVATIVE_PROFIT)
                         .contract(contract)
