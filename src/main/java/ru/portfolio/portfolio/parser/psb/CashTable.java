@@ -10,9 +10,10 @@ import ru.portfolio.portfolio.parser.TableColumnDescription;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static ru.portfolio.portfolio.parser.psb.CashTable.CashTableHeader.*;
 
 @Slf4j
@@ -32,17 +33,15 @@ public class CashTable {
     private List<CashTableRow> pasreTable(PsbBrokerReport report) {
         ExcelTable table = ExcelTable.of(report.getSheet(), TABLE_START_TEXT, TABLE_END_TEXT, CashTableHeader.class);
         table.setDataRowOffset(3);
-        return table.isEmpty() ?
-                Collections.emptyList() :
-                table.getData(report.getPath(), CashTable::getCash);
+        return table.getDataCollection(report.getPath(), CashTable::getCash);
     }
 
-    private static CashTableRow getCash(ExcelTable table, Row row) {
-        return CashTableRow.builder()
+    private static Collection<CashTableRow> getCash(ExcelTable table, Row row) {
+        return singletonList(CashTableRow.builder()
                 .section(table.getCell(row, SECTION).getStringCellValue())
                 .value(BigDecimal.valueOf(table.getCell(row, VALUE).getNumericCellValue()))
                 .currency(table.getCell(row, CURRENCY).getStringCellValue())
-                .build();
+                .build());
     }
 
     enum CashTableHeader implements TableColumnDescription {

@@ -167,7 +167,7 @@ public class PsbReportParserService {
     }
 
     private void addDerivativeCashFlows(DerivativeCashFlowTable derivativeCashFlowTable) {
-        for (DerivativeCashFlowTable.Row row : derivativeCashFlowTable.getData()) {
+        for (DerivativeCashFlowTable.DerivativeCashFlowTableRow row : derivativeCashFlowTable.getData()) {
             if (row.getContract() != null) {
                 boolean isAdded = addSecurity(row.getContract());
                 if (!isAdded) continue;

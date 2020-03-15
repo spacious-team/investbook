@@ -13,6 +13,8 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiFunction;
 
+import static java.util.Collections.emptyList;
+
 @Slf4j
 @ToString(of = {"tableName"})
 public class ExcelTable implements Iterable<Row> {
@@ -76,20 +78,10 @@ public class ExcelTable implements Iterable<Row> {
     }
 
     public <T> List<T> getData(Path file, BiFunction<ExcelTable, Row, T> rowExtractor) {
-        List<T> data = new ArrayList<>();
-        for (Row row : this) {
-            if (row != null) {
-                try {
-                    T transaction = rowExtractor.apply(this, row);
-                    if (transaction != null) {
-                        data.add(transaction);
-                    }
-                } catch (Exception e) {
-                    log.warn("Не могу распарсить таблицу '{}' в файле {}, строка {}", tableName, file.getFileName(), row.getRowNum(), e);
-                }
-            }
-        }
-        return data;
+        return getDataCollection(file, (table, row) ->
+                Optional.ofNullable(rowExtractor.apply(table, row))
+                        .map(Collections::singletonList)
+                        .orElse(emptyList()));
     }
 
     public <T> List<T> getDataCollection(Path file, BiFunction<ExcelTable, Row, Collection<T>> rowExtractor) {
@@ -111,6 +103,10 @@ public class ExcelTable implements Iterable<Row> {
 
     public Cell getCell(Row row, TableColumnDescription columnDescription) {
         return row.getCell(columnIndices.get(columnDescription.getColumn()));
+    }
+
+    public int getCellIntValue(Row row, TableColumnDescription columnDescription) {
+        return Double.valueOf(getCell(row, columnDescription).getNumericCellValue()).intValue();
     }
 
     @Override

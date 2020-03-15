@@ -14,9 +14,11 @@ import ru.portfolio.portfolio.pojo.CashFlowType;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static ru.portfolio.portfolio.parser.psb.CashFlowTable.CashFlowTableHeader.*;
 import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.convertToInstant;
 
@@ -35,12 +37,10 @@ public class CashFlowTable {
 
     private List<CashFlowTableRow> pasreTable(PsbBrokerReport report) {
         ExcelTable table = ExcelTable.of(report.getSheet(), TABLE_START_TEXT, CashFlowTableHeader.class);
-        return table.isEmpty() ?
-                Collections.emptyList() :
-                table.getData(report.getPath(), CashFlowTable::getCash);
+        return table.getDataCollection(report.getPath(), CashFlowTable::getCash);
     }
 
-    private static CashFlowTableRow getCash(ExcelTable table, Row row) {
+    private static Collection<CashFlowTableRow> getCash(ExcelTable table, Row row) {
         String action = table.getCell(row, OPERATION).getStringCellValue();
         CashFlowType type = CashFlowType.CASH;
         boolean isPositive;
@@ -52,17 +52,17 @@ public class CashFlowTable {
             isPositive = false;
             type = CashFlowType.TAX;
         } else {
-            return null;
+            return emptyList();
         }
         if (type == CashFlowType.CASH && !isDescriptionEmpty(table, row)) {
-            return null; // cash in/out records has no description
+            return emptyList(); // cash in/out records has no description
         }
-        return CashFlowTableRow.builder()
+        return singletonList(CashFlowTableRow.builder()
                 .timestamp(convertToInstant(table.getCell(row, DATE).getStringCellValue()))
                 .type(type)
                 .value(BigDecimal.valueOf((isPositive ? 1 : -1) * table.getCell(row, VALUE).getNumericCellValue()))
                 .currency(table.getCell(row, CURRENCY).getStringCellValue())
-                .build();
+                .build());
     }
 
     private static boolean isDescriptionEmpty(ExcelTable table, Row row) {

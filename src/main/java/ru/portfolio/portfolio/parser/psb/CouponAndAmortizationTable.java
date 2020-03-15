@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static ru.portfolio.portfolio.parser.psb.CouponAndAmortizationTable.CouponAndAmortizationTableHeader.*;
@@ -35,9 +34,7 @@ public class CouponAndAmortizationTable {
 
     private List<CouponAndAmortizationTableRow> pasreTable(PsbBrokerReport report) {
         ExcelTable table = ExcelTable.of(report.getSheet(), TABLE_START_TEXT, TABLE_END_TEXT, CouponAndAmortizationTableHeader.class);
-        return table.isEmpty() ?
-                Collections.emptyList() :
-                table.getDataCollection(report.getPath(), CouponAndAmortizationTable::getCouponOrAmortizationOrTax);
+        return table.getDataCollection(report.getPath(), CouponAndAmortizationTable::getCouponOrAmortizationOrTax);
     }
 
     private static Collection<CouponAndAmortizationTableRow> getCouponOrAmortizationOrTax(ExcelTable table, Row row) {

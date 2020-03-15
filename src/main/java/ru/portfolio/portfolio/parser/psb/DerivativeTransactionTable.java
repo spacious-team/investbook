@@ -11,9 +11,10 @@ import ru.portfolio.portfolio.parser.TableColumnDescription;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static ru.portfolio.portfolio.parser.psb.DerivativeTransactionTable.FortsTableHeader.*;
 import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.convertToInstant;
 
@@ -35,19 +36,15 @@ public class DerivativeTransactionTable {
 
     private List<FortsTableRow> parseFortsTable(PsbBrokerReport report) {
         ExcelTable table = ExcelTable.of(report.getSheet(), TABLE1_START_TEXT, TABLE_END_TEXT, FortsTableHeader.class);
-        return table.isEmpty() ?
-                Collections.emptyList() :
-                table.getData(report.getPath(), DerivativeTransactionTable::getFortsTransaction);
+        return table.getDataCollection(report.getPath(), DerivativeTransactionTable::getFortsTransaction);
     }
 
     private List<FortsTableRow> parseFortsExpirationTable(PsbBrokerReport report) {
         ExcelTable table = ExcelTable.of(report.getSheet(), TABLE2_START_TEXT, TABLE_END_TEXT, ExpirationTableHeader.class);
-        return table.isEmpty() ?
-                Collections.emptyList() :
-                table.getData(report.getPath(), DerivativeTransactionTable::getFortsExpirationTransaction);
+        return table.getDataCollection(report.getPath(), DerivativeTransactionTable::getFortsExpirationTransaction);
     }
 
-    private static FortsTableRow getFortsTransaction(ExcelTable table, Row row) {
+    private static Collection<FortsTableRow> getFortsTransaction(ExcelTable table, Row row) {
         boolean isBuy = table.getCell(row, DIRECTION).getStringCellValue().equalsIgnoreCase("покупка");
         int count = Double.valueOf(table.getCell(row, COUNT).getNumericCellValue()).intValue();
         String type = table.getCell(row, TYPE).getStringCellValue().toLowerCase();
@@ -70,7 +67,7 @@ public class DerivativeTransactionTable {
         BigDecimal commission = BigDecimal.valueOf(table.getCell(row, MARKET_COMMISSION).getNumericCellValue())
                 .add(BigDecimal.valueOf(table.getCell(row, BROKER_COMMISSION).getNumericCellValue()))
                 .negate();
-        return FortsTableRow.builder()
+        return singletonList(FortsTableRow.builder()
                 .timestamp(convertToInstant(table.getCell(row, DATE_TIME).getStringCellValue()))
                 .transactionId(Long.parseLong(table.getCell(row, TRANSACTION).getStringCellValue()))
                 .isin(table.getCell(row, CONTRACT).getStringCellValue())
@@ -78,10 +75,10 @@ public class DerivativeTransactionTable {
                 .value(value)
                 .commission(commission)
                 .currency("RUB") // FORTS, only RUB
-                .build();
+                .build());
     }
 
-    private static FortsTableRow getFortsExpirationTransaction(ExcelTable table, Row row) {
+    private static Collection<FortsTableRow> getFortsExpirationTransaction(ExcelTable table, Row row) {
         boolean isBuy = table.getCell(row, ExpirationTableHeader.DIRECTION).getStringCellValue().equalsIgnoreCase("покупка");
         int count = Double.valueOf(table.getCell(row, ExpirationTableHeader.COUNT).getNumericCellValue()).intValue();
         String type = table.getCell(row, ExpirationTableHeader.TYPE).getStringCellValue().toLowerCase();
@@ -90,7 +87,7 @@ public class DerivativeTransactionTable {
         if ("фьючерс".equals(type)) {
             cellValue = table.getCell(row, ExpirationTableHeader.VALUE).getNumericCellValue();
         } else {
-            throw new IllegalArgumentException("Не известный контракт " + type); // unexpected contract
+            throw new IllegalArgumentException("Не известный контракт '" + type + "'"); // unexpected contract
         }
         if (cellValue - 0.01d > 0) {
             value = BigDecimal.valueOf(cellValue);
@@ -99,7 +96,7 @@ public class DerivativeTransactionTable {
         BigDecimal commission = BigDecimal.valueOf(table.getCell(row, ExpirationTableHeader.MARKET_COMMISSION).getNumericCellValue())
                 .add(BigDecimal.valueOf(table.getCell(row, ExpirationTableHeader.BROKER_COMMISSION).getNumericCellValue()))
                 .negate();
-        return FortsTableRow.builder()
+        return singletonList(FortsTableRow.builder()
                 .timestamp(convertToInstant(table.getCell(row, ExpirationTableHeader.DATE_TIME).getStringCellValue()))
                 .transactionId(Long.parseLong(table.getCell(row, ExpirationTableHeader.TRANSACTION).getStringCellValue()))
                 .isin(table.getCell(row, ExpirationTableHeader.CONTRACT).getStringCellValue())
@@ -107,7 +104,7 @@ public class DerivativeTransactionTable {
                 .value(value)
                 .commission(commission)
                 .currency("RUB") // FORTS, only RUB
-                .build();
+                .build());
     }
 
     enum FortsTableHeader implements TableColumnDescription {
