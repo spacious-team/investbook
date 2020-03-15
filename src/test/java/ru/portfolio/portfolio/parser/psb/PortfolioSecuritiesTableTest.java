@@ -8,7 +8,7 @@ import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 
-class PortfolioSecuritiesTableTest {
+public class PortfolioSecuritiesTableTest {
     PsbBrokerReport report;
 
     PortfolioSecuritiesTableTest() throws IOException {
@@ -22,7 +22,7 @@ class PortfolioSecuritiesTableTest {
 
     @Test(dataProvider = "isin")
     void testIsin(String firstIsin, String lastIsin) {
-        List<PortfolioSecuritiesTable.Row> data = new PortfolioSecuritiesTable(this.report).getData();
+        List<PortfolioSecuritiesTable.PortfolioSecuritiesTableRow> data = new PortfolioSecuritiesTable(this.report).getData();
         assertEquals(data.get(0).getIsin(), firstIsin);
         assertEquals(data.get(data.size() - 1).getIsin(), lastIsin);
     }

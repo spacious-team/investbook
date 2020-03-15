@@ -45,32 +45,28 @@ public class DerivativeTransactionTable {
     }
 
     private static Collection<FortsTableRow> getFortsTransaction(ExcelTable table, Row row) {
-        boolean isBuy = table.getCell(row, DIRECTION).getStringCellValue().equalsIgnoreCase("покупка");
-        int count = Double.valueOf(table.getCell(row, COUNT).getNumericCellValue()).intValue();
-        String type = table.getCell(row, TYPE).getStringCellValue().toLowerCase();
-        BigDecimal value = BigDecimal.ZERO;
-        double cellValue = 0;
+        boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
+        int count = table.getIntCellValue(row, COUNT);
+        String type = table.getStringCellValue(row, TYPE).toLowerCase();
+        BigDecimal value;
         switch (type) {
             case "опцион":
-                cellValue = count * table.getCell(row, OPTION_PRICE).getNumericCellValue();
+                value = table.getCurrencyCellValue(row, OPTION_PRICE).multiply(BigDecimal.valueOf(count));
                 break;
             case "фьючерс":
-                cellValue = table.getCell(row, VALUE).getNumericCellValue();
+                value = table.getCurrencyCellValue(row, VALUE);
                 break;
             default:
                 throw new IllegalArgumentException("Не известный контракт " + type);
         }
-        if (cellValue - 0.01d > 0) {
-            value = BigDecimal.valueOf(cellValue);
-            if (isBuy) value = value.negate();
-        }
-        BigDecimal commission = BigDecimal.valueOf(table.getCell(row, MARKET_COMMISSION).getNumericCellValue())
-                .add(BigDecimal.valueOf(table.getCell(row, BROKER_COMMISSION).getNumericCellValue()))
+        if (isBuy) value = value.negate();
+        BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
+                .add(table.getCurrencyCellValue(row, BROKER_COMMISSION))
                 .negate();
         return singletonList(FortsTableRow.builder()
-                .timestamp(convertToInstant(table.getCell(row, DATE_TIME).getStringCellValue()))
-                .transactionId(Long.parseLong(table.getCell(row, TRANSACTION).getStringCellValue()))
-                .isin(table.getCell(row, CONTRACT).getStringCellValue())
+                .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
+                .transactionId(Long.parseLong(table.getStringCellValue(row, TRANSACTION)))
+                .isin(table.getStringCellValue(row, CONTRACT))
                 .count((isBuy ? 1 : -1) * count)
                 .value(value)
                 .commission(commission)
@@ -79,27 +75,23 @@ public class DerivativeTransactionTable {
     }
 
     private static Collection<FortsTableRow> getFortsExpirationTransaction(ExcelTable table, Row row) {
-        boolean isBuy = table.getCell(row, ExpirationTableHeader.DIRECTION).getStringCellValue().equalsIgnoreCase("покупка");
-        int count = Double.valueOf(table.getCell(row, ExpirationTableHeader.COUNT).getNumericCellValue()).intValue();
-        String type = table.getCell(row, ExpirationTableHeader.TYPE).getStringCellValue().toLowerCase();
-        BigDecimal value = BigDecimal.ZERO;
-        double cellValue = 0;
+        boolean isBuy = table.getStringCellValue(row, ExpirationTableHeader.DIRECTION).equalsIgnoreCase("покупка");
+        int count = table.getIntCellValue(row, ExpirationTableHeader.COUNT);
+        String type = table.getStringCellValue(row, ExpirationTableHeader.TYPE).toLowerCase();
+        BigDecimal value;
         if ("фьючерс".equals(type)) {
-            cellValue = table.getCell(row, ExpirationTableHeader.VALUE).getNumericCellValue();
+            value = table.getCurrencyCellValue(row, ExpirationTableHeader.VALUE);
         } else {
             throw new IllegalArgumentException("Не известный контракт '" + type + "'"); // unexpected contract
         }
-        if (cellValue - 0.01d > 0) {
-            value = BigDecimal.valueOf(cellValue);
-            if (isBuy) value = value.negate();
-        }
-        BigDecimal commission = BigDecimal.valueOf(table.getCell(row, ExpirationTableHeader.MARKET_COMMISSION).getNumericCellValue())
-                .add(BigDecimal.valueOf(table.getCell(row, ExpirationTableHeader.BROKER_COMMISSION).getNumericCellValue()))
+        if (isBuy) value = value.negate();
+        BigDecimal commission = table.getCurrencyCellValue(row, ExpirationTableHeader.MARKET_COMMISSION)
+                .add(table.getCurrencyCellValue(row, ExpirationTableHeader.BROKER_COMMISSION))
                 .negate();
         return singletonList(FortsTableRow.builder()
-                .timestamp(convertToInstant(table.getCell(row, ExpirationTableHeader.DATE_TIME).getStringCellValue()))
-                .transactionId(Long.parseLong(table.getCell(row, ExpirationTableHeader.TRANSACTION).getStringCellValue()))
-                .isin(table.getCell(row, ExpirationTableHeader.CONTRACT).getStringCellValue())
+                .timestamp(convertToInstant(table.getStringCellValue(row, ExpirationTableHeader.DATE_TIME)))
+                .transactionId(table.getLongCellValue(row, ExpirationTableHeader.TRANSACTION))
+                .isin(table.getStringCellValue(row, ExpirationTableHeader.CONTRACT))
                 .count(count)
                 .value(value)
                 .commission(commission)

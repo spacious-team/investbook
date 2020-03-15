@@ -41,7 +41,7 @@ public class CashFlowTable {
     }
 
     private static Collection<CashFlowTableRow> getCash(ExcelTable table, Row row) {
-        String action = table.getCell(row, OPERATION).getStringCellValue();
+        String action = table.getStringCellValue(row, OPERATION);
         CashFlowType type = CashFlowType.CASH;
         boolean isPositive;
         if (action.equalsIgnoreCase("Зачислено на счет")) {
@@ -58,10 +58,11 @@ public class CashFlowTable {
             return emptyList(); // cash in/out records has no description
         }
         return singletonList(CashFlowTableRow.builder()
-                .timestamp(convertToInstant(table.getCell(row, DATE).getStringCellValue()))
+                .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
                 .type(type)
-                .value(BigDecimal.valueOf((isPositive ? 1 : -1) * table.getCell(row, VALUE).getNumericCellValue()))
-                .currency(table.getCell(row, CURRENCY).getStringCellValue())
+                .value(table.getCurrencyCellValue(row, VALUE)
+                        .multiply(BigDecimal.valueOf(isPositive ? 1 : -1)))
+                .currency(table.getStringCellValue(row, CURRENCY))
                 .build());
     }
 

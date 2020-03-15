@@ -5,10 +5,12 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -18,6 +20,7 @@ import static java.util.Collections.emptyList;
 @Slf4j
 @ToString(of = {"tableName"})
 public class ExcelTable implements Iterable<Row> {
+    @Getter
     private final Sheet sheet;
     private final String tableName;
     @Getter
@@ -105,8 +108,27 @@ public class ExcelTable implements Iterable<Row> {
         return row.getCell(columnIndices.get(columnDescription.getColumn()));
     }
 
-    public int getCellIntValue(Row row, TableColumnDescription columnDescription) {
-        return Double.valueOf(getCell(row, columnDescription).getNumericCellValue()).intValue();
+    public int getIntCellValue(Row row, TableColumnDescription columnDescription) {
+        return (int) getLongCellValue(row, columnDescription);
+    }
+
+    public long getLongCellValue(Row row, TableColumnDescription columnDescription) {
+        Cell cell = getCell(row, columnDescription);
+        CellType type = cell.getCellType();
+        if (type == CellType.NUMERIC) {
+            return Double.valueOf(cell.getNumericCellValue()).longValue();
+        } else {
+            return Long.parseLong(cell.getStringCellValue());
+        }
+    }
+
+    public BigDecimal getCurrencyCellValue(Row row, TableColumnDescription columnDescription) {
+        double cellValue = getCell(row, columnDescription).getNumericCellValue();
+        return (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
+    }
+
+    public String getStringCellValue(Row row, TableColumnDescription columnDescription) {
+        return getCell(row, columnDescription).getStringCellValue();
     }
 
     @Override

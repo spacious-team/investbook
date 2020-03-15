@@ -38,9 +38,8 @@ public class CouponAndAmortizationTable {
     }
 
     private static Collection<CouponAndAmortizationTableRow> getCouponOrAmortizationOrTax(ExcelTable table, Row row) {
-        BigDecimal value, tax;
         CashFlowType event;
-        String action = table.getCell(row, TYPE).getStringCellValue();
+        String action = table.getStringCellValue(row, TYPE);
         if (action.equalsIgnoreCase("Погашение купона")) {
             event = CashFlowType.COUPON;
         } else if (action.equalsIgnoreCase("Амортизация")) {
@@ -51,20 +50,17 @@ public class CouponAndAmortizationTable {
             throw new RuntimeException("Обработчик события " + action + " не реализован");
         }
 
-        double cellValue = ((event == CashFlowType.COUPON) ?
-                table.getCell(row, COUPON) :
-                table.getCell(row, VALUE))
-                .getNumericCellValue();
-        value = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
-        cellValue = table.getCell(row, TAX).getNumericCellValue();
-        tax = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue).negate();
+        BigDecimal value = ((event == CashFlowType.COUPON) ?
+                table.getCurrencyCellValue(row, COUPON) :
+                table.getCurrencyCellValue(row, VALUE));
+        BigDecimal tax = table.getCurrencyCellValue(row, TAX).negate();
         CouponAndAmortizationTableRow.CouponAndAmortizationTableRowBuilder builder = CouponAndAmortizationTableRow.builder()
-                .timestamp(convertToInstant(table.getCell(row, DATE).getStringCellValue()))
+                .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
                 .event(event)
-                .isin(table.getCell(row, ISIN).getStringCellValue())
-                .count(Double.valueOf(table.getCell(row, COUNT).getNumericCellValue()).intValue())
+                .isin(table.getStringCellValue(row, ISIN))
+                .count(table.getIntCellValue(row, COUNT))
                 .value(value)
-                .currency(table.getCell(row, CURRENCY).getStringCellValue());
+                .currency(table.getStringCellValue(row, CURRENCY));
         Collection<CouponAndAmortizationTableRow> data = new ArrayList<>();
         data.add(builder.build());
         if (!tax.equals(BigDecimal.ZERO)) {

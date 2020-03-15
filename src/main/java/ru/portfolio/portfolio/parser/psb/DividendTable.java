@@ -37,25 +37,21 @@ public class DividendTable {
     }
 
     private static Collection<DividendTableRow> getDividendAndTax(ExcelTable table, Row row) {
-        BigDecimal value, tax;
-        double cellValue = table.getCell(row, VALUE).getNumericCellValue();
-        value = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
-        cellValue = table.getCell(row, TAX).getNumericCellValue();
-        tax = (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue).negate();
         DividendTableRow.DividendTableRowBuilder builder = DividendTableRow.builder()
-                .timestamp(convertToInstant(table.getCell(row, DATE).getStringCellValue()))
+                .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
                 .event(CashFlowType.DIVIDEND)
-                .isin(table.getCell(row, ISIN).getStringCellValue())
-                .count(Double.valueOf(table.getCell(row, COUNT).getNumericCellValue()).intValue())
-                .value(value)
-                .currency(table.getCell(row, VALUE_CURRENCY).getStringCellValue());
+                .isin(table.getStringCellValue(row, ISIN))
+                .count(table.getIntCellValue(row, COUNT))
+                .value(table.getCurrencyCellValue(row, VALUE))
+                .currency(table.getStringCellValue(row, VALUE_CURRENCY));
         Collection<DividendTableRow> data = new ArrayList<>();
         data.add(builder.build());
+        BigDecimal tax = table.getCurrencyCellValue(row, TAX);
         if (!tax.equals(BigDecimal.ZERO)) {
             data.add(builder
                     .event(CashFlowType.TAX)
                     .value(tax)
-                    .currency(table.getCell(row, TAX_CURRENCY).getStringCellValue())
+                    .currency(table.getStringCellValue(row, TAX_CURRENCY))
                     .build());
         }
         return data;

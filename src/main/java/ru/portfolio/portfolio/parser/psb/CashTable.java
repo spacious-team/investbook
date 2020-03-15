@@ -38,9 +38,9 @@ public class CashTable {
 
     private static Collection<CashTableRow> getCash(ExcelTable table, Row row) {
         return singletonList(CashTableRow.builder()
-                .section(table.getCell(row, SECTION).getStringCellValue())
-                .value(BigDecimal.valueOf(table.getCell(row, VALUE).getNumericCellValue()))
-                .currency(table.getCell(row, CURRENCY).getStringCellValue())
+                .section(table.getStringCellValue(row, SECTION))
+                .value(table.getCurrencyCellValue(row, VALUE))
+                .currency(table.getStringCellValue(row, CURRENCY))
                 .build());
     }
 

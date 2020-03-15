@@ -46,12 +46,12 @@ public class DerivativeCashFlowTable {
     }
 
     private static AbstractMap.SimpleEntry<String, Integer> getCount(ExcelTable table, Row row) {
-        String contract = table.getCell(row, CONTRACT).getStringCellValue();
-        int incomingCount = Math.abs(table.getCellIntValue(row, INCOUMING));
-        int outgoingCount = Math.abs(table.getCellIntValue(row, OUTGOING));
+        String contract = table.getStringCellValue(row, CONTRACT);
+        int incomingCount = Math.abs(table.getIntCellValue(row, INCOUMING));
+        int outgoingCount = Math.abs(table.getIntCellValue(row, OUTGOING));
         int count = Math.max(incomingCount, outgoingCount);
         if (count == 0) {
-            count = Math.abs(table.getCellIntValue(row, BUY)); // buyCount == cellCount
+            count = Math.abs(table.getIntCellValue(row, BUY)); // buyCount == cellCount
         }
         return new AbstractMap.SimpleEntry<>(contract, count);
     }
@@ -63,17 +63,16 @@ public class DerivativeCashFlowTable {
     }
 
     private static Collection<DerivativeCashFlowTableRow> getDerivativeCashFlow(ExcelTable table, Row row, Map<String, Integer> contractCount) {
-        BigDecimal value = BigDecimal.valueOf(table.getCell(row, DerivativeCashFlowTableHeader.INCOUMING).getNumericCellValue())
-                .subtract(BigDecimal.valueOf(table.getCell(row, DerivativeCashFlowTableHeader.OUTGOING).getNumericCellValue()));
+        BigDecimal value = table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.INCOUMING)
+                .subtract(table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.OUTGOING));
         DerivativeCashFlowTableRow.DerivativeCashFlowTableRowBuilder builder = DerivativeCashFlowTableRow.builder()
-                .timestamp(convertToInstant(table.getCell(row, DerivativeCashFlowTableHeader.DATE).getStringCellValue()))
+                .timestamp(convertToInstant(table.getStringCellValue(row, DerivativeCashFlowTableHeader.DATE)))
                 .value(value)
                 .currency("RUB"); // FORTS, only RUB
         String action = table.getCell(row, DerivativeCashFlowTableHeader.OPERATION).getStringCellValue().toLowerCase();
         switch (action) {
             case "вариационная маржа":
-                String contract = table.getCell(row, DerivativeCashFlowTableHeader.CONTRACT)
-                        .getStringCellValue()
+                String contract = table.getStringCellValue(row, DerivativeCashFlowTableHeader.CONTRACT)
                         .split("/")[1].trim();
                 Integer count = contractCount.get(contract);
                 if (count == null) {

@@ -55,7 +55,7 @@ public class PsbReportParserService {
     }
 
     private void addSecurities(PortfolioSecuritiesTable portfolioSecuritiesTable) {
-        for (PortfolioSecuritiesTable.Row row : portfolioSecuritiesTable.getData()) {
+        for (PortfolioSecuritiesTable.PortfolioSecuritiesTableRow row : portfolioSecuritiesTable.getData()) {
             addSecurity(row.getIsin(), row.getName());
         }
     }
