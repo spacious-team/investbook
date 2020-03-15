@@ -3,16 +3,19 @@ package ru.portfolio.portfolio.parser.psb;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.util.CellRangeAddress;
+import ru.portfolio.portfolio.parser.ExcelTable;
+import ru.portfolio.portfolio.parser.TableColumn;
+import ru.portfolio.portfolio.parser.TableColumnDescription;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.EMTPY_RANGE;
 import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.convertToInstant;
+import static ru.portfolio.portfolio.parser.psb.TransactionTable.TransactionTablHeader.*;
 
 @Slf4j
 public class TransactionTable {
@@ -22,74 +25,70 @@ public class TransactionTable {
     @Getter
     private final PsbBrokerReport report;
     @Getter
-    private final List<Row> data = new ArrayList<>();
+    private final List<TransactionTableRow> data = new ArrayList<>();
 
     public TransactionTable(PsbBrokerReport report) {
         this.report = report;
-        this.data.addAll(parseTable(report, TABLE1_START_TEXT, TABLE_END_TEXT,1));
-        this.data.addAll(parseTable(report, TABLE2_START_TEXT, TABLE_END_TEXT,2));
+        this.data.addAll(parseTable(report, TABLE1_START_TEXT));
+        this.data.addAll(parseTable(report, TABLE2_START_TEXT));
     }
 
-    private List<Row> parseTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
-        CellRangeAddress address = report.getTableCellRange(tableName, tableFooterString);
-        if (address == EMTPY_RANGE) {
-            return Collections.emptyList();
-        }
-        List<Row> data = new ArrayList<>();
-        for (int rowNum = address.getFirstRow() + 2; rowNum < address.getLastRow(); rowNum++) {
-            org.apache.poi.ss.usermodel.Row row = report.getSheet().getRow(rowNum);
-            if (row != null) {
-                Row transaction = getTransaction(row, leftColumn);
-                if (transaction != null) {
-                    data.add(transaction);
-                }
-            }
-        }
-        return data;
+    private List<TransactionTableRow> parseTable(PsbBrokerReport report, String tableName) {
+        ExcelTable table = ExcelTable.of(report.getSheet(), tableName, TABLE_END_TEXT, TransactionTablHeader.class);
+        return table.getDataCollection(report.getPath(), TransactionTable::getTransaction);
     }
 
-    private Row getTransaction(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
-        try {
-            boolean isBuy = row.getCell(leftColumn + 8).getStringCellValue().equalsIgnoreCase("покупка");
-            BigDecimal value, accruedInterest;
-            double cellValue = row.getCell(leftColumn + 12).getNumericCellValue();
-            if (cellValue - 0.01d < 0) {
-                value = BigDecimal.ZERO;
-            } else {
-                value = BigDecimal.valueOf(cellValue);
-                if (isBuy) value = value.negate();
-            }
-            cellValue = row.getCell(leftColumn + 13).getNumericCellValue();
-            if (cellValue - 0.01d < 0) {
-                accruedInterest = BigDecimal.ZERO;
-            } else {
-                accruedInterest = BigDecimal.valueOf(cellValue);
-                if (isBuy) accruedInterest = accruedInterest.negate();
-            }
-            BigDecimal commission = BigDecimal.valueOf(row.getCell(leftColumn + 14).getNumericCellValue())
-                    .add(BigDecimal.valueOf(row.getCell(leftColumn + 15).getNumericCellValue()))
-                    .add(BigDecimal.valueOf(row.getCell(leftColumn + 16).getNumericCellValue()))
-                    .add(BigDecimal.valueOf(row.getCell(leftColumn + 18).getNumericCellValue()))
-                    .negate();
-            return Row.builder()
-                .timestamp(convertToInstant( row.getCell(leftColumn).getStringCellValue()))
-                .transactionId(Long.parseLong(row.getCell(leftColumn + 1).getStringCellValue()))
-                .isin(row.getCell(leftColumn + 6).getStringCellValue())
-                .count((isBuy ? 1 : -1) * Double.valueOf(row.getCell(leftColumn + 9).getNumericCellValue()).intValue())
+    private static Collection<TransactionTableRow> getTransaction(ExcelTable table, org.apache.poi.ss.usermodel.Row row) {
+        boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
+        BigDecimal value = table.getCurrencyCellValue(row, VALUE);
+        BigDecimal accruedInterest = table.getCurrencyCellValue(row, ACCRUED_INTEREST);
+        if (isBuy) {
+            value = value.negate();
+            accruedInterest = accruedInterest.negate();
+        }
+        BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
+                .add(table.getCurrencyCellValue(row, BROKER_COMMISSION))
+                .add(table.getCurrencyCellValue(row, CLEARING_COMMISSION))
+                .add(table.getCurrencyCellValue(row, ITS_COMMISSION))
+                .negate();
+        return Collections.singletonList(TransactionTableRow.builder()
+                .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
+                .transactionId(table.getLongCellValue(row, TRANSACTION))
+                .isin(table.getStringCellValue(row, ISIN))
+                .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
                 .value(value)
                 .accruedInterest(accruedInterest)
                 .commission(commission)
-                .currency(row.getCell(leftColumn + 10).getStringCellValue().replace(" ", "").split("/")[1])
-                .build();
-        } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу 'Сделки' в файле {}, строка {}", report.getPath(), row.getRowNum(), e);
-            return null;
+                .valueCurrency(table.getStringCellValue(row, VALUE_CURRENCY).replace(" ", "").split("/")[1])
+                .commissionCurrency(table.getStringCellValue(row, COMMISSION_CURRENCY))
+                .build());
+    }
+
+    enum TransactionTablHeader implements TableColumnDescription {
+        DATE_TIME("дата и время"),
+        TRANSACTION("номер сделки"),
+        ISIN("isin"),
+        DIRECTION("покупка", "продажа"),
+        COUNT("кол-во"),
+        VALUE("сумма сделки"),
+        VALUE_CURRENCY("валюта сделки"),
+        ACCRUED_INTEREST("^нкд$"),
+        MARKET_COMMISSION("комиссия торговой системы"),
+        CLEARING_COMMISSION("клиринговая комиссия"),
+        ITS_COMMISSION("комиссия за итс"),
+        BROKER_COMMISSION("ком", "брокера"),
+        COMMISSION_CURRENCY("валюта", "брок", "комиссии");
+
+        @Getter
+        private final TableColumn column;
+        TransactionTablHeader(String ... words) {
+            this.column = TableColumn.of(words);
         }
     }
 
     @Getter
     @Builder
-    public static class Row {
+    public static class TransactionTableRow {
         private long transactionId;
         private String isin;
         private Instant timestamp;
@@ -97,6 +96,7 @@ public class TransactionTable {
         private BigDecimal value; // оценочная стоиомсть в валюце цены
         private BigDecimal accruedInterest; // НКД, в валюте бумаги
         private BigDecimal commission;
-        private String currency; // валюта
+        private String valueCurrency; // валюта платежа
+        private String commissionCurrency; // валюта коммиссии
     }
 }

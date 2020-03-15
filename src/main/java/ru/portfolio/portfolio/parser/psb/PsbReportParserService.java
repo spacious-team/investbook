@@ -72,7 +72,7 @@ public class PsbReportParserService {
     }
 
     private void addTransaction(TransactionTable transactionTable) {
-        for (TransactionTable.Row row : transactionTable.getData()) {
+        for (TransactionTable.TransactionTableRow row : transactionTable.getData()) {
             try {
                 boolean isAdded = addTransaction(Transaction.builder()
                         .id(row.getTransactionId())
@@ -83,22 +83,24 @@ public class PsbReportParserService {
                 if (isAdded) {
                     TransactionCashFlow cashFlow = TransactionCashFlow.builder()
                             .transactionId(row.getTransactionId())
-                            .currency(row.getCurrency())
                             .build();
                     if (!row.getValue().equals(BigDecimal.ZERO)) {
                         addTransactionCashFlow(cashFlow.toBuilder()
                                 .eventType(CashFlowType.PRICE)
-                                .value(row.getValue()));
+                                .value(row.getValue())
+                                .currency(row.getValueCurrency()));
                     }
                     if (!row.getAccruedInterest().equals(BigDecimal.ZERO)) {
                         addTransactionCashFlow(cashFlow.toBuilder()
                                 .eventType(CashFlowType.ACCRUED_INTEREST)
-                                .value(row.getAccruedInterest()));
+                                .value(row.getAccruedInterest())
+                                .currency(row.getValueCurrency()));
                     }
                     if (!row.getCommission().equals(BigDecimal.ZERO)) {
                         addTransactionCashFlow(cashFlow.toBuilder()
                                 .eventType(CashFlowType.COMMISSION)
-                                .value(row.getCommission()));
+                                .value(row.getCommission())
+                                .currency(row.getCommissionCurrency()));
                     }
                 }
             } catch (Exception e) {
