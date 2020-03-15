@@ -33,7 +33,7 @@ public class DividendTable extends AbstractReportTable<DividendTable.DividendTab
                 .isin(table.getStringCellValue(row, ISIN))
                 .count(table.getIntCellValue(row, COUNT))
                 .value(table.getCurrencyCellValue(row, VALUE))
-                .currency(table.getStringCellValue(row, VALUE_CURRENCY));
+                .currency(table.getStringCellValue(row, CURRENCY));
         Collection<DividendTableRow> data = new ArrayList<>();
         data.add(builder.build());
         BigDecimal tax = table.getCurrencyCellValue(row, TAX).negate();
@@ -41,7 +41,6 @@ public class DividendTable extends AbstractReportTable<DividendTable.DividendTab
             data.add(builder
                     .event(CashFlowType.TAX)
                     .value(tax)
-                    .currency(table.getStringCellValue(row, TAX_CURRENCY))
                     .build());
         }
         return data;
@@ -52,9 +51,8 @@ public class DividendTable extends AbstractReportTable<DividendTable.DividendTab
         ISIN("isin"),
         COUNT("кол-во"),
         VALUE("сумма", "дивидендов"),
-        VALUE_CURRENCY("валюта", "выплаты"),
-        TAX("сумма", "налога"),
-        TAX_CURRENCY("валюта", "налога");
+        CURRENCY("валюта", "выплаты"),
+        TAX("сумма", "налога");
 
         @Getter
         private final TableColumn column;
