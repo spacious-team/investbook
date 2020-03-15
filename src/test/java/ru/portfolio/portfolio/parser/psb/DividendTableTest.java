@@ -22,7 +22,7 @@ public class DividendTableTest {
 
     @Test(dataProvider = "isin")
     void testIsin(String firstIsin, String lastIsin) {
-        List<DividendTable.Row> data = new DividendTable(this.report).getData();
+        List<DividendTable.DividendTableRow> data = new DividendTable(this.report).getData();
         assertEquals(data.get(0).getIsin(), firstIsin);
         assertEquals(data.get(data.size() - 1).getIsin(), lastIsin);
     }

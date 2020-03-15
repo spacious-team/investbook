@@ -122,7 +122,7 @@ public class PsbReportParserService {
     }
 
     private void addDividendCashFlows(DividendTable dividendTable) {
-        for (DividendTable.Row row : dividendTable.getData()) {
+        for (DividendTable.DividendTableRow row : dividendTable.getData()) {
             addSecurityEventCashFlow(SecurityEventCashFlow.builder()
                     .isin(row.getIsin())
                     .portfolio(dividendTable.getReport().getPortfolio())
