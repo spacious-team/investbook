@@ -11,11 +11,23 @@ import java.util.List;
 
 public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityEventCashFlowEntity, Integer> {
 
-    @Query("SELECT cf FROM SecurityEventCashFlowEntity cf WHERE cf.security.isin = :isin AND cf.cashFlowType.id = :#{#cashFlowType.ordinal()}")
-    List<SecurityEventCashFlowEntity> findByIsinAndCashFlowType(@Param("isin") String isin, @Param("cashFlowType") CashFlowType cashFlowType);
+    @Query("SELECT cf FROM SecurityEventCashFlowEntity cf " +
+            "WHERE cf.portfolio.portfolio = :portfolio " +
+            "AND cf.security.isin = :isin " +
+            "AND cf.cashFlowType.id = :#{#cashFlowType.ordinal()}")
+    List<SecurityEventCashFlowEntity> findByPortfioAndIsinAndCashFlowType(
+            @Param("portfolio") String portfolio,
+            @Param("isin") String isin,
+            @Param("cashFlowType") CashFlowType cashFlowType);
 
-    @Query("SELECT cf FROM SecurityEventCashFlowEntity cf WHERE cf.security.isin = :isin AND cf.cashFlowType.id = :#{#cashFlowType.ordinal()} ORDER BY cf.timestamp")
-    ArrayList<SecurityEventCashFlowEntity> findByIsinAndCashFlowTypeOOrderByTimestampAsc(@Param("isin") String isin,
-                                                                                         @Param("cashFlowType") CashFlowType cashFlowType);
+    @Query("SELECT cf FROM SecurityEventCashFlowEntity cf " +
+            "WHERE cf.portfolio.portfolio = :portfolio " +
+            "AND cf.security.isin = :isin " +
+            "AND cf.cashFlowType.id = :#{#cashFlowType.ordinal()} " +
+            "ORDER BY cf.timestamp")
+    ArrayList<SecurityEventCashFlowEntity> findByPortfolioAndIsinAndCashFlowTypeOrderByTimestampAsc(
+            @Param("portfolio") String portfolio,
+            @Param("isin") String isin,
+            @Param("cashFlowType") CashFlowType cashFlowType);
 
 }

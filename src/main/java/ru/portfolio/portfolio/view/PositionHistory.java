@@ -6,14 +6,14 @@ import ru.portfolio.portfolio.pojo.Transaction;
 import java.time.Instant;
 
 @Getter
-class PastPosition {
+class PositionHistory {
     private final Instant instant;
     /**
      * Opened positions after {@link #getInstant()}
      */
     private final int openedPositions;
 
-    PastPosition(Transaction transaction, int openedPositions) {
+    PositionHistory(Transaction transaction, int openedPositions) {
         this.instant = transaction.getTimestamp();
         this.openedPositions = openedPositions;
     }

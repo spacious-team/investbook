@@ -20,24 +20,24 @@ public class PaidInterestFactory {
     private static final CashFlowType[] PAY_TYPES =  new CashFlowType[]{COUPON, AMORTIZATION, DIVIDEND, TAX};
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
 
-    PaidInterest getPayedInterestFor(Security security, Positions positions) {
+    PaidInterest getPayedInterestFor(String portfolio, Security security, Positions positions) {
         PaidInterest paidInterest = new PaidInterest();
         for (CashFlowType type : PAY_TYPES) {
-            paidInterest.get(type).putAll(getPositionWithPayments(security.getIsin(), positions, type));
+            paidInterest.get(type).putAll(getPositionWithPayments(portfolio, security.getIsin(), positions, type));
         }
         return paidInterest;
     }
 
-    private Map<Position, List<BigDecimal>> getPositionWithPayments(String isin, Positions positions, CashFlowType event) {
+    private Map<Position, List<BigDecimal>> getPositionWithPayments(String portfolio, String isin, Positions positions, CashFlowType event) {
         List<SecurityEventCashFlowEntity> accruedInterests = securityEventCashFlowRepository
-                .findByIsinAndCashFlowType(isin, event);
+                .findByPortfioAndIsinAndCashFlowType(portfolio, isin, event);
 
         Map<Position, List<BigDecimal>> payments = new HashMap<>();
         for (SecurityEventCashFlowEntity cash : accruedInterests) {
             BigDecimal payPerOne =  cash.getValue()
                     .divide(BigDecimal.valueOf(cash.getCount()), 6, RoundingMode.HALF_UP);
 
-            Instant bookClosureDate = getBookClosureDate(positions.getPastPositions(), cash);
+            Instant bookClosureDate = getBookClosureDate(positions.getPositionHistories(), cash);
             Deque<Position> payedPositions = getPayedPositions(positions.getClosedPositions(), bookClosureDate);
             payedPositions.addAll(getPayedPositions(positions.getOpenedPositions(), bookClosureDate));
 
@@ -56,21 +56,21 @@ public class PaidInterestFactory {
     }
 
     /**
-     * @param pastPositions securities position (date in the past -> securities count)
+     * @param positionHistories securities position (date in the past -> securities count)
      * @param payment dividend or bonds accrued interest payment
      * @return shares book closure (bonds accrued interest paying) date
      */
-    private Instant getBookClosureDate(Deque<PastPosition> pastPositions, SecurityEventCashFlowEntity payment) {
+    private Instant getBookClosureDate(Deque<PositionHistory> positionHistories, SecurityEventCashFlowEntity payment) {
         Instant payDate = payment.getTimestamp(); // дата перечисления дивидендов/купонов Брокером
         int payForSecurities = payment.getCount();
-        Iterator<PastPosition> it = pastPositions.descendingIterator();
+        Iterator<PositionHistory> it = positionHistories.iterator();
         // дата перечисления дивидендов/купонов Эмитентом (дата фиксации реестра акционеров)
         // с точностью до временного интервала между 2-мя соседними транзакции
         Instant bookClosureDate  = null;
         while (it.hasNext()) {
-            PastPosition pastPosition = it.next();
-            Instant pastInstant = pastPosition.getInstant();
-            if (payDate.isAfter(pastInstant) && (payForSecurities == pastPosition.getOpenedPositions())) {
+            PositionHistory positionHistory = it.next();
+            Instant pastInstant = positionHistory.getInstant();
+            if (payDate.isAfter(pastInstant) && (payForSecurities == positionHistory.getOpenedPositions())) {
                 bookClosureDate  = pastInstant.plusNanos(1);
                 break;
             }

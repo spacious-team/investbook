@@ -19,8 +19,8 @@ import static ru.portfolio.portfolio.parser.psb.TransactionTable.TransactionTabl
 
 @Slf4j
 public class TransactionTable implements ReportTable<TransactionTable.TransactionTableRow> {
-    private static final String TABLE1_START_TEXT = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами в дату заключения";
-    private static final String TABLE2_START_TEXT = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами Т+, рассчитанные в отчетном периоде";
+    private static final String TABLE1_NAME = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами в дату заключения";
+    private static final String TABLE2_NAME = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами Т+, рассчитанные в отчетном периоде";
     private static final String TABLE_END_TEXT = "Итого оборот";
     @Getter
     private final PsbBrokerReport report;
@@ -29,8 +29,8 @@ public class TransactionTable implements ReportTable<TransactionTable.Transactio
 
     public TransactionTable(PsbBrokerReport report) {
         this.report = report;
-        this.data.addAll(parseTable(report, TABLE1_START_TEXT));
-        this.data.addAll(parseTable(report, TABLE2_START_TEXT));
+        this.data.addAll(parseTable(report, TABLE1_NAME));
+        this.data.addAll(parseTable(report, TABLE2_NAME));
     }
 
     private List<TransactionTableRow> parseTable(PsbBrokerReport report, String tableName) {

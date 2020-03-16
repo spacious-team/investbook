@@ -19,7 +19,7 @@ import static java.lang.Math.abs;
  */
 class Positions {
     @Getter
-    Deque<PastPosition> pastPositions = new LinkedList<>();
+    Deque<PositionHistory> positionHistories = new LinkedList<>();
     @Getter
     private final Deque<OpenedPosition> openedPositions = new LinkedList<>();
     @Getter
@@ -42,21 +42,21 @@ class Positions {
             for (SecurityEventCashFlow  redemption : redemptions) {
                 closePositions(convertToTransaction(redemption), CashFlowType.REDEMPTION);
             }
-            if (!this.openedPositions.isEmpty() || this.pastPositions.getLast().getOpenedPositions() != 0) {
+            if (!this.openedPositions.isEmpty() || this.positionHistories.getLast().getOpenedPositions() != 0) {
                 throw new RuntimeException("Предоставлены не все транзакции по бумаге " +
                         isin + ", в истории портфеля есть событие погашения номинала облигаций по " +
                         redemptions.stream().mapToInt(SecurityEventCashFlow::getCount).sum() +
-                        " бумагам, однако в портфеле остались " + this.pastPositions.getLast().getOpenedPositions() +
+                        " бумагам, однако в портфеле остались " + this.positionHistories.getLast().getOpenedPositions() +
                         " открытые позиции");
             }
         }
     }
 
     private void updateSecuritiesPastPositions(Queue<Transaction> transactions) {
-        int openedPosition = (!this.pastPositions.isEmpty()) ? this.pastPositions.peekLast().getOpenedPositions() : 0;
+        int openedPosition = (!this.positionHistories.isEmpty()) ? this.positionHistories.peekLast().getOpenedPositions() : 0;
         for (Transaction transaction : transactions) {
             openedPosition += transaction.getCount();
-            this.pastPositions.add(new PastPosition(transaction, openedPosition));
+            this.positionHistories.add(new PositionHistory(transaction, openedPosition));
         }
     }
 

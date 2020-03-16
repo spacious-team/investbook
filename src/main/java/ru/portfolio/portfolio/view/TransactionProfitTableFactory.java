@@ -42,6 +42,7 @@ public class TransactionProfitTableFactory {
         ArrayList<Map<ExcelProfitSheetHeader, Object>> openPositionsProfit = new ArrayList<>();
         ArrayList<Map<ExcelProfitSheetHeader, Object>> closedPositionsProfit = new ArrayList<>();
         for (String isin : transactionRepository.findDistinctIsinByPortfolioOrderByTimestamp(portfolio)) {
+            if (isin.length() != 12) continue; // 12 chars for bonds and shares
             Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
             if (securityEntity.isPresent()) {
                 Security security = securityEntityConverter.fromEntity(securityEntity.get());
@@ -51,12 +52,12 @@ public class TransactionProfitTableFactory {
                         .map(transactionEntityConverter::fromEntity)
                         .collect(Collectors.toCollection(LinkedList::new));
                 Deque<SecurityEventCashFlow> redemption = securityEventCashFlowRepository
-                        .findByIsinAndCashFlowTypeOOrderByTimestampAsc(isin, CashFlowType.REDEMPTION)
+                        .findByPortfolioAndIsinAndCashFlowTypeOrderByTimestampAsc(portfolio.getPortfolio(), isin, CashFlowType.REDEMPTION)
                         .stream()
                         .map(securityEventCashFlowEntityConverter::fromEntity)
                         .collect(Collectors.toCollection(LinkedList::new));
                 Positions positions = new Positions(transactions, redemption);
-                PaidInterest paidInterest = paidInterestFactory.getPayedInterestFor(security, positions);
+                PaidInterest paidInterest = paidInterestFactory.getPayedInterestFor(portfolio.getPortfolio(), security, positions);
                 closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(), paidInterest,this::getClosedPositionProfit));
                 openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(), paidInterest, this::getOpenedPositionProfit));
             }
@@ -109,7 +110,7 @@ public class TransactionProfitTableFactory {
                 cellAmount = getTransactionCashFlow(transaction, CashFlowType.PRICE, multipier);
                 break;
             case REDEMPTION:
-                cellAmount =getRedemptionCashFlow(transaction.getIsin(), multipier);
+                cellAmount = getRedemptionCashFlow(transaction.getPortfolio(), transaction.getIsin(), multipier);
                 break;
             default:
                 throw new IllegalArgumentException("ЦБ " + transaction.getIsin() +
@@ -137,9 +138,9 @@ public class TransactionProfitTableFactory {
                 .orElse(null);
     }
 
-    private BigDecimal getRedemptionCashFlow(String isin, double multiplier) {
+    private BigDecimal getRedemptionCashFlow(String portfolio, String isin, double multiplier) {
         List<SecurityEventCashFlowEntity> cashFlows = securityEventCashFlowRepository
-                .findByIsinAndCashFlowType(isin, CashFlowType.REDEMPTION);
+                .findByPortfioAndIsinAndCashFlowType(portfolio, isin, CashFlowType.REDEMPTION);
         if (cashFlows.isEmpty()) {
             return null;
         } else if (cashFlows.size() != 1) {
