@@ -140,7 +140,7 @@ public class TransactionProfitTableFactory {
 
     private BigDecimal getRedemptionCashFlow(String portfolio, String isin, double multiplier) {
         List<SecurityEventCashFlowEntity> cashFlows = securityEventCashFlowRepository
-                .findByPortfioAndIsinAndCashFlowType(portfolio, isin, CashFlowType.REDEMPTION);
+                .findByPortfolioAndIsinAndCashFlowTypeOrderByTimestampAsc(portfolio, isin, CashFlowType.REDEMPTION);
         if (cashFlows.isEmpty()) {
             return null;
         } else if (cashFlows.size() != 1) {

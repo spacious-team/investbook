@@ -7,18 +7,8 @@ import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityEventCashFlowEntity, Integer> {
-
-    @Query("SELECT cf FROM SecurityEventCashFlowEntity cf " +
-            "WHERE cf.portfolio.portfolio = :portfolio " +
-            "AND cf.security.isin = :isin " +
-            "AND cf.cashFlowType.id = :#{#cashFlowType.ordinal()}")
-    List<SecurityEventCashFlowEntity> findByPortfioAndIsinAndCashFlowType(
-            @Param("portfolio") String portfolio,
-            @Param("isin") String isin,
-            @Param("cashFlowType") CashFlowType cashFlowType);
 
     @Query("SELECT cf FROM SecurityEventCashFlowEntity cf " +
             "WHERE cf.portfolio.portfolio = :portfolio " +

@@ -30,7 +30,7 @@ public class PaidInterestFactory {
 
     private Map<Position, List<BigDecimal>> getPositionWithPayments(String portfolio, String isin, Positions positions, CashFlowType event) {
         List<SecurityEventCashFlowEntity> accruedInterests = securityEventCashFlowRepository
-                .findByPortfioAndIsinAndCashFlowType(portfolio, isin, event);
+                .findByPortfolioAndIsinAndCashFlowTypeOrderByTimestampAsc(portfolio, isin, event);
 
         Map<Position, List<BigDecimal>> payments = new HashMap<>();
         for (SecurityEventCashFlowEntity cash : accruedInterests) {
@@ -63,7 +63,7 @@ public class PaidInterestFactory {
     private Instant getBookClosureDate(Deque<PositionHistory> positionHistories, SecurityEventCashFlowEntity payment) {
         Instant payDate = payment.getTimestamp(); // дата перечисления дивидендов/купонов Брокером
         int payForSecurities = payment.getCount();
-        Iterator<PositionHistory> it = positionHistories.iterator();
+        Iterator<PositionHistory> it = positionHistories.descendingIterator();
         // дата перечисления дивидендов/купонов Эмитентом (дата фиксации реестра акционеров)
         // с точностью до временного интервала между 2-мя соседними транзакции
         Instant bookClosureDate  = null;
