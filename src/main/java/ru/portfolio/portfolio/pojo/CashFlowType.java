@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum CashFlowType {
     CASH(0),   // пополнение и снятие
-    PRICE(1),  // чистая стоимость (без НКД)
+    PRICE(1),  // купля/продажа, чистая стоимость (без НКД)
     ACCRUED_INTEREST(2), // НКД
     COMMISSION(3), // комиссия
     AMORTIZATION(4),    // амортизация

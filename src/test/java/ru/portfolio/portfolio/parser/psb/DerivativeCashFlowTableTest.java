@@ -18,9 +18,9 @@ public class DerivativeCashFlowTableTest {
 
     @Test(dataProvider = "cash-flow")
     void testIsin(String report, BigDecimal expectedSum) throws IOException {
-        List<DerivativeCashFlowTable.Row> data = new DerivativeCashFlowTable(new PsbBrokerReport(report)).getData();
+        List<DerivativeCashFlowTable.DerivativeCashFlowTableRow> data = new DerivativeCashFlowTable(new PsbBrokerReport(report)).getData();
         BigDecimal sum = BigDecimal.ZERO;
-        for (DerivativeCashFlowTable.Row r : data) {
+        for (DerivativeCashFlowTable.DerivativeCashFlowTableRow r : data) {
             sum = sum.add(r.getValue());
         }
         assertEquals(sum, expectedSum);

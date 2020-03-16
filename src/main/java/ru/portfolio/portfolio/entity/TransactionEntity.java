@@ -2,6 +2,7 @@ package ru.portfolio.portfolio.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Entity
 @Table(name = "transaction")
 @Data
+@ToString(exclude = {"transactionCashFlows"})
 public class TransactionEntity {
     @Id
     @GenericGenerator(name = "UseExistingOrGenerateIdGenerator", strategy = "ru.portfolio.portfolio.entity.UseExistingOrGenerateIdGenerator")

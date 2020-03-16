@@ -1,121 +1,121 @@
 package ru.portfolio.portfolio.parser.psb;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.usermodel.Row;
+import ru.portfolio.portfolio.parser.*;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.EMTPY_RANGE;
-import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.convertToInstant;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static ru.portfolio.portfolio.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.*;
 
 @Slf4j
-public class DerivativeCashFlowTable {
-    private static final String TABLE1_START_TEXT = "Движение стандартных контрактов";
-    private static final String TABLE2_START_TEXT = "Прочие операции";
+public class DerivativeCashFlowTable extends AbstractReportTable<DerivativeCashFlowTable.DerivativeCashFlowTableRow> {
+
+    private static final String TABLE1_NAME = "Прочие операции";
+    private static final String TABLE2_NAME = "Движение стандартных контрактов";
     private static final String TABLE_END_TEXT = "Итого";
-    @Getter
-    private final PsbBrokerReport report;
-    @Getter
-    private final List<Row> data = new ArrayList<>();
+    @Getter(AccessLevel.PRIVATE)
+    private Map<String, Integer> contractCount = Collections.emptyMap();
 
     public DerivativeCashFlowTable(PsbBrokerReport report) {
-        this.report = report;
-        Map<String, Integer> contractCount = pasreDerivativeCountTable(report, TABLE1_START_TEXT, TABLE_END_TEXT, 1);
-        if (!contractCount.isEmpty()) {
-            this.data.addAll(pasreDerivativeCashFlowTable(report, TABLE2_START_TEXT, TABLE_END_TEXT, 1, contractCount));
-        }
+        super(report, TABLE1_NAME, TABLE_END_TEXT, DerivativeCashFlowTableHeader.class);
     }
 
-    private static Map<String, Integer> pasreDerivativeCountTable(PsbBrokerReport report, String tableName,
-                                                                  String tableFooterString, int leftColumn) {
-        CellRangeAddress address = report.getTableCellRange(tableName, tableFooterString);
-        if (address == EMTPY_RANGE) {
-            return Collections.emptyMap();
+    @Override
+    protected Collection<DerivativeCashFlowTableRow> pasreTable(ExcelTable table) {
+        return hasOpenContract() ? super.pasreTable(table) : Collections.emptyList();
+    }
+
+    private boolean hasOpenContract() {
+        ExcelTable countTable = ExcelTable.of(getReport().getSheet(), TABLE2_NAME, TABLE_END_TEXT, ContractCountTableHeader.class);
+        List<AbstractMap.SimpleEntry<String, Integer>> counts = countTable.getData(getReport().getPath(), DerivativeCashFlowTable::getCount);
+        this.contractCount = counts.stream()
+                .filter(e -> e.getValue() != 0)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return !this.contractCount.isEmpty();
+    }
+
+    private static AbstractMap.SimpleEntry<String, Integer> getCount(ExcelTable table, Row row) {
+        String contract = table.getStringCellValue(row, CONTRACT);
+        int incomingCount = Math.abs(table.getIntCellValue(row, INCOUMING));
+        int outgoingCount = Math.abs(table.getIntCellValue(row, OUTGOING));
+        int count = Math.max(incomingCount, outgoingCount);
+        if (count == 0) {
+            count = Math.abs(table.getIntCellValue(row, BUY)); // buyCount == cellCount
         }
-        Map<String, Integer> contractCount = new HashMap<>();
-        for (int rowNum = address.getFirstRow() + 2; rowNum < address.getLastRow(); rowNum++) {
-            org.apache.poi.ss.usermodel.Row row = report.getSheet().getRow(rowNum);
-            if (row != null) {
-                String contract = row.getCell(leftColumn + 1).getStringCellValue();
-                int incomingCount = Math.abs(getIntCellValue(row, leftColumn + 2));
-                int outgoingCount = Math.abs(getIntCellValue(row, leftColumn + 5));
-                int count = Math.max(incomingCount, outgoingCount);
-                if (count == 0) {
-                    count = Math.abs(getIntCellValue(row, leftColumn + 3)); // buyCount == cellCount
+        return new AbstractMap.SimpleEntry<>(contract, count);
+    }
+
+    @Override
+    protected Collection<DerivativeCashFlowTableRow> getRow(ExcelTable table, Row row) {
+        BigDecimal value = table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.INCOUMING)
+                .subtract(table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.OUTGOING));
+        DerivativeCashFlowTableRow.DerivativeCashFlowTableRowBuilder builder = DerivativeCashFlowTableRow.builder()
+                .timestamp(convertToInstant(table.getStringCellValue(row, DerivativeCashFlowTableHeader.DATE)))
+                .value(value)
+                .currency("RUB"); // FORTS, only RUB
+        String action = table.getCell(row, DerivativeCashFlowTableHeader.OPERATION).getStringCellValue().toLowerCase();
+        switch (action) {
+            case "вариационная маржа":
+                String contract = table.getStringCellValue(row, DerivativeCashFlowTableHeader.CONTRACT)
+                        .split("/")[1].trim();
+                Integer count = getContractCount().get(contract);
+                if (count == null) {
+                    throw new IllegalArgumentException("Открытых контрактов не найдено");
                 }
-                if (count != 0) {
-                    contractCount.put(contract, count);
-                }
-            }
-        }
-        return contractCount;
-    }
-
-    private static List<Row> pasreDerivativeCashFlowTable(PsbBrokerReport report, String tableName,
-                                                          String tableFooterString, int leftColumn,
-                                                          Map<String, Integer> contractCount) {
-        CellRangeAddress address = report.getTableCellRange(tableName, tableFooterString);
-        if (address == EMTPY_RANGE) {
-            return Collections.emptyList();
-        }
-        List<Row> data = new ArrayList<>();
-        for (int rowNum = address.getFirstRow() + 2; rowNum < address.getLastRow(); rowNum++) {
-            org.apache.poi.ss.usermodel.Row row = report.getSheet().getRow(rowNum);
-            if (row != null) {
-                Row cash = getDerivativeCashFlow(row, leftColumn, contractCount);
-                if (cash != null) {
-                    data.add(cash);
-                }
-            }
-        }
-        return data;
-    }
-
-    private static Row getDerivativeCashFlow(org.apache.poi.ss.usermodel.Row row, int leftColumn, Map<String, Integer> contractCount) {
-        try {
-            BigDecimal value = BigDecimal.valueOf(row.getCell(leftColumn + 6).getNumericCellValue())
-                    .subtract(BigDecimal.valueOf(row.getCell(leftColumn + 5).getNumericCellValue()));
-            Row.RowBuilder builder = Row.builder()
-                    .timestamp(convertToInstant(row.getCell(leftColumn).getStringCellValue()))
-                    .value(value)
-                    .currency("RUB"); // FORTS, only RUB
-            String action = row.getCell(leftColumn + 2).getStringCellValue().toLowerCase();
-            switch (action) {
-                case "вариационная маржа":
-                    String contract = row.getCell(leftColumn + 1).getStringCellValue().split("/")[1].trim();
-                    Integer count = contractCount.get(contract);
-                    if (count == null) {
-                        throw new IllegalArgumentException("Количество открытых контрактов не найдено");
-                    }
-                    return builder.event(CashFlowType.DERIVATIVE_PROFIT)
-                            .contract(contract)
-                            .count(count)
-                            .build();
-                case "биржевой сбор":
-                    return builder.event(CashFlowType.COMMISSION).build();
-                case "заблокированo / разблокировано средств под го":
-                    return null; // не влияет на размер собственных денежных средств
-                default:
-                    throw new IllegalArgumentException("Неизвестный вид операции " + action);
-            }
-        } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу деривативов '{}' в строке {}", TABLE2_START_TEXT, row.getRowNum(), e);
-            return null;
+                return singletonList(builder.event(CashFlowType.DERIVATIVE_PROFIT)
+                        .contract(contract)
+                        .count(count)
+                        .build());
+            case "биржевой сбор":
+                return singletonList(builder.event(CashFlowType.COMMISSION).build());
+            case "заблокированo / разблокировано средств под го":
+                return emptyList(); // не влияет на размер собственных денежных средств
+            default:
+                throw new IllegalArgumentException("Неизвестный вид операции " + action);
         }
     }
 
-    private static int getIntCellValue(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
-        return Double.valueOf(row.getCell(leftColumn).getNumericCellValue()).intValue();
+    enum ContractCountTableHeader implements TableColumnDescription {
+        CONTRACT("контракт"),
+        INCOUMING("входящий остаток"),
+        OUTGOING("исходящий остаток"),
+        BUY("зачислено"),
+        CELL("списано");
+
+        @Getter
+        private final TableColumn column;
+        ContractCountTableHeader(String... words) {
+            this.column = TableColumnImpl.of(words);
+        }
+    }
+
+    enum DerivativeCashFlowTableHeader implements TableColumnDescription {
+        DATE("дата"),
+        CONTRACT("№", "контракт"),
+        OPERATION("вид операции"),
+        INCOUMING("зачислено"),
+        OUTGOING("списано");
+
+        @Getter
+        private final TableColumn column;
+        DerivativeCashFlowTableHeader(String... words) {
+            this.column = TableColumnImpl.of(words);
+        }
     }
 
     @Getter
     @Builder
-    public static class Row {
+    public static class DerivativeCashFlowTableRow {
         private String contract;
         private Instant timestamp;
         private CashFlowType event;

@@ -6,6 +6,7 @@ import ru.portfolio.portfolio.entity.CashFlowTypeEntity;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.entity.SecurityEntity;
 import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
+import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 import ru.portfolio.portfolio.repository.CashFlowTypeRepository;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
@@ -40,5 +41,19 @@ public class SecurityEventCashFlowEntityConverter implements EntityConverter<Sec
         entity.setValue(eventCashFlow.getValue());
         if(eventCashFlow.getCurrency() != null) entity.setCurrency(eventCashFlow.getCurrency());
         return entity;
+    }
+
+    @Override
+    public SecurityEventCashFlow fromEntity(SecurityEventCashFlowEntity entity) {
+        return SecurityEventCashFlow.builder()
+                .id(entity.getId())
+                .portfolio(entity.getPortfolio().getPortfolio())
+                .timestamp(entity.getTimestamp())
+                .eventType(CashFlowType.valueOf(entity.getCashFlowType().getId()))
+                .isin(entity.getSecurity().getIsin())
+                .count(entity.getCount())
+                .value(entity.getValue())
+                .currency(entity.getCurrency())
+                .build();
     }
 }

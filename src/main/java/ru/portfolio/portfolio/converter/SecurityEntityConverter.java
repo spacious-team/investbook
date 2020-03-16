@@ -28,4 +28,14 @@ public class SecurityEntityConverter implements EntityConverter<SecurityEntity, 
         entity.setIssuer(issuerEntity);
         return entity;
     }
+
+    @Override
+    public Security fromEntity(SecurityEntity entity) {
+        return Security.builder()
+                .isin(entity.getIsin())
+                .ticker(entity.getTicker())
+                .name(entity.getName())
+                .inn((entity.getIssuer() != null) ? entity.getIssuer().getInn() : null)
+                .build();
+    }
 }

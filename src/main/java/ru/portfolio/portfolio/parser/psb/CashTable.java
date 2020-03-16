@@ -3,63 +3,54 @@ package ru.portfolio.portfolio.parser.psb;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.usermodel.Row;
+import ru.portfolio.portfolio.parser.*;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Collection;
 
-import static ru.portfolio.portfolio.parser.psb.PsbBrokerReport.EMTPY_RANGE;
+import static java.util.Collections.singletonList;
+import static ru.portfolio.portfolio.parser.psb.CashTable.CashTableHeader.*;
 
 @Slf4j
-public class CashTable {
-    private static final String TABLE_START_TEXT = "Позиция денежных средств по биржевым площадкам";
+public class CashTable extends AbstractReportTable<CashTable.CashTableRow> {
+
+    private static final String TABLE_NAME = "Позиция денежных средств по биржевым площадкам";
     private static final String TABLE_END_TEXT = "ИТОГО:";
-    @Getter
-    private final PsbBrokerReport report;
-    @Getter
-    private final List<Row> data = new ArrayList<>();
 
     public CashTable(PsbBrokerReport report) {
-        this.report = report;
-        this.data.addAll(pasreTable(report, TABLE_START_TEXT, TABLE_END_TEXT, 1));
+        super(report, TABLE_NAME, TABLE_END_TEXT, CashTableHeader.class);
     }
 
-    private static List<Row> pasreTable(PsbBrokerReport report, String tableName, String tableFooterString, int leftColumn) {
-        CellRangeAddress address = report.getTableCellRange(tableName, tableFooterString);
-        if (address == EMTPY_RANGE) {
-            return Collections.emptyList();
-        }
-        List<Row> data = new ArrayList<>();
-        for (int rowNum = address.getFirstRow() + 3; rowNum < address.getLastRow(); rowNum++) {
-            org.apache.poi.ss.usermodel.Row row = report.getSheet().getRow(rowNum);
-            if (row != null) {
-                Row cash = getCash(row, leftColumn);
-                if (cash != null) {
-                    data.add(cash);
-                }
-            }
-        }
-        return data;
+    @Override
+    protected void exelTableConfiguration(ExcelTable table) {
+        table.setDataRowOffset(3);
     }
 
-    private static Row getCash(org.apache.poi.ss.usermodel.Row row, int leftColumn) {
-        try {
-            return Row.builder()
-                    .section(row.getCell(leftColumn).getStringCellValue())
-                    .value(BigDecimal.valueOf(row.getCell(leftColumn + 8).getNumericCellValue()))
-                    .currency(row.getCell(leftColumn + 7).getStringCellValue())
-                    .build();
-        } catch (Exception e) {
-            log.warn("Не могу распарсить таблицу '{}' в строке {}", TABLE_START_TEXT, row.getRowNum(), e);
-            return null;
+    @Override
+    protected Collection<CashTableRow> getRow(ExcelTable table, Row row) {
+        return singletonList(CashTableRow.builder()
+                .section(table.getStringCellValue(row, SECTION))
+                .value(table.getCurrencyCellValue(row, VALUE))
+                .currency(table.getStringCellValue(row, CURRENCY))
+                .build());
+    }
+
+    enum CashTableHeader implements TableColumnDescription {
+        SECTION("сектор"),
+        VALUE("плановый исходящий остаток"),
+        CURRENCY("валюта");
+
+        @Getter
+        private final TableColumn column;
+        CashTableHeader(String ... words) {
+            this.column = TableColumnImpl.of(words);
         }
     }
 
     @Getter
     @Builder
-    public static class Row {
+    static class CashTableRow {
         private String section;
         private BigDecimal value;
         private String currency;

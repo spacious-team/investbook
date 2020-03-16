@@ -9,6 +9,8 @@ import ru.portfolio.portfolio.controller.*;
 import ru.portfolio.portfolio.pojo.*;
 
 import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Service
 @Slf4j
@@ -22,6 +24,10 @@ public class PsbReportParserService {
     private final TransactionCashFlowRestController transactionCashFlowRestController;
 
     public void parse(String reportFile) {
+        parse(Paths.get(reportFile));
+    }
+
+    public void parse(Path reportFile) {
         try (PsbBrokerReport report = new PsbBrokerReport(reportFile)) {
             boolean isAdded = addPortfolio(Portfolio.builder().portfolio(report.getPortfolio()));
             if (isAdded) {
@@ -44,17 +50,18 @@ public class PsbReportParserService {
             }
         } catch (Exception e) {
             log.warn("Не могу открыть/закрыть отчет {}", reportFile, e);
+            throw new RuntimeException(e);
         }
     }
 
     private void addSecurities(PortfolioSecuritiesTable portfolioSecuritiesTable) {
-        for (PortfolioSecuritiesTable.Row row : portfolioSecuritiesTable.getData()) {
+        for (PortfolioSecuritiesTable.PortfolioSecuritiesTableRow row : portfolioSecuritiesTable.getData()) {
             addSecurity(row.getIsin(), row.getName());
         }
     }
 
     private void addCashInAndOutFlows(CashFlowTable cashFlowTable) {
-        for (CashFlowTable.Row row : cashFlowTable.getData()) {
+        for (CashFlowTable.CashFlowTableRow row : cashFlowTable.getData()) {
             addEventCashFlow(EventCashFlow.builder()
                     .portfolio(cashFlowTable.getReport().getPortfolio())
                     .eventType(row.getType())
@@ -65,7 +72,7 @@ public class PsbReportParserService {
     }
 
     private void addTransaction(TransactionTable transactionTable) {
-        for (TransactionTable.Row row : transactionTable.getData()) {
+        for (TransactionTable.TransactionTableRow row : transactionTable.getData()) {
             try {
                 boolean isAdded = addTransaction(Transaction.builder()
                         .id(row.getTransactionId())
@@ -76,22 +83,24 @@ public class PsbReportParserService {
                 if (isAdded) {
                     TransactionCashFlow cashFlow = TransactionCashFlow.builder()
                             .transactionId(row.getTransactionId())
-                            .currency(row.getCurrency())
                             .build();
                     if (!row.getValue().equals(BigDecimal.ZERO)) {
                         addTransactionCashFlow(cashFlow.toBuilder()
                                 .eventType(CashFlowType.PRICE)
-                                .value(row.getValue()));
+                                .value(row.getValue())
+                                .currency(row.getValueCurrency()));
                     }
                     if (!row.getAccruedInterest().equals(BigDecimal.ZERO)) {
                         addTransactionCashFlow(cashFlow.toBuilder()
                                 .eventType(CashFlowType.ACCRUED_INTEREST)
-                                .value(row.getAccruedInterest()));
+                                .value(row.getAccruedInterest())
+                                .currency(row.getValueCurrency()));
                     }
                     if (!row.getCommission().equals(BigDecimal.ZERO)) {
                         addTransactionCashFlow(cashFlow.toBuilder()
                                 .eventType(CashFlowType.COMMISSION)
-                                .value(row.getCommission()));
+                                .value(row.getCommission())
+                                .currency(row.getCommissionCurrency()));
                     }
                 }
             } catch (Exception e) {
@@ -101,7 +110,7 @@ public class PsbReportParserService {
     }
 
     private void addCouponAndAmortizationCashFlows(CouponAndAmortizationTable couponAndAmortizationTable) {
-        for (CouponAndAmortizationTable.Row row : couponAndAmortizationTable.getData()) {
+        for (CouponAndAmortizationTable.CouponAndAmortizationTableRow row : couponAndAmortizationTable.getData()) {
             addSecurity(row.getIsin()); // required for amortization
             addSecurityEventCashFlow(SecurityEventCashFlow.builder()
                     .isin(row.getIsin())
@@ -115,7 +124,7 @@ public class PsbReportParserService {
     }
 
     private void addDividendCashFlows(DividendTable dividendTable) {
-        for (DividendTable.Row row : dividendTable.getData()) {
+        for (DividendTable.DividendTableRow row : dividendTable.getData()) {
             addSecurityEventCashFlow(SecurityEventCashFlow.builder()
                     .isin(row.getIsin())
                     .portfolio(dividendTable.getReport().getPortfolio())
@@ -128,7 +137,7 @@ public class PsbReportParserService {
     }
 
     private void addDerivativeTransaction(DerivativeTransactionTable derivativeTransactionTable) {
-        for (DerivativeTransactionTable.Row row : derivativeTransactionTable.getData()) {
+        for (DerivativeTransactionTable.FortsTableRow row : derivativeTransactionTable.getData()) {
             addSecurity(row.getIsin());
             try {
                 boolean isAdded = addTransaction(Transaction.builder()
@@ -160,7 +169,7 @@ public class PsbReportParserService {
     }
 
     private void addDerivativeCashFlows(DerivativeCashFlowTable derivativeCashFlowTable) {
-        for (DerivativeCashFlowTable.Row row : derivativeCashFlowTable.getData()) {
+        for (DerivativeCashFlowTable.DerivativeCashFlowTableRow row : derivativeCashFlowTable.getData()) {
             if (row.getContract() != null) {
                 boolean isAdded = addSecurity(row.getContract());
                 if (!isAdded) continue;
