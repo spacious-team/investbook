@@ -3,10 +3,7 @@ package ru.portfolio.portfolio.parser.psb;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import ru.portfolio.portfolio.parser.ExcelTable;
-import ru.portfolio.portfolio.parser.ReportTable;
-import ru.portfolio.portfolio.parser.TableColumn;
-import ru.portfolio.portfolio.parser.TableColumnDescription;
+import ru.portfolio.portfolio.parser.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -65,7 +62,7 @@ public class TransactionTable implements ReportTable<TransactionTable.Transactio
     }
 
     enum TransactionTableHeader implements TableColumnDescription {
-        DATE_TIME("дата и время"),
+        DATE_TIME(TableColumnImpl.of("дата", "исполнения"), TableColumnImpl.of("дата и время")),
         TRANSACTION("номер сделки"),
         ISIN("isin"),
         DIRECTION("покупка", "продажа"),
@@ -82,7 +79,11 @@ public class TransactionTable implements ReportTable<TransactionTable.Transactio
         @Getter
         private final TableColumn column;
         TransactionTableHeader(String ... words) {
-            this.column = TableColumn.of(words);
+            this.column = TableColumnImpl.of(words);
+        }
+
+        TransactionTableHeader(TableColumn ... columns) {
+            this.column = AnyOfTableColumn.of(columns);
         }
     }
 

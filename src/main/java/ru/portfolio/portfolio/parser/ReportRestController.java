@@ -13,6 +13,7 @@ import ru.portfolio.portfolio.parser.psb.PsbReportParserService;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -43,16 +44,17 @@ public class ReportRestController {
                 if (report == null || report.isEmpty()) {
                     continue;
                 }
+                long t0 = System.nanoTime();
                 byte[] bytes = report.getBytes();
                 String originalFilename = report.getOriginalFilename();
                 Path path = jimfs.getPath(originalFilename != null ? originalFilename : UUID.randomUUID().toString());
                 Files.write(path, bytes);
-                log.info("Загрузка отчета " + path);
                 if ("psb".equals(format)) {
                     psbReportParserService.parse(path);
                 } else {
                     throw new IllegalArgumentException("Неизвестный формат " + format);
                 }
+                log.info("Загрузка отчета {} завершена за {}", path.getFileName(), Duration.ofNanos(System.nanoTime() - t0));
             } catch (Exception e) {
                 exceptions.add(e);
             }

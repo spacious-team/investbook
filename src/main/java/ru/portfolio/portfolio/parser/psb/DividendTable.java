@@ -4,10 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
-import ru.portfolio.portfolio.parser.AbstractReportTable;
-import ru.portfolio.portfolio.parser.ExcelTable;
-import ru.portfolio.portfolio.parser.TableColumn;
-import ru.portfolio.portfolio.parser.TableColumnDescription;
+import ru.portfolio.portfolio.parser.*;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 
 import java.math.BigDecimal;
@@ -57,7 +54,7 @@ public class DividendTable extends AbstractReportTable<DividendTable.DividendTab
         @Getter
         private final TableColumn column;
         DividendTableHeader(String... words) {
-            this.column = TableColumn.of(words);
+            this.column = TableColumnImpl.of(words);
         }
     }
 
