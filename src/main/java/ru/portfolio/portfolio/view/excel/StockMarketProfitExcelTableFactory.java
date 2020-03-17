@@ -1,4 +1,4 @@
-package ru.portfolio.portfolio.view;
+package ru.portfolio.portfolio.view.excel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,6 +17,7 @@ import ru.portfolio.portfolio.repository.SecurityEventCashFlowRepository;
 import ru.portfolio.portfolio.repository.SecurityRepository;
 import ru.portfolio.portfolio.repository.TransactionCashFlowRepository;
 import ru.portfolio.portfolio.repository.TransactionRepository;
+import ru.portfolio.portfolio.view.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -24,11 +25,11 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static ru.portfolio.portfolio.view.ExcelProfitSheetHeader.*;
+import static ru.portfolio.portfolio.view.excel.StockMarketProfitExcelTableHeader.*;
 
 @Component
 @RequiredArgsConstructor
-public class TransactionProfitTableFactory {
+public class StockMarketProfitExcelTableFactory {
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
@@ -38,9 +39,9 @@ public class TransactionProfitTableFactory {
     private final SecurityEventCashFlowEntityConverter securityEventCashFlowEntityConverter;
     private final PaidInterestFactory paidInterestFactory;
 
-    public Deque<Map<ExcelProfitSheetHeader, Object>> calculatePortfolioProfit(PortfolioEntity portfolio) {
-        ArrayList<Map<ExcelProfitSheetHeader, Object>> openPositionsProfit = new ArrayList<>();
-        ArrayList<Map<ExcelProfitSheetHeader, Object>> closedPositionsProfit = new ArrayList<>();
+    public Deque<Map<StockMarketProfitExcelTableHeader, Object>> create(PortfolioEntity portfolio) {
+        ArrayList<Map<StockMarketProfitExcelTableHeader, Object>> openPositionsProfit = new ArrayList<>();
+        ArrayList<Map<StockMarketProfitExcelTableHeader, Object>> closedPositionsProfit = new ArrayList<>();
         for (String isin : transactionRepository.findDistinctIsinByPortfolioOrderByTimestamp(portfolio)) {
             if (isin.length() != 12) continue; // 12 chars for bonds and shares
             Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
@@ -57,23 +58,23 @@ public class TransactionProfitTableFactory {
                         .map(securityEventCashFlowEntityConverter::fromEntity)
                         .collect(Collectors.toCollection(LinkedList::new));
                 Positions positions = new Positions(transactions, redemption);
-                PaidInterest paidInterest = paidInterestFactory.getPayedInterestFor(portfolio.getPortfolio(), security, positions);
+                PaidInterest paidInterest = paidInterestFactory.create(portfolio.getPortfolio(), security, positions);
                 closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(), paidInterest,this::getClosedPositionProfit));
                 openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(), paidInterest, this::getOpenedPositionProfit));
             }
         }
-        Deque<Map<ExcelProfitSheetHeader, Object>> profit = new LinkedList<>(closedPositionsProfit);
+        Deque<Map<StockMarketProfitExcelTableHeader, Object>> profit = new LinkedList<>(closedPositionsProfit);
         profit.addAll(openPositionsProfit);
         return profit;
     }
 
-    private <T extends Position> List<Map<ExcelProfitSheetHeader, Object>> getPositionProfit(Security security,
-                                                                             Deque<T> positions,
-                                                                             PaidInterest paidInterest,
-                                                                             Function<T, Map<ExcelProfitSheetHeader, Object>> profitBuilder) {
-        List<Map<ExcelProfitSheetHeader, Object>> rows = new ArrayList<>();
+    private <T extends Position> List<Map<StockMarketProfitExcelTableHeader, Object>> getPositionProfit(Security security,
+                                                                                                        Deque<T> positions,
+                                                                                                        PaidInterest paidInterest,
+                                                                                                        Function<T, Map<StockMarketProfitExcelTableHeader, Object>> profitBuilder) {
+        List<Map<StockMarketProfitExcelTableHeader, Object>> rows = new ArrayList<>();
         for (T position : positions) {
-            Map<ExcelProfitSheetHeader, Object> row = profitBuilder.apply(position);
+            Map<StockMarketProfitExcelTableHeader, Object> row = profitBuilder.apply(position);
             row.put(SECURITY, security.getName());
             row.put(COUPON, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.COUPON, position)));
             row.put(AMORTIZATION, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.AMORTIZATION, position)));
@@ -84,8 +85,8 @@ public class TransactionProfitTableFactory {
         return rows;
     }
 
-    private Map<ExcelProfitSheetHeader, Object> getOpenedPositionProfit(OpenedPosition position) {
-        Map<ExcelProfitSheetHeader, Object> row = new HashMap<>();
+    private Map<StockMarketProfitExcelTableHeader, Object> getOpenedPositionProfit(OpenedPosition position) {
+        Map<StockMarketProfitExcelTableHeader, Object> row = new HashMap<>();
         Transaction transaction = position.getOpenTransaction();
         row.put(BUY_DATE, transaction.getTimestamp());
         row.put(COUNT, position.getCount());
@@ -97,9 +98,9 @@ public class TransactionProfitTableFactory {
         return row;
     }
 
-    private Map<ExcelProfitSheetHeader, Object> getClosedPositionProfit(ClosedPosition position) {
+    private Map<StockMarketProfitExcelTableHeader, Object> getClosedPositionProfit(ClosedPosition position) {
         // open transaction info
-        Map<ExcelProfitSheetHeader, Object> row = new HashMap<>(getOpenedPositionProfit(position));
+        Map<StockMarketProfitExcelTableHeader, Object> row = new HashMap<>(getOpenedPositionProfit(position));
         // close transaction info
         Transaction transaction = position.getCloseTransaction();
         double multipier = Math.abs(1d * position.getCount() / transaction.getCount());
@@ -154,11 +155,12 @@ public class TransactionProfitTableFactory {
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
-    private <T extends Position> String convertPaidInterestToExcelFormula(List<BigDecimal> pays) {
+    private <T extends Position> String convertPaidInterestToExcelFormula(List<SecurityEventCashFlow> pays) {
         if (pays == null || pays.isEmpty()) {
             return null;
         }
         return pays.stream()
+                .map(SecurityEventCashFlow::getValue)
                 .map(BigDecimal::abs)
                 .map(String::valueOf)
                 .collect(Collectors.joining("+", "=", ""));

@@ -17,7 +17,7 @@ import static java.lang.Math.abs;
 /**
  * Calculate {@link ClosedPosition}
  */
-class Positions {
+public class Positions {
     @Getter
     Deque<PositionHistory> positionHistories = new LinkedList<>();
     @Getter
@@ -25,7 +25,7 @@ class Positions {
     @Getter
     private final Deque<ClosedPosition> closedPositions = new LinkedList<>();
 
-    Positions(Deque<Transaction> transactions, Deque<SecurityEventCashFlow> redemptions) {
+    public Positions(Deque<Transaction> transactions, Deque<SecurityEventCashFlow> redemptions) {
         updateSecuritiesPastPositions(transactions);
         for (Transaction transaction : transactions) {
             if (isIncreasePosition(transaction)) {

@@ -1,11 +1,11 @@
-package ru.portfolio.portfolio.view;
+package ru.portfolio.portfolio.view.excel;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum ExcelProfitSheetHeader {
+public enum StockMarketProfitExcelTableHeader {
     SECURITY("Бумага"),
     BUY_DATE("Дата покупки"),
     COUNT("Количество"),

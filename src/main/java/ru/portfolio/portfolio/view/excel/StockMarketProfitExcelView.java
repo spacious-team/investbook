@@ -1,4 +1,4 @@
-package ru.portfolio.portfolio.view;
+package ru.portfolio.portfolio.view.excel;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.CellType;
@@ -19,13 +19,13 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 
-import static ru.portfolio.portfolio.view.ExcelProfitSheetHeader.ROW_NUM_PLACE_HOLDER;
+import static ru.portfolio.portfolio.view.excel.StockMarketProfitExcelTableHeader.ROW_NUM_PLACE_HOLDER;
 
 @Component
 @RequiredArgsConstructor
-public class PortfolioExelView {
+public class StockMarketProfitExcelView {
     private final PortfolioRepository portfolioRepository;
-    private final TransactionProfitTableFactory transactionProfitTableFactory;
+    private final StockMarketProfitExcelTableFactory transactionProfitTableFactory;
 
     public void writeTo(Path path) throws IOException {
         XSSFWorkbook book = new XSSFWorkbook();
@@ -38,14 +38,14 @@ public class PortfolioExelView {
         XSSFCellStyle moneyStyle = createMoneyStyle(book);
         XSSFCellStyle intStyle = createIntegerStyle(book);
         for (PortfolioEntity portfolio : portfolioRepository.findAll()) {
-            Deque<Map<ExcelProfitSheetHeader, Object>> profitTable = transactionProfitTableFactory.calculatePortfolioProfit(portfolio);
+            Deque<Map<StockMarketProfitExcelTableHeader, Object>> profitTable = transactionProfitTableFactory.create(portfolio);
             XSSFSheet sheet = book.createSheet(portfolio.getPortfolio());
             writeHeader(sheet, headerStyle);
             profitTable.addFirst(getTotalRow());
             int rowNum = 0;
-            for (Map<ExcelProfitSheetHeader, Object> transactionProfit : profitTable) {
+            for (Map<StockMarketProfitExcelTableHeader, Object> transactionProfit : profitTable) {
                 XSSFRow row = sheet.createRow(++rowNum);
-                for (ExcelProfitSheetHeader header : ExcelProfitSheetHeader.values()) {
+                for (StockMarketProfitExcelTableHeader header : StockMarketProfitExcelTableHeader.values()) {
                     Object value = transactionProfit.get(header);
                     if (value == null) {
                         continue;
@@ -73,14 +73,14 @@ public class PortfolioExelView {
                         cell.setCellStyle(defaultStyle);
                     }
                     if (rowNum == 1) {
-                        if (header == ExcelProfitSheetHeader.SECURITY) {
+                        if (header == StockMarketProfitExcelTableHeader.SECURITY) {
                             cell.setCellStyle(totalTextStyle);
                         } else {
                             cell.setCellStyle(totalRowStyle);
                         }
-                    } else if (header == ExcelProfitSheetHeader.SECURITY) {
+                    } else if (header == StockMarketProfitExcelTableHeader.SECURITY) {
                         cell.setCellStyle(securityNameStyle);
-                    } else if (header == ExcelProfitSheetHeader.COUNT) {
+                    } else if (header == StockMarketProfitExcelTableHeader.COUNT) {
                         cell.setCellStyle(intStyle);
                     }
                 }
@@ -93,7 +93,7 @@ public class PortfolioExelView {
     private void writeHeader(XSSFSheet sheet, XSSFCellStyle style) {
         XSSFRow row = sheet.createRow(0);
         row.setHeight((short)-1);
-        for (ExcelProfitSheetHeader header : ExcelProfitSheetHeader.values()) {
+        for (StockMarketProfitExcelTableHeader header : StockMarketProfitExcelTableHeader.values()) {
             XSSFCell cell = row.createCell(header.ordinal());
             cell.setCellValue(header.getDescription());
             cell.setCellStyle(style);
@@ -104,18 +104,18 @@ public class PortfolioExelView {
         sheet.setColumnWidth(8, 16 * 256);
     }
 
-    private Map<ExcelProfitSheetHeader, Object> getTotalRow() {
-        Map<ExcelProfitSheetHeader, Object> totalRow = new HashMap<>();
-        for (ExcelProfitSheetHeader column : ExcelProfitSheetHeader.values()) {
+    private Map<StockMarketProfitExcelTableHeader, Object> getTotalRow() {
+        Map<StockMarketProfitExcelTableHeader, Object> totalRow = new HashMap<>();
+        for (StockMarketProfitExcelTableHeader column : StockMarketProfitExcelTableHeader.values()) {
             totalRow.put(column, "=SUM(" +
                     column.getColumnIndex() + "3:" +
                     column.getColumnIndex() + "100000)");
         }
-        totalRow.put(ExcelProfitSheetHeader.SECURITY, "Итого:");
-        totalRow.remove(ExcelProfitSheetHeader.BUY_DATE);
-        totalRow.remove(ExcelProfitSheetHeader.CELL_DATE);
-        totalRow.remove(ExcelProfitSheetHeader.BUY_PRICE);
-        totalRow.remove(ExcelProfitSheetHeader.PROFIT);
+        totalRow.put(StockMarketProfitExcelTableHeader.SECURITY, "Итого:");
+        totalRow.remove(StockMarketProfitExcelTableHeader.BUY_DATE);
+        totalRow.remove(StockMarketProfitExcelTableHeader.CELL_DATE);
+        totalRow.remove(StockMarketProfitExcelTableHeader.BUY_PRICE);
+        totalRow.remove(StockMarketProfitExcelTableHeader.PROFIT);
         return totalRow;
     }
 
