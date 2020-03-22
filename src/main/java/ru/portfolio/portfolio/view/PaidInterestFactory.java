@@ -52,7 +52,7 @@ public class PaidInterestFactory {
                 }
                 BigDecimal pay = payPerOne
                         .multiply(BigDecimal.valueOf(count))
-                        .setScale(2, RoundingMode.HALF_UP);
+                        .setScale(2, RoundingMode.DOWN);
                 payments.computeIfAbsent(position, key -> new ArrayList<>())
                         .add(cash.toBuilder()
                                 .count(count)

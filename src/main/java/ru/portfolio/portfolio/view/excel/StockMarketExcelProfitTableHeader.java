@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum StockMarketProfitExcelTableHeader {
+public enum StockMarketExcelProfitTableHeader implements ExcelProfitTableHeader {
     SECURITY("Бумага"),
     BUY_DATE("Дата покупки"),
     COUNT("Количество"),
@@ -24,14 +24,5 @@ public enum StockMarketProfitExcelTableHeader {
     FORECAST_TAX("Налог с разницы курсов (ожидаемый)"),
     PROFIT("Доходность годовых, %");
 
-    static final String ROW_NUM_PLACE_HOLDER = "{rowNum}";
     private final String description;
-
-    String getCellAddr() {
-        return getColumnIndex() + ROW_NUM_PLACE_HOLDER;
-    }
-
-    char getColumnIndex() {
-        return  (char) ('A' + this.ordinal());
-    }
 }
