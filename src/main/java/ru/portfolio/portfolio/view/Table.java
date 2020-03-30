@@ -9,6 +9,10 @@ public class Table extends LinkedList<Table.Record> {
         add(Record.EMPTY);
     }
 
+    public static Record newRecord() {
+        return new Record();
+    }
+
     public static class Record extends HashMap<TableHeader, Object> {
         public static Record EMPTY = new Record();
 

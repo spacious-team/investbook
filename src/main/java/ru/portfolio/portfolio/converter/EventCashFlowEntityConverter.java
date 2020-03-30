@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.entity.CashFlowTypeEntity;
 import ru.portfolio.portfolio.entity.EventCashFlowEntity;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
+import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.EventCashFlow;
 import ru.portfolio.portfolio.repository.CashFlowTypeRepository;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
@@ -33,5 +34,18 @@ public class EventCashFlowEntityConverter implements EntityConverter<EventCashFl
             entity.setDescription(eventCashFlow.getDescription());
         }
         return entity;
+    }
+
+    @Override
+    public EventCashFlow fromEntity(EventCashFlowEntity entity) {
+        return EventCashFlow.builder()
+                .id(entity.getId())
+                .portfolio(entity.getPortfolio().getPortfolio())
+                .timestamp(entity.getTimestamp())
+                .eventType(CashFlowType.valueOf(entity.getCashFlowType().getId()))
+                .value(entity.getValue())
+                .currency(entity.getCurrency())
+                .description(entity.getDescription())
+                .build();
     }
 }
