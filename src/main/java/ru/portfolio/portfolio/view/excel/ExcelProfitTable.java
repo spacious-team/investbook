@@ -100,6 +100,7 @@ public abstract class ExcelProfitTable {
             cell.setCellStyle(style);
             sheet.setColumnWidth(header.ordinal(), 14 * 256);
         }
+        sheet.createFreezePane(0, 1);
     }
 
     protected ProfitTable.Record getTotalRow() {
@@ -107,5 +108,6 @@ public abstract class ExcelProfitTable {
     }
 
     protected void sheetPostCreate(Sheet sheet, CellStyles styles) {
+        sheet.setZoom(97); // show all columns for 24 inch monitor for securities sheet
     }
 }

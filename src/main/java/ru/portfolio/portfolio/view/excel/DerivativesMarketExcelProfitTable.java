@@ -62,6 +62,7 @@ public class DerivativesMarketExcelProfitTable extends ExcelProfitTable {
 
     @Override
     protected void sheetPostCreate(Sheet sheet, CellStyles styles) {
+        super.sheetPostCreate(sheet, styles);
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue;
             Cell cell = row.getCell(CONTRACT.ordinal());
