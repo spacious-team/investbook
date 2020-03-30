@@ -8,8 +8,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
-import ru.portfolio.portfolio.view.ProfitTable;
-import ru.portfolio.portfolio.view.ProfitTableHeader;
+import ru.portfolio.portfolio.view.Table;
+import ru.portfolio.portfolio.view.TableHeader;
 
 import java.util.List;
 
@@ -28,20 +28,20 @@ public class DerivativesMarketExcelProfitTable extends ExcelProfitTable {
     }
 
     @Override
-    protected ProfitTable getProfitTable(PortfolioEntity portfolio) {
+    protected Table getProfitTable(PortfolioEntity portfolio) {
         return derivativesMarketExcelProfitTableFactory.create(portfolio);
     }
 
     @Override
-    protected void writeHeader(Sheet sheet, Class<? extends ProfitTableHeader> headerType, CellStyle style) {
+    protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         sheet.setColumnWidth(CONTRACT.ordinal(), 24 * 256);
         sheet.setColumnWidth(AMOUNT.ordinal(), 16 * 256);
     }
 
     @Override
-    protected ProfitTable.Record getTotalRow() {
-        ProfitTable.Record totalRow = new ProfitTable.Record();
+    protected Table.Record getTotalRow() {
+        Table.Record totalRow = new Table.Record();
         totalRow.put(CONTRACT, "Итого:");
         totalRow.put(COUNT, getSumFormula(COUNT));
         totalRow.put(AMOUNT, "=SUMPRODUCT(ABS(" +

@@ -13,8 +13,8 @@ import ru.portfolio.portfolio.repository.SecurityRepository;
 import ru.portfolio.portfolio.repository.TransactionRepository;
 import ru.portfolio.portfolio.view.DerivativeCashFlow;
 import ru.portfolio.portfolio.view.DerivativeCashFlowFactory;
-import ru.portfolio.portfolio.view.ProfitTable;
-import ru.portfolio.portfolio.view.ProfitTableFactory;
+import ru.portfolio.portfolio.view.Table;
+import ru.portfolio.portfolio.view.TableFactory;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -25,7 +25,7 @@ import static ru.portfolio.portfolio.view.excel.DerivativesMarketExcelProfitTabl
 
 @Component
 @RequiredArgsConstructor
-public class DerivativesMarketExcelProfitTableFactory implements ProfitTableFactory {
+public class DerivativesMarketExcelProfitTableFactory implements TableFactory {
     private static final String TAX_FORMULA = "=IF(" + DERIVATIVE_PROFIT_TOTAL.getCellAddr()
             + "<=0,0,0.13*" + DERIVATIVE_PROFIT_TOTAL.getCellAddr() +")";
     private static final String PROFIT_FORMULA = "=" + DERIVATIVE_PROFIT_TOTAL.getCellAddr()
@@ -36,8 +36,8 @@ public class DerivativesMarketExcelProfitTableFactory implements ProfitTableFact
     private final SecurityEntityConverter securityEntityConverter;
     private final DerivativeCashFlowFactory derivativeCashFlowFactory;
 
-    public ProfitTable create(PortfolioEntity portfolio) {
-        ProfitTable profit = new ProfitTable();
+    public Table create(PortfolioEntity portfolio) {
+        Table profit = new Table();
         for (String isin : getSecuritiesIsin(portfolio)) {
             Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
             if (securityEntity.isPresent()) {
@@ -55,19 +55,19 @@ public class DerivativesMarketExcelProfitTableFactory implements ProfitTableFact
         return transactionRepository.findDistinctDerivativeByPortfolioOrderByTimestampDesc(portfolio);
     }
 
-    private ProfitTable getContractProfit(Security security, DerivativeCashFlow derivativeCashFlow) {
-        ProfitTable contractProfit = new ProfitTable();
+    private Table getContractProfit(Security security, DerivativeCashFlow derivativeCashFlow) {
+        Table contractProfit = new Table();
         BigDecimal totalCommission = BigDecimal.ZERO;
         BigDecimal totalProfit = BigDecimal.ZERO;
         int totalContractCount = 0;
         for (DerivativeCashFlow.DailyCashFlow dailyCashFlow : derivativeCashFlow.getCashFlows()) {
-            ProfitTable.Record record = new ProfitTable.Record();
+            Table.Record record = new Table.Record();
             contractProfit.add(record);
             boolean isFirstRowOfDay = true;
             for (Map.Entry<Transaction, Map<CashFlowType, TransactionCashFlow>> e :
                     dailyCashFlow.getDailyTransactions().entrySet()) {
                 if (!isFirstRowOfDay) {
-                    record = new ProfitTable.Record();
+                    record = new Table.Record();
                     contractProfit.add(record);
                 }
                 Transaction transaction = e.getKey();
@@ -96,7 +96,7 @@ public class DerivativesMarketExcelProfitTableFactory implements ProfitTableFact
             totalContractCount = dailyCashFlow.getPosition();
             record.put(POSITION, totalContractCount);
         }
-        ProfitTable.Record total = new ProfitTable.Record();
+        Table.Record total = new Table.Record();
         total.put(CONTRACT, security.getIsin());
         total.put(DIRECTION, "Итого");
         total.put(COUNT, totalContractCount);

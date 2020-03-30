@@ -29,7 +29,7 @@ import static ru.portfolio.portfolio.view.excel.StockMarketExcelProfitTableHeade
 
 @Component
 @RequiredArgsConstructor
-public class StockMarketExcelProfitTableFactory implements ProfitTableFactory {
+public class StockMarketExcelProfitTableFactory implements TableFactory {
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
@@ -39,9 +39,9 @@ public class StockMarketExcelProfitTableFactory implements ProfitTableFactory {
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityEventCashFlowEntityConverter securityEventCashFlowEntityConverter;
 
-    public ProfitTable create(PortfolioEntity portfolio) {
-        ProfitTable openPositionsProfit = new ProfitTable();
-        ProfitTable closedPositionsProfit = new ProfitTable();
+    public Table create(PortfolioEntity portfolio) {
+        Table openPositionsProfit = new Table();
+        Table closedPositionsProfit = new Table();
         for (String isin : getSecuritiesIsin(portfolio)) {
             Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
             if (securityEntity.isPresent()) {
@@ -54,7 +54,7 @@ public class StockMarketExcelProfitTableFactory implements ProfitTableFactory {
                         paidInterest, this::getOpenedPositionProfit));
             }
         }
-        ProfitTable profit = new ProfitTable();
+        Table profit = new Table();
         profit.addAll(closedPositionsProfit);
         profit.addAll(openPositionsProfit);
         return profit;
@@ -85,13 +85,13 @@ public class StockMarketExcelProfitTableFactory implements ProfitTableFactory {
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    private <T extends Position> ProfitTable getPositionProfit(Security security,
-                                                               Deque<T> positions,
-                                                               PaidInterest paidInterest,
-                                                               Function<T, ProfitTable.Record> profitBuilder) {
-        ProfitTable rows = new ProfitTable();
+    private <T extends Position> Table getPositionProfit(Security security,
+                                                         Deque<T> positions,
+                                                         PaidInterest paidInterest,
+                                                         Function<T, Table.Record> profitBuilder) {
+        Table rows = new Table();
         for (T position : positions) {
-            ProfitTable.Record record = profitBuilder.apply(position);
+            Table.Record record = profitBuilder.apply(position);
             record.putAll(getPaidInterestProfit(position, paidInterest));
             record.put(SECURITY,
                     Optional.ofNullable(security.getName())
@@ -101,8 +101,8 @@ public class StockMarketExcelProfitTableFactory implements ProfitTableFactory {
         return rows;
     }
 
-    private ProfitTable.Record getOpenedPositionProfit(OpenedPosition position) {
-        ProfitTable.Record row = new ProfitTable.Record();
+    private Table.Record getOpenedPositionProfit(OpenedPosition position) {
+        Table.Record row = new Table.Record();
         Transaction transaction = position.getOpenTransaction();
         row.put(BUY_DATE, transaction.getTimestamp());
         row.put(COUNT, position.getCount());
@@ -114,9 +114,9 @@ public class StockMarketExcelProfitTableFactory implements ProfitTableFactory {
         return row;
     }
 
-    private ProfitTable.Record getClosedPositionProfit(ClosedPosition position) {
+    private Table.Record getClosedPositionProfit(ClosedPosition position) {
         // open transaction info
-        ProfitTable.Record row = new ProfitTable.Record(getOpenedPositionProfit(position));
+        Table.Record row = new Table.Record(getOpenedPositionProfit(position));
         // close transaction info
         Transaction transaction = position.getCloseTransaction();
         double multipier = Math.abs(1d * position.getCount() / transaction.getCount());
@@ -141,9 +141,9 @@ public class StockMarketExcelProfitTableFactory implements ProfitTableFactory {
         return row;
     }
 
-    private ProfitTable.Record getPaidInterestProfit(Position position,
-                                                       PaidInterest paidInterest) {
-        ProfitTable.Record info = new ProfitTable.Record();
+    private Table.Record getPaidInterestProfit(Position position,
+                                               PaidInterest paidInterest) {
+        Table.Record info = new Table.Record();
         info.put(COUPON, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.COUPON, position)));
         info.put(AMORTIZATION, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.AMORTIZATION, position)));
         info.put(DIVIDEND, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.DIVIDEND, position)));
