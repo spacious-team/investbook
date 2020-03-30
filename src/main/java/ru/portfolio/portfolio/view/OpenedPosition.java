@@ -9,7 +9,7 @@ import static java.lang.Integer.signum;
 import static java.lang.Math.abs;
 
 @Getter
-class OpenedPosition implements Position {
+public class OpenedPosition implements Position {
     private final Transaction openTransaction;
     /**
      * Positive for long position, negative for short position

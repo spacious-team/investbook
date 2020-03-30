@@ -6,11 +6,8 @@ import ru.portfolio.portfolio.pojo.Transaction;
 
 import java.time.Instant;
 
-import static java.lang.Integer.min;
-import static java.lang.Math.abs;
-
 @Getter
-class ClosedPosition extends OpenedPosition {
+public class ClosedPosition extends OpenedPosition {
     private final Transaction closeTransaction;
     private final CashFlowType closingEvent;
     /**

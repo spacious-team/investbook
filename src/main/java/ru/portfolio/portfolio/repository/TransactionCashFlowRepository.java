@@ -14,6 +14,6 @@ public interface TransactionCashFlowRepository extends JpaRepository<Transaction
 
     List<TransactionCashFlowEntity> findByTransactionId(long transactionId);
 
-    @Query("SELECT cf FROM TransactionCashFlowEntity cf WHERE cf.TransactionCashFlowId.transactionId = :transactionId AND cf.cashFlowType.id = :#{#cashFlowType.ordinal()}")
+    @Query("SELECT cf FROM TransactionCashFlowEntity cf WHERE cf.transactionCashFlowId.transactionId = :transactionId AND cf.cashFlowType.id = :#{#cashFlowType.ordinal()}")
     Optional<TransactionCashFlowEntity> findByTransactionIdAndCashFlowType(@Param("transactionId") long transactionId, @Param("cashFlowType") CashFlowType cashFlowType);
 }

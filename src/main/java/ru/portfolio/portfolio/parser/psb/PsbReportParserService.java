@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static ru.portfolio.portfolio.parser.psb.DerivativeTransactionTable.QUOTE_CURRENCY;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -153,7 +155,9 @@ public class PsbReportParserService {
                             .build();
                     if (!row.getValue().equals(BigDecimal.ZERO)) {
                         addTransactionCashFlow(cashFlow.toBuilder()
-                                .eventType(CashFlowType.DERIVATIVE_PRICE)
+                                .eventType(row.getCurrency().equals(QUOTE_CURRENCY) ?
+                                        CashFlowType.DERIVATIVE_QUOTE :
+                                        CashFlowType.DERIVATIVE_PRICE)
                                 .value(row.getValue()));
                     }
                     if (!row.getCommission().equals(BigDecimal.ZERO)) {

@@ -17,7 +17,8 @@ public enum CashFlowType {
     MARGIN(9), // гарантийное обеспечение
     TAX(10), // налог уплаченный
     FORECAST_TAX(11), // прогнозируемый налог
-    DERIVATIVE_PRICE(12); // стоимость сделки с деривативом
+    DERIVATIVE_PRICE(12), // Стоимость базоваго актива в сделке с деривативом
+    DERIVATIVE_QUOTE(13); // Стоимость сделки с деривативом, пункты
 
     @Getter
     private final int type;

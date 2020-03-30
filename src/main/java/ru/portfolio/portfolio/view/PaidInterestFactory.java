@@ -2,9 +2,11 @@ package ru.portfolio.portfolio.view;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.portfolio.portfolio.converter.SecurityEventCashFlowEntityConverter;
 import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.Security;
+import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 import ru.portfolio.portfolio.repository.SecurityEventCashFlowRepository;
 
 import java.math.BigDecimal;
@@ -19,8 +21,9 @@ import static ru.portfolio.portfolio.pojo.CashFlowType.*;
 public class PaidInterestFactory {
     private static final CashFlowType[] PAY_TYPES =  new CashFlowType[]{COUPON, AMORTIZATION, DIVIDEND, TAX};
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
+    private final SecurityEventCashFlowEntityConverter securityEventCashFlowEntityConverter;
 
-    PaidInterest getPayedInterestFor(String portfolio, Security security, Positions positions) {
+    public PaidInterest create(String portfolio, Security security, Positions positions) {
         PaidInterest paidInterest = new PaidInterest();
         for (CashFlowType type : PAY_TYPES) {
             paidInterest.get(type).putAll(getPositionWithPayments(portfolio, security.getIsin(), positions, type));
@@ -28,28 +31,33 @@ public class PaidInterestFactory {
         return paidInterest;
     }
 
-    private Map<Position, List<BigDecimal>> getPositionWithPayments(String portfolio, String isin, Positions positions, CashFlowType event) {
+    private Map<Position, List<SecurityEventCashFlow>> getPositionWithPayments(String portfolio, String isin, Positions positions, CashFlowType event) {
         List<SecurityEventCashFlowEntity> accruedInterests = securityEventCashFlowRepository
                 .findByPortfolioAndIsinAndCashFlowTypeOrderByTimestampAsc(portfolio, isin, event);
 
-        Map<Position, List<BigDecimal>> payments = new HashMap<>();
-        for (SecurityEventCashFlowEntity cash : accruedInterests) {
+        Map<Position, List<SecurityEventCashFlow>> payments = new HashMap<>();
+        for (SecurityEventCashFlowEntity entity : accruedInterests) {
+            SecurityEventCashFlow cash = securityEventCashFlowEntityConverter.fromEntity(entity);
             BigDecimal payPerOne =  cash.getValue()
                     .divide(BigDecimal.valueOf(cash.getCount()), 6, RoundingMode.HALF_UP);
 
-            Instant bookClosureDate = getBookClosureDate(positions.getPositionHistories(), cash);
-            Deque<Position> payedPositions = getPayedPositions(positions.getClosedPositions(), bookClosureDate);
-            payedPositions.addAll(getPayedPositions(positions.getOpenedPositions(), bookClosureDate));
+            Instant bookClosureDate = getBookClosureDate(positions.getPositionHistories(), entity);
+            Deque<Position> paidPositions = getPayedPositions(positions.getClosedPositions(), bookClosureDate);
+            paidPositions.addAll(getPayedPositions(positions.getOpenedPositions(), bookClosureDate));
 
-            for (Position position : payedPositions) {
+            for (Position position : paidPositions) {
                 int count = position.getCount();
                 if (count <= 0) {
                     throw new IllegalArgumentException("Internal error: payment could not be done for short position");
                 }
                 BigDecimal pay = payPerOne
                         .multiply(BigDecimal.valueOf(count))
-                        .setScale(2, RoundingMode.HALF_UP);
-                payments.computeIfAbsent(position, key -> new ArrayList<>()).add(pay);
+                        .setScale(2, RoundingMode.DOWN);
+                payments.computeIfAbsent(position, key -> new ArrayList<>())
+                        .add(cash.toBuilder()
+                                .count(count)
+                                .value(pay)
+                                .build());
             }
         }
         return payments;

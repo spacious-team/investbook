@@ -6,10 +6,12 @@ import org.apache.poi.ss.usermodel.Row;
 import ru.portfolio.portfolio.parser.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
-import static java.util.Collections.singletonList;
 import static ru.portfolio.portfolio.parser.psb.DerivativeExpirationTable.ExpirationTableHeader.*;
+import static ru.portfolio.portfolio.parser.psb.DerivativeTransactionTable.QUOTE_CURRENCY;
 
 @Slf4j
 class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactionTable.FortsTableRow> {
@@ -26,29 +28,43 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
         int count = table.getIntCellValue(row, COUNT);
         String type = table.getStringCellValue(row, TYPE).toLowerCase();
         BigDecimal value;
+        BigDecimal valueInPoints;
         switch (type) {
             case "фьючерс":
                 value = table.getCurrencyCellValue(row, VALUE);
+                valueInPoints = table.getCurrencyCellValue(row, QUOTE).multiply(BigDecimal.valueOf(count));
                 break;
             case "опцион":
-                value = BigDecimal.ZERO;
+                value = valueInPoints = BigDecimal.ZERO;
                 break;
             default:
                 throw new IllegalArgumentException("Не известный контракт '" + type + "'"); // unexpected contract
         }
-        if (isBuy) value = value.negate();
+        if (isBuy) {
+            value = value.negate();
+            valueInPoints = valueInPoints.negate();
+        }
         BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
                 .add(table.getCurrencyCellValue(row, BROKER_COMMISSION))
                 .negate();
-        return singletonList(DerivativeTransactionTable.FortsTableRow.builder()
-                .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
-                .transactionId(table.getLongCellValue(row, TRANSACTION))
-                .isin(table.getStringCellValue(row, CONTRACT))
-                .count(count)
+        List<DerivativeTransactionTable.FortsTableRow> transactionInfo = new ArrayList<>(2);
+        DerivativeTransactionTable.FortsTableRow.FortsTableRowBuilder builder =
+                DerivativeTransactionTable.FortsTableRow.builder()
+                        .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
+                        .transactionId(table.getLongCellValue(row, TRANSACTION))
+                        .isin(table.getStringCellValue(row, CONTRACT))
+                        .count((isBuy ? 1 : -1) * count);
+        transactionInfo.add(builder
                 .value(value)
                 .commission(commission)
                 .currency("RUB") // FORTS, only RUB
                 .build());
+        transactionInfo.add(builder
+                .value(valueInPoints)
+                .commission(BigDecimal.ZERO)
+                .currency(QUOTE_CURRENCY)
+                .build());
+        return transactionInfo;
     }
 
     enum ExpirationTableHeader implements TableColumnDescription {
@@ -58,6 +74,7 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
         CONTRACT("контракт"),
         DIRECTION("покупка", "продажа"),
         COUNT("кол-во"),
+        QUOTE("цена", "пункты"),
         VALUE("сумма"),
         MARKET_COMMISSION("комиссия торговой системы"),
         BROKER_COMMISSION("комиссия брокера");

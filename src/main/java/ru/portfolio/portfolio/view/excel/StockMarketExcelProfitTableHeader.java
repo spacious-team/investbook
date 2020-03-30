@@ -1,11 +1,11 @@
-package ru.portfolio.portfolio.view;
+package ru.portfolio.portfolio.view.excel;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum ExcelProfitSheetHeader {
+public enum StockMarketExcelProfitTableHeader implements ExcelProfitTableHeader {
     SECURITY("Бумага"),
     BUY_DATE("Дата покупки"),
     COUNT("Количество"),
@@ -24,14 +24,5 @@ public enum ExcelProfitSheetHeader {
     FORECAST_TAX("Налог с разницы курсов (ожидаемый)"),
     PROFIT("Доходность годовых, %");
 
-    static final String ROW_NUM_PLACE_HOLDER = "{rowNum}";
     private final String description;
-
-    String getCellAddr() {
-        return getColumnIndex() + ROW_NUM_PLACE_HOLDER;
-    }
-
-    char getColumnIndex() {
-        return  (char) ('A' + this.ordinal());
-    }
 }

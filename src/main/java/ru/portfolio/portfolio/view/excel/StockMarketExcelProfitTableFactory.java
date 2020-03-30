@@ -1,4 +1,4 @@
-package ru.portfolio.portfolio.view;
+package ru.portfolio.portfolio.view.excel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,6 +17,7 @@ import ru.portfolio.portfolio.repository.SecurityEventCashFlowRepository;
 import ru.portfolio.portfolio.repository.SecurityRepository;
 import ru.portfolio.portfolio.repository.TransactionCashFlowRepository;
 import ru.portfolio.portfolio.repository.TransactionRepository;
+import ru.portfolio.portfolio.view.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -24,68 +25,84 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static ru.portfolio.portfolio.view.ExcelProfitSheetHeader.*;
+import static ru.portfolio.portfolio.view.excel.StockMarketExcelProfitTableHeader.*;
 
 @Component
 @RequiredArgsConstructor
-public class TransactionProfitTableFactory {
+public class StockMarketExcelProfitTableFactory implements ProfitTableFactory {
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
-    private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final TransactionEntityConverter transactionEntityConverter;
     private final SecurityEntityConverter securityEntityConverter;
-    private final SecurityEventCashFlowEntityConverter securityEventCashFlowEntityConverter;
     private final PaidInterestFactory paidInterestFactory;
+    private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
+    private final SecurityEventCashFlowEntityConverter securityEventCashFlowEntityConverter;
 
-    public Deque<Map<ExcelProfitSheetHeader, Object>> calculatePortfolioProfit(PortfolioEntity portfolio) {
-        ArrayList<Map<ExcelProfitSheetHeader, Object>> openPositionsProfit = new ArrayList<>();
-        ArrayList<Map<ExcelProfitSheetHeader, Object>> closedPositionsProfit = new ArrayList<>();
-        for (String isin : transactionRepository.findDistinctIsinByPortfolioOrderByTimestamp(portfolio)) {
-            if (isin.length() != 12) continue; // 12 chars for bonds and shares
+    public ProfitTable create(PortfolioEntity portfolio) {
+        ProfitTable openPositionsProfit = new ProfitTable();
+        ProfitTable closedPositionsProfit = new ProfitTable();
+        for (String isin : getSecuritiesIsin(portfolio)) {
             Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
             if (securityEntity.isPresent()) {
+                Positions positions = getPositions(portfolio, securityEntity.get());
                 Security security = securityEntityConverter.fromEntity(securityEntity.get());
-                Deque<Transaction> transactions = transactionRepository
-                        .findBySecurityAndPortfolioOrderByTimestampAscIdAsc(securityEntity.get(), portfolio)
-                        .stream()
-                        .map(transactionEntityConverter::fromEntity)
-                        .collect(Collectors.toCollection(LinkedList::new));
-                Deque<SecurityEventCashFlow> redemption = securityEventCashFlowRepository
-                        .findByPortfolioAndIsinAndCashFlowTypeOrderByTimestampAsc(portfolio.getPortfolio(), isin, CashFlowType.REDEMPTION)
-                        .stream()
-                        .map(securityEventCashFlowEntityConverter::fromEntity)
-                        .collect(Collectors.toCollection(LinkedList::new));
-                Positions positions = new Positions(transactions, redemption);
-                PaidInterest paidInterest = paidInterestFactory.getPayedInterestFor(portfolio.getPortfolio(), security, positions);
-                closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(), paidInterest,this::getClosedPositionProfit));
-                openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(), paidInterest, this::getOpenedPositionProfit));
+                PaidInterest paidInterest = paidInterestFactory.create(portfolio.getPortfolio(), security, positions);
+                closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(),
+                        paidInterest, this::getClosedPositionProfit));
+                openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(),
+                        paidInterest, this::getOpenedPositionProfit));
             }
         }
-        Deque<Map<ExcelProfitSheetHeader, Object>> profit = new LinkedList<>(closedPositionsProfit);
+        ProfitTable profit = new ProfitTable();
+        profit.addAll(closedPositionsProfit);
         profit.addAll(openPositionsProfit);
         return profit;
     }
 
-    private <T extends Position> List<Map<ExcelProfitSheetHeader, Object>> getPositionProfit(Security security,
-                                                                             Deque<T> positions,
-                                                                             PaidInterest paidInterest,
-                                                                             Function<T, Map<ExcelProfitSheetHeader, Object>> profitBuilder) {
-        List<Map<ExcelProfitSheetHeader, Object>> rows = new ArrayList<>();
+    private Collection<String> getSecuritiesIsin(PortfolioEntity portfolio) {
+        return transactionRepository.findDistinctIsinByPortfolioOrderByTimestampAsc(portfolio);
+    }
+
+    private Positions getPositions(PortfolioEntity portfolio, SecurityEntity security) {
+        Deque<Transaction> transactions = transactionRepository
+                .findBySecurityAndPortfolioOrderByTimestampAscIdAsc(security, portfolio)
+                .stream()
+                .map(transactionEntityConverter::fromEntity)
+                .collect(Collectors.toCollection(LinkedList::new));
+        Deque<SecurityEventCashFlow> redemption = getRedemption(portfolio, security);
+        return new Positions(transactions, redemption);
+    }
+
+    private Deque<SecurityEventCashFlow> getRedemption(PortfolioEntity portfolio, SecurityEntity securityEntity) {
+        return securityEventCashFlowRepository
+                .findByPortfolioAndIsinAndCashFlowTypeOrderByTimestampAsc(
+                        portfolio.getPortfolio(),
+                        securityEntity.getIsin(),
+                        CashFlowType.REDEMPTION)
+                .stream()
+                .map(securityEventCashFlowEntityConverter::fromEntity)
+                .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    private <T extends Position> ProfitTable getPositionProfit(Security security,
+                                                               Deque<T> positions,
+                                                               PaidInterest paidInterest,
+                                                               Function<T, ProfitTable.Record> profitBuilder) {
+        ProfitTable rows = new ProfitTable();
         for (T position : positions) {
-            Map<ExcelProfitSheetHeader, Object> row = profitBuilder.apply(position);
-            row.put(SECURITY, security.getName());
-            row.put(COUPON, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.COUPON, position)));
-            row.put(AMORTIZATION, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.AMORTIZATION, position)));
-            row.put(DIVIDEND, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.DIVIDEND, position)));
-            row.put(TAX, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.TAX, position)));
-            rows.add(row);
+            ProfitTable.Record record = profitBuilder.apply(position);
+            record.putAll(getPaidInterestProfit(position, paidInterest));
+            record.put(SECURITY,
+                    Optional.ofNullable(security.getName())
+                            .orElse(security.getIsin()));
+            rows.add(record);
         }
         return rows;
     }
 
-    private Map<ExcelProfitSheetHeader, Object> getOpenedPositionProfit(OpenedPosition position) {
-        Map<ExcelProfitSheetHeader, Object> row = new HashMap<>();
+    private ProfitTable.Record getOpenedPositionProfit(OpenedPosition position) {
+        ProfitTable.Record row = new ProfitTable.Record();
         Transaction transaction = position.getOpenTransaction();
         row.put(BUY_DATE, transaction.getTimestamp());
         row.put(COUNT, position.getCount());
@@ -97,9 +114,9 @@ public class TransactionProfitTableFactory {
         return row;
     }
 
-    private Map<ExcelProfitSheetHeader, Object> getClosedPositionProfit(ClosedPosition position) {
+    private ProfitTable.Record getClosedPositionProfit(ClosedPosition position) {
         // open transaction info
-        Map<ExcelProfitSheetHeader, Object> row = new HashMap<>(getOpenedPositionProfit(position));
+        ProfitTable.Record row = new ProfitTable.Record(getOpenedPositionProfit(position));
         // close transaction info
         Transaction transaction = position.getCloseTransaction();
         double multipier = Math.abs(1d * position.getCount() / transaction.getCount());
@@ -122,6 +139,16 @@ public class TransactionProfitTableFactory {
         row.put(FORECAST_TAX, getForecastTax());
         row.put(PROFIT, getClosedPositionProfit());
         return row;
+    }
+
+    private ProfitTable.Record getPaidInterestProfit(Position position,
+                                                       PaidInterest paidInterest) {
+        ProfitTable.Record info = new ProfitTable.Record();
+        info.put(COUPON, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.COUPON, position)));
+        info.put(AMORTIZATION, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.AMORTIZATION, position)));
+        info.put(DIVIDEND, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.DIVIDEND, position)));
+        info.put(TAX, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.TAX, position)));
+        return info;
     }
 
     private BigDecimal getTransactionCashFlow(Transaction transaction, CashFlowType type, double multiplier) {
@@ -154,11 +181,12 @@ public class TransactionProfitTableFactory {
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
-    private <T extends Position> String convertPaidInterestToExcelFormula(List<BigDecimal> pays) {
+    public static  <T extends Position> String convertPaidInterestToExcelFormula(List<SecurityEventCashFlow> pays) {
         if (pays == null || pays.isEmpty()) {
             return null;
         }
         return pays.stream()
+                .map(SecurityEventCashFlow::getValue)
                 .map(BigDecimal::abs)
                 .map(String::valueOf)
                 .collect(Collectors.joining("+", "=", ""));
@@ -166,7 +194,7 @@ public class TransactionProfitTableFactory {
 
     private String getForecastTax() {
         String forecastTaxFormula =
-                "(" + CELL_AMOUNT.getCellAddr() + "+" + CELL_ACCRUED_INTEREST.getCellAddr() + "+" +AMORTIZATION.getCellAddr() + ")" +
+                "(" + CELL_AMOUNT.getCellAddr() + "+" + CELL_ACCRUED_INTEREST.getCellAddr() + "+" + AMORTIZATION.getCellAddr() + ")" +
                         "-(" + BUY_AMOUNT.getCellAddr() + "+" + BUY_ACCRUED_INTEREST.getCellAddr() + ")" +
                         "-" + BUY_COMMISSION.getCellAddr() + "-" + CELL_COMMISSION.getCellAddr();
         return "=IF(" + forecastTaxFormula + "<0,0,0.13*(" + forecastTaxFormula + "))";

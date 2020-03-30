@@ -8,13 +8,15 @@ import ru.portfolio.portfolio.parser.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
-import static java.util.Collections.singletonList;
 import static ru.portfolio.portfolio.parser.psb.DerivativeTransactionTable.FortsTableHeader.*;
 
 @Slf4j
 public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTransactionTable.FortsTableRow> {
+    public static final String QUOTE_CURRENCY = "PNT"; // point
     private static final String TABLE_NAME = "Информация о заключенных сделках";
     private static final String TABLE_END_TEXT = "Итого";
 
@@ -29,40 +31,56 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
         int count = table.getIntCellValue(row, COUNT);
         String type = table.getStringCellValue(row, TYPE).toLowerCase();
         BigDecimal value;
+        BigDecimal valueInPoints;
         switch (type) {
             case "опцион":
                 value = table.getCurrencyCellValue(row, OPTION_PRICE).multiply(BigDecimal.valueOf(count));
+                valueInPoints = table.getCurrencyCellValue(row, OPTION_QUOTE).multiply(BigDecimal.valueOf(count));
                 break;
             case "фьючерс":
                 value = table.getCurrencyCellValue(row, VALUE);
+                valueInPoints = table.getCurrencyCellValue(row, QUOTE).multiply(BigDecimal.valueOf(count));
                 break;
             default:
                 throw new IllegalArgumentException("Не известный контракт " + type);
         }
-        if (isBuy) value = value.negate();
+        if (isBuy) {
+            value = value.negate();
+            valueInPoints = valueInPoints.negate();
+        }
         BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
                 .add(table.getCurrencyCellValue(row, BROKER_COMMISSION))
                 .negate();
-        return singletonList(FortsTableRow.builder()
+        List<FortsTableRow> transactionInfo = new ArrayList<>(2);
+        FortsTableRow.FortsTableRowBuilder builder = FortsTableRow.builder()
                 .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
                 .transactionId(Long.parseLong(table.getStringCellValue(row, TRANSACTION)))
                 .isin(table.getStringCellValue(row, CONTRACT))
-                .count((isBuy ? 1 : -1) * count)
+                .count((isBuy ? 1 : -1) * count);
+        transactionInfo.add(builder
                 .value(value)
                 .commission(commission)
                 .currency("RUB") // FORTS, only RUB
                 .build());
+        transactionInfo.add(builder
+                .value(valueInPoints)
+                .commission(BigDecimal.ZERO)
+                .currency(QUOTE_CURRENCY)
+                .build());
+        return transactionInfo;
     }
 
     enum FortsTableHeader implements TableColumnDescription {
-        DATE_TIME("дата и время"),
+        DATE_TIME("дата включения в клиринг"),
         TRANSACTION("№"),
         TYPE("вид контракта"),
         CONTRACT("контракт"),
         DIRECTION("покупка", "продажа"),
         COUNT("кол-во"),
+        QUOTE("цена фьючерсного контракта", "цена исполнения опциона", "пункты"),
         VALUE("сумма срочной сделки"),
-        OPTION_PRICE("цена опциона"),
+        OPTION_QUOTE("цена опциона", "пункты"),
+        OPTION_PRICE("цена опциона", "руб"),
         MARKET_COMMISSION("комиссия торговой системы"),
         BROKER_COMMISSION("комиссия брокера");
 
