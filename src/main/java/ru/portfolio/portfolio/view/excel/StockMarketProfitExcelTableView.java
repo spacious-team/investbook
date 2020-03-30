@@ -13,13 +13,13 @@ import ru.portfolio.portfolio.view.TableHeader;
 
 import java.util.List;
 
-import static ru.portfolio.portfolio.view.excel.DerivativesMarketExcelProfitTableHeader.*;
+import static ru.portfolio.portfolio.view.excel.StockMarketProfitExcelTableHeader.*;
 
 @Component
 @RequiredArgsConstructor
-public class DerivativesMarketExcelProfitTable extends ExcelProfitTable {
+public class StockMarketProfitExcelTableView extends ExcelTableView {
     private final PortfolioRepository portfolioRepository;
-    private final DerivativesMarketExcelProfitTableFactory derivativesMarketExcelProfitTableFactory;
+    private final StockMarketProfitExcelTableFactory stockMarketProfitExcelTableFactory;
 
     @Override
     protected List<PortfolioEntity> getPortfolios() {
@@ -28,36 +28,32 @@ public class DerivativesMarketExcelProfitTable extends ExcelProfitTable {
     }
 
     @Override
-    protected Table getProfitTable(PortfolioEntity portfolio) {
-        return derivativesMarketExcelProfitTableFactory.create(portfolio);
+    protected Table getTable(PortfolioEntity portfolio) {
+        return stockMarketProfitExcelTableFactory.create(portfolio);
     }
 
     @Override
     protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
-        sheet.setColumnWidth(CONTRACT.ordinal(), 24 * 256);
-        sheet.setColumnWidth(AMOUNT.ordinal(), 16 * 256);
+        sheet.setColumnWidth(SECURITY.ordinal(), 45 * 256);
+        sheet.setColumnWidth(BUY_AMOUNT.ordinal(), 16 * 256);
+        sheet.setColumnWidth(CELL_AMOUNT.ordinal(), 16 * 256);
     }
 
     @Override
     protected Table.Record getTotalRow() {
         Table.Record totalRow = new Table.Record();
-        totalRow.put(CONTRACT, "Итого:");
-        totalRow.put(COUNT, getSumFormula(COUNT));
-        totalRow.put(AMOUNT, "=SUMPRODUCT(ABS(" +
-                AMOUNT.getColumnIndex() + "3:" +
-                AMOUNT.getColumnIndex() + "100000))");
-        totalRow.put(COMMISSION, getSumFormula(COMMISSION) + "/2");
-        totalRow.put(DERIVATIVE_PROFIT_DAY, getSumFormula(DERIVATIVE_PROFIT_DAY));
-        totalRow.put(FORECAST_TAX, getSumFormula(FORECAST_TAX));
-        totalRow.put(PROFIT, getSumFormula(PROFIT));
+        for (StockMarketProfitExcelTableHeader column : StockMarketProfitExcelTableHeader.values()) {
+            totalRow.put(column, "=SUM(" +
+                    column.getColumnIndex() + "3:" +
+                    column.getColumnIndex() + "100000)");
+        }
+        totalRow.put(SECURITY, "Итого:");
+        totalRow.remove(BUY_DATE);
+        totalRow.remove(CELL_DATE);
+        totalRow.remove(BUY_PRICE);
+        totalRow.remove(PROFIT);
         return totalRow;
-    }
-
-    private String getSumFormula(DerivativesMarketExcelProfitTableHeader column) {
-        return "=SUM(" +
-                column.getColumnIndex() + "3:" +
-                column.getColumnIndex() + "100000)";
     }
 
     @Override
@@ -65,14 +61,14 @@ public class DerivativesMarketExcelProfitTable extends ExcelProfitTable {
         super.sheetPostCreate(sheet, styles);
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue;
-            Cell cell = row.getCell(CONTRACT.ordinal());
+            Cell cell = row.getCell(SECURITY.ordinal());
             if (cell != null) {
                 cell.setCellStyle(styles.getSecurityNameStyle());
             }
         }
         for (Cell cell : sheet.getRow(1)) {
             if (cell == null) continue;
-            if (cell.getColumnIndex() == CONTRACT.ordinal()) {
+            if (cell.getColumnIndex() == SECURITY.ordinal()) {
                 cell.setCellStyle(styles.getTotalTextStyle());
             } else if (cell.getColumnIndex() == COUNT.ordinal()){
                 cell.setCellStyle(styles.getIntStyle());

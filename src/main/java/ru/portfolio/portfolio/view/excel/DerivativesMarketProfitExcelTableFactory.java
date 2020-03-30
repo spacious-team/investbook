@@ -21,11 +21,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-import static ru.portfolio.portfolio.view.excel.DerivativesMarketExcelProfitTableHeader.*;
+import static ru.portfolio.portfolio.view.excel.DerivativesMarketProfitExcelTableHeader.*;
 
 @Component
 @RequiredArgsConstructor
-public class DerivativesMarketExcelProfitTableFactory implements TableFactory {
+public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
     private static final String TAX_FORMULA = "=IF(" + DERIVATIVE_PROFIT_TOTAL.getCellAddr()
             + "<=0,0,0.13*" + DERIVATIVE_PROFIT_TOTAL.getCellAddr() +")";
     private static final String PROFIT_FORMULA = "=" + DERIVATIVE_PROFIT_TOTAL.getCellAddr()

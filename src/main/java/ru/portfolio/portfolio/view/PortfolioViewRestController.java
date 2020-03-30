@@ -7,7 +7,7 @@ import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.portfolio.portfolio.view.excel.ProfitExcelView;
+import ru.portfolio.portfolio.view.excel.ExcelView;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import java.time.Duration;
 @RequiredArgsConstructor
 @Slf4j
 public class PortfolioViewRestController {
-    private final ProfitExcelView profitViewExcel;
+    private final ExcelView excelView;
     private FileSystem jimfs = Jimfs.newFileSystem();
 
     @GetMapping("/portfolio")
@@ -31,7 +31,7 @@ public class PortfolioViewRestController {
         response.setHeader("Content-disposition", "attachment; filename=" + fileName);
         Path path = jimfs.getPath(fileName);
         try (XSSFWorkbook book = new XSSFWorkbook()) {
-            profitViewExcel.writeTo(book);
+            excelView.writeTo(book);
             book.write(Files.newOutputStream(path));
         }
         IOUtils.copy(Files.newInputStream(path), response.getOutputStream());

@@ -12,27 +12,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
-import static ru.portfolio.portfolio.view.excel.StockMarketExcelProfitTableHeader.ROW_NUM_PLACE_HOLDER;
+import static ru.portfolio.portfolio.view.excel.StockMarketProfitExcelTableHeader.ROW_NUM_PLACE_HOLDER;
 
-public abstract class ExcelProfitTable {
+public abstract class ExcelTableView {
 
     public void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator) {
         for (PortfolioEntity portfolio : getPortfolios()) {
-            Table table = getProfitTable(portfolio);
+            Table table = getTable(portfolio);
             if (!table.isEmpty()) {
                 Sheet sheet = book.createSheet(sheetNameCreator.apply(portfolio.getPortfolio()));
-                writeProfitTable(table, sheet, styles);
+                writeTable(table, sheet, styles);
             }
         }
     }
 
     protected abstract List<PortfolioEntity> getPortfolios();
 
-    protected abstract Table getProfitTable(PortfolioEntity portfolio);
+    protected abstract Table getTable(PortfolioEntity portfolio);
 
-    protected void writeProfitTable(Table table,
-                                    Sheet sheet,
-                                    CellStyles styles) {
+    protected void writeTable(Table table,
+                              Sheet sheet,
+                              CellStyles styles) {
         if (table.isEmpty()) return;
         Class<? extends TableHeader> headerType = getHeaderType(table);
         writeHeader(sheet, headerType, styles.getHeaderStyle());

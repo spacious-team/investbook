@@ -25,11 +25,11 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static ru.portfolio.portfolio.view.excel.StockMarketExcelProfitTableHeader.*;
+import static ru.portfolio.portfolio.view.excel.StockMarketProfitExcelTableHeader.*;
 
 @Component
 @RequiredArgsConstructor
-public class StockMarketExcelProfitTableFactory implements TableFactory {
+public class StockMarketProfitExcelTableFactory implements TableFactory {
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
