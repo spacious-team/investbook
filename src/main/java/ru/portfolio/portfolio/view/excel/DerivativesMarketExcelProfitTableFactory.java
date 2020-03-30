@@ -1,92 +1,111 @@
 package ru.portfolio.portfolio.view.excel;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.converter.SecurityEntityConverter;
-import ru.portfolio.portfolio.converter.TransactionEntityConverter;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.entity.SecurityEntity;
 import ru.portfolio.portfolio.pojo.CashFlowType;
-import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
+import ru.portfolio.portfolio.pojo.Security;
 import ru.portfolio.portfolio.pojo.Transaction;
+import ru.portfolio.portfolio.pojo.TransactionCashFlow;
 import ru.portfolio.portfolio.repository.SecurityRepository;
-import ru.portfolio.portfolio.repository.TransactionCashFlowRepository;
 import ru.portfolio.portfolio.repository.TransactionRepository;
-import ru.portfolio.portfolio.view.*;
+import ru.portfolio.portfolio.view.DerivativeCashFlow;
+import ru.portfolio.portfolio.view.DerivativeCashFlowFactory;
+import ru.portfolio.portfolio.view.ProfitTable;
+import ru.portfolio.portfolio.view.ProfitTableFactory;
 
+import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Deque;
-import java.util.LinkedList;
+import java.util.Map;
+import java.util.Optional;
 
 import static ru.portfolio.portfolio.view.excel.DerivativesMarketExcelProfitTableHeader.*;
-import static ru.portfolio.portfolio.view.excel.StockMarketExcelProfitTableFactory.convertPaidInterestToExcelFormula;
 
 @Component
-public class DerivativesMarketExcelProfitTableFactory extends ProfitTableFactory {
+@RequiredArgsConstructor
+public class DerivativesMarketExcelProfitTableFactory implements ProfitTableFactory {
+    private static final String TAX_FORMULA = "=IF(" + DERIVATIVE_PROFIT_TOTAL.getCellAddr()
+            + "<=0,0,0.13*" + DERIVATIVE_PROFIT_TOTAL.getCellAddr() +")";
+    private static final String PROFIT_FORMULA = "=" + DERIVATIVE_PROFIT_TOTAL.getCellAddr()
+            + "-" + COMMISSION.getCellAddr()
+            + "-" + FORECAST_TAX.getCellAddr();
+    private final TransactionRepository transactionRepository;
+    private final SecurityRepository securityRepository;
+    private final SecurityEntityConverter securityEntityConverter;
+    private final DerivativeCashFlowFactory derivativeCashFlowFactory;
 
-    public DerivativesMarketExcelProfitTableFactory(TransactionRepository transactionRepository,
-                                                    SecurityRepository securityRepository,
-                                                    TransactionCashFlowRepository transactionCashFlowRepository,
-                                                    TransactionEntityConverter transactionEntityConverter,
-                                                    SecurityEntityConverter securityEntityConverter,
-                                                    PaidInterestFactory paidInterestFactory) {
-        super(transactionRepository, securityRepository, transactionCashFlowRepository,
-                transactionEntityConverter, securityEntityConverter, paidInterestFactory);
+    public ProfitTable create(PortfolioEntity portfolio) {
+        ProfitTable profit = new ProfitTable();
+        for (String isin : getSecuritiesIsin(portfolio)) {
+            Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
+            if (securityEntity.isPresent()) {
+                Security security = securityEntityConverter.fromEntity(securityEntity.get());
+                DerivativeCashFlow derivativeCashFlow = derivativeCashFlowFactory.getDerivativeCashFlow(portfolio, securityEntity.get());
+
+                profit.addEmptyRecord();
+                profit.addAll(getContractProfit(security, derivativeCashFlow));
+            }
+        }
+        return profit;
     }
 
-
-    @Override
-    protected Collection<String> getSecuritiesIsin(PortfolioEntity portfolio) {
-        return transactionRepository.findDistinctDerivativeByPortfolioOrderByTimestamp(portfolio);
+    private Collection<String> getSecuritiesIsin(PortfolioEntity portfolio) {
+        return transactionRepository.findDistinctDerivativeByPortfolioOrderByTimestampDesc(portfolio);
     }
 
-    @Override
-    protected Deque<SecurityEventCashFlow> getRedemption(PortfolioEntity portfolio, SecurityEntity securityEntity) {
-        return new LinkedList<>();
-    }
+    private ProfitTable getContractProfit(Security security, DerivativeCashFlow derivativeCashFlow) {
+        ProfitTable contractProfit = new ProfitTable();
+        BigDecimal totalCommission = BigDecimal.ZERO;
+        BigDecimal totalProfit = BigDecimal.ZERO;
+        int totalContractCount = 0;
+        for (DerivativeCashFlow.DailyCashFlow dailyCashFlow : derivativeCashFlow.getCashFlows()) {
+            ProfitTable.Record record = new ProfitTable.Record();
+            contractProfit.add(record);
+            boolean isFirstRowOfDay = true;
+            for (Map.Entry<Transaction, Map<CashFlowType, TransactionCashFlow>> e :
+                    dailyCashFlow.getDailyTransactions().entrySet()) {
+                if (!isFirstRowOfDay) {
+                    record = new ProfitTable.Record();
+                    contractProfit.add(record);
+                }
+                Transaction transaction = e.getKey();
+                Map<CashFlowType, TransactionCashFlow> transactionCashFlows = e.getValue();
+                record.put(DATE, transaction.getTimestamp());
+                record.put(DIRECTION, (transaction.getCount() > 0) ? "покупка" : "продажа");
+                record.put(COUNT, Math.abs(transaction.getCount()));
+                record.put(QUOTE, Optional.ofNullable(transactionCashFlows.get(CashFlowType.DERIVATIVE_QUOTE))
+                        .map(TransactionCashFlow::getValue)
+                        .orElse(null));
+                record.put(AMOUNT, Optional.ofNullable(transactionCashFlows.get(CashFlowType.DERIVATIVE_PRICE))
+                        .map(TransactionCashFlow::getValue)
+                        .orElse(null));
+                BigDecimal commission = Optional.ofNullable(transactionCashFlows.get(CashFlowType.COMMISSION))
+                        .map(TransactionCashFlow::getValue)
+                        .map(BigDecimal::abs)
+                        .orElse(BigDecimal.ZERO);
+                totalCommission = totalCommission.add(commission);
+                record.put(COMMISSION, commission);
+                isFirstRowOfDay = false;
+            }
+            record.put(DATE, dailyCashFlow.getDailyProfit().getTimestamp());
+            record.put(DERIVATIVE_PROFIT_DAY, dailyCashFlow.getDailyProfit().getValue());
+            totalProfit = dailyCashFlow.getTotalProfit();
+            record.put(DERIVATIVE_PROFIT_TOTAL, totalProfit);
+            totalContractCount = dailyCashFlow.getPosition();
+            record.put(POSITION, totalContractCount);
+        }
+        ProfitTable.Record total = new ProfitTable.Record();
+        total.put(CONTRACT, security.getIsin());
+        total.put(DIRECTION, "Итого");
+        total.put(COUNT, totalContractCount);
+        total.put(COMMISSION, totalCommission);
+        total.put(DERIVATIVE_PROFIT_TOTAL, totalProfit);
+        total.put(FORECAST_TAX, TAX_FORMULA);
+        total.put(PROFIT, PROFIT_FORMULA);
+        contractProfit.addFirst(total);
 
-    @Override
-    protected ProfitTable.Record getOpenedPositionProfit(OpenedPosition position) {
-        ProfitTable.Record record = new ProfitTable.Record();
-        Transaction transaction = position.getOpenTransaction();
-        record.put(OPEN_DATE, transaction.getTimestamp());
-        record.put(COUNT, position.getCount());
-        record.put(OPEN_QUOTE, getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount()));
-        double multipier = Math.abs(1d * position.getCount() / transaction.getCount());
-        record.put(OPEN_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multipier));
-        return record;
-    }
-
-    @Override
-    protected ProfitTable.Record getClosedPositionProfit(ClosedPosition position) {
-        // open transaction info
-        ProfitTable.Record row = new ProfitTable.Record(getOpenedPositionProfit(position));
-        // close transaction info
-        Transaction transaction = position.getCloseTransaction();
-        double multipier = Math.abs(1d * position.getCount() / transaction.getCount());
-        row.put(CLOSE_DATE, transaction.getTimestamp());
-        row.put(CLOSE_QUOTE, getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount()));
-        row.put(CLOSE_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multipier));
-        row.put(FORECAST_TAX, getForecastTax());
-        row.put(PROFIT, getClosedPositionProfit());
-        return row;
-    }
-
-    @Override
-    protected ProfitTable.Record getPaidInterestProfit(Position position,
-                                                       PaidInterest paidInterest) {
-        ProfitTable.Record info = new ProfitTable.Record();
-        info.put(PAYMENT, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.DERIVATIVE_PROFIT, position)));
-        return info;
-    }
-
-    private String getForecastTax() {
-        return "=ЕСЛИ(" + PAYMENT.getCellAddr() + ">0;0,13*" + PAYMENT.getCellAddr() + ";0)";
-    }
-
-    private String getClosedPositionProfit() {
-        return "=" + PAYMENT.getCellAddr() +
-                " - " + OPEN_COMMISSION.getCellAddr() +
-                " - " + CLOSE_COMMISSION.getCellAddr() +
-                " - " + FORECAST_TAX.getCellAddr();
+        return contractProfit;
     }
 }

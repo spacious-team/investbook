@@ -1,5 +1,6 @@
 package ru.portfolio.portfolio.view.excel;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.converter.SecurityEntityConverter;
 import ru.portfolio.portfolio.converter.SecurityEventCashFlowEntityConverter;
@@ -7,7 +8,9 @@ import ru.portfolio.portfolio.converter.TransactionEntityConverter;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.entity.SecurityEntity;
 import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
+import ru.portfolio.portfolio.entity.TransactionCashFlowEntity;
 import ru.portfolio.portfolio.pojo.CashFlowType;
+import ru.portfolio.portfolio.pojo.Security;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 import ru.portfolio.portfolio.pojo.Transaction;
 import ru.portfolio.portfolio.repository.SecurityEventCashFlowRepository;
@@ -18,41 +21,60 @@ import ru.portfolio.portfolio.view.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static ru.portfolio.portfolio.view.excel.StockMarketExcelProfitTableHeader.*;
 
 @Component
-public class StockMarketExcelProfitTableFactory extends ProfitTableFactory {
+@RequiredArgsConstructor
+public class StockMarketExcelProfitTableFactory implements ProfitTableFactory {
+    private final TransactionRepository transactionRepository;
+    private final SecurityRepository securityRepository;
+    private final TransactionCashFlowRepository transactionCashFlowRepository;
+    private final TransactionEntityConverter transactionEntityConverter;
+    private final SecurityEntityConverter securityEntityConverter;
+    private final PaidInterestFactory paidInterestFactory;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityEventCashFlowEntityConverter securityEventCashFlowEntityConverter;
 
-    public StockMarketExcelProfitTableFactory(TransactionRepository transactionRepository,
-                                              SecurityRepository securityRepository,
-                                              TransactionCashFlowRepository transactionCashFlowRepository,
-                                              TransactionEntityConverter transactionEntityConverter,
-                                              SecurityEntityConverter securityEntityConverter,
-                                              PaidInterestFactory paidInterestFactory,
-                                              SecurityEventCashFlowRepository securityEventCashFlowRepository,
-                                              SecurityEventCashFlowEntityConverter securityEventCashFlowEntityConverter) {
-        super(transactionRepository, securityRepository, transactionCashFlowRepository,
-                transactionEntityConverter, securityEntityConverter, paidInterestFactory);
-        this.securityEventCashFlowRepository = securityEventCashFlowRepository;
-        this.securityEventCashFlowEntityConverter = securityEventCashFlowEntityConverter;
+    public ProfitTable create(PortfolioEntity portfolio) {
+        ProfitTable openPositionsProfit = new ProfitTable();
+        ProfitTable closedPositionsProfit = new ProfitTable();
+        for (String isin : getSecuritiesIsin(portfolio)) {
+            Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
+            if (securityEntity.isPresent()) {
+                Positions positions = getPositions(portfolio, securityEntity.get());
+                Security security = securityEntityConverter.fromEntity(securityEntity.get());
+                PaidInterest paidInterest = paidInterestFactory.create(portfolio.getPortfolio(), security, positions);
+                closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(),
+                        paidInterest, this::getClosedPositionProfit));
+                openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(),
+                        paidInterest, this::getOpenedPositionProfit));
+            }
+        }
+        ProfitTable profit = new ProfitTable();
+        profit.addAll(closedPositionsProfit);
+        profit.addAll(openPositionsProfit);
+        return profit;
     }
 
-
-    @Override
-    protected Collection<String> getSecuritiesIsin(PortfolioEntity portfolio) {
-        return transactionRepository.findDistinctIsinByPortfolioOrderByTimestamp(portfolio);
+    private Collection<String> getSecuritiesIsin(PortfolioEntity portfolio) {
+        return transactionRepository.findDistinctIsinByPortfolioOrderByTimestampAsc(portfolio);
     }
 
-    @Override
-    protected Deque<SecurityEventCashFlow> getRedemption(PortfolioEntity portfolio, SecurityEntity securityEntity) {
+    private Positions getPositions(PortfolioEntity portfolio, SecurityEntity security) {
+        Deque<Transaction> transactions = transactionRepository
+                .findBySecurityAndPortfolioOrderByTimestampAscIdAsc(security, portfolio)
+                .stream()
+                .map(transactionEntityConverter::fromEntity)
+                .collect(Collectors.toCollection(LinkedList::new));
+        Deque<SecurityEventCashFlow> redemption = getRedemption(portfolio, security);
+        return new Positions(transactions, redemption);
+    }
+
+    private Deque<SecurityEventCashFlow> getRedemption(PortfolioEntity portfolio, SecurityEntity securityEntity) {
         return securityEventCashFlowRepository
                 .findByPortfolioAndIsinAndCashFlowTypeOrderByTimestampAsc(
                         portfolio.getPortfolio(),
@@ -63,8 +85,23 @@ public class StockMarketExcelProfitTableFactory extends ProfitTableFactory {
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    @Override
-    protected ProfitTable.Record getOpenedPositionProfit(OpenedPosition position) {
+    private <T extends Position> ProfitTable getPositionProfit(Security security,
+                                                               Deque<T> positions,
+                                                               PaidInterest paidInterest,
+                                                               Function<T, ProfitTable.Record> profitBuilder) {
+        ProfitTable rows = new ProfitTable();
+        for (T position : positions) {
+            ProfitTable.Record record = profitBuilder.apply(position);
+            record.putAll(getPaidInterestProfit(position, paidInterest));
+            record.put(SECURITY,
+                    Optional.ofNullable(security.getName())
+                            .orElse(security.getIsin()));
+            rows.add(record);
+        }
+        return rows;
+    }
+
+    private ProfitTable.Record getOpenedPositionProfit(OpenedPosition position) {
         ProfitTable.Record row = new ProfitTable.Record();
         Transaction transaction = position.getOpenTransaction();
         row.put(BUY_DATE, transaction.getTimestamp());
@@ -77,8 +114,7 @@ public class StockMarketExcelProfitTableFactory extends ProfitTableFactory {
         return row;
     }
 
-    @Override
-    protected ProfitTable.Record getClosedPositionProfit(ClosedPosition position) {
+    private ProfitTable.Record getClosedPositionProfit(ClosedPosition position) {
         // open transaction info
         ProfitTable.Record row = new ProfitTable.Record(getOpenedPositionProfit(position));
         // close transaction info
@@ -105,8 +141,7 @@ public class StockMarketExcelProfitTableFactory extends ProfitTableFactory {
         return row;
     }
 
-    @Override
-    protected ProfitTable.Record getPaidInterestProfit(Position position,
+    private ProfitTable.Record getPaidInterestProfit(Position position,
                                                        PaidInterest paidInterest) {
         ProfitTable.Record info = new ProfitTable.Record();
         info.put(COUPON, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.COUPON, position)));
@@ -114,6 +149,20 @@ public class StockMarketExcelProfitTableFactory extends ProfitTableFactory {
         info.put(DIVIDEND, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.DIVIDEND, position)));
         info.put(TAX, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.TAX, position)));
         return info;
+    }
+
+    private BigDecimal getTransactionCashFlow(Transaction transaction, CashFlowType type, double multiplier) {
+        if (transaction.getId() == null) {
+            return null;
+        }
+        Optional<TransactionCashFlowEntity> cashFlow = transactionCashFlowRepository
+                .findByTransactionIdAndCashFlowType(transaction.getId(), type);
+        return cashFlow.map(cash -> cash
+                .getValue()
+                .multiply(BigDecimal.valueOf(multiplier))
+                .abs()
+                .setScale(2, RoundingMode.HALF_UP))
+                .orElse(null);
     }
 
     private BigDecimal getRedemptionCashFlow(String portfolio, String isin, double multiplier) {

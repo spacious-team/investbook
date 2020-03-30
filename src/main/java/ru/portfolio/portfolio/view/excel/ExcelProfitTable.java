@@ -81,12 +81,14 @@ public abstract class ExcelProfitTable {
     }
 
     private Class<? extends ProfitTableHeader> getHeaderType(ProfitTable profitTable) {
-        if (profitTable.isEmpty()) return null;
-        return profitTable.peek()
-                .keySet()
-                .iterator()
-                .next()
-                .getClass();
+        for (ProfitTable.Record record : profitTable) {
+            if (record.isEmpty()) continue;
+            return record.keySet()
+                    .iterator()
+                    .next()
+                    .getClass();
+        }
+        return null;
     }
 
     protected void writeHeader(Sheet sheet, Class<? extends ProfitTableHeader> headerType, CellStyle style) {

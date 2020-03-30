@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntity;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntityPK;
+import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.TransactionCashFlow;
 import ru.portfolio.portfolio.repository.CashFlowTypeRepository;
 import ru.portfolio.portfolio.repository.TransactionRepository;
@@ -29,5 +30,15 @@ public class TransactionCashFlowEntityConverter implements EntityConverter<Trans
         entity.setValue(cash.getValue());
         if (cash.getCurrency() != null) entity.setCurrency(cash.getCurrency());
         return entity;
+    }
+
+    @Override
+    public TransactionCashFlow fromEntity(TransactionCashFlowEntity entity) {
+        return TransactionCashFlow.builder()
+                .transactionId(entity.getTransactionCashFlowId().getTransactionId())
+                .eventType(CashFlowType.valueOf(entity.getTransactionCashFlowId().getType()))
+                .value(entity.getValue())
+                .currency(entity.getCurrency())
+                .build();
     }
 }

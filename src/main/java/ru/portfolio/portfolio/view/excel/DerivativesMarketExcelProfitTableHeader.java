@@ -7,17 +7,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum DerivativesMarketExcelProfitTableHeader implements ExcelProfitTableHeader {
     CONTRACT("Контракт"),
-    OPEN_DATE("Дата открытия"),
-    DIRECTION("Направление сделки открытия"),
+    DIRECTION("Сделка"),
+    DATE("Дата"),
     COUNT("Количество"),
-    OPEN_QUOTE("Котировка открытия, пункты"),
-    OPEN_COMMISSION("Комиссия открытия, руб"),
-    CLOSE_DATE("Дата закрытия"),
-    CLOSE_QUOTE("Котировака закрытия, пункты"),
-    PAYMENT("Вариационная маржа полученная, руб"),
-    CLOSE_COMMISSION("Коммисия закрытия, руб"),
-    FORECAST_TAX("Ожидаемый налог от сделки, руб"),
-    PROFIT("Доход, руб");
+    QUOTE("Котировка, пункты"),
+    AMOUNT("Сумма, руб"),
+    COMMISSION("Коммиссия, руб"),
+    DERIVATIVE_PROFIT_DAY("Дневная вариационная маржа, руб"),
+    DERIVATIVE_PROFIT_TOTAL("Накопленная вариационная маржа, руб"),
+    POSITION("Позиция на конец дня"),
+    FORECAST_TAX("Ожидаемый налог, руб"),
+    PROFIT("Прибыль, руб");
 
     private final String description;
 }

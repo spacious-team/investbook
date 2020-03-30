@@ -1,12 +1,15 @@
 package ru.portfolio.portfolio.view.excel;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
 import ru.portfolio.portfolio.view.ProfitTable;
+import ru.portfolio.portfolio.view.ProfitTableHeader;
 
 import java.util.List;
 
@@ -30,41 +33,51 @@ public class DerivativesMarketExcelProfitTable extends ExcelProfitTable {
     }
 
     @Override
-    protected void writeHeader(Sheet sheet, CellStyle style) {
-        super.writeHeader(sheet, style);
-        //sheet.setColumnWidth(StockMarketProfitExcelTableHeader.SECURITY.ordinal(), 45 * 256);
+    protected void writeHeader(Sheet sheet, Class<? extends ProfitTableHeader> headerType, CellStyle style) {
+        super.writeHeader(sheet, headerType, style);
+        sheet.setColumnWidth(CONTRACT.ordinal(), 24 * 256);
+        sheet.setColumnWidth(AMOUNT.ordinal(), 16 * 256);
     }
 
     @Override
     protected ProfitTable.Record getTotalRow() {
         ProfitTable.Record totalRow = new ProfitTable.Record();
-        for (DerivativesMarketExcelProfitTableHeader column : DerivativesMarketExcelProfitTableHeader.values()) {
-            totalRow.put(column, "=SUM(" +
-                    column.getColumnIndex() + "3:" +
-                    column.getColumnIndex() + "100000)");
-        }
         totalRow.put(CONTRACT, "Итого:");
-        totalRow.remove(OPEN_DATE);
-        totalRow.remove(CLOSE_DATE);
-        totalRow.remove(OPEN_QUOTE);
-        totalRow.remove(CLOSE_QUOTE);
+        totalRow.put(COUNT, getSumFormula(COUNT));
+        totalRow.put(AMOUNT, "=SUMPRODUCT(ABS(" +
+                AMOUNT.getColumnIndex() + "3:" +
+                AMOUNT.getColumnIndex() + "100000))");
+        totalRow.put(COMMISSION, getSumFormula(COMMISSION) + "/2");
+        totalRow.put(DERIVATIVE_PROFIT_DAY, getSumFormula(DERIVATIVE_PROFIT_DAY));
+        totalRow.put(FORECAST_TAX, getSumFormula(FORECAST_TAX));
+        totalRow.put(PROFIT, getSumFormula(PROFIT));
         return totalRow;
+    }
+
+    private String getSumFormula(DerivativesMarketExcelProfitTableHeader column) {
+        return "=SUM(" +
+                column.getColumnIndex() + "3:" +
+                column.getColumnIndex() + "100000)";
     }
 
     @Override
     protected void sheetPostCreate(Sheet sheet, CellStyles styles) {
-/*        for (Cell cell : sheet.getRow(1)) {
-            if (cell.getColumnIndex() == StockMarketProfitExcelTableHeader.SECURITY.ordinal()) {
+        for (Row row : sheet) {
+            if (row.getRowNum() == 0) continue;
+            Cell cell = row.getCell(CONTRACT.ordinal());
+            if (cell != null) {
+                cell.setCellStyle(styles.getSecurityNameStyle());
+            }
+        }
+        for (Cell cell : sheet.getRow(1)) {
+            if (cell == null) continue;
+            if (cell.getColumnIndex() == CONTRACT.ordinal()) {
                 cell.setCellStyle(styles.getTotalTextStyle());
+            } else if (cell.getColumnIndex() == COUNT.ordinal()){
+                cell.setCellStyle(styles.getIntStyle());
             } else {
                 cell.setCellStyle(styles.getTotalRowStyle());
             }
         }
-        for (Row row : sheet) {
-            Cell cell = row.getCell(StockMarketProfitExcelTableHeader.SECURITY.ordinal());
-            cell.setCellStyle(styles.getSecurityNameStyle());
-            cell = row.getCell(StockMarketProfitExcelTableHeader.COUNT.ordinal());
-            cell.setCellStyle(styles.getIntStyle());
-        }*/
     }
 }
