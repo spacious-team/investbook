@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @JsonSerialize(using = TransactionCashFlowEntitySerializer.class)
 public class TransactionCashFlowEntity {
     @EmbeddedId
-    private TransactionCashFlowEntityPK TransactionCashFlowId;
+    private TransactionCashFlowEntityPK transactionCashFlowId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transaction_id", referencedColumnName = "id", insertable = false, updatable = false)
