@@ -35,7 +35,7 @@ public abstract class ExcelProfitTable {
                                     CellStyles styles) {
         if (profitTable.isEmpty()) return;
         Class<? extends ProfitTableHeader> headerType = getHeaderType(profitTable);
-        writeHeader(sheet, styles.getHeaderStyle());
+        writeHeader(sheet, headerType, styles.getHeaderStyle());
         ProfitTable.Record totalRow = getTotalRow();
         if (totalRow != null && !totalRow.isEmpty()) {
             profitTable.addFirst(totalRow);
@@ -62,7 +62,12 @@ public abstract class ExcelProfitTable {
                     }
                 } else if (value instanceof Number) {
                     cell.setCellValue(((Number) value).doubleValue());
-                    cell.setCellStyle(styles.getMoneyStyle());
+                    if (value instanceof Integer || value instanceof Long
+                            || value instanceof Short || value instanceof Byte) {
+                        cell.setCellStyle(styles.getIntStyle());
+                    } else {
+                        cell.setCellStyle(styles.getMoneyStyle());
+                    }
                 } else if (value instanceof Instant) {
                     cell.setCellValue(((Instant) value).atZone(ZoneId.systemDefault()).toLocalDateTime());
                     cell.setCellStyle(styles.getDateStyle());
@@ -84,10 +89,10 @@ public abstract class ExcelProfitTable {
                 .getClass();
     }
 
-    protected void writeHeader(Sheet sheet, CellStyle style) {
+    protected void writeHeader(Sheet sheet, Class<? extends ProfitTableHeader> headerType, CellStyle style) {
         Row row = sheet.createRow(0);
         row.setHeight((short)-1);
-        for (StockMarketExcelProfitTableHeader header : StockMarketExcelProfitTableHeader.values()) {
+        for (ProfitTableHeader header : headerType.getEnumConstants()) {
             Cell cell = row.createCell(header.ordinal());
             cell.setCellValue(header.getDescription());
             cell.setCellStyle(style);
