@@ -32,4 +32,7 @@ public class EventCashFlow {
 
     @Builder.Default
     private String currency = "RUR";
+
+    @Nullable
+    private String description;
 }

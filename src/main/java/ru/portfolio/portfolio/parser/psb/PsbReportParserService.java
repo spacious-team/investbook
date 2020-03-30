@@ -64,12 +64,14 @@ public class PsbReportParserService {
 
     private void addCashInAndOutFlows(CashFlowTable cashFlowTable) {
         for (CashFlowTable.CashFlowTableRow row : cashFlowTable.getData()) {
+            String description = row.getDescription();
             addEventCashFlow(EventCashFlow.builder()
                     .portfolio(cashFlowTable.getReport().getPortfolio())
                     .eventType(row.getType())
                     .timestamp(row.getTimestamp())
                     .value(row.getValue())
-                    .currency(row.getCurrency()));
+                    .currency(row.getCurrency())
+                    .description((description == null || description.isEmpty())? null : description));
         }
     }
 

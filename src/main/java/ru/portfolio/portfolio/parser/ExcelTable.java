@@ -141,7 +141,11 @@ public class ExcelTable implements Iterable<Row> {
     }
 
     public String getStringCellValue(Row row, TableColumnDescription columnDescription) {
-        return getCell(row, columnDescription).getStringCellValue();
+        Cell cell = getCell(row, columnDescription);
+        if (cell == null || cell.getCellType() == CellType.BLANK) {
+            return "";
+        }
+        return cell.getStringCellValue();
     }
 
     @Override
