@@ -1,35 +1,22 @@
 package ru.portfolio.portfolio.view.excel;
 
-import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
 import ru.portfolio.portfolio.view.Table;
 import ru.portfolio.portfolio.view.TableHeader;
 
-import java.util.List;
-
 import static ru.portfolio.portfolio.view.excel.StockMarketProfitExcelTableHeader.*;
 
 @Component
-@RequiredArgsConstructor
 public class StockMarketProfitExcelTableView extends ExcelTableView {
-    private final PortfolioRepository portfolioRepository;
-    private final StockMarketProfitExcelTableFactory stockMarketProfitExcelTableFactory;
 
-    @Override
-    protected List<PortfolioEntity> getPortfolios() {
-        // TODO select by user
-        return portfolioRepository.findAll();
-    }
-
-    @Override
-    protected Table getTable(PortfolioEntity portfolio) {
-        return stockMarketProfitExcelTableFactory.create(portfolio);
+    public StockMarketProfitExcelTableView(PortfolioRepository portfolioRepository,
+                                           StockMarketProfitExcelTableFactory tableFactory) {
+        super(portfolioRepository, tableFactory);
     }
 
     @Override

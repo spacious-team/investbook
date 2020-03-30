@@ -1,9 +1,12 @@
 package ru.portfolio.portfolio.view.excel;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
+import ru.portfolio.portfolio.repository.PortfolioRepository;
 import ru.portfolio.portfolio.view.Table;
+import ru.portfolio.portfolio.view.TableFactory;
 import ru.portfolio.portfolio.view.TableHeader;
 
 import java.time.Instant;
@@ -14,7 +17,10 @@ import java.util.function.UnaryOperator;
 
 import static ru.portfolio.portfolio.view.excel.StockMarketProfitExcelTableHeader.ROW_NUM_PLACE_HOLDER;
 
+@RequiredArgsConstructor
 public abstract class ExcelTableView {
+    private final PortfolioRepository portfolioRepository;
+    private final TableFactory tableFactory;
 
     public void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator) {
         for (PortfolioEntity portfolio : getPortfolios()) {
@@ -26,9 +32,14 @@ public abstract class ExcelTableView {
         }
     }
 
-    protected abstract List<PortfolioEntity> getPortfolios();
+    protected List<PortfolioEntity> getPortfolios() {
+        // TODO select by user
+        return portfolioRepository.findAll();
+    }
 
-    protected abstract Table getTable(PortfolioEntity portfolio);
+    protected Table getTable(PortfolioEntity portfolio) {
+        return tableFactory.create(portfolio);
+    }
 
     protected void writeTable(Table table,
                               Sheet sheet,
