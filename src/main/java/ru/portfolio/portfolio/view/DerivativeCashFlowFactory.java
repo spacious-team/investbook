@@ -2,9 +2,9 @@ package ru.portfolio.portfolio.view;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.converter.SecurityEventCashFlowEntityConverter;
-import ru.portfolio.portfolio.converter.TransactionCashFlowEntityConverter;
-import ru.portfolio.portfolio.converter.TransactionEntityConverter;
+import ru.portfolio.portfolio.converter.SecurityEventCashFlowConverter;
+import ru.portfolio.portfolio.converter.TransactionCashFlowConverter;
+import ru.portfolio.portfolio.converter.TransactionConverter;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.entity.SecurityEntity;
 import ru.portfolio.portfolio.pojo.CashFlowType;
@@ -36,9 +36,9 @@ public class DerivativeCashFlowFactory {
     private final TransactionRepository transactionRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
-    private final TransactionEntityConverter transactionEntityConverter;
-    private final SecurityEventCashFlowEntityConverter securityEventCashFlowEntityConverter;
-    private final TransactionCashFlowEntityConverter transactionCashFlowEntityConverter;
+    private final TransactionConverter transactionConverter;
+    private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
+    private final TransactionCashFlowConverter transactionCashFlowConverter;
 
     public DerivativeCashFlow getDerivativeCashFlow(PortfolioEntity portfolio, SecurityEntity security) {
         Deque<Transaction> transactions = getTransactions(portfolio, security);
@@ -70,7 +70,7 @@ public class DerivativeCashFlowFactory {
         return transactionRepository
                 .findBySecurityAndPortfolioOrderByTimestampAscIdAsc(security, portfolio)
                 .stream()
-                .map(transactionEntityConverter::fromEntity)
+                .map(transactionConverter::fromEntity)
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
@@ -81,7 +81,7 @@ public class DerivativeCashFlowFactory {
                             security.getIsin(),
                             CashFlowType.DERIVATIVE_PROFIT)
                     .stream()
-                    .map(securityEventCashFlowEntityConverter::fromEntity)
+                    .map(securityEventCashFlowConverter::fromEntity)
                     .collect(Collectors.toCollection(LinkedList::new));
     }
 
@@ -103,7 +103,7 @@ public class DerivativeCashFlowFactory {
             dailyTransactionsCashFlows.put(transaction,
                     transactionCashFlowRepository.findByTransactionId(transaction.getId())
                             .stream()
-                            .map(transactionCashFlowEntityConverter::fromEntity)
+                            .map(transactionCashFlowConverter::fromEntity)
                             .collect(Collectors.toMap(TransactionCashFlow::getEventType, Function.identity())));
         }
         return dailyTransactionsCashFlows;

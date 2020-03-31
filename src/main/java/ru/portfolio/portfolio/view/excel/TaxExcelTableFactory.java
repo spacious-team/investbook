@@ -2,7 +2,7 @@ package ru.portfolio.portfolio.view.excel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.converter.EventCashFlowEntityConverter;
+import ru.portfolio.portfolio.converter.EventCashFlowConverter;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.EventCashFlow;
@@ -22,7 +22,7 @@ import static ru.portfolio.portfolio.view.excel.TaxExcelTableHeader.*;
 @RequiredArgsConstructor
 public class TaxExcelTableFactory implements TableFactory {
     private final EventCashFlowRepository eventCashFlowRepository;
-    private final EventCashFlowEntityConverter eventCashFlowEntityConverter;
+    private final EventCashFlowConverter eventCashFlowConverter;
 
     @Override
     public Table create(PortfolioEntity portfolio) {
@@ -32,7 +32,7 @@ public class TaxExcelTableFactory implements TableFactory {
                         portfolio.getPortfolio(),
                         CashFlowType.TAX.getType())
                 .stream()
-                .map(eventCashFlowEntityConverter::fromEntity)
+                .map(eventCashFlowConverter::fromEntity)
                 .collect(Collectors.toCollection(ArrayList::new));
 
         for (EventCashFlow cash : cashFlows) {

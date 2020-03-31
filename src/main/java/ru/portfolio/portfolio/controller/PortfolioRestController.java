@@ -2,7 +2,7 @@ package ru.portfolio.portfolio.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.portfolio.portfolio.converter.PortfolioEntityConverter;
+import ru.portfolio.portfolio.converter.PortfolioConverter;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.pojo.Portfolio;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
@@ -15,7 +15,7 @@ import java.util.Optional;
 public class PortfolioRestController extends AbstractRestController<String, Portfolio, PortfolioEntity> {
     private final PortfolioRepository repository;
 
-    public PortfolioRestController(PortfolioRepository repository, PortfolioEntityConverter converter) {
+    public PortfolioRestController(PortfolioRepository repository, PortfolioConverter converter) {
         super(repository, converter);
         this.repository = repository;
     }

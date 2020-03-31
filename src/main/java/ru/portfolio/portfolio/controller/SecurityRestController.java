@@ -2,7 +2,7 @@ package ru.portfolio.portfolio.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.portfolio.portfolio.converter.SecurityEntityConverter;
+import ru.portfolio.portfolio.converter.SecurityConverter;
 import ru.portfolio.portfolio.entity.SecurityEntity;
 import ru.portfolio.portfolio.pojo.Security;
 import ru.portfolio.portfolio.repository.SecurityRepository;
@@ -15,7 +15,7 @@ import java.util.Optional;
 public class SecurityRestController extends AbstractRestController<String, Security, SecurityEntity> {
     private final SecurityRepository repository;
 
-    public SecurityRestController(SecurityRepository repository, SecurityEntityConverter converter) {
+    public SecurityRestController(SecurityRepository repository, SecurityConverter converter) {
         super(repository, converter);
         this.repository = repository;
     }

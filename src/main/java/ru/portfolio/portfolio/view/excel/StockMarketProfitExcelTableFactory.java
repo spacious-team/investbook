@@ -2,9 +2,9 @@ package ru.portfolio.portfolio.view.excel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.converter.SecurityEntityConverter;
-import ru.portfolio.portfolio.converter.SecurityEventCashFlowEntityConverter;
-import ru.portfolio.portfolio.converter.TransactionEntityConverter;
+import ru.portfolio.portfolio.converter.SecurityConverter;
+import ru.portfolio.portfolio.converter.SecurityEventCashFlowConverter;
+import ru.portfolio.portfolio.converter.TransactionConverter;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.entity.SecurityEntity;
 import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
@@ -33,11 +33,11 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
-    private final TransactionEntityConverter transactionEntityConverter;
-    private final SecurityEntityConverter securityEntityConverter;
+    private final TransactionConverter transactionConverter;
+    private final SecurityConverter securityConverter;
     private final PaidInterestFactory paidInterestFactory;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
-    private final SecurityEventCashFlowEntityConverter securityEventCashFlowEntityConverter;
+    private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
 
     public Table create(PortfolioEntity portfolio) {
         Table openPositionsProfit = new Table();
@@ -46,7 +46,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
             if (securityEntity.isPresent()) {
                 Positions positions = getPositions(portfolio, securityEntity.get());
-                Security security = securityEntityConverter.fromEntity(securityEntity.get());
+                Security security = securityConverter.fromEntity(securityEntity.get());
                 PaidInterest paidInterest = paidInterestFactory.create(portfolio.getPortfolio(), security, positions);
                 openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(),
                         paidInterest, this::getOpenedPositionProfit));
@@ -68,7 +68,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         Deque<Transaction> transactions = transactionRepository
                 .findBySecurityAndPortfolioOrderByTimestampAscIdAsc(security, portfolio)
                 .stream()
-                .map(transactionEntityConverter::fromEntity)
+                .map(transactionConverter::fromEntity)
                 .collect(Collectors.toCollection(LinkedList::new));
         Deque<SecurityEventCashFlow> redemption = getRedemption(portfolio, security);
         return new Positions(transactions, redemption);
@@ -81,7 +81,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                         securityEntity.getIsin(),
                         CashFlowType.REDEMPTION)
                 .stream()
-                .map(securityEventCashFlowEntityConverter::fromEntity)
+                .map(securityEventCashFlowConverter::fromEntity)
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 

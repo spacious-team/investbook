@@ -9,7 +9,7 @@ import ru.portfolio.portfolio.repository.PortfolioRepository;
 
 @Component
 @RequiredArgsConstructor
-public class PortfolioPropertyEntityConverter implements EntityConverter<PortfolioPropertyEntity, PortfolioProperty> {
+public class PortfolioPropertyConverter implements EntityConverter<PortfolioPropertyEntity, PortfolioProperty> {
     private final PortfolioRepository portfolioRepository;
 
     @Override

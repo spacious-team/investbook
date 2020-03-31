@@ -5,7 +5,7 @@ import ru.portfolio.portfolio.entity.IssuerEntity;
 import ru.portfolio.portfolio.pojo.Issuer;
 
 @Component
-public class IssuerEntityConverter implements EntityConverter<IssuerEntity, Issuer>  {
+public class IssuerConverter implements EntityConverter<IssuerEntity, Issuer>  {
 
     @Override
     public IssuerEntity toEntity(Issuer issuer) {

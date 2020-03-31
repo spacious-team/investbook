@@ -2,7 +2,7 @@ package ru.portfolio.portfolio.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.portfolio.portfolio.converter.TransactionCashFlowEntityConverter;
+import ru.portfolio.portfolio.converter.TransactionCashFlowConverter;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntity;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntityPK;
 import ru.portfolio.portfolio.pojo.CashFlowType;
@@ -19,7 +19,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
     private final TransactionCashFlowRepository transactionCashFlowRepository;
 
     public TransactionCashFlowRestController(TransactionCashFlowRepository repository,
-                                             TransactionCashFlowEntityConverter converter) {
+                                             TransactionCashFlowConverter converter) {
         super(repository, converter);
         this.transactionCashFlowRepository = repository;
     }

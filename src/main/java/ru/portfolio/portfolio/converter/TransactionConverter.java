@@ -11,7 +11,7 @@ import ru.portfolio.portfolio.repository.SecurityRepository;
 
 @Component
 @RequiredArgsConstructor
-public class TransactionEntityConverter implements EntityConverter<TransactionEntity, Transaction> {
+public class TransactionConverter implements EntityConverter<TransactionEntity, Transaction> {
     private final PortfolioRepository portfolioRepository;
     private final SecurityRepository securityRepository;
 

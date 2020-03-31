@@ -2,7 +2,7 @@ package ru.portfolio.portfolio.view;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.converter.SecurityEventCashFlowEntityConverter;
+import ru.portfolio.portfolio.converter.SecurityEventCashFlowConverter;
 import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.Security;
@@ -21,7 +21,7 @@ import static ru.portfolio.portfolio.pojo.CashFlowType.*;
 public class PaidInterestFactory {
     private static final CashFlowType[] PAY_TYPES =  new CashFlowType[]{COUPON, AMORTIZATION, DIVIDEND, TAX};
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
-    private final SecurityEventCashFlowEntityConverter securityEventCashFlowEntityConverter;
+    private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
 
     public PaidInterest create(String portfolio, Security security, Positions positions) {
         PaidInterest paidInterest = new PaidInterest();
@@ -37,7 +37,7 @@ public class PaidInterestFactory {
 
         Map<Position, List<SecurityEventCashFlow>> payments = new HashMap<>();
         for (SecurityEventCashFlowEntity entity : accruedInterests) {
-            SecurityEventCashFlow cash = securityEventCashFlowEntityConverter.fromEntity(entity);
+            SecurityEventCashFlow cash = securityEventCashFlowConverter.fromEntity(entity);
             BigDecimal payPerOne =  cash.getValue()
                     .divide(BigDecimal.valueOf(cash.getCount()), 6, RoundingMode.HALF_UP);
 

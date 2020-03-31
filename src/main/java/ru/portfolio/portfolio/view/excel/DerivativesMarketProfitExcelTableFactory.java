@@ -2,7 +2,7 @@ package ru.portfolio.portfolio.view.excel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.converter.SecurityEntityConverter;
+import ru.portfolio.portfolio.converter.SecurityConverter;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.entity.SecurityEntity;
 import ru.portfolio.portfolio.pojo.CashFlowType;
@@ -33,7 +33,7 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
             + "-" + FORECAST_TAX.getCellAddr();
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
-    private final SecurityEntityConverter securityEntityConverter;
+    private final SecurityConverter securityConverter;
     private final DerivativeCashFlowFactory derivativeCashFlowFactory;
 
     public Table create(PortfolioEntity portfolio) {
@@ -41,7 +41,7 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
         for (String isin : getSecuritiesIsin(portfolio)) {
             Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
             if (securityEntity.isPresent()) {
-                Security security = securityEntityConverter.fromEntity(securityEntity.get());
+                Security security = securityConverter.fromEntity(securityEntity.get());
                 DerivativeCashFlow derivativeCashFlow = derivativeCashFlowFactory.getDerivativeCashFlow(portfolio, securityEntity.get());
 
                 profit.addEmptyRecord();

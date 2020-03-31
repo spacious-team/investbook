@@ -9,7 +9,7 @@ import ru.portfolio.portfolio.repository.IssuerRepository;
 
 @Component
 @RequiredArgsConstructor
-public class SecurityEntityConverter implements EntityConverter<SecurityEntity, Security> {
+public class SecurityConverter implements EntityConverter<SecurityEntity, Security> {
 
     private final IssuerRepository issuerRepository;
 

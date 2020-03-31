@@ -7,7 +7,7 @@ import ru.portfolio.portfolio.pojo.Portfolio;
 
 @Component
 @RequiredArgsConstructor
-public class PortfolioEntityConverter implements EntityConverter<PortfolioEntity, Portfolio> {
+public class PortfolioConverter implements EntityConverter<PortfolioEntity, Portfolio> {
     @Override
     public PortfolioEntity toEntity(Portfolio pojo) {
         PortfolioEntity entity = new PortfolioEntity();

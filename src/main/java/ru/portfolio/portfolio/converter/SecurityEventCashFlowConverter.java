@@ -3,49 +3,57 @@ package ru.portfolio.portfolio.converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.entity.CashFlowTypeEntity;
-import ru.portfolio.portfolio.entity.EventCashFlowEntity;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
+import ru.portfolio.portfolio.entity.SecurityEntity;
+import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
 import ru.portfolio.portfolio.pojo.CashFlowType;
-import ru.portfolio.portfolio.pojo.EventCashFlow;
+import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 import ru.portfolio.portfolio.repository.CashFlowTypeRepository;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
+import ru.portfolio.portfolio.repository.SecurityRepository;
 
 @Component
 @RequiredArgsConstructor
-public class EventCashFlowEntityConverter implements EntityConverter<EventCashFlowEntity, EventCashFlow> {
+public class SecurityEventCashFlowConverter implements EntityConverter<SecurityEventCashFlowEntity, SecurityEventCashFlow> {
     private final PortfolioRepository portfolioRepository;
+    private final SecurityRepository securityRepository;
     private final CashFlowTypeRepository cashFlowTypeRepository;
 
     @Override
-    public EventCashFlowEntity toEntity(EventCashFlow eventCashFlow) {
+    public SecurityEventCashFlowEntity toEntity(SecurityEventCashFlow eventCashFlow) {
+        SecurityEntity securityEntity = null;
+        if (eventCashFlow.getIsin() != null) {
+            securityEntity = securityRepository.findByIsin(eventCashFlow.getIsin())
+                    .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + eventCashFlow.getIsin()));
+        }
         PortfolioEntity portfolioEntity = portfolioRepository.findById(eventCashFlow.getPortfolio())
                 .orElseThrow(() -> new IllegalArgumentException("В справочнике не найден брокерский счет: " + eventCashFlow.getPortfolio()));
         CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.findById(eventCashFlow.getEventType().getType())
                 .orElseThrow(() -> new IllegalArgumentException("В справочнике не найдено событие с типом: " + eventCashFlow.getEventType().getType()));
 
-        EventCashFlowEntity entity = new EventCashFlowEntity();
+        SecurityEventCashFlowEntity entity = new SecurityEventCashFlowEntity();
         entity.setId(eventCashFlow.getId());
         entity.setPortfolio(portfolioEntity);
         entity.setTimestamp(eventCashFlow.getTimestamp());
+        entity.setSecurity(securityEntity);
+        entity.setCount(eventCashFlow.getCount());
         entity.setCashFlowType(cashFlowTypeEntity);
         entity.setValue(eventCashFlow.getValue());
         if(eventCashFlow.getCurrency() != null) entity.setCurrency(eventCashFlow.getCurrency());
-        if (eventCashFlow.getDescription() != null &&! eventCashFlow.getDescription().isEmpty()) {
-            entity.setDescription(eventCashFlow.getDescription());
-        }
         return entity;
     }
 
     @Override
-    public EventCashFlow fromEntity(EventCashFlowEntity entity) {
-        return EventCashFlow.builder()
+    public SecurityEventCashFlow fromEntity(SecurityEventCashFlowEntity entity) {
+        return SecurityEventCashFlow.builder()
                 .id(entity.getId())
                 .portfolio(entity.getPortfolio().getPortfolio())
                 .timestamp(entity.getTimestamp())
                 .eventType(CashFlowType.valueOf(entity.getCashFlowType().getId()))
+                .isin(entity.getSecurity().getIsin())
+                .count(entity.getCount())
                 .value(entity.getValue())
                 .currency(entity.getCurrency())
-                .description(entity.getDescription())
                 .build();
     }
 }
