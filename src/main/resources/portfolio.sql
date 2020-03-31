@@ -90,6 +90,7 @@ CREATE TABLE IF NOT EXISTS `portfolio_property` (
   `property` varchar(64) NOT NULL,
   `value` varchar(256) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE INDEX `portfolio_property_portfolio_timestamp_property_uniq_ix` (`portfolio`, `timestamp`, `property`),
   KEY `portfolio_property_portfolio_fkey` (`portfolio`),
   CONSTRAINT `portfolio_property_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Свойства портфеля';
