@@ -9,5 +9,6 @@ public interface BrokerReport extends AutoCloseable {
     Sheet getSheet();
     String getPortfolio();
     Path getPath();
+    Instant getReportDate();
     Instant convertToInstant(String value);
 }

@@ -1,5 +1,7 @@
 package ru.portfolio.portfolio.parser.psb;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.NestedExceptionUtils;
@@ -24,6 +26,8 @@ public class PsbReportParserService {
     private final EventCashFlowRestController eventCashFlowRestController;
     private final TransactionRestController transactionRestController;
     private final TransactionCashFlowRestController transactionCashFlowRestController;
+    private final PortfolioPropertyRestController portfolioPropertyRestController;
+    private final ObjectMapper objectMapper;
 
     public void parse(String reportFile) {
         parse(Paths.get(reportFile));
@@ -33,7 +37,8 @@ public class PsbReportParserService {
         try (PsbBrokerReport report = new PsbBrokerReport(reportFile)) {
             boolean isAdded = addPortfolio(Portfolio.builder().portfolio(report.getPortfolio()));
             if (isAdded) {
-                //CashTable cashTable = new CashTable(report);
+                CashTable cashTable = new CashTable(report);
+                PortfolioPropertyTable portfolioPropertyTable = new PortfolioPropertyTable(report);
                 CashFlowTable cashFlowTable = new CashFlowTable(report);
                 PortfolioSecuritiesTable portfolioSecuritiesTable = new PortfolioSecuritiesTable(report);
                 TransactionTable transactionTable = new TransactionTable(report);
@@ -42,6 +47,8 @@ public class PsbReportParserService {
                 DerivativeTransactionTable derivativeTransactionTable = new DerivativeTransactionTable(report);
                 DerivativeCashFlowTable derivativeCashFlowTable = new DerivativeCashFlowTable(report);
 
+                addPortfolioProperties(portfolioPropertyTable);
+                addCashInfo(cashTable);
                 addSecurities(portfolioSecuritiesTable);
                 addCashInAndOutFlows(cashFlowTable);
                 addTransaction(transactionTable);
@@ -199,6 +206,28 @@ public class PsbReportParserService {
         }
     }
 
+    private void addPortfolioProperties(PortfolioPropertyTable portfolioPropertyTable) {
+        for (PortfolioPropertyTable.PortfolioPropertyRow row : portfolioPropertyTable.getData()) {
+            addPortfolioProperty(PortfolioProperty.builder()
+                    .portfolio(portfolioPropertyTable.getReport().getPortfolio())
+                    .property(row.getProperty())
+                    .value(String.valueOf(row.getValue()))
+                    .timestamp(portfolioPropertyTable.getReport().getReportDate()));
+        }
+    }
+
+    private void addCashInfo(CashTable cashTable) {
+        try {
+        addPortfolioProperty(PortfolioProperty.builder()
+                .portfolio(cashTable.getReport().getPortfolio())
+                .property(PortfolioPropertyType.CASH)
+                .value(objectMapper.writeValueAsString(cashTable.getData()))
+                .timestamp(cashTable.getReport().getReportDate()));
+        } catch (JsonProcessingException e) {
+            log.warn("Не могу добавить информацию о наличных средствах {}", cashTable.getData(), e);
+        }
+    }
+
     private boolean addSecurity(String isin) {
         return addSecurity(isin, null);
     }
@@ -304,6 +333,21 @@ public class PsbReportParserService {
                 log.debug("Дублирование информации: не могу добавить информацию о движении денежных средств {}", securityEventCashFlow, e);
             } else {
                 log.warn("Не могу добавить информацию о движении денежных средств {}", securityEventCashFlow, e);
+            }
+        }
+    }
+
+    private void addPortfolioProperty(PortfolioProperty.PortfolioPropertyBuilder property) {
+        try {
+            HttpStatus status = portfolioPropertyRestController.post(property.build()).getStatusCode();
+            if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
+                log.warn("Не могу добавить информацию о свойствах портфеля {}", property);
+            }
+        } catch (Exception e) {
+            if (NestedExceptionUtils.getMostSpecificCause(e).getMessage().toLowerCase().contains("duplicate")) {
+                log.debug("Дублирование информации: не могу добавить информацию о свойствах портфеля {}", property, e);
+            } else {
+                log.warn("Не могу добавить информацию о свойствах портфеля {}", property, e);
             }
         }
     }

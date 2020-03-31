@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.math.BigDecimal;
@@ -121,12 +122,27 @@ public class ExcelTable implements Iterable<Row> {
         return row.getCell(columnIndices.get(columnDescription.getColumn()));
     }
 
+    public Cell getCell(CellAddress address) {
+        return sheet.getRow(address.getRow()).getCell(address.getColumn());
+    }
+
     public int getIntCellValue(Row row, TableColumnDescription columnDescription) {
         return (int) getLongCellValue(row, columnDescription);
     }
 
+    public long getIntCellValue(CellAddress address) {
+        return (int) getLongCellValue(address);
+    }
+
     public long getLongCellValue(Row row, TableColumnDescription columnDescription) {
-        Cell cell = getCell(row, columnDescription);
+        return getLongCellValue(getCell(row, columnDescription));
+    }
+
+    public long getLongCellValue(CellAddress address) {
+        return getLongCellValue(getCell(address));
+    }
+
+    public static long getLongCellValue(Cell cell) {
         CellType type = cell.getCellType();
         if (type == CellType.NUMERIC) {
             return Double.valueOf(cell.getNumericCellValue()).longValue();
@@ -136,12 +152,27 @@ public class ExcelTable implements Iterable<Row> {
     }
 
     public BigDecimal getCurrencyCellValue(Row row, TableColumnDescription columnDescription) {
-        double cellValue = getCell(row, columnDescription).getNumericCellValue();
+        return getCurrencyCellValue(getCell(row, columnDescription));
+    }
+
+    public BigDecimal getCurrencyCellValue(CellAddress address) {
+        return getCurrencyCellValue(getCell(address));
+    }
+
+    public static BigDecimal getCurrencyCellValue(Cell cell) {
+        double cellValue = cell.getNumericCellValue();
         return (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
     }
 
     public String getStringCellValue(Row row, TableColumnDescription columnDescription) {
-        Cell cell = getCell(row, columnDescription);
+        return getStringCellValue(getCell(row, columnDescription));
+    }
+
+    public String getStringCellValue(CellAddress address) {
+        return getStringCellValue(getCell(address));
+    }
+
+    public static String getStringCellValue(Cell cell) {
         if (cell == null || cell.getCellType() == CellType.BLANK) {
             return "";
         }
