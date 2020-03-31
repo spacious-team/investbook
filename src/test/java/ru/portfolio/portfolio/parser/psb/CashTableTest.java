@@ -1,6 +1,7 @@
 package ru.portfolio.portfolio.parser.psb;
 
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.math.BigDecimal;
 
 import static org.testng.Assert.assertEquals;
 
+@Ignore
 public class CashTableTest {
     PsbBrokerReport report;
 
