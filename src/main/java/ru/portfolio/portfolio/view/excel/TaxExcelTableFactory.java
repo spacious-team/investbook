@@ -10,17 +10,17 @@ import ru.portfolio.portfolio.repository.EventCashFlowRepository;
 import ru.portfolio.portfolio.view.Table;
 import ru.portfolio.portfolio.view.TableFactory;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ru.portfolio.portfolio.view.excel.CashFlowExcelTableHeader.*;
+import static ru.portfolio.portfolio.view.excel.TaxExcelTableHeader.*;
 
 @Component
 @RequiredArgsConstructor
-public class CashFlowExcelTableFactory implements TableFactory {
-    // TODO DAYS() excel function not impl by Apache POI: https://bz.apache.org/bugzilla/show_bug.cgi?id=58468
-    private static final String DAYS_COUNT_FORMULA = "=DAYS360(" + DATE.getCellAddr() + ",TODAY())";
+public class TaxExcelTableFactory implements TableFactory {
     private final EventCashFlowRepository eventCashFlowRepository;
     private final EventCashFlowEntityConverter eventCashFlowEntityConverter;
 
@@ -30,7 +30,7 @@ public class CashFlowExcelTableFactory implements TableFactory {
         List<EventCashFlow> cashFlows = eventCashFlowRepository
                 .findByPortfolioPortfolioAndCashFlowTypeIdOrderByTimestamp(
                         portfolio.getPortfolio(),
-                        CashFlowType.CASH.getType())
+                        CashFlowType.TAX.getType())
                 .stream()
                 .map(eventCashFlowEntityConverter::fromEntity)
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -38,9 +38,10 @@ public class CashFlowExcelTableFactory implements TableFactory {
         for (EventCashFlow cash : cashFlows) {
             Table.Record record = new Table.Record();
             record.put(DATE, cash.getTimestamp());
-            record.put(CASH, cash.getValue());
+            record.put(TAX, Optional.ofNullable(cash.getValue())
+                    .map(BigDecimal::abs)
+                    .orElse(BigDecimal.ZERO));
             record.put(CURRENCY, cash.getCurrency());
-            record.put(DAYS_COUNT, DAYS_COUNT_FORMULA);
             record.put(DESCRIPTION, cash.getDescription());
             table.add(record);
         }

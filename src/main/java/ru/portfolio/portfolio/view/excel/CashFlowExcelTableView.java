@@ -14,6 +14,7 @@ import ru.portfolio.portfolio.view.TableHeader;
 import java.math.BigDecimal;
 
 import static ru.portfolio.portfolio.view.excel.CashFlowExcelTableHeader.*;
+import static ru.portfolio.portfolio.view.excel.TaxExcelTableHeader.DESCRIPTION;
 
 @Component
 public class CashFlowExcelTableView extends ExcelTableView {
@@ -48,10 +49,10 @@ public class CashFlowExcelTableView extends ExcelTableView {
                         PortfolioPropertyType.TOTAL_ASSETS.name())
                 .map(e -> BigDecimal.valueOf(Double.parseDouble(e.getValue())))
                 .orElse(BigDecimal.ZERO));
-        total.put(PROFIT, "=(" + LIQUIDATION_VALUE.getColumnIndex() + "3-" + CASH.getColumnIndex() + "3)"
+        total.put(PROFIT, "=(" + LIQUIDATION_VALUE.getColumnIndex() + "2-" + CASH.getColumnIndex() + "2)"
                 + "/SUMPRODUCT("
-                + CASH.getColumnIndex() + "2:" + CASH.getColumnIndex() + "100000,"
-                + DAYS_COUNT.getColumnIndex() + "2:" + DAYS_COUNT.getColumnIndex() + "100000)*365*100");
+                + CASH.getColumnIndex() + "3:" + CASH.getColumnIndex() + "100000,"
+                + DAYS_COUNT.getColumnIndex() + "3:" + DAYS_COUNT.getColumnIndex() + "100000)*365*100");
         return total;
     }
 
@@ -63,6 +64,10 @@ public class CashFlowExcelTableView extends ExcelTableView {
             Cell cell = row.getCell(DAYS_COUNT.ordinal());
             if (cell != null) {
                 cell.setCellStyle(styles.getIntStyle());
+            }
+            cell = row.getCell(DESCRIPTION.ordinal());
+            if (cell != null) {
+                cell.setCellStyle(styles.getLeftAlignedTextStyle());
             }
         }
         for (Cell cell : sheet.getRow(1)) {

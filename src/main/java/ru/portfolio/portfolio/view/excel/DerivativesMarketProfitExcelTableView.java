@@ -54,7 +54,7 @@ public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
             if (row.getRowNum() == 0) continue;
             Cell cell = row.getCell(CONTRACT.ordinal());
             if (cell != null) {
-                cell.setCellStyle(styles.getSecurityNameStyle());
+                cell.setCellStyle(styles.getLeftAlignedTextStyle());
             }
         }
         for (Cell cell : sheet.getRow(1)) {

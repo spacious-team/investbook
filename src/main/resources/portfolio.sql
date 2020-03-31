@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
-  `description` varchar(10) NULL DEFAULT NULL,
+  `description` varchar(128) NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `event_cash_flow_timestamp_type_value_currency_portfolio_uniq_ix` (`timestamp`,`type`,`value`,`currency`,`portfolio`),
   KEY `event_cash_flow_type_ix` (`type`),
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS `portfolio` (
 
 -- Экспортируемые данные не выделены.
 
--- Дамп структуры для таблица portfolio.property
+-- Дамп структуры для таблица portfolio.portfolio_property
 CREATE TABLE IF NOT EXISTS `portfolio_property` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `portfolio` varchar(32) NOT NULL,
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS `portfolio_property` (
   `property` varchar(64) NOT NULL,
   `value` varchar(256) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY portfolio_property_portfolio_fkey` (`portfolio`),
+  KEY `portfolio_property_portfolio_fkey` (`portfolio`),
   CONSTRAINT `portfolio_property_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`portfolio`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Свойства портфеля';
 
