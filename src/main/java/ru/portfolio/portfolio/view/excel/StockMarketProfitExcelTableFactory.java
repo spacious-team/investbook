@@ -43,7 +43,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             if (securityEntity.isPresent()) {
                 Security security = securityConverter.fromEntity(securityEntity.get());
                 Positions positions = getPositions(portfolio, security);
-                PaidInterest paidInterest = paidInterestFactory.create(portfolio.getPortfolio(), security, positions);
+                PaidInterest paidInterest = paidInterestFactory.create(portfolio.getId(), security, positions);
                 openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(),
                         paidInterest, this::getOpenedPositionProfit));
                 closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(),
@@ -62,7 +62,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
 
     private Positions getPositions(Portfolio portfolio, Security security) {
         Deque<Transaction> transactions = transactionRepository
-                .findBySecurityIsinAndPortfolioPortfolioOrderByTimestampAscIdAsc(security.getIsin(), portfolio.getPortfolio())
+                .findBySecurityIsinAndPortfolioIdOrderByTimestampAscIdAsc(security.getIsin(), portfolio.getId())
                 .stream()
                 .map(transactionConverter::fromEntity)
                 .collect(Collectors.toCollection(LinkedList::new));
@@ -72,8 +72,8 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
 
     private Deque<SecurityEventCashFlow> getRedemption(Portfolio portfolio, Security securityEntity) {
         return securityEventCashFlowRepository
-                .findByPortfolioPortfolioAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(
-                        portfolio.getPortfolio(),
+                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(
+                        portfolio.getId(),
                         securityEntity.getIsin(),
                         CashFlowType.REDEMPTION.getId())
                 .stream()
@@ -163,7 +163,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
 
     private BigDecimal getRedemptionCashFlow(String portfolio, String isin, double multiplier) {
         List<SecurityEventCashFlowEntity> cashFlows = securityEventCashFlowRepository
-                .findByPortfolioPortfolioAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(
+                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(
                         portfolio,
                         isin,
                         CashFlowType.REDEMPTION.getId());

@@ -35,7 +35,7 @@ public class TransactionConverter implements EntityConverter<TransactionEntity, 
     public Transaction fromEntity(TransactionEntity entity) {
         return Transaction.builder()
                 .id(entity.getId())
-                .portfolio(entity.getPortfolio().getPortfolio())
+                .portfolio(entity.getPortfolio().getId())
                 .isin(entity.getSecurity().getIsin())
                 .timestamp(entity.getTimestamp())
                 .count(entity.getCount())

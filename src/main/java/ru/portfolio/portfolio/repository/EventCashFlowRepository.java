@@ -7,6 +7,6 @@ import java.util.ArrayList;
 
 public interface EventCashFlowRepository extends JpaRepository<EventCashFlowEntity, Integer> {
 
-    ArrayList<EventCashFlowEntity> findByPortfolioPortfolioAndCashFlowTypeIdOrderByTimestamp(String portfolio,
-                                                                                             int cashFlowType);
+    ArrayList<EventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdOrderByTimestamp(String portfolio,
+                                                                                      int cashFlowType);
 }

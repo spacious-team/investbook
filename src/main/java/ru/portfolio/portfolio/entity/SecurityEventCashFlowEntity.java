@@ -20,7 +20,7 @@ public class SecurityEventCashFlowEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "portfolio", referencedColumnName = "portfolio")
+    @JoinColumn(name = "portfolio", referencedColumnName = "id")
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private PortfolioEntity portfolio;
 

@@ -11,14 +11,14 @@ public class PortfolioConverter implements EntityConverter<PortfolioEntity, Port
     @Override
     public PortfolioEntity toEntity(Portfolio pojo) {
         PortfolioEntity entity = new PortfolioEntity();
-        entity.setPortfolio(pojo.getPortfolio());
+        entity.setId(pojo.getId());
         return entity;
     }
 
     @Override
     public Portfolio fromEntity(PortfolioEntity entity) {
         return Portfolio.builder()
-                .portfolio(entity.getPortfolio())
+                .id(entity.getId())
                 .build();
     }
 }

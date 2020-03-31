@@ -15,7 +15,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
      * Returns stock market share and bonds ISINs
      */
     @Query(nativeQuery = true, value = "SELECT distinct isin FROM transaction " +
-            "WHERE portfolio = :#{#portfolio.portfolio} " +
+            "WHERE portfolio = :#{#portfolio.id} " +
             "AND length(isin) = 12 " +
             "ORDER BY timestamp DESC")
     Collection<String> findDistinctIsinByPortfolioOrderByTimestampDesc(@Param("portfolio") Portfolio portfolio);
@@ -24,11 +24,11 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
      * Returns derivatives market contracts
      */
     @Query(nativeQuery = true, value = "SELECT distinct isin FROM transaction " +
-            "WHERE portfolio = :#{#portfolio.portfolio} " +
+            "WHERE portfolio = :#{#portfolio.id} " +
             "AND length(isin) <> 12 " +
             "ORDER BY timestamp DESC")
     Collection<String> findDistinctDerivativeByPortfolioOrderByTimestampDesc(@Param("portfolio") Portfolio portfolio);
 
-    ArrayList<TransactionEntity> findBySecurityIsinAndPortfolioPortfolioOrderByTimestampAscIdAsc(String isin,
-                                                                                                 String portfolio);
+    ArrayList<TransactionEntity> findBySecurityIsinAndPortfolioIdOrderByTimestampAscIdAsc(String isin,
+                                                                                          String portfolio);
 }

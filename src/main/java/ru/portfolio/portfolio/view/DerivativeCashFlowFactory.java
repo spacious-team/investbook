@@ -63,9 +63,9 @@ public class DerivativeCashFlowFactory {
 
     private LinkedList<Transaction> getTransactions(Portfolio portfolio, Security contract) {
         return transactionRepository
-                .findBySecurityIsinAndPortfolioPortfolioOrderByTimestampAscIdAsc(
+                .findBySecurityIsinAndPortfolioIdOrderByTimestampAscIdAsc(
                         contract.getIsin(),
-                        portfolio.getPortfolio())
+                        portfolio.getId())
                 .stream()
                 .map(transactionConverter::fromEntity)
                 .collect(Collectors.toCollection(LinkedList::new));
@@ -73,8 +73,8 @@ public class DerivativeCashFlowFactory {
 
     private Deque<SecurityEventCashFlow> getSecurityEventCashFlows(Portfolio portfolio, Security contract) {
         return securityEventCashFlowRepository
-                    .findByPortfolioPortfolioAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(
-                            portfolio.getPortfolio(),
+                    .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(
+                            portfolio.getId(),
                             contract.getIsin(),
                             CashFlowType.DERIVATIVE_PROFIT.getId())
                     .stream()

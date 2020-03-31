@@ -36,7 +36,7 @@ public abstract class ExcelTableView {
             setPortfolio(portfolio);
             Table table = getTable(portfolio);
             if (!table.isEmpty()) {
-                Sheet sheet = book.createSheet(sheetNameCreator.apply(portfolio.getPortfolio()));
+                Sheet sheet = book.createSheet(sheetNameCreator.apply(portfolio.getId()));
                 writeTable(table, sheet, styles);
             }
         }

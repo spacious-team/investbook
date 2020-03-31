@@ -46,8 +46,8 @@ public class CashFlowExcelTableView extends ExcelTableView {
                 CASH.getColumnIndex() + "3:" +
                 CASH.getColumnIndex() + "100000)");
         total.put(LIQUIDATION_VALUE, portfolioPropertyRepository
-                .findFirstByPortfolioPortfolioAndPropertyOrderByTimestampDesc(
-                        getPortfolio().getPortfolio(),
+                .findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(
+                        getPortfolio().getId(),
                         PortfolioPropertyType.TOTAL_ASSETS.name())
                 .map(e -> BigDecimal.valueOf(Double.parseDouble(e.getValue())))
                 .orElse(BigDecimal.ZERO));

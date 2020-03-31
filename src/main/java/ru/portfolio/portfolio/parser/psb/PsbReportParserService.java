@@ -35,7 +35,7 @@ public class PsbReportParserService {
 
     public void parse(Path reportFile) {
         try (PsbBrokerReport report = new PsbBrokerReport(reportFile)) {
-            boolean isAdded = addPortfolio(Portfolio.builder().portfolio(report.getPortfolio()));
+            boolean isAdded = addPortfolio(Portfolio.builder().id(report.getPortfolio()));
             if (isAdded) {
                 CashTable cashTable = new CashTable(report);
                 PortfolioPropertyTable portfolioPropertyTable = new PortfolioPropertyTable(report);

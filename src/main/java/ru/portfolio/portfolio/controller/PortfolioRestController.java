@@ -53,17 +53,17 @@ public class PortfolioRestController extends AbstractRestController<String, Port
 
     @Override
     protected Optional<PortfolioEntity> getById(String id) {
-        return repository.findByPortfolio(id);
+        return repository.findById(id);
     }
 
     @Override
     protected String getId(Portfolio object) {
-        return object.getPortfolio();
+        return object.getId();
     }
 
     @Override
     protected Portfolio updateId(String id, Portfolio object) {
-        return object.toBuilder().portfolio(id).build();
+        return object.toBuilder().id(id).build();
     }
 
     @Override

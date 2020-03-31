@@ -40,7 +40,7 @@ public class EventCashFlowConverter implements EntityConverter<EventCashFlowEnti
     public EventCashFlow fromEntity(EventCashFlowEntity entity) {
         return EventCashFlow.builder()
                 .id(entity.getId())
-                .portfolio(entity.getPortfolio().getPortfolio())
+                .portfolio(entity.getPortfolio().getId())
                 .timestamp(entity.getTimestamp())
                 .eventType(CashFlowType.valueOf(entity.getCashFlowType().getId()))
                 .value(entity.getValue())

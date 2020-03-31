@@ -47,7 +47,7 @@ public class SecurityEventCashFlowConverter implements EntityConverter<SecurityE
     public SecurityEventCashFlow fromEntity(SecurityEventCashFlowEntity entity) {
         return SecurityEventCashFlow.builder()
                 .id(entity.getId())
-                .portfolio(entity.getPortfolio().getPortfolio())
+                .portfolio(entity.getPortfolio().getId())
                 .timestamp(entity.getTimestamp())
                 .eventType(CashFlowType.valueOf(entity.getCashFlowType().getId()))
                 .isin(entity.getSecurity().getIsin())

@@ -28,8 +28,8 @@ public class TaxExcelTableFactory implements TableFactory {
     public Table create(Portfolio portfolio) {
         Table table = new Table();
         List<EventCashFlow> cashFlows = eventCashFlowRepository
-                .findByPortfolioPortfolioAndCashFlowTypeIdOrderByTimestamp(
-                        portfolio.getPortfolio(),
+                .findByPortfolioIdAndCashFlowTypeIdOrderByTimestamp(
+                        portfolio.getId(),
                         CashFlowType.TAX.getId())
                 .stream()
                 .map(eventCashFlowConverter::fromEntity)

@@ -11,5 +11,5 @@ import javax.validation.constraints.NotNull;
 @Builder(toBuilder = true)
 public class Portfolio {
     @NotNull
-    private final String portfolio;
+    private final String id;
 }

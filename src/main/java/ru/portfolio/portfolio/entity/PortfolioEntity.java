@@ -12,11 +12,11 @@ import javax.persistence.Table;
 @Data
 public class PortfolioEntity {
     @Id
-    @Column(name = "portfolio")
-    private String portfolio;
+    @Column(name = "id")
+    private String id;
 
     @Override
     public int hashCode() {
-        return portfolio.hashCode();
+        return id.hashCode();
     }
 }
