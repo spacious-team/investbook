@@ -5,18 +5,25 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.stereotype.Component;
+import ru.portfolio.portfolio.pojo.PortfolioPropertyType;
+import ru.portfolio.portfolio.repository.PortfolioPropertyRepository;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
 import ru.portfolio.portfolio.view.Table;
 import ru.portfolio.portfolio.view.TableHeader;
+
+import java.math.BigDecimal;
 
 import static ru.portfolio.portfolio.view.excel.CashFlowExcelTableHeader.*;
 
 @Component
 public class CashFlowExcelTableView extends ExcelTableView {
+    private final PortfolioPropertyRepository portfolioPropertyRepository;
 
     public CashFlowExcelTableView(PortfolioRepository portfolioRepository,
-                                  CashFlowExcelTableFactory tableFactory) {
+                                  CashFlowExcelTableFactory tableFactory,
+                                  PortfolioPropertyRepository portfolioPropertyRepository) {
         super(portfolioRepository, tableFactory);
+        this.portfolioPropertyRepository = portfolioPropertyRepository;
     }
 
     @Override
@@ -35,8 +42,13 @@ public class CashFlowExcelTableView extends ExcelTableView {
         total.put(CASH, "=SUM(" +
                 CASH.getColumnIndex() + "3:" +
                 CASH.getColumnIndex() + "100000)");
-        total.put(LIQUIDATION_VALUE, "0");
-        total.put(PROFIT, "=(" + LIQUIDATION_VALUE.getColumnIndex() + "2-" + CASH.getColumnIndex() + "2)"
+        total.put(LIQUIDATION_VALUE, portfolioPropertyRepository
+                .findFirstByPortfolioPortfolioAndPropertyOrderByTimestampDesc(
+                        getPortfolio(),
+                        PortfolioPropertyType.TOTAL_ASSETS.name())
+                .map(e -> BigDecimal.valueOf(Double.parseDouble(e.getValue())))
+                .orElse(BigDecimal.ZERO));
+        total.put(PROFIT, "=(" + LIQUIDATION_VALUE.getColumnIndex() + "3-" + CASH.getColumnIndex() + "3)"
                 + "/SUMPRODUCT("
                 + CASH.getColumnIndex() + "2:" + CASH.getColumnIndex() + "100000,"
                 + DAYS_COUNT.getColumnIndex() + "2:" + DAYS_COUNT.getColumnIndex() + "100000)*365*100");
