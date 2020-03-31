@@ -48,20 +48,20 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                 Positions positions = getPositions(portfolio, securityEntity.get());
                 Security security = securityEntityConverter.fromEntity(securityEntity.get());
                 PaidInterest paidInterest = paidInterestFactory.create(portfolio.getPortfolio(), security, positions);
-                closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(),
-                        paidInterest, this::getClosedPositionProfit));
                 openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(),
                         paidInterest, this::getOpenedPositionProfit));
+                closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(),
+                        paidInterest, this::getClosedPositionProfit));
             }
         }
         Table profit = new Table();
-        profit.addAll(closedPositionsProfit);
         profit.addAll(openPositionsProfit);
+        profit.addAll(closedPositionsProfit);
         return profit;
     }
 
     private Collection<String> getSecuritiesIsin(PortfolioEntity portfolio) {
-        return transactionRepository.findDistinctIsinByPortfolioOrderByTimestampAsc(portfolio);
+        return transactionRepository.findDistinctIsinByPortfolioOrderByTimestampDesc(portfolio);
     }
 
     private Positions getPositions(PortfolioEntity portfolio, SecurityEntity security) {
