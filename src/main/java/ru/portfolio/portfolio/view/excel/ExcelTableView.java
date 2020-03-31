@@ -1,10 +1,15 @@
 package ru.portfolio.portfolio.view.excel;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
-import ru.portfolio.portfolio.view.ProfitTable;
-import ru.portfolio.portfolio.view.ProfitTableHeader;
+import ru.portfolio.portfolio.repository.PortfolioRepository;
+import ru.portfolio.portfolio.view.Table;
+import ru.portfolio.portfolio.view.TableFactory;
+import ru.portfolio.portfolio.view.TableHeader;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -12,38 +17,50 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
-import static ru.portfolio.portfolio.view.excel.StockMarketExcelProfitTableHeader.ROW_NUM_PLACE_HOLDER;
+import static ru.portfolio.portfolio.view.excel.StockMarketProfitExcelTableHeader.ROW_NUM_PLACE_HOLDER;
 
-public abstract class ExcelProfitTable {
+@RequiredArgsConstructor
+public abstract class ExcelTableView {
+    private final PortfolioRepository portfolioRepository;
+    private final TableFactory tableFactory;
+    @Getter
+    @Setter
+    private String portfolio;
 
     public void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator) {
         for (PortfolioEntity portfolio : getPortfolios()) {
-            ProfitTable profitTable = getProfitTable(portfolio);
-            if (!profitTable.isEmpty()) {
+            setPortfolio(portfolio.getPortfolio());
+            Table table = getTable(portfolio);
+            if (!table.isEmpty()) {
                 Sheet sheet = book.createSheet(sheetNameCreator.apply(portfolio.getPortfolio()));
-                writeProfitTable(profitTable, sheet, styles);
+                writeTable(table, sheet, styles);
             }
         }
     }
 
-    protected abstract List<PortfolioEntity> getPortfolios();
+    protected List<PortfolioEntity> getPortfolios() {
+        // TODO select by user
+        return portfolioRepository.findAll();
+    }
 
-    protected abstract ProfitTable getProfitTable(PortfolioEntity portfolio);
+    protected Table getTable(PortfolioEntity portfolio) {
+        return tableFactory.create(portfolio);
+    }
 
-    protected void writeProfitTable(ProfitTable profitTable,
-                                    Sheet sheet,
-                                    CellStyles styles) {
-        if (profitTable.isEmpty()) return;
-        Class<? extends ProfitTableHeader> headerType = getHeaderType(profitTable);
+    protected void writeTable(Table table,
+                              Sheet sheet,
+                              CellStyles styles) {
+        if (table.isEmpty()) return;
+        Class<? extends TableHeader> headerType = getHeaderType(table);
         writeHeader(sheet, headerType, styles.getHeaderStyle());
-        ProfitTable.Record totalRow = getTotalRow();
+        Table.Record totalRow = getTotalRow();
         if (totalRow != null && !totalRow.isEmpty()) {
-            profitTable.addFirst(totalRow);
+            table.addFirst(totalRow);
         }
         int rowNum = 0;
-        for (Map<? extends ProfitTableHeader, Object> transactionProfit : profitTable) {
+        for (Map<? extends TableHeader, Object> transactionProfit : table) {
             Row row = sheet.createRow(++rowNum);
-            for (ProfitTableHeader header : headerType.getEnumConstants()) {
+            for (TableHeader header : headerType.getEnumConstants()) {
                 Object value = transactionProfit.get(header);
                 if (value == null) {
                     continue;
@@ -80,8 +97,8 @@ public abstract class ExcelProfitTable {
         sheetPostCreate(sheet, styles);
     }
 
-    private Class<? extends ProfitTableHeader> getHeaderType(ProfitTable profitTable) {
-        for (ProfitTable.Record record : profitTable) {
+    private Class<? extends TableHeader> getHeaderType(Table table) {
+        for (Table.Record record : table) {
             if (record.isEmpty()) continue;
             return record.keySet()
                     .iterator()
@@ -91,10 +108,10 @@ public abstract class ExcelProfitTable {
         return null;
     }
 
-    protected void writeHeader(Sheet sheet, Class<? extends ProfitTableHeader> headerType, CellStyle style) {
+    protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         Row row = sheet.createRow(0);
         row.setHeight((short)-1);
-        for (ProfitTableHeader header : headerType.getEnumConstants()) {
+        for (TableHeader header : headerType.getEnumConstants()) {
             Cell cell = row.createCell(header.ordinal());
             cell.setCellValue(header.getDescription());
             cell.setCellStyle(style);
@@ -103,8 +120,8 @@ public abstract class ExcelProfitTable {
         sheet.createFreezePane(0, 1);
     }
 
-    protected ProfitTable.Record getTotalRow() {
-        return new ProfitTable.Record();
+    protected Table.Record getTotalRow() {
+        return new Table.Record();
     }
 
     protected void sheetPostCreate(Sheet sheet, CellStyles styles) {

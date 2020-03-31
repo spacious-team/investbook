@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum StockMarketExcelProfitTableHeader implements ExcelProfitTableHeader {
+public enum StockMarketProfitExcelTableHeader implements ExcelTableHeader {
     SECURITY("Бумага"),
     BUY_DATE("Дата покупки"),
     COUNT("Количество"),

@@ -11,7 +11,7 @@ public class CellStyles {
     private final CellStyle headerStyle;
     private final CellStyle totalTextStyle;
     private final CellStyle totalRowStyle;
-    private final CellStyle securityNameStyle;
+    private final CellStyle leftAlignedTextStyle;
     private final CellStyle dateStyle;
     private final CellStyle moneyStyle;
     private final CellStyle intStyle;
@@ -21,7 +21,7 @@ public class CellStyles {
         this.headerStyle = createHeaderStyle(book);
         this.totalTextStyle = createLeftAlignedItalicTextStyle(book);
         this.totalRowStyle = createTotalRowStyle(book);
-        this.securityNameStyle = createLeftAlignedTextStyle(book);
+        this.leftAlignedTextStyle = createLeftAlignedTextStyle(book);
         this.dateStyle = createDateStyle(book);
         this.moneyStyle = createMoneyStyle(book);
         this.intStyle = createIntegerStyle(book);

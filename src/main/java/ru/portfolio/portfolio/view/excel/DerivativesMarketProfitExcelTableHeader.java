@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum DerivativesMarketExcelProfitTableHeader implements ExcelProfitTableHeader {
+public enum DerivativesMarketProfitExcelTableHeader implements ExcelTableHeader {
     CONTRACT("Контракт"),
     DIRECTION("Сделка"),
     DATE("Дата"),

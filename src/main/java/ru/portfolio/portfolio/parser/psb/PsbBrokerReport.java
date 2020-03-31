@@ -50,6 +50,15 @@ public class PsbBrokerReport implements BrokerReport {
         }
     }
 
+    @Override
+    public Instant getReportDate() {
+        try {
+            return convertToInstant(sheet.getRow(6).getCell(3).getStringCellValue().split(" ")[3]);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка поиска даты отчета");
+        }
+    }
+
     public Instant convertToInstant(String value) {
         if (value.contains(":")) {
             return LocalDateTime.parse(value, PsbBrokerReport.dateTimeFormatter).atZone(PsbBrokerReport.zoneId).toInstant();

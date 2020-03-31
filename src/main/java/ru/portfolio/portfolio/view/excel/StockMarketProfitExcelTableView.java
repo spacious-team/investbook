@@ -1,39 +1,26 @@
 package ru.portfolio.portfolio.view.excel;
 
-import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
-import ru.portfolio.portfolio.view.ProfitTable;
-import ru.portfolio.portfolio.view.ProfitTableHeader;
+import ru.portfolio.portfolio.view.Table;
+import ru.portfolio.portfolio.view.TableHeader;
 
-import java.util.List;
-
-import static ru.portfolio.portfolio.view.excel.StockMarketExcelProfitTableHeader.*;
+import static ru.portfolio.portfolio.view.excel.StockMarketProfitExcelTableHeader.*;
 
 @Component
-@RequiredArgsConstructor
-public class StockMarketExcelProfitTable extends ExcelProfitTable {
-    private final PortfolioRepository portfolioRepository;
-    private final StockMarketExcelProfitTableFactory stockMarketExcelProfitTableFactory;
+public class StockMarketProfitExcelTableView extends ExcelTableView {
 
-    @Override
-    protected List<PortfolioEntity> getPortfolios() {
-        // TODO select by user
-        return portfolioRepository.findAll();
+    public StockMarketProfitExcelTableView(PortfolioRepository portfolioRepository,
+                                           StockMarketProfitExcelTableFactory tableFactory) {
+        super(portfolioRepository, tableFactory);
     }
 
     @Override
-    protected ProfitTable getProfitTable(PortfolioEntity portfolio) {
-        return stockMarketExcelProfitTableFactory.create(portfolio);
-    }
-
-    @Override
-    protected void writeHeader(Sheet sheet, Class<? extends ProfitTableHeader> headerType, CellStyle style) {
+    protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         sheet.setColumnWidth(SECURITY.ordinal(), 45 * 256);
         sheet.setColumnWidth(BUY_AMOUNT.ordinal(), 16 * 256);
@@ -41,9 +28,9 @@ public class StockMarketExcelProfitTable extends ExcelProfitTable {
     }
 
     @Override
-    protected ProfitTable.Record getTotalRow() {
-        ProfitTable.Record totalRow = new ProfitTable.Record();
-        for (StockMarketExcelProfitTableHeader column : StockMarketExcelProfitTableHeader.values()) {
+    protected Table.Record getTotalRow() {
+        Table.Record totalRow = new Table.Record();
+        for (StockMarketProfitExcelTableHeader column : StockMarketProfitExcelTableHeader.values()) {
             totalRow.put(column, "=SUM(" +
                     column.getColumnIndex() + "3:" +
                     column.getColumnIndex() + "100000)");
@@ -63,7 +50,7 @@ public class StockMarketExcelProfitTable extends ExcelProfitTable {
             if (row.getRowNum() == 0) continue;
             Cell cell = row.getCell(SECURITY.ordinal());
             if (cell != null) {
-                cell.setCellStyle(styles.getSecurityNameStyle());
+                cell.setCellStyle(styles.getLeftAlignedTextStyle());
             }
         }
         for (Cell cell : sheet.getRow(1)) {

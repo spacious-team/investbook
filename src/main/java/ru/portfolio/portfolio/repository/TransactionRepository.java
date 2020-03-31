@@ -18,8 +18,8 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     @Query(nativeQuery = true, value = "SELECT distinct isin FROM transaction " +
             "WHERE portfolio = :portfolio " +
             "AND length(isin) = 12 " +
-            "ORDER BY timestamp ASC")
-    Collection<String> findDistinctIsinByPortfolioOrderByTimestampAsc(@Param("portfolio") PortfolioEntity portfolio);
+            "ORDER BY timestamp DESC")
+    Collection<String> findDistinctIsinByPortfolioOrderByTimestampDesc(@Param("portfolio") PortfolioEntity portfolio);
 
     /**
      * Returns derivatives market contracts

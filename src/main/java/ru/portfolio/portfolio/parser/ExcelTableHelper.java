@@ -8,19 +8,20 @@ import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 public class ExcelTableHelper {
     public static final CellRangeAddress EMTPY_RANGE = new CellRangeAddress(-1, -1, -1, -1);
-    public static final CellAddress NOT_ADDRESS = new CellAddress(-1, -1);
+    public static final CellAddress NOT_FOUND = new CellAddress(-1, -1);
 
     public static CellRangeAddress getTableCellRange(Sheet sheet, String tableName, String tableFooterString) {
         CellAddress startAddress = find(sheet, tableName);
-        if (startAddress.equals(NOT_ADDRESS)) {
+        if (startAddress.equals(NOT_FOUND)) {
             return EMTPY_RANGE;
         }
         CellAddress endAddress = find(sheet, tableFooterString, startAddress.getRow() + 2,
                 sheet.getLastRowNum(), (cell , prefix) -> cell.startsWith(prefix.toString()));
-        if (endAddress.equals(NOT_ADDRESS)) {
+        if (endAddress.equals(NOT_FOUND)) {
             return EMTPY_RANGE;
         }
         return new CellRangeAddress(
@@ -35,7 +36,7 @@ public class ExcelTableHelper {
      */
     public static CellRangeAddress getTableCellRange(Sheet sheet, String tableName) {
         CellAddress startAddress = find(sheet, tableName);
-        if (startAddress.equals(NOT_ADDRESS)) {
+        if (startAddress.equals(NOT_FOUND)) {
             return EMTPY_RANGE;
         }
         int lastRowNum = startAddress.getRow() + 1;
@@ -62,7 +63,7 @@ public class ExcelTableHelper {
     }
 
     public static boolean rowContains(Sheet sheet, int rowNum, Object value) {
-        return find(sheet, value, rowNum, rowNum + 1, String::equals) != NOT_ADDRESS;
+        return find(sheet, value, rowNum, rowNum + 1, String::equals) != NOT_FOUND;
     }
 
     public static CellAddress find(Sheet sheet, Object value) {
@@ -86,7 +87,7 @@ public class ExcelTableHelper {
      */
     public static CellAddress find(Sheet sheet, Object value, int startRow, int endRow, BiPredicate<String, Object> stringPredicate) {
         if (sheet.getLastRowNum() == -1) {
-            return NOT_ADDRESS;
+            return NOT_FOUND;
         } else if (endRow > sheet.getLastRowNum()) {
             endRow = sheet.getLastRowNum();
         }
@@ -105,7 +106,21 @@ public class ExcelTableHelper {
                 }
             }
         }
-        return NOT_ADDRESS;
+        return NOT_FOUND;
+    }
+
+    public static CellAddress findByPredicate(Sheet sheet, int startRow, Predicate<Cell> predicate) {
+        int endRow = sheet.getLastRowNum();
+        for(int rowNum = startRow; rowNum < endRow; rowNum++) {
+            Row row = sheet.getRow(rowNum);
+            if (row == null) continue;
+            for (Cell cell : row) {
+                if (predicate.test(cell)) {
+                    return cell.getAddress();
+                }
+            }
+        }
+        return NOT_FOUND;
     }
 
     private static CellType getType(Object value) {
@@ -140,6 +155,10 @@ public class ExcelTableHelper {
                 return false;
         }
         return false;
+    }
+
+    public static Cell getCell(Sheet sheet, CellAddress address) {
+        return sheet.getRow(address.getRow()).getCell(address.getColumn());
     }
 
 }

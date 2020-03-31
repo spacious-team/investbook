@@ -4,8 +4,6 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import ru.portfolio.portfolio.parser.*;
 import ru.portfolio.portfolio.pojo.CashFlowType;
@@ -53,7 +51,7 @@ public class CashFlowTable extends AbstractReportTable<CashFlowTable.CashFlowTab
         } else {
             return emptyList();
         }
-        if (type == CashFlowType.CASH && !isDescriptionEmpty(table, row)) {
+        if (type == CashFlowType.CASH && !table.getStringCellValue(row, DESCRIPTION).isEmpty()) {
             return emptyList(); // cash in/out records has no description
         }
         return singletonList(CashFlowTableRow.builder()
@@ -62,14 +60,8 @@ public class CashFlowTable extends AbstractReportTable<CashFlowTable.CashFlowTab
                 .value(table.getCurrencyCellValue(row, VALUE)
                         .multiply(BigDecimal.valueOf(isPositive ? 1 : -1)))
                 .currency(table.getStringCellValue(row, CURRENCY))
+                .description(table.getStringCellValue(row, DESCRIPTION))
                 .build());
-    }
-
-    private static boolean isDescriptionEmpty(ExcelTable table, Row row) {
-        Cell cell = table.getCell(row, DESCRIPTION);
-        return cell == null ||
-                cell.getCellType() == CellType.BLANK ||
-                (cell.getCellType() == CellType.STRING && cell.getStringCellValue().isEmpty());
     }
 
     enum CashFlowTableHeader implements TableColumnDescription {
@@ -94,5 +86,6 @@ public class CashFlowTable extends AbstractReportTable<CashFlowTable.CashFlowTab
         private CashFlowType type;
         private BigDecimal value;
         private String currency; // валюта
+        private String description;
     }
 }

@@ -1,47 +1,34 @@
 package ru.portfolio.portfolio.view.excel;
 
-import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
-import ru.portfolio.portfolio.view.ProfitTable;
-import ru.portfolio.portfolio.view.ProfitTableHeader;
+import ru.portfolio.portfolio.view.Table;
+import ru.portfolio.portfolio.view.TableHeader;
 
-import java.util.List;
-
-import static ru.portfolio.portfolio.view.excel.DerivativesMarketExcelProfitTableHeader.*;
+import static ru.portfolio.portfolio.view.excel.DerivativesMarketProfitExcelTableHeader.*;
 
 @Component
-@RequiredArgsConstructor
-public class DerivativesMarketExcelProfitTable extends ExcelProfitTable {
-    private final PortfolioRepository portfolioRepository;
-    private final DerivativesMarketExcelProfitTableFactory derivativesMarketExcelProfitTableFactory;
+public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
 
-    @Override
-    protected List<PortfolioEntity> getPortfolios() {
-        // TODO select by user
-        return portfolioRepository.findAll();
+    public DerivativesMarketProfitExcelTableView(PortfolioRepository portfolioRepository,
+                                                 DerivativesMarketProfitExcelTableFactory tableFactory) {
+        super(portfolioRepository, tableFactory);
     }
 
     @Override
-    protected ProfitTable getProfitTable(PortfolioEntity portfolio) {
-        return derivativesMarketExcelProfitTableFactory.create(portfolio);
-    }
-
-    @Override
-    protected void writeHeader(Sheet sheet, Class<? extends ProfitTableHeader> headerType, CellStyle style) {
+    protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         sheet.setColumnWidth(CONTRACT.ordinal(), 24 * 256);
         sheet.setColumnWidth(AMOUNT.ordinal(), 16 * 256);
     }
 
     @Override
-    protected ProfitTable.Record getTotalRow() {
-        ProfitTable.Record totalRow = new ProfitTable.Record();
+    protected Table.Record getTotalRow() {
+        Table.Record totalRow = new Table.Record();
         totalRow.put(CONTRACT, "Итого:");
         totalRow.put(COUNT, getSumFormula(COUNT));
         totalRow.put(AMOUNT, "=SUMPRODUCT(ABS(" +
@@ -54,7 +41,7 @@ public class DerivativesMarketExcelProfitTable extends ExcelProfitTable {
         return totalRow;
     }
 
-    private String getSumFormula(DerivativesMarketExcelProfitTableHeader column) {
+    private String getSumFormula(DerivativesMarketProfitExcelTableHeader column) {
         return "=SUM(" +
                 column.getColumnIndex() + "3:" +
                 column.getColumnIndex() + "100000)";
@@ -67,7 +54,7 @@ public class DerivativesMarketExcelProfitTable extends ExcelProfitTable {
             if (row.getRowNum() == 0) continue;
             Cell cell = row.getCell(CONTRACT.ordinal());
             if (cell != null) {
-                cell.setCellStyle(styles.getSecurityNameStyle());
+                cell.setCellStyle(styles.getLeftAlignedTextStyle());
             }
         }
         for (Cell cell : sheet.getRow(1)) {

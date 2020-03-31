@@ -1,38 +1,29 @@
 package ru.portfolio.portfolio.pojo;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import java.time.Instant;
 
 @Getter
 @ToString
 @Builder(toBuilder = true)
-public class EventCashFlow {
+public class PortfolioProperty {
     @Nullable // autoincrement
     private Integer id;
 
     @NotNull
     private String portfolio;
 
-    @NotNull
+    @Nullable
     private Instant timestamp;
 
     @NotNull
-    @JsonProperty("event-type")
-    private CashFlowType eventType;
+    private PortfolioPropertyType property;
 
     @NotNull
-    private BigDecimal value;
-
-    @Builder.Default
-    private String currency = "RUR";
-
-    @Nullable
-    private String description;
+    private String value;
 }

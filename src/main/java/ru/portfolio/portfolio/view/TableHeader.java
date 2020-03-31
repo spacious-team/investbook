@@ -1,6 +1,6 @@
 package ru.portfolio.portfolio.view;
 
-public interface ProfitTableHeader {
+public interface TableHeader {
     int ordinal();
     String getDescription();
 }

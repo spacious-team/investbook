@@ -1,8 +1,8 @@
 package ru.portfolio.portfolio.view.excel;
 
-import ru.portfolio.portfolio.view.ProfitTableHeader;
+import ru.portfolio.portfolio.view.TableHeader;
 
-public interface ExcelProfitTableHeader extends ProfitTableHeader {
+public interface ExcelTableHeader extends TableHeader {
     String ROW_NUM_PLACE_HOLDER = "{rowNum}";
 
     default String getCellAddr() {

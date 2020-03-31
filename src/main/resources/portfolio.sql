@@ -38,7 +38,7 @@ INSERT IGNORE INTO `cash_flow_type` (`id`, `name`) VALUES
 	(9, 'Гарантийное обеспечение'),
 	(10, 'Налог уплаченный (с купона, с дивидендов)'),
 	(11, 'Прогнозируемый налог'),
-	(12, 'Стоимость базоваго актива в сделке с деривативом'),
+	(12, 'Стоимость сделки с деривативом, рубли'),
 	(13, 'Стоимость сделки с деривативом, пункты');
 /*!40000 ALTER TABLE `cash_flow_type` ENABLE KEYS */;
 
@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
+  `description` varchar(128) NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `event_cash_flow_timestamp_type_value_currency_portfolio_uniq_ix` (`timestamp`,`type`,`value`,`currency`,`portfolio`),
   KEY `event_cash_flow_type_ix` (`type`),
@@ -79,9 +80,21 @@ CREATE TABLE IF NOT EXISTS `portfolio` (
   PRIMARY KEY (`portfolio`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Таблица пользователей';
 
--- Дамп данных таблицы portfolio.portfolio: ~0 rows (приблизительно)
-/*!40000 ALTER TABLE `portfolio` DISABLE KEYS */;
-/*!40000 ALTER TABLE `portfolio` ENABLE KEYS */;
+-- Экспортируемые данные не выделены.
+
+-- Дамп структуры для таблица portfolio.portfolio_property
+CREATE TABLE IF NOT EXISTS `portfolio_property` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `portfolio` varchar(32) NOT NULL,
+  `timestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `property` varchar(64) NOT NULL,
+  `value` varchar(256) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `portfolio_property_portfolio_fkey` (`portfolio`),
+  CONSTRAINT `portfolio_property_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`portfolio`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Свойства портфеля';
+
+-- Экспортируемые данные не выделены.
 
 -- Дамп структуры для таблица portfolio.security
 CREATE TABLE IF NOT EXISTS `security` (
@@ -127,7 +140,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Номер транзакции',
   `portfolio` varchar(32) NOT NULL COMMENT 'Портфель (номер брокерского счета)',
   `isin` varchar(64) NOT NULL COMMENT 'Ценная бумага',
-  `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Время совершения сделки',
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Фактическое время исполнения сделки',
   `count` int(1) NOT NULL COMMENT 'Покупка (+), продажа (-)',
   PRIMARY KEY (`id`),
   KEY `transaction_ticker_ix` (`isin`),
