@@ -33,7 +33,7 @@ public class PaidInterestFactory {
 
     private Map<Position, List<SecurityEventCashFlow>> getPositionWithPayments(String portfolio, String isin, Positions positions, CashFlowType event) {
         List<SecurityEventCashFlowEntity> accruedInterests = securityEventCashFlowRepository
-                .findByPortfolioAndIsinAndCashFlowTypeOrderByTimestampAsc(portfolio, isin, event);
+                .findByPortfolioPortfolioAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(portfolio, isin, event.getId());
 
         Map<Position, List<SecurityEventCashFlow>> payments = new HashMap<>();
         for (SecurityEventCashFlowEntity entity : accruedInterests) {

@@ -20,8 +20,8 @@ public class EventCashFlowConverter implements EntityConverter<EventCashFlowEnti
     public EventCashFlowEntity toEntity(EventCashFlow eventCashFlow) {
         PortfolioEntity portfolioEntity = portfolioRepository.findById(eventCashFlow.getPortfolio())
                 .orElseThrow(() -> new IllegalArgumentException("В справочнике не найден брокерский счет: " + eventCashFlow.getPortfolio()));
-        CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.findById(eventCashFlow.getEventType().getType())
-                .orElseThrow(() -> new IllegalArgumentException("В справочнике не найдено событие с типом: " + eventCashFlow.getEventType().getType()));
+        CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.findById(eventCashFlow.getEventType().getId())
+                .orElseThrow(() -> new IllegalArgumentException("В справочнике не найдено событие с типом: " + eventCashFlow.getEventType().getId()));
 
         EventCashFlowEntity entity = new EventCashFlowEntity();
         entity.setId(eventCashFlow.getId());

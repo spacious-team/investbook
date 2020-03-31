@@ -21,11 +21,11 @@ public enum CashFlowType {
     DERIVATIVE_QUOTE(13); // Стоимость сделки с деривативом, пункты
 
     @Getter
-    private final int type;
+    private final int id;
 
     public static CashFlowType valueOf(int type) {
         for (CashFlowType e : values()) {
-            if (e.getType() == type) {
+            if (e.getId() == type) {
                 return e;
             }
         }

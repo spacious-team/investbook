@@ -3,9 +3,9 @@ package ru.portfolio.portfolio.view.excel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.converter.EventCashFlowConverter;
-import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.EventCashFlow;
+import ru.portfolio.portfolio.pojo.Portfolio;
 import ru.portfolio.portfolio.repository.EventCashFlowRepository;
 import ru.portfolio.portfolio.view.Table;
 import ru.portfolio.portfolio.view.TableFactory;
@@ -25,12 +25,12 @@ public class TaxExcelTableFactory implements TableFactory {
     private final EventCashFlowConverter eventCashFlowConverter;
 
     @Override
-    public Table create(PortfolioEntity portfolio) {
+    public Table create(Portfolio portfolio) {
         Table table = new Table();
         List<EventCashFlow> cashFlows = eventCashFlowRepository
                 .findByPortfolioPortfolioAndCashFlowTypeIdOrderByTimestamp(
                         portfolio.getPortfolio(),
-                        CashFlowType.TAX.getType())
+                        CashFlowType.TAX.getId())
                 .stream()
                 .map(eventCashFlowConverter::fromEntity)
                 .collect(Collectors.toCollection(ArrayList::new));

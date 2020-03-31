@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import ru.portfolio.portfolio.converter.PortfolioConverter;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
+import ru.portfolio.portfolio.pojo.Portfolio;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
 import ru.portfolio.portfolio.view.Table;
 import ru.portfolio.portfolio.view.TableFactory;
@@ -23,13 +25,15 @@ import static ru.portfolio.portfolio.view.excel.StockMarketProfitExcelTableHeade
 public abstract class ExcelTableView {
     private final PortfolioRepository portfolioRepository;
     private final TableFactory tableFactory;
+    private final PortfolioConverter portfolioConverter;
     @Getter
     @Setter
-    private String portfolio;
+    private Portfolio portfolio;
 
     public void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator) {
-        for (PortfolioEntity portfolio : getPortfolios()) {
-            setPortfolio(portfolio.getPortfolio());
+        for (PortfolioEntity entity : getPortfolios()) {
+            Portfolio portfolio = portfolioConverter.fromEntity(entity);
+            setPortfolio(portfolio);
             Table table = getTable(portfolio);
             if (!table.isEmpty()) {
                 Sheet sheet = book.createSheet(sheetNameCreator.apply(portfolio.getPortfolio()));
@@ -43,7 +47,7 @@ public abstract class ExcelTableView {
         return portfolioRepository.findAll();
     }
 
-    protected Table getTable(PortfolioEntity portfolio) {
+    protected Table getTable(Portfolio portfolio) {
         return tableFactory.create(portfolio);
     }
 

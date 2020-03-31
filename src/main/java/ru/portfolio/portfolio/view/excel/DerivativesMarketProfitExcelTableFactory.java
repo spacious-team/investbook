@@ -3,12 +3,8 @@ package ru.portfolio.portfolio.view.excel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.converter.SecurityConverter;
-import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.entity.SecurityEntity;
-import ru.portfolio.portfolio.pojo.CashFlowType;
-import ru.portfolio.portfolio.pojo.Security;
-import ru.portfolio.portfolio.pojo.Transaction;
-import ru.portfolio.portfolio.pojo.TransactionCashFlow;
+import ru.portfolio.portfolio.pojo.*;
 import ru.portfolio.portfolio.repository.SecurityRepository;
 import ru.portfolio.portfolio.repository.TransactionRepository;
 import ru.portfolio.portfolio.view.DerivativeCashFlow;
@@ -36,13 +32,13 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
     private final SecurityConverter securityConverter;
     private final DerivativeCashFlowFactory derivativeCashFlowFactory;
 
-    public Table create(PortfolioEntity portfolio) {
+    public Table create(Portfolio portfolio) {
         Table profit = new Table();
         for (String isin : getSecuritiesIsin(portfolio)) {
             Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
             if (securityEntity.isPresent()) {
                 Security security = securityConverter.fromEntity(securityEntity.get());
-                DerivativeCashFlow derivativeCashFlow = derivativeCashFlowFactory.getDerivativeCashFlow(portfolio, securityEntity.get());
+                DerivativeCashFlow derivativeCashFlow = derivativeCashFlowFactory.getDerivativeCashFlow(portfolio, security);
 
                 profit.addEmptyRecord();
                 profit.addAll(getContractProfit(security, derivativeCashFlow));
@@ -51,7 +47,7 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
         return profit;
     }
 
-    private Collection<String> getSecuritiesIsin(PortfolioEntity portfolio) {
+    private Collection<String> getSecuritiesIsin(Portfolio portfolio) {
         return transactionRepository.findDistinctDerivativeByPortfolioOrderByTimestampDesc(portfolio);
     }
 

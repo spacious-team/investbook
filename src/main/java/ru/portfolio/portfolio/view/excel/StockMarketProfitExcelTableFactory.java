@@ -5,14 +5,10 @@ import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.converter.SecurityConverter;
 import ru.portfolio.portfolio.converter.SecurityEventCashFlowConverter;
 import ru.portfolio.portfolio.converter.TransactionConverter;
-import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.entity.SecurityEntity;
 import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntity;
-import ru.portfolio.portfolio.pojo.CashFlowType;
-import ru.portfolio.portfolio.pojo.Security;
-import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
-import ru.portfolio.portfolio.pojo.Transaction;
+import ru.portfolio.portfolio.pojo.*;
 import ru.portfolio.portfolio.repository.SecurityEventCashFlowRepository;
 import ru.portfolio.portfolio.repository.SecurityRepository;
 import ru.portfolio.portfolio.repository.TransactionCashFlowRepository;
@@ -39,14 +35,14 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
 
-    public Table create(PortfolioEntity portfolio) {
+    public Table create(Portfolio portfolio) {
         Table openPositionsProfit = new Table();
         Table closedPositionsProfit = new Table();
         for (String isin : getSecuritiesIsin(portfolio)) {
             Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
             if (securityEntity.isPresent()) {
-                Positions positions = getPositions(portfolio, securityEntity.get());
                 Security security = securityConverter.fromEntity(securityEntity.get());
+                Positions positions = getPositions(portfolio, security);
                 PaidInterest paidInterest = paidInterestFactory.create(portfolio.getPortfolio(), security, positions);
                 openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(),
                         paidInterest, this::getOpenedPositionProfit));
@@ -60,13 +56,13 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         return profit;
     }
 
-    private Collection<String> getSecuritiesIsin(PortfolioEntity portfolio) {
+    private Collection<String> getSecuritiesIsin(Portfolio portfolio) {
         return transactionRepository.findDistinctIsinByPortfolioOrderByTimestampDesc(portfolio);
     }
 
-    private Positions getPositions(PortfolioEntity portfolio, SecurityEntity security) {
+    private Positions getPositions(Portfolio portfolio, Security security) {
         Deque<Transaction> transactions = transactionRepository
-                .findBySecurityAndPortfolioOrderByTimestampAscIdAsc(security, portfolio)
+                .findBySecurityIsinAndPortfolioPortfolioOrderByTimestampAscIdAsc(security.getIsin(), portfolio.getPortfolio())
                 .stream()
                 .map(transactionConverter::fromEntity)
                 .collect(Collectors.toCollection(LinkedList::new));
@@ -74,12 +70,12 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         return new Positions(transactions, redemption);
     }
 
-    private Deque<SecurityEventCashFlow> getRedemption(PortfolioEntity portfolio, SecurityEntity securityEntity) {
+    private Deque<SecurityEventCashFlow> getRedemption(Portfolio portfolio, Security securityEntity) {
         return securityEventCashFlowRepository
-                .findByPortfolioAndIsinAndCashFlowTypeOrderByTimestampAsc(
+                .findByPortfolioPortfolioAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(
                         portfolio.getPortfolio(),
                         securityEntity.getIsin(),
-                        CashFlowType.REDEMPTION)
+                        CashFlowType.REDEMPTION.getId())
                 .stream()
                 .map(securityEventCashFlowConverter::fromEntity)
                 .collect(Collectors.toCollection(LinkedList::new));
@@ -156,7 +152,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             return null;
         }
         Optional<TransactionCashFlowEntity> cashFlow = transactionCashFlowRepository
-                .findByTransactionIdAndCashFlowType(transaction.getId(), type);
+                .findByTransactionCashFlowIdTransactionIdAndCashFlowTypeId(transaction.getId(), type.getId());
         return cashFlow.map(cash -> cash
                 .getValue()
                 .multiply(BigDecimal.valueOf(multiplier))
@@ -167,7 +163,10 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
 
     private BigDecimal getRedemptionCashFlow(String portfolio, String isin, double multiplier) {
         List<SecurityEventCashFlowEntity> cashFlows = securityEventCashFlowRepository
-                .findByPortfolioAndIsinAndCashFlowTypeOrderByTimestampAsc(portfolio, isin, CashFlowType.REDEMPTION);
+                .findByPortfolioPortfolioAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(
+                        portfolio,
+                        isin,
+                        CashFlowType.REDEMPTION.getId());
         if (cashFlows.isEmpty()) {
             return null;
         } else if (cashFlows.size() != 1) {
@@ -181,7 +180,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
-    public static  <T extends Position> String convertPaidInterestToExcelFormula(List<SecurityEventCashFlow> pays) {
+    public static <T extends Position> String convertPaidInterestToExcelFormula(List<SecurityEventCashFlow> pays) {
         if (pays == null || pays.isEmpty()) {
             return null;
         }

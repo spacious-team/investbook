@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.stereotype.Component;
+import ru.portfolio.portfolio.converter.PortfolioConverter;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
 import ru.portfolio.portfolio.view.Table;
 import ru.portfolio.portfolio.view.TableHeader;
@@ -15,8 +16,9 @@ import static ru.portfolio.portfolio.view.excel.DerivativesMarketProfitExcelTabl
 public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
 
     public DerivativesMarketProfitExcelTableView(PortfolioRepository portfolioRepository,
-                                                 DerivativesMarketProfitExcelTableFactory tableFactory) {
-        super(portfolioRepository, tableFactory);
+                                                 DerivativesMarketProfitExcelTableFactory tableFactory,
+                                                 PortfolioConverter portfolioConverter) {
+        super(portfolioRepository, tableFactory, portfolioConverter);
     }
 
     @Override

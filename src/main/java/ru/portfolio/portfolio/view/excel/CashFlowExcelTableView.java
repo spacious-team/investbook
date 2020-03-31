@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.stereotype.Component;
+import ru.portfolio.portfolio.converter.PortfolioConverter;
 import ru.portfolio.portfolio.pojo.PortfolioPropertyType;
 import ru.portfolio.portfolio.repository.PortfolioPropertyRepository;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
@@ -22,8 +23,9 @@ public class CashFlowExcelTableView extends ExcelTableView {
 
     public CashFlowExcelTableView(PortfolioRepository portfolioRepository,
                                   CashFlowExcelTableFactory tableFactory,
+                                  PortfolioConverter portfolioConverter,
                                   PortfolioPropertyRepository portfolioPropertyRepository) {
-        super(portfolioRepository, tableFactory);
+        super(portfolioRepository, tableFactory, portfolioConverter);
         this.portfolioPropertyRepository = portfolioPropertyRepository;
     }
 
@@ -45,7 +47,7 @@ public class CashFlowExcelTableView extends ExcelTableView {
                 CASH.getColumnIndex() + "100000)");
         total.put(LIQUIDATION_VALUE, portfolioPropertyRepository
                 .findFirstByPortfolioPortfolioAndPropertyOrderByTimestampDesc(
-                        getPortfolio(),
+                        getPortfolio().getPortfolio(),
                         PortfolioPropertyType.TOTAL_ASSETS.name())
                 .map(e -> BigDecimal.valueOf(Double.parseDouble(e.getValue())))
                 .orElse(BigDecimal.ZERO));

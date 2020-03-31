@@ -75,7 +75,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
 
     @Override
     protected TransactionCashFlowEntityPK getId(TransactionCashFlow object) {
-        return getId(object.getTransactionId(), object.getEventType().getType());
+        return getId(object.getTransactionId(), object.getEventType().getId());
     }
 
     private TransactionCashFlowEntityPK getId(long transactionId, int eventType) {
@@ -95,7 +95,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
 
     @Override
     protected URI getLocationURI(TransactionCashFlow object) throws URISyntaxException {
-        return new URI(getLocation() + "/" + object.getTransactionId() + "/events/" + object.getEventType().getType());
+        return new URI(getLocation() + "/" + object.getTransactionId() + "/events/" + object.getEventType().getId());
     }
 
     @Override

@@ -1,7 +1,7 @@
 package ru.portfolio.portfolio.view;
 
-import ru.portfolio.portfolio.entity.PortfolioEntity;
+import ru.portfolio.portfolio.pojo.Portfolio;
 
 public interface TableFactory {
-    Table create(PortfolioEntity portfolio);
+    Table create(Portfolio portfolio);
 }
