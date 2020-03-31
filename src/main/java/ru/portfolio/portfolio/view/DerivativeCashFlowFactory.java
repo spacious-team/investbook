@@ -1,16 +1,29 @@
+/*
+ * Portfolio
+ * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package ru.portfolio.portfolio.view;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.converter.SecurityEventCashFlowEntityConverter;
-import ru.portfolio.portfolio.converter.TransactionCashFlowEntityConverter;
-import ru.portfolio.portfolio.converter.TransactionEntityConverter;
-import ru.portfolio.portfolio.entity.PortfolioEntity;
-import ru.portfolio.portfolio.entity.SecurityEntity;
-import ru.portfolio.portfolio.pojo.CashFlowType;
-import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
-import ru.portfolio.portfolio.pojo.Transaction;
-import ru.portfolio.portfolio.pojo.TransactionCashFlow;
+import ru.portfolio.portfolio.converter.SecurityEventCashFlowConverter;
+import ru.portfolio.portfolio.converter.TransactionCashFlowConverter;
+import ru.portfolio.portfolio.converter.TransactionConverter;
+import ru.portfolio.portfolio.pojo.*;
 import ru.portfolio.portfolio.repository.SecurityEventCashFlowRepository;
 import ru.portfolio.portfolio.repository.TransactionCashFlowRepository;
 import ru.portfolio.portfolio.repository.TransactionRepository;
@@ -36,13 +49,13 @@ public class DerivativeCashFlowFactory {
     private final TransactionRepository transactionRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
-    private final TransactionEntityConverter transactionEntityConverter;
-    private final SecurityEventCashFlowEntityConverter securityEventCashFlowEntityConverter;
-    private final TransactionCashFlowEntityConverter transactionCashFlowEntityConverter;
+    private final TransactionConverter transactionConverter;
+    private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
+    private final TransactionCashFlowConverter transactionCashFlowConverter;
 
-    public DerivativeCashFlow getDerivativeCashFlow(PortfolioEntity portfolio, SecurityEntity security) {
-        Deque<Transaction> transactions = getTransactions(portfolio, security);
-        Deque<SecurityEventCashFlow> securityEventCashFlows = getSecurityEventCashFlows(portfolio, security);
+    public DerivativeCashFlow getDerivativeCashFlow(Portfolio portfolio, Security contract) {
+        Deque<Transaction> transactions = getTransactions(portfolio, contract);
+        Deque<SecurityEventCashFlow> securityEventCashFlows = getSecurityEventCashFlows(portfolio, contract);
 
         DerivativeCashFlow derivativeCashFlow = new DerivativeCashFlow();
         BigDecimal totalProfit = BigDecimal.ZERO;
@@ -66,22 +79,24 @@ public class DerivativeCashFlowFactory {
         return derivativeCashFlow;
     }
 
-    private LinkedList<Transaction> getTransactions(PortfolioEntity portfolio, SecurityEntity security) {
+    private LinkedList<Transaction> getTransactions(Portfolio portfolio, Security contract) {
         return transactionRepository
-                .findBySecurityAndPortfolioOrderByTimestampAscIdAsc(security, portfolio)
+                .findBySecurityIsinAndPortfolioIdOrderByTimestampAscIdAsc(
+                        contract.getIsin(),
+                        portfolio.getId())
                 .stream()
-                .map(transactionEntityConverter::fromEntity)
+                .map(transactionConverter::fromEntity)
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    private Deque<SecurityEventCashFlow> getSecurityEventCashFlows(PortfolioEntity portfolio, SecurityEntity security) {
+    private Deque<SecurityEventCashFlow> getSecurityEventCashFlows(Portfolio portfolio, Security contract) {
         return securityEventCashFlowRepository
-                    .findByPortfolioAndIsinAndCashFlowTypeOrderByTimestampAsc(
-                            portfolio.getPortfolio(),
-                            security.getIsin(),
-                            CashFlowType.DERIVATIVE_PROFIT)
+                    .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(
+                            portfolio.getId(),
+                            contract.getIsin(),
+                            CashFlowType.DERIVATIVE_PROFIT.getId())
                     .stream()
-                    .map(securityEventCashFlowEntityConverter::fromEntity)
+                    .map(securityEventCashFlowConverter::fromEntity)
                     .collect(Collectors.toCollection(LinkedList::new));
     }
 
@@ -103,7 +118,7 @@ public class DerivativeCashFlowFactory {
             dailyTransactionsCashFlows.put(transaction,
                     transactionCashFlowRepository.findByTransactionId(transaction.getId())
                             .stream()
-                            .map(transactionCashFlowEntityConverter::fromEntity)
+                            .map(transactionCashFlowConverter::fromEntity)
                             .collect(Collectors.toMap(TransactionCashFlow::getEventType, Function.identity())));
         }
         return dailyTransactionsCashFlows;

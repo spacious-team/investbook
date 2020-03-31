@@ -1,8 +1,26 @@
+/*
+ * Portfolio
+ * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package ru.portfolio.portfolio.view;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.converter.SecurityEventCashFlowEntityConverter;
+import ru.portfolio.portfolio.converter.SecurityEventCashFlowConverter;
 import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.Security;
@@ -21,7 +39,7 @@ import static ru.portfolio.portfolio.pojo.CashFlowType.*;
 public class PaidInterestFactory {
     private static final CashFlowType[] PAY_TYPES =  new CashFlowType[]{COUPON, AMORTIZATION, DIVIDEND, TAX};
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
-    private final SecurityEventCashFlowEntityConverter securityEventCashFlowEntityConverter;
+    private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
 
     public PaidInterest create(String portfolio, Security security, Positions positions) {
         PaidInterest paidInterest = new PaidInterest();
@@ -33,11 +51,11 @@ public class PaidInterestFactory {
 
     private Map<Position, List<SecurityEventCashFlow>> getPositionWithPayments(String portfolio, String isin, Positions positions, CashFlowType event) {
         List<SecurityEventCashFlowEntity> accruedInterests = securityEventCashFlowRepository
-                .findByPortfolioAndIsinAndCashFlowTypeOrderByTimestampAsc(portfolio, isin, event);
+                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(portfolio, isin, event.getId());
 
         Map<Position, List<SecurityEventCashFlow>> payments = new HashMap<>();
         for (SecurityEventCashFlowEntity entity : accruedInterests) {
-            SecurityEventCashFlow cash = securityEventCashFlowEntityConverter.fromEntity(entity);
+            SecurityEventCashFlow cash = securityEventCashFlowConverter.fromEntity(entity);
             BigDecimal payPerOne =  cash.getValue()
                     .divide(BigDecimal.valueOf(cash.getCount()), 6, RoundingMode.HALF_UP);
 

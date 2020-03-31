@@ -1,8 +1,26 @@
+/*
+ * Portfolio
+ * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package ru.portfolio.portfolio.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.portfolio.portfolio.converter.PortfolioEntityConverter;
+import ru.portfolio.portfolio.converter.PortfolioConverter;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.pojo.Portfolio;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
@@ -15,7 +33,7 @@ import java.util.Optional;
 public class PortfolioRestController extends AbstractRestController<String, Portfolio, PortfolioEntity> {
     private final PortfolioRepository repository;
 
-    public PortfolioRestController(PortfolioRepository repository, PortfolioEntityConverter converter) {
+    public PortfolioRestController(PortfolioRepository repository, PortfolioConverter converter) {
         super(repository, converter);
         this.repository = repository;
     }
@@ -53,17 +71,17 @@ public class PortfolioRestController extends AbstractRestController<String, Port
 
     @Override
     protected Optional<PortfolioEntity> getById(String id) {
-        return repository.findByPortfolio(id);
+        return repository.findById(id);
     }
 
     @Override
     protected String getId(Portfolio object) {
-        return object.getPortfolio();
+        return object.getId();
     }
 
     @Override
     protected Portfolio updateId(String id, Portfolio object) {
-        return object.toBuilder().portfolio(id).build();
+        return object.toBuilder().id(id).build();
     }
 
     @Override

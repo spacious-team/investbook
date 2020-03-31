@@ -1,3 +1,21 @@
+/*
+ * Portfolio
+ * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package ru.portfolio.portfolio.converter;
 
 import lombok.RequiredArgsConstructor;
@@ -11,7 +29,7 @@ import ru.portfolio.portfolio.repository.TransactionRepository;
 
 @Component
 @RequiredArgsConstructor
-public class TransactionCashFlowEntityConverter implements EntityConverter<TransactionCashFlowEntity, TransactionCashFlow> {
+public class TransactionCashFlowConverter implements EntityConverter<TransactionCashFlowEntity, TransactionCashFlow> {
     private final TransactionRepository transactionRepository;
     private final CashFlowTypeRepository cashFlowTypeRepository;
 
@@ -19,12 +37,12 @@ public class TransactionCashFlowEntityConverter implements EntityConverter<Trans
     public TransactionCashFlowEntity toEntity(TransactionCashFlow cash) {
         if (!transactionRepository.existsById(cash.getTransactionId()))
             throw new IllegalArgumentException("Транзакция с номером не найдена: " + cash.getTransactionId());
-        if (!cashFlowTypeRepository.existsById(cash.getEventType().getType()))
-            throw new IllegalArgumentException("В справочнике не найдено событие с типом: " + cash.getEventType().getType());
+        if (!cashFlowTypeRepository.existsById(cash.getEventType().getId()))
+            throw new IllegalArgumentException("В справочнике не найдено событие с типом: " + cash.getEventType().getId());
 
         TransactionCashFlowEntityPK pk = new TransactionCashFlowEntityPK();
         pk.setTransactionId(cash.getTransactionId());
-        pk.setType(cash.getEventType().getType());
+        pk.setType(cash.getEventType().getId());
         TransactionCashFlowEntity entity = new TransactionCashFlowEntity();
         entity.setTransactionCashFlowId(pk);
         entity.setValue(cash.getValue());

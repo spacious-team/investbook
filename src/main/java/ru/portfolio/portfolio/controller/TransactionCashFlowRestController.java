@@ -1,8 +1,26 @@
+/*
+ * Portfolio
+ * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package ru.portfolio.portfolio.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.portfolio.portfolio.converter.TransactionCashFlowEntityConverter;
+import ru.portfolio.portfolio.converter.TransactionCashFlowConverter;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntity;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntityPK;
 import ru.portfolio.portfolio.pojo.CashFlowType;
@@ -19,7 +37,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
     private final TransactionCashFlowRepository transactionCashFlowRepository;
 
     public TransactionCashFlowRestController(TransactionCashFlowRepository repository,
-                                             TransactionCashFlowEntityConverter converter) {
+                                             TransactionCashFlowConverter converter) {
         super(repository, converter);
         this.transactionCashFlowRepository = repository;
     }
@@ -75,7 +93,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
 
     @Override
     protected TransactionCashFlowEntityPK getId(TransactionCashFlow object) {
-        return getId(object.getTransactionId(), object.getEventType().getType());
+        return getId(object.getTransactionId(), object.getEventType().getId());
     }
 
     private TransactionCashFlowEntityPK getId(long transactionId, int eventType) {
@@ -95,7 +113,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
 
     @Override
     protected URI getLocationURI(TransactionCashFlow object) throws URISyntaxException {
-        return new URI(getLocation() + "/" + object.getTransactionId() + "/events/" + object.getEventType().getType());
+        return new URI(getLocation() + "/" + object.getTransactionId() + "/events/" + object.getEventType().getId());
     }
 
     @Override

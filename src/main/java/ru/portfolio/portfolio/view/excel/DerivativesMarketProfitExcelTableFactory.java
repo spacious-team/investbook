@@ -1,14 +1,28 @@
+/*
+ * Portfolio
+ * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package ru.portfolio.portfolio.view.excel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.converter.SecurityEntityConverter;
-import ru.portfolio.portfolio.entity.PortfolioEntity;
+import ru.portfolio.portfolio.converter.SecurityConverter;
 import ru.portfolio.portfolio.entity.SecurityEntity;
-import ru.portfolio.portfolio.pojo.CashFlowType;
-import ru.portfolio.portfolio.pojo.Security;
-import ru.portfolio.portfolio.pojo.Transaction;
-import ru.portfolio.portfolio.pojo.TransactionCashFlow;
+import ru.portfolio.portfolio.pojo.*;
 import ru.portfolio.portfolio.repository.SecurityRepository;
 import ru.portfolio.portfolio.repository.TransactionRepository;
 import ru.portfolio.portfolio.view.DerivativeCashFlow;
@@ -33,16 +47,16 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
             + "-" + FORECAST_TAX.getCellAddr();
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
-    private final SecurityEntityConverter securityEntityConverter;
+    private final SecurityConverter securityConverter;
     private final DerivativeCashFlowFactory derivativeCashFlowFactory;
 
-    public Table create(PortfolioEntity portfolio) {
+    public Table create(Portfolio portfolio) {
         Table profit = new Table();
         for (String isin : getSecuritiesIsin(portfolio)) {
             Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
             if (securityEntity.isPresent()) {
-                Security security = securityEntityConverter.fromEntity(securityEntity.get());
-                DerivativeCashFlow derivativeCashFlow = derivativeCashFlowFactory.getDerivativeCashFlow(portfolio, securityEntity.get());
+                Security security = securityConverter.fromEntity(securityEntity.get());
+                DerivativeCashFlow derivativeCashFlow = derivativeCashFlowFactory.getDerivativeCashFlow(portfolio, security);
 
                 profit.addEmptyRecord();
                 profit.addAll(getContractProfit(security, derivativeCashFlow));
@@ -51,7 +65,7 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
         return profit;
     }
 
-    private Collection<String> getSecuritiesIsin(PortfolioEntity portfolio) {
+    private Collection<String> getSecuritiesIsin(Portfolio portfolio) {
         return transactionRepository.findDistinctDerivativeByPortfolioOrderByTimestampDesc(portfolio);
     }
 
