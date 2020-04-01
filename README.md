@@ -25,6 +25,10 @@ java -jar portfolio-1.0.jar
 
 После загрузки отчета становится доступным аналитическая выгрузка по вашим портфелям в формате exсel файла:
 - доходность сделок на фондовом рынке;
+  ![stock-market](https://user-images.githubusercontent.com/11336712/78156498-8de02b00-7447-11ea-833c-cfc755bd7558.png)
 - доходность сделок на срочном рынке;
+  ![derivatives-market](https://user-images.githubusercontent.com/11336712/78156504-8f115800-7447-11ea-87e5-3cd4c34aab47.png)
 - пополнения, списания и доходность портфеля;
+  ![cash-in](https://user-images.githubusercontent.com/11336712/78156505-8f115800-7447-11ea-8f6d-6a34c21dfc89.png)
 - налоговая нагрузка. 
+  ![tax](https://user-images.githubusercontent.com/11336712/78156502-8e78c180-7447-11ea-9259-445c85d75a65.png)
