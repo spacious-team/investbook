@@ -34,7 +34,7 @@ import java.util.List;
 import static ru.portfolio.portfolio.parser.psb.DerivativeTransactionTable.FortsTableHeader.*;
 
 @Slf4j
-public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTransactionTable.FortsTableRow> {
+public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTransactionTable.DerivativeTransaction> {
     public static final String QUOTE_CURRENCY = "PNT"; // point
     private static final String TABLE_NAME = "Информация о заключенных сделках";
     private static final String TABLE_END_TEXT = "Итого";
@@ -45,7 +45,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
     }
 
     @Override
-    protected Collection<FortsTableRow> getRow(ExcelTable table, Row row) {
+    protected Collection<DerivativeTransaction> getRow(ExcelTable table, Row row) {
         boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
         int count = table.getIntCellValue(row, COUNT);
         String type = table.getStringCellValue(row, TYPE).toLowerCase();
@@ -70,8 +70,8 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
         BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
                 .add(table.getCurrencyCellValue(row, BROKER_COMMISSION))
                 .negate();
-        List<FortsTableRow> transactionInfo = new ArrayList<>(2);
-        FortsTableRow.FortsTableRowBuilder builder = FortsTableRow.builder()
+        List<DerivativeTransaction> transactionInfo = new ArrayList<>(2);
+        DerivativeTransaction.DerivativeTransactionBuilder builder = DerivativeTransaction.builder()
                 .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
                 .transactionId(Long.parseLong(table.getStringCellValue(row, TRANSACTION)))
                 .contract(table.getStringCellValue(row, CONTRACT))
@@ -79,12 +79,14 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
         transactionInfo.add(builder
                 .value(value)
                 .commission(commission)
-                .currency("RUB") // FORTS, only RUB
+                .valueCurrency("RUB") // FORTS, only RUB
+                .commissionCurrency("RUB") // FORTS, only RUB
                 .build());
         transactionInfo.add(builder
                 .value(valueInPoints)
                 .commission(BigDecimal.ZERO)
-                .currency(QUOTE_CURRENCY)
+                .valueCurrency(QUOTE_CURRENCY)
+                .commissionCurrency("RUB") // FORTS, only RUB
                 .build());
         return transactionInfo;
     }
@@ -113,13 +115,14 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
     @Getter
     @Builder
     @EqualsAndHashCode
-    static class FortsTableRow {
+    static class DerivativeTransaction {
         private long transactionId;
         private String contract;
         private Instant timestamp;
         private int count;
         private BigDecimal value; // оценочная стоиомсть в валюце цены
         private BigDecimal commission;
-        private String currency; // валюта
+        private String valueCurrency; // валюта платежа
+        private String commissionCurrency; // валюта коммиссии
     }
 }

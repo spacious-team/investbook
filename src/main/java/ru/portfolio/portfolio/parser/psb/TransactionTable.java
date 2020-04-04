@@ -34,14 +34,14 @@ import java.util.List;
 import static ru.portfolio.portfolio.parser.psb.TransactionTable.TransactionTableHeader.*;
 
 @Slf4j
-public class TransactionTable implements ReportTable<TransactionTable.TransactionTableRow> {
+public class TransactionTable implements ReportTable<TransactionTable.SecurityTransaction> {
     private static final String TABLE1_NAME = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами в дату заключения";
     private static final String TABLE2_NAME = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами Т+, рассчитанные в отчетном периоде";
     private static final String TABLE_END_TEXT = "Итого оборот";
     @Getter
     private final PsbBrokerReport report;
     @Getter
-    private final List<TransactionTableRow> data = new ArrayList<>();
+    private final List<SecurityTransaction> data = new ArrayList<>();
 
     public TransactionTable(PsbBrokerReport report) {
         this.report = report;
@@ -49,12 +49,12 @@ public class TransactionTable implements ReportTable<TransactionTable.Transactio
         this.data.addAll(parseTable(report, TABLE2_NAME));
     }
 
-    private List<TransactionTableRow> parseTable(PsbBrokerReport report, String tableName) {
+    private List<SecurityTransaction> parseTable(PsbBrokerReport report, String tableName) {
         ExcelTable table = ExcelTable.of(report.getSheet(), tableName, TABLE_END_TEXT, TransactionTableHeader.class);
         return table.getDataCollection(report.getPath(), this::getTransaction);
     }
 
-    private Collection<TransactionTableRow> getTransaction(ExcelTable table, org.apache.poi.ss.usermodel.Row row) {
+    private Collection<SecurityTransaction> getTransaction(ExcelTable table, org.apache.poi.ss.usermodel.Row row) {
         boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
         BigDecimal value = table.getCurrencyCellValue(row, VALUE);
         BigDecimal accruedInterest = table.getCurrencyCellValue(row, ACCRUED_INTEREST);
@@ -67,7 +67,7 @@ public class TransactionTable implements ReportTable<TransactionTable.Transactio
                 .add(table.getCurrencyCellValue(row, CLEARING_COMMISSION))
                 .add(table.getCurrencyCellValue(row, ITS_COMMISSION))
                 .negate();
-        return Collections.singletonList(TransactionTableRow.builder()
+        return Collections.singletonList(SecurityTransaction.builder()
                 .timestamp(report.convertToInstant(table.getStringCellValue(row, DATE_TIME)))
                 .transactionId(table.getLongCellValue(row, TRANSACTION))
                 .isin(table.getStringCellValue(row, ISIN))
@@ -109,7 +109,7 @@ public class TransactionTable implements ReportTable<TransactionTable.Transactio
     @Getter
     @Builder
     @EqualsAndHashCode
-    public static class TransactionTableRow {
+    public static class SecurityTransaction {
         private long transactionId;
         private String isin;
         private Instant timestamp;

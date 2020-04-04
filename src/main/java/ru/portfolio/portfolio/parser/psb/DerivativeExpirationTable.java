@@ -32,7 +32,7 @@ import static ru.portfolio.portfolio.parser.psb.DerivativeExpirationTable.Expira
 import static ru.portfolio.portfolio.parser.psb.DerivativeTransactionTable.QUOTE_CURRENCY;
 
 @Slf4j
-class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactionTable.FortsTableRow> {
+class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactionTable.DerivativeTransaction> {
     private static final String TABLE_NAME = "Исполнение контрактов";
     private static final String TABLE_END_TEXT = "Итого";
 
@@ -41,7 +41,7 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
     }
 
     @Override
-    protected Collection<DerivativeTransactionTable.FortsTableRow> getRow(ExcelTable table, Row row) {
+    protected Collection<DerivativeTransactionTable.DerivativeTransaction> getRow(ExcelTable table, Row row) {
         boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
         int count = table.getIntCellValue(row, COUNT);
         String type = table.getStringCellValue(row, TYPE).toLowerCase();
@@ -65,9 +65,9 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
         BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
                 .add(table.getCurrencyCellValue(row, BROKER_COMMISSION))
                 .negate();
-        List<DerivativeTransactionTable.FortsTableRow> transactionInfo = new ArrayList<>(2);
-        DerivativeTransactionTable.FortsTableRow.FortsTableRowBuilder builder =
-                DerivativeTransactionTable.FortsTableRow.builder()
+        List<DerivativeTransactionTable.DerivativeTransaction> transactionInfo = new ArrayList<>(2);
+        DerivativeTransactionTable.DerivativeTransaction.DerivativeTransactionBuilder builder =
+                DerivativeTransactionTable.DerivativeTransaction.builder()
                         .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
                         .transactionId(table.getLongCellValue(row, TRANSACTION))
                         .contract(table.getStringCellValue(row, CONTRACT))
@@ -75,12 +75,14 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
         transactionInfo.add(builder
                 .value(value)
                 .commission(commission)
-                .currency("RUB") // FORTS, only RUB
+                .valueCurrency("RUB") // FORTS, only RUB
+                .commissionCurrency("RUB") // FORTS, only RUB
                 .build());
         transactionInfo.add(builder
                 .value(valueInPoints)
                 .commission(BigDecimal.ZERO)
-                .currency(QUOTE_CURRENCY)
+                .valueCurrency(QUOTE_CURRENCY)
+                .commissionCurrency("RUB") // FORTS, only RUB
                 .build());
         return transactionInfo;
     }

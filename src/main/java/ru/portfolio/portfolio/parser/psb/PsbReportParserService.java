@@ -78,8 +78,8 @@ public class PsbReportParserService {
         }
     }
 
-    private void addTransaction(ReportTable<TransactionTable.TransactionTableRow> transactionTable) {
-        for (TransactionTable.TransactionTableRow row : transactionTable.getData()) {
+    private void addTransaction(ReportTable<TransactionTable.SecurityTransaction> transactionTable) {
+        for (TransactionTable.SecurityTransaction row : transactionTable.getData()) {
             boolean isAdded = saver.addTransaction(Transaction.builder()
                     .id(row.getTransactionId())
                     .portfolio(transactionTable.getReport().getPortfolio())
@@ -116,8 +116,8 @@ public class PsbReportParserService {
         }
     }
 
-    private void addDerivativeTransaction(ReportTable<DerivativeTransactionTable.FortsTableRow> derivativeTransactionTable) {
-        for (DerivativeTransactionTable.FortsTableRow row : derivativeTransactionTable.getData()) {
+    private void addDerivativeTransaction(ReportTable<DerivativeTransactionTable.DerivativeTransaction> derivativeTransactionTable) {
+        for (DerivativeTransactionTable.DerivativeTransaction row : derivativeTransactionTable.getData()) {
             saver.addSecurity(row.getContract());
             boolean isAdded = saver.addTransaction(Transaction.builder()
                     .id(row.getTransactionId())
@@ -129,20 +129,21 @@ public class PsbReportParserService {
             if (isAdded) {
                 TransactionCashFlow cashFlow = TransactionCashFlow.builder()
                         .transactionId(row.getTransactionId())
-                        .currency(row.getCurrency())
                         .build();
                 if (!row.getValue().equals(BigDecimal.ZERO)) {
                     saver.addTransactionCashFlow(cashFlow.toBuilder()
-                            .eventType(row.getCurrency().equals(QUOTE_CURRENCY) ?
+                            .eventType(row.getValueCurrency().equals(QUOTE_CURRENCY) ?
                                     CashFlowType.DERIVATIVE_QUOTE :
                                     CashFlowType.DERIVATIVE_PRICE)
                             .value(row.getValue())
+                            .currency(row.getValueCurrency())
                             .build());
                 }
                 if (!row.getCommission().equals(BigDecimal.ZERO)) {
                     saver.addTransactionCashFlow(cashFlow.toBuilder()
                             .eventType(CashFlowType.COMMISSION)
                             .value(row.getCommission())
+                            .currency(row.getCommissionCurrency())
                             .build());
                 }
             }
