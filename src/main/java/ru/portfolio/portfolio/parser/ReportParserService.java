@@ -27,11 +27,11 @@ import ru.portfolio.portfolio.pojo.*;
 @Slf4j
 @RequiredArgsConstructor
 public class ReportParserService {
-    private final ReportTableSaver saver;
+    private final ReportTableStorage storage;
 
     public void parse(ReportTableFactory reportTableFactory) {
         try {
-            boolean isAdded = saver.addPortfolio(Portfolio.builder()
+            boolean isAdded = storage.addPortfolio(Portfolio.builder()
                     .id(reportTableFactory.getReport().getPortfolio())
                     .build());
             if (isAdded) {
@@ -45,21 +45,21 @@ public class ReportParserService {
                 ReportTable<DerivativeTransaction> derivativeTransactionTable = reportTableFactory.getDerivativeTransactionTable();
                 ReportTable<SecurityEventCashFlow> derivativeCashFlowTable = reportTableFactory.getDerivativeCashFlowTable();
 
-                portfolioPropertyTable.getData().forEach(saver::addPortfolioProperty);
-                saver.addCashInfo(portfolioCashTable);
-                portfolioSecuritiesTable.getData().forEach(saver::addSecurity);
-                cashFlowTable.getData().forEach(saver::addEventCashFlow);
-                transactionTable.getData().forEach(saver::addTransaction);
+                portfolioPropertyTable.getData().forEach(storage::addPortfolioProperty);
+                storage.addCashInfo(portfolioCashTable);
+                portfolioSecuritiesTable.getData().forEach(storage::addSecurity);
+                cashFlowTable.getData().forEach(storage::addEventCashFlow);
+                transactionTable.getData().forEach(storage::addTransaction);
                 couponAndAmortizationTable.getData().forEach(c -> {
-                    if (saver.addSecurity(c.getIsin())) { // required for amortization
-                        saver.addSecurityEventCashFlow(c);
+                    if (storage.addSecurity(c.getIsin())) { // required for amortization
+                        storage.addSecurityEventCashFlow(c);
                     }
                 });
-                dividendTable.getData().forEach(saver::addSecurityEventCashFlow);
-                derivativeTransactionTable.getData().forEach(saver::addTransaction);
+                dividendTable.getData().forEach(storage::addSecurityEventCashFlow);
+                derivativeTransactionTable.getData().forEach(storage::addTransaction);
                 derivativeCashFlowTable.getData().forEach(c -> {
-                    if (saver.addSecurity(c.getIsin())) {
-                        saver.addSecurityEventCashFlow(c);
+                    if (storage.addSecurity(c.getIsin())) {
+                        storage.addSecurityEventCashFlow(c);
                     }
                 });
             }
