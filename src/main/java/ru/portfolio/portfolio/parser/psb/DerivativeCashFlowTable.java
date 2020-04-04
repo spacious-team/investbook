@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import ru.portfolio.portfolio.parser.*;
 import ru.portfolio.portfolio.pojo.CashFlowType;
+import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -37,7 +38,7 @@ import static java.util.Collections.singletonList;
 import static ru.portfolio.portfolio.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.*;
 
 @Slf4j
-public class DerivativeCashFlowTable extends AbstractReportTable<DerivativeCashFlowTable.DerivativeCashFlowTableRow> {
+public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCashFlow> {
 
     private static final String TABLE1_NAME = "Прочие операции";
     private static final String TABLE2_NAME = "Движение стандартных контрактов";
@@ -50,7 +51,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<DerivativeCashF
     }
 
     @Override
-    protected Collection<DerivativeCashFlowTableRow> pasreTable(ExcelTable table) {
+    protected Collection<SecurityEventCashFlow> pasreTable(ExcelTable table) {
         return hasOpenContract() ? super.pasreTable(table) : Collections.emptyList();
     }
 
@@ -75,11 +76,12 @@ public class DerivativeCashFlowTable extends AbstractReportTable<DerivativeCashF
     }
 
     @Override
-    protected Collection<DerivativeCashFlowTableRow> getRow(ExcelTable table, Row row) {
+    protected Collection<SecurityEventCashFlow> getRow(ExcelTable table, Row row) {
         BigDecimal value = table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.INCOUMING)
                 .subtract(table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.OUTGOING));
-        DerivativeCashFlowTableRow.DerivativeCashFlowTableRowBuilder builder = DerivativeCashFlowTableRow.builder()
+        SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .timestamp(convertToInstant(table.getStringCellValue(row, DerivativeCashFlowTableHeader.DATE)))
+                .portfolio(getReport().getPortfolio())
                 .value(value)
                 .currency("RUB"); // FORTS, only RUB
         String action = table.getCell(row, DerivativeCashFlowTableHeader.OPERATION).getStringCellValue().toLowerCase();
@@ -91,12 +93,12 @@ public class DerivativeCashFlowTable extends AbstractReportTable<DerivativeCashF
                 if (count == null) {
                     throw new IllegalArgumentException("Открытых контрактов не найдено");
                 }
-                return singletonList(builder.event(CashFlowType.DERIVATIVE_PROFIT)
-                        .contract(contract)
+                return singletonList(builder.eventType(CashFlowType.DERIVATIVE_PROFIT)
+                        .isin(contract)
                         .count(count)
                         .build());
             case "биржевой сбор":
-                return singletonList(builder.event(CashFlowType.COMMISSION).build());
+                return emptyList(); // изменения отображаются в ликвидной стоимости портфеля
             case "заблокированo / разблокировано средств под го":
                 return emptyList(); // не влияет на размер собственных денежных средств
             default:

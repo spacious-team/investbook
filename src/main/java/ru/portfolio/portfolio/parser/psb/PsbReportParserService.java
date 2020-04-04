@@ -21,11 +21,8 @@ package ru.portfolio.portfolio.parser.psb;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.portfolio.portfolio.parser.ReportTable;
 import ru.portfolio.portfolio.parser.ReportTableSaver;
-import ru.portfolio.portfolio.pojo.EventCashFlow;
 import ru.portfolio.portfolio.pojo.Portfolio;
-import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,7 +32,6 @@ import java.nio.file.Paths;
 @RequiredArgsConstructor
 public class PsbReportParserService {
     private final ReportTableSaver saver;
-
 
     public void parse(String reportFile) {
         parse(Paths.get(reportFile));
@@ -61,43 +57,21 @@ public class PsbReportParserService {
                 cashFlowTable.getData().forEach(saver::addEventCashFlow);
                 transactionTable.getData().forEach(saver::addTransaction);
                 couponAndAmortizationTable.getData().forEach(c -> {
-                    saver.addSecurity(c.getIsin()); // required for amortization
-                    saver.addSecurityEventCashFlow(c);
+                    if (saver.addSecurity(c.getIsin())) { // required for amortization
+                        saver.addSecurityEventCashFlow(c);
+                    }
                 });
                 dividendTable.getData().forEach(saver::addSecurityEventCashFlow);
                 derivativeTransactionTable.getData().forEach(saver::addTransaction);
-                addDerivativeCashFlows(derivativeCashFlowTable);
+                derivativeCashFlowTable.getData().forEach(c -> {
+                    if (saver.addSecurity(c.getIsin())) {
+                        saver.addSecurityEventCashFlow(c);
+                    }
+                });
             }
         } catch (Exception e) {
             log.warn("Не могу открыть/закрыть отчет {}", reportFile, e);
             throw new RuntimeException(e);
-        }
-    }
-
-    private void addDerivativeCashFlows(ReportTable<DerivativeCashFlowTable.DerivativeCashFlowTableRow> derivativeCashFlowTable) {
-        for (DerivativeCashFlowTable.DerivativeCashFlowTableRow row : derivativeCashFlowTable.getData()) {
-            if (row.getContract() != null) {
-                boolean isAdded = saver.addSecurity(row.getContract());
-                if (!isAdded) continue;
-                saver.addSecurityEventCashFlow(SecurityEventCashFlow.builder()
-                        .isin(row.getContract())
-                        .portfolio(derivativeCashFlowTable.getReport().getPortfolio())
-                        .count(row.getCount())
-                        .eventType(row.getEvent())
-                        .timestamp(row.getTimestamp())
-                        .value(row.getValue())
-                        .currency(row.getCurrency())
-                        .build());
-            } else {
-                // Событие "Биржевой сбор"
-                saver.addEventCashFlow(EventCashFlow.builder()
-                        .portfolio(derivativeCashFlowTable.getReport().getPortfolio())
-                        .eventType(row.getEvent())
-                        .timestamp(row.getTimestamp())
-                        .value(row.getValue())
-                        .currency(row.getCurrency())
-                        .build());
-            }
         }
     }
 }
