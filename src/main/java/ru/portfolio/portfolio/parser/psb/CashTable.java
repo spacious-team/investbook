@@ -18,14 +18,11 @@
 
 package ru.portfolio.portfolio.parser.psb;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import ru.portfolio.portfolio.parser.*;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 
 import static java.util.Collections.emptyList;
@@ -34,7 +31,7 @@ import static ru.portfolio.portfolio.parser.ExcelTableHelper.rowContains;
 import static ru.portfolio.portfolio.parser.psb.CashTable.CashTableHeader.*;
 
 @Slf4j
-public class CashTable extends AbstractReportTable<CashTable.CashTableRow> {
+public class CashTable extends AbstractReportTable<PortfolioCash> {
 
     private static final String TABLE_NAME = "Позиция денежных средств по биржевым площадкам";
     private static final String TABLE_END_TEXT = "КонецДС_Б"; // hidden text in 0-th column
@@ -50,10 +47,10 @@ public class CashTable extends AbstractReportTable<CashTable.CashTableRow> {
     }
 
     @Override
-    protected Collection<CashTableRow> getRow(ExcelTable table, Row row) {
+    protected Collection<PortfolioCash> getRow(ExcelTable table, Row row) {
         return rowContains(table, row, INVALID_TEXT) ?
                 emptyList() :
-                singletonList(CashTableRow.builder()
+                singletonList(PortfolioCash.builder()
                         .section(table.getStringCellValue(row, SECTION))
                         .value(table.getCurrencyCellValue(row, VALUE))
                         .currency(table.getStringCellValue(row, CURRENCY))
@@ -70,14 +67,5 @@ public class CashTable extends AbstractReportTable<CashTable.CashTableRow> {
         CashTableHeader(String ... words) {
             this.column = TableColumnImpl.of(words);
         }
-    }
-
-    @Getter
-    @Builder
-    @EqualsAndHashCode
-    static class CashTableRow {
-        private String section;
-        private BigDecimal value;
-        private String currency;
     }
 }

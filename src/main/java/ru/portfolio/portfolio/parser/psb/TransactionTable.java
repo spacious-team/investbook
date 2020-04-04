@@ -18,14 +18,11 @@
 
 package ru.portfolio.portfolio.parser.psb;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import ru.portfolio.portfolio.parser.*;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,7 +31,7 @@ import java.util.List;
 import static ru.portfolio.portfolio.parser.psb.TransactionTable.TransactionTableHeader.*;
 
 @Slf4j
-public class TransactionTable implements ReportTable<TransactionTable.SecurityTransaction> {
+public class TransactionTable implements ReportTable<SecurityTransaction> {
     private static final String TABLE1_NAME = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами в дату заключения";
     private static final String TABLE2_NAME = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами Т+, рассчитанные в отчетном периоде";
     private static final String TABLE_END_TEXT = "Итого оборот";
@@ -70,6 +67,7 @@ public class TransactionTable implements ReportTable<TransactionTable.SecurityTr
         return Collections.singletonList(SecurityTransaction.builder()
                 .timestamp(report.convertToInstant(table.getStringCellValue(row, DATE_TIME)))
                 .transactionId(table.getLongCellValue(row, TRANSACTION))
+                .portfolio(getReport().getPortfolio())
                 .isin(table.getStringCellValue(row, ISIN))
                 .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
                 .value(value)
@@ -104,20 +102,5 @@ public class TransactionTable implements ReportTable<TransactionTable.SecurityTr
         TransactionTableHeader(TableColumn ... columns) {
             this.column = AnyOfTableColumn.of(columns);
         }
-    }
-
-    @Getter
-    @Builder
-    @EqualsAndHashCode
-    public static class SecurityTransaction {
-        private long transactionId;
-        private String isin;
-        private Instant timestamp;
-        private int count;
-        private BigDecimal value; // оценочная стоиомсть в валюце цены
-        private BigDecimal accruedInterest; // НКД, в валюте бумаги
-        private BigDecimal commission;
-        private String valueCurrency; // валюта платежа
-        private String commissionCurrency; // валюта коммиссии
     }
 }

@@ -21,6 +21,7 @@ package ru.portfolio.portfolio.parser.psb;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
+import ru.portfolio.portfolio.parser.DerivativeTransaction;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,7 +38,7 @@ public class DerivativeTransactionTableTest {
 
     @Test(dataProvider = "isin")
     void testIsin(String report, String firstIsin, String lastIsin) throws IOException {
-        List<DerivativeTransactionTable.DerivativeTransaction> data = new DerivativeTransactionTable(new PsbBrokerReport(report)).getData();
+        List<DerivativeTransaction> data = new DerivativeTransactionTable(new PsbBrokerReport(report)).getData();
         assertEquals(data.get(0).getContract(), firstIsin);
         assertEquals(data.get(data.size() - 1).getContract(), lastIsin);
     }

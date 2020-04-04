@@ -28,11 +28,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static ru.portfolio.portfolio.parser.DerivativeTransaction.QUOTE_CURRENCY;
 import static ru.portfolio.portfolio.parser.psb.DerivativeExpirationTable.ExpirationTableHeader.*;
-import static ru.portfolio.portfolio.parser.psb.DerivativeTransactionTable.QUOTE_CURRENCY;
 
 @Slf4j
-class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactionTable.DerivativeTransaction> {
+class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransaction> {
     private static final String TABLE_NAME = "Исполнение контрактов";
     private static final String TABLE_END_TEXT = "Итого";
 
@@ -41,7 +41,7 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
     }
 
     @Override
-    protected Collection<DerivativeTransactionTable.DerivativeTransaction> getRow(ExcelTable table, Row row) {
+    protected Collection<DerivativeTransaction> getRow(ExcelTable table, Row row) {
         boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
         int count = table.getIntCellValue(row, COUNT);
         String type = table.getStringCellValue(row, TYPE).toLowerCase();
@@ -65,9 +65,9 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
         BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
                 .add(table.getCurrencyCellValue(row, BROKER_COMMISSION))
                 .negate();
-        List<DerivativeTransactionTable.DerivativeTransaction> transactionInfo = new ArrayList<>(2);
-        DerivativeTransactionTable.DerivativeTransaction.DerivativeTransactionBuilder builder =
-                DerivativeTransactionTable.DerivativeTransaction.builder()
+        List<DerivativeTransaction> transactionInfo = new ArrayList<>(2);
+        DerivativeTransaction.DerivativeTransactionBuilder builder =
+                DerivativeTransaction.builder()
                         .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
                         .transactionId(table.getLongCellValue(row, TRANSACTION))
                         .contract(table.getStringCellValue(row, CONTRACT))

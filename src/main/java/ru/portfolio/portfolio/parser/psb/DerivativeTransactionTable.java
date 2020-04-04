@@ -18,15 +18,12 @@
 
 package ru.portfolio.portfolio.parser.psb;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import ru.portfolio.portfolio.parser.*;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,8 +31,7 @@ import java.util.List;
 import static ru.portfolio.portfolio.parser.psb.DerivativeTransactionTable.FortsTableHeader.*;
 
 @Slf4j
-public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTransactionTable.DerivativeTransaction> {
-    public static final String QUOTE_CURRENCY = "PNT"; // point
+public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTransaction> {
     private static final String TABLE_NAME = "Информация о заключенных сделках";
     private static final String TABLE_END_TEXT = "Итого";
 
@@ -74,6 +70,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
         DerivativeTransaction.DerivativeTransactionBuilder builder = DerivativeTransaction.builder()
                 .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
                 .transactionId(Long.parseLong(table.getStringCellValue(row, TRANSACTION)))
+                .portfolio(getReport().getPortfolio())
                 .contract(table.getStringCellValue(row, CONTRACT))
                 .count((isBuy ? 1 : -1) * count);
         transactionInfo.add(builder
@@ -85,7 +82,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
         transactionInfo.add(builder
                 .value(valueInPoints)
                 .commission(BigDecimal.ZERO)
-                .valueCurrency(QUOTE_CURRENCY)
+                .valueCurrency(DerivativeTransaction.QUOTE_CURRENCY)
                 .commissionCurrency("RUB") // FORTS, only RUB
                 .build());
         return transactionInfo;
@@ -112,17 +109,4 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
         }
     }
 
-    @Getter
-    @Builder
-    @EqualsAndHashCode
-    static class DerivativeTransaction {
-        private long transactionId;
-        private String contract;
-        private Instant timestamp;
-        private int count;
-        private BigDecimal value; // оценочная стоиомсть в валюце цены
-        private BigDecimal commission;
-        private String valueCurrency; // валюта платежа
-        private String commissionCurrency; // валюта коммиссии
-    }
 }

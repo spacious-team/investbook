@@ -18,6 +18,8 @@
 
 package ru.portfolio.portfolio.parser;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.NestedExceptionUtils;
@@ -37,17 +39,7 @@ public class ReportTableSaver {
     private final TransactionRestController transactionRestController;
     private final TransactionCashFlowRestController transactionCashFlowRestController;
     private final PortfolioPropertyRestController portfolioPropertyRestController;
-
-    public boolean addSecurity(String isin) {
-        return addSecurity(isin, null);
-    }
-
-    public boolean addSecurity(String isin, String name) {
-        return addSecurity(Security.builder()
-                .isin(isin)
-                .name(name)
-                .build());
-    }
+    private final ObjectMapper objectMapper;
 
     public boolean addPortfolio(Portfolio portfolio) {
         try {
@@ -67,6 +59,17 @@ public class ReportTableSaver {
         return true;
     }
 
+    public boolean addSecurity(String isin) {
+        return addSecurity(isin, null);
+    }
+
+    public boolean addSecurity(String isin, String name) {
+        return addSecurity(Security.builder()
+                .isin(isin)
+                .name(name)
+                .build());
+    }
+
     public boolean addSecurity(Security security) {
         try {
             HttpStatus status = securityRestController.post(security).getStatusCode();
@@ -83,6 +86,21 @@ public class ReportTableSaver {
             return false;
         }
         return true;
+    }
+
+    public void addTransaction(SecurityTransaction securityTransaction) {
+        boolean isAdded = addTransaction(securityTransaction.getTransaction());
+        if (isAdded) {
+            securityTransaction.getTransactionCashFlows().forEach(this::addTransactionCashFlow);
+        }
+    }
+
+    public void addTransaction(DerivativeTransaction derivativeTransaction) {
+        addSecurity(derivativeTransaction.getContract());
+        boolean isAdded = addTransaction(derivativeTransaction.getTransaction());
+        if (isAdded) {
+            derivativeTransaction.getTransactionCashFlows().forEach(this::addTransactionCashFlow);
+        }
     }
 
     public boolean addTransaction(Transaction transaction) {
@@ -160,6 +178,19 @@ public class ReportTableSaver {
             } else {
                 log.warn("Не могу добавить информацию о свойствах портфеля {}", property, e);
             }
+        }
+    }
+
+    public void addCashInfo(ReportTable<PortfolioCash> cashTable) {
+        try {
+            addPortfolioProperty(PortfolioProperty.builder()
+                    .portfolio(cashTable.getReport().getPortfolio())
+                    .property(PortfolioPropertyType.CASH)
+                    .value(objectMapper.writeValueAsString(cashTable.getData()))
+                    .timestamp(cashTable.getReport().getReportDate())
+                    .build());
+        } catch (JsonProcessingException e) {
+            log.warn("Не могу добавить информацию о наличных средствах {}", cashTable.getData(), e);
         }
     }
 }
