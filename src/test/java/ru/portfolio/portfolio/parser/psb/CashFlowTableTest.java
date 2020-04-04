@@ -21,6 +21,7 @@ package ru.portfolio.portfolio.parser.psb;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
+import ru.portfolio.portfolio.pojo.EventCashFlow;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -40,9 +41,9 @@ public class CashFlowTableTest {
     @Test(dataProvider = "cash")
     void testIsin(String reportFile, BigDecimal expectedCashIn) throws IOException {
         PsbBrokerReport report = new PsbBrokerReport(reportFile);
-        List<CashFlowTable.CashFlowTableRow> data = new CashFlowTable(report).getData();
+        List<EventCashFlow> data = new CashFlowTable(report).getData();
         BigDecimal sum = BigDecimal.ZERO;
-        for (CashFlowTable.CashFlowTableRow r : data) {
+        for (EventCashFlow r : data) {
             sum = sum.add(r.getValue());
         }
         assertEquals(sum, expectedCashIn);

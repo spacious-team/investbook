@@ -28,10 +28,10 @@ import java.math.BigDecimal;
 import static org.testng.Assert.assertEquals;
 
 @Ignore
-public class CashTableTest {
+public class PortfolioCashTableTest {
     PsbBrokerReport report;
 
-    CashTableTest() throws IOException {
+    PortfolioCashTableTest() throws IOException {
         this.report = new PsbBrokerReport("E:\\1.xlsx");
     }
 
@@ -42,6 +42,6 @@ public class CashTableTest {
 
     @Test(dataProvider = "cash_in")
     void testIsin(BigDecimal expectedCash) {
-        assertEquals(new CashTable(this.report).getData().get(0).getValue(), expectedCash);
+        assertEquals(new PortfolioCashTable(this.report).getData().get(0).getValue(), expectedCash);
     }
 }

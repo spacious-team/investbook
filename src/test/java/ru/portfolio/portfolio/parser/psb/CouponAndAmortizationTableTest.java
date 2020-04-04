@@ -21,6 +21,7 @@ package ru.portfolio.portfolio.parser.psb;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
+import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 
 import java.io.IOException;
 import java.util.List;
@@ -42,7 +43,7 @@ public class CouponAndAmortizationTableTest {
 
     @Test(dataProvider = "isin")
     void testIsin(String firstIsin, String lastIsin) {
-        List<CouponAndAmortizationTable.CouponAndAmortizationTableRow> data = new CouponAndAmortizationTable(this.report).getData();
+        List<SecurityEventCashFlow> data = new CouponAndAmortizationTable(this.report).getData();
         assertEquals(data.get(0).getIsin(), firstIsin);
         assertEquals(data.get(data.size() - 1).getIsin(), lastIsin);
     }

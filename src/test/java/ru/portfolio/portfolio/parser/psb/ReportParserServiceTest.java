@@ -25,13 +25,17 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 import ru.portfolio.portfolio.PortfolioApplication;
+import ru.portfolio.portfolio.parser.ReportParserService;
+
+import java.io.IOException;
+import java.nio.file.Paths;
 
 @Ignore
 @SpringBootTest(classes = PortfolioApplication.class)
-public class PsbReportParserServiceTest extends AbstractTestNGSpringContextTests {
+public class ReportParserServiceTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    private PsbReportParserService psbReportParserService;
+    private ReportParserService reportParserService;
 
     @DataProvider(name = "report")
     Object[][] getData() {
@@ -42,8 +46,10 @@ public class PsbReportParserServiceTest extends AbstractTestNGSpringContextTests
     }
 
     @Test(dataProvider = "report")
-    void testParse(String report) {
-        psbReportParserService.parse(report);
+    void testParse(String report) throws IOException {
+        PsbBrokerReport brokerReport = new PsbBrokerReport(Paths.get(report));
+        PsbReportTableFactory reportTableFactory = new PsbReportTableFactory(brokerReport);
+        reportParserService.parse(reportTableFactory);
     }
 
 }

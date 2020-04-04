@@ -16,43 +16,37 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.portfolio.portfolio.parser.psb;
+package ru.portfolio.portfolio.parser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.portfolio.portfolio.parser.ReportTableSaver;
-import ru.portfolio.portfolio.pojo.Portfolio;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import ru.portfolio.portfolio.pojo.*;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PsbReportParserService {
+public class ReportParserService {
     private final ReportTableSaver saver;
 
-    public void parse(String reportFile) {
-        parse(Paths.get(reportFile));
-    }
-
-    public void parse(Path reportFile) {
-        try (PsbBrokerReport report = new PsbBrokerReport(reportFile)) {
-            boolean isAdded = saver.addPortfolio(Portfolio.builder().id(report.getPortfolio()).build());
+    public void parse(ReportTableFactory reportTableFactory) {
+        try {
+            boolean isAdded = saver.addPortfolio(Portfolio.builder()
+                    .id(reportTableFactory.getReport().getPortfolio())
+                    .build());
             if (isAdded) {
-                CashTable cashTable = new CashTable(report);
-                PortfolioPropertyTable portfolioPropertyTable = new PortfolioPropertyTable(report);
-                CashFlowTable cashFlowTable = new CashFlowTable(report);
-                PortfolioSecuritiesTable portfolioSecuritiesTable = new PortfolioSecuritiesTable(report);
-                TransactionTable transactionTable = new TransactionTable(report);
-                CouponAndAmortizationTable couponAndAmortizationTable = new CouponAndAmortizationTable(report);
-                DividendTable dividendTable = new DividendTable(report);
-                DerivativeTransactionTable derivativeTransactionTable = new DerivativeTransactionTable(report);
-                DerivativeCashFlowTable derivativeCashFlowTable = new DerivativeCashFlowTable(report);
+                ReportTable<PortfolioCash> portfolioCashTable = reportTableFactory.createPortfolioCashTable();
+                ReportTable<PortfolioProperty> portfolioPropertyTable = reportTableFactory.getPortfolioPropertyTable();
+                ReportTable<EventCashFlow> cashFlowTable = reportTableFactory.getCashFlowTable();
+                ReportTable<Security> portfolioSecuritiesTable = reportTableFactory.getPortfolioSecuritiesTable();
+                ReportTable<SecurityTransaction> transactionTable = reportTableFactory.getTransactionTable();
+                ReportTable<SecurityEventCashFlow> couponAndAmortizationTable = reportTableFactory.getCouponAndAmortizationTable();
+                ReportTable<SecurityEventCashFlow> dividendTable = reportTableFactory.getDividendTable();
+                ReportTable<DerivativeTransaction> derivativeTransactionTable = reportTableFactory.getDerivativeTransactionTable();
+                ReportTable<SecurityEventCashFlow> derivativeCashFlowTable = reportTableFactory.getDerivativeCashFlowTable();
 
                 portfolioPropertyTable.getData().forEach(saver::addPortfolioProperty);
-                saver.addCashInfo(cashTable);
+                saver.addCashInfo(portfolioCashTable);
                 portfolioSecuritiesTable.getData().forEach(saver::addSecurity);
                 cashFlowTable.getData().forEach(saver::addEventCashFlow);
                 transactionTable.getData().forEach(saver::addTransaction);
@@ -70,7 +64,7 @@ public class PsbReportParserService {
                 });
             }
         } catch (Exception e) {
-            log.warn("Не могу открыть/закрыть отчет {}", reportFile, e);
+            log.warn("Не могу распарсить отчет {}", reportTableFactory.getReport().getPath(), e);
             throw new RuntimeException(e);
         }
     }

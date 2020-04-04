@@ -28,16 +28,16 @@ import java.util.Collection;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static ru.portfolio.portfolio.parser.ExcelTableHelper.rowContains;
-import static ru.portfolio.portfolio.parser.psb.CashTable.CashTableHeader.*;
+import static ru.portfolio.portfolio.parser.psb.PortfolioCashTable.CashTableHeader.*;
 
 @Slf4j
-public class CashTable extends AbstractReportTable<PortfolioCash> {
+public class PortfolioCashTable extends AbstractReportTable<PortfolioCash> {
 
     private static final String TABLE_NAME = "Позиция денежных средств по биржевым площадкам";
     private static final String TABLE_END_TEXT = "КонецДС_Б"; // hidden text in 0-th column
     private static final String INVALID_TEXT = "ИТОГО:";
 
-    public CashTable(PsbBrokerReport report) {
+    public PortfolioCashTable(PsbBrokerReport report) {
         super(report, TABLE_NAME, TABLE_END_TEXT, CashTableHeader.class);
     }
 

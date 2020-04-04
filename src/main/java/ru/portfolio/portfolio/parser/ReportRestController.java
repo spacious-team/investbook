@@ -26,7 +26,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import ru.portfolio.portfolio.parser.psb.PsbReportParserService;
+import ru.portfolio.portfolio.parser.psb.PsbBrokerReport;
+import ru.portfolio.portfolio.parser.psb.PsbReportTableFactory;
 
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -41,7 +42,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class ReportRestController {
-    private final PsbReportParserService psbReportParserService;
+    private final ReportParserService reportParserService;
     private FileSystem jimfs = Jimfs.newFileSystem(Configuration.unix());
 
     @PostMapping("/a")
@@ -51,8 +52,8 @@ public class ReportRestController {
 
     @PostMapping("/reports")
     public String post(@RequestParam("reports") MultipartFile[] reports,
-                                                @RequestParam(name = "format", required = false) String format) {
-       if (format == null || format.isEmpty()) {
+                       @RequestParam(name = "format", required = false) String format) {
+        if (format == null || format.isEmpty()) {
             format = "psb";
         }
         format = format.toLowerCase();
@@ -68,7 +69,7 @@ public class ReportRestController {
                 Path path = jimfs.getPath(originalFilename != null ? originalFilename : UUID.randomUUID().toString());
                 Files.write(path, bytes);
                 if ("psb".equals(format)) {
-                    psbReportParserService.parse(path);
+                    parsePsbReport(path);
                 } else {
                     throw new IllegalArgumentException("Неизвестный формат " + format);
                 }
@@ -81,6 +82,16 @@ public class ReportRestController {
             return "ok";
         } else {
             throw new RuntimeException(exceptions.stream().map(Throwable::getMessage).collect(Collectors.joining(", ")));
+        }
+    }
+
+    private void parsePsbReport(Path path) {
+        try (PsbBrokerReport brockerReport = new PsbBrokerReport(path)) {
+            ReportTableFactory reportTableFactory = new PsbReportTableFactory(brockerReport);
+            reportParserService.parse(reportTableFactory);
+        } catch (Exception e) {
+            log.warn("Не могу открыть/закрыть отчет {}", path, e);
+            throw new RuntimeException(e);
         }
     }
 }
