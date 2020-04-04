@@ -22,7 +22,5 @@ public interface EntityConverter<Entity, Pojo> {
 
     Entity toEntity(Pojo pojo);
 
-    default Pojo fromEntity(Entity entity) {
-        throw new UnsupportedOperationException();
-    }
+    Pojo fromEntity(Entity entity);
 }

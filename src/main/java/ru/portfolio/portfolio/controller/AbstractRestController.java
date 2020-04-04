@@ -113,9 +113,10 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
      * @return response entity with http CREATE status, Location http header and body
      */
     private ResponseEntity<Entity> createEntity(Pojo object) throws URISyntaxException {
+        Entity entity = saveAndFlush(object);
         return ResponseEntity
-                .created(getLocationURI(object))
-                .body(saveAndFlush(object));
+                .created(getLocationURI(converter.fromEntity(entity)))
+                .body(entity);
     }
 
     protected URI getLocationURI(Pojo object) throws URISyntaxException {
