@@ -69,6 +69,7 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
         DerivativeTransaction.DerivativeTransactionBuilder builder =
                 DerivativeTransaction.builder()
                         .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
+                        .portfolio(getReport().getPortfolio())
                         .transactionId(table.getLongCellValue(row, TRANSACTION))
                         .contract(table.getStringCellValue(row, CONTRACT))
                         .count((isBuy ? 1 : -1) * count);
