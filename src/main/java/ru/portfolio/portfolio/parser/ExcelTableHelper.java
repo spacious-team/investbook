@@ -80,6 +80,10 @@ public class ExcelTableHelper {
                 sheet.getRow(lastRowNum).getLastCellNum());
     }
 
+    public static boolean rowContains(ExcelTable table, Row row, Object value) {
+        return rowContains(table.getSheet(), row.getRowNum(), value);
+    }
+
     public static boolean rowContains(Sheet sheet, int rowNum, Object value) {
         return find(sheet, value, rowNum, rowNum + 1, String::equals) != NOT_FOUND;
     }

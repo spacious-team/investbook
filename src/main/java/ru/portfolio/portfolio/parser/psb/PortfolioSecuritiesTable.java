@@ -44,7 +44,7 @@ public class PortfolioSecuritiesTable extends AbstractReportTable<PortfolioSecur
 
     @Override
     protected Collection<PortfolioSecuritiesTableRow> getRow(ExcelTable table, Row row) {
-        return rowContains(table.getSheet(), row.getRowNum(), INVALID_TEXT) ?
+        return rowContains(table, row, INVALID_TEXT) ?
                 emptyList() :
                 getPosition(table, row);
     }

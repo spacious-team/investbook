@@ -27,14 +27,17 @@ import ru.portfolio.portfolio.parser.*;
 import java.math.BigDecimal;
 import java.util.Collection;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static ru.portfolio.portfolio.parser.ExcelTableHelper.rowContains;
 import static ru.portfolio.portfolio.parser.psb.CashTable.CashTableHeader.*;
 
 @Slf4j
 public class CashTable extends AbstractReportTable<CashTable.CashTableRow> {
 
     private static final String TABLE_NAME = "Позиция денежных средств по биржевым площадкам";
-    private static final String TABLE_END_TEXT = "ИТОГО:";
+    private static final String TABLE_END_TEXT = "КонецДС_Б"; // hidden text in 0-th column
+    private static final String INVALID_TEXT = "ИТОГО:";
 
     public CashTable(PsbBrokerReport report) {
         super(report, TABLE_NAME, TABLE_END_TEXT, CashTableHeader.class);
@@ -47,11 +50,13 @@ public class CashTable extends AbstractReportTable<CashTable.CashTableRow> {
 
     @Override
     protected Collection<CashTableRow> getRow(ExcelTable table, Row row) {
-        return singletonList(CashTableRow.builder()
-                .section(table.getStringCellValue(row, SECTION))
-                .value(table.getCurrencyCellValue(row, VALUE))
-                .currency(table.getStringCellValue(row, CURRENCY))
-                .build());
+        return rowContains(table, row, INVALID_TEXT) ?
+                emptyList() :
+                singletonList(CashTableRow.builder()
+                        .section(table.getStringCellValue(row, SECTION))
+                        .value(table.getCurrencyCellValue(row, VALUE))
+                        .currency(table.getStringCellValue(row, CURRENCY))
+                        .build());
     }
 
     enum CashTableHeader implements TableColumnDescription {
