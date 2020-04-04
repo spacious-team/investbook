@@ -19,6 +19,7 @@
 package ru.portfolio.portfolio.pojo;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -27,6 +28,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 @ToString
 @Builder(toBuilder = true)
+@EqualsAndHashCode
 public class Issuer {
     @NotNull
     private final Long inn;

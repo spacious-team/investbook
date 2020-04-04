@@ -18,23 +18,22 @@
 
 package ru.portfolio.portfolio.parser.psb;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import ru.portfolio.portfolio.parser.*;
+import ru.portfolio.portfolio.pojo.Security;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 
 import static java.util.Collections.emptyList;
 import static ru.portfolio.portfolio.parser.ExcelTableHelper.rowContains;
-import static ru.portfolio.portfolio.parser.psb.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.*;
+import static ru.portfolio.portfolio.parser.psb.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.ISIN;
+import static ru.portfolio.portfolio.parser.psb.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.NAME;
 
 @Slf4j
-public class PortfolioSecuritiesTable extends AbstractReportTable<PortfolioSecuritiesTable.PortfolioSecuritiesTableRow> {
+public class PortfolioSecuritiesTable extends AbstractReportTable<Security> {
     private static final String TABLE_NAME = "Портфель на конец дня на биржевом рынке";
     private static final String TABLE_END_TEXT = "* цена последней сделки (на организованных торгах)";
     private static final String INVALID_TEXT = "Итого в валюте цены";
@@ -44,24 +43,13 @@ public class PortfolioSecuritiesTable extends AbstractReportTable<PortfolioSecur
     }
 
     @Override
-    protected Collection<PortfolioSecuritiesTableRow> getRow(ExcelTable table, Row row) {
+    protected Collection<Security> getRow(ExcelTable table, Row row) {
         return rowContains(table, row, INVALID_TEXT) ?
                 emptyList() :
-                getPosition(table, row);
-    }
-
-    private static Collection<PortfolioSecuritiesTableRow> getPosition(ExcelTable table, Row row) {
-        String currency = table.getStringCellValue(row, CURRENCY);
-        return Collections.singletonList(PortfolioSecuritiesTableRow.builder()
-                .name(table.getStringCellValue(row, NAME))
-                .isin(table.getStringCellValue(row, ISIN))
-                .buyCount(table.getIntCellValue(row, BUY))
-                .cellCount(table.getIntCellValue(row, CELL))
-                .outgoingCount(table.getIntCellValue(row, OUTGOING))
-                .currency((currency != null && !currency.isEmpty()) ? currency : "RUB")
-                .amount(table.getCurrencyCellValue(row, AMOUNT))
-                .accruedInterest(table.getCurrencyCellValue(row, ACCRUED_INTEREST))
-                .build());
+                Collections.singletonList(Security.builder()
+                        .isin(table.getStringCellValue(row, ISIN))
+                        .name(table.getStringCellValue(row, NAME))
+                        .build());
     }
 
     enum PortfolioSecuritiesTableHeader implements TableColumnDescription {
@@ -79,19 +67,5 @@ public class PortfolioSecuritiesTable extends AbstractReportTable<PortfolioSecur
         PortfolioSecuritiesTableHeader(String... words) {
             this.column = TableColumnImpl.of(words);
         }
-    }
-
-    @Getter
-    @Builder
-    @EqualsAndHashCode
-    public static class PortfolioSecuritiesTableRow {
-        private String isin;
-        private String name;
-        private int buyCount;
-        private int cellCount;
-        private int outgoingCount;
-        private BigDecimal amount; // оценочная стоиомсть в валюце цены
-        private BigDecimal accruedInterest; // НКД, в валюте бумаги
-        private String currency; // валюта
     }
 }

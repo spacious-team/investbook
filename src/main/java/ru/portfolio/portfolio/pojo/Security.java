@@ -19,6 +19,7 @@
 package ru.portfolio.portfolio.pojo;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.lang.Nullable;
@@ -28,6 +29,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 @ToString
 @Builder(toBuilder = true)
+@EqualsAndHashCode
 public class Security {
     @NotNull
     private final String isin;

@@ -20,6 +20,7 @@ package ru.portfolio.portfolio.pojo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.lang.Nullable;
@@ -31,6 +32,7 @@ import java.time.Instant;
 @Getter
 @ToString
 @Builder(toBuilder = true)
+@EqualsAndHashCode
 public class EventCashFlow {
     @Nullable // autoincrement
     private Integer id;

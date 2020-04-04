@@ -70,7 +70,7 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
                 DerivativeTransactionTable.FortsTableRow.builder()
                         .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
                         .transactionId(table.getLongCellValue(row, TRANSACTION))
-                        .isin(table.getStringCellValue(row, CONTRACT))
+                        .contract(table.getStringCellValue(row, CONTRACT))
                         .count((isBuy ? 1 : -1) * count);
         transactionInfo.add(builder
                 .value(value)

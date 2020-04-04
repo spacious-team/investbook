@@ -45,12 +45,13 @@ public class ReportTableSaver {
     public boolean addSecurity(String isin, String name) {
         return addSecurity(Security.builder()
                 .isin(isin)
-                .name(name));
+                .name(name)
+                .build());
     }
 
-    public boolean addPortfolio(Portfolio.PortfolioBuilder portfolio) {
+    public boolean addPortfolio(Portfolio portfolio) {
         try {
-            HttpStatus status = portfolioRestController.post(portfolio.build()).getStatusCode();
+            HttpStatus status = portfolioRestController.post(portfolio).getStatusCode();
             if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                 log.warn("Не могу сохранить Портфель {}", portfolio);
                 return false;
@@ -66,9 +67,9 @@ public class ReportTableSaver {
         return true;
     }
 
-    public boolean addSecurity(Security.SecurityBuilder security) {
+    public boolean addSecurity(Security security) {
         try {
-            HttpStatus status = securityRestController.post(security.build()).getStatusCode();
+            HttpStatus status = securityRestController.post(security).getStatusCode();
             if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                 log.warn("Не могу добавить ЦБ {} в список", security);
                 return false;
@@ -84,9 +85,9 @@ public class ReportTableSaver {
         return true;
     }
 
-    public boolean addTransaction(Transaction.TransactionBuilder transaction) {
+    public boolean addTransaction(Transaction transaction) {
         try {
-            HttpStatus status = transactionRestController.post(transaction.build()).getStatusCode();
+            HttpStatus status = transactionRestController.post(transaction).getStatusCode();
             if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                 log.warn("Не могу добавить транзакцию {}", transaction);
                 return false;
@@ -102,9 +103,9 @@ public class ReportTableSaver {
         return true;
     }
 
-    public void addTransactionCashFlow(TransactionCashFlow.TransactionCashFlowBuilder transactionCashFlow) {
+    public void addTransactionCashFlow(TransactionCashFlow transactionCashFlow) {
         try {
-            HttpStatus status = transactionCashFlowRestController.post(transactionCashFlow.build()).getStatusCode();
+            HttpStatus status = transactionCashFlowRestController.post(transactionCashFlow).getStatusCode();
             if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                 log.warn("Не могу добавить информацию о передвижении средств {}", transactionCashFlow);
             }
@@ -117,9 +118,9 @@ public class ReportTableSaver {
         }
     }
 
-    public void addEventCashFlow(EventCashFlow.EventCashFlowBuilder eventCashFlow) {
+    public void addEventCashFlow(EventCashFlow eventCashFlow) {
         try {
-            HttpStatus status = eventCashFlowRestController.post(eventCashFlow.build()).getStatusCode();
+            HttpStatus status = eventCashFlowRestController.post(eventCashFlow).getStatusCode();
             if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                 log.warn("Не могу добавить информацию о движении денежных средств {}", eventCashFlow);
             }
@@ -132,9 +133,9 @@ public class ReportTableSaver {
         }
     }
 
-    public void addSecurityEventCashFlow(SecurityEventCashFlow.SecurityEventCashFlowBuilder securityEventCashFlow) {
+    public void addSecurityEventCashFlow(SecurityEventCashFlow securityEventCashFlow) {
         try {
-            HttpStatus status = securityEventCashFlowRestController.post(securityEventCashFlow.build()).getStatusCode();
+            HttpStatus status = securityEventCashFlowRestController.post(securityEventCashFlow).getStatusCode();
             if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                 log.warn("Не могу добавить информацию о движении денежных средств {}", securityEventCashFlow);
             }
@@ -147,9 +148,9 @@ public class ReportTableSaver {
         }
     }
 
-    public void addPortfolioProperty(PortfolioProperty.PortfolioPropertyBuilder property) {
+    public void addPortfolioProperty(PortfolioProperty property) {
         try {
-            HttpStatus status = portfolioPropertyRestController.post(property.build()).getStatusCode();
+            HttpStatus status = portfolioPropertyRestController.post(property).getStatusCode();
             if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                 log.warn("Не могу добавить информацию о свойствах портфеля {}", property);
             }

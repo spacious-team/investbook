@@ -47,7 +47,7 @@ public class PsbReportParserService {
 
     public void parse(Path reportFile) {
         try (PsbBrokerReport report = new PsbBrokerReport(reportFile)) {
-            boolean isAdded = saver.addPortfolio(Portfolio.builder().id(report.getPortfolio()));
+            boolean isAdded = saver.addPortfolio(Portfolio.builder().id(report.getPortfolio()).build());
             if (isAdded) {
                 CashTable cashTable = new CashTable(report);
                 PortfolioPropertyTable portfolioPropertyTable = new PortfolioPropertyTable(report);
@@ -59,13 +59,16 @@ public class PsbReportParserService {
                 DerivativeTransactionTable derivativeTransactionTable = new DerivativeTransactionTable(report);
                 DerivativeCashFlowTable derivativeCashFlowTable = new DerivativeCashFlowTable(report);
 
-                addPortfolioProperties(portfolioPropertyTable);
+                portfolioPropertyTable.getData().forEach(saver::addPortfolioProperty);
                 addCashInfo(cashTable);
-                addSecurities(portfolioSecuritiesTable);
-                addCashInAndOutFlows(cashFlowTable);
+                portfolioSecuritiesTable.getData().forEach(saver::addSecurity);
+                cashFlowTable.getData().forEach(saver::addEventCashFlow);
                 addTransaction(transactionTable);
-                addCouponAndAmortizationCashFlows(couponAndAmortizationTable);
-                addDividendCashFlows(dividendTable);
+                couponAndAmortizationTable.getData().forEach(c -> {
+                    saver.addSecurity(c.getIsin()); // required for amortization
+                    saver.addSecurityEventCashFlow(c);
+                });
+                dividendTable.getData().forEach(saver::addSecurityEventCashFlow);
                 addDerivativeTransaction(derivativeTransactionTable);
                 addDerivativeCashFlows(derivativeCashFlowTable);
             }
@@ -75,120 +78,73 @@ public class PsbReportParserService {
         }
     }
 
-    private void addSecurities(ReportTable<PortfolioSecuritiesTable.PortfolioSecuritiesTableRow> portfolioSecuritiesTable) {
-        for (PortfolioSecuritiesTable.PortfolioSecuritiesTableRow row : portfolioSecuritiesTable.getData()) {
-            saver.addSecurity(row.getIsin(), row.getName());
-        }
-    }
-
-    private void addCashInAndOutFlows(ReportTable<CashFlowTable.CashFlowTableRow> cashFlowTable) {
-        for (CashFlowTable.CashFlowTableRow row : cashFlowTable.getData()) {
-            String description = row.getDescription();
-            saver.addEventCashFlow(EventCashFlow.builder()
-                    .portfolio(cashFlowTable.getReport().getPortfolio())
-                    .eventType(row.getType())
-                    .timestamp(row.getTimestamp())
-                    .value(row.getValue())
-                    .currency(row.getCurrency())
-                    .description((description == null || description.isEmpty())? null : description));
-        }
-    }
-
     private void addTransaction(ReportTable<TransactionTable.TransactionTableRow> transactionTable) {
         for (TransactionTable.TransactionTableRow row : transactionTable.getData()) {
-            try {
-                boolean isAdded = saver.addTransaction(Transaction.builder()
-                        .id(row.getTransactionId())
-                        .portfolio(transactionTable.getReport().getPortfolio())
-                        .isin(row.getIsin())
-                        .timestamp(row.getTimestamp())
-                        .count(row.getCount()));
-                if (isAdded) {
-                    TransactionCashFlow cashFlow = TransactionCashFlow.builder()
-                            .transactionId(row.getTransactionId())
-                            .build();
-                    if (!row.getValue().equals(BigDecimal.ZERO)) {
-                        saver.addTransactionCashFlow(cashFlow.toBuilder()
-                                .eventType(CashFlowType.PRICE)
-                                .value(row.getValue())
-                                .currency(row.getValueCurrency()));
-                    }
-                    if (!row.getAccruedInterest().equals(BigDecimal.ZERO)) {
-                        saver.addTransactionCashFlow(cashFlow.toBuilder()
-                                .eventType(CashFlowType.ACCRUED_INTEREST)
-                                .value(row.getAccruedInterest())
-                                .currency(row.getValueCurrency()));
-                    }
-                    if (!row.getCommission().equals(BigDecimal.ZERO)) {
-                        saver.addTransactionCashFlow(cashFlow.toBuilder()
-                                .eventType(CashFlowType.COMMISSION)
-                                .value(row.getCommission())
-                                .currency(row.getCommissionCurrency()));
-                    }
+            boolean isAdded = saver.addTransaction(Transaction.builder()
+                    .id(row.getTransactionId())
+                    .portfolio(transactionTable.getReport().getPortfolio())
+                    .isin(row.getIsin())
+                    .timestamp(row.getTimestamp())
+                    .count(row.getCount())
+                    .build());
+            if (isAdded) {
+                TransactionCashFlow cashFlow = TransactionCashFlow.builder()
+                        .transactionId(row.getTransactionId())
+                        .build();
+                if (!row.getValue().equals(BigDecimal.ZERO)) {
+                    saver.addTransactionCashFlow(cashFlow.toBuilder()
+                            .eventType(CashFlowType.PRICE)
+                            .value(row.getValue())
+                            .currency(row.getValueCurrency())
+                            .build());
                 }
-            } catch (Exception e) {
-                log.warn("Не могу добавить транзакцию {}", row, e);
+                if (!row.getAccruedInterest().equals(BigDecimal.ZERO)) {
+                    saver.addTransactionCashFlow(cashFlow.toBuilder()
+                            .eventType(CashFlowType.ACCRUED_INTEREST)
+                            .value(row.getAccruedInterest())
+                            .currency(row.getValueCurrency())
+                            .build());
+                }
+                if (!row.getCommission().equals(BigDecimal.ZERO)) {
+                    saver.addTransactionCashFlow(cashFlow.toBuilder()
+                            .eventType(CashFlowType.COMMISSION)
+                            .value(row.getCommission())
+                            .currency(row.getCommissionCurrency())
+                            .build());
+                }
             }
-        }
-    }
-
-    private void addCouponAndAmortizationCashFlows(ReportTable<CouponAndAmortizationTable.CouponAndAmortizationTableRow> couponAndAmortizationTable) {
-        for (CouponAndAmortizationTable.CouponAndAmortizationTableRow row : couponAndAmortizationTable.getData()) {
-            saver.addSecurity(row.getIsin()); // required for amortization
-            saver.addSecurityEventCashFlow(SecurityEventCashFlow.builder()
-                    .isin(row.getIsin())
-                    .portfolio(couponAndAmortizationTable.getReport().getPortfolio())
-                    .count(row.getCount())
-                    .eventType(row.getEvent())
-                    .timestamp(row.getTimestamp())
-                    .value(row.getValue())
-                    .currency(row.getCurrency()));
-        }
-    }
-
-    private void addDividendCashFlows(ReportTable<DividendTable.DividendTableRow> dividendTable) {
-        for (DividendTable.DividendTableRow row : dividendTable.getData()) {
-            saver.addSecurityEventCashFlow(SecurityEventCashFlow.builder()
-                    .isin(row.getIsin())
-                    .portfolio(dividendTable.getReport().getPortfolio())
-                    .count(row.getCount())
-                    .eventType(row.getEvent())
-                    .timestamp(row.getTimestamp())
-                    .value(row.getValue())
-                    .currency(row.getCurrency()));
         }
     }
 
     private void addDerivativeTransaction(ReportTable<DerivativeTransactionTable.FortsTableRow> derivativeTransactionTable) {
         for (DerivativeTransactionTable.FortsTableRow row : derivativeTransactionTable.getData()) {
-            saver.addSecurity(row.getIsin());
-            try {
-                boolean isAdded = saver.addTransaction(Transaction.builder()
-                        .id(row.getTransactionId())
-                        .portfolio(derivativeTransactionTable.getReport().getPortfolio())
-                        .isin(row.getIsin())
-                        .timestamp(row.getTimestamp())
-                        .count(row.getCount()));
-                if (isAdded) {
-                    TransactionCashFlow cashFlow = TransactionCashFlow.builder()
-                            .transactionId(row.getTransactionId())
-                            .currency(row.getCurrency())
-                            .build();
-                    if (!row.getValue().equals(BigDecimal.ZERO)) {
-                        saver.addTransactionCashFlow(cashFlow.toBuilder()
-                                .eventType(row.getCurrency().equals(QUOTE_CURRENCY) ?
-                                        CashFlowType.DERIVATIVE_QUOTE :
-                                        CashFlowType.DERIVATIVE_PRICE)
-                                .value(row.getValue()));
-                    }
-                    if (!row.getCommission().equals(BigDecimal.ZERO)) {
-                        saver.addTransactionCashFlow(cashFlow.toBuilder()
-                                .eventType(CashFlowType.COMMISSION)
-                                .value(row.getCommission()));
-                    }
+            saver.addSecurity(row.getContract());
+            boolean isAdded = saver.addTransaction(Transaction.builder()
+                    .id(row.getTransactionId())
+                    .portfolio(derivativeTransactionTable.getReport().getPortfolio())
+                    .isin(row.getContract())
+                    .timestamp(row.getTimestamp())
+                    .count(row.getCount())
+                    .build());
+            if (isAdded) {
+                TransactionCashFlow cashFlow = TransactionCashFlow.builder()
+                        .transactionId(row.getTransactionId())
+                        .currency(row.getCurrency())
+                        .build();
+                if (!row.getValue().equals(BigDecimal.ZERO)) {
+                    saver.addTransactionCashFlow(cashFlow.toBuilder()
+                            .eventType(row.getCurrency().equals(QUOTE_CURRENCY) ?
+                                    CashFlowType.DERIVATIVE_QUOTE :
+                                    CashFlowType.DERIVATIVE_PRICE)
+                            .value(row.getValue())
+                            .build());
                 }
-            } catch (Exception e) {
-                log.warn("Не могу добавить транзакцию {}", row, e);
+                if (!row.getCommission().equals(BigDecimal.ZERO)) {
+                    saver.addTransactionCashFlow(cashFlow.toBuilder()
+                            .eventType(CashFlowType.COMMISSION)
+                            .value(row.getCommission())
+                            .build());
+                }
             }
         }
     }
@@ -205,7 +161,8 @@ public class PsbReportParserService {
                         .eventType(row.getEvent())
                         .timestamp(row.getTimestamp())
                         .value(row.getValue())
-                        .currency(row.getCurrency()));
+                        .currency(row.getCurrency())
+                        .build());
             } else {
                 // Событие "Биржевой сбор"
                 saver.addEventCashFlow(EventCashFlow.builder()
@@ -213,18 +170,9 @@ public class PsbReportParserService {
                         .eventType(row.getEvent())
                         .timestamp(row.getTimestamp())
                         .value(row.getValue())
-                        .currency(row.getCurrency()));
+                        .currency(row.getCurrency())
+                        .build());
             }
-        }
-    }
-
-    private void addPortfolioProperties(ReportTable<PortfolioPropertyTable.PortfolioPropertyRow> portfolioPropertyTable) {
-        for (PortfolioPropertyTable.PortfolioPropertyRow row : portfolioPropertyTable.getData()) {
-            saver.addPortfolioProperty(PortfolioProperty.builder()
-                    .portfolio(portfolioPropertyTable.getReport().getPortfolio())
-                    .property(row.getProperty())
-                    .value(String.valueOf(row.getValue()))
-                    .timestamp(portfolioPropertyTable.getReport().getReportDate()));
         }
     }
 
@@ -234,7 +182,8 @@ public class PsbReportParserService {
                 .portfolio(cashTable.getReport().getPortfolio())
                 .property(PortfolioPropertyType.CASH)
                 .value(objectMapper.writeValueAsString(cashTable.getData()))
-                .timestamp(cashTable.getReport().getReportDate()));
+                .timestamp(cashTable.getReport().getReportDate())
+                .build());
         } catch (JsonProcessingException e) {
             log.warn("Не могу добавить информацию о наличных средствах {}", cashTable.getData(), e);
         }

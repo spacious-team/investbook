@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import ru.portfolio.portfolio.parser.*;
 import ru.portfolio.portfolio.pojo.CashFlowType;
+import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -34,7 +35,7 @@ import java.util.Collection;
 import static ru.portfolio.portfolio.parser.psb.DividendTable.DividendTableHeader.*;
 
 @Slf4j
-public class DividendTable extends AbstractReportTable<DividendTable.DividendTableRow> {
+public class DividendTable extends AbstractReportTable<SecurityEventCashFlow> {
     private static final String TABLE_NAME = "Выплата дивидендов";
 
     public DividendTable(PsbBrokerReport report) {
@@ -42,20 +43,21 @@ public class DividendTable extends AbstractReportTable<DividendTable.DividendTab
     }
 
     @Override
-    protected Collection<DividendTableRow> getRow(ExcelTable table, Row row) {
-        DividendTableRow.DividendTableRowBuilder builder = DividendTableRow.builder()
-                .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
-                .event(CashFlowType.DIVIDEND)
+    protected Collection<SecurityEventCashFlow> getRow(ExcelTable table, Row row) {
+        SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .isin(table.getStringCellValue(row, ISIN))
+                .portfolio(getReport().getPortfolio())
                 .count(table.getIntCellValue(row, COUNT))
+                .eventType(CashFlowType.DIVIDEND)
+                .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
                 .value(table.getCurrencyCellValue(row, VALUE))
                 .currency(table.getStringCellValue(row, CURRENCY));
-        Collection<DividendTableRow> data = new ArrayList<>();
+        Collection<SecurityEventCashFlow> data = new ArrayList<>();
         data.add(builder.build());
         BigDecimal tax = table.getCurrencyCellValue(row, TAX).negate();
         if (!tax.equals(BigDecimal.ZERO)) {
             data.add(builder
-                    .event(CashFlowType.TAX)
+                    .eventType(CashFlowType.TAX)
                     .value(tax)
                     .build());
         }

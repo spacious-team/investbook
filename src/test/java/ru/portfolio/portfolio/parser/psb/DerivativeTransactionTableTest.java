@@ -38,7 +38,7 @@ public class DerivativeTransactionTableTest {
     @Test(dataProvider = "isin")
     void testIsin(String report, String firstIsin, String lastIsin) throws IOException {
         List<DerivativeTransactionTable.FortsTableRow> data = new DerivativeTransactionTable(new PsbBrokerReport(report)).getData();
-        assertEquals(data.get(0).getIsin(), firstIsin);
-        assertEquals(data.get(data.size() - 1).getIsin(), lastIsin);
+        assertEquals(data.get(0).getContract(), firstIsin);
+        assertEquals(data.get(data.size() - 1).getContract(), lastIsin);
     }
 }

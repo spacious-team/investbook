@@ -18,16 +18,14 @@
 
 package ru.portfolio.portfolio.parser.psb;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import ru.portfolio.portfolio.parser.*;
 import ru.portfolio.portfolio.pojo.CashFlowType;
+import ru.portfolio.portfolio.pojo.EventCashFlow;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -36,7 +34,7 @@ import static java.util.Collections.singletonList;
 import static ru.portfolio.portfolio.parser.psb.CashFlowTable.CashFlowTableHeader.*;
 
 @Slf4j
-public class CashFlowTable extends AbstractReportTable<CashFlowTable.CashFlowTableRow> {
+public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
 
     private static final String TABLE_NAME = "Внешнее движение денежных средств в валюте счета";
 
@@ -45,7 +43,7 @@ public class CashFlowTable extends AbstractReportTable<CashFlowTable.CashFlowTab
     }
 
     @Override
-    protected Collection<CashFlowTableRow> pasreTable(ExcelTable table) {
+    protected Collection<EventCashFlow> pasreTable(ExcelTable table) {
         return table.getDataCollection(getReport().getPath(), this::getRow, e ->
                 // SQL db restricts storing duplicate rows. Join rows by summing they values.
                 Collections.singletonList(e.toBuilder()
@@ -55,7 +53,7 @@ public class CashFlowTable extends AbstractReportTable<CashFlowTable.CashFlowTab
     }
 
     @Override
-    protected Collection<CashFlowTableRow> getRow(ExcelTable table, Row row) {
+    protected Collection<EventCashFlow> getRow(ExcelTable table, Row row) {
         String action = table.getStringCellValue(row, OPERATION);
         CashFlowType type = CashFlowType.CASH;
         boolean isPositive;
@@ -72,13 +70,15 @@ public class CashFlowTable extends AbstractReportTable<CashFlowTable.CashFlowTab
         if (type == CashFlowType.CASH && !table.getStringCellValue(row, DESCRIPTION).isEmpty()) {
             return emptyList(); // cash in/out records has no description
         }
-        return singletonList(CashFlowTableRow.builder()
+        String description = table.getStringCellValue(row, DESCRIPTION);
+        return singletonList(EventCashFlow.builder()
+                .portfolio(getReport().getPortfolio())
+                .eventType(type)
                 .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
-                .type(type)
                 .value(table.getCurrencyCellValue(row, VALUE)
                         .multiply(BigDecimal.valueOf(isPositive ? 1 : -1)))
                 .currency(table.getStringCellValue(row, CURRENCY))
-                .description(table.getStringCellValue(row, DESCRIPTION))
+                .description((description == null || description.isEmpty())? null : description)
                 .build());
     }
 
@@ -94,16 +94,5 @@ public class CashFlowTable extends AbstractReportTable<CashFlowTable.CashFlowTab
         CashFlowTableHeader(String ... words) {
             this.column = TableColumnImpl.of(words);
         }
-    }
-
-    @Getter
-    @Builder(toBuilder = true)
-    @EqualsAndHashCode
-    public static class CashFlowTableRow {
-        private Instant timestamp;
-        private CashFlowType type;
-        private BigDecimal value;
-        private String currency; // валюта
-        private String description;
     }
 }

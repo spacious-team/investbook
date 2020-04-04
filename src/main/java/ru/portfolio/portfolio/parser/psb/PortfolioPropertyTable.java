@@ -18,15 +18,13 @@
 
 package ru.portfolio.portfolio.parser.psb;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.util.CellAddress;
 import ru.portfolio.portfolio.parser.BrokerReport;
-import ru.portfolio.portfolio.parser.ExcelTable;
 import ru.portfolio.portfolio.parser.ExcelTableHelper;
 import ru.portfolio.portfolio.parser.ReportTable;
+import ru.portfolio.portfolio.pojo.PortfolioProperty;
 import ru.portfolio.portfolio.pojo.PortfolioPropertyType;
 
 import java.util.ArrayList;
@@ -34,12 +32,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class PortfolioPropertyTable implements ReportTable<PortfolioPropertyTable.PortfolioPropertyRow> {
+import static ru.portfolio.portfolio.parser.ExcelTable.getCurrencyCellValue;
+import static ru.portfolio.portfolio.parser.ExcelTableHelper.getCell;
+
+public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
     private static final String ASSETS = "\"СУММА АКТИВОВ\" на конец дня";
     @Getter
     private final BrokerReport report;
     @Getter
-    private final List<PortfolioPropertyTable.PortfolioPropertyRow> data = new ArrayList<>();
+    private final List<PortfolioProperty> data = new ArrayList<>();
 
 
     protected PortfolioPropertyTable(PsbBrokerReport report) {
@@ -47,7 +48,7 @@ public class PortfolioPropertyTable implements ReportTable<PortfolioPropertyTabl
         this.data.addAll(getRow(report));
     }
 
-    protected Collection<PortfolioPropertyRow> getRow(PsbBrokerReport report) {
+    protected Collection<PortfolioProperty> getRow(PsbBrokerReport report) {
         CellAddress address = ExcelTableHelper.find(report.getSheet(), ASSETS);
         if (address == ExcelTableHelper.NOT_FOUND) {
             return Collections.emptyList();
@@ -60,18 +61,11 @@ public class PortfolioPropertyTable implements ReportTable<PortfolioPropertyTabl
             return Collections.emptyList();
         }
 
-        return Collections.singletonList(
-                PortfolioPropertyRow.builder()
+        return Collections.singletonList(PortfolioProperty.builder()
+                .portfolio(report.getPortfolio())
                 .property(PortfolioPropertyType.TOTAL_ASSETS)
-                .value(ExcelTable.getCurrencyCellValue(ExcelTableHelper.getCell(report.getSheet(), assestsAddr)))
+                .value(String.valueOf(getCurrencyCellValue(getCell(report.getSheet(), assestsAddr))))
+                .timestamp(report.getReportDate())
                 .build());
-    }
-
-    @Getter
-    @Builder
-    @EqualsAndHashCode
-    public static class PortfolioPropertyRow {
-        private final PortfolioPropertyType property;
-        private final Object value;
     }
 }

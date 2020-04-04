@@ -74,7 +74,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
         FortsTableRow.FortsTableRowBuilder builder = FortsTableRow.builder()
                 .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
                 .transactionId(Long.parseLong(table.getStringCellValue(row, TRANSACTION)))
-                .isin(table.getStringCellValue(row, CONTRACT))
+                .contract(table.getStringCellValue(row, CONTRACT))
                 .count((isBuy ? 1 : -1) * count);
         transactionInfo.add(builder
                 .value(value)
@@ -115,12 +115,11 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
     @EqualsAndHashCode
     static class FortsTableRow {
         private long transactionId;
-        private String isin;
+        private String contract;
         private Instant timestamp;
         private int count;
         private BigDecimal value; // оценочная стоиомсть в валюце цены
         private BigDecimal commission;
         private String currency; // валюта
-
     }
 }

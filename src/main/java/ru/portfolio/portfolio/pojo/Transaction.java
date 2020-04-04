@@ -19,6 +19,7 @@
 package ru.portfolio.portfolio.pojo;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.lang.Nullable;
@@ -29,6 +30,7 @@ import java.time.Instant;
 @Getter
 @ToString
 @Builder(toBuilder = true)
+@EqualsAndHashCode
 public class Transaction {
     @Nullable // autoincrement
     private Long id;
