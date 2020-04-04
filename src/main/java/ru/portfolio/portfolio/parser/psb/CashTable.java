@@ -19,6 +19,7 @@
 package ru.portfolio.portfolio.parser.psb;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
@@ -73,6 +74,7 @@ public class CashTable extends AbstractReportTable<CashTable.CashTableRow> {
 
     @Getter
     @Builder
+    @EqualsAndHashCode
     static class CashTableRow {
         private String section;
         private BigDecimal value;

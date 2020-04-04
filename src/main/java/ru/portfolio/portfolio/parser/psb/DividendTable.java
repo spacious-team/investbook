@@ -19,6 +19,7 @@
 package ru.portfolio.portfolio.parser.psb;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
@@ -78,6 +79,7 @@ public class DividendTable extends AbstractReportTable<DividendTable.DividendTab
 
     @Getter
     @Builder(toBuilder = true)
+    @EqualsAndHashCode
     public static class DividendTableRow {
         private String isin;
         private Instant timestamp;

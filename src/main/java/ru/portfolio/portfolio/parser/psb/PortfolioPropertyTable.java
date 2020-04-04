@@ -19,6 +19,7 @@
 package ru.portfolio.portfolio.parser.psb;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.util.CellAddress;
@@ -68,6 +69,7 @@ public class PortfolioPropertyTable implements ReportTable<PortfolioPropertyTabl
 
     @Getter
     @Builder
+    @EqualsAndHashCode
     public static class PortfolioPropertyRow {
         private final PortfolioPropertyType property;
         private final Object value;

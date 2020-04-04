@@ -19,6 +19,7 @@
 package ru.portfolio.portfolio.parser.psb;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
@@ -82,6 +83,7 @@ public class PortfolioSecuritiesTable extends AbstractReportTable<PortfolioSecur
 
     @Getter
     @Builder
+    @EqualsAndHashCode
     public static class PortfolioSecuritiesTableRow {
         private String isin;
         private String name;

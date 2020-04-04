@@ -20,6 +20,7 @@ package ru.portfolio.portfolio.parser.psb;
 
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
@@ -133,6 +134,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<DerivativeCashF
 
     @Getter
     @Builder
+    @EqualsAndHashCode
     public static class DerivativeCashFlowTableRow {
         private String contract;
         private Instant timestamp;

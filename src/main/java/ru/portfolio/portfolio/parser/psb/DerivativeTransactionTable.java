@@ -19,6 +19,7 @@
 package ru.portfolio.portfolio.parser.psb;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
@@ -111,6 +112,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
 
     @Getter
     @Builder
+    @EqualsAndHashCode
     static class FortsTableRow {
         private long transactionId;
         private String isin;
