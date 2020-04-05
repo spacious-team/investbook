@@ -2,7 +2,7 @@
   <configuration default="false" name="PortfolioApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <module name="portfolio" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="ru.portfolio.portfolio.PortfolioApplication" />
-    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=dev" />
+    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=core,dev" />
     <option name="ALTERNATIVE_JRE_PATH" />
     <method v="2">
       <option name="Make" enabled="true" />
