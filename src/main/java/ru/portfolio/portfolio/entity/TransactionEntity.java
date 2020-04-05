@@ -21,7 +21,6 @@ package ru.portfolio.portfolio.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.ToString;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -34,16 +33,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @Data
 @ToString(exclude = {"transactionCashFlows"})
 public class TransactionEntity {
-    @Id
-    @GenericGenerator(name = "UseExistingOrGenerateIdGenerator", strategy = "ru.portfolio.portfolio.entity.UseExistingOrGenerateIdGenerator")
-    @GeneratedValue(generator = "UseExistingOrGenerateIdGenerator")
-    @Column(name = "id")
-    private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "portfolio", referencedColumnName = "id")
-    @JsonIgnoreProperties({"hibernateLazyInitializer"})
-    private PortfolioEntity portfolio;
+    @EmbeddedId
+    private TransactionEntityPK pk;
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "portfolio", referencedColumnName = "id")
+//    @JsonIgnoreProperties({"hibernateLazyInitializer"})
+//    private PortfolioEntity portfolio;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "isin", referencedColumnName = "isin")
@@ -73,7 +70,7 @@ public class TransactionEntity {
     }
 
     @Override
-    public int hashCode() { ;
-        return (int) (59 * this.getId() + 43 * this.getTimestamp().hashCode());
+    public int hashCode() {
+        return this.getPk().hashCode();
     }
 }

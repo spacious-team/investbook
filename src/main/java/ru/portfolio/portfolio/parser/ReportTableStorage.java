@@ -46,7 +46,7 @@ public class ReportTableStorage {
 
     public boolean addPortfolio(Portfolio portfolio) {
         return handlePost(
-                () ->  portfolioRestController.post(portfolio),
+                () -> portfolioRestController.post(portfolio),
                 "Не могу сохранить Портфель " + portfolio);
     }
 
@@ -82,7 +82,7 @@ public class ReportTableStorage {
         }
     }
 
-    public boolean addTransaction(Transaction transaction) {
+    protected boolean addTransaction(Transaction transaction) {
         return handlePost(
                 () -> transactionRestController.post(transaction),
                 "Не могу добавить транзакцию " + transaction);

@@ -16,11 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.portfolio.portfolio.converter;
+package ru.portfolio.portfolio.entity;
 
-public interface EntityConverter<Entity, Pojo> {
+import lombok.Data;
 
-    Entity toEntity(Pojo pojo);
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Table;
+import java.io.Serializable;
 
-    Pojo fromEntity(Entity entity);
+@Embeddable
+@Table(name = "transaction")
+@Data
+public class TransactionEntityPK implements Serializable {
+    @Column(name = "id")
+    private long id;
+
+    @Column(name = "portfolio")
+    private String portfolio;
 }

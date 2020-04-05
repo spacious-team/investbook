@@ -22,7 +22,6 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
@@ -32,7 +31,7 @@ import java.time.Instant;
 @Builder(toBuilder = true)
 @EqualsAndHashCode
 public class Transaction {
-    @Nullable // autoincrement
+    @NotNull
     private Long id;
 
     @NotNull

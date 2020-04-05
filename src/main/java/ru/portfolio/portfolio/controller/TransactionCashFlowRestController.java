@@ -48,18 +48,20 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
         return super.get();
     }
 
-    @GetMapping("/transaction-cash-flows/{transaction-id}")
-    protected List<TransactionCashFlowEntity> get(@PathVariable("transaction-id") int transactionId) {
-        return transactionCashFlowRepository.findByTransactionId(transactionId);
+    @GetMapping("/transaction-cash-flows/portfolio/{portfolio}/id/{transaction-id}")
+    protected List<TransactionCashFlowEntity> get(@PathVariable("portfolio") String portfolio,
+                                                  @PathVariable("transaction-id") long transactionId) {
+        return transactionCashFlowRepository.findByPkPortfolioAndPkTransactionId(portfolio, transactionId);
     }
 
     /**
      * see {@link AbstractRestController#get(Object)}
      */
-    @GetMapping("/transaction-cash-flows/{transaction-id}/events/{event-type}")
-    public ResponseEntity<TransactionCashFlowEntity> get(@PathVariable("transaction-id") int transactionId,
+    @GetMapping("/transaction-cash-flows/portfolio/{portfolio}/id/{transaction-id}/events/{event-type}")
+    public ResponseEntity<TransactionCashFlowEntity> get(@PathVariable("portfolio") String portfolio,
+                                                         @PathVariable("transaction-id") long transactionId,
                                                          @PathVariable("event-type") int eventType) {
-        return super.get(getId(transactionId, eventType));
+        return super.get(getId(portfolio, transactionId, eventType));
     }
 
     @PostMapping("/transaction-cash-flows")
@@ -71,19 +73,22 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
     /**
      * see {@link AbstractRestController#put(Object, Object)}
      */
-    @PutMapping("/transaction-cash-flows/{transaction-id}/events/{event-type}")
-    public ResponseEntity<TransactionCashFlowEntity> put(@PathVariable("transaction-id") int transactionId,
+    @PutMapping("/transaction-cash-flows/portfolio/{portfolio}/id/{transaction-id}/events/{event-type}")
+    public ResponseEntity<TransactionCashFlowEntity> put(@PathVariable("portfolio") String portfolio,
+                                                         @PathVariable("transaction-id") long transactionId,
                                                          @PathVariable("event-type") int eventType,
                                                          @RequestBody TransactionCashFlow object) {
-        return super.put(getId(transactionId, eventType), object);
+        return super.put(getId(portfolio, transactionId, eventType), object);
     }
 
     /**
      * see {@link AbstractRestController#delete(Object)}
      */
-    @DeleteMapping("/transaction-cash-flows/{transaction-id}/events/{event-type}")
-    public void delete(@PathVariable("transaction-id") int transactionId, @PathVariable("event-type") int eventType) {
-        super.delete(getId(transactionId, eventType));
+    @DeleteMapping("/transaction-cash-flows/portfolio/{portfolio}/id/{transaction-id}/events/{event-type}")
+    public void delete(@PathVariable("portfolio") String portfolio,
+                       @PathVariable("transaction-id") long transactionId,
+                       @PathVariable("event-type") int eventType) {
+        super.delete(getId(portfolio, transactionId, eventType));
     }
 
     @Override
@@ -93,12 +98,13 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
 
     @Override
     protected TransactionCashFlowEntityPK getId(TransactionCashFlow object) {
-        return getId(object.getTransactionId(), object.getEventType().getId());
+        return getId(object.getPortfolio(), object.getTransactionId(), object.getEventType().getId());
     }
 
-    private TransactionCashFlowEntityPK getId(long transactionId, int eventType) {
+    private TransactionCashFlowEntityPK getId(String portfolio, long transactionId, int eventType) {
         TransactionCashFlowEntityPK pk = new TransactionCashFlowEntityPK();
         pk.setTransactionId(transactionId);
+        pk.setPortfolio(portfolio);
         pk.setType(eventType);
         return pk;
     }
@@ -107,13 +113,16 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
     protected TransactionCashFlow updateId(TransactionCashFlowEntityPK id, TransactionCashFlow object) {
         return object.toBuilder()
                 .transactionId(id.getTransactionId())
+                .portfolio(id.getPortfolio())
                 .eventType(CashFlowType.valueOf(id.getType()))
                 .build();
     }
 
     @Override
     protected URI getLocationURI(TransactionCashFlow object) throws URISyntaxException {
-        return new URI(getLocation() + "/" + object.getTransactionId() + "/events/" + object.getEventType().getId());
+        return new URI(getLocation() + "/portfolio/" + object.getPortfolio()
+                + "/id/"+ object.getTransactionId()
+                + "/events/" + object.getEventType().getId());
     }
 
     @Override

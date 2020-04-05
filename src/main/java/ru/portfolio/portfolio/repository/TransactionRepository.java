@@ -22,12 +22,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.portfolio.portfolio.entity.TransactionEntity;
+import ru.portfolio.portfolio.entity.TransactionEntityPK;
 import ru.portfolio.portfolio.pojo.Portfolio;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public interface TransactionRepository extends JpaRepository<TransactionEntity, Long> {
+public interface TransactionRepository extends JpaRepository<TransactionEntity, TransactionEntityPK> {
 
     /**
      * Returns stock market share and bonds ISINs
@@ -47,6 +48,6 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "ORDER BY timestamp DESC")
     Collection<String> findDistinctDerivativeByPortfolioOrderByTimestampDesc(@Param("portfolio") Portfolio portfolio);
 
-    ArrayList<TransactionEntity> findBySecurityIsinAndPortfolioIdOrderByTimestampAscIdAsc(String isin,
-                                                                                          String portfolio);
+    ArrayList<TransactionEntity> findBySecurityIsinAndPkPortfolioOrderByTimestampAscPkIdAsc(String isin,
+                                                                                            String portfolio);
 }

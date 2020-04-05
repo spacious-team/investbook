@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.entity.PortfolioPropertyEntity;
 import ru.portfolio.portfolio.pojo.PortfolioProperty;
+import ru.portfolio.portfolio.pojo.PortfolioPropertyType;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
 
 @Component
@@ -42,5 +43,16 @@ public class PortfolioPropertyConverter implements EntityConverter<PortfolioProp
         entity.setProperty(property.getProperty().name());
         entity.setValue(property.getValue());
         return  entity;
+    }
+
+    @Override
+    public PortfolioProperty fromEntity(PortfolioPropertyEntity entity) {
+        return PortfolioProperty.builder()
+                .id(entity.getId())
+                .portfolio(entity.getPortfolio().getId())
+                .timestamp(entity.getTimestamp())
+                .property(PortfolioPropertyType.valueOf(entity.getProperty()))
+                .value(entity.getValue())
+                .build();
     }
 }

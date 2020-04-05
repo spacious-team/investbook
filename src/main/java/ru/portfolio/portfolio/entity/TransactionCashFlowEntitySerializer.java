@@ -35,8 +35,9 @@ public class TransactionCashFlowEntitySerializer extends StdSerializer<Transacti
                           JsonGenerator jsonGenerator,
                           SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeStartObject();
-        jsonGenerator.writeObjectField("transaction-id", object.getTransactionCashFlowId().getTransactionId());
-        jsonGenerator.writeObjectField("event-type", object.getTransactionCashFlowId().getType());
+        jsonGenerator.writeObjectField("id", object.getPk().getTransactionId());
+        jsonGenerator.writeObjectField("portfolio", object.getPk().getPortfolio());
+        jsonGenerator.writeObjectField("event-type", object.getPk().getType());
         jsonGenerator.writeObjectField("value", object.getValue());
         jsonGenerator.writeObjectField("currency", object.getCurrency());
         jsonGenerator.writeEndObject();
