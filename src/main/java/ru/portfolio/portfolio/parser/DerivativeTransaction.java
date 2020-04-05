@@ -61,6 +61,7 @@ public class DerivativeTransaction {
         if (!value.equals(BigDecimal.ZERO)) {
             list.add(TransactionCashFlow.builder()
                     .transactionId(transactionId)
+                    .portfolio(portfolio)
                     .eventType(valueCurrency.equals(QUOTE_CURRENCY) ?
                             CashFlowType.DERIVATIVE_QUOTE :
                             CashFlowType.DERIVATIVE_PRICE)
@@ -71,6 +72,7 @@ public class DerivativeTransaction {
         if (!commission.equals(BigDecimal.ZERO)) {
             list.add(TransactionCashFlow.builder()
                     .transactionId(transactionId)
+                    .portfolio(portfolio)
                     .eventType(CashFlowType.COMMISSION)
                     .value(commission)
                     .currency(commissionCurrency)

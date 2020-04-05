@@ -81,7 +81,7 @@ public class DerivativeCashFlowFactory {
 
     private LinkedList<Transaction> getTransactions(Portfolio portfolio, Security contract) {
         return transactionRepository
-                .findBySecurityIsinAndPortfolioIdOrderByTimestampAscIdAsc(
+                .findBySecurityIsinAndPkPortfolioOrderByTimestampAscPkIdAsc(
                         contract.getIsin(),
                         portfolio.getId())
                 .stream()
@@ -116,7 +116,10 @@ public class DerivativeCashFlowFactory {
         for (Transaction transaction : dailyTransactions) {
             if (transaction.getId() == null) continue;
             dailyTransactionsCashFlows.put(transaction,
-                    transactionCashFlowRepository.findByTransactionId(transaction.getId())
+                    transactionCashFlowRepository
+                            .findByPkPortfolioAndPkTransactionId(
+                                    transaction.getPortfolio(),
+                                    transaction.getId())
                             .stream()
                             .map(transactionCashFlowConverter::fromEntity)
                             .collect(Collectors.toMap(TransactionCashFlow::getEventType, Function.identity())));

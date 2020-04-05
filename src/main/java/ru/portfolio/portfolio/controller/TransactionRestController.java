@@ -23,16 +23,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.portfolio.portfolio.converter.EntityConverter;
 import ru.portfolio.portfolio.entity.TransactionEntity;
+import ru.portfolio.portfolio.entity.TransactionEntityPK;
 import ru.portfolio.portfolio.pojo.Transaction;
 
 import javax.validation.Valid;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-public class TransactionRestController extends AbstractRestController<Long, Transaction, TransactionEntity> {
+public class TransactionRestController extends AbstractRestController<TransactionEntityPK, Transaction, TransactionEntity> {
 
-    public TransactionRestController(JpaRepository<TransactionEntity, Long> repository,
+    public TransactionRestController(JpaRepository<TransactionEntity, TransactionEntityPK> repository,
                                      EntityConverter<TransactionEntity, Transaction> converter) {
         super(repository, converter);
     }
@@ -43,10 +46,13 @@ public class TransactionRestController extends AbstractRestController<Long, Tran
         return super.get();
     }
 
-    @Override
-    @GetMapping("/transactions/{id}")
-    public ResponseEntity<TransactionEntity> get(@PathVariable("id") Long id) {
-        return super.get(id);
+    /**
+     * see {@link AbstractRestController#get(Object)}
+     */
+    @GetMapping("/transactions/portfolio/{portfolio}/id/{id}")
+    public ResponseEntity<TransactionEntity> get(@PathVariable("portfolio") String portfolio,
+                                                 @PathVariable("id") Long id) {
+        return super.get(getId(portfolio, id));
     }
 
     @Override
@@ -55,32 +61,53 @@ public class TransactionRestController extends AbstractRestController<Long, Tran
         return super.post(object);
     }
 
-    @Override
-    @PutMapping("/transactions/{id}")
-    public ResponseEntity<TransactionEntity> put(@PathVariable("id") Long id,
+    /**
+     * see {@link AbstractRestController#put(Object, Object)}
+     */
+    @PutMapping("/transactions/portfolio/{portfolio}/id/{id}")
+    public ResponseEntity<TransactionEntity> put(@PathVariable("portfolio") String portfolio,
+                                                 @PathVariable("id") Long id,
                                                  @Valid @RequestBody Transaction object) {
-        return super.put(id, object);
+        return super.put(getId(portfolio, id), object);
+    }
+
+    /**
+     * see {@link AbstractRestController#delete(Object)}
+     */
+    @DeleteMapping("/transactions/portfolio/{portfolio}/id/{id}")
+    public void delete(@PathVariable("portfolio") String portfolio,
+                       @PathVariable("id") Long id) {
+        super.delete(getId(portfolio, id));
     }
 
     @Override
-    @DeleteMapping("/transactions/{id}")
-    public void delete(@PathVariable("id") Long id) {
-        super.delete(id);
-    }
-
-    @Override
-    protected Optional<TransactionEntity> getById(Long id) {
+    protected Optional<TransactionEntity> getById(TransactionEntityPK id) {
         return repository.findById(id);
     }
 
     @Override
-    protected Long getId(Transaction object) {
-        return object.getId();
+    protected TransactionEntityPK getId(Transaction object) {
+        return getId(object.getPortfolio(), object.getId());
+    }
+
+    private TransactionEntityPK getId(String portfolio, long transactionId) {
+        TransactionEntityPK pk = new TransactionEntityPK();
+        pk.setId(transactionId);
+        pk.setPortfolio(portfolio);
+        return pk;
     }
 
     @Override
-    protected Transaction updateId(Long id, Transaction object) {
-        return object.toBuilder().id(id).build();
+    protected Transaction updateId(TransactionEntityPK id, Transaction object) {
+        return object.toBuilder()
+                .id(id.getId())
+                .portfolio(id.getPortfolio())
+                .build();
+    }
+
+    @Override
+    protected URI getLocationURI(Transaction object) throws URISyntaxException {
+        return new URI(getLocation() + "/portfolio/" + object.getPortfolio() + "/id/" + object.getId());
     }
 
     @Override

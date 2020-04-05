@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `cash_flow_type` (
 
 -- Дамп данных таблицы portfolio.cash_flow_type: ~13 rows (приблизительно)
 /*!40000 ALTER TABLE `cash_flow_type` DISABLE KEYS */;
-INSERT IGNORE INTO `cash_flow_type` (`id`, `name`) VALUES
+INSERT INTO `cash_flow_type` (`id`, `name`) VALUES
 	(0, 'Пополнение и снятие'),
 	(1, 'Чистая стоимость сделки (без НКД)'),
 	(2, 'НКД на день сделки'),
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
-  `description` varchar(128) NULL DEFAULT NULL,
+  `description` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `event_cash_flow_timestamp_type_value_currency_portfolio_uniq_ix` (`timestamp`,`type`,`value`,`currency`,`portfolio`),
   KEY `event_cash_flow_type_ix` (`type`),
@@ -86,11 +86,11 @@ CREATE TABLE IF NOT EXISTS `portfolio` (
 CREATE TABLE IF NOT EXISTS `portfolio_property` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `portfolio` varchar(32) NOT NULL,
-  `timestamp` TIMESTAMP NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `property` varchar(64) NOT NULL,
   `value` varchar(256) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `portfolio_property_portfolio_timestamp_property_uniq_ix` (`portfolio`, `timestamp`, `property`),
+  UNIQUE KEY `portfolio_property_portfolio_timestamp_property_uniq_ix` (`portfolio`,`timestamp`,`property`),
   KEY `portfolio_property_portfolio_fkey` (`portfolio`),
   CONSTRAINT `portfolio_property_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Свойства портфеля';
@@ -138,12 +138,12 @@ CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
 
 -- Дамп структуры для таблица portfolio.transaction
 CREATE TABLE IF NOT EXISTS `transaction` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Номер транзакции',
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Номер сделки в системе учета брокера',
   `portfolio` varchar(32) NOT NULL COMMENT 'Портфель (номер брокерского счета)',
   `isin` varchar(64) NOT NULL COMMENT 'Ценная бумага',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Фактическое время исполнения сделки',
   `count` int(1) NOT NULL COMMENT 'Покупка (+), продажа (-)',
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`,`portfolio`),
   KEY `transaction_ticker_ix` (`isin`),
   KEY `transaction_portfolio_fkey` (`portfolio`),
   CONSTRAINT `transaction_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE,
@@ -157,12 +157,15 @@ CREATE TABLE IF NOT EXISTS `transaction` (
 -- Дамп структуры для таблица portfolio.transaction_cash_flow
 CREATE TABLE IF NOT EXISTS `transaction_cash_flow` (
   `transaction_id` bigint(20) unsigned NOT NULL COMMENT 'ID транзакции',
+  `portfolio` varchar(32) NOT NULL COMMENT 'ID портфеля',
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
-  PRIMARY KEY (`transaction_id`,`type`),
+  PRIMARY KEY (`transaction_id`,`portfolio`,`type`),
   KEY `transaction_cash_flow_type_key` (`type`),
   KEY `transaction_cash_flow_transaction_id_ix` (`transaction_id`),
+  KEY `transaction_cash_flow_portfolio_fkey` (`portfolio`),
+  CONSTRAINT `transaction_cash_flow_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `transaction_cash_flow_transaction_id_fkey` FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `transaction_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Движение денежных средств';

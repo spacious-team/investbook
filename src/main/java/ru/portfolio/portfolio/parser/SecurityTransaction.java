@@ -60,6 +60,7 @@ public class SecurityTransaction {
         if (!value.equals(BigDecimal.ZERO)) {
             list.add(TransactionCashFlow.builder()
                     .transactionId(transactionId)
+                    .portfolio(portfolio)
                     .eventType(CashFlowType.PRICE)
                     .value(value)
                     .currency(valueCurrency)
@@ -68,6 +69,7 @@ public class SecurityTransaction {
         if (!accruedInterest.equals(BigDecimal.ZERO)) {
             list.add(TransactionCashFlow.builder()
                     .transactionId(transactionId)
+                    .portfolio(portfolio)
                     .eventType(CashFlowType.ACCRUED_INTEREST)
                     .value(accruedInterest)
                     .currency(valueCurrency)
@@ -76,6 +78,7 @@ public class SecurityTransaction {
         if (!commission.equals(BigDecimal.ZERO)) {
             list.add(TransactionCashFlow.builder()
                     .transactionId(transactionId)
+                    .portfolio(portfolio)
                     .eventType(CashFlowType.COMMISSION)
                     .value(commission)
                     .currency(commissionCurrency)

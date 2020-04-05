@@ -38,6 +38,9 @@ public class TransactionCashFlow {
     private Long transactionId;
 
     @NotNull
+    private String portfolio;
+
+    @NotNull
     @JsonProperty("event-type")
     private CashFlowType eventType;
 

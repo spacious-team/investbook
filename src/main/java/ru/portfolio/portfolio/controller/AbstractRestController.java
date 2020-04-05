@@ -52,7 +52,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
 
     /**
      * Create a new entity.
-     * In create case  method returns CREATE http status, Location header and updated version of entity in body.
+     * In create case  method returns CREATE http status, Location header and entity in body.
      * If entiry already exists CONFLICT http status and Location header was returned.
      * @param object new entity (ID may not be provided if it AUTOINCREMENT)
      */
@@ -81,7 +81,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
      * Update or create a new entity.
      * In update case method returns OK http status and updated version of entity in body.
      * In create case  method returns CREATE http status, Location header and updated version of entity in body.
-     * @param id updating or creating entity
+     * @param id     updating or creating entity
      * @param object new version of entity
      * @throws URISyntaxException
      */

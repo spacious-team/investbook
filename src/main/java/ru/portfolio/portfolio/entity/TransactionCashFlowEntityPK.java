@@ -32,6 +32,9 @@ public class TransactionCashFlowEntityPK implements Serializable {
     @Column(name = "transaction_id")
     private long transactionId;
 
+    @Column(name = "portfolio")
+    private String portfolio;
+
     @Column(name = "type")
     private int type;
 }

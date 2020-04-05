@@ -16,33 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.portfolio.portfolio.pojo;
+package ru.portfolio.portfolio.entity;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
-import javax.validation.constraints.NotNull;
-import java.time.Instant;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Table;
+import java.io.Serializable;
 
-@Getter
-@ToString
-@Builder(toBuilder = true)
-@EqualsAndHashCode
-public class Transaction {
-    @NotNull
-    private Long id;
+@Embeddable
+@Table(name = "transaction")
+@Data
+public class TransactionEntityPK implements Serializable {
+    @Column(name = "id")
+    private long id;
 
-    @NotNull
+    @Column(name = "portfolio")
     private String portfolio;
-
-    @NotNull
-    private String isin;
-
-    @NotNull
-    private Instant timestamp;
-
-    @NotNull
-    private int count;
 }

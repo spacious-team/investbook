@@ -30,10 +30,13 @@ import java.math.BigDecimal;
 @JsonSerialize(using = TransactionCashFlowEntitySerializer.class)
 public class TransactionCashFlowEntity {
     @EmbeddedId
-    private TransactionCashFlowEntityPK transactionCashFlowId;
+    private TransactionCashFlowEntityPK pk;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "transaction_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumns({
+            @JoinColumn(name = "transaction_id", referencedColumnName = "id", insertable = false, updatable = false),
+            @JoinColumn(name = "portfolio", referencedColumnName = "portfolio", insertable = false, updatable = false)
+    })
     private TransactionEntity transaction;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -50,6 +53,6 @@ public class TransactionCashFlowEntity {
 
     @Override
     public int hashCode() {
-        return this.getTransactionCashFlowId().hashCode();
+        return this.getPk().hashCode();
     }
 }

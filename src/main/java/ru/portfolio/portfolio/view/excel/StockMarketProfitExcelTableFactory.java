@@ -80,7 +80,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
 
     private Positions getPositions(Portfolio portfolio, Security security) {
         Deque<Transaction> transactions = transactionRepository
-                .findBySecurityIsinAndPortfolioIdOrderByTimestampAscIdAsc(security.getIsin(), portfolio.getId())
+                .findBySecurityIsinAndPkPortfolioOrderByTimestampAscPkIdAsc(security.getIsin(), portfolio.getId())
                 .stream()
                 .map(transactionConverter::fromEntity)
                 .collect(Collectors.toCollection(LinkedList::new));
@@ -170,7 +170,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             return null;
         }
         Optional<TransactionCashFlowEntity> cashFlow = transactionCashFlowRepository
-                .findByTransactionCashFlowIdTransactionIdAndCashFlowTypeId(transaction.getId(), type.getId());
+                .findByPkPortfolioAndPkTransactionIdAndPkType(transaction.getPortfolio(), transaction.getId(), type.getId());
         return cashFlow.map(cash -> cash
                 .getValue()
                 .multiply(BigDecimal.valueOf(multiplier))

@@ -27,8 +27,10 @@ import java.util.Optional;
 
 public interface TransactionCashFlowRepository extends JpaRepository<TransactionCashFlowEntity, TransactionCashFlowEntityPK> {
 
-    List<TransactionCashFlowEntity> findByTransactionId(long transactionId);
+    List<TransactionCashFlowEntity> findByPkPortfolioAndPkTransactionId(String portfolio,
+                                                                        long transactionId);
 
-    Optional<TransactionCashFlowEntity> findByTransactionCashFlowIdTransactionIdAndCashFlowTypeId(long transactionId,
-                                                                                                  int cashFlowType);
+    Optional<TransactionCashFlowEntity> findByPkPortfolioAndPkTransactionIdAndPkType(String portfolio,
+                                                                                     long transactionId,
+                                                                                     int cashFlowType);
 }

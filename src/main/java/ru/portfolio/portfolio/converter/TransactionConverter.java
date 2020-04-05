@@ -20,9 +20,9 @@ package ru.portfolio.portfolio.converter;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.entity.PortfolioEntity;
 import ru.portfolio.portfolio.entity.SecurityEntity;
 import ru.portfolio.portfolio.entity.TransactionEntity;
+import ru.portfolio.portfolio.entity.TransactionEntityPK;
 import ru.portfolio.portfolio.pojo.Transaction;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
 import ru.portfolio.portfolio.repository.SecurityRepository;
@@ -35,14 +35,16 @@ public class TransactionConverter implements EntityConverter<TransactionEntity, 
 
     @Override
     public TransactionEntity toEntity(Transaction transaction) {
-        PortfolioEntity portfolioEntity = portfolioRepository.findById(transaction.getPortfolio())
+        portfolioRepository.findById(transaction.getPortfolio())
                 .orElseThrow(() -> new IllegalArgumentException("В справочнике не найден брокерский счет: " + transaction.getPortfolio()));
         SecurityEntity securityEntity = securityRepository.findByIsin(transaction.getIsin())
                 .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + transaction.getIsin()));
 
+        TransactionEntityPK pk = new TransactionEntityPK();
+        pk.setId(transaction.getId());
+        pk.setPortfolio(transaction.getPortfolio());
         TransactionEntity entity = new TransactionEntity();
-        entity.setId(transaction.getId());
-        entity.setPortfolio(portfolioEntity);
+        entity.setPk(pk);
         entity.setSecurity(securityEntity);
         entity.setTimestamp(transaction.getTimestamp());
         entity.setCount(transaction.getCount());
@@ -52,8 +54,8 @@ public class TransactionConverter implements EntityConverter<TransactionEntity, 
     @Override
     public Transaction fromEntity(TransactionEntity entity) {
         return Transaction.builder()
-                .id(entity.getId())
-                .portfolio(entity.getPortfolio().getId())
+                .id(entity.getPk().getId())
+                .portfolio(entity.getPk().getPortfolio())
                 .isin(entity.getSecurity().getIsin())
                 .timestamp(entity.getTimestamp())
                 .count(entity.getCount())
