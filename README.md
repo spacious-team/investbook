@@ -6,7 +6,6 @@
 ### Установка
  Перед запуском приложения необходимо:
 1. Установить базу данных, например, [MariaDB](https://downloads.mariadb.org/).
-1. Загрузить схему хранения данных, выполнив [sql файл](/src/main/resources/portfolio.sql).
 1. Установить [java](https://jdk.java.net/) версии не ниже 12.
 1. Скачать релиз приложения `portfolio.jar`, создать в той же директории файл конфигурации `application.properties` и
    прописать логин и пароль для коннекта к базе данных, [пример](/src/main/resources/application.properties).
