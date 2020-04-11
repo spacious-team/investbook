@@ -1,0 +1,34 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+    <id>zip</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <fileSets>
+        <fileSet>
+            <directory>src/main/assembly</directory>
+            <outputDirectory/>
+            <includes>
+                <include>*</include>
+            </includes>
+            <excludes>
+                <exclude>zip.xml</exclude>
+            </excludes>
+        </fileSet>
+    </fileSets>
+    <files>
+        <file>
+            <source>${project.build.directory}/${project.artifactId}-${project.version}.jar</source>
+            <outputDirectory/>
+        </file>
+        <file>
+            <source>src/main/resources/application.properties</source>
+            <outputDirectory/>
+        </file>
+        <file>
+            <source>README.md</source>
+            <outputDirectory/>
+        </file>
+    </files>
+</assembly>
