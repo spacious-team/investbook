@@ -13,8 +13,8 @@
 
 
 -- Дамп структуры базы данных portfolio
-CREATE DATABASE IF NOT EXISTS `portfolio` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `portfolio`;
+-- CREATE DATABASE IF NOT EXISTS `portfolio` /*!40100 DEFAULT CHARACTER SET utf8 */;
+-- USE `portfolio`;
 
 -- Дамп структуры для таблица portfolio.cash_flow_type
 CREATE TABLE IF NOT EXISTS `cash_flow_type` (
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `event_cash_flow` (
 
 -- Дамп структуры для таблица portfolio.issuer
 CREATE TABLE IF NOT EXISTS `issuer` (
-  `inn` bigint(10) unsigned zerofill NOT NULL COMMENT 'ИНН',
+  `inn` bigint(10) unsigned NOT NULL COMMENT 'ИНН',
   `name` varchar(100) NOT NULL COMMENT 'Наименование',
   PRIMARY KEY (`inn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Эмитенты';
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS `security` (
   `isin` varchar(64) NOT NULL COMMENT 'ISIN код ценной бумаги',
   `ticker` varchar(16) DEFAULT NULL COMMENT 'Тикер',
   `name` varchar(100) DEFAULT NULL COMMENT 'Полное наименование ценной бумаги или дериватива',
-  `issuer_inn` bigint(10) unsigned zerofill DEFAULT NULL COMMENT 'Эмитент (ИНН)',
+  `issuer_inn` bigint(10) unsigned DEFAULT NULL COMMENT 'Эмитент (ИНН)',
   PRIMARY KEY (`isin`),
   KEY `security_issuer_inn_ix` (`issuer_inn`),
   CONSTRAINT `security_issuer_inn_fkey` FOREIGN KEY (`issuer_inn`) REFERENCES `issuer` (`inn`) ON UPDATE CASCADE
@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
   `portfolio` varchar(32) NOT NULL COMMENT 'Портфель (номер брокерского счета)',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `isin` varchar(64) NOT NULL COMMENT 'ISIN инструмента, по которому произошло событие',
-  `count` int(1) unsigned zerofill NOT NULL COMMENT 'Количество ЦБ, по которым произошло событие',
+  `count` int(1) unsigned NOT NULL COMMENT 'Количество ЦБ, по которым произошло событие',
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',

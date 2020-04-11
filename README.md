@@ -4,11 +4,7 @@
 
 ### Установка
 Перед запуском приложения необходимо:
-1. Установить базу данных [MariaDB](https://downloads.mariadb.org/)
-   ([ссылка](https://downloads.mariadb.org/interstitial/mariadb-10.4.12/win32-packages/mariadb-10.4.12-win32.msi/from/http%3A//mariadb.melbourneitmirror.net/)
-   для Windows).
-1. Распаковать приложение `portfolio.zip` в удобное место, указать в файле `application.properties` логин и пароль
-   для коннекта к базе данных, заданный при установке MariaDB.
+1. Распаковать приложение `portfolio.zip` в удобное место.
 1. Установить [java](https://jdk.java.net/) версии не ниже 12
    ([ссылка](https://download.java.net/java/GA/jdk14/076bab302c7b4508975440c56f6cc26a/36/GPL/openjdk-14_windows-x64_bin.zip)
    для Windows, распаковать, например, в папку `C:\Program Files\Java\`).
@@ -37,3 +33,30 @@ set JAVA_HOME=C:\Program Files\Java\jdk-14
   ![cash-in](https://user-images.githubusercontent.com/11336712/78156505-8f115800-7447-11ea-8f6d-6a34c21dfc89.png)
 - налоговая нагрузка. 
   ![tax](https://user-images.githubusercontent.com/11336712/78156502-8e78c180-7447-11ea-9259-445c85d75a65.png)
+
+Важно: для корректного учета выплат по ценным бумагам (дивидендов, купонов, амортизации облигаций) приложению необходима
+точная информация о количестве бумаг на момент выплаты. Поэтому важно загружать в приложение все сделки (не пропускать
+отчеты брокера). Если информация о количестве ценных бумаг, которой обладает приложение, отличается от количества бумаг,
+по которым произведена выплата, то при формировании аналитической выгрузки приложение сообщит об ошибке.
+
+### Смена СУБД
+Приложение по умолчанию использует СУБД H2 и сохраняет данные в файл `portfolio.mv.db` в каталоге пользователя.
+Если у вас не достаточно опыта или нет желания перейти на другую СУБД, пропустите этот раздел.
+
+Возможен переход на [MariaDB](https://downloads.mariadb.org/)
+([ссылка](https://downloads.mariadb.org/interstitial/mariadb-10.4.12/win32-packages/mariadb-10.4.12-win32.msi/from/http%3A//mariadb.melbourneitmirror.net/)
+на дистрибутив для Windows). После установки, замените в файле `application.properties`
+```
+spring.profiles.active=core,h2
+```
+на
+```
+spring.profiles.active=core,mariadb
+```
+укажите логин и пароль доступа к БД
+```
+spring.datasource.username=root
+spring.datasource.password=123456
+```
+После смены БД необходимо перезалить отчеты брокера.
+
