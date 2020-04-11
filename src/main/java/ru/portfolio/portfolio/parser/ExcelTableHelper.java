@@ -62,14 +62,17 @@ public class ExcelTableHelper {
         for(; lastRowNum < sheet.getLastRowNum(); lastRowNum++) {
             Row row = sheet.getRow(lastRowNum);
             if (row == null || row.getLastCellNum() == 0) {
-                break;
+                break; // all row cells blank
             }
             for (Cell cell : row) {
-                if (cell != null && cell.getCellType() != CellType.BLANK) {
+                if (!(cell == null
+                        || cell.getCellType() == CellType.BLANK
+                        || (cell.getCellType() == CellType.STRING && cell.getStringCellValue().isEmpty()))) {
+                    // not empty
                     continue LAST_ROW;
                 }
             }
-            break; // is all row cells blank
+            break; // all row cells blank
         }
         lastRowNum--; // exclude last row from table
         if (lastRowNum < startAddress.getRow()) lastRowNum = startAddress.getRow();

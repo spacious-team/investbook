@@ -16,13 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.portfolio.portfolio.pojo;
+package ru.portfolio.portfolio.parser;
 
-public enum PortfolioPropertyType {
-    TOTAL_ASSETS,
-    CASH,
-    USD_EXCHANGE_RATE,
-    EUR_EXCHANGE_RATE,
-    GBP_EXCHANGE_RATE,
-    CHF_EXCHANGE_RATE
+import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Row;
+
+@RequiredArgsConstructor(staticName = "of")
+public class ConstantPositionTableColumn implements TableColumn {
+    private final int columnIndex;
+
+    @Override
+    public int getColumnIndex(Row header) {
+        return columnIndex;
+    }
 }
