@@ -25,12 +25,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum CashFlowExcelTableHeader implements ExcelTableHeader {
     DATE("Дата"),
-    CASH("Внесено (+)/Выведено (-), руб"),
+    CASH("Внесено (+) / Выведено (-)"),
     CURRENCY("Валюта"),
+    CASH_RUB("Внесено (+) / Выведено (-), руб"),
     DAYS_COUNT("Количество дней на счету"),
     DESCRIPTION("Описание"),
-    LIQUIDATION_VALUE("Ликвидная стоимость, руб"),
-    PROFIT("Доходность годовых (простая), %");
+    LIQUIDATION_VALUE_RUB("Ликвидная стоимость, руб"),
+    PROFIT("Доходность годовых (простая), %"),
+    CURRENCY_NAME("Валюта"),
+    EXCHANGE_RATE("Курс, руб");
 
     private final String description;
 }

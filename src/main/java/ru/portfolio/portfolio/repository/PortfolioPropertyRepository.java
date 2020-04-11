@@ -27,4 +27,6 @@ public interface PortfolioPropertyRepository extends JpaRepository<PortfolioProp
 
     Optional<PortfolioPropertyEntity> findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(String portfolio,
                                                                                             String property);
+
+    Optional<PortfolioPropertyEntity> findFirstByPropertyOrderByTimestampDesc(String property);
 }
