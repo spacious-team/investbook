@@ -16,17 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.portfolio.portfolio.repository;
+package ru.portfolio.portfolio.parser;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import ru.portfolio.portfolio.entity.PortfolioPropertyEntity;
+import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Row;
 
-import java.util.Optional;
+@RequiredArgsConstructor(staticName = "of")
+public class ConstantPositionTableColumn implements TableColumn {
+    private final int columnIndex;
 
-public interface PortfolioPropertyRepository extends JpaRepository<PortfolioPropertyEntity, Integer> {
-
-    Optional<PortfolioPropertyEntity> findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(String portfolio,
-                                                                                            String property);
-
-    Optional<PortfolioPropertyEntity> findFirstByPropertyOrderByTimestampDesc(String property);
+    @Override
+    public int getColumnIndex(Row header) {
+        return columnIndex;
+    }
 }

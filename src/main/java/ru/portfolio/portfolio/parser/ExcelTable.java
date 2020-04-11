@@ -136,6 +136,17 @@ public class ExcelTable implements Iterable<Row> {
         return data;
     }
 
+    /**
+     * @return row containg given value or null if not found
+     */
+    public Row findRow(String value) {
+        CellAddress address = ExcelTableHelper.find(getSheet(), value);
+        if (address == ExcelTableHelper.NOT_FOUND) {
+            return null;
+        }
+        return getSheet().getRow(address.getRow());
+    }
+
     public Cell getCell(Row row, TableColumnDescription columnDescription) {
         return row.getCell(columnIndices.get(columnDescription.getColumn()));
     }
@@ -203,13 +214,13 @@ public class ExcelTable implements Iterable<Row> {
     }
 
     class ExelTableIterator implements Iterator<Row> {
+        private final int dataRowsCount = tableRange.getLastRow() - tableRange.getFirstRow()
+                - dataRowOffset
+                + (isLastTableRowContainsTotalData ? 0 : 1);
         private int cnt = 0;
 
         @Override
         public boolean hasNext() {
-            int dataRowsCount = tableRange.getLastRow() - tableRange.getFirstRow()
-                    - dataRowOffset
-                    + (isLastTableRowContainsTotalData ? 0 : 1);
             return cnt < dataRowsCount;
         }
 

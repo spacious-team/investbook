@@ -33,7 +33,6 @@ import ru.portfolio.portfolio.view.TableHeader;
 import java.math.BigDecimal;
 
 import static ru.portfolio.portfolio.view.excel.CashFlowExcelTableHeader.*;
-import static ru.portfolio.portfolio.view.excel.TaxExcelTableHeader.DESCRIPTION;
 
 @Component
 public class CashFlowExcelTableView extends ExcelTableView {
@@ -50,9 +49,10 @@ public class CashFlowExcelTableView extends ExcelTableView {
     @Override
     protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
-        sheet.setColumnWidth(CASH.ordinal(), 30 * 256);
+        sheet.setColumnWidth(CASH.ordinal(), 14 * 256);
+        sheet.setColumnWidth(CASH_RUB.ordinal(), 30 * 256);
         sheet.setColumnWidth(DESCRIPTION.ordinal(), 50 * 256);
-        sheet.setColumnWidth(LIQUIDATION_VALUE.ordinal(), 28 * 256);
+        sheet.setColumnWidth(LIQUIDATION_VALUE_RUB.ordinal(), 28 * 256);
         sheet.setColumnWidth(PROFIT.ordinal(), 28 * 256);
     }
 
@@ -60,18 +60,18 @@ public class CashFlowExcelTableView extends ExcelTableView {
     protected Table.Record getTotalRow() {
         Table.Record total = Table.newRecord();
         total.put(DATE, "Итого:");
-        total.put(CASH, "=SUM(" +
-                CASH.getColumnIndex() + "3:" +
-                CASH.getColumnIndex() + "100000)");
-        total.put(LIQUIDATION_VALUE, portfolioPropertyRepository
+        total.put(CASH_RUB, "=SUM(" +
+                CASH_RUB.getColumnIndex() + "3:" +
+                CASH_RUB.getColumnIndex() + "100000)");
+        total.put(LIQUIDATION_VALUE_RUB, portfolioPropertyRepository
                 .findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(
                         getPortfolio().getId(),
                         PortfolioPropertyType.TOTAL_ASSETS.name())
                 .map(e -> BigDecimal.valueOf(Double.parseDouble(e.getValue())))
                 .orElse(BigDecimal.ZERO));
-        total.put(PROFIT, "=(" + LIQUIDATION_VALUE.getColumnIndex() + "2-" + CASH.getColumnIndex() + "2)"
+        total.put(PROFIT, "=(" + LIQUIDATION_VALUE_RUB.getColumnIndex() + "2-" + CASH_RUB.getColumnIndex() + "2)"
                 + "/SUMPRODUCT("
-                + CASH.getColumnIndex() + "3:" + CASH.getColumnIndex() + "100000,"
+                + CASH_RUB.getColumnIndex() + "3:" + CASH_RUB.getColumnIndex() + "100000,"
                 + DAYS_COUNT.getColumnIndex() + "3:" + DAYS_COUNT.getColumnIndex() + "100000)*365*100");
         return total;
     }
