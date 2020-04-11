@@ -104,7 +104,7 @@ public class ExcelTableHelper {
      * @param endRow search rows excluding this
      */
     public static CellAddress find(Sheet sheet, Object value, int startRow, int endRow) {
-        return find(sheet, value, startRow, endRow, String::equals);
+        return find(sheet, value, startRow, endRow, (v1, v2) -> v2 != null && v1.trim().equals(v2.toString().trim()));
     }
 
     /**

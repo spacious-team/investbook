@@ -35,7 +35,7 @@ import static java.util.Collections.singletonList;
 import static ru.portfolio.portfolio.parser.psb.PortfolioPropertyTable.SummaryTableHeader.*;
 
 public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
-    private static final String SUMMARY_TABLE = "Сводная информация по счетам клиента в валюте счета ";
+    private static final String SUMMARY_TABLE = "Сводная информация по счетам клиента в валюте счета";
     private static final String ASSETS = "\"СУММА АКТИВОВ\" на конец дня";
     private static final String EXCHANGE_RATE_ROW = "Курс валют ЦБ РФ";
     private static final BigDecimal min = BigDecimal.valueOf(0.01);
