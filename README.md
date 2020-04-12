@@ -61,5 +61,6 @@ spring.profiles.active=core,mariadb
 spring.datasource.username=root
 spring.datasource.password=123456
 ```
-После смены БД необходимо перезалить отчеты брокера.
+После смены БД необходимо перезалить отчеты брокера. Ранее загруженные отчеты могут быть найдены в домашней директории
+пользователя в папке `portfolio-report-backups`.
 
