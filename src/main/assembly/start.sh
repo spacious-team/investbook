@@ -1,1 +1,1 @@
-java -jar portfolio-1.0.jar
+java -jar portfolio-*.jar
