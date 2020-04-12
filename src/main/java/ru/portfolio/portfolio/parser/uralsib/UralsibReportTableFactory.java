@@ -33,7 +33,7 @@ public class UralsibReportTableFactory implements ReportTableFactory {
 
     @Override
     public ReportTable<PortfolioCash> createPortfolioCashTable() {
-        return new EmptyReportTable<>(report);
+        return new PortfolioCashTable(report);
     }
         
     @Override
