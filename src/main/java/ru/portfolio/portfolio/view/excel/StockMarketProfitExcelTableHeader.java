@@ -29,7 +29,7 @@ public enum StockMarketProfitExcelTableHeader implements ExcelTableHeader {
     COUNT("Количество"),
     BUY_PRICE("Цена, руб"),
     BUY_AMOUNT("Стоимость (без НКД и комиссии)"),
-    BUY_ACCRUED_INTEREST("НКД уплоченный"),
+    BUY_ACCRUED_INTEREST("НКД уплаченный"),
     BUY_COMMISSION("Комиссия покупки"),
     CELL_DATE("Дата продажи"),
     CELL_AMOUNT("Стоимость продажи/погашения"),

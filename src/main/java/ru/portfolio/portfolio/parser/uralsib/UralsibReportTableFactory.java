@@ -38,7 +38,7 @@ public class UralsibReportTableFactory implements ReportTableFactory {
         
     @Override
     public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
-        return new EmptyReportTable<>(report);
+        return new PortfolioPropertyTable(report);
     }
     
     @Override
