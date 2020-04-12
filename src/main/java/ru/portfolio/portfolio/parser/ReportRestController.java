@@ -18,8 +18,6 @@
 
 package ru.portfolio.portfolio.parser;
 
-import com.google.common.jimfs.Configuration;
-import com.google.common.jimfs.Jimfs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,9 +27,10 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.portfolio.portfolio.parser.psb.PsbBrokerReport;
 import ru.portfolio.portfolio.parser.psb.PsbReportTableFactory;
 
-import java.nio.file.FileSystem;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,13 +41,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class ReportRestController {
+    private static final Path reportBackupPath = Paths.get(
+            System.getProperty("user.home", ""),
+            "portfolio-report-backups");
     private final ReportParserService reportParserService;
-    private FileSystem jimfs = Jimfs.newFileSystem(Configuration.unix());
-
-    @PostMapping("/a")
-    public String a() {
-        throw new IllegalArgumentException();
-    }
 
     @PostMapping("/reports")
     public String post(@RequestParam("reports") MultipartFile[] reports,
@@ -64,16 +60,14 @@ public class ReportRestController {
                     continue;
                 }
                 long t0 = System.nanoTime();
-                byte[] bytes = report.getBytes();
-                String originalFilename = report.getOriginalFilename();
-                Path path = jimfs.getPath(originalFilename != null ? originalFilename : UUID.randomUUID().toString());
-                Files.write(path, bytes);
+                Path path = getPath(format, report);
                 if ("psb".equals(format)) {
                     parsePsbReport(path);
                 } else {
                     throw new IllegalArgumentException("Неизвестный формат " + format);
                 }
-                log.info("Загрузка отчета {} завершена за {}", path.getFileName(), Duration.ofNanos(System.nanoTime() - t0));
+                log.info("Загрузка отчета {} завершена за {}, бекап отчета сохранен в {}", path.getFileName(),
+                        Duration.ofNanos(System.nanoTime() - t0), path.toAbsolutePath());
             } catch (Exception e) {
                 exceptions.add(e);
             }
@@ -83,6 +77,26 @@ public class ReportRestController {
         } else {
             throw new RuntimeException(exceptions.stream().map(Throwable::getMessage).collect(Collectors.joining(", ")));
         }
+    }
+
+    private Path getPath(String reportType, MultipartFile report) throws IOException {
+        byte[] bytes = report.getBytes();
+        String originalFilename = report.getOriginalFilename();
+        Path backupPath = reportBackupPath.resolve(reportType);
+        Files.createDirectories(backupPath);
+        Path path = backupPath.resolve((originalFilename != null) ?
+                originalFilename :
+                UUID.randomUUID().toString());
+        for (int i = 1; i < 1e6; i++) {
+            if (!Files.exists(path)) {
+                break;
+            }
+            path = backupPath.resolve((originalFilename != null) ?
+                    "Копия " + i + " - " + (originalFilename) :
+                    UUID.randomUUID().toString());
+        }
+        Files.write(path, bytes);
+        return path;
     }
 
     private void parsePsbReport(Path path) {

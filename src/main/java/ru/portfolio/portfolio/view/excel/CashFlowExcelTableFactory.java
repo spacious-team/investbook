@@ -103,7 +103,7 @@ public class CashFlowExcelTableFactory implements TableFactory {
                     case "EUR": defaultExchangeRate = 85; break;
                     case "GBP": defaultExchangeRate = 95; break;
                 }
-                log.info("Не могу в БД найти курс валюты {}, использую значение по умолчанию = {}",
+                log.debug("Не могу в БД найти курс валюты {}, использую значение по умолчанию = {}",
                         currency, defaultExchangeRate);
                 record.put(EXCHANGE_RATE, defaultExchangeRate);
             }
