@@ -22,5 +22,5 @@ import org.apache.poi.ss.usermodel.Row;
 
 public interface TableColumn {
 
-    int getColumnIndex(Row header);
+    int getColumnIndex(Row... headerRows);
 }

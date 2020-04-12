@@ -49,10 +49,9 @@ public class ExcelTable implements Iterable<Row> {
     @Getter
     private final boolean empty;
     /**
-     * Offset of first data row. First table row is a header. Default is 2.
+     * Offset of first data row. First table row is a header.
      */
-    @Setter
-    private int dataRowOffset = 2;
+    private int dataRowOffset;
     /**
      * Set to true if last table row contains total information. Default is false.
      */
@@ -60,51 +59,71 @@ public class ExcelTable implements Iterable<Row> {
     private boolean isLastTableRowContainsTotalData = false;
 
     public static ExcelTable of(Sheet sheet, String tableName, String tableFooterString,
-                         Class<? extends TableColumnDescription> headerDescription) {
+                                Class<? extends TableColumnDescription> headerDescription) {
+        return of(sheet, tableName, tableFooterString, headerDescription, 1);
+    }
+
+    public static ExcelTable of(Sheet sheet, String tableName,
+                                Class<? extends TableColumnDescription> headerDescription) {
+        return of(sheet, tableName, headerDescription, 1);
+    }
+
+    public static ExcelTable of(Sheet sheet, String tableName, String tableFooterString,
+                                Class<? extends TableColumnDescription> headerDescription,
+                                int headersRowCount) {
         ExcelTable table = new ExcelTable(sheet, tableName,
                 ExcelTableHelper.getTableCellRange(sheet, tableName, tableFooterString),
-                headerDescription);
+                headerDescription,
+                headersRowCount);
         table.setLastTableRowContainsTotalData(true);
         return table;
     }
 
     public static ExcelTable of(Sheet sheet, String tableName,
-                         Class<? extends TableColumnDescription> headerDescription) {
+                                Class<? extends TableColumnDescription> headerDescription,
+                                int headersRowCount) {
         ExcelTable table = new ExcelTable(sheet, tableName,
                 ExcelTableHelper.getTableCellRange(sheet, tableName),
-                headerDescription);
+                headerDescription,
+                headersRowCount);
         table.setLastTableRowContainsTotalData(false);
         return table;
     }
 
-    private ExcelTable(Sheet sheet, String tableName, CellRangeAddress tableRange, Class<? extends TableColumnDescription> headerDescription) {
+    private ExcelTable(Sheet sheet, String tableName, CellRangeAddress tableRange,
+                       Class<? extends TableColumnDescription> headerDescription, int headersRowCount) {
         this.sheet = sheet;
         this.tableName = tableName;
         this.tableRange = tableRange;
+        this.dataRowOffset = 1 + headersRowCount; // table_name + headersRowCount
         this.empty = this.tableRange.equals(ExcelTableHelper.EMTPY_RANGE);
         this.columnIndices = empty ?
                 Collections.emptyMap() :
-                getColumnIndices(sheet, this.tableRange, headerDescription);
+                getColumnIndices(sheet, this.tableRange, headerDescription, headersRowCount);
     }
 
-    private  Map<TableColumn, Integer> getColumnIndices(Sheet sheet, CellRangeAddress tableRange,
-                                                        Class<? extends TableColumnDescription> headerDescription) {
+    private Map<TableColumn, Integer> getColumnIndices(Sheet sheet, CellRangeAddress tableRange,
+                                                       Class<? extends TableColumnDescription> headerDescription,
+                                                       int headersRowCount) {
         Map<TableColumn, Integer> columnIndices = new HashMap<>();
-        Row header = sheet.getRow(tableRange.getFirstRow() + 1);
+        Row[] headerRows = new Row[headersRowCount];
+        for (int i = 0; i < headersRowCount; i++) {
+            headerRows[i] = sheet.getRow(tableRange.getFirstRow() + 1 + i);
+        }
         TableColumn[] columns = Arrays.stream(headerDescription.getEnumConstants())
                 .map(TableColumnDescription::getColumn)
                 .toArray(TableColumn[]::new);
         for (TableColumn column : columns) {
-            columnIndices.put(column, column.getColumnIndex(header));
+            columnIndices.put(column, column.getColumnIndex(headerRows));
         }
         return columnIndices;
     }
 
     public <T> List<T> getData(Path file, BiFunction<ExcelTable, Row, T> rowExtractor) {
         return getDataCollection(file, (table, row) ->
-                        Optional.ofNullable(rowExtractor.apply(table, row))
-                                .map(Collections::singletonList)
-                                .orElse(emptyList()));
+                Optional.ofNullable(rowExtractor.apply(table, row))
+                        .map(Collections::singletonList)
+                        .orElse(emptyList()));
     }
 
     public <T> List<T> getDataCollection(Path file, BiFunction<ExcelTable, Row, Collection<T>> rowExtractor) {

@@ -38,12 +38,7 @@ public class PortfolioCashTable extends AbstractReportTable<PortfolioCash> {
     private static final String INVALID_TEXT = "ИТОГО:";
 
     public PortfolioCashTable(PsbBrokerReport report) {
-        super(report, TABLE_NAME, TABLE_END_TEXT, CashTableHeader.class);
-    }
-
-    @Override
-    protected void exelTableConfiguration(ExcelTable table) {
-        table.setDataRowOffset(3);
+        super(report, TABLE_NAME, TABLE_END_TEXT, CashTableHeader.class, 2);
     }
 
     @Override

@@ -26,7 +26,7 @@ public class ConstantPositionTableColumn implements TableColumn {
     private final int columnIndex;
 
     @Override
-    public int getColumnIndex(Row header) {
+    public int getColumnIndex(Row... headerRows) {
         return columnIndex;
     }
 }
