@@ -37,32 +37,32 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
         super(repository, converter);
     }
 
-    @GetMapping("/portfolio-property")
+    @GetMapping("/portfolio-properties")
     @Override
     public List<PortfolioPropertyEntity> get() {
         return super.get();
     }
 
-    @GetMapping("/portfolio-property/{id}")
+    @GetMapping("/portfolio-properties/{id}")
     @Override
     public ResponseEntity<PortfolioPropertyEntity> get(@PathVariable("id") Integer id) {
         return super.get(id);
     }
 
-    @PostMapping("/portfolio-property")
+    @PostMapping("/portfolio-properties")
     @Override
     public ResponseEntity<PortfolioPropertyEntity> post(@Valid @RequestBody PortfolioProperty property) {
         return super.post(property);
     }
 
-    @PutMapping("/portfolio-property/{id}")
+    @PutMapping("/portfolio-properties/{id}")
     @Override
     public ResponseEntity<PortfolioPropertyEntity> put(@PathVariable("id") Integer id,
                                                         @Valid @RequestBody PortfolioProperty property) {
         return super.put(id, property);
     }
 
-    @DeleteMapping("/portfolio-property/{id}")
+    @DeleteMapping("/portfolio-properties/{id}")
     @Override
     public void delete(@PathVariable("id") Integer id) {
         super.delete(id);
@@ -85,6 +85,6 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
 
     @Override
     protected String getLocation() {
-        return "/portfolio-property";
+        return "/portfolio-properties";
     }
 }
