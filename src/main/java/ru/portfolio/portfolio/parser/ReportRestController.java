@@ -55,7 +55,7 @@ public class ReportRestController {
         if (format == null || format.isEmpty()) {
             format = "psb";
         }
-        format = format.toLowerCase();
+        BrockerType brocker =BrockerType.valueOf(format.toUpperCase());
         List<Exception> exceptions = new ArrayList<>();
         for (MultipartFile report : reports) {
             try {
@@ -63,12 +63,16 @@ public class ReportRestController {
                     continue;
                 }
                 long t0 = System.nanoTime();
-                Path path = saveToBackup(format, report);
-                switch (format) {
-                    case "psb":
+                Path path = saveToBackup(brocker, report);
+                String originalFileName = report.getOriginalFilename();
+                switch (brocker) {
+                    case PSB:
                         parsePsbReport(report);
                         break;
-                    case "uralsib":
+                    case URALSIB:
+                        if (originalFileName != null && !originalFileName.contains("_invest_")) {
+                            log.warn("Рекомендуется загружать отчеты содержащие в имени файла слово 'invest'");
+                        }
                         parseUralsibReport(report);
                         break;
                         default:
@@ -90,10 +94,10 @@ public class ReportRestController {
     /**
      * @return backup file
      */
-    private Path saveToBackup(String reportType, MultipartFile report) throws IOException {
+    private Path saveToBackup(BrockerType brocker, MultipartFile report) throws IOException {
         byte[] bytes = report.getBytes();
         String originalFilename = report.getOriginalFilename();
-        Path backupPath = reportBackupPath.resolve(reportType);
+        Path backupPath = reportBackupPath.resolve(brocker.name().toLowerCase());
         Files.createDirectories(backupPath);
         Path path = backupPath.resolve((originalFilename != null) ?
                 originalFilename :

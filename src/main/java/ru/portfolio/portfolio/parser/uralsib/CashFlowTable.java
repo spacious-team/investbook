@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.portfolio.portfolio.parser.psb;
+package ru.portfolio.portfolio.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -31,14 +31,13 @@ import java.util.Collections;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static ru.portfolio.portfolio.parser.psb.CashFlowTable.CashFlowTableHeader.*;
 
 @Slf4j
 public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
 
-    private static final String TABLE_NAME = "Внешнее движение денежных средств в валюте счета";
+    private static final String TABLE_NAME = "ДВИЖЕНИЕ ДЕНЕЖНЫХ СРЕДСТВ ЗА ОТЧЕТНЫЙ ПЕРИОД";
 
-    public CashFlowTable(PsbBrokerReport report) {
+    public CashFlowTable(UralsibBrokerReport report) {
         super(report, TABLE_NAME, "", CashFlowTableHeader.class);
     }
 
@@ -54,44 +53,40 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
 
     @Override
     protected Collection<EventCashFlow> getRow(ExcelTable table, Row row) {
-        String action = table.getStringCellValue(row, OPERATION);
+        String action = table.getStringCellValue(row, CashFlowTable.CashFlowTableHeader.OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
-        CashFlowType type = CashFlowType.CASH;
-        boolean isPositive;
+        CashFlowType type;
         switch (action) {
-            case"зачислено на счет":
-                isPositive = true;
+            case"ввод дс":
+            case"вывод дс":
+                type = CashFlowType.CASH;
                 break;
-            case"cписано со счета":
-                isPositive = false;
-                break;
-            case "налог удержанный":
-                isPositive = false;
+            case "налог":
                 type = CashFlowType.TAX;
+                break;
+            case "доначисление комиссии до размера минимальной":
+            case "депозитарные сборы других депозитариев":
+                type = CashFlowType.COMMISSION;
                 break;
             default:
                 return emptyList();
         }
-        if (type == CashFlowType.CASH && !table.getStringCellValue(row, DESCRIPTION).isEmpty()) {
-            return emptyList(); // cash in/out records has no description
-        }
-        String description = table.getStringCellValue(row, DESCRIPTION);
+        String description = table.getStringCellValue(row, CashFlowTable.CashFlowTableHeader.DESCRIPTION);
         return singletonList(EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(type)
-                .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
-                .value(table.getCurrencyCellValue(row, VALUE)
-                        .multiply(BigDecimal.valueOf(isPositive ? 1 : -1)))
-                .currency(table.getStringCellValue(row, CURRENCY))
+                .timestamp(convertToInstant(table.getStringCellValue(row, CashFlowTable.CashFlowTableHeader.DATE)))
+                .value(table.getCurrencyCellValue(row, CashFlowTable.CashFlowTableHeader.VALUE))
+                .currency(table.getStringCellValue(row, CashFlowTable.CashFlowTableHeader.CURRENCY))
                 .description((description == null || description.isEmpty())? null : description)
                 .build());
     }
 
     enum CashFlowTableHeader implements TableColumnDescription {
         DATE("дата"),
-        OPERATION("операция"),
+        OPERATION("тип", "операции"),
         VALUE("сумма"),
-        CURRENCY("валюта счета"),
+        CURRENCY("валюта"),
         DESCRIPTION("комментарий");
 
         @Getter

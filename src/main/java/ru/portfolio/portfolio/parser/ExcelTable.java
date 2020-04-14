@@ -209,7 +209,7 @@ public class ExcelTable implements Iterable<Row> {
 
     public static BigDecimal getCurrencyCellValue(Cell cell) {
         double cellValue = cell.getNumericCellValue();
-        return (cellValue - 0.01d < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
+        return (Math.abs(cellValue - 0.01d) < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
     }
 
     public String getStringCellValue(Row row, TableColumnDescription columnDescription) {

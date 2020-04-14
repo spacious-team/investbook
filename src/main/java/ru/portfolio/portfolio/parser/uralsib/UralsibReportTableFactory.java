@@ -43,7 +43,7 @@ public class UralsibReportTableFactory implements ReportTableFactory {
     
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
-        return new EmptyReportTable<>(report);
+        return new CashFlowTable(report);
     }
     
     @Override
