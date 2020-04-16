@@ -34,7 +34,7 @@ public interface ReportTableFactory {
 
     ReportTable<Security> getPortfolioSecuritiesTable();
 
-    ReportTable<SecurityTransaction> getTransactionTable();
+    ReportTable<SecurityTransaction> getSecurityTransactionTable();
 
     ReportTable<DerivativeTransaction> getDerivativeTransactionTable();
 

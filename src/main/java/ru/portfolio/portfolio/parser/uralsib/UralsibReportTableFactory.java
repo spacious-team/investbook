@@ -19,17 +19,21 @@
 package ru.portfolio.portfolio.parser.uralsib;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import ru.portfolio.portfolio.parser.*;
 import ru.portfolio.portfolio.pojo.EventCashFlow;
 import ru.portfolio.portfolio.pojo.PortfolioProperty;
 import ru.portfolio.portfolio.pojo.Security;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 
-@RequiredArgsConstructor
 public class UralsibReportTableFactory implements ReportTableFactory {
     @Getter
     private final UralsibBrokerReport report;
+    private PortfolioSecuritiesTable portfolioSecuritiesTable;
+
+    public UralsibReportTableFactory(UralsibBrokerReport report) {
+        this.report = report;
+        this.portfolioSecuritiesTable = new PortfolioSecuritiesTable(report);
+    }
 
     @Override
     public ReportTable<PortfolioCash> createPortfolioCashTable() {
@@ -48,12 +52,12 @@ public class UralsibReportTableFactory implements ReportTableFactory {
     
     @Override
     public ReportTable<Security> getPortfolioSecuritiesTable() {
-        return new EmptyReportTable<>(report);
+        return portfolioSecuritiesTable;
     }
     
     @Override
-    public ReportTable<SecurityTransaction> getTransactionTable() {
-        return new EmptyReportTable<>(report);
+    public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
+        return new SecurityTransactionTable(report);
     }
 
     @Override

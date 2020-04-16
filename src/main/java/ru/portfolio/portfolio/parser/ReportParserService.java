@@ -39,7 +39,7 @@ public class ReportParserService {
                 ReportTable<PortfolioProperty> portfolioPropertyTable = reportTableFactory.getPortfolioPropertyTable();
                 ReportTable<EventCashFlow> cashFlowTable = reportTableFactory.getCashFlowTable();
                 ReportTable<Security> portfolioSecuritiesTable = reportTableFactory.getPortfolioSecuritiesTable();
-                ReportTable<SecurityTransaction> transactionTable = reportTableFactory.getTransactionTable();
+                ReportTable<SecurityTransaction> transactionTable = reportTableFactory.getSecurityTransactionTable();
                 ReportTable<SecurityEventCashFlow> couponAndAmortizationTable = reportTableFactory.getCouponAndAmortizationTable();
                 ReportTable<SecurityEventCashFlow> dividendTable = reportTableFactory.getDividendTable();
                 ReportTable<DerivativeTransaction> derivativeTransactionTable = reportTableFactory.getDerivativeTransactionTable();

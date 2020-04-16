@@ -52,8 +52,8 @@ public class PsbReportTableFactory implements ReportTableFactory {
     }
     
     @Override
-    public ReportTable<SecurityTransaction> getTransactionTable() {
-        return new TransactionTable(report);
+    public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
+        return new SecurityTransactionTable(report);
     }
 
     @Override
