@@ -62,6 +62,11 @@ public class PsbReportTableFactory implements ReportTableFactory {
     }
 
     @Override
+    public ReportTable<ForeignExchangeTransaction> getForeignExchangeTransactionTable() {
+        return new EmptyReportTable<>(report);
+    }
+
+    @Override
     public ReportTable<SecurityEventCashFlow> getCouponAndAmortizationTable() {
         return new CouponAndAmortizationTable(report);
     }

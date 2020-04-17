@@ -82,6 +82,14 @@ public class ReportTableStorage {
         }
     }
 
+    public void addTransaction(ForeignExchangeTransaction fxTransaction) {
+        addSecurity(fxTransaction.getInstrument());
+        boolean isAdded = addTransaction(fxTransaction.getTransaction());
+        if (isAdded) {
+            fxTransaction.getTransactionCashFlows().forEach(this::addTransactionCashFlow);
+        }
+    }
+
     protected boolean addTransaction(Transaction transaction) {
         return handlePost(
                 () -> transactionRestController.post(transaction),

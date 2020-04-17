@@ -87,6 +87,7 @@ public class CashFlowExcelTableFactory implements TableFactory {
     private void appendExchangeRates(Table table) {
         for (int i = 0; i < currencies.size(); i++) {
             String currency = currencies.get(i);
+            if (table.size() <= i) table.add(new Table.Record());
             Table.Record record = table.get(i);
             record.put(CURRENCY_NAME, currency);
             try {

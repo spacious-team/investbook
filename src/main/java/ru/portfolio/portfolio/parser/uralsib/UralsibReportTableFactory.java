@@ -66,6 +66,11 @@ public class UralsibReportTableFactory implements ReportTableFactory {
     }
 
     @Override
+    public ReportTable<ForeignExchangeTransaction> getForeignExchangeTransactionTable() {
+        return new ForeignExchangeTransactionTable(report);
+    }
+
+    @Override
     public ReportTable<SecurityEventCashFlow> getCouponAndAmortizationTable() {
         return new EmptyReportTable<>(report);
     }
