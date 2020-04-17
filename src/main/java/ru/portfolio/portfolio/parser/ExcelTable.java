@@ -72,7 +72,7 @@ public class ExcelTable implements Iterable<Row> {
                                 Class<? extends TableColumnDescription> headerDescription,
                                 int headersRowCount) {
         ExcelTable table = new ExcelTable(sheet, tableName,
-                ExcelTableHelper.getTableCellRange(sheet, tableName, tableFooterString),
+                ExcelTableHelper.getTableCellRange(sheet, tableName, headersRowCount, tableFooterString),
                 headerDescription,
                 headersRowCount);
         table.setLastTableRowContainsTotalData(true);
@@ -83,7 +83,7 @@ public class ExcelTable implements Iterable<Row> {
                                 Class<? extends TableColumnDescription> headerDescription,
                                 int headersRowCount) {
         ExcelTable table = new ExcelTable(sheet, tableName,
-                ExcelTableHelper.getTableCellRange(sheet, tableName),
+                ExcelTableHelper.getTableCellRange(sheet, tableName, headersRowCount),
                 headerDescription,
                 headersRowCount);
         table.setLastTableRowContainsTotalData(false);

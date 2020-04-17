@@ -32,13 +32,14 @@ public class ExcelTableHelper {
     public static final CellRangeAddress EMTPY_RANGE = new CellRangeAddress(-1, -1, -1, -1);
     public static final CellAddress NOT_FOUND = new CellAddress(-1, -1);
 
-    public static CellRangeAddress getTableCellRange(Sheet sheet, String tableName, String tableFooterString) {
+    public static CellRangeAddress getTableCellRange(Sheet sheet, String tableName, int headersRowCount, String tableFooterString) {
         CellAddress startAddress = find(sheet, tableName);
         if (startAddress.equals(NOT_FOUND)) {
             return EMTPY_RANGE;
         }
-        CellAddress endAddress = find(sheet, tableFooterString, startAddress.getRow() + 2,
-                sheet.getLastRowNum(), (cell , prefix) -> cell.startsWith(prefix.toString()));
+        CellAddress endAddress = find(sheet, tableFooterString, startAddress.getRow() + headersRowCount + 1,
+                sheet.getLastRowNum(), (cell , prefix) ->
+                        cell.trim().toLowerCase().startsWith(prefix.toString().trim().toLowerCase()));
         if (endAddress.equals(NOT_FOUND)) {
             return EMTPY_RANGE;
         }
@@ -52,12 +53,12 @@ public class ExcelTableHelper {
     /**
      * Get table ragne, table ends with empty line
      */
-    public static CellRangeAddress getTableCellRange(Sheet sheet, String tableName) {
+    public static CellRangeAddress getTableCellRange(Sheet sheet, String tableName, int headersRowCount) {
         CellAddress startAddress = find(sheet, tableName);
         if (startAddress.equals(NOT_FOUND)) {
             return EMTPY_RANGE;
         }
-        int lastRowNum = startAddress.getRow() + 1;
+        int lastRowNum = startAddress.getRow() + headersRowCount + 1;
         LAST_ROW:
         for(; lastRowNum < sheet.getLastRowNum(); lastRowNum++) {
             Row row = sheet.getRow(lastRowNum);
