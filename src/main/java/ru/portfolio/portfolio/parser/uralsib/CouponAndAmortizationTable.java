@@ -18,13 +18,9 @@
 
 package ru.portfolio.portfolio.parser.uralsib;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
-import ru.portfolio.portfolio.parser.BrokerReport;
 import ru.portfolio.portfolio.parser.ExcelTable;
-import ru.portfolio.portfolio.parser.ReportTable;
-import ru.portfolio.portfolio.parser.SecurityTransaction;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.Security;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
@@ -32,37 +28,25 @@ import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import static java.util.Collections.emptyList;
-import static ru.portfolio.portfolio.parser.uralsib.CashFlowTable.CashFlowTableHeader.*;
+import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
-public class CouponAndAmortizationTable implements ReportTable<SecurityEventCashFlow> {
+public class CouponAndAmortizationTable extends PaymentsTable<SecurityEventCashFlow> {
 
-    @Getter
-    private final BrokerReport report;
-    @Getter
-    private final List<SecurityEventCashFlow> data = new ArrayList<>();
-    // human readable name -> incoming count
-    private final List<Map.Entry<Security, Integer>> securitiesIncomingCount;
-    private final List<SecurityTransaction> securityTransactions;
     private final List<Map.Entry<String, Instant>> redemptionDates;
 
     public CouponAndAmortizationTable(UralsibBrokerReport report,
                                       PortfolioSecuritiesTable securitiesTable,
                                       SecurityTransactionTable securityTransactionTable) {
-        this.report = report;
-        this.securitiesIncomingCount = securitiesTable.getData();
-        this.securityTransactions = securityTransactionTable.getData();
+        super(report, securitiesTable, securityTransactionTable);
         this.redemptionDates = new SecurityRedemptionTable(report).getData();
-        ExcelTable table = ExcelTable.of(report.getSheet(), CashFlowTable.TABLE_NAME, CashFlowTable.CashFlowTableHeader.class);
-        data.addAll(pasreTable(table));
-    }
-
-    protected Collection<SecurityEventCashFlow> pasreTable(ExcelTable table) {
-        return table.getDataCollection(getReport().getPath(), this::getRow);
+        data.addAll(pasreTable());
     }
 
     protected Collection<SecurityEventCashFlow> getRow(ExcelTable table, Row row) {
@@ -77,8 +61,7 @@ public class CouponAndAmortizationTable implements ReportTable<SecurityEventCash
             return emptyList();
         }
 
-        String description = table.getStringCellValue(row, DESCRIPTION);
-        Security security = getSecurity(description);
+        Security security = getSecurity(table, row);
         Instant timestamp = getReport().convertToInstant(table.getStringCellValue(row, DATE));
 
         if (event == null) {
@@ -100,23 +83,11 @@ public class CouponAndAmortizationTable implements ReportTable<SecurityEventCash
         Collection<SecurityEventCashFlow> data = new ArrayList<>();
         data.add(builder.build());
 
-        BigDecimal tax = getTax(description);
+        BigDecimal tax = getTax(table, row);
         if (!tax.equals(BigDecimal.ZERO)) {
             data.add(builder.eventType(CashFlowType.TAX).value(tax).build());
         }
         return data;
-    }
-
-    private Security getSecurity(String eventDescription) {
-        String eventDescriptionLowercase = eventDescription.toLowerCase();
-        for (Map.Entry<Security, Integer> e : securitiesIncomingCount) {
-            Security security = e.getKey();
-            String securityName = security.getName();
-            if (securityName != null && eventDescriptionLowercase.contains(securityName.toLowerCase())) {
-                return security;
-            }
-        }
-        throw new RuntimeException("Не могу найти ISIN ценной бумаги в отчете брокера по событию:" + eventDescription);
     }
 
     private boolean isRedemption(String securityName, Instant amortizationDay) {
@@ -129,27 +100,7 @@ public class CouponAndAmortizationTable implements ReportTable<SecurityEventCash
         return (redemptionDate != null) && redemptionDate.equals(LocalDate.ofInstant(amortizationDay, UralsibBrokerReport.zoneId));
     }
 
-    private Integer getSecurityCount(Security security, Instant atInstant) {
-        int count = securitiesIncomingCount.stream()
-                .filter(e -> e.getKey().equals(security))
-                .map(Map.Entry::getValue)
-                .findAny()
-                .orElseThrow(() -> new RuntimeException("Не найдено количество на начало периода отчета для ЦБ " + security));
-        Collection<SecurityTransaction> transactions = securityTransactions.stream()
-                .filter(t -> t.getIsin().equals(security.getIsin()))
-                .sorted(Comparator.comparing(SecurityTransaction::getTimestamp))
-                .collect(Collectors.toList());
-        for (SecurityTransaction transaction : transactions) {
-            if (transaction.getTimestamp().isBefore(atInstant)) {
-                count += transaction.getCount();
-            } else {
-                break;
-            }
-        }
-        return count;
-    }
-
-    private BigDecimal getTax(String eventDescription) {
+    private BigDecimal getTax(ExcelTable table, Row row) {
         // информация о налоге по купонам облигаций не выводится в отчет брокера
         return BigDecimal.ZERO;
     }

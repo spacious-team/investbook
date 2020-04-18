@@ -148,7 +148,7 @@ public class ExcelTable implements Iterable<Row> {
                         }
                     }
                 } catch (Exception e) {
-                    log.warn("Не могу распарсить таблицу '{}' в файле {}, строка {}", tableName, file.getFileName(), row.getRowNum(), e);
+                    log.warn("Не могу распарсить таблицу '{}' в файле {}, строка {}", tableName, file.getFileName(), row.getRowNum() + 1, e);
                 }
             }
         }

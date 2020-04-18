@@ -18,10 +18,10 @@
 
 package ru.portfolio.portfolio.parser.uralsib;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
-import ru.portfolio.portfolio.parser.*;
+import ru.portfolio.portfolio.parser.AbstractReportTable;
+import ru.portfolio.portfolio.parser.ExcelTable;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.EventCashFlow;
 
@@ -31,14 +31,13 @@ import java.util.Collections;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
 public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
 
-    static final String TABLE_NAME = "ДВИЖЕНИЕ ДЕНЕЖНЫХ СРЕДСТВ ЗА ОТЧЕТНЫЙ ПЕРИОД";
-
     public CashFlowTable(UralsibBrokerReport report) {
-        super(report, TABLE_NAME, "", CashFlowTableHeader.class);
+        super(report, PaymentsTable.TABLE_NAME, "", PaymentsTable.PaymentsTableHeader.class);
     }
 
     @Override
@@ -53,7 +52,7 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
 
     @Override
     protected Collection<EventCashFlow> getRow(ExcelTable table, Row row) {
-        String action = table.getStringCellValue(row, CashFlowTable.CashFlowTableHeader.OPERATION);
+        String action = table.getStringCellValue(row, OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         CashFlowType type;
         switch (action) {
@@ -71,28 +70,14 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
             default:
                 return emptyList();
         }
-        String description = table.getStringCellValue(row, CashFlowTable.CashFlowTableHeader.DESCRIPTION);
+        String description = table.getStringCellValue(row, DESCRIPTION);
         return singletonList(EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(type)
-                .timestamp(convertToInstant(table.getStringCellValue(row, CashFlowTable.CashFlowTableHeader.DATE)))
-                .value(table.getCurrencyCellValue(row, CashFlowTable.CashFlowTableHeader.VALUE))
-                .currency(table.getStringCellValue(row, CashFlowTable.CashFlowTableHeader.CURRENCY))
+                .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
+                .value(table.getCurrencyCellValue(row, VALUE))
+                .currency(table.getStringCellValue(row, CURRENCY))
                 .description((description == null || description.isEmpty())? null : description)
                 .build());
-    }
-
-    enum CashFlowTableHeader implements TableColumnDescription {
-        DATE("дата"),
-        OPERATION("тип", "операции"),
-        VALUE("сумма"),
-        CURRENCY("валюта"),
-        DESCRIPTION("комментарий");
-
-        @Getter
-        private final TableColumn column;
-        CashFlowTableHeader(String ... words) {
-            this.column = TableColumnImpl.of(words);
-        }
     }
 }
