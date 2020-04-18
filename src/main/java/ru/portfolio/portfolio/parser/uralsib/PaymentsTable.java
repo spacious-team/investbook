@@ -22,10 +22,14 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import ru.portfolio.portfolio.parser.*;
+import ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInformation;
 import ru.portfolio.portfolio.pojo.Security;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.DESCRIPTION;
@@ -39,7 +43,7 @@ abstract class PaymentsTable<RowType> implements ReportTable<RowType> {
     @Getter
     protected final List<RowType> data = new ArrayList<>();
     // human readable name -> incoming count
-    private final List<Map.Entry<Security, Integer>> securitiesIncomingCount;
+    private final List<ReportSecurityInformation> securitiesIncomingCount;
     private final List<SecurityTransaction> securityTransactions;
     private final ExcelTable table;
 
@@ -59,22 +63,28 @@ abstract class PaymentsTable<RowType> implements ReportTable<RowType> {
     protected abstract Collection<RowType> getRow(ExcelTable table, Row row);
 
     protected Security getSecurity(ExcelTable table, Row row) {
-        String eventDescription = table.getStringCellValue(row, DESCRIPTION);
-        String eventDescriptionLowercase = eventDescription.toLowerCase();
-        for (Map.Entry<Security, Integer> e : securitiesIncomingCount) {
-            Security security = e.getKey();
-            String securityName = security.getName();
-            if (securityName != null && eventDescriptionLowercase.contains(securityName.toLowerCase())) {
+        String description = table.getStringCellValue(row, DESCRIPTION);
+        String descriptionLowercase = description.toLowerCase();
+        for (ReportSecurityInformation info : securitiesIncomingCount) {
+            if (info == null) continue;
+            Security security = info.getSecurity();
+            if (contains(descriptionLowercase, info.getCfi()) ||   // dividend
+                    (security != null && (contains(descriptionLowercase, security.getName()) ||  // coupon, amortization, redemption
+                            contains(descriptionLowercase, security.getIsin())))) { // for furute report changes
                 return security;
             }
         }
-        throw new RuntimeException("Не могу найти ISIN ценной бумаги в отчете брокера по событию:" + eventDescription);
+        throw new RuntimeException("Не могу найти ISIN ценной бумаги в отчете брокера по событию:" + description);
+    }
+
+    private boolean contains(String description, String securityParameter) {
+        return securityParameter != null && description.contains(securityParameter.toLowerCase());
     }
 
     protected Integer getSecurityCount(Security security, Instant atInstant) {
         int count = securitiesIncomingCount.stream()
-                .filter(e -> e.getKey().equals(security))
-                .map(Map.Entry::getValue)
+                .filter(i -> i.getSecurity().getIsin().equals(security.getIsin()))
+                .map(ReportSecurityInformation::getIncomingCount)
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("Не найдено количество на начало периода отчета для ЦБ " + security));
         Collection<SecurityTransaction> transactions = securityTransactions.stream()
@@ -100,7 +110,8 @@ abstract class PaymentsTable<RowType> implements ReportTable<RowType> {
 
         @Getter
         private final TableColumn column;
-        PaymentsTableHeader(String ... words) {
+
+        PaymentsTableHeader(String... words) {
             this.column = TableColumnImpl.of(words);
         }
     }

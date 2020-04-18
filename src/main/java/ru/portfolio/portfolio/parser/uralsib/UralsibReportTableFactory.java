@@ -20,12 +20,12 @@ package ru.portfolio.portfolio.parser.uralsib;
 
 import lombok.Getter;
 import ru.portfolio.portfolio.parser.*;
+import ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInformation;
 import ru.portfolio.portfolio.pojo.EventCashFlow;
 import ru.portfolio.portfolio.pojo.PortfolioProperty;
 import ru.portfolio.portfolio.pojo.Security;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class UralsibReportTableFactory implements ReportTableFactory {
@@ -59,7 +59,7 @@ public class UralsibReportTableFactory implements ReportTableFactory {
     public ReportTable<Security> getPortfolioSecuritiesTable() {
         return new WrappingReportTable<>(report, portfolioSecuritiesTable.getData()
                 .stream()
-                .map(Map.Entry::getKey)
+                .map(ReportSecurityInformation::getSecurity)
                 .collect(Collectors.toList()));
     }
     
@@ -85,7 +85,7 @@ public class UralsibReportTableFactory implements ReportTableFactory {
     
     @Override
     public ReportTable<SecurityEventCashFlow> getDividendTable() {
-        return new EmptyReportTable<>(report);
+        return new DividendTable(report, portfolioSecuritiesTable, securityTransactionTable);
     }
     
     @Override

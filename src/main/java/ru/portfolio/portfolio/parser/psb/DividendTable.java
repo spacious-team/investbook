@@ -18,8 +18,6 @@
 
 package ru.portfolio.portfolio.parser.psb;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
@@ -28,7 +26,6 @@ import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -77,17 +74,5 @@ public class DividendTable extends AbstractReportTable<SecurityEventCashFlow> {
         DividendTableHeader(String... words) {
             this.column = TableColumnImpl.of(words);
         }
-    }
-
-    @Getter
-    @Builder(toBuilder = true)
-    @EqualsAndHashCode
-    public static class DividendTableRow {
-        private String isin;
-        private Instant timestamp;
-        private CashFlowType event;
-        private int count;
-        private BigDecimal value; // НКД, амортизация или налог
-        private String currency; // валюта
     }
 }
