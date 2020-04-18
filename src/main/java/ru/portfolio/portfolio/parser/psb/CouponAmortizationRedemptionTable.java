@@ -29,15 +29,15 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static ru.portfolio.portfolio.parser.psb.CouponAndAmortizationTable.CouponAndAmortizationTableHeader.*;
+import static ru.portfolio.portfolio.parser.psb.CouponAmortizationRedemptionTable.CouponAndAmortizationTableHeader.*;
 
 @Slf4j
-public class CouponAndAmortizationTable extends AbstractReportTable<SecurityEventCashFlow> {
+public class CouponAmortizationRedemptionTable extends AbstractReportTable<SecurityEventCashFlow> {
 
     private static final String TABLE_NAME = "Погашение купонов и ЦБ";
     private static final String TABLE_END_TEXT = "*Налог удерживается с рублевого брокерского счета";
 
-    public CouponAndAmortizationTable(PsbBrokerReport report) {
+    public CouponAmortizationRedemptionTable(PsbBrokerReport report) {
         super(report, TABLE_NAME, TABLE_END_TEXT, CouponAndAmortizationTableHeader.class);
     }
 

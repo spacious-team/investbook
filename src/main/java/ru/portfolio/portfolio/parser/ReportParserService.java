@@ -39,17 +39,18 @@ public class ReportParserService {
                 ReportTable<PortfolioProperty> portfolioPropertyTable = reportTableFactory.getPortfolioPropertyTable();
                 ReportTable<EventCashFlow> cashFlowTable = reportTableFactory.getCashFlowTable();
                 ReportTable<Security> portfolioSecuritiesTable = reportTableFactory.getPortfolioSecuritiesTable();
-                ReportTable<SecurityTransaction> transactionTable = reportTableFactory.getTransactionTable();
+                ReportTable<SecurityTransaction> securityTransactionTable = reportTableFactory.getSecurityTransactionTable();
                 ReportTable<SecurityEventCashFlow> couponAndAmortizationTable = reportTableFactory.getCouponAndAmortizationTable();
                 ReportTable<SecurityEventCashFlow> dividendTable = reportTableFactory.getDividendTable();
                 ReportTable<DerivativeTransaction> derivativeTransactionTable = reportTableFactory.getDerivativeTransactionTable();
                 ReportTable<SecurityEventCashFlow> derivativeCashFlowTable = reportTableFactory.getDerivativeCashFlowTable();
+                ReportTable<ForeignExchangeTransaction> fxTransactionTable = reportTableFactory.getForeignExchangeTransactionTable();
 
                 portfolioPropertyTable.getData().forEach(storage::addPortfolioProperty);
                 storage.addCashInfo(portfolioCashTable);
                 portfolioSecuritiesTable.getData().forEach(storage::addSecurity);
                 cashFlowTable.getData().forEach(storage::addEventCashFlow);
-                transactionTable.getData().forEach(storage::addTransaction);
+                securityTransactionTable.getData().forEach(storage::addTransaction);
                 couponAndAmortizationTable.getData().forEach(c -> {
                     if (storage.addSecurity(c.getIsin())) { // required for amortization
                         storage.addSecurityEventCashFlow(c);
@@ -62,6 +63,7 @@ public class ReportParserService {
                         storage.addSecurityEventCashFlow(c);
                     }
                 });
+                fxTransactionTable.getData().forEach(storage::addTransaction);
             }
         } catch (Exception e) {
             log.warn("Не могу распарсить отчет {}", reportTableFactory.getReport().getPath(), e);

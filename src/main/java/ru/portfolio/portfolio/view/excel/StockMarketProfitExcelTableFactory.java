@@ -75,7 +75,10 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     }
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio) {
-        return transactionRepository.findDistinctIsinByPortfolioOrderByTimestampDesc(portfolio);
+        List<String> securities = new ArrayList<>();
+        securities.addAll(transactionRepository.findDistinctIsinByPortfolioOrderByTimestampDesc(portfolio));
+        securities.addAll(transactionRepository.findDistinctFxInstrumentByPortfolioOrderByTimestampDesc(portfolio));
+        return securities;
     }
 
     private Positions getPositions(Portfolio portfolio, Security security) {

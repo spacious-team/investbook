@@ -18,15 +18,6 @@
 
 package ru.portfolio.portfolio.parser;
 
-import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.Row;
-
-@RequiredArgsConstructor(staticName = "of")
-public class ConstantPositionTableColumn implements TableColumn {
-    private final int columnIndex;
-
-    @Override
-    public int getColumnIndex(int firstColumnForSearch, Row... headerRows) {
-        return columnIndex;
-    }
+public enum BrockerType {
+    PSB, URALSIB
 }

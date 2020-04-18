@@ -20,6 +20,7 @@ package ru.portfolio.portfolio.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Row;
 import ru.portfolio.portfolio.parser.*;
 
 import java.math.BigDecimal;
@@ -28,19 +29,20 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static ru.portfolio.portfolio.parser.psb.TransactionTable.TransactionTableHeader.*;
+import static ru.portfolio.portfolio.parser.psb.SecurityTransactionTable.TransactionTableHeader.*;
 
 @Slf4j
-public class TransactionTable implements ReportTable<SecurityTransaction> {
+public class SecurityTransactionTable implements ReportTable<SecurityTransaction> {
     private static final String TABLE1_NAME = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами в дату заключения";
     private static final String TABLE2_NAME = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами Т+, рассчитанные в отчетном периоде";
     private static final String TABLE_END_TEXT = "Итого оборот";
+    private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
     @Getter
     private final PsbBrokerReport report;
     @Getter
     private final List<SecurityTransaction> data = new ArrayList<>();
 
-    public TransactionTable(PsbBrokerReport report) {
+    public SecurityTransactionTable(PsbBrokerReport report) {
         this.report = report;
         this.data.addAll(parseTable(report, TABLE1_NAME));
         this.data.addAll(parseTable(report, TABLE2_NAME));
@@ -51,7 +53,7 @@ public class TransactionTable implements ReportTable<SecurityTransaction> {
         return table.getDataCollection(report.getPath(), this::getTransaction);
     }
 
-    private Collection<SecurityTransaction> getTransaction(ExcelTable table, org.apache.poi.ss.usermodel.Row row) {
+    private Collection<SecurityTransaction> getTransaction(ExcelTable table, Row row) {
         boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
         BigDecimal value = table.getCurrencyCellValue(row, VALUE);
         BigDecimal accruedInterest = table.getCurrencyCellValue(row, ACCRUED_INTEREST);
@@ -71,7 +73,7 @@ public class TransactionTable implements ReportTable<SecurityTransaction> {
                 .isin(table.getStringCellValue(row, ISIN))
                 .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
                 .value(value)
-                .accruedInterest(accruedInterest)
+                .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)
                 .commission(commission)
                 .valueCurrency(table.getStringCellValue(row, VALUE_CURRENCY).replace(" ", "").split("/")[1])
                 .commissionCurrency(table.getStringCellValue(row, COMMISSION_CURRENCY))

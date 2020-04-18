@@ -36,15 +36,19 @@ public abstract class AbstractReportTable<RowType> implements ReportTable<RowTyp
                                   String tableName,
                                   String tableFooter,
                                   Class<? extends TableColumnDescription> headerDescription) {
-        this.report = report;
-        ExcelTable table = (tableFooter != null && !tableFooter.isEmpty()) ?
-                ExcelTable.of(report.getSheet(), tableName, tableFooter, headerDescription) :
-                ExcelTable.of(report.getSheet(), tableName, headerDescription);
-        this.exelTableConfiguration(table);
-        this.data.addAll(pasreTable(table));
+        this(report, tableName, tableFooter, headerDescription, 1);
     }
 
-    protected void exelTableConfiguration(ExcelTable table) {
+    protected AbstractReportTable(BrokerReport report,
+                                  String tableName,
+                                  String tableFooter,
+                                  Class<? extends TableColumnDescription> headerDescription,
+                                  int headersRowCount) {
+        this.report = report;
+        ExcelTable table = (tableFooter != null && !tableFooter.isEmpty()) ?
+                ExcelTable.of(report.getSheet(), tableName, tableFooter, headerDescription, headersRowCount) :
+                ExcelTable.of(report.getSheet(), tableName, headerDescription, headersRowCount);
+        this.data.addAll(pasreTable(table));
     }
 
     protected Collection<RowType> pasreTable(ExcelTable table) {

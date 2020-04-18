@@ -16,20 +16,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.portfolio.portfolio.parser.psb;
+package ru.portfolio.portfolio.parser.uralsib;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import ru.portfolio.portfolio.parser.*;
+import ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInformation;
 import ru.portfolio.portfolio.pojo.EventCashFlow;
 import ru.portfolio.portfolio.pojo.PortfolioProperty;
 import ru.portfolio.portfolio.pojo.Security;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 
-@RequiredArgsConstructor
-public class PsbReportTableFactory implements ReportTableFactory {
+import java.util.stream.Collectors;
+
+public class UralsibReportTableFactory implements ReportTableFactory {
     @Getter
-    private final PsbBrokerReport report;
+    private final UralsibBrokerReport report;
+    private PortfolioSecuritiesTable portfolioSecuritiesTable;
+    private SecurityTransactionTable securityTransactionTable;
+
+    public UralsibReportTableFactory(UralsibBrokerReport report) {
+        this.report = report;
+        this.portfolioSecuritiesTable = new PortfolioSecuritiesTable(report);
+        this.securityTransactionTable = new SecurityTransactionTable(report);
+    }
 
     @Override
     public ReportTable<PortfolioCash> createPortfolioCashTable() {
@@ -48,36 +57,39 @@ public class PsbReportTableFactory implements ReportTableFactory {
     
     @Override
     public ReportTable<Security> getPortfolioSecuritiesTable() {
-        return new PortfolioSecuritiesTable(report);
+        return new WrappingReportTable<>(report, portfolioSecuritiesTable.getData()
+                .stream()
+                .map(ReportSecurityInformation::getSecurity)
+                .collect(Collectors.toList()));
     }
     
     @Override
     public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
-        return new SecurityTransactionTable(report);
+        return securityTransactionTable;
     }
 
     @Override
     public ReportTable<DerivativeTransaction> getDerivativeTransactionTable() {
-        return new DerivativeTransactionTable(report);
-    }
-
-    @Override
-    public ReportTable<ForeignExchangeTransaction> getForeignExchangeTransactionTable() {
         return new EmptyReportTable<>(report);
     }
 
     @Override
+    public ReportTable<ForeignExchangeTransaction> getForeignExchangeTransactionTable() {
+        return new ForeignExchangeTransactionTable(report);
+    }
+
+    @Override
     public ReportTable<SecurityEventCashFlow> getCouponAndAmortizationTable() {
-        return new CouponAmortizationRedemptionTable(report);
+        return new CouponAmortizationRedemptionTable(report, portfolioSecuritiesTable, securityTransactionTable);
     }
     
     @Override
     public ReportTable<SecurityEventCashFlow> getDividendTable() {
-        return new DividendTable(report);
+        return new DividendTable(report, portfolioSecuritiesTable, securityTransactionTable);
     }
     
     @Override
     public ReportTable<SecurityEventCashFlow> getDerivativeCashFlowTable() {
-        return new DerivativeCashFlowTable(report);
+        return new EmptyReportTable<>(report);
     }
 }

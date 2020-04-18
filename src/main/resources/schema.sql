@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
-  `description` varchar(128) DEFAULT NULL,
+  `description` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `event_cash_flow_timestamp_type_value_currency_portfolio_uniq_ix` (`timestamp`,`type`,`value`,`currency`,`portfolio`),
   KEY `event_cash_flow_type_ix` (`type`),

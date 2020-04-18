@@ -18,15 +18,19 @@
 
 package ru.portfolio.portfolio.parser;
 
-import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.Row;
+import lombok.Getter;
 
-@RequiredArgsConstructor(staticName = "of")
-public class ConstantPositionTableColumn implements TableColumn {
-    private final int columnIndex;
+import java.util.Collections;
+import java.util.List;
 
-    @Override
-    public int getColumnIndex(int firstColumnForSearch, Row... headerRows) {
-        return columnIndex;
+public class WrappingReportTable<RowType> implements ReportTable<RowType> {
+    @Getter
+    private final BrokerReport report;
+    @Getter
+    private final List<RowType> data;
+
+    public WrappingReportTable(BrokerReport report, List<RowType> data) {
+        this.report = report;
+        this.data = Collections.unmodifiableList(data);
     }
 }
