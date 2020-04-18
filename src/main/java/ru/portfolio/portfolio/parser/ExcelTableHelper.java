@@ -31,6 +31,8 @@ import java.util.function.Predicate;
 public class ExcelTableHelper {
     public static final CellRangeAddress EMTPY_RANGE = new CellRangeAddress(-1, -1, -1, -1);
     public static final CellAddress NOT_FOUND = new CellAddress(-1, -1);
+    public static final BiPredicate<String, Object> CELL_STRING_EQUALS = (cell, searchingValue) ->
+            searchingValue != null && cell.trim().toLowerCase().startsWith(searchingValue.toString().trim().toLowerCase());
 
     public static CellRangeAddress getTableCellRange(Sheet sheet, String tableName, int headersRowCount, String tableFooterString) {
         CellAddress startAddress = find(sheet, tableName);
@@ -38,8 +40,7 @@ public class ExcelTableHelper {
             return EMTPY_RANGE;
         }
         CellAddress endAddress = find(sheet, tableFooterString, startAddress.getRow() + headersRowCount + 1,
-                sheet.getLastRowNum(), (cell , prefix) ->
-                        cell.trim().toLowerCase().startsWith(prefix.toString().trim().toLowerCase()));
+                sheet.getLastRowNum(), CELL_STRING_EQUALS);
         if (endAddress.equals(NOT_FOUND)) {
             return EMTPY_RANGE;
         }
@@ -105,13 +106,28 @@ public class ExcelTableHelper {
      * @param endRow search rows excluding this
      */
     public static CellAddress find(Sheet sheet, Object value, int startRow, int endRow) {
-        return find(sheet, value, startRow, endRow, (v1, v2) -> v2 != null && v1.trim().equals(v2.toString().trim()));
+        return find(sheet, value, startRow, endRow, CELL_STRING_EQUALS);
     }
 
     /**
+     * @param startRow search rows start from this
+     * @param endRow search rows excluding this
      * @param stringPredicate cell and value comparing bi-predicate if cell value type is string
      */
     public static CellAddress find(Sheet sheet, Object value, int startRow, int endRow, BiPredicate<String, Object> stringPredicate) {
+        return find(sheet, value, startRow, endRow, 0, Integer.MAX_VALUE, stringPredicate);
+    }
+
+    /**
+     * @param value searching value
+     * @param startRow search rows start from this
+     * @param endRow search rows excluding this
+     * @param startColumn search columns start from this
+     * @param endColumn search columns excluding this
+     */
+    public static CellAddress find(Sheet sheet, Object value, int startRow, int endRow,
+                                   int startColumn, int endColumn,
+                                   BiPredicate<String, Object> stringPredicate) {
         if (sheet.getLastRowNum() == -1) {
             return NOT_FOUND;
         } else if (endRow > sheet.getLastRowNum()) {
@@ -125,9 +141,12 @@ public class ExcelTableHelper {
             Row row = sheet.getRow(rowNum);
             if (row == null) continue;
             for (Cell cell : row) {
-                if (cell != null && cell.getCellType() == type) {
-                    if (compare(value, cell, stringPredicate)) {
-                        return cell.getAddress();
+                if (cell != null) {
+                    int column = cell.getColumnIndex();
+                    if (startColumn <= column && column < endColumn && cell.getCellType() == type) {
+                        if (compare(value, cell, stringPredicate)) {
+                            return cell.getAddress();
+                        }
                     }
                 }
             }

@@ -90,13 +90,25 @@ public class ExcelTable implements Iterable<Row> {
         return table;
     }
 
+    public static ExcelTable ofNoName(Sheet sheet, String madeUpTableName, String firstLineText,
+                                      Class<? extends TableColumnDescription> headerDescription,
+                                      int headersRowCount) {
+        CellRangeAddress range = ExcelTableHelper.getTableCellRange(sheet, firstLineText, headersRowCount);
+        range = new CellRangeAddress(range.getFirstRow() - 1, range.getLastRow(),
+                range.getFirstColumn(), range.getLastColumn());
+        ExcelTable table = new ExcelTable(sheet, madeUpTableName, range, headerDescription, headersRowCount);
+        table.setLastTableRowContainsTotalData(true);
+        return table;
+    }
+
     private ExcelTable(Sheet sheet, String tableName, CellRangeAddress tableRange,
                        Class<? extends TableColumnDescription> headerDescription, int headersRowCount) {
         this.sheet = sheet;
         this.tableName = tableName;
         this.tableRange = tableRange;
         this.dataRowOffset = 1 + headersRowCount; // table_name + headersRowCount
-        this.empty = this.tableRange.equals(ExcelTableHelper.EMTPY_RANGE);
+        this.empty = this.tableRange.equals(ExcelTableHelper.EMTPY_RANGE) ||
+                ((this.tableRange.getLastRow() - this.tableRange.getFirstRow()) <= headersRowCount);
         this.columnIndices = empty ?
                 Collections.emptyMap() :
                 getColumnIndices(sheet, this.tableRange, headerDescription, headersRowCount);

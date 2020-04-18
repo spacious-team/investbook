@@ -41,11 +41,11 @@ public class TableColumnImpl implements TableColumn {
                 .toArray(String[]::new);
     }
 
-    public int getColumnIndex(Row... headerRows) {
+    public int getColumnIndex(int firstColumnForSearch, Row... headerRows) {
         for (Row header : headerRows) {
             next_cell:
             for (Cell cell : header) {
-                if (cell.getCellType() == CellType.STRING) {
+                if (cell != null && cell.getColumnIndex() >= firstColumnForSearch && cell.getCellType() == CellType.STRING) {
                     String colName = cell.getStringCellValue();
                     if (colName != null) {
                         colName = colName.toLowerCase();

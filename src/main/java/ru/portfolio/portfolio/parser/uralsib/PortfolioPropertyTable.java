@@ -36,6 +36,7 @@ import static ru.portfolio.portfolio.parser.uralsib.PortfolioPropertyTable.Summa
 
 public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
     private static final String ASSETS_TABLE = "ОЦЕНКА АКТИВОВ";
+    private static final String TABLE_FIRST_HEADER_LINE = "На конец отчетного периода";
     private static final String ASSETS = "Общая стоимость активов:";
     private static final BigDecimal min = BigDecimal.valueOf(0.01);
     @Getter
@@ -51,7 +52,8 @@ public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
     }
 
     protected static Collection<PortfolioProperty> getTotalAssets(BrokerReport report) {
-        ExcelTable table = ExcelTable.of(report.getSheet(), ASSETS_TABLE, SummaryTableHeader.class);
+        ExcelTable table = ExcelTable.ofNoName(report.getSheet(), ASSETS_TABLE, TABLE_FIRST_HEADER_LINE,
+                SummaryTableHeader.class, 3);
         if (table.isEmpty()) {
             throw new IllegalArgumentException("Таблица '" + ASSETS_TABLE + "' не найдена");
         }
@@ -88,12 +90,14 @@ public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
     }
 
     enum SummaryTableHeader implements TableColumnDescription {
-        RUB(13);
+        RUB(TableColumnImpl.of(TABLE_FIRST_HEADER_LINE),
+                TableColumnImpl.of("по цене закрытия"),
+                TableColumnImpl.of("RUR"));
 
         @Getter
         private final TableColumn column;
-        SummaryTableHeader(int columnIndex) {
-            this.column = ConstantPositionTableColumn.of(columnIndex);
+        SummaryTableHeader(TableColumn... rowDescripts) {
+            this.column = MultiLineTableColumn.of(rowDescripts);
         }
     }
 }
