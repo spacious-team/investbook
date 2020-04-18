@@ -80,7 +80,7 @@ public class UralsibReportTableFactory implements ReportTableFactory {
 
     @Override
     public ReportTable<SecurityEventCashFlow> getCouponAndAmortizationTable() {
-        return new CouponAndAmortizationTable(report, portfolioSecuritiesTable, securityTransactionTable);
+        return new CouponAmortizationRedemptionTable(report, portfolioSecuritiesTable, securityTransactionTable);
     }
     
     @Override

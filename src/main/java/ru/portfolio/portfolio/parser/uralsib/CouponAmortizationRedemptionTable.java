@@ -37,13 +37,13 @@ import static java.util.Collections.emptyList;
 import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
-public class CouponAndAmortizationTable extends PaymentsTable<SecurityEventCashFlow> {
+public class CouponAmortizationRedemptionTable extends PaymentsTable<SecurityEventCashFlow> {
 
     private final List<Map.Entry<String, Instant>> redemptionDates;
 
-    public CouponAndAmortizationTable(UralsibBrokerReport report,
-                                      PortfolioSecuritiesTable securitiesTable,
-                                      SecurityTransactionTable securityTransactionTable) {
+    public CouponAmortizationRedemptionTable(UralsibBrokerReport report,
+                                             PortfolioSecuritiesTable securitiesTable,
+                                             SecurityTransactionTable securityTransactionTable) {
         super(report, securitiesTable, securityTransactionTable);
         this.redemptionDates = new SecurityRedemptionTable(report).getData();
         data.addAll(pasreTable());
