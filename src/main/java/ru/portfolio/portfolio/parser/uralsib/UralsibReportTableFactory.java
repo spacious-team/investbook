@@ -25,14 +25,19 @@ import ru.portfolio.portfolio.pojo.PortfolioProperty;
 import ru.portfolio.portfolio.pojo.Security;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class UralsibReportTableFactory implements ReportTableFactory {
     @Getter
     private final UralsibBrokerReport report;
     private PortfolioSecuritiesTable portfolioSecuritiesTable;
+    private SecurityTransactionTable securityTransactionTable;
 
     public UralsibReportTableFactory(UralsibBrokerReport report) {
         this.report = report;
         this.portfolioSecuritiesTable = new PortfolioSecuritiesTable(report);
+        this.securityTransactionTable = new SecurityTransactionTable(report);
     }
 
     @Override
@@ -52,12 +57,15 @@ public class UralsibReportTableFactory implements ReportTableFactory {
     
     @Override
     public ReportTable<Security> getPortfolioSecuritiesTable() {
-        return portfolioSecuritiesTable;
+        return new WrappingReportTable<>(report, portfolioSecuritiesTable.getData()
+                .stream()
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList()));
     }
     
     @Override
     public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
-        return new SecurityTransactionTable(report);
+        return securityTransactionTable;
     }
 
     @Override
@@ -72,7 +80,7 @@ public class UralsibReportTableFactory implements ReportTableFactory {
 
     @Override
     public ReportTable<SecurityEventCashFlow> getCouponAndAmortizationTable() {
-        return new EmptyReportTable<>(report);
+        return new CouponAndAmortizationTable(report, portfolioSecuritiesTable, securityTransactionTable);
     }
     
     @Override

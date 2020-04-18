@@ -24,32 +24,36 @@ import org.apache.poi.ss.usermodel.Row;
 import ru.portfolio.portfolio.parser.*;
 import ru.portfolio.portfolio.pojo.Security;
 
+import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.Map;
 
 import static java.util.Collections.singletonList;
-import static ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.ISIN;
-import static ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.NAME;
+import static ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.*;
 
 @Slf4j
-public class PortfolioSecuritiesTable extends AbstractReportTable<Security> {
-    private static final String TABLE_NAME = "СОСТОЯНИЕ ПОРТФЕЛЯ ЦЕННЫХ БУМАГ";
-    private static final String TABLE_END_TEXT = "Итого:";
+public class PortfolioSecuritiesTable extends AbstractReportTable<Map.Entry<Security, Integer>> {
+    static final String TABLE_NAME = "СОСТОЯНИЕ ПОРТФЕЛЯ ЦЕННЫХ БУМАГ";
+    static final String TABLE_END_TEXT = "Итого:";
 
     public PortfolioSecuritiesTable(UralsibBrokerReport report) {
         super(report, TABLE_NAME, TABLE_END_TEXT, PortfolioSecuritiesTableHeader.class);
     }
 
     @Override
-    protected Collection<Security> getRow(ExcelTable table, Row row) {
-        return singletonList(Security.builder()
+    protected Collection<Map.Entry<Security, Integer>> getRow(ExcelTable table, Row row) {
+        return singletonList(new AbstractMap.SimpleEntry<>(
+                Security.builder()
                         .isin(table.getStringCellValue(row, ISIN))
                         .name(table.getStringCellValue(row, NAME))
-                        .build());
+                        .build(),
+                table.getIntCellValue(row, INCOMING_COUNT)));
     }
 
     enum PortfolioSecuritiesTableHeader implements TableColumnDescription {
         NAME("наименование"),
-        ISIN("isin");
+        ISIN("isin"),
+        INCOMING_COUNT("количество", "на начало периода");
 
         @Getter
         private final TableColumn column;

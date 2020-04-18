@@ -40,7 +40,7 @@ import java.util.zip.ZipInputStream;
 
 @EqualsAndHashCode(of = "path")
 public class UralsibBrokerReport implements BrokerReport {
-    private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
+    public static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 

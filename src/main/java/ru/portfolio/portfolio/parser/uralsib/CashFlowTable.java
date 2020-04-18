@@ -35,7 +35,7 @@ import static java.util.Collections.singletonList;
 @Slf4j
 public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
 
-    private static final String TABLE_NAME = "ДВИЖЕНИЕ ДЕНЕЖНЫХ СРЕДСТВ ЗА ОТЧЕТНЫЙ ПЕРИОД";
+    static final String TABLE_NAME = "ДВИЖЕНИЕ ДЕНЕЖНЫХ СРЕДСТВ ЗА ОТЧЕТНЫЙ ПЕРИОД";
 
     public CashFlowTable(UralsibBrokerReport report) {
         super(report, TABLE_NAME, "", CashFlowTableHeader.class);
