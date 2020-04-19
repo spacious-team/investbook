@@ -69,7 +69,7 @@ public class DividendTable extends PaymentsTable<SecurityEventCashFlow> {
                 .eventType(CashFlowType.DIVIDEND)
                 .timestamp(timestamp)
                 .value(table.getCurrencyCellValue(row, VALUE))
-                .currency(table.getStringCellValue(row, CURRENCY));
+                .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)));
 
         Collection<SecurityEventCashFlow> data = new ArrayList<>();
         data.add(builder.build());

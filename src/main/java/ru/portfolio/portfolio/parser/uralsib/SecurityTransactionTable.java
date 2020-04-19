@@ -93,8 +93,8 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
                 .value(value)
                 .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)
                 .commission(commission)
-                .valueCurrency(table.getStringCellValue(row, VALUE_CURRENCY))
-                .commissionCurrency(commissionCurrency)
+                .valueCurrency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, VALUE_CURRENCY)))
+                .commissionCurrency(UralsibBrokerReport.convertToCurrency(commissionCurrency))
                 .build());
     }
 

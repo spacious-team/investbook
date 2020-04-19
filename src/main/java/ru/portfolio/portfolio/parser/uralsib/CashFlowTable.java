@@ -76,7 +76,7 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
                 .eventType(type)
                 .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
                 .value(table.getCurrencyCellValue(row, VALUE))
-                .currency(table.getStringCellValue(row, CURRENCY))
+                .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
                 .description((description == null || description.isEmpty())? null : description)
                 .build());
     }

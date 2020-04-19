@@ -81,7 +81,7 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
                 .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
                 .value(value)
                 .commission(commission)
-                .valueCurrency(table.getStringCellValue(row, VALUE_CURRENCY))
+                .valueCurrency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, VALUE_CURRENCY)))
                 .commissionCurrency("RUB")
                 .build());
     }
