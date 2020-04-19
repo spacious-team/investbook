@@ -25,13 +25,11 @@ import ru.portfolio.portfolio.converter.EventCashFlowConverter;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.EventCashFlow;
 import ru.portfolio.portfolio.pojo.Portfolio;
-import ru.portfolio.portfolio.pojo.PortfolioPropertyType;
 import ru.portfolio.portfolio.repository.EventCashFlowRepository;
-import ru.portfolio.portfolio.repository.PortfolioPropertyRepository;
+import ru.portfolio.portfolio.view.ForeignExchangeRateService;
 import ru.portfolio.portfolio.view.Table;
 import ru.portfolio.portfolio.view.TableFactory;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +46,7 @@ public class CashFlowExcelTableFactory implements TableFactory {
     private static final List<String> currencies = Arrays.asList("USD", "EUR", "GBP", "CHF");
     private final EventCashFlowRepository eventCashFlowRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
-    private final PortfolioPropertyRepository portfolioPropertyRepository;
+    private final ForeignExchangeRateService foreignExchangeRateService;
 
     @Override
     public Table create(Portfolio portfolio) {
@@ -90,24 +88,7 @@ public class CashFlowExcelTableFactory implements TableFactory {
             if (table.size() <= i) table.add(new Table.Record());
             Table.Record record = table.get(i);
             record.put(CURRENCY_NAME, currency);
-            try {
-                PortfolioPropertyType property = PortfolioPropertyType.valueOf(currency + "_EXCHANGE_RATE");
-                BigDecimal exchangeRate = portfolioPropertyRepository
-                        .findFirstByPropertyOrderByTimestampDesc(property.name())
-                        .map(v -> BigDecimal.valueOf(Double.parseDouble(v.getValue())))
-                        .orElseThrow(RuntimeException::new);
-
-                record.put(EXCHANGE_RATE, exchangeRate);
-            } catch (Exception e) {
-                int defaultExchangeRate = 75;
-                switch (currency) {
-                    case "EUR": defaultExchangeRate = 85; break;
-                    case "GBP": defaultExchangeRate = 95; break;
-                }
-                log.debug("Не могу в БД найти курс валюты {}, использую значение по умолчанию = {}",
-                        currency, defaultExchangeRate);
-                record.put(EXCHANGE_RATE, defaultExchangeRate);
-            }
+            record.put(EXCHANGE_RATE, foreignExchangeRateService.getExchangeRateToRub(currency));
         }
     }
 }

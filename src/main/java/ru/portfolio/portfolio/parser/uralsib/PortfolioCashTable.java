@@ -43,7 +43,7 @@ public class PortfolioCashTable extends AbstractReportTable<PortfolioCash> {
         return singletonList(PortfolioCash.builder()
                 .section("all")
                 .value(table.getCurrencyCellValue(row, VALUE))
-                .currency(table.getStringCellValue(row, CURRENCY))
+                .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
                 .build());
     }
 

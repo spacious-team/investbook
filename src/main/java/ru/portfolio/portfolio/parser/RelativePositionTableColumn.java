@@ -16,13 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.portfolio.portfolio.pojo;
+package ru.portfolio.portfolio.parser;
 
-public enum PortfolioPropertyType {
-    TOTAL_ASSETS,
-    CASH,
-    USDRUB_EXCHANGE_RATE,
-    EURRUB_EXCHANGE_RATE,
-    GBPRUB_EXCHANGE_RATE,
-    CHFRUB_EXCHANGE_RATE
+
+import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Row;
+
+@RequiredArgsConstructor(staticName = "of")
+public class RelativePositionTableColumn implements TableColumn {
+    private final TableColumn releatedTableColumn;
+    private final int relatedOffset;
+
+    @Override
+    public int getColumnIndex(int firstColumnForSearch, Row... headerRows) {
+        return releatedTableColumn.getColumnIndex(firstColumnForSearch, headerRows) + relatedOffset;
+    }
 }
