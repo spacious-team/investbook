@@ -21,5 +21,11 @@ package ru.portfolio.portfolio.view;
 import ru.portfolio.portfolio.pojo.Portfolio;
 
 public interface TableFactory {
+
     Table create(Portfolio portfolio);
+
+    default Table create(Portfolio portfolio, String forCurrency) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
 }

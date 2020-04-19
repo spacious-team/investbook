@@ -41,9 +41,9 @@ import static ru.portfolio.portfolio.view.excel.StockMarketProfitExcelTableHeade
 
 @RequiredArgsConstructor
 public abstract class ExcelTableView {
-    private final PortfolioRepository portfolioRepository;
-    private final TableFactory tableFactory;
-    private final PortfolioConverter portfolioConverter;
+    protected final PortfolioRepository portfolioRepository;
+    protected final TableFactory tableFactory;
+    protected final PortfolioConverter portfolioConverter;
     @Getter
     @Setter
     private Portfolio portfolio;
@@ -52,11 +52,15 @@ public abstract class ExcelTableView {
         for (PortfolioEntity entity : getPortfolios()) {
             Portfolio portfolio = portfolioConverter.fromEntity(entity);
             setPortfolio(portfolio);
-            Table table = getTable(portfolio);
-            if (!table.isEmpty()) {
-                Sheet sheet = book.createSheet(sheetNameCreator.apply(portfolio.getId()));
-                writeTable(table, sheet, styles);
-            }
+            writeTo(book, styles, sheetNameCreator, portfolio);
+        }
+    }
+
+    protected void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator, Portfolio portfolio) {
+        Table table = getTable(portfolio);
+        if (!table.isEmpty()) {
+            Sheet sheet = book.createSheet(sheetNameCreator.apply(portfolio.getId()));
+            writeTable(table, sheet, styles);
         }
     }
 

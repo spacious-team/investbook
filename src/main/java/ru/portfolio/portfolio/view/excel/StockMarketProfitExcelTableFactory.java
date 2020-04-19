@@ -54,9 +54,17 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
 
     public Table create(Portfolio portfolio) {
+        return create(portfolio, getSecuritiesIsin(portfolio));
+    }
+
+    public Table create(Portfolio portfolio, String forCurrency) {
+        return create(portfolio, getSecuritiesIsin(portfolio, forCurrency));
+    }
+
+    public Table create(Portfolio portfolio, Collection<String> securitiesIsin) {
         Table openPositionsProfit = new Table();
         Table closedPositionsProfit = new Table();
-        for (String isin : getSecuritiesIsin(portfolio)) {
+        for (String isin : securitiesIsin) {
             Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
             if (securityEntity.isPresent()) {
                 Security security = securityConverter.fromEntity(securityEntity.get());
@@ -78,6 +86,13 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         List<String> securities = new ArrayList<>();
         securities.addAll(transactionRepository.findDistinctIsinByPortfolioOrderByTimestampDesc(portfolio));
         securities.addAll(transactionRepository.findDistinctFxInstrumentByPortfolioOrderByTimestampDesc(portfolio));
+        return securities;
+    }
+
+    private Collection<String> getSecuritiesIsin(Portfolio portfolio, String currency) {
+        List<String> securities = new ArrayList<>();
+        securities.addAll(transactionRepository.findDistinctIsinByPortfolioAndCurrencyOrderByTimestampDesc(portfolio, currency));
+        securities.addAll(transactionRepository.findDistinctFxInstrumentByPortfolioAndCurrencyOrderByTimestampDesc(portfolio, currency));
         return securities;
     }
 

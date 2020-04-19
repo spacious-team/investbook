@@ -22,21 +22,45 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.converter.PortfolioConverter;
+import ru.portfolio.portfolio.pojo.CashFlowType;
+import ru.portfolio.portfolio.pojo.Portfolio;
 import ru.portfolio.portfolio.repository.PortfolioRepository;
+import ru.portfolio.portfolio.repository.TransactionCashFlowRepository;
 import ru.portfolio.portfolio.view.Table;
 import ru.portfolio.portfolio.view.TableHeader;
+
+import java.util.List;
+import java.util.function.UnaryOperator;
 
 import static ru.portfolio.portfolio.view.excel.StockMarketProfitExcelTableHeader.*;
 
 @Component
 public class StockMarketProfitExcelTableView extends ExcelTableView {
 
+    private final TransactionCashFlowRepository transactionCashFlowRepository;
+
     public StockMarketProfitExcelTableView(PortfolioRepository portfolioRepository,
                                            StockMarketProfitExcelTableFactory tableFactory,
-                                           PortfolioConverter portfolioConverter) {
+                                           PortfolioConverter portfolioConverter,
+                                           TransactionCashFlowRepository transactionCashFlowRepository) {
         super(portfolioRepository, tableFactory, portfolioConverter);
+        this.transactionCashFlowRepository = transactionCashFlowRepository;
+    }
+
+    @Override
+    protected void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator, Portfolio portfolio) {
+        List<String> currencies = transactionCashFlowRepository
+                .findDistinctCurrencyByPkPortfolioAndPkType(portfolio.getId(), CashFlowType.PRICE);
+        for (String currency : currencies) {
+            Table table = tableFactory.create(portfolio, currency);
+            if (!table.isEmpty()) {
+                Sheet sheet = book.createSheet(sheetNameCreator.apply(portfolio.getId()) + " " + currency);
+                writeTable(table, sheet, styles);
+            }
+        }
     }
 
     @Override
