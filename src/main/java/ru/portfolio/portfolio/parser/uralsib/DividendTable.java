@@ -41,6 +41,7 @@ public class DividendTable extends PaymentsTable<SecurityEventCashFlow> {
 
     private static final String DIVIDENT_ACTION = "Доход по финансовым инструментам";
     private final Pattern taxInformationPattern = Pattern.compile("налог в размере ([0-9\\.]+) удержан");
+    private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
     public DividendTable(UralsibBrokerReport report,
                          PortfolioSecuritiesTable securitiesTable,
@@ -75,7 +76,7 @@ public class DividendTable extends PaymentsTable<SecurityEventCashFlow> {
         data.add(builder.build());
 
         BigDecimal tax = getTax(table, row).negate();
-        if (!tax.equals(BigDecimal.ZERO)) {
+        if (tax.abs().compareTo(minValue) >= 0) {
             data.add(builder
                     .eventType(CashFlowType.TAX)
                     .value(tax)

@@ -34,15 +34,17 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode
 public class ForeignExchangeTransaction {
-    private long transactionId;
-    private String portfolio;
-    private String instrument; // валютная пара
-    private Instant timestamp; // дата исполнения
-    private int count;
-    private BigDecimal value; // оценочная стоиомсть в валюце цены
-    private BigDecimal commission;
-    private String valueCurrency; // валюта платежа
-    private String commissionCurrency; // валюта коммиссии
+
+    private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
+    private final long transactionId;
+    private final String portfolio;
+    private final String instrument; // валютная пара
+    private final Instant timestamp; // дата исполнения
+    private final int count;
+    private final BigDecimal value; // оценочная стоиомсть в валюце цены
+    private final BigDecimal commission;
+    private final String valueCurrency; // валюта платежа
+    private final String commissionCurrency; // валюта коммиссии
 
     public Transaction getTransaction() {
         return Transaction.builder()
@@ -65,7 +67,7 @@ public class ForeignExchangeTransaction {
                     .currency(valueCurrency)
                     .build());
         }
-        if (!commission.equals(BigDecimal.ZERO)) {
+        if (commission.abs().compareTo(minValue) >= 0) {
             list.add(TransactionCashFlow.builder()
                     .transactionId(transactionId)
                     .portfolio(portfolio)

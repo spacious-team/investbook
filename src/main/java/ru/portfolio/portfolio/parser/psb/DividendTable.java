@@ -34,6 +34,7 @@ import static ru.portfolio.portfolio.parser.psb.DividendTable.DividendTableHeade
 @Slf4j
 public class DividendTable extends AbstractReportTable<SecurityEventCashFlow> {
     private static final String TABLE_NAME = "Выплата дивидендов";
+    private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
     public DividendTable(PsbBrokerReport report) {
         super(report, TABLE_NAME, "", DividendTableHeader.class);
@@ -52,7 +53,7 @@ public class DividendTable extends AbstractReportTable<SecurityEventCashFlow> {
         Collection<SecurityEventCashFlow> data = new ArrayList<>();
         data.add(builder.build());
         BigDecimal tax = table.getCurrencyCellValue(row, TAX).negate();
-        if (!tax.equals(BigDecimal.ZERO)) {
+        if (tax.abs().compareTo(minValue) >= 0) {
             data.add(builder
                     .eventType(CashFlowType.TAX)
                     .value(tax)

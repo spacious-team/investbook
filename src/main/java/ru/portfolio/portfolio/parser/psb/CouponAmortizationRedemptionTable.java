@@ -36,6 +36,7 @@ public class CouponAmortizationRedemptionTable extends AbstractReportTable<Secur
 
     private static final String TABLE_NAME = "Погашение купонов и ЦБ";
     private static final String TABLE_END_TEXT = "*Налог удерживается с рублевого брокерского счета";
+    private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
     public CouponAmortizationRedemptionTable(PsbBrokerReport report) {
         super(report, TABLE_NAME, TABLE_END_TEXT, CouponAndAmortizationTableHeader.class);
@@ -70,7 +71,7 @@ public class CouponAmortizationRedemptionTable extends AbstractReportTable<Secur
                 .currency(table.getStringCellValue(row, CURRENCY));
         Collection<SecurityEventCashFlow> data = new ArrayList<>();
         data.add(builder.build());
-        if (!tax.equals(BigDecimal.ZERO)) {
+        if (tax.abs().compareTo(minValue) >= 0) {
             data.add(builder.eventType(CashFlowType.TAX).value(tax).build());
         }
         return data;

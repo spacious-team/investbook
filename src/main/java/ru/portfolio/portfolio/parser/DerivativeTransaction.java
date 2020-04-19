@@ -34,17 +34,18 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode
 public class DerivativeTransaction {
-    public static final String QUOTE_CURRENCY = "PNT"; // point
 
-    private long transactionId;
-    private String portfolio;
-    private String contract;
-    private Instant timestamp;
-    private int count;
-    private BigDecimal value; // оценочная стоиомсть в валюце цены
-    private BigDecimal commission;
-    private String valueCurrency; // валюта платежа
-    private String commissionCurrency; // валюта коммиссии
+    public static final String QUOTE_CURRENCY = "PNT"; // point
+    private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
+    private final long transactionId;
+    private final String portfolio;
+    private final String contract;
+    private final Instant timestamp;
+    private final int count;
+    private final BigDecimal value; // оценочная стоиомсть в валюце цены
+    private final BigDecimal commission;
+    private final String valueCurrency; // валюта платежа
+    private final String commissionCurrency; // валюта коммиссии
 
     public Transaction getTransaction() {
         return Transaction.builder()
@@ -58,18 +59,17 @@ public class DerivativeTransaction {
 
     public List<TransactionCashFlow> getTransactionCashFlows() {
         List<TransactionCashFlow> list = new ArrayList<>(2);
-        if (!value.equals(BigDecimal.ZERO)) {
-            list.add(TransactionCashFlow.builder()
-                    .transactionId(transactionId)
-                    .portfolio(portfolio)
-                    .eventType(valueCurrency.equals(QUOTE_CURRENCY) ?
-                            CashFlowType.DERIVATIVE_QUOTE :
-                            CashFlowType.DERIVATIVE_PRICE)
-                    .value(value)
-                    .currency(valueCurrency)
-                    .build());
-        }
-        if (!commission.equals(BigDecimal.ZERO)) {
+        list.add(TransactionCashFlow.builder()
+                .transactionId(transactionId)
+                .portfolio(portfolio)
+                .eventType(valueCurrency.equals(QUOTE_CURRENCY) ?
+                        CashFlowType.DERIVATIVE_QUOTE :
+                        CashFlowType.DERIVATIVE_PRICE)
+                .value(value)
+                .currency(valueCurrency)
+                .build());
+
+        if (commission.abs().compareTo(minValue) >= 0) {
             list.add(TransactionCashFlow.builder()
                     .transactionId(transactionId)
                     .portfolio(portfolio)

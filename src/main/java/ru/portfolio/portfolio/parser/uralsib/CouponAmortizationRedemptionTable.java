@@ -39,6 +39,7 @@ import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableH
 @Slf4j
 public class CouponAmortizationRedemptionTable extends PaymentsTable<SecurityEventCashFlow> {
 
+    private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
     private final List<Map.Entry<String, Instant>> redemptionDates;
 
     public CouponAmortizationRedemptionTable(UralsibBrokerReport report,
@@ -84,7 +85,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable<SecurityEve
         data.add(builder.build());
 
         BigDecimal tax = getTax(table, row);
-        if (!tax.equals(BigDecimal.ZERO)) {
+        if (tax.abs().compareTo(minValue) >= 0) {
             data.add(builder.eventType(CashFlowType.TAX).value(tax).build());
         }
         return data;
