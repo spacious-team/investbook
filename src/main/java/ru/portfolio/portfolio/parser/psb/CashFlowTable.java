@@ -59,10 +59,10 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
         CashFlowType type = CashFlowType.CASH;
         boolean isPositive;
         switch (action) {
-            case"зачислено на счет":
+            case "зачислено на счет":
                 isPositive = true;
                 break;
-            case"cписано со счета":
+            case "списано со счета":
                 isPositive = false;
                 break;
             case "налог удержанный":
