@@ -36,6 +36,7 @@ import ru.portfolio.portfolio.view.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -44,6 +45,8 @@ import static ru.portfolio.portfolio.view.excel.StockMarketProfitExcelTableHeade
 @Component
 @RequiredArgsConstructor
 public class StockMarketProfitExcelTableFactory implements TableFactory {
+    // isin -> security price currency
+    private final Map<String, String> securityCurrencies = new ConcurrentHashMap<>();
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
@@ -52,6 +55,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     private final PaidInterestFactory paidInterestFactory;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
+    private final ForeignExchangeRateService foreignExchangeRateService;
 
     public Table create(Portfolio portfolio) {
         return create(portfolio, getSecuritiesIsin(portfolio));
@@ -187,13 +191,16 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         if (transaction.getId() == null) {
             return null;
         }
-        Optional<TransactionCashFlowEntity> cashFlow = transactionCashFlowRepository
-                .findByPkPortfolioAndPkTransactionIdAndPkType(transaction.getPortfolio(), transaction.getId(), type.getId());
-        return cashFlow.map(cash -> cash
-                .getValue()
-                .multiply(BigDecimal.valueOf(multiplier))
-                .abs()
-                .setScale(2, RoundingMode.HALF_UP))
+        return transactionCashFlowRepository
+                .findByPkPortfolioAndPkTransactionIdAndPkType(
+                        transaction.getPortfolio(),
+                        transaction.getId(),
+                        type.getId())
+                .map(cash -> cash.getValue()
+                        .multiply(exchangeRateToSecurityCurrency(cash.getCurrency(), transaction))
+                        .multiply(BigDecimal.valueOf(multiplier))
+                        .abs()
+                        .setScale(6, RoundingMode.HALF_UP))
                 .orElse(null);
     }
 
@@ -213,7 +220,33 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                 .getValue()
                 .multiply(BigDecimal.valueOf(multiplier))
                 .abs()
-                .setScale(2, RoundingMode.HALF_UP);
+                .setScale(6, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal exchangeRateToSecurityCurrency(String currency, Transaction transaction) {
+        String securityCurrency = getSecurityCurrency(transaction);
+        return currency.equalsIgnoreCase(securityCurrency) ?
+                BigDecimal.ONE :
+                foreignExchangeRateService.getExchangeRate(currency, securityCurrency);
+    }
+
+    /**
+     * @return security price currency
+     */
+    private String getSecurityCurrency(Transaction transaction) {
+        String currency = securityCurrencies.get(transaction.getIsin());
+        if (currency != null) {
+            return currency;
+        }
+        currency = transactionCashFlowRepository
+                .findByPkPortfolioAndPkTransactionIdAndPkType(
+                        transaction.getPortfolio(),
+                        transaction.getId(),
+                        CashFlowType.PRICE.getId())
+                .map(TransactionCashFlowEntity::getCurrency)
+                .orElseThrow();
+        securityCurrencies.put(transaction.getIsin(), currency);
+        return currency;
     }
 
     public static <T extends Position> String convertPaidInterestToExcelFormula(List<SecurityEventCashFlow> pays) {
