@@ -19,8 +19,10 @@
 package ru.portfolio.portfolio.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntity;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntityPK;
+import ru.portfolio.portfolio.pojo.CashFlowType;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,4 +35,8 @@ public interface TransactionCashFlowRepository extends JpaRepository<Transaction
     Optional<TransactionCashFlowEntity> findByPkPortfolioAndPkTransactionIdAndPkType(String portfolio,
                                                                                      long transactionId,
                                                                                      int cashFlowType);
+
+    @Query(value = "SELECT distinct t.currency FROM TransactionCashFlowEntity t " +
+            "WHERE t.pk.portfolio = :portfolio AND t.pk.type = :#{#cashFlowType.id}")
+    List<String> findDistinctCurrencyByPkPortfolioAndPkType(String portfolio, CashFlowType cashFlowType);
 }

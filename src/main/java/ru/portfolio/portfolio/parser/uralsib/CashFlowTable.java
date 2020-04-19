@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.portfolio.portfolio.parser.psb;
+package ru.portfolio.portfolio.parser.uralsib;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
-import ru.portfolio.portfolio.parser.*;
+import ru.portfolio.portfolio.parser.AbstractReportTable;
+import ru.portfolio.portfolio.parser.ExcelTable;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.EventCashFlow;
 
@@ -31,15 +31,13 @@ import java.util.Collections;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static ru.portfolio.portfolio.parser.psb.CashFlowTable.CashFlowTableHeader.*;
+import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
 public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
 
-    private static final String TABLE_NAME = "Внешнее движение денежных средств в валюте счета";
-
-    public CashFlowTable(PsbBrokerReport report) {
-        super(report, TABLE_NAME, "", CashFlowTableHeader.class);
+    public CashFlowTable(UralsibBrokerReport report) {
+        super(report, PaymentsTable.TABLE_NAME, "", PaymentsTable.PaymentsTableHeader.class);
     }
 
     @Override
@@ -56,48 +54,30 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
     protected Collection<EventCashFlow> getRow(ExcelTable table, Row row) {
         String action = table.getStringCellValue(row, OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
-        CashFlowType type = CashFlowType.CASH;
-        boolean isPositive;
+        CashFlowType type;
         switch (action) {
-            case "зачислено на счет":
-                isPositive = true;
+            case"ввод дс":
+            case"вывод дс":
+                type = CashFlowType.CASH;
                 break;
-            case "списано со счета":
-                isPositive = false;
-                break;
-            case "налог удержанный":
-                isPositive = false;
+            case "налог":
                 type = CashFlowType.TAX;
+                break;
+            case "доначисление комиссии до размера минимальной":
+            case "депозитарные сборы других депозитариев":
+                type = CashFlowType.COMMISSION;
                 break;
             default:
                 return emptyList();
-        }
-        if (type == CashFlowType.CASH && !table.getStringCellValue(row, DESCRIPTION).isEmpty()) {
-            return emptyList(); // cash in/out records has no description
         }
         String description = table.getStringCellValue(row, DESCRIPTION);
         return singletonList(EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(type)
                 .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
-                .value(table.getCurrencyCellValue(row, VALUE)
-                        .multiply(BigDecimal.valueOf(isPositive ? 1 : -1)))
-                .currency(table.getStringCellValue(row, CURRENCY))
+                .value(table.getCurrencyCellValue(row, VALUE))
+                .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
                 .description((description == null || description.isEmpty())? null : description)
                 .build());
-    }
-
-    enum CashFlowTableHeader implements TableColumnDescription {
-        DATE("дата"),
-        OPERATION("операция"),
-        VALUE("сумма"),
-        CURRENCY("валюта счета"),
-        DESCRIPTION("комментарий");
-
-        @Getter
-        private final TableColumn column;
-        CashFlowTableHeader(String ... words) {
-            this.column = TableColumnImpl.of(words);
-        }
     }
 }

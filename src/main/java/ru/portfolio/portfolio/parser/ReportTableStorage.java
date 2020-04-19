@@ -82,6 +82,14 @@ public class ReportTableStorage {
         }
     }
 
+    public void addTransaction(ForeignExchangeTransaction fxTransaction) {
+        addSecurity(fxTransaction.getInstrument());
+        boolean isAdded = addTransaction(fxTransaction.getTransaction());
+        if (isAdded) {
+            fxTransaction.getTransactionCashFlows().forEach(this::addTransactionCashFlow);
+        }
+    }
+
     protected boolean addTransaction(Transaction transaction) {
         return handlePost(
                 () -> transactionRestController.post(transaction),
@@ -114,12 +122,14 @@ public class ReportTableStorage {
 
     public void addCashInfo(ReportTable<PortfolioCash> cashTable) {
         try {
-            addPortfolioProperty(PortfolioProperty.builder()
-                    .portfolio(cashTable.getReport().getPortfolio())
-                    .property(PortfolioPropertyType.CASH)
-                    .value(objectMapper.writeValueAsString(cashTable.getData()))
-                    .timestamp(cashTable.getReport().getReportDate())
-                    .build());
+            if (!cashTable.getData().isEmpty()) {
+                addPortfolioProperty(PortfolioProperty.builder()
+                        .portfolio(cashTable.getReport().getPortfolio())
+                        .property(PortfolioPropertyType.CASH)
+                        .value(objectMapper.writeValueAsString(cashTable.getData()))
+                        .timestamp(cashTable.getReport().getReportDate())
+                        .build());
+            }
         } catch (JsonProcessingException e) {
             log.warn("Не могу добавить информацию о наличных средствах {}", cashTable.getData(), e);
         }

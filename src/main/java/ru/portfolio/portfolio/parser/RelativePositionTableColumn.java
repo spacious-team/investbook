@@ -18,15 +18,17 @@
 
 package ru.portfolio.portfolio.parser;
 
+
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Row;
 
 @RequiredArgsConstructor(staticName = "of")
-public class ConstantPositionTableColumn implements TableColumn {
-    private final int columnIndex;
+public class RelativePositionTableColumn implements TableColumn {
+    private final TableColumn releatedTableColumn;
+    private final int relatedOffset;
 
     @Override
     public int getColumnIndex(int firstColumnForSearch, Row... headerRows) {
-        return columnIndex;
+        return releatedTableColumn.getColumnIndex(firstColumnForSearch, headerRows) + relatedOffset;
     }
 }

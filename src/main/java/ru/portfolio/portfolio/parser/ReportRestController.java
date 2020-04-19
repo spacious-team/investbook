@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.portfolio.portfolio.parser.psb.PsbBrokerReport;
 import ru.portfolio.portfolio.parser.psb.PsbReportTableFactory;
+import ru.portfolio.portfolio.parser.uralsib.UralsibBrokerReport;
+import ru.portfolio.portfolio.parser.uralsib.UralsibReportTableFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.zip.ZipInputStream;
 
 @RestController
 @RequiredArgsConstructor
@@ -52,7 +55,7 @@ public class ReportRestController {
         if (format == null || format.isEmpty()) {
             format = "psb";
         }
-        format = format.toLowerCase();
+        BrockerType brocker =BrockerType.valueOf(format.toUpperCase());
         List<Exception> exceptions = new ArrayList<>();
         for (MultipartFile report : reports) {
             try {
@@ -60,13 +63,22 @@ public class ReportRestController {
                     continue;
                 }
                 long t0 = System.nanoTime();
-                Path path = getPath(format, report);
-                if ("psb".equals(format)) {
-                    parsePsbReport(path);
-                } else {
-                    throw new IllegalArgumentException("Неизвестный формат " + format);
+                Path path = saveToBackup(brocker, report);
+                String originalFileName = report.getOriginalFilename();
+                switch (brocker) {
+                    case PSB:
+                        parsePsbReport(report);
+                        break;
+                    case URALSIB:
+                        if (originalFileName != null && !originalFileName.contains("_invest_")) {
+                            log.warn("Рекомендуется загружать отчеты содержащие в имени файла слово 'invest'");
+                        }
+                        parseUralsibReport(report);
+                        break;
+                        default:
+                        throw new IllegalArgumentException("Неизвестный формат " + format);
                 }
-                log.info("Загрузка отчета {} завершена за {}, бекап отчета сохранен в {}", path.getFileName(),
+                log.info("Загрузка отчета {} завершена за {}, бекап отчета сохранен в {}", report.getOriginalFilename(),
                         Duration.ofNanos(System.nanoTime() - t0), path.toAbsolutePath());
             } catch (Exception e) {
                 exceptions.add(e);
@@ -79,10 +91,13 @@ public class ReportRestController {
         }
     }
 
-    private Path getPath(String reportType, MultipartFile report) throws IOException {
+    /**
+     * @return backup file
+     */
+    private Path saveToBackup(BrockerType brocker, MultipartFile report) throws IOException {
         byte[] bytes = report.getBytes();
         String originalFilename = report.getOriginalFilename();
-        Path backupPath = reportBackupPath.resolve(reportType);
+        Path backupPath = reportBackupPath.resolve(brocker.name().toLowerCase());
         Files.createDirectories(backupPath);
         Path path = backupPath.resolve((originalFilename != null) ?
                 originalFilename :
@@ -99,12 +114,27 @@ public class ReportRestController {
         return path;
     }
 
-    private void parsePsbReport(Path path) {
-        try (PsbBrokerReport brockerReport = new PsbBrokerReport(path)) {
+    private void parsePsbReport(MultipartFile report) {
+        try (PsbBrokerReport brockerReport = new PsbBrokerReport(report.getOriginalFilename(), report.getInputStream())) {
             ReportTableFactory reportTableFactory = new PsbReportTableFactory(brockerReport);
             reportParserService.parse(reportTableFactory);
         } catch (Exception e) {
-            log.warn("Не могу открыть/закрыть отчет {}", path, e);
+            log.warn("Не могу открыть/закрыть отчет {}", report.getOriginalFilename(), e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void parseUralsibReport(MultipartFile report) {
+        try (ZipInputStream zis = new ZipInputStream(report.getInputStream())) {
+            try (UralsibBrokerReport brockerReport = new UralsibBrokerReport(zis)) {
+                ReportTableFactory reportTableFactory = new UralsibReportTableFactory(brockerReport);
+                reportParserService.parse(reportTableFactory);
+            } catch (Exception e) {
+                log.warn("Не могу открыть/закрыть отчет {}", report.getOriginalFilename(), e);
+                throw new RuntimeException(e);
+            }
+        } catch (IOException e) {
+            log.warn("Не могу открыть zip архив {}", report.getOriginalFilename(), e);
             throw new RuntimeException(e);
         }
     }

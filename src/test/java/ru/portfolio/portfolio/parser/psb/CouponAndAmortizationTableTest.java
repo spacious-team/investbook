@@ -43,7 +43,7 @@ public class CouponAndAmortizationTableTest {
 
     @Test(dataProvider = "isin")
     void testIsin(String firstIsin, String lastIsin) {
-        List<SecurityEventCashFlow> data = new CouponAndAmortizationTable(this.report).getData();
+        List<SecurityEventCashFlow> data = new CouponAmortizationRedemptionTable(this.report).getData();
         assertEquals(data.get(0).getIsin(), firstIsin);
         assertEquals(data.get(data.size() - 1).getIsin(), lastIsin);
     }

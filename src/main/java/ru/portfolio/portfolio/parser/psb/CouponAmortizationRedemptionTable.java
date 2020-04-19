@@ -29,15 +29,16 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static ru.portfolio.portfolio.parser.psb.CouponAndAmortizationTable.CouponAndAmortizationTableHeader.*;
+import static ru.portfolio.portfolio.parser.psb.CouponAmortizationRedemptionTable.CouponAndAmortizationTableHeader.*;
 
 @Slf4j
-public class CouponAndAmortizationTable extends AbstractReportTable<SecurityEventCashFlow> {
+public class CouponAmortizationRedemptionTable extends AbstractReportTable<SecurityEventCashFlow> {
 
     private static final String TABLE_NAME = "Погашение купонов и ЦБ";
     private static final String TABLE_END_TEXT = "*Налог удерживается с рублевого брокерского счета";
+    private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
-    public CouponAndAmortizationTable(PsbBrokerReport report) {
+    public CouponAmortizationRedemptionTable(PsbBrokerReport report) {
         super(report, TABLE_NAME, TABLE_END_TEXT, CouponAndAmortizationTableHeader.class);
     }
 
@@ -70,7 +71,7 @@ public class CouponAndAmortizationTable extends AbstractReportTable<SecurityEven
                 .currency(table.getStringCellValue(row, CURRENCY));
         Collection<SecurityEventCashFlow> data = new ArrayList<>();
         data.add(builder.build());
-        if (!tax.equals(BigDecimal.ZERO)) {
+        if (tax.abs().compareTo(minValue) >= 0) {
             data.add(builder.eventType(CashFlowType.TAX).value(tax).build());
         }
         return data;

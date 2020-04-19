@@ -34,16 +34,18 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode
 public class SecurityTransaction {
-    private long transactionId;
-    private String portfolio;
-    private String isin;
-    private Instant timestamp;
-    private int count;
-    private BigDecimal value; // оценочная стоиомсть в валюце цены
-    private BigDecimal accruedInterest; // НКД, в валюте бумаги
-    private BigDecimal commission;
-    private String valueCurrency; // валюта платежа
-    private String commissionCurrency; // валюта коммиссии
+
+    private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
+    private final long transactionId;
+    private final String portfolio;
+    private final String isin;
+    private final Instant timestamp;
+    private final int count;
+    private final BigDecimal value; // оценочная стоиомсть в валюце цены
+    private final BigDecimal accruedInterest; // НКД, в валюте бумаги
+    private final BigDecimal commission;
+    private final String valueCurrency; // валюта платежа
+    private final String commissionCurrency; // валюта коммиссии
 
     public Transaction getTransaction() {
         return Transaction.builder()
@@ -57,16 +59,14 @@ public class SecurityTransaction {
 
     public List<TransactionCashFlow> getTransactionCashFlows() {
         List<TransactionCashFlow> list = new ArrayList<>(3);
-        if (!value.equals(BigDecimal.ZERO)) {
-            list.add(TransactionCashFlow.builder()
-                    .transactionId(transactionId)
-                    .portfolio(portfolio)
-                    .eventType(CashFlowType.PRICE)
-                    .value(value)
-                    .currency(valueCurrency)
-                    .build());
-        }
-        if (!accruedInterest.equals(BigDecimal.ZERO)) {
+        list.add(TransactionCashFlow.builder()
+                .transactionId(transactionId)
+                .portfolio(portfolio)
+                .eventType(CashFlowType.PRICE)
+                .value(value)
+                .currency(valueCurrency)
+                .build());
+        if (accruedInterest.abs().compareTo(minValue) >= 0) { // for securities accrued interest = 0
             list.add(TransactionCashFlow.builder()
                     .transactionId(transactionId)
                     .portfolio(portfolio)
@@ -75,7 +75,7 @@ public class SecurityTransaction {
                     .currency(valueCurrency)
                     .build());
         }
-        if (!commission.equals(BigDecimal.ZERO)) {
+        if (commission.abs().compareTo(minValue) >= 0) {
             list.add(TransactionCashFlow.builder()
                     .transactionId(transactionId)
                     .portfolio(portfolio)

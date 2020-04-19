@@ -57,7 +57,7 @@ public class TaxExcelTableFactory implements TableFactory {
             Table.Record record = new Table.Record();
             record.put(DATE, cash.getTimestamp());
             record.put(TAX, Optional.ofNullable(cash.getValue())
-                    .map(BigDecimal::abs)
+                    .map(BigDecimal::negate)
                     .orElse(BigDecimal.ZERO));
             record.put(CURRENCY, cash.getCurrency());
             record.put(DESCRIPTION, cash.getDescription());

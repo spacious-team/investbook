@@ -18,8 +18,6 @@
 
 package ru.portfolio.portfolio.parser.psb;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
@@ -28,7 +26,6 @@ import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -37,6 +34,7 @@ import static ru.portfolio.portfolio.parser.psb.DividendTable.DividendTableHeade
 @Slf4j
 public class DividendTable extends AbstractReportTable<SecurityEventCashFlow> {
     private static final String TABLE_NAME = "Выплата дивидендов";
+    private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
     public DividendTable(PsbBrokerReport report) {
         super(report, TABLE_NAME, "", DividendTableHeader.class);
@@ -55,7 +53,7 @@ public class DividendTable extends AbstractReportTable<SecurityEventCashFlow> {
         Collection<SecurityEventCashFlow> data = new ArrayList<>();
         data.add(builder.build());
         BigDecimal tax = table.getCurrencyCellValue(row, TAX).negate();
-        if (!tax.equals(BigDecimal.ZERO)) {
+        if (tax.abs().compareTo(minValue) >= 0) {
             data.add(builder
                     .eventType(CashFlowType.TAX)
                     .value(tax)
@@ -77,17 +75,5 @@ public class DividendTable extends AbstractReportTable<SecurityEventCashFlow> {
         DividendTableHeader(String... words) {
             this.column = TableColumnImpl.of(words);
         }
-    }
-
-    @Getter
-    @Builder(toBuilder = true)
-    @EqualsAndHashCode
-    public static class DividendTableRow {
-        private String isin;
-        private Instant timestamp;
-        private CashFlowType event;
-        private int count;
-        private BigDecimal value; // НКД, амортизация или налог
-        private String currency; // валюта
     }
 }

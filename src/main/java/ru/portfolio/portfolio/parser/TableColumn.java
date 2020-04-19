@@ -22,5 +22,18 @@ import org.apache.poi.ss.usermodel.Row;
 
 public interface TableColumn {
 
-    int getColumnIndex(Row header);
+    /**
+     * @param headerRows header rows
+     * @return column index of table
+     */
+    default int getColumnIndex(Row... headerRows) {
+        return getColumnIndex(0, headerRows);
+    }
+
+    /**
+     * @param firstColumnForSearch start result column search from this index
+     * @param headerRows header rows
+     * @return column index of table
+     */
+    int getColumnIndex(int firstColumnForSearch, Row... headerRows);
 }

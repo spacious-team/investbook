@@ -43,7 +43,7 @@ public class TaxExcelTableView extends ExcelTableView {
     protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         sheet.setColumnWidth(TAX.ordinal(), 30 * 256);
-        sheet.setColumnWidth(DESCRIPTION.ordinal(), 50 * 256);
+        sheet.setColumnWidth(DESCRIPTION.ordinal(), 65 * 256);
     }
 
     @Override

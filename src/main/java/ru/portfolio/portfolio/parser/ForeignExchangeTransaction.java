@@ -33,14 +33,13 @@ import java.util.List;
 @Getter
 @Builder
 @EqualsAndHashCode
-public class DerivativeTransaction {
+public class ForeignExchangeTransaction {
 
-    public static final String QUOTE_CURRENCY = "PNT"; // point
     private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
     private final long transactionId;
     private final String portfolio;
-    private final String contract;
-    private final Instant timestamp;
+    private final String instrument; // валютная пара
+    private final Instant timestamp; // дата исполнения
     private final int count;
     private final BigDecimal value; // оценочная стоиомсть в валюце цены
     private final BigDecimal commission;
@@ -51,24 +50,23 @@ public class DerivativeTransaction {
         return Transaction.builder()
                 .id(transactionId)
                 .portfolio(portfolio)
-                .isin(contract)
+                .isin(instrument)
                 .timestamp(timestamp)
                 .count(count)
                 .build();
     }
 
     public List<TransactionCashFlow> getTransactionCashFlows() {
-        List<TransactionCashFlow> list = new ArrayList<>(2);
-        list.add(TransactionCashFlow.builder()
-                .transactionId(transactionId)
-                .portfolio(portfolio)
-                .eventType(valueCurrency.equals(QUOTE_CURRENCY) ?
-                        CashFlowType.DERIVATIVE_QUOTE :
-                        CashFlowType.DERIVATIVE_PRICE)
-                .value(value)
-                .currency(valueCurrency)
-                .build());
-
+        List<TransactionCashFlow> list = new ArrayList<>(3);
+        if (!value.equals(BigDecimal.ZERO)) {
+            list.add(TransactionCashFlow.builder()
+                    .transactionId(transactionId)
+                    .portfolio(portfolio)
+                    .eventType(CashFlowType.PRICE)
+                    .value(value)
+                    .currency(valueCurrency)
+                    .build());
+        }
         if (commission.abs().compareTo(minValue) >= 0) {
             list.add(TransactionCashFlow.builder()
                     .transactionId(transactionId)

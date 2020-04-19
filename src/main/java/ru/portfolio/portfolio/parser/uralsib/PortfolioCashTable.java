@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.portfolio.portfolio.parser.psb;
+package ru.portfolio.portfolio.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -25,37 +25,31 @@ import ru.portfolio.portfolio.parser.*;
 
 import java.util.Collection;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static ru.portfolio.portfolio.parser.ExcelTableHelper.rowContains;
-import static ru.portfolio.portfolio.parser.psb.PortfolioCashTable.CashTableHeader.*;
+import static ru.portfolio.portfolio.parser.uralsib.PortfolioCashTable.CashTableHeader.CURRENCY;
+import static ru.portfolio.portfolio.parser.uralsib.PortfolioCashTable.CashTableHeader.VALUE;
 
 @Slf4j
 public class PortfolioCashTable extends AbstractReportTable<PortfolioCash> {
 
-    private static final String TABLE_NAME = "Позиция денежных средств по биржевым площадкам";
-    private static final String TABLE_END_TEXT = "КонецДС_Б"; // hidden text in 0-th column
-    private static final String INVALID_TEXT = "ИТОГО:";
+    private static final String TABLE_NAME = "ПОЗИЦИЯ ПО ДЕНЕЖНЫМ СРЕДСТВАМ";
 
-    public PortfolioCashTable(PsbBrokerReport report) {
-        super(report, TABLE_NAME, TABLE_END_TEXT, CashTableHeader.class, 2);
+    public PortfolioCashTable(UralsibBrokerReport report) {
+        super(report, TABLE_NAME, "", CashTableHeader.class, 2);
     }
 
     @Override
     protected Collection<PortfolioCash> getRow(ExcelTable table, Row row) {
-        return rowContains(table, row, INVALID_TEXT) ?
-                emptyList() :
-                singletonList(PortfolioCash.builder()
-                        .section(table.getStringCellValue(row, SECTION))
-                        .value(table.getCurrencyCellValue(row, VALUE))
-                        .currency(table.getStringCellValue(row, CURRENCY))
-                        .build());
+        return singletonList(PortfolioCash.builder()
+                .section("all")
+                .value(table.getCurrencyCellValue(row, VALUE))
+                .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
+                .build());
     }
 
     enum CashTableHeader implements TableColumnDescription {
-        SECTION("сектор"),
-        VALUE("плановый исходящий остаток"),
-        CURRENCY("валюта");
+        VALUE("исходящий остаток"),
+        CURRENCY("код валюты");
 
         @Getter
         private final TableColumn column;
