@@ -72,7 +72,7 @@ public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
     protected static Collection<PortfolioProperty> getExchangeRate(BrokerReport report) {
         return singletonList(PortfolioProperty.builder()
                 .portfolio(report.getPortfolio())
-                .property(PortfolioPropertyType.USD_EXCHANGE_RATE)
+                .property(PortfolioPropertyType.USDRUB_EXCHANGE_RATE)
                 .value(getUsdExchangeRate(report).toString())
                 .timestamp(report.getReportDate())
                 .build());

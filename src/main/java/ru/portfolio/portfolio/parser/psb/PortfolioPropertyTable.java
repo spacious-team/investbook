@@ -79,10 +79,10 @@ public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
             return emptyList();
         }
         Collection<PortfolioProperty> rates = new ArrayList<>();
-        rates.addAll(createExchangeRateProperty(report, table, row, USD, PortfolioPropertyType.USD_EXCHANGE_RATE));
-        rates.addAll(createExchangeRateProperty(report, table, row, EUR, PortfolioPropertyType.EUR_EXCHANGE_RATE));
-        rates.addAll(createExchangeRateProperty(report, table, row, GBP, PortfolioPropertyType.GBP_EXCHANGE_RATE));
-        rates.addAll(createExchangeRateProperty(report, table, row, CHF, PortfolioPropertyType.CHF_EXCHANGE_RATE));
+        rates.addAll(createExchangeRateProperty(report, table, row, USD, PortfolioPropertyType.USDRUB_EXCHANGE_RATE));
+        rates.addAll(createExchangeRateProperty(report, table, row, EUR, PortfolioPropertyType.EURRUB_EXCHANGE_RATE));
+        rates.addAll(createExchangeRateProperty(report, table, row, GBP, PortfolioPropertyType.GBPRUB_EXCHANGE_RATE));
+        rates.addAll(createExchangeRateProperty(report, table, row, CHF, PortfolioPropertyType.CHFRUB_EXCHANGE_RATE));
         return rates;
     }
 

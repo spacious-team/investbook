@@ -21,8 +21,8 @@ package ru.portfolio.portfolio.pojo;
 public enum PortfolioPropertyType {
     TOTAL_ASSETS,
     CASH,
-    USD_EXCHANGE_RATE,
-    EUR_EXCHANGE_RATE,
-    GBP_EXCHANGE_RATE,
-    CHF_EXCHANGE_RATE
+    USDRUB_EXCHANGE_RATE,
+    EURRUB_EXCHANGE_RATE,
+    GBPRUB_EXCHANGE_RATE,
+    CHFRUB_EXCHANGE_RATE
 }

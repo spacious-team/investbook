@@ -63,7 +63,7 @@ public class ForeignExchangeRateService {
      * @return exchange rate for currency (russian rubles)
      */
     public BigDecimal getExchangeRateToRub(String currency) {
-        PortfolioPropertyType property = PortfolioPropertyType.valueOf(currency + "_EXCHANGE_RATE");
+        PortfolioPropertyType property = PortfolioPropertyType.valueOf(currency + "RUB_EXCHANGE_RATE");
         BigDecimal exchangeRate = portfolioPropertyRepository
                 .findFirstByPropertyOrderByTimestampDesc(property.name())
                 .map(v -> BigDecimal.valueOf(Double.parseDouble(v.getValue())))
