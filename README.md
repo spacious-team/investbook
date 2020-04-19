@@ -5,7 +5,7 @@
 ### Установка
 Перед запуском приложения необходимо:
 1. Распаковать приложение `portfolio.zip` в удобное место.
-1. Установить [java](https://jdk.java.net/) версии не ниже 12
+1. Установить [java](https://jdk.java.net/) версии не ниже 14
    ([ссылка](https://download.java.net/java/GA/jdk14/076bab302c7b4508975440c56f6cc26a/36/GPL/openjdk-14_windows-x64_bin.zip)
    для Windows, распаковать, например, в папку `C:\Program Files\Java\`).
    В папке распаковки `portfolio.zip` измените файл `start.bat` по правому щелчку мышкой, указав папку
