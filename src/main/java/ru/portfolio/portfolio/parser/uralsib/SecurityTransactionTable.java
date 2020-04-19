@@ -107,10 +107,16 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
         VALUE("сумма сделки"),
         VALUE_CURRENCY("валюта суммы"),
         ACCRUED_INTEREST("нкд"),
-        MARKET_COMMISSION(16),
-        MARKET_COMMISSION_CURRENCY(17),
-        BROKER_COMMISSION(20),
-        BROKER_COMMISSION_CURRENCY(21);
+        MARKET_COMMISSION(
+                TableColumnImpl.of("комиссия тс"),
+                TableColumnImpl.of("всего")),
+        MARKET_COMMISSION_CURRENCY(
+                TableColumnImpl.of("комиссия тс"),
+                TableColumnImpl.of("валюта списания")),
+        BROKER_COMMISSION_CURRENCY(
+                TableColumnImpl.of("комиссия брокера"),
+                TableColumnImpl.of("валюта списания")),
+        BROKER_COMMISSION(BROKER_COMMISSION_CURRENCY, -1);
 
         @Getter
         private final TableColumn column;
@@ -118,8 +124,12 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
             this.column = TableColumnImpl.of(words);
         }
 
-        TransactionTableHeader(int columnIndex) {
-            this.column = ConstantPositionTableColumn.of(columnIndex);
+        TransactionTableHeader(TableColumn... rowDescriptors) {
+            this.column = MultiLineTableColumn.of(rowDescriptors);
+        }
+
+        TransactionTableHeader(TransactionTableHeader relatedColumn, int relatedOffset) {
+            this.column = RelativePositionTableColumn.of(relatedColumn.getColumn(), relatedOffset);
         }
     }
 }
