@@ -44,8 +44,12 @@ public class SecurityTransactionTable implements ReportTable<SecurityTransaction
 
     public SecurityTransactionTable(PsbBrokerReport report) {
         this.report = report;
-        this.data.addAll(parseTable(report, TABLE1_NAME));
-        this.data.addAll(parseTable(report, TABLE2_NAME));
+        try {
+            this.data.addAll(parseTable(report, TABLE1_NAME));
+            this.data.addAll(parseTable(report, TABLE2_NAME));
+        } catch (Exception e) {
+            log.warn("Ошибка при парсинге транзакций в файле {}", report.getPath().getFileName());
+        }
     }
 
     private List<SecurityTransaction> parseTable(PsbBrokerReport report, String tableName) {
