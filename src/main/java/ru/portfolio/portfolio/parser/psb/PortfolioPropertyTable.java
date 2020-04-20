@@ -19,6 +19,7 @@
 package ru.portfolio.portfolio.parser.psb;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import ru.portfolio.portfolio.parser.*;
 import ru.portfolio.portfolio.pojo.PortfolioProperty;
@@ -34,6 +35,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static ru.portfolio.portfolio.parser.psb.PortfolioPropertyTable.SummaryTableHeader.*;
 
+@Slf4j
 public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
     private static final String SUMMARY_TABLE = "Сводная информация по счетам клиента в валюте счета";
     private static final String ASSETS = "\"СУММА АКТИВОВ\" на конец дня";
@@ -47,9 +49,13 @@ public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
 
     protected PortfolioPropertyTable(PsbBrokerReport report) {
         this.report = report;
-        ExcelTable table = getSummaryTable(report);
-        this.data.addAll(getTotalAssets(table, report));
-        this.data.addAll(getExchangeRate(table, report));
+        try {
+            ExcelTable table = getSummaryTable(report);
+            this.data.addAll(getTotalAssets(table, report));
+            this.data.addAll(getExchangeRate(table, report));
+        } catch (Exception e) {
+            log.info("Не могу получить стоимость активов или обменный курс из отчета {}", report.getPath().getFileName());
+        }
     }
 
     private static ExcelTable getSummaryTable(PsbBrokerReport report) {
@@ -61,43 +67,58 @@ public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
     }
 
     protected static Collection<PortfolioProperty> getTotalAssets(ExcelTable table, PsbBrokerReport report) {
-        Row row = table.findRow(ASSETS);
-        if (row == null) {
+        try {
+            Row row = table.findRow(ASSETS);
+            if (row == null) {
+                return emptyList();
+            }
+            return Collections.singletonList(PortfolioProperty.builder()
+                    .portfolio(report.getPortfolio())
+                    .property(PortfolioPropertyType.TOTAL_ASSETS)
+                    .value(table.getCurrencyCellValue(row, RUB).toString())
+                    .timestamp(report.getReportDate())
+                    .build());
+        } catch (Exception e) {
+            log.info("Не могу получить стоимость активов из отчета {}", report.getPath().getFileName());
             return emptyList();
         }
-        return Collections.singletonList(PortfolioProperty.builder()
-                .portfolio(report.getPortfolio())
-                .property(PortfolioPropertyType.TOTAL_ASSETS)
-                .value(table.getCurrencyCellValue(row, RUB).toString())
-                .timestamp(report.getReportDate())
-                .build());
     }
 
     protected static Collection<PortfolioProperty> getExchangeRate(ExcelTable table, PsbBrokerReport report) {
-        Row row = table.findRow(EXCHANGE_RATE_ROW);
-        if (row == null) {
+        try {
+            Row row = table.findRow(EXCHANGE_RATE_ROW);
+            if (row == null) {
+                return emptyList();
+            }
+            Collection<PortfolioProperty> rates = new ArrayList<>();
+            rates.addAll(createExchangeRateProperty(report, table, row, USD, PortfolioPropertyType.USDRUB_EXCHANGE_RATE));
+            rates.addAll(createExchangeRateProperty(report, table, row, EUR, PortfolioPropertyType.EURRUB_EXCHANGE_RATE));
+            rates.addAll(createExchangeRateProperty(report, table, row, GBP, PortfolioPropertyType.GBPRUB_EXCHANGE_RATE));
+            rates.addAll(createExchangeRateProperty(report, table, row, CHF, PortfolioPropertyType.CHFRUB_EXCHANGE_RATE));
+            return rates;
+        } catch (Exception e) {
+            log.info("Ошибка поиска стоимости активов или обменного курса в файле {}", report.getPath().getFileName(), e);
             return emptyList();
         }
-        Collection<PortfolioProperty> rates = new ArrayList<>();
-        rates.addAll(createExchangeRateProperty(report, table, row, USD, PortfolioPropertyType.USDRUB_EXCHANGE_RATE));
-        rates.addAll(createExchangeRateProperty(report, table, row, EUR, PortfolioPropertyType.EURRUB_EXCHANGE_RATE));
-        rates.addAll(createExchangeRateProperty(report, table, row, GBP, PortfolioPropertyType.GBPRUB_EXCHANGE_RATE));
-        rates.addAll(createExchangeRateProperty(report, table, row, CHF, PortfolioPropertyType.CHFRUB_EXCHANGE_RATE));
-        return rates;
     }
 
     private static Collection<PortfolioProperty> createExchangeRateProperty(PsbBrokerReport report, ExcelTable table,
                                                                             Row row, SummaryTableHeader currency,
                                                                             PortfolioPropertyType property) {
-        BigDecimal exchangeRate = table.getCurrencyCellValue(row, currency);
-        if (exchangeRate.compareTo(min) > 0) {
-            return singletonList(PortfolioProperty.builder()
-                    .portfolio(report.getPortfolio())
-                    .property(property)
-                    .value(exchangeRate.toString())
-                    .timestamp(report.getReportDate())
-                    .build());
-        } else {
+        try {
+            BigDecimal exchangeRate = table.getCurrencyCellValue(row, currency);
+            if (exchangeRate.compareTo(min) > 0) {
+                return singletonList(PortfolioProperty.builder()
+                        .portfolio(report.getPortfolio())
+                        .property(property)
+                        .value(exchangeRate.toString())
+                        .timestamp(report.getReportDate())
+                        .build());
+            } else {
+                return emptyList();
+            }
+        } catch (Exception e) {
+            log.info("Не могу получить обменный курс для валюты {} в файле {}", currency, report.getPath().getFileName());
             return emptyList();
         }
     }
@@ -112,7 +133,7 @@ public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
 
         @Getter
         private final TableColumn column;
-        SummaryTableHeader(String ... words) {
+        SummaryTableHeader(String... words) {
             this.column = TableColumnImpl.of(words);
         }
 
