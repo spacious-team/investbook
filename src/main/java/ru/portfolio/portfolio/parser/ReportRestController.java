@@ -20,6 +20,8 @@ package ru.portfolio.portfolio.parser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +32,8 @@ import ru.portfolio.portfolio.parser.uralsib.UralsibBrokerReport;
 import ru.portfolio.portfolio.parser.uralsib.UralsibReportTableFactory;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -50,12 +54,12 @@ public class ReportRestController {
     private final ReportParserService reportParserService;
 
     @PostMapping("/reports")
-    public String post(@RequestParam("reports") MultipartFile[] reports,
-                       @RequestParam(name = "format", required = false) String format) {
+    public ResponseEntity<String> post(@RequestParam("reports") MultipartFile[] reports,
+                                       @RequestParam(name = "format", required = false) String format) {
         if (format == null || format.isEmpty()) {
             format = "psb";
         }
-        BrockerType brocker =BrockerType.valueOf(format.toUpperCase());
+        BrockerType brocker = BrockerType.valueOf(format.toUpperCase());
         List<Exception> exceptions = new ArrayList<>();
         for (MultipartFile report : reports) {
             try {
@@ -75,7 +79,7 @@ public class ReportRestController {
                         }
                         parseUralsibReport(report);
                         break;
-                        default:
+                    default:
                         throw new IllegalArgumentException("Неизвестный формат " + format);
                 }
                 log.info("Загрузка отчета {} завершена за {}, бекап отчета сохранен в {}", report.getOriginalFilename(),
@@ -85,9 +89,18 @@ public class ReportRestController {
             }
         }
         if (exceptions.isEmpty()) {
-            return "ok";
+            return ResponseEntity.ok("ok");
         } else {
-            throw new RuntimeException(exceptions.stream().map(Throwable::getMessage).collect(Collectors.joining(", ")));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(exceptions.stream()
+                            .map(e -> {
+                                StringWriter sw = new StringWriter();
+                                PrintWriter pw = new PrintWriter(sw);
+                                e.printStackTrace(pw);
+                                return sw.toString().replace("\n", "</br>");
+                            }).collect(Collectors.joining("</br></br> - ",
+                                    "<b>Ошибка загрузки отчетов</b></br></br> - ",
+                                    "")));
         }
     }
 
@@ -130,7 +143,7 @@ public class ReportRestController {
                 ReportTableFactory reportTableFactory = new UralsibReportTableFactory(brockerReport);
                 reportParserService.parse(reportTableFactory);
             } catch (Exception e) {
-                log.warn("Не могу открыть/закрыть отчет {}", report.getOriginalFilename(), e);
+                log.warn("Не могу открыть/закрыть отчет {}, ожидается .zip файл с вложенным .xls файлом", report.getOriginalFilename(), e);
                 throw new RuntimeException(e);
             }
         } catch (IOException e) {
