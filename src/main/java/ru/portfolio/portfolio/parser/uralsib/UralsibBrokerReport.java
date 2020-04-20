@@ -22,9 +22,14 @@ import com.google.common.collect.Lists;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellAddress;
 import ru.portfolio.portfolio.parser.BrokerReport;
+import ru.portfolio.portfolio.parser.ExcelTable;
+import ru.portfolio.portfolio.parser.ExcelTableHelper;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -43,6 +48,8 @@ public class UralsibBrokerReport implements BrokerReport {
     public static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+    private static final String PORTFOLIO_MARKER = "Номер счета Клиента:";
+    private static final String REPORT_DATE_MARKER = "за период";
 
     private final Workbook book;
     @Getter
@@ -51,6 +58,8 @@ public class UralsibBrokerReport implements BrokerReport {
     private final String portfolio;
     @Getter
     private final Path path;
+    @Getter
+    private final Instant reportDate;
 
     public UralsibBrokerReport(ZipInputStream zis) throws IOException {
         ZipEntry zipEntry = zis.getNextEntry();
@@ -58,26 +67,35 @@ public class UralsibBrokerReport implements BrokerReport {
         this.book = new HSSFWorkbook(zis); // constructor close zis
         this.sheet = book.getSheetAt(0);
         this.portfolio = getPortfolio(this.sheet);
+        this.reportDate = getReportDate(this.sheet);
     }
 
     private static String getPortfolio(Sheet sheet) {
         try {
-            return sheet.getRow(7).getCell(2).getStringCellValue()
-                    .replace("_invest", "")
-                    .replace("SP", "");
+            CellAddress address = ExcelTableHelper.find(sheet, PORTFOLIO_MARKER);
+            for (Cell cell : sheet.getRow(address.getRow())) {
+                if (cell != null && cell.getColumnIndex() > address.getColumn() && cell.getCellType() == CellType.STRING) {
+                    return ExcelTable.getStringCellValue(cell)
+                            .replace("_invest", "")
+                            .replace("SP", "");
+                }
+            }
+            throw new IllegalArgumentException(
+                    "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + ": XXX'");
         } catch (Exception e) {
-            throw new RuntimeException("Ошибка поиска номера Брокерского счета в отчете");
+            throw new RuntimeException("Ошибка поиска номера Брокерского счета в отчете", e);
         }
     }
 
-    @Override
-    public Instant getReportDate() {
+    private Instant getReportDate(Sheet sheet) {
         try {
+            CellAddress address = ExcelTableHelper.find(sheet, REPORT_DATE_MARKER, 0, Integer.MAX_VALUE,
+                    (cell, value) -> cell.toLowerCase().contains(value.toString()));
             return convertToInstant(
                     Lists.reverse(
                             Arrays.asList(
-                                    sheet.getRow(2)
-                                            .getCell(2)
+                                    sheet.getRow(address.getRow())
+                                            .getCell(address.getColumn())
                                             .getStringCellValue()
                                             .split(" ")))
                             .get(0));
