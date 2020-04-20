@@ -19,7 +19,10 @@
 package ru.portfolio.portfolio.parser.uralsib;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.util.CellAddress;
 import ru.portfolio.portfolio.parser.*;
 import ru.portfolio.portfolio.pojo.PortfolioProperty;
 import ru.portfolio.portfolio.pojo.PortfolioPropertyType;
@@ -30,15 +33,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import static java.lang.Double.parseDouble;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static ru.portfolio.portfolio.parser.uralsib.PortfolioPropertyTable.SummaryTableHeader.RUB;
 
+@Slf4j
 public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
     private static final String ASSETS_TABLE = "ОЦЕНКА АКТИВОВ";
     private static final String TABLE_FIRST_HEADER_LINE = "На конец отчетного периода";
     private static final String ASSETS = "Общая стоимость активов:";
-    private static final BigDecimal min = BigDecimal.valueOf(0.01);
+    private static final String EXCHANGE_RATE = "Официальный обменный курс";
     @Getter
     private final BrokerReport report;
     @Getter
@@ -52,41 +56,61 @@ public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
     }
 
     protected static Collection<PortfolioProperty> getTotalAssets(BrokerReport report) {
-        ExcelTable table = ExcelTable.ofNoName(report.getSheet(), ASSETS_TABLE, TABLE_FIRST_HEADER_LINE,
-                SummaryTableHeader.class, 3);
-        if (table.isEmpty()) {
-            throw new IllegalArgumentException("Таблица '" + ASSETS_TABLE + "' не найдена");
-        }
-        Row row = table.findRow(ASSETS);
-        if (row == null) {
+        try {
+            ExcelTable table = ExcelTable.ofNoName(report.getSheet(), ASSETS_TABLE, TABLE_FIRST_HEADER_LINE,
+                    SummaryTableHeader.class, 3);
+            if (table.isEmpty()) {
+                log.info("Таблица {}' не найдена", ASSETS_TABLE);
+                return emptyList();
+            }
+            Row row = table.findRow(ASSETS);
+            if (row == null) {
+                return emptyList();
+            }
+            return Collections.singletonList(PortfolioProperty.builder()
+                    .portfolio(report.getPortfolio())
+                    .property(PortfolioPropertyType.TOTAL_ASSETS)
+                    .value(table.getCurrencyCellValue(row, RUB).toString())
+                    .timestamp(report.getReportDate())
+                    .build());
+        } catch (Exception e) {
+            log.info("Не могу распарсить таблицу '{}' в файле {}", ASSETS_TABLE, report.getPath().getFileName(), e);
             return emptyList();
         }
-        return Collections.singletonList(PortfolioProperty.builder()
-                .portfolio(report.getPortfolio())
-                .property(PortfolioPropertyType.TOTAL_ASSETS)
-                .value(table.getCurrencyCellValue(row, RUB).toString())
-                .timestamp(report.getReportDate())
-                .build());
     }
 
     protected static Collection<PortfolioProperty> getExchangeRate(BrokerReport report) {
-        return singletonList(PortfolioProperty.builder()
-                .portfolio(report.getPortfolio())
-                .property(PortfolioPropertyType.USDRUB_EXCHANGE_RATE)
-                .value(getUsdExchangeRate(report).toString())
-                .timestamp(report.getReportDate())
-                .build());
-    }
-
-    private static BigDecimal getUsdExchangeRate(BrokerReport report) {
-        return BigDecimal.valueOf(
-                Double.parseDouble(
-                        report.getSheet()
-                                .getRow(12)
-                                .getCell(0)
-                                .getStringCellValue()
-                                .split(" ")[2]
-                                .replace(",", ".")));
+        try {
+            CellAddress address = ExcelTableHelper.find(report.getSheet(), EXCHANGE_RATE);
+            if (address == ExcelTableHelper.NOT_FOUND) {
+                return emptyList();
+            }
+            List<PortfolioProperty> exchangeRates = new ArrayList<>();
+            Cell cell = report.getSheet().getRow(address.getRow() + 1).getCell(0);
+            String text = ExcelTable.getStringCellValue(cell);
+            String[] words = text.split(" ");
+            for (int i = 0; i < words.length; i++) {
+                try {
+                    String word = words[i];
+                    if (word.equalsIgnoreCase("=")) {
+                        String currency = words[i - 1];
+                        BigDecimal exchangeRate = BigDecimal.valueOf(parseDouble(words[i + 1].replace(",", ".")));
+                        exchangeRates.add(PortfolioProperty.builder()
+                                .portfolio(report.getPortfolio())
+                                .property(PortfolioPropertyType.valueOf(currency.toUpperCase() + "RUB_EXCHANGE_RATE"))
+                                .value(exchangeRate.toString())
+                                .timestamp(report.getReportDate())
+                                .build());
+                    }
+                } catch (Exception e) {
+                    log.debug("Не смог распарсить курс валюты из отчета", e);
+                }
+            }
+            return exchangeRates;
+        } catch (Exception e) {
+            log.debug("Не могу найти обменный курс в файле {}", report.getPath().getFileName(), e);
+            return emptyList();
+        }
     }
 
     enum SummaryTableHeader implements TableColumnDescription {
@@ -96,6 +120,7 @@ public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
 
         @Getter
         private final TableColumn column;
+
         SummaryTableHeader(TableColumn... rowDescripts) {
             this.column = MultiLineTableColumn.of(rowDescripts);
         }

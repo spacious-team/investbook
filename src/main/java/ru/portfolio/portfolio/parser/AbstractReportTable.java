@@ -19,6 +19,7 @@
 package ru.portfolio.portfolio.parser;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 
 import java.time.Instant;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@Slf4j
 public abstract class AbstractReportTable<RowType> implements ReportTable<RowType> {
     @Getter
     private final BrokerReport report;
@@ -45,10 +47,14 @@ public abstract class AbstractReportTable<RowType> implements ReportTable<RowTyp
                                   Class<? extends TableColumnDescription> headerDescription,
                                   int headersRowCount) {
         this.report = report;
-        ExcelTable table = (tableFooter != null && !tableFooter.isEmpty()) ?
-                ExcelTable.of(report.getSheet(), tableName, tableFooter, headerDescription, headersRowCount) :
-                ExcelTable.of(report.getSheet(), tableName, headerDescription, headersRowCount);
-        this.data.addAll(pasreTable(table));
+        try {
+            ExcelTable table = (tableFooter != null && !tableFooter.isEmpty()) ?
+                    ExcelTable.of(report.getSheet(), tableName, tableFooter, headerDescription, headersRowCount) :
+                    ExcelTable.of(report.getSheet(), tableName, headerDescription, headersRowCount);
+            this.data.addAll(pasreTable(table));
+        } catch (Exception e) {
+            log.warn("Ошибка при парсинге таблицы '{}' транзакций в файле {}", tableName, report.getPath().getFileName());
+        }
     }
 
     protected Collection<RowType> pasreTable(ExcelTable table) {
