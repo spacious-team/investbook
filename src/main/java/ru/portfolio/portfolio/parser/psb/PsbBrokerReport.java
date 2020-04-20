@@ -20,6 +20,7 @@ package ru.portfolio.portfolio.parser.psb;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -69,10 +70,18 @@ public class PsbBrokerReport implements BrokerReport {
 
     public PsbBrokerReport(String exelFileName, InputStream is) throws IOException {
         this.path = Paths.get(exelFileName);
-        this.book = new XSSFWorkbook(is);
+        this.book = getWorkBook(exelFileName, is);
         this.sheet = book.getSheetAt(0);
         this.portfolio = getPortfolio(this.sheet);
         this.reportDate = getReportDate(this.sheet);
+    }
+
+    private Workbook getWorkBook(String exelFileName, InputStream is) throws IOException {
+        if (exelFileName.endsWith(".xls")) {
+            return new HSSFWorkbook(is); // constructor close zis
+        } else {
+            return new XSSFWorkbook(is);
+        }
     }
 
     private static String getPortfolio(Sheet sheet) {

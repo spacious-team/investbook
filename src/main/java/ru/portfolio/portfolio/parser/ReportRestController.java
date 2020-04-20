@@ -41,6 +41,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.zip.ZipInputStream;
 
@@ -77,7 +78,11 @@ public class ReportRestController {
                         if (originalFileName != null && !originalFileName.contains("_invest_")) {
                             log.warn("Рекомендуется загружать отчеты содержащие в имени файла слово 'invest'");
                         }
-                        parseUralsibReport(report);
+                        if (originalFileName != null && !originalFileName.toLowerCase().endsWith(".zip")) {
+                            parseUralsibReport(report);
+                        } else {
+                            parseUralsibZipReport(report);
+                        }
                         break;
                     default:
                         throw new IllegalArgumentException("Неизвестный формат " + format);
@@ -132,23 +137,50 @@ public class ReportRestController {
             ReportTableFactory reportTableFactory = new PsbReportTableFactory(brockerReport);
             reportParserService.parse(reportTableFactory);
         } catch (Exception e) {
-            log.warn("Не могу открыть/закрыть отчет {}", report.getOriginalFilename(), e);
-            throw new RuntimeException(e);
+            String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
+            log.warn(error, e);
+            throw new RuntimeException(error, e);
         }
     }
 
     private void parseUralsibReport(MultipartFile report) {
-        try (ZipInputStream zis = new ZipInputStream(report.getInputStream())) {
-            try (UralsibBrokerReport brockerReport = new UralsibBrokerReport(zis)) {
-                ReportTableFactory reportTableFactory = new UralsibReportTableFactory(brockerReport);
-                reportParserService.parse(reportTableFactory);
+        parseUralsibReport(report, () -> {
+            try {
+                return new UralsibBrokerReport(report.getOriginalFilename(), report.getInputStream());
             } catch (Exception e) {
-                log.warn("Не могу открыть/закрыть отчет {}, ожидается .zip файл с вложенным .xls файлом", report.getOriginalFilename(), e);
-                throw new RuntimeException(e);
+                String error = "Отчет предоставлен в неверном формате " + report.getOriginalFilename();
+                log.warn(error, e);
+                throw new RuntimeException(error, e);
             }
+        });
+    }
+
+    private void parseUralsibZipReport(MultipartFile report) {
+        try (ZipInputStream zis = new ZipInputStream(report.getInputStream())) {
+            parseUralsibReport(report, () -> {
+                try {
+                    return new UralsibBrokerReport(zis);
+                } catch (Exception e) {
+                    String error = "Отчет предоставлен в неверном формате " + report.getOriginalFilename();
+                    log.warn(error, e);
+                    throw new RuntimeException(error, e);
+                }
+            });
         } catch (IOException e) {
-            log.warn("Не могу открыть zip архив {}", report.getOriginalFilename(), e);
-            throw new RuntimeException(e);
+            String error = "Не могу открыть zip архив " + report.getOriginalFilename();
+            log.warn(error, e);
+            throw new RuntimeException(error, e);
+        }
+    }
+
+    private void parseUralsibReport(MultipartFile report, Supplier<UralsibBrokerReport> reportSupplizer) {
+        try (UralsibBrokerReport brockerReport = reportSupplizer.get()) {
+            ReportTableFactory reportTableFactory = new UralsibReportTableFactory(brockerReport);
+            reportParserService.parse(reportTableFactory);
+        } catch (Exception e) {
+            String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
+            log.warn(error, e);
+            throw new RuntimeException(error, e);
         }
     }
 }

@@ -21,17 +21,20 @@ package ru.portfolio.portfolio.parser.uralsib;
 import com.google.common.collect.Lists;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import ru.portfolio.portfolio.parser.BrokerReport;
 import ru.portfolio.portfolio.parser.ExcelTable;
 import ru.portfolio.portfolio.parser.ExcelTableHelper;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -43,6 +46,7 @@ import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+@RequiredArgsConstructor()
 @EqualsAndHashCode(of = "path")
 public class UralsibBrokerReport implements BrokerReport {
     public static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
@@ -64,10 +68,26 @@ public class UralsibBrokerReport implements BrokerReport {
     public UralsibBrokerReport(ZipInputStream zis) throws IOException {
         ZipEntry zipEntry = zis.getNextEntry();
         this.path = Paths.get(zipEntry.getName());
-        this.book = new HSSFWorkbook(zis); // constructor close zis
+        this.book = getWorkBook(this.path.getFileName().toString(), zis);
         this.sheet = book.getSheetAt(0);
         this.portfolio = getPortfolio(this.sheet);
         this.reportDate = getReportDate(this.sheet);
+    }
+
+    public UralsibBrokerReport(String exelFileName, InputStream is) throws IOException {
+        this.path = Paths.get(exelFileName);
+        this.book = getWorkBook(exelFileName, is);
+        this.sheet = book.getSheetAt(0);
+        this.portfolio = getPortfolio(this.sheet);
+        this.reportDate = getReportDate(this.sheet);
+    }
+
+    private Workbook getWorkBook(String exelFileName, InputStream is) throws IOException {
+        if (exelFileName.endsWith(".xls")) {
+            return new HSSFWorkbook(is); // constructor close zis
+        } else {
+            return new XSSFWorkbook(is);
+        }
     }
 
     private static String getPortfolio(Sheet sheet) {
