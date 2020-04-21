@@ -23,7 +23,7 @@
             <outputDirectory/>
         </file>
         <file>
-            <source>src/main/resources/application.properties</source>
+            <source>src/main/resources/application-conf.properties</source>
             <outputDirectory/>
         </file>
         <file>
