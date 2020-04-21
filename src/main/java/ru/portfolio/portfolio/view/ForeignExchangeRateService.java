@@ -63,7 +63,7 @@ public class ForeignExchangeRateService {
      * @return exchange rate for currency (russian rubles)
      */
     public BigDecimal getExchangeRateToRub(String currency) {
-        PortfolioPropertyType property = PortfolioPropertyType.valueOf(currency + "RUB_EXCHANGE_RATE");
+        PortfolioPropertyType property = getExchangePropertyFor(currency);
         BigDecimal exchangeRate = portfolioPropertyRepository
                 .findFirstByPropertyOrderByTimestampDesc(property.name())
                 .map(v -> BigDecimal.valueOf(Double.parseDouble(v.getValue())))
@@ -84,6 +84,10 @@ public class ForeignExchangeRateService {
         }
         cache(currency, "RUB", exchangeRate);
         return exchangeRate;
+    }
+
+    public static PortfolioPropertyType getExchangePropertyFor(String currency) {
+        return PortfolioPropertyType.valueOf(currency.toUpperCase() + "RUB_EXCHANGE_RATE");
     }
 
     private void cache(String baseCurrency, String quoteCurrency, BigDecimal exchangeRate) {

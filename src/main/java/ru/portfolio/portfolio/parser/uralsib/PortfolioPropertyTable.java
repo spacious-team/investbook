@@ -26,6 +26,7 @@ import org.apache.poi.ss.util.CellAddress;
 import ru.portfolio.portfolio.parser.*;
 import ru.portfolio.portfolio.pojo.PortfolioProperty;
 import ru.portfolio.portfolio.pojo.PortfolioPropertyType;
+import ru.portfolio.portfolio.view.ForeignExchangeRateService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -97,7 +98,7 @@ public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
                         BigDecimal exchangeRate = BigDecimal.valueOf(parseDouble(words[i + 1].replace(",", ".")));
                         exchangeRates.add(PortfolioProperty.builder()
                                 .portfolio(report.getPortfolio())
-                                .property(PortfolioPropertyType.valueOf(currency.toUpperCase() + "RUB_EXCHANGE_RATE"))
+                                .property(ForeignExchangeRateService.getExchangePropertyFor(currency))
                                 .value(exchangeRate.toString())
                                 .timestamp(report.getReportDate())
                                 .build());
