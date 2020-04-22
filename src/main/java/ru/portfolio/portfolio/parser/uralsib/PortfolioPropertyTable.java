@@ -29,6 +29,8 @@ import ru.portfolio.portfolio.pojo.PortfolioPropertyType;
 import ru.portfolio.portfolio.view.ForeignExchangeRateService;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,9 +46,11 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
     private static final String TABLE_FIRST_HEADER_LINE = "На конец отчетного периода";
     private static final String ASSETS = "Общая стоимость активов:";
     private static final String EXCHANGE_RATE = "Официальный обменный курс";
+    private final ForeignExchangeRateService foreignExchangeRateService;
 
-    protected PortfolioPropertyTable(UralsibBrokerReport report) {
+    protected PortfolioPropertyTable(UralsibBrokerReport report, ForeignExchangeRateService foreignExchangeRateService) {
         super(report);
+        this.foreignExchangeRateService = foreignExchangeRateService;
     }
 
     @Override
@@ -112,6 +116,46 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
         } catch (Exception e) {
             log.debug("Не могу найти обменный курс в файле {}", report.getPath().getFileName(), e);
             return emptyList();
+        }
+    }
+
+    /**
+     * Returns foreign exchange rate to given transaction time instant from report or from database.
+     */
+    public BigDecimal getExchangeRate(String baseCurrency, String quoteCurrency, Instant transactionInstant) {
+        if (baseCurrency.equalsIgnoreCase(quoteCurrency)) {
+            return BigDecimal.ONE;
+        }
+        BigDecimal exhangeRate = BigDecimal.ZERO;
+        if (quoteCurrency.equalsIgnoreCase("rub")) {
+            exhangeRate = getReportExchangeRate(baseCurrency);
+        } else if (baseCurrency.equalsIgnoreCase("rub")) {
+            BigDecimal v = getReportExchangeRate(quoteCurrency);
+            exhangeRate = v.equals(BigDecimal.ZERO) ? v : BigDecimal.ONE.divide(v, 6, RoundingMode.HALF_UP);
+        } else {
+            BigDecimal baseToRubRate = getReportExchangeRate(baseCurrency);
+            BigDecimal quoteToRubRate = getReportExchangeRate(quoteCurrency);
+            if (!baseToRubRate.equals(BigDecimal.ZERO) && !quoteToRubRate.equals(BigDecimal.ZERO)) {
+                exhangeRate = baseToRubRate.divide(quoteToRubRate, 6, RoundingMode.HALF_UP);
+            }
+        }
+        if (exhangeRate.equals(BigDecimal.ZERO)) {
+            exhangeRate = foreignExchangeRateService.getExchangeRate(baseCurrency, quoteCurrency,
+                    transactionInstant, UralsibBrokerReport.zoneId);
+        }
+        return exhangeRate;
+    }
+
+    private BigDecimal getReportExchangeRate(String currency) {
+        try {
+            return getData().stream()
+                    .filter(e -> e.getProperty().equals(ForeignExchangeRateService.getExchangePropertyFor(currency)))
+                    .map(PortfolioProperty::getValue)
+                    .map(s -> BigDecimal.valueOf(Double.parseDouble(s)))
+                    .findFirst()
+                    .orElse(BigDecimal.ZERO);
+        } catch (Exception e) {
+            return BigDecimal.ZERO;
         }
     }
 

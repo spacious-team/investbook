@@ -30,6 +30,7 @@ import ru.portfolio.portfolio.parser.psb.PsbBrokerReport;
 import ru.portfolio.portfolio.parser.psb.PsbReportTableFactory;
 import ru.portfolio.portfolio.parser.uralsib.UralsibBrokerReport;
 import ru.portfolio.portfolio.parser.uralsib.UralsibReportTableFactory;
+import ru.portfolio.portfolio.view.ForeignExchangeRateService;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -53,6 +54,7 @@ public class ReportRestController {
             System.getProperty("user.home", ""),
             "portfolio-report-backups");
     private final ReportParserService reportParserService;
+    private final ForeignExchangeRateService foreignExchangeRateService;
 
     @PostMapping("/reports")
     public ResponseEntity<String> post(@RequestParam("reports") MultipartFile[] reports,
@@ -175,7 +177,7 @@ public class ReportRestController {
 
     private void parseUralsibReport(MultipartFile report, Supplier<UralsibBrokerReport> reportSupplizer) {
         try (UralsibBrokerReport brockerReport = reportSupplizer.get()) {
-            ReportTableFactory reportTableFactory = new UralsibReportTableFactory(brockerReport);
+            ReportTableFactory reportTableFactory = new UralsibReportTableFactory(brockerReport, foreignExchangeRateService);
             reportParserService.parse(reportTableFactory);
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
