@@ -37,7 +37,14 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
 
     public DerivativeTransactionTable(PsbBrokerReport report) {
         super(report, TABLE_NAME, TABLE_END_TEXT, FortsTableHeader.class);
-        getData().addAll(new DerivativeExpirationTable(report).getData());
+    }
+
+    @Override
+    protected Collection<DerivativeTransaction> parseTable(ExcelTable table) {
+        Collection<DerivativeTransaction> data = new ArrayList<>();
+        data.addAll(super.parseTable(table));
+        data.addAll(new DerivativeExpirationTable((PsbBrokerReport) getReport()).getData());
+        return data;
     }
 
     @Override

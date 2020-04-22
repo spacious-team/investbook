@@ -47,7 +47,6 @@ public class DividendTable extends PaymentsTable<SecurityEventCashFlow> {
                          PortfolioSecuritiesTable securitiesTable,
                          SecurityTransactionTable securityTransactionTable) {
         super(report, securitiesTable, securityTransactionTable);
-        data.addAll(pasreTable());
     }
 
     @Override

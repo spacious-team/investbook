@@ -32,24 +32,22 @@ import java.util.List;
 import static ru.portfolio.portfolio.parser.psb.SecurityTransactionTable.TransactionTableHeader.*;
 
 @Slf4j
-public class SecurityTransactionTable implements ReportTable<SecurityTransaction> {
+public class SecurityTransactionTable extends InitializableReportTable<SecurityTransaction> {
     private static final String TABLE1_NAME = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами в дату заключения";
     private static final String TABLE2_NAME = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами Т+, рассчитанные в отчетном периоде";
     private static final String TABLE_END_TEXT = "Итого оборот";
     private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
-    @Getter
-    private final PsbBrokerReport report;
-    @Getter
-    private final List<SecurityTransaction> data = new ArrayList<>();
 
     public SecurityTransactionTable(PsbBrokerReport report) {
-        this.report = report;
-        try {
-            this.data.addAll(parseTable(report, TABLE1_NAME));
-            this.data.addAll(parseTable(report, TABLE2_NAME));
-        } catch (Exception e) {
-            log.warn("Ошибка при парсинге транзакций в файле {}", report.getPath().getFileName());
-        }
+        super(report);
+    }
+
+    @Override
+    protected Collection<SecurityTransaction> parseTable() {
+        List<SecurityTransaction> data = new ArrayList<>();
+        data.addAll(parseTable((PsbBrokerReport) getReport(), TABLE1_NAME));
+        data.addAll(parseTable((PsbBrokerReport) getReport(), TABLE2_NAME));
+        return data;
     }
 
     private List<SecurityTransaction> parseTable(PsbBrokerReport report, String tableName) {
@@ -71,7 +69,7 @@ public class SecurityTransactionTable implements ReportTable<SecurityTransaction
                 .add(table.getCurrencyCellValue(row, ITS_COMMISSION))
                 .negate();
         return Collections.singletonList(SecurityTransaction.builder()
-                .timestamp(report.convertToInstant(table.getStringCellValue(row, DATE_TIME)))
+                .timestamp(getReport().convertToInstant(table.getStringCellValue(row, DATE_TIME)))
                 .transactionId(table.getLongCellValue(row, TRANSACTION))
                 .portfolio(getReport().getPortfolio())
                 .isin(table.getStringCellValue(row, ISIN))

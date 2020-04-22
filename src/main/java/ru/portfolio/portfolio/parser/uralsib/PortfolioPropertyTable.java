@@ -39,21 +39,22 @@ import static java.util.Collections.emptyList;
 import static ru.portfolio.portfolio.parser.uralsib.PortfolioPropertyTable.SummaryTableHeader.RUB;
 
 @Slf4j
-public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
+public class PortfolioPropertyTable extends InitializableReportTable<PortfolioProperty> {
     private static final String ASSETS_TABLE = "ОЦЕНКА АКТИВОВ";
     private static final String TABLE_FIRST_HEADER_LINE = "На конец отчетного периода";
     private static final String ASSETS = "Общая стоимость активов:";
     private static final String EXCHANGE_RATE = "Официальный обменный курс";
-    @Getter
-    private final BrokerReport report;
-    @Getter
-    private final List<PortfolioProperty> data = new ArrayList<>();
-
 
     protected PortfolioPropertyTable(UralsibBrokerReport report) {
-        this.report = report;
-        this.data.addAll(getTotalAssets(report));
-        this.data.addAll(getExchangeRate(report));
+        super(report);
+    }
+
+    @Override
+    protected Collection<PortfolioProperty> parseTable() {
+        List<PortfolioProperty> data = new ArrayList<>();
+        data.addAll(getTotalAssets(getReport()));
+        data.addAll(getExchangeRate(getReport()));
+        return data;
     }
 
     protected static Collection<PortfolioProperty> getTotalAssets(BrokerReport report) {

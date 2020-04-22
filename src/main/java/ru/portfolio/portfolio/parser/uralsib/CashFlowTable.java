@@ -41,7 +41,7 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
     }
 
     @Override
-    protected Collection<EventCashFlow> pasreTable(ExcelTable table) {
+    protected Collection<EventCashFlow> parseTable(ExcelTable table) {
         return table.getDataCollection(getReport().getPath(), this::getRow, e ->
                 // SQL db restricts storing duplicate rows. Join rows by summing they values.
                 Collections.singletonList(e.toBuilder()

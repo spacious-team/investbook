@@ -19,8 +19,6 @@
 package ru.portfolio.portfolio.parser.psb;
 
 import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
@@ -29,7 +27,6 @@ import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,8 +48,8 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> pasreTable(ExcelTable table) {
-        return hasOpenContract() ? super.pasreTable(table) : Collections.emptyList();
+    protected Collection<SecurityEventCashFlow> parseTable(ExcelTable table) {
+        return hasOpenContract() ? super.parseTable(table) : Collections.emptyList();
     }
 
     private boolean hasOpenContract() {
@@ -132,17 +129,5 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
         DerivativeCashFlowTableHeader(String... words) {
             this.column = TableColumnImpl.of(words);
         }
-    }
-
-    @Getter
-    @Builder
-    @EqualsAndHashCode
-    public static class DerivativeCashFlowTableRow {
-        private String contract;
-        private Instant timestamp;
-        private CashFlowType event;
-        private Integer count;
-        private BigDecimal value;
-        private String currency; // валюта
     }
 }
