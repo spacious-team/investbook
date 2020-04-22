@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collection;
 
 @Slf4j
@@ -65,7 +66,7 @@ public abstract class AbstractReportTable<RowType> extends InitializableReportTa
     }
 
     protected Collection<RowType> parseTable(ExcelTable table) {
-        return table.getDataCollection(getReport().getPath(), this::getRow);
+        return table.getDataCollection(getReport().getPath(), this::getRow, this::checkEquality, this::mergeDuplicates);
     }
 
     protected Instant convertToInstant(String dateTime) {
@@ -73,4 +74,12 @@ public abstract class AbstractReportTable<RowType> extends InitializableReportTa
     }
 
     protected abstract Collection<RowType> getRow(ExcelTable table, Row row);
+
+    protected boolean checkEquality(RowType object1, RowType object2) {
+        return object1.equals(object2);
+    }
+
+    protected Collection<RowType> mergeDuplicates(RowType oldObject, RowType newObject) {
+        return Arrays.asList(oldObject, newObject);
+    }
 }

@@ -33,7 +33,7 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.function.BiPredicate;
 
 import static java.util.Collections.emptyList;
 
@@ -131,6 +131,9 @@ public class ExcelTable implements Iterable<Row> {
         return columnIndices;
     }
 
+    /**
+     * Extracts exactly one object from excel row
+     */
     public <T> List<T> getData(Path file, BiFunction<ExcelTable, Row, T> rowExtractor) {
         return getDataCollection(file, (table, row) ->
                 Optional.ofNullable(rowExtractor.apply(table, row))
@@ -138,12 +141,19 @@ public class ExcelTable implements Iterable<Row> {
                         .orElse(emptyList()));
     }
 
+    /**
+     * Extracts objects from excel table without duplicate objects handling (duplicated row are both will be returned)
+     */
     public <T> List<T> getDataCollection(Path file, BiFunction<ExcelTable, Row, Collection<T>> rowExtractor) {
-        return getDataCollection(file, rowExtractor, e -> Arrays.asList(e, e));
+        return getDataCollection(file, rowExtractor, Object::equals, (older, newer) -> Arrays.asList(older, newer));
     }
 
+    /**
+     * Extracts objects from excel table with duplicate objects handling logic
+     */
     public <T> List<T> getDataCollection(Path file, BiFunction<ExcelTable, Row, Collection<T>> rowExtractor,
-                                         Function<T, Collection<T>> mergeDuplicates) {
+                                         BiPredicate<T, T> equalityChecker,
+                                         BiFunction<T, T, Collection<T>> mergeDuplicates) {
         List<T> data = new ArrayList<>();
         for (Row row : this) {
             if (row != null) {
@@ -151,9 +161,16 @@ public class ExcelTable implements Iterable<Row> {
                     Collection<T> result = rowExtractor.apply(this, row);
                     if (result != null) {
                         for (T r : result) {
-                            if (data.contains(r)) {
-                                data.remove(r);
-                                data.addAll(mergeDuplicates.apply(r));
+                            T equalsObject = null;
+                            for (T e : data) {
+                                if (equalityChecker.test(e, r)) {
+                                    equalsObject = e;
+                                    break;
+                                }
+                            }
+                            if (equalsObject != null) {
+                                data.remove(equalsObject);
+                                data.addAll(mergeDuplicates.apply(equalsObject, r));
                             } else {
                                 data.add(r);
                             }

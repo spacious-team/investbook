@@ -27,7 +27,6 @@ import ru.portfolio.portfolio.pojo.EventCashFlow;
 
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Collections;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -40,16 +39,6 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
 
     public CashFlowTable(PsbBrokerReport report) {
         super(report, TABLE_NAME, "", CashFlowTableHeader.class);
-    }
-
-    @Override
-    protected Collection<EventCashFlow> parseTable(ExcelTable table) {
-        return table.getDataCollection(getReport().getPath(), this::getRow, e ->
-                // SQL db restricts storing duplicate rows. Join rows by summing they values.
-                Collections.singletonList(e.toBuilder()
-                        .value(e.getValue()
-                                .multiply(BigDecimal.valueOf(2)))
-                        .build()));
     }
 
     @Override
@@ -85,6 +74,16 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
                 .currency(table.getStringCellValue(row, CURRENCY))
                 .description((description == null || description.isEmpty())? null : description)
                 .build());
+    }
+
+    @Override
+    protected boolean checkEquality(EventCashFlow flow1, EventCashFlow flow2) {
+        return EventCashFlow.checkEquality(flow1, flow2);
+    }
+
+    @Override
+    protected Collection<EventCashFlow> mergeDuplicates(EventCashFlow old, EventCashFlow nw) {
+        return EventCashFlow.mergeDuplicates(old, nw);
     }
 
     enum CashFlowTableHeader implements TableColumnDescription {
