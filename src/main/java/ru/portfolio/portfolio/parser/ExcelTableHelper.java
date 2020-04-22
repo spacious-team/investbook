@@ -25,6 +25,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 
+import java.math.BigDecimal;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -206,4 +207,24 @@ public class ExcelTableHelper {
         return sheet.getRow(address.getRow()).getCell(address.getColumn());
     }
 
+    public static long getLongCellValue(Cell cell) {
+        CellType type = cell.getCellType();
+        if (type == CellType.NUMERIC) {
+            return Double.valueOf(cell.getNumericCellValue()).longValue();
+        } else {
+            return Long.parseLong(cell.getStringCellValue());
+        }
+    }
+
+    public static BigDecimal getCurrencyCellValue(Cell cell) {
+        double cellValue = cell.getNumericCellValue();
+        return (Math.abs(cellValue - 0.01d) < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
+    }
+
+    public static String getStringCellValue(Cell cell) {
+        if (cell == null || cell.getCellType() == CellType.BLANK) {
+            return "";
+        }
+        return cell.getStringCellValue();
+    }
 }

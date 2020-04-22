@@ -23,7 +23,6 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellAddress;
@@ -212,48 +211,27 @@ public class ExcelTable implements Iterable<Row> {
     }
 
     public long getLongCellValue(Row row, TableColumnDescription columnDescription) {
-        return getLongCellValue(getCell(row, columnDescription));
+        return ExcelTableHelper.getLongCellValue(getCell(row, columnDescription));
     }
 
     public long getLongCellValue(CellAddress address) {
-        return getLongCellValue(getCell(address));
-    }
-
-    public static long getLongCellValue(Cell cell) {
-        CellType type = cell.getCellType();
-        if (type == CellType.NUMERIC) {
-            return Double.valueOf(cell.getNumericCellValue()).longValue();
-        } else {
-            return Long.parseLong(cell.getStringCellValue());
-        }
+        return ExcelTableHelper.getLongCellValue(getCell(address));
     }
 
     public BigDecimal getCurrencyCellValue(Row row, TableColumnDescription columnDescription) {
-        return getCurrencyCellValue(getCell(row, columnDescription));
+        return ExcelTableHelper.getCurrencyCellValue(getCell(row, columnDescription));
     }
 
     public BigDecimal getCurrencyCellValue(CellAddress address) {
-        return getCurrencyCellValue(getCell(address));
-    }
-
-    public static BigDecimal getCurrencyCellValue(Cell cell) {
-        double cellValue = cell.getNumericCellValue();
-        return (Math.abs(cellValue - 0.01d) < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
+        return ExcelTableHelper.getCurrencyCellValue(getCell(address));
     }
 
     public String getStringCellValue(Row row, TableColumnDescription columnDescription) {
-        return getStringCellValue(getCell(row, columnDescription));
+        return ExcelTableHelper.getStringCellValue(getCell(row, columnDescription));
     }
 
     public String getStringCellValue(CellAddress address) {
-        return getStringCellValue(getCell(address));
-    }
-
-    public static String getStringCellValue(Cell cell) {
-        if (cell == null || cell.getCellType() == CellType.BLANK) {
-            return "";
-        }
-        return cell.getStringCellValue();
+        return ExcelTableHelper.getStringCellValue(getCell(address));
     }
 
     @Override

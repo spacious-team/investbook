@@ -28,7 +28,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import ru.portfolio.portfolio.parser.BrokerReport;
-import ru.portfolio.portfolio.parser.ExcelTable;
 import ru.portfolio.portfolio.parser.ExcelTableHelper;
 
 import java.io.IOException;
@@ -89,7 +88,7 @@ public class PsbBrokerReport implements BrokerReport {
             CellAddress address = ExcelTableHelper.find(sheet, PORTFOLIO_MARKER);
             for (Cell cell : sheet.getRow(address.getRow())) {
                 if (cell != null && cell.getColumnIndex() > address.getColumn() && cell.getCellType() == CellType.STRING) {
-                    String value = ExcelTable.getStringCellValue(cell);
+                    String value = ExcelTableHelper.getStringCellValue(cell);
                     return value.contains("/") ? value.split("/")[0] : value;
                 }
             }
@@ -106,7 +105,7 @@ public class PsbBrokerReport implements BrokerReport {
             CellAddress address = ExcelTableHelper.find(sheet, REPORT_DATE_MARKER);
             for (Cell cell : sheet.getRow(address.getRow())) {
                 if (cell != null && cell.getColumnIndex() > address.getColumn() && cell.getCellType() == CellType.STRING) {
-                    return convertToInstant(ExcelTable.getStringCellValue(cell).split(" ")[3]);
+                    return convertToInstant(ExcelTableHelper.getStringCellValue(cell).split(" ")[3]);
                 }
             }
             throw new IllegalArgumentException(

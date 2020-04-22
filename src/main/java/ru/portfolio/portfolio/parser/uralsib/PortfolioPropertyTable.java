@@ -93,7 +93,7 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
             }
             List<PortfolioProperty> exchangeRates = new ArrayList<>();
             Cell cell = report.getSheet().getRow(address.getRow() + 1).getCell(0);
-            String text = ExcelTable.getStringCellValue(cell);
+            String text = ExcelTableHelper.getStringCellValue(cell);
             String[] words = text.split(" ");
             for (int i = 0; i < words.length; i++) {
                 try {
