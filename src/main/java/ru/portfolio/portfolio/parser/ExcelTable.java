@@ -23,7 +23,6 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellAddress;
@@ -33,7 +32,7 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.function.BiPredicate;
 
 import static java.util.Collections.emptyList;
 
@@ -131,6 +130,9 @@ public class ExcelTable implements Iterable<Row> {
         return columnIndices;
     }
 
+    /**
+     * Extracts exactly one object from excel row
+     */
     public <T> List<T> getData(Path file, BiFunction<ExcelTable, Row, T> rowExtractor) {
         return getDataCollection(file, (table, row) ->
                 Optional.ofNullable(rowExtractor.apply(table, row))
@@ -138,12 +140,19 @@ public class ExcelTable implements Iterable<Row> {
                         .orElse(emptyList()));
     }
 
+    /**
+     * Extracts objects from excel table without duplicate objects handling (duplicated row are both will be returned)
+     */
     public <T> List<T> getDataCollection(Path file, BiFunction<ExcelTable, Row, Collection<T>> rowExtractor) {
-        return getDataCollection(file, rowExtractor, e -> Arrays.asList(e, e));
+        return getDataCollection(file, rowExtractor, Object::equals, (older, newer) -> Arrays.asList(older, newer));
     }
 
+    /**
+     * Extracts objects from excel table with duplicate objects handling logic
+     */
     public <T> List<T> getDataCollection(Path file, BiFunction<ExcelTable, Row, Collection<T>> rowExtractor,
-                                         Function<T, Collection<T>> mergeDuplicates) {
+                                         BiPredicate<T, T> equalityChecker,
+                                         BiFunction<T, T, Collection<T>> mergeDuplicates) {
         List<T> data = new ArrayList<>();
         for (Row row : this) {
             if (row != null) {
@@ -151,9 +160,16 @@ public class ExcelTable implements Iterable<Row> {
                     Collection<T> result = rowExtractor.apply(this, row);
                     if (result != null) {
                         for (T r : result) {
-                            if (data.contains(r)) {
-                                data.remove(r);
-                                data.addAll(mergeDuplicates.apply(r));
+                            T equalsObject = null;
+                            for (T e : data) {
+                                if (equalityChecker.test(e, r)) {
+                                    equalsObject = e;
+                                    break;
+                                }
+                            }
+                            if (equalsObject != null) {
+                                data.remove(equalsObject);
+                                data.addAll(mergeDuplicates.apply(equalsObject, r));
                             } else {
                                 data.add(r);
                             }
@@ -195,48 +211,27 @@ public class ExcelTable implements Iterable<Row> {
     }
 
     public long getLongCellValue(Row row, TableColumnDescription columnDescription) {
-        return getLongCellValue(getCell(row, columnDescription));
+        return ExcelTableHelper.getLongCellValue(getCell(row, columnDescription));
     }
 
     public long getLongCellValue(CellAddress address) {
-        return getLongCellValue(getCell(address));
-    }
-
-    public static long getLongCellValue(Cell cell) {
-        CellType type = cell.getCellType();
-        if (type == CellType.NUMERIC) {
-            return Double.valueOf(cell.getNumericCellValue()).longValue();
-        } else {
-            return Long.parseLong(cell.getStringCellValue());
-        }
+        return ExcelTableHelper.getLongCellValue(getCell(address));
     }
 
     public BigDecimal getCurrencyCellValue(Row row, TableColumnDescription columnDescription) {
-        return getCurrencyCellValue(getCell(row, columnDescription));
+        return ExcelTableHelper.getCurrencyCellValue(getCell(row, columnDescription));
     }
 
     public BigDecimal getCurrencyCellValue(CellAddress address) {
-        return getCurrencyCellValue(getCell(address));
-    }
-
-    public static BigDecimal getCurrencyCellValue(Cell cell) {
-        double cellValue = cell.getNumericCellValue();
-        return (Math.abs(cellValue - 0.01d) < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
+        return ExcelTableHelper.getCurrencyCellValue(getCell(address));
     }
 
     public String getStringCellValue(Row row, TableColumnDescription columnDescription) {
-        return getStringCellValue(getCell(row, columnDescription));
+        return ExcelTableHelper.getStringCellValue(getCell(row, columnDescription));
     }
 
     public String getStringCellValue(CellAddress address) {
-        return getStringCellValue(getCell(address));
-    }
-
-    public static String getStringCellValue(Cell cell) {
-        if (cell == null || cell.getCellType() == CellType.BLANK) {
-            return "";
-        }
-        return cell.getStringCellValue();
+        return ExcelTableHelper.getStringCellValue(getCell(address));
     }
 
     @Override

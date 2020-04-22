@@ -30,7 +30,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import ru.portfolio.portfolio.parser.BrokerReport;
-import ru.portfolio.portfolio.parser.ExcelTable;
 import ru.portfolio.portfolio.parser.ExcelTableHelper;
 
 import java.io.IOException;
@@ -95,7 +94,7 @@ public class UralsibBrokerReport implements BrokerReport {
             CellAddress address = ExcelTableHelper.find(sheet, PORTFOLIO_MARKER);
             for (Cell cell : sheet.getRow(address.getRow())) {
                 if (cell != null && cell.getColumnIndex() > address.getColumn() && cell.getCellType() == CellType.STRING) {
-                    return ExcelTable.getStringCellValue(cell)
+                    return ExcelTableHelper.getStringCellValue(cell)
                             .replace("_invest", "")
                             .replace("SP", "");
                 }

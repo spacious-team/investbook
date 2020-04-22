@@ -25,19 +25,24 @@ import org.apache.poi.ss.usermodel.Row;
 import ru.portfolio.portfolio.parser.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 
 import static java.util.Collections.emptyList;
 import static ru.portfolio.portfolio.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.*;
+import static ru.portfolio.portfolio.parser.uralsib.UralsibBrokerReport.convertToCurrency;
 
 @Slf4j
 public class SecurityTransactionTable extends AbstractReportTable<SecurityTransaction> {
     private static final String TABLE_NAME = "Биржевые сделки с ценными бумагами в отчетном периоде";
     private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
+    private final PortfolioPropertyTable portfolioPropertyTable;
 
-    public SecurityTransactionTable(UralsibBrokerReport report) {
+    public SecurityTransactionTable(UralsibBrokerReport report,
+                                    PortfolioPropertyTable portfolioPropertyTable) {
         super(report, TABLE_NAME, "", TransactionTableHeader.class, 2);
+        this.portfolioPropertyTable = portfolioPropertyTable;
     }
 
     @Override
@@ -64,28 +69,17 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
             accruedInterest = accruedInterest.negate();
         }
         BigDecimal marketCommission = table.getCurrencyCellValue(row, MARKET_COMMISSION);
-        String marketCommissionCurrency = table.getStringCellValue(row, MARKET_COMMISSION_CURRENCY);
+        String marketCommissionCurrency = convertToCurrency(table.getStringCellValue(row, MARKET_COMMISSION_CURRENCY));
         BigDecimal brokerCommission = table.getCurrencyCellValue(row, BROKER_COMMISSION);
-        String brokerCommissionCurrency = table.getStringCellValue(row, BROKER_COMMISSION_CURRENCY);
-        BigDecimal commission = BigDecimal.ZERO;
-        String commissionCurrency = null;
-        if (marketCommission.abs().compareTo(minValue) >= 0) {
-            commission = marketCommission;
-            commissionCurrency = marketCommissionCurrency;
-        }
-        if (brokerCommission.abs().compareTo(minValue) >= 0) {
-            if (commissionCurrency == null) {
-                commissionCurrency = brokerCommissionCurrency;
-            } else if (!commissionCurrency.equalsIgnoreCase(brokerCommissionCurrency)) {
-                throw new IllegalArgumentException("Для транзакции " + transactionId +
-                        " не могу сложить коммиссию в валютах " + commissionCurrency + " и " + brokerCommissionCurrency);
-            }
-            commission = commission.add(brokerCommission);
-        }
-        commission = commission.negate();
+        String brokerCommissionCurrency = convertToCurrency(table.getStringCellValue(row, BROKER_COMMISSION_CURRENCY));
+        String valueCurrency = convertToCurrency(table.getStringCellValue(row, VALUE_CURRENCY));
+        Instant timestamp = getReport().convertToInstant(table.getStringCellValue(row, DATE_TIME));
+        BigDecimal commission = getConvertedCommission(marketCommission, marketCommissionCurrency, valueCurrency, timestamp)
+                .add(getConvertedCommission(brokerCommission, brokerCommissionCurrency, valueCurrency, timestamp))
+                .negate();
 
         return Collections.singletonList(SecurityTransaction.builder()
-                .timestamp(getReport().convertToInstant(table.getStringCellValue(row, DATE_TIME)))
+                .timestamp(timestamp)
                 .transactionId(transactionId)
                 .portfolio(getReport().getPortfolio())
                 .isin(table.getStringCellValue(row, ISIN))
@@ -93,9 +87,26 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
                 .value(value)
                 .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)
                 .commission(commission)
-                .valueCurrency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, VALUE_CURRENCY)))
-                .commissionCurrency(UralsibBrokerReport.convertToCurrency(commissionCurrency))
+                .valueCurrency(valueCurrency)
+                .commissionCurrency(valueCurrency)
                 .build());
+    }
+
+    /**
+     * Returns commistin converted from commissionCurrency to targetCurrency
+     */
+    private BigDecimal getConvertedCommission(BigDecimal commission, String commissionCurrency,
+                                              String targetCurrency, Instant timestamp) {
+        if (commission.compareTo(minValue) < 0) {
+            // is commission == 0 report contains commissionCurrency = ""
+            return commission;
+        } else if (commissionCurrency.isEmpty() || targetCurrency.isEmpty()) {
+            log.warn("Не указана валюта комиссии для комиссии {} в файле {}", commission, getReport().getPath().getFileName());
+            return commission;
+        }
+        BigDecimal exchangeRate = portfolioPropertyTable.getExchangeRate(commissionCurrency,
+                targetCurrency, timestamp);
+        return commission.multiply(exchangeRate);
     }
 
     enum TransactionTableHeader implements TableColumnDescription {

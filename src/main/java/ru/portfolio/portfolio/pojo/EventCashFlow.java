@@ -28,6 +28,9 @@ import org.springframework.lang.Nullable;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.StringJoiner;
 
 @Getter
 @ToString
@@ -55,4 +58,23 @@ public class EventCashFlow {
 
     @Nullable
     private String description;
+
+    public static boolean checkEquality(EventCashFlow cash1, EventCashFlow cash2) {
+        return cash1.getPortfolio().equals(cash2.getPortfolio()) &&
+                cash1.getTimestamp().equals(cash2.getTimestamp()) &&
+                cash1.getEventType().equals(cash2.getEventType()) &&
+                cash1.getValue().equals(cash2.getValue()) &&
+                cash1.getCurrency().equals(cash2.getCurrency());
+    }
+
+    public static Collection<EventCashFlow> mergeDuplicates(EventCashFlow cash1, EventCashFlow cash2) {
+        StringJoiner joiner = new StringJoiner("; ");
+        if (cash1.getDescription() != null) joiner.add(cash1.getDescription());
+        if (cash2.getDescription() != null) joiner.add(cash2.getDescription());
+        String description = (joiner.length() == 0) ? null : joiner.toString();
+        return Collections.singletonList(cash1.toBuilder()
+                .value(cash1.getValue().add(cash2.getValue()))
+                .description((description == null) ? null : description.substring(0, Math.min(500, description.length())))
+                .build());
+    }
 }

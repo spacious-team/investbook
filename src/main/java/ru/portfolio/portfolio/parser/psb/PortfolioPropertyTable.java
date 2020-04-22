@@ -29,33 +29,29 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static ru.portfolio.portfolio.parser.psb.PortfolioPropertyTable.SummaryTableHeader.*;
 
 @Slf4j
-public class PortfolioPropertyTable implements ReportTable<PortfolioProperty> {
+public class PortfolioPropertyTable extends InitializableReportTable<PortfolioProperty> {
     private static final String SUMMARY_TABLE = "Сводная информация по счетам клиента в валюте счета";
     private static final String ASSETS = "\"СУММА АКТИВОВ\" на конец дня";
     private static final String EXCHANGE_RATE_ROW = "Курс валют ЦБ РФ";
     private static final BigDecimal min = BigDecimal.valueOf(0.01);
-    @Getter
-    private final BrokerReport report;
-    @Getter
-    private final List<PortfolioProperty> data = new ArrayList<>();
 
+    public PortfolioPropertyTable(PsbBrokerReport report) {
+        super(report);
+    }
 
-    protected PortfolioPropertyTable(PsbBrokerReport report) {
-        this.report = report;
-        try {
-            ExcelTable table = getSummaryTable(report);
-            this.data.addAll(getTotalAssets(table, report));
-            this.data.addAll(getExchangeRate(table, report));
-        } catch (Exception e) {
-            log.info("Не могу получить стоимость активов или обменный курс из отчета {}", report.getPath().getFileName());
-        }
+    @Override
+    protected Collection<PortfolioProperty> parseTable() {
+        ExcelTable table = getSummaryTable((PsbBrokerReport) getReport());
+        Collection<PortfolioProperty> data = new ArrayList<>();
+        data.addAll(getTotalAssets(table, (PsbBrokerReport) getReport()));
+        data.addAll(getExchangeRate(table, (PsbBrokerReport) getReport()));
+        return data;
     }
 
     private static ExcelTable getSummaryTable(PsbBrokerReport report) {

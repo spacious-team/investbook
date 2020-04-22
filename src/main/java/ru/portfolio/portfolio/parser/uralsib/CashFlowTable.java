@@ -25,9 +25,7 @@ import ru.portfolio.portfolio.parser.ExcelTable;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.EventCashFlow;
 
-import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Collections;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -38,16 +36,6 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
 
     public CashFlowTable(UralsibBrokerReport report) {
         super(report, PaymentsTable.TABLE_NAME, "", PaymentsTable.PaymentsTableHeader.class);
-    }
-
-    @Override
-    protected Collection<EventCashFlow> pasreTable(ExcelTable table) {
-        return table.getDataCollection(getReport().getPath(), this::getRow, e ->
-                // SQL db restricts storing duplicate rows. Join rows by summing they values.
-                Collections.singletonList(e.toBuilder()
-                        .value(e.getValue()
-                                .multiply(BigDecimal.valueOf(2)))
-                        .build()));
     }
 
     @Override
@@ -79,5 +67,15 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
                 .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
                 .description((description == null || description.isEmpty())? null : description)
                 .build());
+    }
+
+    @Override
+    protected boolean checkEquality(EventCashFlow flow1, EventCashFlow flow2) {
+        return EventCashFlow.checkEquality(flow1, flow2);
+    }
+
+    @Override
+    protected Collection<EventCashFlow> mergeDuplicates(EventCashFlow old, EventCashFlow nw) {
+        return EventCashFlow.mergeDuplicates(old, nw);
     }
 }

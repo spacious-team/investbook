@@ -26,7 +26,6 @@ import ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.ReportSecu
 import ru.portfolio.portfolio.pojo.Security;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -35,32 +34,20 @@ import java.util.stream.Collectors;
 import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.DESCRIPTION;
 
 @Slf4j
-abstract class PaymentsTable<RowType> implements ReportTable<RowType> {
+abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
 
     static final String TABLE_NAME = "ДВИЖЕНИЕ ДЕНЕЖНЫХ СРЕДСТВ ЗА ОТЧЕТНЫЙ ПЕРИОД";
-    @Getter
-    private final BrokerReport report;
-    @Getter
-    protected final List<RowType> data = new ArrayList<>();
     // human readable name -> incoming count
     private final List<ReportSecurityInformation> securitiesIncomingCount;
     private final List<SecurityTransaction> securityTransactions;
-    private final ExcelTable table;
 
     public PaymentsTable(UralsibBrokerReport report,
                          PortfolioSecuritiesTable securitiesTable,
                          SecurityTransactionTable securityTransactionTable) {
-        this.report = report;
+        super(report, TABLE_NAME, "", PaymentsTableHeader.class);
         this.securitiesIncomingCount = securitiesTable.getData();
         this.securityTransactions = securityTransactionTable.getData();
-        this.table = ExcelTable.of(report.getSheet(), TABLE_NAME, PaymentsTableHeader.class);
     }
-
-    protected Collection<RowType> pasreTable() {
-        return table.getDataCollection(getReport().getPath(), this::getRow);
-    }
-
-    protected abstract Collection<RowType> getRow(ExcelTable table, Row row);
 
     protected Security getSecurity(ExcelTable table, Row row) {
         String description = table.getStringCellValue(row, DESCRIPTION);

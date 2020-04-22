@@ -25,19 +25,22 @@ import ru.portfolio.portfolio.pojo.EventCashFlow;
 import ru.portfolio.portfolio.pojo.PortfolioProperty;
 import ru.portfolio.portfolio.pojo.Security;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
+import ru.portfolio.portfolio.view.ForeignExchangeRateService;
 
 import java.util.stream.Collectors;
 
 public class UralsibReportTableFactory implements ReportTableFactory {
     @Getter
     private final UralsibBrokerReport report;
-    private PortfolioSecuritiesTable portfolioSecuritiesTable;
-    private SecurityTransactionTable securityTransactionTable;
+    private final PortfolioSecuritiesTable portfolioSecuritiesTable;
+    private final SecurityTransactionTable securityTransactionTable;
+    private final PortfolioPropertyTable portfolioPropertyTable;
 
-    public UralsibReportTableFactory(UralsibBrokerReport report) {
+    public UralsibReportTableFactory(UralsibBrokerReport report, ForeignExchangeRateService foreignExchangeRateService) {
         this.report = report;
+        this.portfolioPropertyTable = new PortfolioPropertyTable(report, foreignExchangeRateService);
         this.portfolioSecuritiesTable = new PortfolioSecuritiesTable(report);
-        this.securityTransactionTable = new SecurityTransactionTable(report);
+        this.securityTransactionTable = new SecurityTransactionTable(report, portfolioPropertyTable);
     }
 
     @Override
@@ -47,7 +50,7 @@ public class UralsibReportTableFactory implements ReportTableFactory {
         
     @Override
     public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
-        return new PortfolioPropertyTable(report);
+        return portfolioPropertyTable;
     }
     
     @Override

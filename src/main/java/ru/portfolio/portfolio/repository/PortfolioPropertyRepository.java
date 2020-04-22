@@ -21,6 +21,8 @@ package ru.portfolio.portfolio.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.portfolio.portfolio.entity.PortfolioPropertyEntity;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 public interface PortfolioPropertyRepository extends JpaRepository<PortfolioPropertyEntity, Integer> {
@@ -29,4 +31,8 @@ public interface PortfolioPropertyRepository extends JpaRepository<PortfolioProp
                                                                                             String property);
 
     Optional<PortfolioPropertyEntity> findFirstByPropertyOrderByTimestampDesc(String property);
+
+    List<PortfolioPropertyEntity> findByPropertyAndTimestampBetweenOrderByTimestampDesc(String property,
+                                                                                        Instant startDate,
+                                                                                        Instant endDate);
 }

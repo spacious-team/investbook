@@ -91,6 +91,7 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
                 record.put(COUNT, Math.abs(transaction.getCount()));
                 record.put(QUOTE, Optional.ofNullable(transactionCashFlows.get(CashFlowType.DERIVATIVE_QUOTE))
                         .map(TransactionCashFlow::getValue)
+                        .map(q -> "=" + q + "/" + Math.abs(transaction.getCount()))
                         .orElse(null));
                 record.put(AMOUNT, Optional.ofNullable(transactionCashFlows.get(CashFlowType.DERIVATIVE_PRICE))
                         .map(TransactionCashFlow::getValue)
