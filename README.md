@@ -49,13 +49,9 @@ set JAVA_HOME=C:\Program Files\Java\jdk-14
 
 Возможен переход на [MariaDB](https://downloads.mariadb.org/)
 ([ссылка](https://downloads.mariadb.org/interstitial/mariadb-10.4.12/win32-packages/mariadb-10.4.12-win32.msi/from/http%3A//mariadb.melbourneitmirror.net/)
-на дистрибутив для Windows). После установки, замените в файле `application.properties`
+на дистрибутив для Windows). После установки, создать файл `application.properties` с содержимым
 ```
-spring.profiles.active=core,h2
-```
-на
-```
-spring.profiles.active=core,mariadb
+spring.profiles.active=core,mariadb,conf
 ```
 укажите логин и пароль доступа к БД
 ```

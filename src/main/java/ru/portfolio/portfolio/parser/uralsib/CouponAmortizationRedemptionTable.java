@@ -47,7 +47,6 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable<SecurityEve
                                              SecurityTransactionTable securityTransactionTable) {
         super(report, securitiesTable, securityTransactionTable);
         this.redemptionDates = new SecurityRedemptionTable(report).getData();
-        data.addAll(pasreTable());
     }
 
     protected Collection<SecurityEventCashFlow> getRow(ExcelTable table, Row row) {
