@@ -29,32 +29,47 @@ import ru.portfolio.portfolio.view.excel.ExcelView;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.joining;
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
 public class PortfolioViewRestController {
     private final ExcelView excelView;
-    private FileSystem jimfs = Jimfs.newFileSystem();
+    private final FileSystem jimfs = Jimfs.newFileSystem();
 
     @GetMapping("/portfolio")
     public void getExelView(HttpServletResponse response) throws IOException {
-        long t0 = System.nanoTime();
-        String fileName = "portfolio.xlsx";
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-disposition", "attachment; filename=" + fileName);
-        Path path = jimfs.getPath(fileName);
-        try (XSSFWorkbook book = new XSSFWorkbook()) {
-            excelView.writeTo(book);
-            book.write(Files.newOutputStream(path));
+        try {
+            long t0 = System.nanoTime();
+            String fileName = "portfolio.xlsx";
+            Path path = jimfs.getPath(fileName);
+            try (XSSFWorkbook book = new XSSFWorkbook()) {
+                excelView.writeTo(book);
+                book.write(Files.newOutputStream(path));
+            }
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-disposition", "attachment; filename=" + fileName);
+            IOUtils.copy(Files.newInputStream(path), response.getOutputStream());
+            log.info("Отчет {} сформирован за {}", path.getFileName(), Duration.ofNanos(System.nanoTime() - t0));
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            String httpBody = Stream.of(sw.toString().split("\n"))
+                    .collect(joining("</br>", "<b>Ошибка сборки отчета</b></br></br>", ""));
+            response.setContentType("text/html; charset=utf-8");
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(httpBody);
         }
-        IOUtils.copy(Files.newInputStream(path), response.getOutputStream());
         response.flushBuffer();
-        log.info("Отчет {} сформирован за {}", path.getFileName(), Duration.ofNanos(System.nanoTime() - t0));
     }
-
 }
