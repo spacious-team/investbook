@@ -49,7 +49,10 @@ public class PaidInterestFactory {
         return paidInterest;
     }
 
-    private Map<Position, List<SecurityEventCashFlow>> getPositionWithPayments(String portfolio, String isin, Positions positions, CashFlowType event) {
+    private Map<Position, List<SecurityEventCashFlow>> getPositionWithPayments(String portfolio,
+                                                                               String isin,
+                                                                               Positions positions,
+                                                                               CashFlowType event) {
         List<SecurityEventCashFlowEntity> accruedInterests = securityEventCashFlowRepository
                 .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(portfolio, isin, event.getId());
 
@@ -113,13 +116,13 @@ public class PaidInterestFactory {
 
     private <T extends Position> Deque<Position> getPayedPositions(Deque<T> positions, Instant bookClosureDate) {
         Iterator<? extends T> it = positions.descendingIterator();
-        Deque<Position> payedClosedPositions = new LinkedList<>();
+        Deque<Position> payedPositions = new LinkedList<>();
         while (it.hasNext()) {
             T position = it.next();
             if (position.wasOpenedAtTheInstant(bookClosureDate)) {
-                payedClosedPositions.addFirst(position);
+                payedPositions.addFirst(position);
             }
         }
-        return payedClosedPositions;
+        return payedPositions;
     }
 }
