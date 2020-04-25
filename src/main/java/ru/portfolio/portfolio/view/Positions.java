@@ -101,7 +101,7 @@ public class Positions {
             closedPositions.add(closed);
         }
         if (closingCount != 0) {
-            openedPositions.add(new OpenedPosition(closing, closingCount));
+            openedPositions.add(new OpenedPosition(closing, signum(closing.getCount()) * closingCount));
         }
     }
 
