@@ -21,17 +21,18 @@ package ru.portfolio.portfolio.view;
 import lombok.Getter;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
+import ru.portfolio.portfolio.pojo.Transaction;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Links securities events (dividends, bond amortizations) with transactions.
  */
 @Getter
 public class PaidInterest {
+    static final Instant fictitiousPositionInstant = Instant.ofEpochSecond(0);
     private final HashMap<CashFlowType, Map<Position, List<SecurityEventCashFlow>>> paidInterest = new HashMap<>();
 
     Map<Position, List<SecurityEventCashFlow>> get(CashFlowType type) {
@@ -41,5 +42,25 @@ public class PaidInterest {
     public List<SecurityEventCashFlow> get(CashFlowType payType, Position position) {
         List<SecurityEventCashFlow> value = this.get(payType).get(position);
         return (value != null) ? value : Collections.emptyList();
+    }
+
+    static Position getFictitiousPositionPayment(SecurityEventCashFlow cash) {
+        return new OpenedPosition(Transaction.builder()
+                .timestamp(PaidInterest.fictitiousPositionInstant)
+                .portfolio(cash.getPortfolio())
+                .isin(cash.getIsin())
+                .count(cash.getCount())
+                .build());
+    }
+
+    @SuppressWarnings("unchecked")
+    public Deque<OpenedPosition> getFictitiousPositions() {
+        Instant instant = fictitiousPositionInstant.plusNanos(1);
+        return (Deque<OpenedPosition>)(Deque<?>) paidInterest.values()
+                .stream()
+                .flatMap(map -> map.keySet().stream())
+                .filter(position -> position instanceof OpenedPosition)
+                .filter(position -> position.wasOpenedAtTheInstant(instant))
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 }
