@@ -66,7 +66,9 @@ public class CashFlowExcelTableFactory implements TableFactory {
             record.put(DESCRIPTION, cash.getDescription());
             table.add(record);
         }
-        foreignExchangeRateTableFactory.appendExchangeRates(table, CURRENCY_NAME, EXCHANGE_RATE);
+        if (!cashFlows.isEmpty()) {
+            foreignExchangeRateTableFactory.appendExchangeRates(table, CURRENCY_NAME, EXCHANGE_RATE);
+        }
         return table;
     }
 }
