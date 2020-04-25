@@ -78,6 +78,8 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                         paidInterest, this::getOpenedPositionProfit));
                 closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(),
                         paidInterest, this::getClosedPositionProfit));
+                openPositionsProfit.addAll(getPositionProfit(security, paidInterest.getFictitiousPositions(),
+                        paidInterest, this::getOpenedPositionProfit));
             }
         }
         Table profit = new Table();

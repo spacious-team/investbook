@@ -19,6 +19,7 @@
 package ru.portfolio.portfolio.view;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.converter.SecurityEventCashFlowConverter;
 import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
@@ -36,8 +37,9 @@ import static ru.portfolio.portfolio.pojo.CashFlowType.*;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class PaidInterestFactory {
-    private static final CashFlowType[] PAY_TYPES =  new CashFlowType[]{COUPON, AMORTIZATION, DIVIDEND, TAX};
+    private static final CashFlowType[] PAY_TYPES = new CashFlowType[]{COUPON, AMORTIZATION, DIVIDEND, TAX};
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
 
@@ -59,10 +61,21 @@ public class PaidInterestFactory {
         Map<Position, List<SecurityEventCashFlow>> payments = new HashMap<>();
         for (SecurityEventCashFlowEntity entity : accruedInterests) {
             SecurityEventCashFlow cash = securityEventCashFlowConverter.fromEntity(entity);
-            BigDecimal payPerOne =  cash.getValue()
+            Instant bookClosureDate;
+            try {
+                bookClosureDate = getBookClosureDate(positions.getPositionHistories(), entity);
+            } catch (Exception e) {
+                // не найден день в прошлом, в который количество открытых позиций = количеству ЦБ, по которым сделана выплата
+                log.error("{}, выплата будет отображена в отчете по фиктивной позиции покупки ЦБ от даты {}",
+                        e.getMessage(), PaidInterest.fictitiousPositionInstant);
+                payments.computeIfAbsent(PaidInterest.getFictitiousPositionPayment(cash), key -> new ArrayList<>())
+                        .add(cash);
+                continue;
+            }
+
+            BigDecimal payPerOne = cash.getValue()
                     .divide(BigDecimal.valueOf(cash.getCount()), 6, RoundingMode.HALF_UP);
 
-            Instant bookClosureDate = getBookClosureDate(positions.getPositionHistories(), entity);
             Deque<Position> paidPositions = getPayedPositions(positions.getClosedPositions(), bookClosureDate);
             paidPositions.addAll(getPayedPositions(positions.getOpenedPositions(), bookClosureDate));
 
@@ -86,7 +99,7 @@ public class PaidInterestFactory {
 
     /**
      * @param positionHistories securities position (date in the past -> securities count)
-     * @param payment dividend or bonds accrued interest payment
+     * @param payment           dividend or bonds accrued interest payment
      * @return shares book closure (bonds accrued interest paying) date
      */
     private Instant getBookClosureDate(Deque<PositionHistory> positionHistories, SecurityEventCashFlowEntity payment) {
@@ -95,16 +108,16 @@ public class PaidInterestFactory {
         Iterator<PositionHistory> it = positionHistories.descendingIterator();
         // дата перечисления дивидендов/купонов Эмитентом (дата фиксации реестра акционеров)
         // с точностью до временного интервала между 2-мя соседними транзакции
-        Instant bookClosureDate  = null;
+        Instant bookClosureDate = null;
         while (it.hasNext()) {
             PositionHistory positionHistory = it.next();
             Instant pastInstant = positionHistory.getInstant();
             if (payDate.isAfter(pastInstant) && (payForSecurities == positionHistory.getOpenedPositions())) {
-                bookClosureDate  = pastInstant.plusNanos(1);
+                bookClosureDate = pastInstant.plusNanos(1);
                 break;
             }
         }
-        if (bookClosureDate  == null) {
+        if (bookClosureDate == null) {
             throw new IllegalArgumentException("История транзакций для ЦБ " + payment.getSecurity().getIsin() +
                     ((payment.getSecurity().getName() != null) ? " (\"" + payment.getSecurity().getName() + "\") " : " ") +
                     "не полная, не найден день в прошлом, " +
