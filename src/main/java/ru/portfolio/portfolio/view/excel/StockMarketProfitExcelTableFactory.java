@@ -142,13 +142,13 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     private Table.Record getOpenedPositionProfit(OpenedPosition position) {
         Table.Record row = new Table.Record();
         Transaction transaction = position.getOpenTransaction();
-        row.put(BUY_DATE, transaction.getTimestamp());
-        row.put(COUNT, position.getCount());
-        row.put(BUY_PRICE, getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount()));
+        row.put(OPEN_DATE, transaction.getTimestamp());
+        row.put(COUNT, Math.abs(position.getCount()) * Math.signum(transaction.getCount()));
+        row.put(OPEN_PRICE, getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount()));
         double multipier = Math.abs(1d * position.getCount() / transaction.getCount());
-        row.put(BUY_AMOUNT, getTransactionCashFlow(transaction, CashFlowType.PRICE, multipier));
-        row.put(BUY_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
-        row.put(BUY_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multipier));
+        row.put(OPEN_AMOUNT, getTransactionCashFlow(transaction, CashFlowType.PRICE, multipier));
+        row.put(OPEN_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
+        row.put(OPEN_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multipier));
         return row;
     }
 
@@ -158,25 +158,30 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         // close transaction info
         Transaction transaction = position.getCloseTransaction();
         double multipier = Math.abs(1d * position.getCount() / transaction.getCount());
-        row.put(CELL_DATE, transaction.getTimestamp());
-        BigDecimal cellAmount;
+        row.put(CLOSE_DATE, transaction.getTimestamp());
+        BigDecimal closeAmount;
         switch (position.getClosingEvent()) {
             case PRICE:
-                cellAmount = getTransactionCashFlow(transaction, CashFlowType.PRICE, multipier);
+                closeAmount = getTransactionCashFlow(transaction, CashFlowType.PRICE, multipier);
                 break;
             case REDEMPTION:
-                cellAmount = getRedemptionCashFlow(transaction.getPortfolio(), transaction.getIsin(), multipier);
+                closeAmount = getRedemptionCashFlow(transaction.getPortfolio(), transaction.getIsin(), multipier);
                 break;
             default:
                 throw new IllegalArgumentException("ЦБ " + transaction.getIsin() +
                         " не может быть закрыта событием типа " + position.getClosingEvent());
         }
-        row.put(CELL_AMOUNT, cellAmount);
-        row.put(CELL_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
-        row.put(CELL_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multipier));
-        row.put(FORECAST_TAX, getForecastTax());
-        row.put(PROFIT, getClosedPositionProfit());
+        row.put(CLOSE_AMOUNT, closeAmount);
+        row.put(CLOSE_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
+        row.put(CLOSE_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multipier));
+        boolean isLongPosition = isLongPosition(position);
+        row.put(FORECAST_TAX, getForecastTax(isLongPosition));
+        row.put(PROFIT, getClosedPositionProfit(isLongPosition));
         return row;
+    }
+
+    private boolean isLongPosition(ClosedPosition position) {
+        return position.getOpenTransaction().getCount() > 0;
     }
 
     private Table.Record getPaidInterestProfit(Position position,
@@ -262,21 +267,34 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                 .collect(Collectors.joining("+", "=", ""));
     }
 
-    private String getForecastTax() {
-        String forecastTaxFormula =
-                "(" + CELL_AMOUNT.getCellAddr() + "+" + CELL_ACCRUED_INTEREST.getCellAddr() + "+" + AMORTIZATION.getCellAddr() + ")" +
-                        "-(" + BUY_AMOUNT.getCellAddr() + "+" + BUY_ACCRUED_INTEREST.getCellAddr() + ")" +
-                        "-" + BUY_COMMISSION.getCellAddr() + "-" + CELL_COMMISSION.getCellAddr();
+    private String getForecastTax(boolean isLongPosition) {
+        String open = "(" + OPEN_AMOUNT.getCellAddr() + "+" + OPEN_ACCRUED_INTEREST.getCellAddr() + ")";
+        String close = "(" + CLOSE_AMOUNT.getCellAddr() + "+" + CLOSE_ACCRUED_INTEREST.getCellAddr() + ")";
+        String commission = "(" + OPEN_COMMISSION.getCellAddr() + "-" + CLOSE_COMMISSION.getCellAddr() + ")";
+        String buy = isLongPosition ? open : close;
+        String cell = isLongPosition ? close : open;
+        String forecastTaxFormula = cell + "+" + AMORTIZATION.getCellAddr() + "-" + buy + "-" + commission;
         return "=IF(" + forecastTaxFormula + "<0,0,0.13*(" + forecastTaxFormula + "))";
     }
 
-    private String getClosedPositionProfit() {
-        String buy = "(" + BUY_AMOUNT.getCellAddr() + "+" + BUY_ACCRUED_INTEREST.getCellAddr() + "+" + BUY_COMMISSION.getCellAddr() + ")";
-        String cell = "(" + CELL_AMOUNT.getCellAddr() + "+" + CELL_ACCRUED_INTEREST.getCellAddr() + "+" +
-                COUPON.getCellAddr() + "+" + AMORTIZATION.getCellAddr() + "+" + DIVIDEND.getCellAddr() +
-                "-(" + CELL_COMMISSION.getCellAddr() + "+" + TAX.getCellAddr() + "+" + FORECAST_TAX.getCellAddr() + "))";
+    private String getClosedPositionProfit(boolean isLongPosition) {
+        String open = "(" + OPEN_AMOUNT.getCellAddr() + "+" + OPEN_ACCRUED_INTEREST.getCellAddr() + ")";
+        String close = "(" + CLOSE_AMOUNT.getCellAddr() + "+" + CLOSE_ACCRUED_INTEREST.getCellAddr() + ")";
+        String openCommission = OPEN_COMMISSION.getCellAddr();
+        String closeCommission = CLOSE_COMMISSION.getCellAddr();
+        String commission = "(" + openCommission + "+" + closeCommission + ")";
+        String payments = "(" + COUPON.getCellAddr() + "+" + AMORTIZATION.getCellAddr() + "+" + DIVIDEND.getCellAddr() + ")";
+        String tax = "(" + TAX.getCellAddr() + "+" + FORECAST_TAX.getCellAddr() + ")";
         // TODO DAYS() excel function not impl by Apache POI: https://bz.apache.org/bugzilla/show_bug.cgi?id=58468
-        String multiplicator = "100*365/(1+DAYS360(" + BUY_DATE.getCellAddr() + "," + CELL_DATE.getCellAddr() + "))";
-        return "=((" + cell + "-" + buy + ")/" + buy + ")*" + multiplicator;
+        String multiplicator = "ABS(100*365/(1+DAYS360(" + OPEN_DATE.getCellAddr() + "," + CLOSE_DATE.getCellAddr() + ")))";
+
+        String buy = isLongPosition ? open : close;
+        String cell = isLongPosition ? close : open;
+
+        return "=(" +
+                "(" + cell + "+" + payments + "-" + buy + "-" + tax + "-" + commission + ")" +
+                "/(" + open + "+" + openCommission + ")" +
+                ")" +
+                "*" + multiplicator;
     }
 }
