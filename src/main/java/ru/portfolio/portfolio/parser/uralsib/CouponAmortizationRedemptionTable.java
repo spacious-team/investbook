@@ -61,7 +61,8 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable<SecurityEve
             return emptyList();
         }
 
-        Security security = getSecurity(table, row);
+        Security security = getSecurity(table, row, CashFlowType.AMORTIZATION);
+        if (security == null) return emptyList();
         Instant timestamp = getReport().convertToInstant(table.getStringCellValue(row, DATE));
 
         if (event == null) {
