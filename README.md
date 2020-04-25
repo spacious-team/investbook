@@ -3,16 +3,13 @@
 и обрабатывается локально, подключение к интернету не требуется.
 
 ### Установка
-Перед запуском приложения необходимо:
-1. Распаковать приложение `portfolio.zip` в удобное место.
-1. Установить [java](https://jdk.java.net/) версии не ниже 14
-   ([ссылка](https://download.java.net/java/GA/jdk14/076bab302c7b4508975440c56f6cc26a/36/GPL/openjdk-14_windows-x64_bin.zip)
-   для Windows, распаковать, например, в папку `C:\Program Files\Java\`).
-   В папке распаковки `portfolio.zip` измените файл `start.bat` по правому щелчку мышкой, указав папку
-   к распакованному архиву Java, например, так
-```
-set JAVA_HOME=C:\Program Files\Java\jdk-14
-```
+1. Cкачать со станицы [проекта](https://github.com/vananiev/portfolio/releases/latest)
+   архив `portfolio.zip` и распаковать на рабочий стол.
+1. Скачать [Java 14](https://download.java.net/java/GA/jdk14/076bab302c7b4508975440c56f6cc26a/36/GPL/openjdk-14_windows-x64_bin.zip)
+   и распаковыть из архива папку `jdk-14` в `C:\Program Files\Java\`.
+
+Подробная инструкция по установке и запуску прилжения для [windows](docs/install-on-windows.md)
+и [linux](docs/install-on-linux.md).
 
 ### Работа с приложением
 Запустите `start.bat`, в браузере перейдите по адресу http://localhost и загрузите отчеты брокера.
@@ -40,8 +37,8 @@ set JAVA_HOME=C:\Program Files\Java\jdk-14
 по которым произведена выплата, то при формировании аналитической выгрузки приложение сообщит об ошибке.
 
 ### Обновление приложения
-Для обновления распакуйте новый релиз `portfolio.zip` в любую удобную папку и обновите переменную `JAVA_HOME` в файле
-`start.bat`, аналогично предыдущей версии. Приложение готово к запуску.
+Скачать со станицы [проекта](https://github.com/vananiev/portfolio/releases/latest) архив `portfolio.zip` и
+распаковать в любую удобную папку. Приложение готово к запуску файлом `start.bat`.
 
 ### Смена СУБД
 Приложение по умолчанию использует СУБД H2 и сохраняет данные в файл `portfolio.mv.db` в каталоге пользователя.

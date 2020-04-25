@@ -23,15 +23,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import ru.portfolio.portfolio.parser.*;
 import ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInformation;
+import ru.portfolio.portfolio.pojo.CashFlowType;
+import ru.portfolio.portfolio.pojo.EventCashFlow;
 import ru.portfolio.portfolio.pojo.Security;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.DESCRIPTION;
+import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
+import static ru.portfolio.portfolio.parser.uralsib.UralsibBrokerReport.convertToCurrency;
 
 @Slf4j
 abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
@@ -40,6 +44,7 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
     // human readable name -> incoming count
     private final List<ReportSecurityInformation> securitiesIncomingCount;
     private final List<SecurityTransaction> securityTransactions;
+    private final Collection<EventCashFlow> eventCashFlows = new ArrayList<>();
 
     public PaymentsTable(UralsibBrokerReport report,
                          PortfolioSecuritiesTable securitiesTable,
@@ -49,7 +54,28 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
         this.securityTransactions = securityTransactionTable.getData();
     }
 
-    protected Security getSecurity(ExcelTable table, Row row) {
+    /**
+     * @return security if found, null otherwise
+     */
+    protected Security getSecurity(ExcelTable table, Row row, CashFlowType cashEventIfSecurityNotFound) {
+        try {
+            return getSecurityIfCan(table, row);
+        } catch (Exception e) {
+            EventCashFlow cash = EventCashFlow.builder()
+                    .portfolio(getReport().getPortfolio())
+                    .timestamp(getReport().convertToInstant(table.getStringCellValue(row, DATE)))
+                    .eventType(cashEventIfSecurityNotFound)
+                    .value(table.getCurrencyCellValue(row, VALUE))
+                    .currency(convertToCurrency(table.getStringCellValue(row, CURRENCY)))
+                    .description(table.getStringCellValue(row, DESCRIPTION))
+                    .build();
+            eventCashFlows.add(cash);
+            log.debug("Получена выплата по ценной бумаге, которой нет в портфеле: " + cash);
+            return null;
+        }
+    }
+
+    protected Security getSecurityIfCan(ExcelTable table, Row row) {
         String description = table.getStringCellValue(row, DESCRIPTION);
         String descriptionLowercase = description.toLowerCase();
         for (ReportSecurityInformation info : securitiesIncomingCount) {
@@ -86,6 +112,11 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
             }
         }
         return count;
+    }
+
+    public Collection<EventCashFlow> getEventCashFlows() {
+        initializeIfNeed();
+        return eventCashFlows;
     }
 
     enum PaymentsTableHeader implements TableColumnDescription {

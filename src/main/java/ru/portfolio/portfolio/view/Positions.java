@@ -19,6 +19,7 @@
 package ru.portfolio.portfolio.view;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 import ru.portfolio.portfolio.pojo.Transaction;
@@ -35,6 +36,7 @@ import static java.lang.Math.abs;
 /**
  * Calculate {@link ClosedPosition}
  */
+@Slf4j
 public class Positions {
     @Getter
     Deque<PositionHistory> positionHistories = new LinkedList<>();
@@ -61,7 +63,7 @@ public class Positions {
                 closePositions(convertToTransaction(redemption), CashFlowType.REDEMPTION);
             }
             if (!this.openedPositions.isEmpty() || this.positionHistories.getLast().getOpenedPositions() != 0) {
-                throw new RuntimeException("Предоставлены не все транзакции по бумаге " +
+                log.error("Предоставлены не все транзакции по бумаге " +
                         isin + ", в истории портфеля есть событие погашения номинала облигаций по " +
                         redemptions.stream().mapToInt(SecurityEventCashFlow::getCount).sum() +
                         " бумагам, однако в портфеле остались " + this.positionHistories.getLast().getOpenedPositions() +
@@ -101,7 +103,7 @@ public class Positions {
             closedPositions.add(closed);
         }
         if (closingCount != 0) {
-            openedPositions.add(new OpenedPosition(closing, closingCount));
+            openedPositions.add(new OpenedPosition(closing, signum(closing.getCount()) * closingCount));
         }
     }
 

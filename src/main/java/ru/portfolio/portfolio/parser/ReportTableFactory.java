@@ -40,7 +40,7 @@ public interface ReportTableFactory {
 
     ReportTable<ForeignExchangeTransaction> getForeignExchangeTransactionTable();
 
-    ReportTable<SecurityEventCashFlow> getCouponAndAmortizationTable();
+    ReportTable<SecurityEventCashFlow> getCouponAmortizationRedemptionTable();
 
     ReportTable<SecurityEventCashFlow> getDividendTable();
 

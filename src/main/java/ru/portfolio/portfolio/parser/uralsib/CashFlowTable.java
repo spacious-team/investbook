@@ -26,6 +26,8 @@ import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.EventCashFlow;
 
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -33,6 +35,10 @@ import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableH
 
 @Slf4j
 public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
+
+    private final Pattern moneyTransferToDescriptionPattern = Pattern.compile(".*\\s+на\\s+[^\\s]+\\s+([^\\s.]+)");
+    private final Pattern moneyTransferFromDescriptionPattern = Pattern.compile(".*\\s+с\\s+[^\\s]+\\s+([^\\s.]+)");
+    private final Pattern clientCodePattern = Pattern.compile("(^[0-9]+)");
 
     public CashFlowTable(UralsibBrokerReport report) {
         super(report, PaymentsTable.TABLE_NAME, "", PaymentsTable.PaymentsTableHeader.class);
@@ -42,12 +48,25 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
     protected Collection<EventCashFlow> getRow(ExcelTable table, Row row) {
         String action = table.getStringCellValue(row, OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
+        String description = table.getStringCellValue(row, DESCRIPTION);
         CashFlowType type;
         switch (action) {
             case"ввод дс":
             case"вывод дс":
                 type = CashFlowType.CASH;
                 break;
+            case "перевод дс":
+                Matcher matcherTo = moneyTransferToDescriptionPattern.matcher(description);
+                Matcher matcherFrom = moneyTransferFromDescriptionPattern.matcher(description);
+                if (matcherTo.find() && matcherFrom.find()) {
+                    String to = matcherTo.group(1);
+                    String from = matcherFrom.group(1);
+                    if (isCurrentPortfolioAccount(to) != isCurrentPortfolioAccount(from)) {
+                        type = CashFlowType.CASH;
+                        break;
+                    }
+                }
+                return emptyList();
             case "налог":
                 type = CashFlowType.TAX;
                 break;
@@ -58,7 +77,6 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
             default:
                 return emptyList();
         }
-        String description = table.getStringCellValue(row, DESCRIPTION);
         return singletonList(EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(type)
@@ -67,6 +85,29 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
                 .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
                 .description((description == null || description.isEmpty())? null : description)
                 .build());
+    }
+
+    private boolean isCurrentPortfolioAccount(String account) {
+        String portfolio = getReport().getPortfolio();
+        boolean isIIS = portfolio.endsWith("I");
+        if (account.startsWith("SPBFUT")) {
+            // срочный рынок
+            return isIIS == (account.length() > 6 && account.charAt(6) == 'I');
+        } else {
+            // Мосбиржа, СПб биржа
+            return getClientCode(portfolio).equals(getClientCode(account))
+                    && (isIIS == account.endsWith("I"));
+        }
+    }
+
+    private Integer getClientCode(String account) {
+        try {
+            Matcher matcher = clientCodePattern.matcher(account);
+            matcher.find();
+            return Integer.parseInt(matcher.group(1));
+        } catch (Exception e) {
+            throw new RuntimeException("Не могу найти код клиента для субсчета " + account);
+        }
     }
 
     @Override

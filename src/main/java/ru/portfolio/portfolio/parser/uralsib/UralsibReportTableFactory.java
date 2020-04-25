@@ -22,40 +22,49 @@ import lombok.Getter;
 import ru.portfolio.portfolio.parser.*;
 import ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInformation;
 import ru.portfolio.portfolio.pojo.EventCashFlow;
-import ru.portfolio.portfolio.pojo.PortfolioProperty;
 import ru.portfolio.portfolio.pojo.Security;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 import ru.portfolio.portfolio.view.ForeignExchangeRateService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class UralsibReportTableFactory implements ReportTableFactory {
     @Getter
     private final UralsibBrokerReport report;
     private final PortfolioSecuritiesTable portfolioSecuritiesTable;
+    @Getter
     private final SecurityTransactionTable securityTransactionTable;
+    @Getter
     private final PortfolioPropertyTable portfolioPropertyTable;
+    @Getter
+    private final CouponAmortizationRedemptionTable couponAmortizationRedemptionTable;
+    @Getter
+    private final DividendTable dividendTable;
 
     public UralsibReportTableFactory(UralsibBrokerReport report, ForeignExchangeRateService foreignExchangeRateService) {
         this.report = report;
         this.portfolioPropertyTable = new PortfolioPropertyTable(report, foreignExchangeRateService);
         this.portfolioSecuritiesTable = new PortfolioSecuritiesTable(report);
         this.securityTransactionTable = new SecurityTransactionTable(report, portfolioPropertyTable);
+        this.couponAmortizationRedemptionTable =
+                new CouponAmortizationRedemptionTable(report, portfolioSecuritiesTable, securityTransactionTable);
+        this.dividendTable = new DividendTable(report, portfolioSecuritiesTable, securityTransactionTable);
     }
 
     @Override
     public ReportTable<PortfolioCash> createPortfolioCashTable() {
         return new PortfolioCashTable(report);
     }
-        
-    @Override
-    public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
-        return portfolioPropertyTable;
-    }
     
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
-        return new CashFlowTable(report);
+        List<EventCashFlow> data = new ArrayList<>();
+        data.addAll(new CashFlowTable(report).getData());
+        data.addAll(couponAmortizationRedemptionTable.getEventCashFlows());
+        data.addAll(dividendTable.getEventCashFlows());
+        return new WrappingReportTable<>(report, data);
     }
     
     @Override
@@ -64,11 +73,6 @@ public class UralsibReportTableFactory implements ReportTableFactory {
                 .stream()
                 .map(ReportSecurityInformation::getSecurity)
                 .collect(Collectors.toList()));
-    }
-    
-    @Override
-    public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
-        return securityTransactionTable;
     }
 
     @Override
@@ -79,16 +83,6 @@ public class UralsibReportTableFactory implements ReportTableFactory {
     @Override
     public ReportTable<ForeignExchangeTransaction> getForeignExchangeTransactionTable() {
         return new ForeignExchangeTransactionTable(report);
-    }
-
-    @Override
-    public ReportTable<SecurityEventCashFlow> getCouponAndAmortizationTable() {
-        return new CouponAmortizationRedemptionTable(report, portfolioSecuritiesTable, securityTransactionTable);
-    }
-    
-    @Override
-    public ReportTable<SecurityEventCashFlow> getDividendTable() {
-        return new DividendTable(report, portfolioSecuritiesTable, securityTransactionTable);
     }
     
     @Override

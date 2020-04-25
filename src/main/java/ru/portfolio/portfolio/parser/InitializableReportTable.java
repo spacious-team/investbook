@@ -36,6 +36,11 @@ public abstract class InitializableReportTable<RowType> implements ReportTable<R
 
     @Override
     public List<RowType> getData() {
+        initializeIfNeed();
+        return data;
+    }
+
+    protected void initializeIfNeed() {
         try {
             if (!initialized) {
                 synchronized (this) {
@@ -48,7 +53,6 @@ public abstract class InitializableReportTable<RowType> implements ReportTable<R
         } catch (Exception e) {
             log.warn("Ошибка при парсинге файла {}", report.getPath().getFileName());
         }
-        return data;
     }
 
     protected abstract Collection<RowType> parseTable();

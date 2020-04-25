@@ -32,15 +32,17 @@ import ru.portfolio.portfolio.view.TableFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static ru.portfolio.portfolio.view.excel.CashFlowExcelTableHeader.*;
+import static ru.portfolio.portfolio.pojo.CashFlowType.*;
+import static ru.portfolio.portfolio.view.excel.ForeignPortfolioPaymentTableHeader.*;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class CashFlowExcelTableFactory implements TableFactory {
+public class ForeignPortfolioPaymentTableFactory implements TableFactory {
+    private static final CashFlowType[] PAY_TYPES = new CashFlowType[]{AMORTIZATION, REDEMPTION, COUPON, DIVIDEND};
     // TODO DAYS() excel function not impl by Apache POI: https://bz.apache.org/bugzilla/show_bug.cgi?id=58468
-    private static final String DAYS_COUNT_FORMULA = "=DAYS360(" + DATE.getCellAddr() + ",TODAY())";
     private final EventCashFlowRepository eventCashFlowRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
@@ -49,9 +51,11 @@ public class CashFlowExcelTableFactory implements TableFactory {
     public Table create(Portfolio portfolio) {
         Table table = new Table();
         List<EventCashFlow> cashFlows = eventCashFlowRepository
-                .findByPortfolioIdAndCashFlowTypeIdOrderByTimestamp(
+                .findByPortfolioIdAndCashFlowTypeIdInOrderByTimestamp(
                         portfolio.getId(),
-                        CashFlowType.CASH.getId())
+                        Stream.of(PAY_TYPES)
+                                .map(CashFlowType::getId)
+                                .collect(Collectors.toList()))
                 .stream()
                 .map(eventCashFlowConverter::fromEntity)
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -59,10 +63,10 @@ public class CashFlowExcelTableFactory implements TableFactory {
         for (EventCashFlow cash : cashFlows) {
             Table.Record record = new Table.Record();
             record.put(DATE, cash.getTimestamp());
-            record.put(CASH, cash.getValue());
+            record.put(ForeignPortfolioPaymentTableHeader.CASH, cash.getValue());
             record.put(CURRENCY, cash.getCurrency());
-            record.put(CASH_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash, CASH, EXCHANGE_RATE));
-            record.put(DAYS_COUNT, DAYS_COUNT_FORMULA);
+            record.put(CASH_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash,
+                    ForeignPortfolioPaymentTableHeader.CASH, EXCHANGE_RATE));
             record.put(DESCRIPTION, cash.getDescription());
             table.add(record);
         }

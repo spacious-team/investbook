@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 public class ExcelView {
     private final StockMarketProfitExcelTableView stockMarketProfitExcelTableView;
     private final DerivativesMarketProfitExcelTableView derivativesMarketProfitExcelTableView;
+    private final ForeignPortfolioPaymentTableView foreignPortfolioPaymentTableView;
     private final CashFlowExcelTableView cashFlowExcelTableView;
     private final TaxExcelTableView taxExcelTableView;
 
@@ -34,6 +35,7 @@ public class ExcelView {
         CellStyles styles = new CellStyles(book);
         stockMarketProfitExcelTableView.writeTo(book, styles, portfolio -> portfolio + " (фондовый)");
         derivativesMarketProfitExcelTableView.writeTo(book, styles, portfolio -> portfolio + " (срочный)");
+        foreignPortfolioPaymentTableView.writeTo(book, styles, portfolio -> portfolio + " (внешние выплаты)");
         cashFlowExcelTableView.writeTo(book, styles, portfolio -> "Доходность (" + portfolio + ")");
         taxExcelTableView.writeTo(book, styles, portfolio -> "Налог (" + portfolio + ")");
     }

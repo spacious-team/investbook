@@ -22,9 +22,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ru.portfolio.portfolio.entity.EventCashFlowEntity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 public interface EventCashFlowRepository extends JpaRepository<EventCashFlowEntity, Integer> {
 
     ArrayList<EventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdOrderByTimestamp(String portfolio,
                                                                                       int cashFlowType);
+
+    ArrayList<EventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdInOrderByTimestamp(String portfolio,
+                                                                                        Collection<Integer> cashFlowType);
 }
