@@ -36,7 +36,9 @@ import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableH
 @Slf4j
 public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
 
-    private final Pattern moneyTransferDescriptionPattern = Pattern.compile(".*на с/с ([^\\s]+) с с/с ([^\\s.]+)");;
+    private final Pattern moneyTransferToDescriptionPattern = Pattern.compile(".*\\s+на\\s+[^\\s]+\\s+([^\\s.]+)");
+    private final Pattern moneyTransferFromDescriptionPattern = Pattern.compile(".*\\s+с\\s+[^\\s]+\\s+([^\\s.]+)");
+    private final Pattern clientCodePattern = Pattern.compile("(^[0-9]+)");
 
     public CashFlowTable(UralsibBrokerReport report) {
         super(report, PaymentsTable.TABLE_NAME, "", PaymentsTable.PaymentsTableHeader.class);
@@ -54,10 +56,11 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
                 type = CashFlowType.CASH;
                 break;
             case "перевод дс":
-                Matcher matcher = moneyTransferDescriptionPattern.matcher(description);
-                if (matcher.find()) {
-                    String to = matcher.group(1);
-                    String from = matcher.group(2);
+                Matcher matcherTo = moneyTransferToDescriptionPattern.matcher(description);
+                Matcher matcherFrom = moneyTransferFromDescriptionPattern.matcher(description);
+                if (matcherTo.find() && matcherFrom.find()) {
+                    String to = matcherTo.group(1);
+                    String from = matcherFrom.group(1);
                     if (isCurrentPortfolioAccount(to) != isCurrentPortfolioAccount(from)) {
                         type = CashFlowType.CASH;
                         break;
@@ -87,15 +90,23 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
     private boolean isCurrentPortfolioAccount(String account) {
         String portfolio = getReport().getPortfolio();
         boolean isIIS = portfolio.endsWith("I");
-        String clientCode = isIIS ? portfolio.replace("I", "") : portfolio;
         if (account.startsWith("SPBFUT")) {
             // срочный рынок
-            return isIIS == (account.charAt(6) == 'I');
+            return isIIS == (account.length() > 6 && account.charAt(6) == 'I');
         } else {
             // Мосбиржа, СПб биржа
-            return account.startsWith(clientCode)
-                    && (!isIIS || account.endsWith("I"))
-                    && (account.length() == clientCode.length() || !Character.isDigit(account.charAt(clientCode.length())));
+            return getClientCode(portfolio).equals(getClientCode(account))
+                    && (isIIS == account.endsWith("I"));
+        }
+    }
+
+    private Integer getClientCode(String account) {
+        try {
+            Matcher matcher = clientCodePattern.matcher(account);
+            matcher.find();
+            return Integer.parseInt(matcher.group(1));
+        } catch (Exception e) {
+            throw new RuntimeException("Не могу найти код клиента для субсчета " + account);
         }
     }
 
