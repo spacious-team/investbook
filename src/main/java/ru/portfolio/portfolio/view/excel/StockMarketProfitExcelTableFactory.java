@@ -143,7 +143,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         Table.Record row = new Table.Record();
         Transaction transaction = position.getOpenTransaction();
         row.put(OPEN_DATE, transaction.getTimestamp());
-        row.put(COUNT, Math.abs(position.getCount()) * Math.signum(transaction.getCount()));
+        row.put(COUNT, Math.abs(position.getCount()) * Integer.signum(transaction.getCount()));
         row.put(OPEN_PRICE, getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount()));
         double multipier = Math.abs(1d * position.getCount() / transaction.getCount());
         row.put(OPEN_AMOUNT, getTransactionCashFlow(transaction, CashFlowType.PRICE, multipier));
@@ -270,7 +270,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     private String getForecastTax(boolean isLongPosition) {
         String open = "(" + OPEN_AMOUNT.getCellAddr() + "+" + OPEN_ACCRUED_INTEREST.getCellAddr() + ")";
         String close = "(" + CLOSE_AMOUNT.getCellAddr() + "+" + CLOSE_ACCRUED_INTEREST.getCellAddr() + ")";
-        String commission = "(" + OPEN_COMMISSION.getCellAddr() + "-" + CLOSE_COMMISSION.getCellAddr() + ")";
+        String commission = "(" + OPEN_COMMISSION.getCellAddr() + "+" + CLOSE_COMMISSION.getCellAddr() + ")";
         String buy = isLongPosition ? open : close;
         String cell = isLongPosition ? close : open;
         String forecastTaxFormula = cell + "+" + AMORTIZATION.getCellAddr() + "-" + buy + "-" + commission;
@@ -286,7 +286,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         String payments = "(" + COUPON.getCellAddr() + "+" + AMORTIZATION.getCellAddr() + "+" + DIVIDEND.getCellAddr() + ")";
         String tax = "(" + TAX.getCellAddr() + "+" + FORECAST_TAX.getCellAddr() + ")";
         // TODO DAYS() excel function not impl by Apache POI: https://bz.apache.org/bugzilla/show_bug.cgi?id=58468
-        String multiplicator = "ABS(100*365/(1+DAYS360(" + OPEN_DATE.getCellAddr() + "," + CLOSE_DATE.getCellAddr() + ")))";
+        String multiplicator = "100*365/(1+ABS(DAYS360(" + OPEN_DATE.getCellAddr() + "," + CLOSE_DATE.getCellAddr() + ")))";
 
         String buy = isLongPosition ? open : close;
         String cell = isLongPosition ? close : open;
