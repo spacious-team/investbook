@@ -67,8 +67,8 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
     protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         sheet.setColumnWidth(SECURITY.ordinal(), 45 * 256);
-        sheet.setColumnWidth(BUY_AMOUNT.ordinal(), 16 * 256);
-        sheet.setColumnWidth(CELL_AMOUNT.ordinal(), 16 * 256);
+        sheet.setColumnWidth(OPEN_AMOUNT.ordinal(), 16 * 256);
+        sheet.setColumnWidth(CLOSE_AMOUNT.ordinal(), 16 * 256);
     }
 
     @Override
@@ -80,9 +80,12 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
                     column.getColumnIndex() + "100000)");
         }
         totalRow.put(SECURITY, "Итого:");
-        totalRow.remove(BUY_DATE);
-        totalRow.remove(CELL_DATE);
-        totalRow.remove(BUY_PRICE);
+        totalRow.put(COUNT, "=SUMPRODUCT(ABS(" +
+                COUNT.getColumnIndex() + "3:" +
+                COUNT.getColumnIndex() + "100000))");
+        totalRow.remove(OPEN_DATE);
+        totalRow.remove(CLOSE_DATE);
+        totalRow.remove(OPEN_PRICE);
         totalRow.remove(PROFIT);
         return totalRow;
     }
