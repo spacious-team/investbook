@@ -67,7 +67,7 @@ public class PsbReportTableFactory implements ReportTableFactory {
     }
 
     @Override
-    public ReportTable<SecurityEventCashFlow> getCouponAndAmortizationTable() {
+    public ReportTable<SecurityEventCashFlow> getCouponAmortizationRedemptionTable() {
         return new CouponAmortizationRedemptionTable(report);
     }
     

@@ -59,7 +59,8 @@ public class DividendTable extends PaymentsTable<SecurityEventCashFlow> {
             return emptyList();
         }
 
-        Security security = getSecurity(table, row);
+        Security security = getSecurity(table, row, CashFlowType.DIVIDEND);
+        if (security == null) return emptyList();
         Instant timestamp = getReport().convertToInstant(table.getStringCellValue(row, DATE));
 
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
