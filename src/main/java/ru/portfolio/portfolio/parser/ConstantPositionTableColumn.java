@@ -19,8 +19,10 @@
 package ru.portfolio.portfolio.parser;
 
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.apache.poi.ss.usermodel.Row;
 
+@ToString
 @RequiredArgsConstructor(staticName = "of")
 public class ConstantPositionTableColumn implements TableColumn {
     private final int columnIndex;
