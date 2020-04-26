@@ -177,6 +177,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         boolean isLongPosition = isLongPosition(position);
         row.put(FORECAST_TAX, getForecastTax(isLongPosition));
         row.put(PROFIT, getClosedPositionProfit(isLongPosition));
+        row.put(YIELD, getClosedPositionYield(isLongPosition));
         return row;
     }
 
@@ -285,16 +286,21 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         String commission = "(" + openCommission + "+" + closeCommission + ")";
         String payments = "(" + COUPON.getCellAddr() + "+" + AMORTIZATION.getCellAddr() + "+" + DIVIDEND.getCellAddr() + ")";
         String tax = "(" + TAX.getCellAddr() + "+" + FORECAST_TAX.getCellAddr() + ")";
-        // TODO DAYS() excel function not impl by Apache POI: https://bz.apache.org/bugzilla/show_bug.cgi?id=58468
-        String multiplicator = "100*365/(1+ABS(DAYS360(" + OPEN_DATE.getCellAddr() + "," + CLOSE_DATE.getCellAddr() + ")))";
 
         String buy = isLongPosition ? open : close;
         String cell = isLongPosition ? close : open;
 
-        return "=(" +
-                "(" + cell + "+" + payments + "-" + buy + "-" + tax + "-" + commission + ")" +
+        return "=" + cell + "+" + payments + "-" + buy + "-" + tax + "-" + commission;
+    }
+
+    private String getClosedPositionYield(boolean isLongPosition) {
+        String profit = getClosedPositionProfit(isLongPosition).replace("=", "");
+        String open = "(" + OPEN_AMOUNT.getCellAddr() + "+" + OPEN_ACCRUED_INTEREST.getCellAddr() + ")";
+        String openCommission = OPEN_COMMISSION.getCellAddr();
+        // TODO DAYS() excel function not impl by Apache POI: https://bz.apache.org/bugzilla/show_bug.cgi?id=58468
+        String multiplicator = "100*365/(1+ABS(DAYS360(" + OPEN_DATE.getCellAddr() + "," + CLOSE_DATE.getCellAddr() + ")))";
+        return "=(" + profit + ")" +
                 "/(" + open + "+" + openCommission + ")" +
-                ")" +
                 "*" + multiplicator;
     }
 }
