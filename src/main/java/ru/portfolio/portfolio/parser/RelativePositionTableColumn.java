@@ -20,8 +20,10 @@ package ru.portfolio.portfolio.parser;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.apache.poi.ss.usermodel.Row;
 
+@ToString
 @RequiredArgsConstructor(staticName = "of")
 public class RelativePositionTableColumn implements TableColumn {
     private final TableColumn releatedTableColumn;

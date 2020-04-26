@@ -104,14 +104,24 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
                 .filter(t -> t.getIsin().equals(security.getIsin()))
                 .sorted(Comparator.comparing(SecurityTransaction::getTimestamp))
                 .collect(Collectors.toList());
+        int prevCount = 0;
         for (SecurityTransaction transaction : transactions) {
             if (transaction.getTimestamp().isBefore(atInstant)) {
+                prevCount = count;
                 count += transaction.getCount();
             } else {
                 break;
             }
         }
-        return count;
+        if (count > 0) {
+            return count;
+        } else if (prevCount > 0) {
+            // dividends, coupons payments was received after securities celling (count == 0),
+            // returning securities quantity before celling
+            return prevCount;
+        } else {
+            throw  new RuntimeException("Не определено количество ЦБ " + security + " на момент времени " + atInstant);
+        }
     }
 
     public Collection<EventCashFlow> getEventCashFlows() {

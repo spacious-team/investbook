@@ -40,7 +40,8 @@ public enum StockMarketProfitExcelTableHeader implements ExcelTableHeader {
     CLOSE_COMMISSION("Комиссия закрытия/погашения"),
     TAX("Налог с купонов и дивидендов (уплаченный)"),
     FORECAST_TAX("Налог с разницы курсов (ожидаемый)"),
-    PROFIT("Доходность годовых, %");
+    PROFIT("Прибыль"),
+    YIELD("Доходность годовых, %");
 
     private final String description;
 }

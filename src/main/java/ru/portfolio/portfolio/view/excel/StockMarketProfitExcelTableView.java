@@ -86,7 +86,7 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
         totalRow.remove(OPEN_DATE);
         totalRow.remove(CLOSE_DATE);
         totalRow.remove(OPEN_PRICE);
-        totalRow.remove(PROFIT);
+        totalRow.remove(YIELD);
         return totalRow;
     }
 
