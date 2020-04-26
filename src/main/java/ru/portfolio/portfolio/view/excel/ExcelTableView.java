@@ -151,6 +151,6 @@ public abstract class ExcelTableView {
     }
 
     protected void sheetPostCreate(Sheet sheet, CellStyles styles) {
-        sheet.setZoom(97); // show all columns for 24 inch monitor for securities sheet
+        sheet.setZoom(93); // show all columns for 24 inch monitor for securities sheet
     }
 }
