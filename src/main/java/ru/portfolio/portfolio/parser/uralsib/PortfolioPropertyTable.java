@@ -19,6 +19,7 @@
 package ru.portfolio.portfolio.parser.uralsib;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -44,6 +45,7 @@ import static ru.portfolio.portfolio.parser.uralsib.PortfolioPropertyTable.Summa
 public class PortfolioPropertyTable extends InitializableReportTable<PortfolioProperty> {
     private static final String ASSETS_TABLE = "ОЦЕНКА АКТИВОВ";
     private static final String TABLE_FIRST_HEADER_LINE = "На конец отчетного периода";
+    private static final String TABLE_SECOND_HEADER_LINE = "по цене закрытия";
     private static final String ASSETS = "Общая стоимость активов:";
     private static final String EXCHANGE_RATE = "Официальный обменный курс";
     private final ForeignExchangeRateService foreignExchangeRateService;
@@ -66,7 +68,11 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
             ExcelTable table = ExcelTable.ofNoName(report.getSheet(), ASSETS_TABLE, TABLE_FIRST_HEADER_LINE,
                     SummaryTableHeader.class, 3);
             if (table.isEmpty()) {
-                log.info("Таблица {}' не найдена", ASSETS_TABLE);
+                table = ExcelTable.ofNoName(report.getSheet(), ASSETS_TABLE, TABLE_SECOND_HEADER_LINE,
+                        SummaryTableHeader.class, 2);
+            }
+            if (table.isEmpty()) {
+                log.info("Таблица '{}' не найдена", ASSETS_TABLE);
                 return emptyList();
             }
             Row row = table.findRow(ASSETS);
@@ -159,16 +165,18 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
         }
     }
 
+    @RequiredArgsConstructor
     enum SummaryTableHeader implements TableColumnDescription {
-        RUB(TableColumnImpl.of(TABLE_FIRST_HEADER_LINE),
-                TableColumnImpl.of("по цене закрытия"),
-                TableColumnImpl.of("RUR"));
+        RUB(AnyOfTableColumn.of(
+                MultiLineTableColumn.of(
+                        TableColumnImpl.of(TABLE_FIRST_HEADER_LINE),
+                        TableColumnImpl.of(TABLE_SECOND_HEADER_LINE),
+                        TableColumnImpl.of("RUR")),
+                MultiLineTableColumn.of(
+                        TableColumnImpl.of(TABLE_SECOND_HEADER_LINE),
+                        TableColumnImpl.of("RUR"))));
 
         @Getter
         private final TableColumn column;
-
-        SummaryTableHeader(TableColumn... rowDescripts) {
-            this.column = MultiLineTableColumn.of(rowDescripts);
-        }
     }
 }

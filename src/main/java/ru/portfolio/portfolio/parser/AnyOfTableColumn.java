@@ -38,12 +38,10 @@ public class AnyOfTableColumn implements TableColumn {
 
     @Override
     public int getColumnIndex(int firstColumnForSearch, Row... headerRows) {
-        for (Row header : headerRows) {
-            for (TableColumn c : columns) {
-                try {
-                    return c.getColumnIndex(header);
-                } catch (RuntimeException ignore) {
-                }
+        for (TableColumn c : columns) {
+            try {
+                return c.getColumnIndex(firstColumnForSearch, headerRows);
+            } catch (RuntimeException ignore) {
             }
         }
         throw new RuntimeException("Не обнаружен заголовок таблицы, включающий: " + String.join(", ",

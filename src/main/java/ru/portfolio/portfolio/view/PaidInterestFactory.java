@@ -61,37 +61,20 @@ public class PaidInterestFactory {
         Map<Position, List<SecurityEventCashFlow>> payments = new HashMap<>();
         for (SecurityEventCashFlowEntity entity : accruedInterests) {
             SecurityEventCashFlow cash = securityEventCashFlowConverter.fromEntity(entity);
-            Instant bookClosureDate;
             try {
-                bookClosureDate = getBookClosureDate(positions.getPositionHistories(), entity);
+                Instant bookClosureDate = getBookClosureDate(positions.getPositionHistories(), entity);
+                Deque<Position> paidPositions = getPayedPositions(positions.getClosedPositions(), bookClosureDate);
+                paidPositions.addAll(getPayedPositions(positions.getOpenedPositions(), bookClosureDate));
+
+                getPayments(cash, paidPositions).forEach((position, cashs) ->
+                        cashs.forEach(securityCash ->
+                                payments.computeIfAbsent(position, p -> new ArrayList<>())
+                                        .add(securityCash)));
             } catch (Exception e) {
-                // не найден день в прошлом, в который количество открытых позиций = количеству ЦБ, по которым сделана выплата
                 log.error("{}, выплата будет отображена в отчете по фиктивной позиции покупки ЦБ от даты {}",
-                        e.getMessage(), PaidInterest.fictitiousPositionInstant);
+                        e.getMessage(), PaidInterest.fictitiousPositionInstant, e);
                 payments.computeIfAbsent(PaidInterest.getFictitiousPositionPayment(cash), key -> new ArrayList<>())
                         .add(cash);
-                continue;
-            }
-
-            BigDecimal payPerOne = cash.getValue()
-                    .divide(BigDecimal.valueOf(cash.getCount()), 6, RoundingMode.HALF_UP);
-
-            Deque<Position> paidPositions = getPayedPositions(positions.getClosedPositions(), bookClosureDate);
-            paidPositions.addAll(getPayedPositions(positions.getOpenedPositions(), bookClosureDate));
-
-            for (Position position : paidPositions) {
-                int count = position.getCount();
-                if (count <= 0) {
-                    throw new IllegalArgumentException("Internal error: payment could not be done for short position");
-                }
-                BigDecimal pay = payPerOne
-                        .multiply(BigDecimal.valueOf(count))
-                        .setScale(2, RoundingMode.DOWN);
-                payments.computeIfAbsent(position, key -> new ArrayList<>())
-                        .add(cash.toBuilder()
-                                .count(count)
-                                .value(pay)
-                                .build());
             }
         }
         return payments;
@@ -137,5 +120,25 @@ public class PaidInterestFactory {
             }
         }
         return payedPositions;
+    }
+
+    private Map<Position, List<SecurityEventCashFlow>> getPayments(SecurityEventCashFlow cash, Deque<Position> paidPositions) {
+        Map<Position, List<SecurityEventCashFlow>> payments = new HashMap<>();
+        BigDecimal payPerOne = cash.getValue().divide(BigDecimal.valueOf(cash.getCount()), 6, RoundingMode.HALF_UP);
+        for (Position position : paidPositions) {
+            int count = position.getCount();
+            if (count <= 0) {
+                throw new IllegalArgumentException("Internal error: payment could not be done for short position");
+            }
+            BigDecimal pay = payPerOne
+                    .multiply(BigDecimal.valueOf(count))
+                    .setScale(2, RoundingMode.DOWN);
+            payments.computeIfAbsent(position, key -> new ArrayList<>())
+                    .add(cash.toBuilder()
+                            .count(count)
+                            .value(pay)
+                            .build());
+        }
+        return payments;
     }
 }

@@ -93,8 +93,10 @@ public class ExcelTable implements Iterable<Row> {
                                       Class<? extends TableColumnDescription> headerDescription,
                                       int headersRowCount) {
         CellRangeAddress range = ExcelTableHelper.getTableCellRange(sheet, firstLineText, headersRowCount);
-        range = new CellRangeAddress(range.getFirstRow() - 1, range.getLastRow(),
-                range.getFirstColumn(), range.getLastColumn());
+        if (!range.equals(ExcelTableHelper.EMTPY_RANGE)) {
+            range = new CellRangeAddress(range.getFirstRow() - 1, range.getLastRow(),
+                    range.getFirstColumn(), range.getLastColumn());
+        }
         ExcelTable table = new ExcelTable(sheet, madeUpTableName, range, headerDescription, headersRowCount);
         table.setLastTableRowContainsTotalData(true);
         return table;
