@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Финансовый портфель</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<ol>
+    <li><a href="reports.html">Загрузить отчеты брокера</a></li>
+    <li><a href="/portfolio">Скачать анализ загруженных отчетов</a></li>
+</ol>
+<p style="font-size: smaller; color: gray;">
+    Ваша версия приложения <span th:text="${buildProperties.version}">не актуальна</span>.
+    Проверить обновление можно на
+    <a href="https://github.com/vananiev/portfolio/releases/latest" style="color: gray;">github</a>
+    странице проекта.
+</p>
+</body>
+</html>
