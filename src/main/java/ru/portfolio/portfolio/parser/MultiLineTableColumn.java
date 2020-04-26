@@ -19,6 +19,7 @@
 package ru.portfolio.portfolio.parser;
 
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.apache.poi.ss.usermodel.Row;
 
 /**
@@ -30,6 +31,7 @@ import org.apache.poi.ss.usermodel.Row;
  * <pre/>
  * Can find index for (Two -> a3 -> b1) column
  */
+@ToString
 @RequiredArgsConstructor
 public class MultiLineTableColumn implements TableColumn {
     private final TableColumn[] rowDescriptiors;

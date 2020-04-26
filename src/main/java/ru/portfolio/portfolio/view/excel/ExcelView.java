@@ -38,5 +38,8 @@ public class ExcelView {
         foreignPortfolioPaymentTableView.writeTo(book, styles, portfolio -> portfolio + " (внешние выплаты)");
         cashFlowExcelTableView.writeTo(book, styles, portfolio -> "Доходность (" + portfolio + ")");
         taxExcelTableView.writeTo(book, styles, portfolio -> "Налог (" + portfolio + ")");
+        if (book.getNumberOfSheets() == 0) {
+            book.createSheet("пустой отчет");
+        }
     }
 }
