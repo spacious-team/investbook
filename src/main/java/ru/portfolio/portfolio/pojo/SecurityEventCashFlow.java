@@ -28,6 +28,8 @@ import org.springframework.lang.Nullable;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
 
 @Getter
 @ToString
@@ -58,4 +60,30 @@ public class SecurityEventCashFlow {
 
     @Builder.Default
     private String currency = "RUR";
+
+    /**
+     * Checks DB unique index constraint
+     */
+    public static boolean checkEquality(SecurityEventCashFlow cash1, SecurityEventCashFlow cash2) {
+        return cash1.getPortfolio().equals(cash2.getPortfolio()) &&
+                cash1.getTimestamp().equals(cash2.getTimestamp()) &&
+                cash1.getEventType().equals(cash2.getEventType()) &&
+                cash1.getIsin().equals(cash2.getIsin());
+    }
+
+    /**
+     * Merge information of two objects with equals by {@link #checkEquality(SecurityEventCashFlow, SecurityEventCashFlow)}
+     */
+    public static Collection<SecurityEventCashFlow> mergeDuplicates(SecurityEventCashFlow cash1, SecurityEventCashFlow cash2) {
+        if (!String.valueOf(cash1.getCurrency())
+                .equals(String.valueOf(cash2.getCurrency()))) {
+            throw new RuntimeException("Не могу объединить выплаты по ЦБ, разные валюты: " + cash1 + " и " + cash2);
+        } else if (!String.valueOf(cash1.getCount())
+                .equals(String.valueOf(cash2.getCount()))) {
+            throw new RuntimeException("Не могу объединить выплаты по ЦБ, разное количество ЦБ: " + cash1 + " и " + cash2);
+        }
+        return Collections.singletonList(cash1.toBuilder()
+                .value(cash1.getValue().add(cash2.getValue()))
+                .build());
+    }
 }

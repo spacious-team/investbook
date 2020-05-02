@@ -69,7 +69,8 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
                     .currency(convertToCurrency(table.getStringCellValue(row, CURRENCY)))
                     .description(table.getStringCellValue(row, DESCRIPTION))
                     .build();
-            eventCashFlows.add(cash);
+            ExcelTable.addWithEqualityChecker(cash, eventCashFlows,
+                    EventCashFlow::checkEquality, EventCashFlow::mergeDuplicates);
             log.debug("Получена выплата по ценной бумаге, которой нет в портфеле: " + cash);
             return null;
         }

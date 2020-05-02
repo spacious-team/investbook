@@ -51,7 +51,7 @@ public abstract class InitializableReportTable<RowType> implements ReportTable<R
                 }
             }
         } catch (Exception e) {
-            log.warn("Ошибка при парсинге файла {}", report.getPath().getFileName());
+            throw new RuntimeException("Ошибка при парсинге файла " + report.getPath().getFileName(), e);
         }
     }
 

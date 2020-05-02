@@ -162,19 +162,7 @@ public class ExcelTable implements Iterable<Row> {
                     Collection<T> result = rowExtractor.apply(this, row);
                     if (result != null) {
                         for (T r : result) {
-                            T equalsObject = null;
-                            for (T e : data) {
-                                if (equalityChecker.test(e, r)) {
-                                    equalsObject = e;
-                                    break;
-                                }
-                            }
-                            if (equalsObject != null) {
-                                data.remove(equalsObject);
-                                data.addAll(mergeDuplicates.apply(equalsObject, r));
-                            } else {
-                                data.add(r);
-                            }
+                            addWithEqualityChecker(r, data, equalityChecker, mergeDuplicates);
                         }
                     }
                 } catch (Exception e) {
@@ -183,6 +171,25 @@ public class ExcelTable implements Iterable<Row> {
             }
         }
         return data;
+    }
+
+    public static <T> void addWithEqualityChecker(T eletent,
+                                           Collection<T> collection,
+                                           BiPredicate<T, T> equalityChecker,
+                                           BiFunction<T, T, Collection<T>> mergeDuplicates) {
+        T equalsObject = null;
+        for (T e : collection) {
+            if (equalityChecker.test(e, eletent)) {
+                equalsObject = e;
+                break;
+            }
+        }
+        if (equalsObject != null) {
+            collection.remove(equalsObject);
+            collection.addAll(mergeDuplicates.apply(equalsObject, eletent));
+        } else {
+            collection.add(eletent);
+        }
     }
 
     /**
@@ -204,12 +211,34 @@ public class ExcelTable implements Iterable<Row> {
         return sheet.getRow(address.getRow()).getCell(address.getColumn());
     }
 
+    /**
+     * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
+     */
+    public int getIntCellValueOrDefault(Row row, TableColumnDescription columnDescription, int defaultValue) {
+        try {
+            return getIntCellValue(row, columnDescription);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
     public int getIntCellValue(Row row, TableColumnDescription columnDescription) {
         return (int) getLongCellValue(row, columnDescription);
     }
 
     public long getIntCellValue(CellAddress address) {
         return (int) getLongCellValue(address);
+    }
+
+    /**
+     * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
+     */
+    public long getLongCellValueOrDefault(Row row, TableColumnDescription columnDescription, long defaultValue) {
+        try {
+            return getLongCellValue(row, columnDescription);
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     public long getLongCellValue(Row row, TableColumnDescription columnDescription) {
@@ -220,12 +249,34 @@ public class ExcelTable implements Iterable<Row> {
         return ExcelTableHelper.getLongCellValue(getCell(address));
     }
 
+    /**
+     * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
+     */
+    public BigDecimal getCurrencyCellValueOrDefault(Row row, TableColumnDescription columnDescription, BigDecimal defaultValue) {
+        try {
+            return getCurrencyCellValue(row, columnDescription);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
     public BigDecimal getCurrencyCellValue(Row row, TableColumnDescription columnDescription) {
         return ExcelTableHelper.getCurrencyCellValue(getCell(row, columnDescription));
     }
 
     public BigDecimal getCurrencyCellValue(CellAddress address) {
         return ExcelTableHelper.getCurrencyCellValue(getCell(address));
+    }
+
+    /**
+     * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
+     */
+    public String getStringCellValueOrDefault(Row row, TableColumnDescription columnDescription, String defaultValue) {
+        try {
+            return getStringCellValue(row, columnDescription);
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     public String getStringCellValue(Row row, TableColumnDescription columnDescription) {

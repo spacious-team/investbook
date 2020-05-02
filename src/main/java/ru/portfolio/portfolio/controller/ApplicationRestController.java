@@ -16,29 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.portfolio.portfolio.parser;
+package ru.portfolio.portfolio.controller;
 
-import org.apache.poi.ss.usermodel.Row;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.info.BuildProperties;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 
-public interface TableColumn {
-    TableColumn NOCOLUMN = (i, j) -> -1;
+@Controller
+@RequiredArgsConstructor
+public class ApplicationRestController {
 
-    default TableColumn ofOptional(TableColumn column) {
-        return AnyOfTableColumn.of(column, TableColumn.NOCOLUMN);
+    private final BuildProperties buildProperties;
+
+    @GetMapping("/")
+    public String get(Model model) {
+        model.addAttribute("buildProperties", buildProperties);
+        return "index";
     }
-
-    /**
-     * @param headerRows header rows
-     * @return column index of table
-     */
-    default int getColumnIndex(Row... headerRows) {
-        return getColumnIndex(0, headerRows);
-    }
-
-    /**
-     * @param firstColumnForSearch start result column search from this index
-     * @param headerRows header rows
-     * @return column index of table
-     */
-    int getColumnIndex(int firstColumnForSearch, Row... headerRows);
 }

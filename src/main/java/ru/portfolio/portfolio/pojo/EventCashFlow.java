@@ -59,6 +59,9 @@ public class EventCashFlow {
     @Nullable
     private String description;
 
+    /**
+     * Checks DB unique index constraint
+     */
     public static boolean checkEquality(EventCashFlow cash1, EventCashFlow cash2) {
         return cash1.getPortfolio().equals(cash2.getPortfolio()) &&
                 cash1.getTimestamp().equals(cash2.getTimestamp()) &&
@@ -67,6 +70,9 @@ public class EventCashFlow {
                 cash1.getCurrency().equals(cash2.getCurrency());
     }
 
+    /**
+     * Merge information of two objects with equals by {@link #checkEquality(EventCashFlow, EventCashFlow)}
+     */
     public static Collection<EventCashFlow> mergeDuplicates(EventCashFlow cash1, EventCashFlow cash2) {
         StringJoiner joiner = new StringJoiner("; ");
         if (cash1.getDescription() != null) joiner.add(cash1.getDescription());

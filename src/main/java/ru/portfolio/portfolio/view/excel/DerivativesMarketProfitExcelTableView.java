@@ -56,8 +56,11 @@ public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
                 AMOUNT.getColumnIndex() + "100000))");
         totalRow.put(COMMISSION, getSumFormula(COMMISSION) + "/2");
         totalRow.put(DERIVATIVE_PROFIT_DAY, getSumFormula(DERIVATIVE_PROFIT_DAY));
-        totalRow.put(FORECAST_TAX, getSumFormula(FORECAST_TAX));
-        totalRow.put(PROFIT, getSumFormula(PROFIT));
+        String profitMinusCommission = "(" + DERIVATIVE_PROFIT_DAY.getCellAddr() + "-" + COMMISSION.getCellAddr() + ")";
+        totalRow.put(FORECAST_TAX, "=IF(" + profitMinusCommission + "<=0,0,0.13*" + profitMinusCommission +")");
+        totalRow.put(PROFIT, "=" + DERIVATIVE_PROFIT_DAY.getCellAddr()
+                + "-" + COMMISSION.getCellAddr()
+                + "-" + FORECAST_TAX.getCellAddr());
         return totalRow;
     }
 
