@@ -222,9 +222,6 @@ public class ExcelTableHelper {
     }
 
     public static String getStringCellValue(Cell cell) {
-        if (cell == null || cell.getCellType() == CellType.BLANK) {
-            return "";
-        }
-        return cell.getStringCellValue();
+        return (cell.getCellType() == CellType.BLANK) ? "" : cell.getStringCellValue();
     }
 }

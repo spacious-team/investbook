@@ -204,12 +204,34 @@ public class ExcelTable implements Iterable<Row> {
         return sheet.getRow(address.getRow()).getCell(address.getColumn());
     }
 
+    /**
+     * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
+     */
+    public int getIntCellValueOrDefault(Row row, TableColumnDescription columnDescription, int defaultValue) {
+        try {
+            return getIntCellValue(row, columnDescription);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
     public int getIntCellValue(Row row, TableColumnDescription columnDescription) {
         return (int) getLongCellValue(row, columnDescription);
     }
 
     public long getIntCellValue(CellAddress address) {
         return (int) getLongCellValue(address);
+    }
+
+    /**
+     * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
+     */
+    public long getLongCellValueOrDefault(Row row, TableColumnDescription columnDescription, long defaultValue) {
+        try {
+            return getLongCellValue(row, columnDescription);
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     public long getLongCellValue(Row row, TableColumnDescription columnDescription) {
@@ -220,12 +242,34 @@ public class ExcelTable implements Iterable<Row> {
         return ExcelTableHelper.getLongCellValue(getCell(address));
     }
 
+    /**
+     * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
+     */
+    public BigDecimal getCurrencyCellValueOrDefault(Row row, TableColumnDescription columnDescription, BigDecimal defaultValue) {
+        try {
+            return getCurrencyCellValue(row, columnDescription);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
     public BigDecimal getCurrencyCellValue(Row row, TableColumnDescription columnDescription) {
         return ExcelTableHelper.getCurrencyCellValue(getCell(row, columnDescription));
     }
 
     public BigDecimal getCurrencyCellValue(CellAddress address) {
         return ExcelTableHelper.getCurrencyCellValue(getCell(address));
+    }
+
+    /**
+     * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
+     */
+    public String getStringCellValueOrDefault(Row row, TableColumnDescription columnDescription, String defaultValue) {
+        try {
+            return getStringCellValue(row, columnDescription);
+        } catch (Exception e) {
+            return defaultValue;
+        }
     }
 
     public String getStringCellValue(Row row, TableColumnDescription columnDescription) {

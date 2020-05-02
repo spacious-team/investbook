@@ -20,25 +20,17 @@ package ru.portfolio.portfolio.parser;
 
 import org.apache.poi.ss.usermodel.Row;
 
-public interface TableColumn {
-    TableColumn NOCOLUMN = (i, j) -> -1;
+public class OptionalTableColumn implements TableColumn {
 
-    default TableColumn ofOptional(TableColumn column) {
+    public static TableColumn of(TableColumn column) {
         return AnyOfTableColumn.of(column, TableColumn.NOCOLUMN);
     }
 
-    /**
-     * @param headerRows header rows
-     * @return column index of table
-     */
-    default int getColumnIndex(Row... headerRows) {
-        return getColumnIndex(0, headerRows);
+    private OptionalTableColumn() {
     }
 
-    /**
-     * @param firstColumnForSearch start result column search from this index
-     * @param headerRows header rows
-     * @return column index of table
-     */
-    int getColumnIndex(int firstColumnForSearch, Row... headerRows);
+    @Override
+    public int getColumnIndex(int firstColumnForSearch, Row... headerRows) {
+        return -1;
+    }
 }
