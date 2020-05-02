@@ -93,7 +93,7 @@ public class PsbBrokerReport implements BrokerReport {
                 }
             }
             throw new IllegalArgumentException(
-                    "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + ": XXX'");
+                    "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + " XXX'");
         } catch (Exception e) {
             throw new RuntimeException("Ошибка поиска номера Брокерского счета в отчете");
         }
