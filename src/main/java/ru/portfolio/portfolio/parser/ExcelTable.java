@@ -162,19 +162,7 @@ public class ExcelTable implements Iterable<Row> {
                     Collection<T> result = rowExtractor.apply(this, row);
                     if (result != null) {
                         for (T r : result) {
-                            T equalsObject = null;
-                            for (T e : data) {
-                                if (equalityChecker.test(e, r)) {
-                                    equalsObject = e;
-                                    break;
-                                }
-                            }
-                            if (equalsObject != null) {
-                                data.remove(equalsObject);
-                                data.addAll(mergeDuplicates.apply(equalsObject, r));
-                            } else {
-                                data.add(r);
-                            }
+                            addWithEqualityChecker(r, data, equalityChecker, mergeDuplicates);
                         }
                     }
                 } catch (Exception e) {
@@ -183,6 +171,25 @@ public class ExcelTable implements Iterable<Row> {
             }
         }
         return data;
+    }
+
+    public static <T> void addWithEqualityChecker(T eletent,
+                                           Collection<T> collection,
+                                           BiPredicate<T, T> equalityChecker,
+                                           BiFunction<T, T, Collection<T>> mergeDuplicates) {
+        T equalsObject = null;
+        for (T e : collection) {
+            if (equalityChecker.test(e, eletent)) {
+                equalsObject = e;
+                break;
+            }
+        }
+        if (equalsObject != null) {
+            collection.remove(equalsObject);
+            collection.addAll(mergeDuplicates.apply(equalsObject, eletent));
+        } else {
+            collection.add(eletent);
+        }
     }
 
     /**
