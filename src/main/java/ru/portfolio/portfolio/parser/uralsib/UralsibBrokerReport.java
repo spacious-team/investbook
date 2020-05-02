@@ -93,14 +93,18 @@ public class UralsibBrokerReport implements BrokerReport {
         try {
             CellAddress address = ExcelTableHelper.find(sheet, PORTFOLIO_MARKER);
             for (Cell cell : sheet.getRow(address.getRow())) {
-                if (cell != null && cell.getColumnIndex() > address.getColumn() && cell.getCellType() == CellType.STRING) {
-                    return ExcelTableHelper.getStringCellValue(cell)
-                            .replace("_invest", "")
-                            .replace("SP", "");
+                if (cell != null && cell.getColumnIndex() > address.getColumn()) {
+                    if (cell.getCellType() == CellType.STRING) {
+                        return ExcelTableHelper.getStringCellValue(cell)
+                                .replace("_invest", "")
+                                .replace("SP", "");
+                    } else if (cell.getCellType() == CellType.NUMERIC) {
+                        return String.valueOf(ExcelTableHelper.getLongCellValue(cell));
+                    }
                 }
             }
             throw new IllegalArgumentException(
-                    "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + ": XXX'");
+                    "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + " XXX'");
         } catch (Exception e) {
             throw new RuntimeException("Ошибка поиска номера Брокерского счета в отчете", e);
         }

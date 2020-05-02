@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
   `portfolio` varchar(32) NOT NULL COMMENT 'Портфель (номер брокерского счета)',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `isin` varchar(64) NOT NULL COMMENT 'ISIN инструмента, по которому произошло событие',
-  `count` int(1) unsigned NOT NULL COMMENT 'Количество ЦБ, по которым произошло событие',
+  `count` int(1) unsigned NOT NULL COMMENT 'Количество ЦБ, по которым произошло событие (для деривативов - опциональное поле, можно заполнять 0)',
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(8,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',

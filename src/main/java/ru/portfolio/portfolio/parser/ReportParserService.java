@@ -60,6 +60,10 @@ public class ReportParserService {
                 derivativeTransactionTable.getData().forEach(storage::addTransaction);
                 derivativeCashFlowTable.getData().forEach(c -> {
                     if (storage.addSecurity(c.getIsin())) {
+                        if (c.getCount() == null &&
+                                c.getEventType() == CashFlowType.DERIVATIVE_PROFIT) { // count is optional for derivatives
+                            c = c.toBuilder().count(0).build();
+                        }
                         storage.addSecurityEventCashFlow(c);
                     }
                 });

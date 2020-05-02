@@ -61,7 +61,7 @@ public abstract class AbstractReportTable<RowType> extends InitializableReportTa
             return parseTable(table);
         } catch (Exception e) {
             throw new RuntimeException("Ошибка при парсинге таблицы '" + this.tableName + "' " +
-                    "в файле " + getReport().getPath().getFileName());
+                    "в файле " + getReport().getPath().getFileName(), e);
         }
     }
 

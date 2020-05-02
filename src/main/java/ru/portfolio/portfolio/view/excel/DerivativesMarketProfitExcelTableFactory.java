@@ -40,8 +40,8 @@ import static ru.portfolio.portfolio.view.excel.DerivativesMarketProfitExcelTabl
 @Component
 @RequiredArgsConstructor
 public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
-    private static final String TAX_FORMULA = "=IF(" + DERIVATIVE_PROFIT_TOTAL.getCellAddr()
-            + "<=0,0,0.13*" + DERIVATIVE_PROFIT_TOTAL.getCellAddr() +")";
+    private static final String TAX_FORMULA = "=IF((" + DERIVATIVE_PROFIT_TOTAL.getCellAddr() + "-" + COMMISSION.getCellAddr() + ")<=0," +
+            "0,0.13*(" + DERIVATIVE_PROFIT_TOTAL.getCellAddr() + "-" + COMMISSION.getCellAddr() +"))";
     private static final String PROFIT_FORMULA = "=" + DERIVATIVE_PROFIT_TOTAL.getCellAddr()
             + "-" + COMMISSION.getCellAddr()
             + "-" + FORECAST_TAX.getCellAddr();
