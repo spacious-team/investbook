@@ -28,7 +28,7 @@ public enum DerivativesMarketProfitExcelTableHeader implements ExcelTableHeader 
     DIRECTION("Сделка"),
     DATE("Дата"),
     COUNT("Количество"),
-    QUOTE("Котировка, пункты"),
+    QUOTE("Котировка / премия, пункты"),
     AMOUNT("Сумма, руб"),
     COMMISSION("Коммиссия, руб"),
     DERIVATIVE_PROFIT_DAY("Дневная вариационная маржа, руб"),
