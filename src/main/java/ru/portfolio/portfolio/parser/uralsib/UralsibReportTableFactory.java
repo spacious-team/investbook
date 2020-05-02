@@ -77,7 +77,7 @@ public class UralsibReportTableFactory implements ReportTableFactory {
 
     @Override
     public ReportTable<DerivativeTransaction> getDerivativeTransactionTable() {
-        return new EmptyReportTable<>(report);
+        return new DerivativeTransactionTable(report);
     }
 
     @Override

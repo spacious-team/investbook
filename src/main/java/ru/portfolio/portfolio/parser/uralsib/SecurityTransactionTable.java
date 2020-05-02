@@ -20,7 +20,6 @@ package ru.portfolio.portfolio.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import ru.portfolio.portfolio.parser.*;
 
@@ -47,19 +46,8 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
 
     @Override
     protected Collection<SecurityTransaction> getRow(ExcelTable table, Row row) {
-        long transactionId;
-        if (table.getCell(row, TRANSACTION).getCellType() == CellType.STRING) {
-            try {
-                // some numbers represented by string type cells
-                transactionId = Long.parseLong(table.getStringCellValue(row, TRANSACTION));
-            } catch (NumberFormatException e) {
-                return emptyList();
-            }
-        } else if (table.getCell(row, TRANSACTION).getCellType() == CellType.NUMERIC) {
-            transactionId = table.getLongCellValue(row, TRANSACTION);
-        } else {
-            return emptyList();
-        }
+        Long transactionId = getTransactionId(table, row, TRANSACTION);
+        if (transactionId == null) return emptyList();
 
         boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
         BigDecimal value = table.getCurrencyCellValue(row, VALUE);
@@ -90,6 +78,22 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
                 .valueCurrency(valueCurrency)
                 .commissionCurrency(valueCurrency)
                 .build());
+    }
+
+    static Long getTransactionId(ExcelTable table, Row row, TableColumnDescription column) {
+        switch (table.getCell(row, column).getCellType()) {
+            case STRING:
+                try {
+                    // some numbers represented by string type cells
+                    return Long.parseLong(table.getStringCellValue(row, column));
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            case NUMERIC:
+                return table.getLongCellValue(row, column);
+            default:
+                return null;
+        }
     }
 
     /**
