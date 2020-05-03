@@ -30,7 +30,15 @@ import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.math.BigDecimal;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 
@@ -93,7 +101,7 @@ public class ExcelTable implements Iterable<Row> {
                                       Class<? extends TableColumnDescription> headerDescription,
                                       int headersRowCount) {
         CellRangeAddress range = ExcelTableHelper.getTableCellRange(sheet, firstLineText, headersRowCount);
-        if (!range.equals(ExcelTableHelper.EMTPY_RANGE)) {
+        if (!range.equals(ExcelTableHelper.EMPTY_RANGE)) {
             range = new CellRangeAddress(range.getFirstRow() - 1, range.getLastRow(),
                     range.getFirstColumn(), range.getLastColumn());
         }
@@ -108,7 +116,7 @@ public class ExcelTable implements Iterable<Row> {
         this.tableName = tableName;
         this.tableRange = tableRange;
         this.dataRowOffset = 1 + headersRowCount; // table_name + headersRowCount
-        this.empty = this.tableRange.equals(ExcelTableHelper.EMTPY_RANGE) ||
+        this.empty = this.tableRange.equals(ExcelTableHelper.EMPTY_RANGE) ||
                 ((this.tableRange.getLastRow() - this.tableRange.getFirstRow()) <= headersRowCount);
         this.columnIndices = empty ?
                 Collections.emptyMap() :
@@ -173,27 +181,27 @@ public class ExcelTable implements Iterable<Row> {
         return data;
     }
 
-    public static <T> void addWithEqualityChecker(T eletent,
+    public static <T> void addWithEqualityChecker(T element,
                                            Collection<T> collection,
                                            BiPredicate<T, T> equalityChecker,
                                            BiFunction<T, T, Collection<T>> mergeDuplicates) {
         T equalsObject = null;
         for (T e : collection) {
-            if (equalityChecker.test(e, eletent)) {
+            if (equalityChecker.test(e, element)) {
                 equalsObject = e;
                 break;
             }
         }
         if (equalsObject != null) {
             collection.remove(equalsObject);
-            collection.addAll(mergeDuplicates.apply(equalsObject, eletent));
+            collection.addAll(mergeDuplicates.apply(equalsObject, element));
         } else {
-            collection.add(eletent);
+            collection.add(element);
         }
     }
 
     /**
-     * @return row containg given value or null if not found
+     * @return row containing given value or null if not found
      */
     public Row findRow(String value) {
         CellAddress address = ExcelTableHelper.find(getSheet(), value);
@@ -289,10 +297,10 @@ public class ExcelTable implements Iterable<Row> {
 
     @Override
     public Iterator<Row> iterator() {
-        return new ExelTableIterator();
+        return new ExcelTableIterator();
     }
 
-    class ExelTableIterator implements Iterator<Row> {
+    class ExcelTableIterator implements Iterator<Row> {
         private final int dataRowsCount = tableRange.getLastRow() - tableRange.getFirstRow()
                 - dataRowOffset
                 + (isLastTableRowContainsTotalData ? 0 : 1);

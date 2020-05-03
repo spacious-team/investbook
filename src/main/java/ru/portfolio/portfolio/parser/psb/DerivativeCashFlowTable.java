@@ -22,17 +22,27 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
-import ru.portfolio.portfolio.parser.*;
+import ru.portfolio.portfolio.parser.AbstractReportTable;
+import ru.portfolio.portfolio.parser.ExcelTable;
+import ru.portfolio.portfolio.parser.TableColumn;
+import ru.portfolio.portfolio.parser.TableColumnDescription;
+import ru.portfolio.portfolio.parser.TableColumnImpl;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static ru.portfolio.portfolio.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.*;
+import static ru.portfolio.portfolio.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.BUY;
+import static ru.portfolio.portfolio.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.CONTRACT;
+import static ru.portfolio.portfolio.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.OUTGOING;
 
 @Slf4j
 public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCashFlow> {
@@ -63,7 +73,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
 
     private static AbstractMap.SimpleEntry<String, Integer> getCount(ExcelTable table, Row row) {
         String contract = table.getStringCellValue(row, CONTRACT);
-        int incomingCount = Math.abs(table.getIntCellValue(row, INCOUMING));
+        int incomingCount = Math.abs(table.getIntCellValue(row, ContractCountTableHeader.INCOMING));
         int outgoingCount = Math.abs(table.getIntCellValue(row, OUTGOING));
         int count = Math.max(incomingCount, outgoingCount);
         if (count == 0) {
@@ -74,7 +84,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
 
     @Override
     protected Collection<SecurityEventCashFlow> getRow(ExcelTable table, Row row) {
-        BigDecimal value = table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.INCOUMING)
+        BigDecimal value = table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.INCOMING)
                 .subtract(table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.OUTGOING));
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .timestamp(convertToInstant(table.getStringCellValue(row, DerivativeCashFlowTableHeader.DATE)))
@@ -96,7 +106,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
                         .build());
             case "биржевой сбор":
                 return emptyList(); // изменения отображаются в ликвидной стоимости портфеля
-            case "заблокированo / разблокировано средств под го":
+            case "заблокировано / разблокировано средств под го":
                 return emptyList(); // не влияет на размер собственных денежных средств
             default:
                 throw new IllegalArgumentException("Неизвестный вид операции " + action);
@@ -105,7 +115,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
 
     enum ContractCountTableHeader implements TableColumnDescription {
         CONTRACT("контракт"),
-        INCOUMING("входящий остаток"),
+        INCOMING("входящий остаток"),
         OUTGOING("исходящий остаток"),
         BUY("зачислено"),
         CELL("списано");
@@ -121,7 +131,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
         DATE("дата"),
         CONTRACT("№", "контракт"),
         OPERATION("вид операции"),
-        INCOUMING("зачислено"),
+        INCOMING("зачислено"),
         OUTGOING("списано");
 
         @Getter

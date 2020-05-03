@@ -59,24 +59,24 @@ public class PsbBrokerReport implements BrokerReport {
     @Getter
     private final Instant reportDate;
 
-    public PsbBrokerReport(String exelFileName) throws IOException {
-        this(Paths.get(exelFileName));
+    public PsbBrokerReport(String excelFileName) throws IOException {
+        this(Paths.get(excelFileName));
     }
 
     public PsbBrokerReport(Path report) throws IOException {
         this(report.getFileName().toString(), Files.newInputStream(report));
     }
 
-    public PsbBrokerReport(String exelFileName, InputStream is) throws IOException {
-        this.path = Paths.get(exelFileName);
-        this.book = getWorkBook(exelFileName, is);
+    public PsbBrokerReport(String excelFileName, InputStream is) throws IOException {
+        this.path = Paths.get(excelFileName);
+        this.book = getWorkBook(excelFileName, is);
         this.sheet = book.getSheetAt(0);
         this.portfolio = getPortfolio(this.sheet);
         this.reportDate = getReportDate(this.sheet);
     }
 
-    private Workbook getWorkBook(String exelFileName, InputStream is) throws IOException {
-        if (exelFileName.endsWith(".xls")) {
+    private Workbook getWorkBook(String excelFileName, InputStream is) throws IOException {
+        if (excelFileName.endsWith(".xls")) {
             return new HSSFWorkbook(is); // constructor close zis
         } else {
             return new XSSFWorkbook(is);

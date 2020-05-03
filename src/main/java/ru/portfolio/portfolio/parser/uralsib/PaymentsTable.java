@@ -21,7 +21,12 @@ package ru.portfolio.portfolio.parser.uralsib;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
-import ru.portfolio.portfolio.parser.*;
+import ru.portfolio.portfolio.parser.AbstractReportTable;
+import ru.portfolio.portfolio.parser.ExcelTable;
+import ru.portfolio.portfolio.parser.SecurityTransaction;
+import ru.portfolio.portfolio.parser.TableColumn;
+import ru.portfolio.portfolio.parser.TableColumnDescription;
+import ru.portfolio.portfolio.parser.TableColumnImpl;
 import ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInformation;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.EventCashFlow;
@@ -34,7 +39,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
+import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.CURRENCY;
+import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.DATE;
+import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.DESCRIPTION;
+import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.VALUE;
 import static ru.portfolio.portfolio.parser.uralsib.UralsibBrokerReport.convertToCurrency;
 
 @Slf4j
@@ -84,7 +92,7 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
             Security security = info.getSecurity();
             if (contains(descriptionLowercase, info.getCfi()) ||   // dividend
                     (security != null && (contains(descriptionLowercase, security.getName()) ||  // coupon, amortization, redemption
-                            contains(descriptionLowercase, security.getIsin())))) { // for furute report changes
+                            contains(descriptionLowercase, security.getIsin())))) { // for future report changes
                 return security;
             }
         }

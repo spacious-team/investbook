@@ -34,13 +34,13 @@ import org.apache.poi.ss.usermodel.Row;
 @ToString
 @RequiredArgsConstructor
 public class MultiLineTableColumn implements TableColumn {
-    private final TableColumn[] rowDescriptiors;
+    private final TableColumn[] rowDescriptors;
 
     /**
-     * @param rowDescriptiors each array element describes next rows column
+     * @param rowDescriptors each array element describes next rows column
      */
-    public static MultiLineTableColumn of(TableColumn... rowDescriptiors) {
-        return new MultiLineTableColumn(rowDescriptiors);
+    public static MultiLineTableColumn of(TableColumn... rowDescriptors) {
+        return new MultiLineTableColumn(rowDescriptors);
     }
 
     /**
@@ -48,15 +48,15 @@ public class MultiLineTableColumn implements TableColumn {
      */
     @Override
     public int getColumnIndex(int firstColumnForSearch, Row... headerRows) {
-        if (headerRows.length != rowDescriptiors.length) {
-            throw new RuntimeException("Внутренняя ошибка, в таблице ожидается " + rowDescriptiors.length +
+        if (headerRows.length != rowDescriptors.length) {
+            throw new RuntimeException("Внутренняя ошибка, в таблице ожидается " + rowDescriptors.length +
                     " строк в заголовке");
         }
         int columnIndex = firstColumnForSearch;
         int i = 0;
         for (Row row : headerRows) {
-            TableColumn rowDescriptior = rowDescriptiors[i++];
-            columnIndex = rowDescriptior.getColumnIndex(columnIndex, row);
+            TableColumn rowDescriptor = rowDescriptors[i++];
+            columnIndex = rowDescriptor.getColumnIndex(columnIndex, row);
         }
         return columnIndex;
     }
