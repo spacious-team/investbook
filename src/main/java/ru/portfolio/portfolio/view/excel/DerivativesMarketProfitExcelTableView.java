@@ -44,6 +44,11 @@ public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
         super.writeHeader(sheet, headerType, style);
         sheet.setColumnWidth(CONTRACT.ordinal(), 24 * 256);
         sheet.setColumnWidth(AMOUNT.ordinal(), 16 * 256);
+        sheet.setColumnWidth(DERIVATIVE_PROFIT_DAY.ordinal(), 17 * 256);
+        sheet.setColumnWidth(DERIVATIVE_PROFIT_TOTAL.ordinal(), 17 * 256);
+        sheet.setColumnWidth(POSITION.ordinal(), 17 * 256);
+        sheet.setColumnWidth(FORECAST_TAX.ordinal(), 17 * 256);
+        sheet.setColumnWidth(PROFIT.ordinal(), 17 * 256);
     }
 
     @Override
