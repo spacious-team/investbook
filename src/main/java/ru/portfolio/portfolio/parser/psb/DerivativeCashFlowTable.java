@@ -96,7 +96,8 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
                         .build());
             case "биржевой сбор":
                 return emptyList(); // изменения отображаются в ликвидной стоимости портфеля
-            case "заблокировано / разблокировано средств под го":
+            // латиница в слове "заблокированo" - это опечатка в брокерском отчёте
+            case "заблокированo / разблокировано средств под го":
                 return emptyList(); // не влияет на размер собственных денежных средств
             default:
                 throw new IllegalArgumentException("Неизвестный вид операции " + action);
