@@ -21,14 +21,7 @@ package ru.portfolio.portfolio.parser.uralsib;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
-import ru.portfolio.portfolio.parser.AbstractReportTable;
-import ru.portfolio.portfolio.parser.ExcelTable;
-import ru.portfolio.portfolio.parser.MultiLineTableColumn;
-import ru.portfolio.portfolio.parser.RelativePositionTableColumn;
-import ru.portfolio.portfolio.parser.SecurityTransaction;
-import ru.portfolio.portfolio.parser.TableColumn;
-import ru.portfolio.portfolio.parser.TableColumnDescription;
-import ru.portfolio.portfolio.parser.TableColumnImpl;
+import ru.portfolio.portfolio.parser.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -36,18 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static java.util.Collections.emptyList;
-import static ru.portfolio.portfolio.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.ACCRUED_INTEREST;
-import static ru.portfolio.portfolio.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.BROKER_COMMISSION;
-import static ru.portfolio.portfolio.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.BROKER_COMMISSION_CURRENCY;
-import static ru.portfolio.portfolio.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.COUNT;
-import static ru.portfolio.portfolio.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.DATE_TIME;
-import static ru.portfolio.portfolio.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.DIRECTION;
-import static ru.portfolio.portfolio.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.ISIN;
-import static ru.portfolio.portfolio.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.MARKET_COMMISSION;
-import static ru.portfolio.portfolio.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.MARKET_COMMISSION_CURRENCY;
-import static ru.portfolio.portfolio.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.TRANSACTION;
-import static ru.portfolio.portfolio.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.VALUE;
-import static ru.portfolio.portfolio.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.VALUE_CURRENCY;
+import static ru.portfolio.portfolio.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.*;
 import static ru.portfolio.portfolio.parser.uralsib.UralsibBrokerReport.convertToCurrency;
 
 @Slf4j

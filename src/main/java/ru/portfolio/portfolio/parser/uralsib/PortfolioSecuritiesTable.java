@@ -24,21 +24,14 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
-import ru.portfolio.portfolio.parser.AbstractReportTable;
-import ru.portfolio.portfolio.parser.ExcelTable;
-import ru.portfolio.portfolio.parser.TableColumn;
-import ru.portfolio.portfolio.parser.TableColumnDescription;
-import ru.portfolio.portfolio.parser.TableColumnImpl;
+import ru.portfolio.portfolio.parser.*;
 import ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInformation;
 import ru.portfolio.portfolio.pojo.Security;
 
 import java.util.Collection;
 
 import static java.util.Collections.singletonList;
-import static ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.CFI;
-import static ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.INCOMING_COUNT;
-import static ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.ISIN;
-import static ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.NAME;
+import static ru.portfolio.portfolio.parser.uralsib.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.*;
 
 @Slf4j
 public class PortfolioSecuritiesTable extends AbstractReportTable<ReportSecurityInformation> {

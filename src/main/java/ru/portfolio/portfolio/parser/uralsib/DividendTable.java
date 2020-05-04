@@ -34,11 +34,7 @@ import java.util.regex.Pattern;
 
 import static java.lang.Double.parseDouble;
 import static java.util.Collections.emptyList;
-import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.CURRENCY;
-import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.DATE;
-import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.DESCRIPTION;
-import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.OPERATION;
-import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.VALUE;
+import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
 public class DividendTable extends PaymentsTable<SecurityEventCashFlow> {
