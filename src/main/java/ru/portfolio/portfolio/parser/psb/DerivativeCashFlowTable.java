@@ -63,7 +63,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
 
     private static AbstractMap.SimpleEntry<String, Integer> getCount(ExcelTable table, Row row) {
         String contract = table.getStringCellValue(row, CONTRACT);
-        int incomingCount = Math.abs(table.getIntCellValue(row, ContractCountTableHeader.INCOMING));
+        int incomingCount = Math.abs(table.getIntCellValue(row, INCOMING));
         int outgoingCount = Math.abs(table.getIntCellValue(row, OUTGOING));
         int count = Math.max(incomingCount, outgoingCount);
         if (count == 0) {
