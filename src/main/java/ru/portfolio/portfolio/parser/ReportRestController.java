@@ -78,7 +78,7 @@ public class ReportRestController {
                         break;
                     case URALSIB:
                         if (originalFileName != null && !originalFileName.contains("_invest_")) {
-                            log.warn("Рекомендуется загружать отчеты содержащие в имени файла слово 'invest'");
+                            log.warn("Рекомендуется загружать отчеты, содержащие в имени файла слово 'invest'");
                         }
                         if (originalFileName != null && !originalFileName.toLowerCase().endsWith(".zip")) {
                             parseUralsibReport(report);
@@ -96,7 +96,7 @@ public class ReportRestController {
             }
         }
         if (exceptions.isEmpty()) {
-            return ResponseEntity.ok("ok");
+            return ResponseEntity.ok("Отчеты загружены <a href=\"/\">[ok]</a>");
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(exceptions.stream()
@@ -106,7 +106,10 @@ public class ReportRestController {
                                 e.printStackTrace(pw);
                                 return sw.toString().replace("\n", "</br>");
                             }).collect(Collectors.joining("</br></br> - ",
-                                    "<b>Ошибка загрузки отчетов</b></br></br> - ",
+                                    "<b>Ошибка загрузки отчетов</b> <a href=\"/\">[назад]</a><br/>" +
+                                    "<span style=\"font-size: smaller; color: gray;\">Вы можете " +
+                                    "<a href=\"https://github.com/vananiev/portfolio/issues\">сообщить</a> об ошибке " +
+                                    "разработчикам</span></br></br> - ",
                                     "")));
         }
     }
