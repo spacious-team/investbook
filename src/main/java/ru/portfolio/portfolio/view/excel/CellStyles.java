@@ -35,7 +35,7 @@ public class CellStyles {
     private final CellStyle intStyle;
 
     public CellStyles(XSSFWorkbook book) {
-        this.defaultStyle = createDefalutStyle(book);
+        this.defaultStyle = createDefaultStyle(book);
         this.headerStyle = createHeaderStyle(book);
         this.totalTextStyle = createLeftAlignedItalicTextStyle(book);
         this.totalRowStyle = createTotalRowStyle(book);
@@ -46,7 +46,7 @@ public class CellStyles {
     }
 
     protected static XSSFCellStyle createHeaderStyle(XSSFWorkbook book) {
-        XSSFCellStyle style = createDefalutStyle(book);
+        XSSFCellStyle style = createDefaultStyle(book);
         style.getFont().setBold(true);
         return style;
     }
@@ -58,7 +58,7 @@ public class CellStyles {
     }
 
     protected static XSSFCellStyle createLeftAlignedTextStyle(XSSFWorkbook book) {
-        XSSFCellStyle style = createDefalutStyle(book);
+        XSSFCellStyle style = createDefaultStyle(book);
         style.setAlignment(HorizontalAlignment.LEFT);
         return style;
     }
@@ -70,27 +70,27 @@ public class CellStyles {
     }
 
     protected static XSSFCellStyle createDateStyle(XSSFWorkbook book) {
-        XSSFCellStyle style = createDefalutStyle(book);
+        XSSFCellStyle style = createDefaultStyle(book);
         CreationHelper createHelper = book.getCreationHelper();
         style.setDataFormat(createHelper.createDataFormat().getFormat("dd.mm.yyyy"));
         return style;
     }
 
     protected static XSSFCellStyle createIntegerStyle(XSSFWorkbook book) {
-        XSSFCellStyle style = createDefalutStyle(book);
+        XSSFCellStyle style = createDefaultStyle(book);
         CreationHelper createHelper = book.getCreationHelper();
         style.setDataFormat(createHelper.createDataFormat().getFormat("_-* # ### ##0_-;-* # ### ##0_-;_-* \"-\"??_-;_-@_-"));
         return style;
     }
 
     protected static XSSFCellStyle createMoneyStyle(XSSFWorkbook book) {
-        XSSFCellStyle style = createDefalutStyle(book);
+        XSSFCellStyle style = createDefaultStyle(book);
         CreationHelper createHelper = book.getCreationHelper();
         style.setDataFormat(createHelper.createDataFormat().getFormat("_-* # ### ##0.00_р_._-;-* # ### ##0.00_р_._-;_-* \"-\"??_р_._-;_-@_-"));
         return style;
     }
 
-    protected static XSSFCellStyle createDefalutStyle(XSSFWorkbook book) {
+    protected static XSSFCellStyle createDefaultStyle(XSSFWorkbook book) {
         Font font = book.createFont();
         XSSFCellStyle style = book.createCellStyle();
         style.setFont(font);

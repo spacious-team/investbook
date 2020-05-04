@@ -53,7 +53,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
     /**
      * Create a new entity.
      * In create case  method returns CREATE http status, Location header and entity in body.
-     * If entiry already exists CONFLICT http status and Location header was returned.
+     * If entity already exists CONFLICT http status and Location header was returned.
      * @param object new entity (ID may not be provided if it AUTOINCREMENT)
      */
     protected ResponseEntity<Entity> post(Pojo object) {

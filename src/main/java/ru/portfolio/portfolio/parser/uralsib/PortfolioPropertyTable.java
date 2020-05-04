@@ -132,24 +132,24 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
         if (baseCurrency.equalsIgnoreCase(quoteCurrency)) {
             return BigDecimal.ONE;
         }
-        BigDecimal exhangeRate = BigDecimal.ZERO;
+        BigDecimal exchangeRate = BigDecimal.ZERO;
         if (quoteCurrency.equalsIgnoreCase("rub")) {
-            exhangeRate = getReportExchangeRate(baseCurrency);
+            exchangeRate = getReportExchangeRate(baseCurrency);
         } else if (baseCurrency.equalsIgnoreCase("rub")) {
             BigDecimal v = getReportExchangeRate(quoteCurrency);
-            exhangeRate = v.equals(BigDecimal.ZERO) ? v : BigDecimal.ONE.divide(v, 6, RoundingMode.HALF_UP);
+            exchangeRate = v.equals(BigDecimal.ZERO) ? v : BigDecimal.ONE.divide(v, 6, RoundingMode.HALF_UP);
         } else {
             BigDecimal baseToRubRate = getReportExchangeRate(baseCurrency);
             BigDecimal quoteToRubRate = getReportExchangeRate(quoteCurrency);
             if (!baseToRubRate.equals(BigDecimal.ZERO) && !quoteToRubRate.equals(BigDecimal.ZERO)) {
-                exhangeRate = baseToRubRate.divide(quoteToRubRate, 6, RoundingMode.HALF_UP);
+                exchangeRate = baseToRubRate.divide(quoteToRubRate, 6, RoundingMode.HALF_UP);
             }
         }
-        if (exhangeRate.equals(BigDecimal.ZERO)) {
-            exhangeRate = foreignExchangeRateService.getExchangeRate(baseCurrency, quoteCurrency,
+        if (exchangeRate.equals(BigDecimal.ZERO)) {
+            exchangeRate = foreignExchangeRateService.getExchangeRate(baseCurrency, quoteCurrency,
                     transactionInstant, UralsibBrokerReport.zoneId);
         }
-        return exhangeRate;
+        return exchangeRate;
     }
 
     private BigDecimal getReportExchangeRate(String currency) {

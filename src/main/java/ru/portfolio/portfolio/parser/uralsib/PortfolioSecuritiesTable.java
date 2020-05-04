@@ -44,12 +44,12 @@ public class PortfolioSecuritiesTable extends AbstractReportTable<ReportSecurity
 
     @Override
     protected Collection<ReportSecurityInformation> getRow(ExcelTable table, Row row) {
-        Security securty = Security.builder()
+        Security security = Security.builder()
                 .isin(table.getStringCellValue(row, ISIN))
                 .name(table.getStringCellValue(row, NAME))
                 .build();
         return singletonList(ReportSecurityInformation.builder()
-                .security(securty)
+                .security(security)
                 .cfi(table.getStringCellValue(row, CFI))
                 .incomingCount(table.getIntCellValue(row, INCOMING_COUNT))
                 .build());

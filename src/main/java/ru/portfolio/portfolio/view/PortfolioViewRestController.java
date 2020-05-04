@@ -47,7 +47,7 @@ public class PortfolioViewRestController {
     private final FileSystem jimfs = Jimfs.newFileSystem();
 
     @GetMapping("/portfolio")
-    public void getExelView(HttpServletResponse response) throws IOException {
+    public void getExcelView(HttpServletResponse response) throws IOException {
         try {
             long t0 = System.nanoTime();
             String fileName = "portfolio.xlsx";

@@ -30,7 +30,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 public class ExcelTableHelper {
-    public static final CellRangeAddress EMTPY_RANGE = new CellRangeAddress(-1, -1, -1, -1);
+    public static final CellRangeAddress EMPTY_RANGE = new CellRangeAddress(-1, -1, -1, -1);
     public static final CellAddress NOT_FOUND = new CellAddress(-1, -1);
     public static final BiPredicate<String, Object> CELL_STRING_EQUALS = (cell, searchingValue) ->
             searchingValue != null && cell.trim().toLowerCase().startsWith(searchingValue.toString().trim().toLowerCase());
@@ -38,12 +38,12 @@ public class ExcelTableHelper {
     public static CellRangeAddress getTableCellRange(Sheet sheet, String tableName, int headersRowCount, String tableFooterString) {
         CellAddress startAddress = find(sheet, tableName);
         if (startAddress.equals(NOT_FOUND)) {
-            return EMTPY_RANGE;
+            return EMPTY_RANGE;
         }
         CellAddress endAddress = find(sheet, tableFooterString, startAddress.getRow() + headersRowCount + 1,
                 sheet.getLastRowNum(), CELL_STRING_EQUALS);
         if (endAddress.equals(NOT_FOUND)) {
-            return EMTPY_RANGE;
+            return EMPTY_RANGE;
         }
         return new CellRangeAddress(
                 startAddress.getRow(),
@@ -53,12 +53,12 @@ public class ExcelTableHelper {
     }
 
     /**
-     * Get table ragne, table ends with empty line
+     * Get table range, table ends with empty line
      */
     public static CellRangeAddress getTableCellRange(Sheet sheet, String tableName, int headersRowCount) {
         CellAddress startAddress = find(sheet, tableName);
         if (startAddress.equals(NOT_FOUND)) {
-            return EMTPY_RANGE;
+            return EMPTY_RANGE;
         }
         int lastRowNum = startAddress.getRow() + headersRowCount + 1;
         LAST_ROW:
