@@ -41,7 +41,7 @@ import static java.util.Objects.requireNonNull;
 
 @Component
 @RequiredArgsConstructor
-public class DerivativeCashFlowFactory {
+public class DerivativeEventsFactory {
     private static final ZoneId MOEX_TIMEZONE = ZoneId.of("Europe/Moscow");
     private static final int LAST_TRADE_HOUR = 18;
     private final TransactionRepository transactionRepository;
@@ -51,7 +51,7 @@ public class DerivativeCashFlowFactory {
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
     private final TransactionCashFlowConverter transactionCashFlowConverter;
 
-    public DerivativeCashFlow getDerivativeCashFlow(Portfolio portfolio, Security contract) {
+    public DerivativeEvents getDerivativeEvents(Portfolio portfolio, Security contract) {
         Deque<Transaction> transactions = getTransactions(portfolio, contract);
         Map<LocalDate, SecurityEventCashFlow> securityEventCashFlows = getSecurityEventCashFlows(portfolio, contract);
 
@@ -59,7 +59,7 @@ public class DerivativeCashFlowFactory {
         LocalDate lastEventDate = Optional.ofNullable(getContractLastEventDate(transactions, securityEventCashFlows))
                 .orElse(firstEventDate);
 
-        DerivativeCashFlow derivativeCashFlow = new DerivativeCashFlow();
+        DerivativeEvents derivativeEvents = new DerivativeEvents();
         BigDecimal totalProfit = BigDecimal.ZERO;
         int currentPosition = 0;
         LocalDate currentDay = firstEventDate;
@@ -77,8 +77,8 @@ public class DerivativeCashFlowFactory {
                         cash;
                 totalProfit = totalProfit.add(cash.getValue());
 
-                derivativeCashFlow.getCashFlows().add(
-                        DerivativeCashFlow.DailyCashFlow.builder()
+                derivativeEvents.getDerivativeDailyEvents().add(
+                        DerivativeEvents.DerivativeDailyEvents.builder()
                                 .dailyTransactions(getCashFlows(dailyTransactions))
                                 .dailyProfit(cash)
                                 .totalProfit(totalProfit)
@@ -87,7 +87,7 @@ public class DerivativeCashFlowFactory {
             }
             currentDay = currentDay.plusDays(1);
         }
-        return derivativeCashFlow;
+        return derivativeEvents;
     }
 
     private LinkedList<Transaction> getTransactions(Portfolio portfolio, Security contract) {

@@ -20,6 +20,7 @@ package ru.portfolio.portfolio.view;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.lang.Nullable;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 import ru.portfolio.portfolio.pojo.Transaction;
@@ -32,13 +33,15 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
-public class DerivativeCashFlow {
-    private final List<DailyCashFlow> cashFlows = new ArrayList<>();
+public class DerivativeEvents {
+    private final List<DerivativeDailyEvents> derivativeDailyEvents = new ArrayList<>();
 
     @Getter
     @Builder
-    public static class DailyCashFlow {
+    public static class DerivativeDailyEvents {
+        @Nullable
         private final SecurityEventCashFlow dailyProfit;
+        @Nullable
         private final LinkedHashMap<Transaction, Map<CashFlowType, TransactionCashFlow>> dailyTransactions;
         private final BigDecimal totalProfit;
         private final int position;

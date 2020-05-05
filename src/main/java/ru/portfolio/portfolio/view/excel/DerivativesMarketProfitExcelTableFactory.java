@@ -25,8 +25,8 @@ import ru.portfolio.portfolio.entity.SecurityEntity;
 import ru.portfolio.portfolio.pojo.*;
 import ru.portfolio.portfolio.repository.SecurityRepository;
 import ru.portfolio.portfolio.repository.TransactionRepository;
-import ru.portfolio.portfolio.view.DerivativeCashFlow;
-import ru.portfolio.portfolio.view.DerivativeCashFlowFactory;
+import ru.portfolio.portfolio.view.DerivativeEvents;
+import ru.portfolio.portfolio.view.DerivativeEventsFactory;
 import ru.portfolio.portfolio.view.Table;
 import ru.portfolio.portfolio.view.TableFactory;
 
@@ -48,18 +48,18 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final SecurityConverter securityConverter;
-    private final DerivativeCashFlowFactory derivativeCashFlowFactory;
+    private final DerivativeEventsFactory derivativeEventsFactory;
 
     public Table create(Portfolio portfolio) {
         Table profit = new Table();
         for (String isin : getSecuritiesIsin(portfolio)) {
             Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
             if (securityEntity.isPresent()) {
-                Security security = securityConverter.fromEntity(securityEntity.get());
-                DerivativeCashFlow derivativeCashFlow = derivativeCashFlowFactory.getDerivativeCashFlow(portfolio, security);
+                Security contract = securityConverter.fromEntity(securityEntity.get());
+                DerivativeEvents derivativeEvents = derivativeEventsFactory.getDerivativeEvents(portfolio, contract);
 
                 profit.addEmptyRecord();
-                profit.addAll(getContractProfit(security, derivativeCashFlow));
+                profit.addAll(getContractProfit(contract, derivativeEvents));
             }
         }
         return profit;
@@ -69,17 +69,17 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
         return transactionRepository.findDistinctDerivativeByPortfolioOrderByTimestampDesc(portfolio);
     }
 
-    private Table getContractProfit(Security security, DerivativeCashFlow derivativeCashFlow) {
+    private Table getContractProfit(Security contract, DerivativeEvents derivativeEvents) {
         Table contractProfit = new Table();
         BigDecimal totalCommission = BigDecimal.ZERO;
         BigDecimal totalProfit = BigDecimal.ZERO;
         int totalContractCount = 0;
-        for (DerivativeCashFlow.DailyCashFlow dailyCashFlow : derivativeCashFlow.getCashFlows()) {
+        for (DerivativeEvents.DerivativeDailyEvents dailyEvents : derivativeEvents.getDerivativeDailyEvents()) {
             Table.Record record = new Table.Record();
             contractProfit.add(record);
             boolean isFirstRowOfDay = true;
             for (Map.Entry<Transaction, Map<CashFlowType, TransactionCashFlow>> e :
-                    dailyCashFlow.getDailyTransactions().entrySet()) {
+                    dailyEvents.getDailyTransactions().entrySet()) {
                 if (!isFirstRowOfDay) {
                     record = new Table.Record();
                     contractProfit.add(record);
@@ -104,15 +104,15 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
                 record.put(COMMISSION, commission);
                 isFirstRowOfDay = false;
             }
-            record.put(DATE, dailyCashFlow.getDailyProfit().getTimestamp());
-            record.put(DERIVATIVE_PROFIT_DAY, dailyCashFlow.getDailyProfit().getValue());
-            totalProfit = dailyCashFlow.getTotalProfit();
+            record.put(DATE, dailyEvents.getDailyProfit().getTimestamp());
+            record.put(DERIVATIVE_PROFIT_DAY, dailyEvents.getDailyProfit().getValue());
+            totalProfit = dailyEvents.getTotalProfit();
             record.put(DERIVATIVE_PROFIT_TOTAL, totalProfit);
-            totalContractCount = dailyCashFlow.getPosition();
+            totalContractCount = dailyEvents.getPosition();
             record.put(POSITION, totalContractCount);
         }
         Table.Record total = new Table.Record();
-        total.put(CONTRACT, security.getIsin());
+        total.put(CONTRACT, contract.getIsin());
         total.put(DIRECTION, "Итого");
         total.put(COUNT, totalContractCount);
         total.put(COMMISSION, totalCommission);
