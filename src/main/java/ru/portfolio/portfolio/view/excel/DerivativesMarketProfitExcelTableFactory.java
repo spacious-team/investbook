@@ -32,6 +32,7 @@ import ru.portfolio.portfolio.view.TableFactory;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -77,35 +78,40 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
         for (DerivativeEvents.DerivativeDailyEvents dailyEvents : derivativeEvents.getDerivativeDailyEvents()) {
             Table.Record record = new Table.Record();
             contractProfit.add(record);
-            boolean isFirstRowOfDay = true;
-            for (Map.Entry<Transaction, Map<CashFlowType, TransactionCashFlow>> e :
-                    dailyEvents.getDailyTransactions().entrySet()) {
-                if (!isFirstRowOfDay) {
-                    record = new Table.Record();
-                    contractProfit.add(record);
+            LinkedHashMap<Transaction, Map<CashFlowType, TransactionCashFlow>> dailyTransactions = dailyEvents.getDailyTransactions();
+            if (dailyTransactions != null) {
+                boolean isFirstRowOfDay = true;
+                for (Map.Entry<Transaction, Map<CashFlowType, TransactionCashFlow>> e : dailyTransactions.entrySet()) {
+                    if (!isFirstRowOfDay) {
+                        record = new Table.Record();
+                        contractProfit.add(record);
+                    }
+                    Transaction transaction = e.getKey();
+                    Map<CashFlowType, TransactionCashFlow> transactionCashFlows = e.getValue();
+                    record.put(DATE, transaction.getTimestamp());
+                    record.put(DIRECTION, (transaction.getCount() > 0) ? "покупка" : "продажа");
+                    record.put(COUNT, Math.abs(transaction.getCount()));
+                    record.put(QUOTE, Optional.ofNullable(transactionCashFlows.get(CashFlowType.DERIVATIVE_QUOTE))
+                            .map(TransactionCashFlow::getValue)
+                            .map(q -> "=" + q + "/" + Math.abs(transaction.getCount()))
+                            .orElse(null));
+                    record.put(AMOUNT, Optional.ofNullable(transactionCashFlows.get(CashFlowType.DERIVATIVE_PRICE))
+                            .map(TransactionCashFlow::getValue)
+                            .orElse(null));
+                    BigDecimal commission = Optional.ofNullable(transactionCashFlows.get(CashFlowType.COMMISSION))
+                            .map(TransactionCashFlow::getValue)
+                            .map(BigDecimal::abs)
+                            .orElse(BigDecimal.ZERO);
+                    totalCommission = totalCommission.add(commission);
+                    record.put(COMMISSION, commission);
+                    isFirstRowOfDay = false;
                 }
-                Transaction transaction = e.getKey();
-                Map<CashFlowType, TransactionCashFlow> transactionCashFlows = e.getValue();
-                record.put(DATE, transaction.getTimestamp());
-                record.put(DIRECTION, (transaction.getCount() > 0) ? "покупка" : "продажа");
-                record.put(COUNT, Math.abs(transaction.getCount()));
-                record.put(QUOTE, Optional.ofNullable(transactionCashFlows.get(CashFlowType.DERIVATIVE_QUOTE))
-                        .map(TransactionCashFlow::getValue)
-                        .map(q -> "=" + q + "/" + Math.abs(transaction.getCount()))
-                        .orElse(null));
-                record.put(AMOUNT, Optional.ofNullable(transactionCashFlows.get(CashFlowType.DERIVATIVE_PRICE))
-                        .map(TransactionCashFlow::getValue)
-                        .orElse(null));
-                BigDecimal commission = Optional.ofNullable(transactionCashFlows.get(CashFlowType.COMMISSION))
-                        .map(TransactionCashFlow::getValue)
-                        .map(BigDecimal::abs)
-                        .orElse(BigDecimal.ZERO);
-                totalCommission = totalCommission.add(commission);
-                record.put(COMMISSION, commission);
-                isFirstRowOfDay = false;
             }
-            record.put(DATE, dailyEvents.getDailyProfit().getTimestamp());
-            record.put(DERIVATIVE_PROFIT_DAY, dailyEvents.getDailyProfit().getValue());
+            SecurityEventCashFlow dailyProfit = dailyEvents.getDailyProfit();
+            if (dailyProfit != null) {
+                record.put(DATE, dailyProfit.getTimestamp());
+                record.put(DERIVATIVE_PROFIT_DAY, dailyProfit.getValue());
+            }
             totalProfit = dailyEvents.getTotalProfit();
             record.put(DERIVATIVE_PROFIT_TOTAL, totalProfit);
             totalContractCount = dailyEvents.getPosition();

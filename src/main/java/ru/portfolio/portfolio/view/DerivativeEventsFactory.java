@@ -35,10 +35,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static java.lang.Integer.max;
-import static java.lang.Math.abs;
-import static java.util.Objects.requireNonNull;
-
 @Component
 @RequiredArgsConstructor
 public class DerivativeEventsFactory {
@@ -68,14 +64,12 @@ public class DerivativeEventsFactory {
             SecurityEventCashFlow cash = securityEventCashFlows.get(currentDay);
             if ((dailyTransactions != null && !dailyTransactions.isEmpty())
                     || (cash != null && !cash.getValue().equals(BigDecimal.ZERO))) {
-                int incomingCount = currentPosition;
-                currentPosition += requireNonNull(dailyTransactions).stream()
+                currentPosition += Optional.ofNullable(dailyTransactions)
+                        .orElse(new LinkedList<>())
+                        .stream()
                         .mapToInt(Transaction::getCount)
                         .sum();
-                cash = (cash == null) ?
-                        zeroValueCashFlow(currentDay, contract, portfolio, max(abs(incomingCount), abs(currentPosition))) :
-                        cash;
-                totalProfit = totalProfit.add(cash.getValue());
+                totalProfit = totalProfit.add((cash == null) ? BigDecimal.ZERO : cash.getValue());
 
                 derivativeEvents.getDerivativeDailyEvents().add(
                         DerivativeEvents.DerivativeDailyEvents.builder()
@@ -159,24 +153,13 @@ public class DerivativeEventsFactory {
                 dateTime.toLocalDate().plusDays(1);
     }
 
-    private static SecurityEventCashFlow zeroValueCashFlow(LocalDate localDate, Security contract, Portfolio portfolio,
-                                                           int count) {
-        return SecurityEventCashFlow.builder()
-                .timestamp(localDate.atStartOfDay(MOEX_TIMEZONE).toInstant())
-                .eventType(CashFlowType.DERIVATIVE_PROFIT)
-                .value(BigDecimal.ZERO)
-                .currency("RUB")
-                .portfolio(portfolio.getId())
-                .isin(contract.getIsin())
-                .count(count) // nowadays: optional parameter for derivative view
-                .build();
-    }
-
     private LinkedHashMap<Transaction, Map<CashFlowType, TransactionCashFlow>> getCashFlows(Deque<Transaction> dailyTransactions) {
         LinkedHashMap<Transaction, Map<CashFlowType, TransactionCashFlow>> dailyTransactionsCashFlows = new LinkedHashMap<>();
-        for (Transaction transaction : dailyTransactions) {
-            if (transaction.getId() != null) {
-                dailyTransactionsCashFlows.put(transaction, getTransactionCashFlows(transaction));
+        if (dailyTransactions != null) {
+            for (Transaction transaction : dailyTransactions) {
+                if (transaction.getId() != null) {
+                    dailyTransactionsCashFlows.put(transaction, getTransactionCashFlows(transaction));
+                }
             }
         }
         return dailyTransactionsCashFlows;
