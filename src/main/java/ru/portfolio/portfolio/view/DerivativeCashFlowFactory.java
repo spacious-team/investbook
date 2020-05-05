@@ -114,16 +114,20 @@ public class DerivativeCashFlowFactory {
     private LinkedHashMap<Transaction, Map<CashFlowType, TransactionCashFlow>> getCashFlows(Deque<Transaction> dailyTransactions) {
         LinkedHashMap<Transaction, Map<CashFlowType, TransactionCashFlow>> dailyTransactionsCashFlows = new LinkedHashMap<>();
         for (Transaction transaction : dailyTransactions) {
-            if (transaction.getId() == null) continue;
-            dailyTransactionsCashFlows.put(transaction,
-                    transactionCashFlowRepository
-                            .findByPkPortfolioAndPkTransactionId(
-                                    transaction.getPortfolio(),
-                                    transaction.getId())
-                            .stream()
-                            .map(transactionCashFlowConverter::fromEntity)
-                            .collect(Collectors.toMap(TransactionCashFlow::getEventType, Function.identity())));
+            if (transaction.getId() != null) {
+                dailyTransactionsCashFlows.put(transaction, getTransactionCashFlows(transaction));
+            }
         }
         return dailyTransactionsCashFlows;
+    }
+
+    private Map<CashFlowType, TransactionCashFlow> getTransactionCashFlows(Transaction transaction) {
+        return transactionCashFlowRepository
+                .findByPkPortfolioAndPkTransactionId(
+                        transaction.getPortfolio(),
+                        transaction.getId())
+                .stream()
+                .map(transactionCashFlowConverter::fromEntity)
+                .collect(Collectors.toMap(TransactionCashFlow::getEventType, Function.identity()));
     }
 }
