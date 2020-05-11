@@ -53,6 +53,10 @@ public class PaidInterest {
                 .build());
     }
 
+    /**
+     * Positions with unknown transaction date
+     * (for example dividend payment record exists but security transaction does not uploaded by broker report)
+     */
     @SuppressWarnings("unchecked")
     public Deque<OpenedPosition> getFictitiousPositions() {
         Instant instant = fictitiousPositionInstant.plusNanos(1);
