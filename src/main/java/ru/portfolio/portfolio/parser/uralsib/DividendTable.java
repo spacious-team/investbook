@@ -39,7 +39,7 @@ import static ru.portfolio.portfolio.parser.uralsib.PaymentsTable.PaymentsTableH
 @Slf4j
 public class DividendTable extends PaymentsTable<SecurityEventCashFlow> {
 
-    private static final String DIVIDENT_ACTION = "Доход по финансовым инструментам";
+    private static final String DIVIDEND_ACTION = "Доход по финансовым инструментам";
     private final Pattern taxInformationPattern = Pattern.compile("налог в размере ([0-9\\.]+) удержан");
     private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
@@ -55,7 +55,7 @@ public class DividendTable extends PaymentsTable<SecurityEventCashFlow> {
         action = String.valueOf(action).toLowerCase().trim();
         String description = table.getStringCellValue(row, DESCRIPTION);
         description = String.valueOf(description).toLowerCase();
-        if (!action.equalsIgnoreCase(DIVIDENT_ACTION) || !description.contains("дивиденд")) {
+        if (!action.equalsIgnoreCase(DIVIDEND_ACTION) || !description.contains("дивиденд")) {
             return emptyList();
         }
 

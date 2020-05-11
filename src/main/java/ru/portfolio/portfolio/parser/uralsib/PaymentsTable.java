@@ -84,7 +84,7 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
             Security security = info.getSecurity();
             if (contains(descriptionLowercase, info.getCfi()) ||   // dividend
                     (security != null && (contains(descriptionLowercase, security.getName()) ||  // coupon, amortization, redemption
-                            contains(descriptionLowercase, security.getIsin())))) { // for furute report changes
+                            contains(descriptionLowercase, security.getIsin())))) { // for future report changes
                 return security;
             }
         }

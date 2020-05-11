@@ -26,11 +26,11 @@ import org.apache.poi.ss.usermodel.Row;
 @ToString
 @RequiredArgsConstructor(staticName = "of")
 public class RelativePositionTableColumn implements TableColumn {
-    private final TableColumn releatedTableColumn;
+    private final TableColumn relatedTableColumn;
     private final int relatedOffset;
 
     @Override
     public int getColumnIndex(int firstColumnForSearch, Row... headerRows) {
-        return releatedTableColumn.getColumnIndex(firstColumnForSearch, headerRows) + relatedOffset;
+        return relatedTableColumn.getColumnIndex(firstColumnForSearch, headerRows) + relatedOffset;
     }
 }

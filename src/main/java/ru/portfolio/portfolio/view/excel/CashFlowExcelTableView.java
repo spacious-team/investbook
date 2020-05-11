@@ -49,11 +49,14 @@ public class CashFlowExcelTableView extends ExcelTableView {
     @Override
     protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
-        sheet.setColumnWidth(CASH.ordinal(), 14 * 256);
-        sheet.setColumnWidth(CASH_RUB.ordinal(), 30 * 256);
+        sheet.setColumnWidth(CASH.ordinal(), 17 * 256);
+        sheet.setColumnWidth(CASH_RUB.ordinal(), 22 * 256);
+        sheet.setColumnWidth(DAYS_COUNT.ordinal(), 18 * 256);
         sheet.setColumnWidth(DESCRIPTION.ordinal(), 50 * 256);
-        sheet.setColumnWidth(LIQUIDATION_VALUE_RUB.ordinal(), 28 * 256);
+        sheet.setColumnWidth(LIQUIDATION_VALUE_RUB.ordinal(), 31 * 256);
         sheet.setColumnWidth(PROFIT.ordinal(), 28 * 256);
+        sheet.setColumnWidth(CURRENCY_NAME.ordinal(), 15 * 256);
+        sheet.setColumnWidth(EXCHANGE_RATE.ordinal(), 15 * 256);
     }
 
     @Override

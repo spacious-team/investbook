@@ -62,7 +62,7 @@ public class ReportRestController {
         if (format == null || format.isEmpty()) {
             format = "psb";
         }
-        BrockerType brocker = BrockerType.valueOf(format.toUpperCase());
+        BrokerType broker = BrokerType.valueOf(format.toUpperCase());
         List<Exception> exceptions = new ArrayList<>();
         for (MultipartFile report : reports) {
             try {
@@ -70,15 +70,15 @@ public class ReportRestController {
                     continue;
                 }
                 long t0 = System.nanoTime();
-                Path path = saveToBackup(brocker, report);
+                Path path = saveToBackup(broker, report);
                 String originalFileName = report.getOriginalFilename();
-                switch (brocker) {
+                switch (broker) {
                     case PSB:
                         parsePsbReport(report);
                         break;
                     case URALSIB:
                         if (originalFileName != null && !originalFileName.contains("_invest_")) {
-                            log.warn("Рекомендуется загружать отчеты содержащие в имени файла слово 'invest'");
+                            log.warn("Рекомендуется загружать отчеты, содержащие в имени файла слово 'invest'");
                         }
                         if (originalFileName != null && !originalFileName.toLowerCase().endsWith(".zip")) {
                             parseUralsibReport(report);
@@ -96,7 +96,7 @@ public class ReportRestController {
             }
         }
         if (exceptions.isEmpty()) {
-            return ResponseEntity.ok("ok");
+            return ResponseEntity.ok("Отчеты загружены <a href=\"/\">[ok]</a>");
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(exceptions.stream()
@@ -106,7 +106,10 @@ public class ReportRestController {
                                 e.printStackTrace(pw);
                                 return sw.toString().replace("\n", "</br>");
                             }).collect(Collectors.joining("</br></br> - ",
-                                    "<b>Ошибка загрузки отчетов</b></br></br> - ",
+                                    "<b>Ошибка загрузки отчетов</b> <a href=\"/\">[назад]</a><br/>" +
+                                    "<span style=\"font-size: smaller; color: gray;\">Вы можете " +
+                                    "<a href=\"https://github.com/vananiev/portfolio/issues\">сообщить</a> об ошибке " +
+                                    "разработчикам</span></br></br> - ",
                                     "")));
         }
     }
@@ -114,10 +117,10 @@ public class ReportRestController {
     /**
      * @return backup file
      */
-    private Path saveToBackup(BrockerType brocker, MultipartFile report) throws IOException {
+    private Path saveToBackup(BrokerType broker, MultipartFile report) throws IOException {
         byte[] bytes = report.getBytes();
         String originalFilename = report.getOriginalFilename();
-        Path backupPath = reportBackupPath.resolve(brocker.name().toLowerCase());
+        Path backupPath = reportBackupPath.resolve(broker.name().toLowerCase());
         Files.createDirectories(backupPath);
         Path path = backupPath.resolve((originalFilename != null) ?
                 originalFilename :
@@ -135,8 +138,8 @@ public class ReportRestController {
     }
 
     private void parsePsbReport(MultipartFile report) {
-        try (PsbBrokerReport brockerReport = new PsbBrokerReport(report.getOriginalFilename(), report.getInputStream())) {
-            ReportTableFactory reportTableFactory = new PsbReportTableFactory(brockerReport);
+        try (PsbBrokerReport brokerReport = new PsbBrokerReport(report.getOriginalFilename(), report.getInputStream())) {
+            ReportTableFactory reportTableFactory = new PsbReportTableFactory(brokerReport);
             reportParserService.parse(reportTableFactory);
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
@@ -175,9 +178,9 @@ public class ReportRestController {
         }
     }
 
-    private void parseUralsibReport(MultipartFile report, Supplier<UralsibBrokerReport> reportSupplizer) {
-        try (UralsibBrokerReport brockerReport = reportSupplizer.get()) {
-            ReportTableFactory reportTableFactory = new UralsibReportTableFactory(brockerReport, foreignExchangeRateService);
+    private void parseUralsibReport(MultipartFile report, Supplier<UralsibBrokerReport> reportSupplier) {
+        try (UralsibBrokerReport brokerReport = reportSupplier.get()) {
+            ReportTableFactory reportTableFactory = new UralsibReportTableFactory(brokerReport, foreignExchangeRateService);
             reportParserService.parse(reportTableFactory);
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();

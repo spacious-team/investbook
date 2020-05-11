@@ -10,7 +10,7 @@
     </parent>
     <groupId>ru.portfolio</groupId>
     <artifactId>portfolio</artifactId>
-    <version>2020.4</version>
+    <version>2020.5</version>
     <name>portfolio</name>
     <description>Investing Portfolio</description>
 

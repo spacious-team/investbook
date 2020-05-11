@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import ru.portfolio.portfolio.converter.PortfolioConverter;
 import ru.portfolio.portfolio.entity.PortfolioEntity;
@@ -144,6 +145,7 @@ public abstract class ExcelTableView {
             sheet.setColumnWidth(header.ordinal(), 14 * 256);
         }
         sheet.createFreezePane(0, 1);
+        sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, (headerType.getEnumConstants().length - 1)));
     }
 
     protected Table.Record getTotalRow() {

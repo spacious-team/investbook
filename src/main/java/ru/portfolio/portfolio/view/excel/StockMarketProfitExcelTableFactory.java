@@ -89,17 +89,11 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     }
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio) {
-        List<String> securities = new ArrayList<>();
-        securities.addAll(transactionRepository.findDistinctIsinByPortfolioOrderByTimestampDesc(portfolio));
-        securities.addAll(transactionRepository.findDistinctFxInstrumentByPortfolioOrderByTimestampDesc(portfolio));
-        return securities;
+        return transactionRepository.findDistinctIsinByPortfolioOrderByTimestampDesc(portfolio);
     }
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio, String currency) {
-        List<String> securities = new ArrayList<>();
-        securities.addAll(transactionRepository.findDistinctIsinByPortfolioAndCurrencyOrderByTimestampDesc(portfolio, currency));
-        securities.addAll(transactionRepository.findDistinctFxInstrumentByPortfolioAndCurrencyOrderByTimestampDesc(portfolio, currency));
-        return securities;
+        return transactionRepository.findDistinctIsinByPortfolioAndCurrencyOrderByTimestampDesc(portfolio, currency);
     }
 
     private Positions getPositions(Portfolio portfolio, Security security) {
@@ -145,10 +139,10 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         row.put(OPEN_DATE, transaction.getTimestamp());
         row.put(COUNT, Math.abs(position.getCount()) * Integer.signum(transaction.getCount()));
         row.put(OPEN_PRICE, getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount()));
-        double multipier = Math.abs(1d * position.getCount() / transaction.getCount());
-        row.put(OPEN_AMOUNT, getTransactionCashFlow(transaction, CashFlowType.PRICE, multipier));
-        row.put(OPEN_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
-        row.put(OPEN_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multipier));
+        double multiplier = Math.abs(1d * position.getCount() / transaction.getCount());
+        row.put(OPEN_AMOUNT, getTransactionCashFlow(transaction, CashFlowType.PRICE, multiplier));
+        row.put(OPEN_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier));
+        row.put(OPEN_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multiplier));
         return row;
     }
 
@@ -157,23 +151,23 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         Table.Record row = new Table.Record(getOpenedPositionProfit(position));
         // close transaction info
         Transaction transaction = position.getCloseTransaction();
-        double multipier = Math.abs(1d * position.getCount() / transaction.getCount());
+        double multiplier = Math.abs(1d * position.getCount() / transaction.getCount());
         row.put(CLOSE_DATE, transaction.getTimestamp());
         BigDecimal closeAmount;
         switch (position.getClosingEvent()) {
             case PRICE:
-                closeAmount = getTransactionCashFlow(transaction, CashFlowType.PRICE, multipier);
+                closeAmount = getTransactionCashFlow(transaction, CashFlowType.PRICE, multiplier);
                 break;
             case REDEMPTION:
-                closeAmount = getRedemptionCashFlow(transaction.getPortfolio(), transaction.getIsin(), multipier);
+                closeAmount = getRedemptionCashFlow(transaction.getPortfolio(), transaction.getIsin(), multiplier);
                 break;
             default:
                 throw new IllegalArgumentException("ЦБ " + transaction.getIsin() +
                         " не может быть закрыта событием типа " + position.getClosingEvent());
         }
         row.put(CLOSE_AMOUNT, closeAmount);
-        row.put(CLOSE_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multipier));
-        row.put(CLOSE_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multipier));
+        row.put(CLOSE_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier));
+        row.put(CLOSE_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multiplier));
         boolean isLongPosition = isLongPosition(position);
         row.put(FORECAST_TAX, getForecastTax(isLongPosition));
         row.put(PROFIT, getClosedPositionProfit(isLongPosition));
@@ -298,9 +292,9 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         String open = "(" + OPEN_AMOUNT.getCellAddr() + "+" + OPEN_ACCRUED_INTEREST.getCellAddr() + ")";
         String openCommission = OPEN_COMMISSION.getCellAddr();
         // TODO DAYS() excel function not impl by Apache POI: https://bz.apache.org/bugzilla/show_bug.cgi?id=58468
-        String multiplicator = "100*365/(1+ABS(DAYS360(" + OPEN_DATE.getCellAddr() + "," + CLOSE_DATE.getCellAddr() + ")))";
+        String multiplier = "100*365/(1+ABS(DAYS360(" + OPEN_DATE.getCellAddr() + "," + CLOSE_DATE.getCellAddr() + ")))";
         return "=(" + profit + ")" +
                 "/(" + open + "+" + openCommission + ")" +
-                "*" + multiplicator;
+                "*" + multiplier;
     }
 }

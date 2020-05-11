@@ -97,7 +97,7 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
     }
 
     /**
-     * Returns commistin converted from commissionCurrency to targetCurrency
+     * Returns commission converted from commissionCurrency to targetCurrency
      */
     private BigDecimal getConvertedCommission(BigDecimal commission, String commissionCurrency,
                                               String targetCurrency, Instant timestamp) {

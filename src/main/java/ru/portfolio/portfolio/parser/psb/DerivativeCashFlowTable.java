@@ -63,7 +63,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
 
     private static AbstractMap.SimpleEntry<String, Integer> getCount(ExcelTable table, Row row) {
         String contract = table.getStringCellValue(row, CONTRACT);
-        int incomingCount = Math.abs(table.getIntCellValue(row, INCOUMING));
+        int incomingCount = Math.abs(table.getIntCellValue(row, INCOMING));
         int outgoingCount = Math.abs(table.getIntCellValue(row, OUTGOING));
         int count = Math.max(incomingCount, outgoingCount);
         if (count == 0) {
@@ -74,7 +74,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
 
     @Override
     protected Collection<SecurityEventCashFlow> getRow(ExcelTable table, Row row) {
-        BigDecimal value = table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.INCOUMING)
+        BigDecimal value = table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.INCOMING)
                 .subtract(table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.OUTGOING));
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .timestamp(convertToInstant(table.getStringCellValue(row, DerivativeCashFlowTableHeader.DATE)))
@@ -96,6 +96,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
                         .build());
             case "биржевой сбор":
                 return emptyList(); // изменения отображаются в ликвидной стоимости портфеля
+            // латиница в слове "заблокированo" - это опечатка в брокерском отчёте
             case "заблокированo / разблокировано средств под го":
                 return emptyList(); // не влияет на размер собственных денежных средств
             default:
@@ -105,7 +106,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
 
     enum ContractCountTableHeader implements TableColumnDescription {
         CONTRACT("контракт"),
-        INCOUMING("входящий остаток"),
+        INCOMING("входящий остаток"),
         OUTGOING("исходящий остаток"),
         BUY("зачислено"),
         CELL("списано");
@@ -121,7 +122,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
         DATE("дата"),
         CONTRACT("№", "контракт"),
         OPERATION("вид операции"),
-        INCOUMING("зачислено"),
+        INCOMING("зачислено"),
         OUTGOING("списано");
 
         @Getter

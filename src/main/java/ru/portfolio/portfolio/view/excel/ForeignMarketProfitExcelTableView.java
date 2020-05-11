@@ -28,51 +28,43 @@ import ru.portfolio.portfolio.repository.PortfolioRepository;
 import ru.portfolio.portfolio.view.Table;
 import ru.portfolio.portfolio.view.TableHeader;
 
-import static ru.portfolio.portfolio.view.excel.DerivativesMarketProfitExcelTableHeader.*;
+import static ru.portfolio.portfolio.view.excel.ForeignMarketProfitExcelTableHeader.*;
 
 @Component
-public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
+public class ForeignMarketProfitExcelTableView extends ExcelTableView {
 
-    public DerivativesMarketProfitExcelTableView(PortfolioRepository portfolioRepository,
-                                                 DerivativesMarketProfitExcelTableFactory tableFactory,
-                                                 PortfolioConverter portfolioConverter) {
+    public ForeignMarketProfitExcelTableView(PortfolioRepository portfolioRepository,
+                                             ForeignMarketProfitExcelTableFactory tableFactory,
+                                             PortfolioConverter portfolioConverter) {
         super(portfolioRepository, tableFactory, portfolioConverter);
     }
 
     @Override
     protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
-        sheet.setColumnWidth(CONTRACT.ordinal(), 24 * 256);
-        sheet.setColumnWidth(AMOUNT.ordinal(), 16 * 256);
-        sheet.setColumnWidth(DERIVATIVE_PROFIT_DAY.ordinal(), 17 * 256);
-        sheet.setColumnWidth(DERIVATIVE_PROFIT_TOTAL.ordinal(), 17 * 256);
-        sheet.setColumnWidth(POSITION.ordinal(), 17 * 256);
-        sheet.setColumnWidth(FORECAST_TAX.ordinal(), 17 * 256);
-        sheet.setColumnWidth(PROFIT.ordinal(), 17 * 256);
+        for (TableHeader header : headerType.getEnumConstants()) {
+            sheet.setColumnWidth(header.ordinal(), 18 * 256);
+        }
+        sheet.setColumnWidth(CURRENCY_PAIR.ordinal(), 20 * 256);
     }
 
     @Override
     protected Table.Record getTotalRow() {
         Table.Record totalRow = new Table.Record();
-        totalRow.put(CONTRACT, "Итого:");
-        totalRow.put(COUNT, getSumFormula(COUNT));
-        totalRow.put(AMOUNT, "=SUMPRODUCT(ABS(" +
-                AMOUNT.getColumnIndex() + "3:" +
-                AMOUNT.getColumnIndex() + "100000))");
-        totalRow.put(COMMISSION, getSumFormula(COMMISSION) + "/2");
-        totalRow.put(DERIVATIVE_PROFIT_DAY, getSumFormula(DERIVATIVE_PROFIT_DAY));
-        String profitMinusCommission = "(" + DERIVATIVE_PROFIT_DAY.getCellAddr() + "-" + COMMISSION.getCellAddr() + ")";
-        totalRow.put(FORECAST_TAX, "=IF(" + profitMinusCommission + "<=0,0,0.13*" + profitMinusCommission +")");
-        totalRow.put(PROFIT, "=" + DERIVATIVE_PROFIT_DAY.getCellAddr()
-                + "-" + COMMISSION.getCellAddr()
-                + "-" + FORECAST_TAX.getCellAddr());
+        for (ForeignMarketProfitExcelTableHeader column : ForeignMarketProfitExcelTableHeader.values()) {
+            totalRow.put(column, "=SUM(" +
+                    column.getColumnIndex() + "3:" +
+                    column.getColumnIndex() + "100000)");
+        }
+        totalRow.put(CURRENCY_PAIR, "Итого:");
+        totalRow.put(COUNT, "=SUMPRODUCT(ABS(" +
+                COUNT.getColumnIndex() + "3:" +
+                COUNT.getColumnIndex() + "100000))");
+        totalRow.remove(OPEN_DATE);
+        totalRow.remove(CLOSE_DATE);
+        totalRow.remove(OPEN_PRICE);
+        totalRow.remove(YIELD);
         return totalRow;
-    }
-
-    private String getSumFormula(DerivativesMarketProfitExcelTableHeader column) {
-        return "=SUM(" +
-                column.getColumnIndex() + "3:" +
-                column.getColumnIndex() + "100000)";
     }
 
     @Override
@@ -80,14 +72,14 @@ public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
         super.sheetPostCreate(sheet, styles);
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue;
-            Cell cell = row.getCell(CONTRACT.ordinal());
+            Cell cell = row.getCell(CURRENCY_PAIR.ordinal());
             if (cell != null) {
                 cell.setCellStyle(styles.getLeftAlignedTextStyle());
             }
         }
         for (Cell cell : sheet.getRow(1)) {
             if (cell == null) continue;
-            if (cell.getColumnIndex() == CONTRACT.ordinal()) {
+            if (cell.getColumnIndex() == CURRENCY_PAIR.ordinal()) {
                 cell.setCellStyle(styles.getTotalTextStyle());
             } else if (cell.getColumnIndex() == COUNT.ordinal()){
                 cell.setCellStyle(styles.getIntStyle());

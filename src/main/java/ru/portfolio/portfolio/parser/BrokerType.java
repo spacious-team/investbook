@@ -18,6 +18,6 @@
 
 package ru.portfolio.portfolio.parser;
 
-public enum BrockerType {
+public enum BrokerType {
     PSB, URALSIB
 }
