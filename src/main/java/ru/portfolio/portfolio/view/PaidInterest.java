@@ -23,6 +23,7 @@ import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 import ru.portfolio.portfolio.pojo.Transaction;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 @Getter
 public class PaidInterest {
     static final Instant fictitiousPositionInstant = Instant.ofEpochSecond(0);
-    private final HashMap<CashFlowType, Map<Position, List<SecurityEventCashFlow>>> paidInterest = new HashMap<>();
+    private final Map<CashFlowType, Map<Position, List<SecurityEventCashFlow>>> paidInterest = new HashMap<>();
 
     Map<Position, List<SecurityEventCashFlow>> get(CashFlowType type) {
         return paidInterest.computeIfAbsent(type, k -> new HashMap<>());
@@ -42,6 +43,15 @@ public class PaidInterest {
     public List<SecurityEventCashFlow> get(CashFlowType payType, Position position) {
         List<SecurityEventCashFlow> value = this.get(payType).get(position);
         return (value != null) ? value : Collections.emptyList();
+    }
+
+    public BigDecimal sumPaymentsForType(CashFlowType type) {
+        return get(type)
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .map(SecurityEventCashFlow::getValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     static Position getFictitiousPositionPayment(SecurityEventCashFlow cash) {

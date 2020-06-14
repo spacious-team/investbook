@@ -23,25 +23,21 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum StockMarketProfitExcelTableHeader implements ExcelTableHeader {
+public enum PortfolioStatusExcelTableHeader implements ExcelTableHeader {
     SECURITY("Бумага"),
-    OPEN_DATE("Дата открытия"),
-    COUNT("Количество"),
-    OPEN_PRICE("Цена"),
-    OPEN_AMOUNT("Стоимость (без НКД и комиссии)"),
-    OPEN_ACCRUED_INTEREST("НКД уплаченный"),
-    OPEN_COMMISSION("Комиссия открытия"),
-    CLOSE_DATE("Дата закрытия"),
-    CLOSE_AMOUNT("Стоимость закрытия/погашения"),
-    CLOSE_ACCRUED_INTEREST("НКД при закрытии" ),
-    COUPON("Выплачены купоны"),
+    FIRST_TRNSACTION_DATE("Дата первой сделки"),
+    LAST_TRANSACTION_DATE("Дата последней сделки"),
+    LAST_EVENT_DATE("Дата последнего события"),
+    BUY_COUNT("Всего куплено"),
+    CELL_COUNT("Всего продано"),
+    COUNT("Текущая позиция"),
+    AVERAGE_PRICE("Усредненная цена ЦБ"),
+    COMMISSION("Комиссии"),
+    COUPON("Выплаченные купоны"),
     AMORTIZATION("Амортизация облигации"),
     DIVIDEND("Дивиденды"),
-    CLOSE_COMMISSION("Комиссия закрытия/погашения"),
     TAX("Налог с купонов и дивидендов (уплаченный)"),
-    FORECAST_TAX("Налог с разницы курсов (ожидаемый)"),
-    PROFIT("Прибыль (закрытых позиций)"),
-    YIELD("Доходность годовых, %");
+    PROFIT("Прибыль");
 
     private final String description;
 }

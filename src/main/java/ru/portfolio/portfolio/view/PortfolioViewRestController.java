@@ -61,6 +61,7 @@ public class PortfolioViewRestController {
             IOUtils.copy(Files.newInputStream(path), response.getOutputStream());
             log.info("Отчет {} сформирован за {}", path.getFileName(), Duration.ofNanos(System.nanoTime() - t0));
         } catch (Exception e) {
+            log.error("Ошибка сборки отчета", e);
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
