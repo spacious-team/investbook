@@ -27,6 +27,7 @@
 - доходность сделок на срочном рынке;
   ![derivatives-market](https://user-images.githubusercontent.com/11336712/78156504-8f115800-7447-11ea-87e5-3cd4c34aab47.png)
 - дивидендные, купонные и амортизационные выплаты по акциям и облигациям;
+  ![payment](https://user-images.githubusercontent.com/11336712/84598929-e6379e00-ae76-11ea-9a9f-608780c0ff7e.png)
 - пополнения, списания, переводы с/на другие счета и доходность портфеля;
   ![cash-in](https://user-images.githubusercontent.com/11336712/78156505-8f115800-7447-11ea-8f6d-6a34c21dfc89.png)
 - налоговая нагрузка. 
