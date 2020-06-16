@@ -27,16 +27,16 @@ public enum PortfolioStatusExcelTableHeader implements ExcelTableHeader {
     SECURITY("Бумага"),
     FIRST_TRNSACTION_DATE("Дата первой сделки"),
     LAST_TRANSACTION_DATE("Дата последней сделки"),
-    LAST_EVENT_DATE("Дата последнего события"),
-    BUY_COUNT("Всего куплено"),
-    CELL_COUNT("Всего продано"),
+    BUY_COUNT("Куплено"),
+    CELL_COUNT("Продано"),
     COUNT("Текущая позиция"),
-    AVERAGE_PRICE("Усредненная цена ЦБ"),
-    COMMISSION("Комиссии"),
+    AVERAGE_PRICE("Усредненная цена"),
+    COMMISSION("Комиссия"),
+    LAST_EVENT_DATE("Дата последней выплаты"),
     COUPON("Выплаченные купоны"),
     AMORTIZATION("Амортизация облигации"),
     DIVIDEND("Дивиденды"),
-    TAX("Налог с купонов и дивидендов (уплаченный)"),
+    TAX("Налог (удержанный)"),
     PROFIT("Прибыль");
 
     private final String description;

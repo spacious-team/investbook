@@ -34,7 +34,7 @@ public enum StockMarketProfitExcelTableHeader implements ExcelTableHeader {
     CLOSE_DATE("Дата закрытия"),
     CLOSE_AMOUNT("Стоимость закрытия/погашения"),
     CLOSE_ACCRUED_INTEREST("НКД при закрытии" ),
-    COUPON("Выплачены купоны"),
+    COUPON("Выплаченные купоны"),
     AMORTIZATION("Амортизация облигации"),
     DIVIDEND("Дивиденды"),
     CLOSE_COMMISSION("Комиссия закрытия/погашения"),

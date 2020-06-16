@@ -39,7 +39,6 @@ import ru.portfolio.portfolio.view.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -90,12 +89,12 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 transactionRepository
                         .findFirstBySecurityIsinAndPkPortfolioOrderByTimestampAsc(security.getIsin(), portfolio.getId())
                         .map(TransactionEntity::getTimestamp)
-                        .orElse(Instant.EPOCH));
+                        .orElse(null));
         row.put(LAST_TRANSACTION_DATE,
                 transactionRepository
                         .findFirstBySecurityIsinAndPkPortfolioOrderByTimestampDesc(security.getIsin(), portfolio.getId())
                         .map(TransactionEntity::getTimestamp)
-                        .orElse(Instant.EPOCH));
+                        .orElse(null));
         row.put(LAST_EVENT_DATE,
                 securityEventCashFlowRepository
                         .findFirstByPortfolioIdAndSecurityIsinAndCashFlowTypeIdInOrderByTimestampDesc(
@@ -105,7 +104,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                                         CashFlowType.COUPON.getId(),
                                         CashFlowType.DIVIDEND.getId()))
                         .map(SecurityEventCashFlowEntity::getTimestamp)
-                        .orElse(Instant.EPOCH));
+                        .orElse(null));
         row.put(BUY_COUNT, Optional.ofNullable(
                 transactionRepository.findBySecurityIsinAndPkPortfolioBuyCount(security, portfolio))
                 .orElse(0L));

@@ -66,7 +66,11 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     @Override
     protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
+        for (TableHeader header : headerType.getEnumConstants()) {
+            sheet.setColumnWidth(header.ordinal(), 16 * 256);
+        }
         sheet.setColumnWidth(SECURITY.ordinal(), 45 * 256);
+        sheet.setColumnWidth(DIVIDEND.ordinal(), 17 * 256);
         sheet.setColumnWidth(TAX.ordinal(), 19 * 256);
     }
 
@@ -103,6 +107,10 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
             if (cell == null) continue;
             if (cell.getColumnIndex() == SECURITY.ordinal()) {
                 cell.setCellStyle(styles.getTotalTextStyle());
+            } else if (cell.getColumnIndex() == BUY_COUNT.ordinal()){
+                cell.setCellStyle(styles.getIntStyle());
+            } else if (cell.getColumnIndex() == CELL_COUNT.ordinal()){
+                cell.setCellStyle(styles.getIntStyle());
             } else if (cell.getColumnIndex() == COUNT.ordinal()){
                 cell.setCellStyle(styles.getIntStyle());
             } else {
