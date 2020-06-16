@@ -24,7 +24,7 @@ import ru.portfolio.portfolio.pojo.Transaction;
 import java.time.Instant;
 
 @Getter
-class PositionHistory {
+public class PositionHistory {
     private final Instant instant;
     /**
      * Opened positions after {@link #getInstant()}

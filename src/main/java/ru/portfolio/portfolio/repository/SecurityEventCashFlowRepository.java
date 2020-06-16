@@ -22,6 +22,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
 
 import java.util.ArrayList;
+import java.util.Optional;
+import java.util.Set;
 
 public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityEventCashFlowEntity, Integer> {
 
@@ -30,4 +32,11 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
             String isin,
             int cashFlowType);
 
+    /**
+     * Return last security payment
+     */
+    Optional<SecurityEventCashFlowEntity> findFirstByPortfolioIdAndSecurityIsinAndCashFlowTypeIdInOrderByTimestampDesc(
+            String portfolio,
+            String isin,
+            Set<Integer> cashFlowType);
 }

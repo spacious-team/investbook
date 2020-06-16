@@ -23,25 +23,23 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum StockMarketProfitExcelTableHeader implements ExcelTableHeader {
+public enum PortfolioStatusExcelTableHeader implements ExcelTableHeader {
     SECURITY("Бумага"),
-    OPEN_DATE("Дата открытия"),
-    COUNT("Количество"),
-    OPEN_PRICE("Цена"),
-    OPEN_AMOUNT("Стоимость (без НКД и комиссии)"),
-    OPEN_ACCRUED_INTEREST("НКД уплаченный"),
-    OPEN_COMMISSION("Комиссия открытия"),
-    CLOSE_DATE("Дата закрытия"),
-    CLOSE_AMOUNT("Стоимость закрытия/погашения"),
-    CLOSE_ACCRUED_INTEREST("НКД при закрытии" ),
+    FIRST_TRNSACTION_DATE("Дата первой сделки"),
+    LAST_TRANSACTION_DATE("Дата последней сделки"),
+    BUY_COUNT("Куплено"),
+    CELL_COUNT("Продано"),
+    COUNT("Текущая позиция"),
+    AVERAGE_PRICE("Усредненная цена"),
+    AVERAGE_ACCRUED_INTEREST("Усредненный НКД"),
+    COMMISSION("Комиссия"),
+    LAST_EVENT_DATE("Дата последней выплаты"),
     COUPON("Выплаченные купоны"),
     AMORTIZATION("Амортизация облигации"),
     DIVIDEND("Дивиденды"),
-    CLOSE_COMMISSION("Комиссия закрытия/погашения"),
-    TAX("Налог с купонов и дивидендов (уплаченный)"),
-    FORECAST_TAX("Налог с разницы курсов (ожидаемый)"),
-    PROFIT("Прибыль (закрытых позиций)"),
-    YIELD("Доходность годовых, %");
+    TAX("Налог (удержанный)"),
+    BUY_CELL_PROFIT("Курсовой доход"),
+    PROFIT("Прибыль");
 
     private final String description;
 }

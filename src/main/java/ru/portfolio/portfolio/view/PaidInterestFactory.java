@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.converter.SecurityEventCashFlowConverter;
 import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
 import ru.portfolio.portfolio.pojo.CashFlowType;
+import ru.portfolio.portfolio.pojo.Portfolio;
 import ru.portfolio.portfolio.pojo.Security;
 import ru.portfolio.portfolio.pojo.SecurityEventCashFlow;
 import ru.portfolio.portfolio.repository.SecurityEventCashFlowRepository;
@@ -32,6 +33,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static ru.portfolio.portfolio.pojo.CashFlowType.*;
 
@@ -40,10 +42,18 @@ import static ru.portfolio.portfolio.pojo.CashFlowType.*;
 @Slf4j
 public class PaidInterestFactory {
     private static final CashFlowType[] PAY_TYPES = new CashFlowType[]{COUPON, AMORTIZATION, DIVIDEND, TAX};
+    private final PositionsFactory positionsFactory;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
+    private final Map<Positions, PaidInterest> paidInterestCache = new ConcurrentHashMap<>();
 
-    public PaidInterest create(String portfolio, Security security, Positions positions) {
+    public PaidInterest get(Portfolio portfolio, Security security) {
+        Positions positions = positionsFactory.get(portfolio, security);
+        return paidInterestCache.computeIfAbsent(positions,
+                p -> create(portfolio.getId(), security, p));
+    }
+
+    private PaidInterest create(String portfolio, Security security, Positions positions) {
         PaidInterest paidInterest = new PaidInterest();
         for (CashFlowType type : PAY_TYPES) {
             paidInterest.get(type).putAll(getPositionWithPayments(portfolio, security.getIsin(), positions, type));

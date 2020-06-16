@@ -24,9 +24,11 @@ import org.springframework.data.repository.query.Param;
 import ru.portfolio.portfolio.entity.TransactionEntity;
 import ru.portfolio.portfolio.entity.TransactionEntityPK;
 import ru.portfolio.portfolio.pojo.Portfolio;
+import ru.portfolio.portfolio.pojo.Security;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 public interface TransactionRepository extends JpaRepository<TransactionEntity, TransactionEntityPK> {
 
@@ -90,4 +92,34 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
 
     ArrayList<TransactionEntity> findBySecurityIsinAndPkPortfolioOrderByTimestampAscPkIdAsc(String isin,
                                                                                             String portfolio);
+
+    /**
+     * Return first security transaction
+     */
+    Optional<TransactionEntity> findFirstBySecurityIsinAndPkPortfolioOrderByTimestampAsc(String isin, String portfolio);
+
+    /**
+     * Return last security transaction
+     */
+    Optional<TransactionEntity> findFirstBySecurityIsinAndPkPortfolioOrderByTimestampDesc(String isin, String portfolio);
+
+    /**
+     * Return security total buy count
+     */
+    @Query(nativeQuery = true, value = "SELECT sum(count) FROM transaction " +
+            "WHERE portfolio = :#{#portfolio.id} " +
+            "AND isin = :#{#security.isin} " +
+            "AND count > 0")
+    Long findBySecurityIsinAndPkPortfolioBuyCount(@Param("security") Security security,
+                                                  @Param("portfolio") Portfolio portfolio);
+
+    /**
+     * Return security total cell count
+     */
+    @Query(nativeQuery = true, value = "SELECT abs(sum(count)) FROM transaction " +
+            "WHERE portfolio = :#{#portfolio.id} " +
+            "AND isin = :#{#security.isin} " +
+            "AND count < 0")
+    Long findBySecurityIsinAndPkPortfolioCellCount(@Param("security") Security security,
+                                                   @Param("portfolio") Portfolio portfolio);
 }
