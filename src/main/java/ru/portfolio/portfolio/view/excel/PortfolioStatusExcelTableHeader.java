@@ -31,12 +31,14 @@ public enum PortfolioStatusExcelTableHeader implements ExcelTableHeader {
     CELL_COUNT("Продано"),
     COUNT("Текущая позиция"),
     AVERAGE_PRICE("Усредненная цена"),
+    AVERAGE_ACCRUED_INTEREST("Усредненный НКД"),
     COMMISSION("Комиссия"),
     LAST_EVENT_DATE("Дата последней выплаты"),
     COUPON("Выплаченные купоны"),
     AMORTIZATION("Амортизация облигации"),
     DIVIDEND("Дивиденды"),
     TAX("Налог (удержанный)"),
+    BUY_CELL_PROFIT("Курсовой доход"),
     PROFIT("Прибыль");
 
     private final String description;

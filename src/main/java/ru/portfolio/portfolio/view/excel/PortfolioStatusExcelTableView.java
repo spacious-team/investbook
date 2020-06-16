@@ -70,7 +70,6 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
             sheet.setColumnWidth(header.ordinal(), 16 * 256);
         }
         sheet.setColumnWidth(SECURITY.ordinal(), 45 * 256);
-        sheet.setColumnWidth(DIVIDEND.ordinal(), 17 * 256);
         sheet.setColumnWidth(TAX.ordinal(), 19 * 256);
     }
 

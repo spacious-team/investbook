@@ -22,15 +22,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.portfolio.portfolio.converter.SecurityConverter;
-import ru.portfolio.portfolio.converter.TransactionConverter;
 import ru.portfolio.portfolio.entity.SecurityEntity;
 import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
 import ru.portfolio.portfolio.entity.TransactionCashFlowEntity;
 import ru.portfolio.portfolio.entity.TransactionEntity;
-import ru.portfolio.portfolio.pojo.CashFlowType;
-import ru.portfolio.portfolio.pojo.Portfolio;
-import ru.portfolio.portfolio.pojo.Security;
-import ru.portfolio.portfolio.pojo.Transaction;
+import ru.portfolio.portfolio.pojo.*;
 import ru.portfolio.portfolio.repository.SecurityEventCashFlowRepository;
 import ru.portfolio.portfolio.repository.SecurityRepository;
 import ru.portfolio.portfolio.repository.TransactionCashFlowRepository;
@@ -39,8 +35,10 @@ import ru.portfolio.portfolio.view.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.Optional;
+import java.util.Set;
 
 import static ru.portfolio.portfolio.view.excel.PortfolioStatusExcelTableHeader.*;
 
@@ -52,10 +50,9 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     private final SecurityRepository securityRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final SecurityConverter securityConverter;
-    private final TransactionConverter transactionConverter;
     private final PaidInterestFactory paidInterestFactory;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
-    private final PositionsFactory positionsAndPaidInterestRegistry;
+    private final PositionsFactory positionsFactory;
 
     public Table create(Portfolio portfolio) {
         throw new UnsupportedOperationException();
@@ -79,7 +76,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     }
 
     private Table.Record getSecurityStatus(Portfolio portfolio, Security security) {
-        Positions positions = positionsAndPaidInterestRegistry.get(portfolio, security);
+        Positions positions = positionsFactory.get(portfolio, security);
         PaidInterest paidInterest = paidInterestFactory.get(portfolio, security);
         Table.Record row = new Table.Record();
         row.put(SECURITY,
@@ -110,68 +107,57 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 .orElse(0L));
         row.put(CELL_COUNT, Optional.ofNullable(
                 transactionRepository.findBySecurityIsinAndPkPortfolioCellCount(security, portfolio))
-                .orElse(0L));
+                .orElse(0L) +
+                positions.getRedemptions().size());
         Integer count = Optional.ofNullable(positions.getPositionHistories().peekLast())
                 .map(PositionHistory::getOpenedPositions)
                 .orElse(0);
-        Deque<Transaction> transactions = getTransactions(portfolio, security);
+        // сальдированные расходы на покупку
+        BigDecimal purchasePrice = getTotal(positions.getTransactions(), CashFlowType.PRICE);
+        purchasePrice = positions.getRedemptions()
+                .stream()
+                .map(SecurityEventCashFlow::getValue)
+                .map(BigDecimal::abs)
+                .reduce(purchasePrice, BigDecimal::add);
+        // сальдированные расходы на НКД
+        BigDecimal purchaseAccuredInterest = getTotal(positions.getTransactions(), CashFlowType.ACCRUED_INTEREST);
         row.put(COUNT, count);
-        if (count != 0) {
-            row.put(AVERAGE_PRICE,
-                    getTotalAmount(transactions)
+        if (count == 0) {
+            row.put(BUY_CELL_PROFIT, purchasePrice.add(purchaseAccuredInterest));
+        } else {
+            row.put(AVERAGE_PRICE, purchasePrice
+                    .abs()
+                    .divide(BigDecimal.valueOf(Math.abs(count)), 2, RoundingMode.CEILING));
+            row.put(AVERAGE_ACCRUED_INTEREST, purchaseAccuredInterest
+                            .abs()
                             .divide(BigDecimal.valueOf(Math.abs(count)), 2, RoundingMode.CEILING));
         }
-        row.put(COMMISSION, getTotalComission(transactions));
+        row.put(COMMISSION, getTotal(positions.getTransactions(), CashFlowType.COMMISSION).abs());
         row.put(COUPON, paidInterest.sumPaymentsForType(CashFlowType.COUPON));
         row.put(AMORTIZATION, paidInterest.sumPaymentsForType(CashFlowType.AMORTIZATION));
         row.put(DIVIDEND, paidInterest.sumPaymentsForType(CashFlowType.DIVIDEND));
         row.put(TAX, paidInterest.sumPaymentsForType(CashFlowType.TAX).abs());
         row.put(PROFIT, "=" + COUPON.getCellAddr() + "+" + AMORTIZATION.getCellAddr() + "+" + DIVIDEND.getCellAddr() +
-                "-" + COMMISSION.getCellAddr());
+                "+" + BUY_CELL_PROFIT.getCellAddr() + "-" + TAX.getCellAddr() + "-" + COMMISSION.getCellAddr());
         return row;
-    }
-
-    private LinkedList<Transaction> getTransactions(Portfolio portfolio, Security security) {
-        return transactionRepository
-                .findBySecurityIsinAndPkPortfolioOrderByTimestampAscPkIdAsc(security.getIsin(), portfolio.getId())
-                .stream()
-                .map(transactionConverter::fromEntity)
-                .collect(Collectors.toCollection(LinkedList::new));
     }
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio, String currency) {
         return transactionRepository.findDistinctIsinByPortfolioAndCurrencyOrderByTimestampDesc(portfolio, currency);
     }
 
-    private BigDecimal getTotalAmount(Deque<Transaction> transactions) {
+    private BigDecimal getTotal(Deque<Transaction> transactions, CashFlowType type) {
         return transactions.stream()
                 .filter(t -> t.getId() != null && t.getCount() != 0)
-                .map(this::getAmount)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .abs();
-    }
-
-    private Optional<BigDecimal> getAmount(Transaction t) {
-        return transactionCashFlowRepository
-                .findByPkPortfolioAndPkTransactionIdAndPkType(t.getPortfolio(), t.getId(), CashFlowType.PRICE.getId())
-                .map(TransactionCashFlowEntity::getValue);
-    }
-
-    private BigDecimal getTotalComission(Deque<Transaction> transactions) {
-        return transactions.stream()
-                .filter(t -> t.getId() != null && t.getCount() != 0)
-                .map(this::getCommission)
+                .map(t -> getTransactionValue(t, type))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private Optional<BigDecimal> getCommission(Transaction t) {
+    private Optional<BigDecimal> getTransactionValue(Transaction t, CashFlowType type) {
         return transactionCashFlowRepository
-                .findByPkPortfolioAndPkTransactionIdAndPkType(t.getPortfolio(), t.getId(), CashFlowType.COMMISSION.getId())
-                .map(TransactionCashFlowEntity::getValue)
-                .map(BigDecimal::abs);
+                .findByPkPortfolioAndPkTransactionIdAndPkType(t.getPortfolio(), t.getId(), type.getId())
+                .map(TransactionCashFlowEntity::getValue);
     }
 }
