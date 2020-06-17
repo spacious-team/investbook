@@ -109,7 +109,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 transactionRepository.findBySecurityIsinAndPkPortfolioCellCount(security, portfolio))
                 .orElse(0L) +
                 positions.getRedemptions().size());
-        Integer count = Optional.ofNullable(positions.getPositionHistories().peekLast())
+        int count = Optional.ofNullable(positions.getPositionHistories().peekLast())
                 .map(PositionHistory::getOpenedPositions)
                 .orElse(0);
         // сальдированные расходы на покупку
@@ -129,8 +129,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     .abs()
                     .divide(BigDecimal.valueOf(Math.abs(count)), 2, RoundingMode.CEILING));
             row.put(AVERAGE_ACCRUED_INTEREST, purchaseAccuredInterest
-                            .abs()
-                            .divide(BigDecimal.valueOf(Math.abs(count)), 2, RoundingMode.CEILING));
+                    .abs()
+                    .divide(BigDecimal.valueOf(Math.abs(count)), 2, RoundingMode.CEILING));
         }
         row.put(COMMISSION, getTotal(positions.getTransactions(), CashFlowType.COMMISSION).abs());
         row.put(COUPON, paidInterest.sumPaymentsForType(CashFlowType.COUPON));
