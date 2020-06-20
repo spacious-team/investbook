@@ -38,7 +38,7 @@ public enum PortfolioStatusExcelTableHeader implements ExcelTableHeader {
     AMORTIZATION("Амортизация облигации"),
     DIVIDEND("Дивиденды"),
     TAX("Налог (удержанный)"),
-    BUY_CELL_PROFIT("Курсовой доход"),
+    GROSS_PROFIT("Курсовой доход"),
     PROFIT("Прибыль");
 
     private final String description;
