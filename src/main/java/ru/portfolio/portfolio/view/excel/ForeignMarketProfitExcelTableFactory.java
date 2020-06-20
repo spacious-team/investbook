@@ -20,7 +20,6 @@ package ru.portfolio.portfolio.view.excel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.converter.TransactionConverter;
 import ru.portfolio.portfolio.pojo.CashFlowType;
 import ru.portfolio.portfolio.pojo.Portfolio;
 import ru.portfolio.portfolio.pojo.Transaction;
@@ -31,11 +30,8 @@ import ru.portfolio.portfolio.view.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static ru.portfolio.portfolio.view.excel.ForeignMarketProfitExcelTableHeader.*;
 
@@ -45,7 +41,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
     // isin -> security price currency
     private final TransactionRepository transactionRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
-    private final TransactionConverter transactionConverter;
+    private final PositionsFactory positionsFactory;
 
     public Table create(Portfolio portfolio) {
         return create(portfolio, getCurrencyPairs(portfolio));
@@ -55,7 +51,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
         Table openPositionsProfit = new Table();
         Table closedPositionsProfit = new Table();
         for (String currencyPair : currencyPairs) {
-            Positions positions = getPositions(portfolio, currencyPair);
+            Positions positions = positionsFactory.get(portfolio, currencyPair);
             openPositionsProfit.addAll(getPositionProfit(currencyPair, positions.getOpenedPositions(),
                     this::getOpenedPositionProfit));
             closedPositionsProfit.addAll(getPositionProfit(currencyPair, positions.getClosedPositions(),
@@ -71,36 +67,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
      * Returns currency pairs, for example USDRUB, EURRUB
      */
     private Collection<String> getCurrencyPairs(Portfolio portfolio) {
-        return transactionRepository.findDistinctFxInstrumentByPortfolioOrderByTimestampDesc(portfolio)
-                .stream()
-                .map(e -> e.replace("_TOD", "")
-                        .replace("_TOM", ""))
-                .distinct()
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Returns positions for currency pairs, for example USDRUB, EURRUB
-     */
-    private Positions getPositions(Portfolio portfolio, String currencyPair) {
-        LinkedList<Transaction> transactions = new LinkedList<>();
-        transactions.addAll(getTransactions(portfolio, currencyPair + "_TOM"));
-        transactions.addAll(getTransactions(portfolio, currencyPair + "_TOD"));
-        transactions.sort(
-                Comparator.comparing(Transaction::getTimestamp)
-                        .thenComparingLong(Transaction::getId));
-        return new Positions(transactions, new LinkedList<>());
-    }
-
-    /**
-     * Returns positions for currency pairs contracts, for example USDRUB_TOD, EURRUB_TOD
-     */
-    private Deque<Transaction> getTransactions(Portfolio portfolio, String contract) {
-        return transactionRepository
-                    .findBySecurityIsinAndPkPortfolioOrderByTimestampAscPkIdAsc(contract, portfolio.getId())
-                    .stream()
-                    .map(transactionConverter::fromEntity)
-                    .collect(Collectors.toCollection(LinkedList::new));
+        return transactionRepository.findDistinctFxCurrencyPairs(portfolio);
     }
 
     private <T extends Position> Table getPositionProfit(String currencyPair,

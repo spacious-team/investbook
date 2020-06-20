@@ -26,11 +26,11 @@ import ru.portfolio.portfolio.pojo.*;
 import ru.portfolio.portfolio.repository.SecurityEventCashFlowRepository;
 import ru.portfolio.portfolio.repository.TransactionRepository;
 
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import static ru.portfolio.portfolio.pojo.SecurityType.getCurrencyPair;
 
 @Component
 @RequiredArgsConstructor
@@ -40,28 +40,55 @@ public class PositionsFactory {
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final TransactionConverter transactionConverter;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
-    private final Map<Portfolio, Map<Security, Positions>> positionsCache = new ConcurrentHashMap<>();
+    private final Map<Portfolio, Map<String, Positions>> positionsCache = new ConcurrentHashMap<>();
 
     public Positions get(Portfolio portfolio, Security security) {
-        return positionsCache.computeIfAbsent(portfolio, k -> new ConcurrentHashMap<>())
-                .computeIfAbsent(security, k -> create(portfolio, security));
+        return get(portfolio, security.getIsin());
     }
 
-    private Positions create(Portfolio portfolio, Security security) {
-        Deque<Transaction> transactions = transactionRepository
-                .findBySecurityIsinAndPkPortfolioOrderByTimestampAscPkIdAsc(security.getIsin(), portfolio.getId())
-                .stream()
-                .map(transactionConverter::fromEntity)
-                .collect(Collectors.toCollection(LinkedList::new));
-        Deque<SecurityEventCashFlow> redemption = getRedemption(portfolio, security);
+    public Positions get(Portfolio portfolio, String isinOrContract) {
+        return positionsCache.computeIfAbsent(portfolio, k -> new ConcurrentHashMap<>())
+                .computeIfAbsent(getCacheKey(isinOrContract), k -> create(portfolio, isinOrContract));
+    }
+
+    private String getCacheKey(String isinOrContract) {
+        return (SecurityType.getSecurityType(isinOrContract) == SecurityType.CURRENCY_PAIR) ?
+                getCurrencyPair(isinOrContract) :
+                isinOrContract;
+    }
+
+    private Positions create(Portfolio portfolio, String isinOrContract) {
+        SecurityType type = SecurityType.getSecurityType(isinOrContract);
+        LinkedList<Transaction> transactions = new LinkedList<>();
+        if (type == SecurityType.CURRENCY_PAIR) {
+            String currencyPair = getCurrencyPair(isinOrContract);
+            transactions.addAll(getTransactions(portfolio, currencyPair + "_TOM"));
+            transactions.addAll(getTransactions(portfolio, currencyPair + "_TOD"));
+            transactions.sort(
+                    Comparator.comparing(Transaction::getTimestamp)
+                            .thenComparingLong(Transaction::getId));
+        } else {
+            transactions.addAll(getTransactions(portfolio, isinOrContract));
+        }
+        Deque<SecurityEventCashFlow> redemption = (type == SecurityType.STOCK_OR_BOND) ?
+                getRedemption(portfolio, isinOrContract) :
+                new ArrayDeque<>(0);
         return new Positions(transactions, redemption);
     }
 
-    private Deque<SecurityEventCashFlow> getRedemption(Portfolio portfolio, Security securityEntity) {
+    private LinkedList<Transaction> getTransactions(Portfolio portfolio, String isin) {
+        return transactionRepository
+                .findBySecurityIsinAndPkPortfolioOrderByTimestampAscPkIdAsc(isin, portfolio.getId())
+                .stream()
+                .map(transactionConverter::fromEntity)
+                .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    private Deque<SecurityEventCashFlow> getRedemption(Portfolio portfolio, String isin) {
         return securityEventCashFlowRepository
                 .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(
                         portfolio.getId(),
-                        securityEntity.getIsin(),
+                        isin,
                         CashFlowType.REDEMPTION.getId())
                 .stream()
                 .map(securityEventCashFlowConverter::fromEntity)
