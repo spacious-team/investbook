@@ -30,20 +30,15 @@ import static org.testng.Assert.assertEquals;
 
 @Ignore
 public class DividendTableTest {
-    PsbBrokerReport report;
-
-    DividendTableTest() throws IOException {
-        this.report = new PsbBrokerReport("E:\\1.xlsx");
-    }
 
     @DataProvider(name = "isin")
     Object[][] getData() {
-        return new Object[][] {{"RU000A0JRKT8", "RU000A0JRKT8" }};
+        return new Object[][] {{"E:\\1.xlsx", "RU000A0JRKT8", "RU000A0JRKT8" }};
     }
 
     @Test(dataProvider = "isin")
-    void testIsin(String firstIsin, String lastIsin) {
-        List<SecurityEventCashFlow> data = new DividendTable(this.report).getData();
+    void testIsin(String report, String firstIsin, String lastIsin) throws IOException {
+        List<SecurityEventCashFlow> data = new DividendTable(new PsbBrokerReport(report)).getData();
         assertEquals(data.get(0).getIsin(), firstIsin);
         assertEquals(data.get(data.size() - 1).getIsin(), lastIsin);
     }
