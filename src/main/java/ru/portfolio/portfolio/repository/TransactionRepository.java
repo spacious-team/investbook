@@ -24,9 +24,12 @@ import org.springframework.data.repository.query.Param;
 import ru.portfolio.portfolio.entity.TransactionEntity;
 import ru.portfolio.portfolio.entity.TransactionEntityPK;
 import ru.portfolio.portfolio.pojo.Portfolio;
+import ru.portfolio.portfolio.pojo.Security;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public interface TransactionRepository extends JpaRepository<TransactionEntity, TransactionEntityPK> {
 
@@ -64,7 +67,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     Collection<String> findDistinctDerivativeByPortfolioOrderByTimestampDesc(@Param("portfolio") Portfolio portfolio);
 
     /**
-     * Returns foreign exchange market contracts
+     * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM format)
      */
     @Query(nativeQuery = true, value = "SELECT distinct isin FROM transaction " +
             "WHERE portfolio = :#{#portfolio.id} " +
@@ -74,7 +77,19 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     Collection<String> findDistinctFxInstrumentByPortfolioOrderByTimestampDesc(@Param("portfolio") Portfolio portfolio);
 
     /**
-     * Returns foreign exchange market contracts
+     * Returns foreign exchange market currency pairs (in USDRUB format)
+     */
+    default Collection<String> findDistinctFxCurrencyPairs(Portfolio portfolio) {
+        return findDistinctFxInstrumentByPortfolioOrderByTimestampDesc(portfolio)
+                .stream()
+                .map(e -> e.replace("_TOD", "")
+                        .replace("_TOM", ""))
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM format)
      */
     @Query(nativeQuery = true, value = "SELECT DISTINCT isin FROM transaction as t1 " +
             "JOIN transaction_cash_flow as t2 " +
@@ -88,6 +103,48 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     Collection<String> findDistinctFxInstrumentByPortfolioAndCurrencyOrderByTimestampDesc(@Param("portfolio") Portfolio portfolio,
                                                                                           @Param("currency") String currency);
 
+    /**
+     * Returns foreign exchange market currency pairs (in USDRUB format)
+     */
+    default Collection<String> findDistinctFxCurrencyPairs(Portfolio portfolio, String currency) {
+        return findDistinctFxInstrumentByPortfolioAndCurrencyOrderByTimestampDesc(portfolio, currency)
+                .stream()
+                .map(e -> e.replace("_TOD", "")
+                        .replace("_TOM", ""))
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
     ArrayList<TransactionEntity> findBySecurityIsinAndPkPortfolioOrderByTimestampAscPkIdAsc(String isin,
                                                                                             String portfolio);
+
+    /**
+     * Return first security transaction
+     */
+    Optional<TransactionEntity> findFirstBySecurityIsinAndPkPortfolioOrderByTimestampAsc(String isin, String portfolio);
+
+    /**
+     * Return last security transaction
+     */
+    Optional<TransactionEntity> findFirstBySecurityIsinAndPkPortfolioOrderByTimestampDesc(String isin, String portfolio);
+
+    /**
+     * Return security total buy count
+     */
+    @Query(nativeQuery = true, value = "SELECT sum(count) FROM transaction " +
+            "WHERE portfolio = :#{#portfolio.id} " +
+            "AND isin = :#{#security.isin} " +
+            "AND count > 0")
+    Long findBySecurityIsinAndPkPortfolioBuyCount(@Param("security") Security security,
+                                                  @Param("portfolio") Portfolio portfolio);
+
+    /**
+     * Return security total cell count
+     */
+    @Query(nativeQuery = true, value = "SELECT abs(sum(count)) FROM transaction " +
+            "WHERE portfolio = :#{#portfolio.id} " +
+            "AND isin = :#{#security.isin} " +
+            "AND count < 0")
+    Long findBySecurityIsinAndPkPortfolioCellCount(@Param("security") Security security,
+                                                   @Param("portfolio") Portfolio portfolio);
 }

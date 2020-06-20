@@ -29,19 +29,14 @@ import static org.testng.Assert.assertEquals;
 
 @Ignore
 public class PortfolioCashTableTest {
-    PsbBrokerReport report;
-
-    PortfolioCashTableTest() throws IOException {
-        this.report = new PsbBrokerReport("E:\\1.xlsx");
-    }
 
     @DataProvider(name = "cash_in")
     Object[][] getData() {
-        return new Object[][] {{BigDecimal.valueOf(350.37)}};
+        return new Object[][] {{"E:\\1.xlsx", BigDecimal.valueOf(350.37)}};
     }
 
     @Test(dataProvider = "cash_in")
-    void testIsin(BigDecimal expectedCash) {
-        assertEquals(new PortfolioCashTable(this.report).getData().get(0).getValue(), expectedCash);
+    void testIsin(String report, BigDecimal expectedCash) throws IOException {
+        assertEquals(new PortfolioCashTable(new PsbBrokerReport(report)).getData().get(0).getValue(), expectedCash);
     }
 }

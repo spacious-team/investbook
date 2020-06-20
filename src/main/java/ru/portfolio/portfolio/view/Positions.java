@@ -36,16 +36,19 @@ import static java.lang.Math.abs;
 /**
  * Calculate {@link ClosedPosition}
  */
+@Getter
 @Slf4j
 public class Positions {
-    @Getter
-    Deque<PositionHistory> positionHistories = new LinkedList<>();
-    @Getter
+
+    private final Deque<Transaction> transactions;
+    private final Deque<SecurityEventCashFlow> redemptions;
+    private final Deque<PositionHistory> positionHistories = new LinkedList<>();
     private final Deque<OpenedPosition> openedPositions = new LinkedList<>();
-    @Getter
     private final Deque<ClosedPosition> closedPositions = new LinkedList<>();
 
     public Positions(Deque<Transaction> transactions, Deque<SecurityEventCashFlow> redemptions) {
+        this.transactions = transactions;
+        this.redemptions = redemptions;
         updateSecuritiesPastPositions(transactions);
         for (Transaction transaction : transactions) {
             if (isIncreasePosition(transaction)) {

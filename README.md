@@ -4,11 +4,11 @@
 
 ### Установка
 1. Скачать со станицы [проекта](https://github.com/vananiev/portfolio/releases/latest)
-   архив `portfolio.zip` и распаковать на рабочий стол.
+   архив `portfolio.zip` и распаковать в любую удобную папку.
 1. Скачать [Java 14](https://download.java.net/java/GA/jdk14/076bab302c7b4508975440c56f6cc26a/36/GPL/openjdk-14_windows-x64_bin.zip)
    и распаковыть из архива папку `jdk-14` в `C:\Program Files\Java\`.
 
-Подробная инструкция по установке и запуску прилжения для [windows](docs/install-on-windows.md)
+Подробная инструкция по установке и запуску прилжения для операционных систем [windows](docs/install-on-windows.md)
 и [linux](docs/install-on-linux.md).
 
 ### Работа с приложением
@@ -22,11 +22,17 @@
 1. Допустимо загружать отчеты по нескольким брокерским/инвестиционным счетам, в том числе от разных брокерских домов.
 
 После загрузки отчета становится доступным аналитическая выгрузка по вашим портфелям в формате excel файла:
+- состояние портфеля ценных бумаг инвестора, включая хеджирующие позиции на срочном рынке и усредненную цену покупки валют;
+  ![portfolio](https://user-images.githubusercontent.com/11336712/85202150-04851a00-b30d-11ea-90b2-df266df956fe.png)
 - доходность сделок на фондовом рынке;
   ![stock-market](https://user-images.githubusercontent.com/11336712/78156498-8de02b00-7447-11ea-833c-cfc755bd7558.png)
 - доходность сделок на срочном рынке;
   ![derivatives-market](https://user-images.githubusercontent.com/11336712/78156504-8f115800-7447-11ea-87e5-3cd4c34aab47.png)
-- пополнения, списания и доходность портфеля;
+- доходность сделок на валютном рынке;
+  ![foreighn-market](https://user-images.githubusercontent.com/11336712/84881751-fa59e600-b096-11ea-8b83-19d1c1229d73.png)
+- дивидендные, купонные и амортизационные выплаты, начисленные по акциям и облигациям связанного брокерского счета;
+  ![payment](https://user-images.githubusercontent.com/11336712/84598929-e6379e00-ae76-11ea-9a9f-608780c0ff7e.png)
+- пополнения, списания, переводы с/на другие счета и доходность портфеля;
   ![cash-in](https://user-images.githubusercontent.com/11336712/78156505-8f115800-7447-11ea-8f6d-6a34c21dfc89.png)
 - налоговая нагрузка. 
   ![tax](https://user-images.githubusercontent.com/11336712/78156502-8e78c180-7447-11ea-9259-445c85d75a65.png)
