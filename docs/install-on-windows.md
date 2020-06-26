@@ -2,7 +2,7 @@
 
 Поддерживается любая версия Windows.
 1. Скачать [Java 14](https://download.java.net/java/GA/jdk14/076bab302c7b4508975440c56f6cc26a/36/GPL/openjdk-14_windows-x64_bin.zip)
-   и распаковыть в `C:\Program Files\Java\` папку `jdk-14` из архива.
+   и распаковать в `C:\Program Files\Java\` папку `jdk-14` из архива.
 1. Скачать со станицы [проекта](https://github.com/vananiev/portfolio/releases/latest)
    архив `portfolio.zip` и распаковать на рабочий стол.
 1. Запустить файл `start.bat`, появится консоль, подождите 10-30 сек (в зависимости от мощности вашего компьтера).
