@@ -3,6 +3,7 @@ target/
 !**/src/main/**
 !**/src/test/**
 /portfolio.log
+portfolio-report-backups/
 
 ### STS ###
 .apt_generated

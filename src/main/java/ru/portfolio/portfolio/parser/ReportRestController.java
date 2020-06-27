@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import ru.portfolio.portfolio.PortfolioProperties;
 import ru.portfolio.portfolio.parser.psb.PsbBrokerReport;
 import ru.portfolio.portfolio.parser.psb.PsbReportTableFactory;
 import ru.portfolio.portfolio.parser.uralsib.UralsibBrokerReport;
@@ -37,7 +38,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,11 +50,9 @@ import java.util.zip.ZipInputStream;
 @RequiredArgsConstructor
 @Slf4j
 public class ReportRestController {
-    private static final Path reportBackupPath = Paths.get(
-            System.getProperty("user.home", ""),
-            "portfolio-report-backups");
     private final ReportParserService reportParserService;
     private final ForeignExchangeRateService foreignExchangeRateService;
+    private final PortfolioProperties portfolioProperties;
 
     @PostMapping("/reports")
     public ResponseEntity<String> post(@RequestParam("reports") MultipartFile[] reports,
@@ -120,7 +118,7 @@ public class ReportRestController {
     private Path saveToBackup(BrokerType broker, MultipartFile report) throws IOException {
         byte[] bytes = report.getBytes();
         String originalFilename = report.getOriginalFilename();
-        Path backupPath = reportBackupPath.resolve(broker.name().toLowerCase());
+        Path backupPath = portfolioProperties.getReportBackupPath().resolve(broker.name().toLowerCase());
         Files.createDirectories(backupPath);
         Path path = backupPath.resolve((originalFilename != null) ?
                 originalFilename :
