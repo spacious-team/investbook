@@ -22,6 +22,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ru.portfolio.portfolio.entity.SecurityEventCashFlowEntity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
@@ -39,4 +40,7 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
             String portfolio,
             String isin,
             Set<Integer> cashFlowType);
+
+    ArrayList<SecurityEventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdInOrderByTimestampDesc(String portfolio,
+                                                                                                    Collection<Integer> cashFlowType);
 }
