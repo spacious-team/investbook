@@ -28,14 +28,14 @@ import ru.portfolio.portfolio.repository.PortfolioRepository;
 import ru.portfolio.portfolio.view.Table;
 import ru.portfolio.portfolio.view.TableHeader;
 
-import static ru.portfolio.portfolio.view.excel.ForeignPortfolioPaymentTableHeader.*;
+import static ru.portfolio.portfolio.view.excel.PortfolioPaymentTableHeader.*;
 
 @Component
-public class ForeignPortfolioPaymentTableView extends ExcelTableView {
+public class PortfolioPaymentTableView extends ExcelTableView {
 
-    public ForeignPortfolioPaymentTableView(PortfolioRepository portfolioRepository,
-                                            ForeignPortfolioPaymentTableFactory tableFactory,
-                                            PortfolioConverter portfolioConverter) {
+    public PortfolioPaymentTableView(PortfolioRepository portfolioRepository,
+                                     PortfolioPaymentTableFactory tableFactory,
+                                     PortfolioConverter portfolioConverter) {
         super(portfolioRepository, tableFactory, portfolioConverter);
     }
 
@@ -50,6 +50,9 @@ public class ForeignPortfolioPaymentTableView extends ExcelTableView {
     protected Table.Record getTotalRow() {
         Table.Record total = Table.newRecord();
         total.put(DATE, "Итого:");
+        total.put(COUNT, "=SUM(" +
+                COUNT.getColumnIndex() + "3:" +
+                COUNT.getColumnIndex() + "100000)");
         total.put(CASH_RUB, "=SUM(" +
                 CASH_RUB.getColumnIndex() + "3:" +
                 CASH_RUB.getColumnIndex() + "100000)");
@@ -70,6 +73,8 @@ public class ForeignPortfolioPaymentTableView extends ExcelTableView {
             if (cell == null) continue;
             if (cell.getColumnIndex() == DATE.ordinal()) {
                 cell.setCellStyle(styles.getTotalTextStyle());
+            } else if (cell.getColumnIndex() == COUNT.ordinal()) {
+                cell.setCellStyle(styles.getIntStyle());
             } else {
                 cell.setCellStyle(styles.getTotalRowStyle());
             }

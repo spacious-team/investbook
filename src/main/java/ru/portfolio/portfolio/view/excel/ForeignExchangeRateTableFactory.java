@@ -20,7 +20,6 @@ package ru.portfolio.portfolio.view.excel;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.portfolio.portfolio.pojo.EventCashFlow;
 import ru.portfolio.portfolio.view.ForeignExchangeRateService;
 import ru.portfolio.portfolio.view.Table;
 
@@ -33,10 +32,10 @@ public class ForeignExchangeRateTableFactory {
     private static final List<String> currencies = Arrays.asList("USD", "EUR", "GBP", "CHF");
     private final ForeignExchangeRateService foreignExchangeRateService;
 
-    public String cashConvertToRubExcelFormula(EventCashFlow cash,
+    public String cashConvertToRubExcelFormula(String currency,
                                                ExcelTableHeader cashColumn,
                                                ExcelTableHeader exchangeRateColumn) {
-        int rowNum = currencies.indexOf(cash.getCurrency());
+        int rowNum = currencies.indexOf(currency);
         if (rowNum == -1) {
             return "=" + cashColumn.getCellAddr();
         } else {

@@ -10,7 +10,7 @@
     </parent>
     <groupId>ru.portfolio</groupId>
     <artifactId>portfolio</artifactId>
-    <version>2020.6</version>
+    <version>2020.7</version>
     <name>portfolio</name>
     <description>Investing Portfolio</description>
 
@@ -96,6 +96,10 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
             <version>1.4.200</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
         </dependency>
     </dependencies>
 

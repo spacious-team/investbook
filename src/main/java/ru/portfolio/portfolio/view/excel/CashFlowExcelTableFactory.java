@@ -61,7 +61,7 @@ public class CashFlowExcelTableFactory implements TableFactory {
             record.put(DATE, cash.getTimestamp());
             record.put(CASH, cash.getValue());
             record.put(CURRENCY, cash.getCurrency());
-            record.put(CASH_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash, CASH, EXCHANGE_RATE));
+            record.put(CASH_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash.getCurrency(), CASH, EXCHANGE_RATE));
             record.put(DAYS_COUNT, DAYS_COUNT_FORMULA);
             record.put(DESCRIPTION, cash.getDescription());
             table.add(record);
