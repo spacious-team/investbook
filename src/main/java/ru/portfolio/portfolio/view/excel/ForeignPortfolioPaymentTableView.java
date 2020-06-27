@@ -42,7 +42,8 @@ public class ForeignPortfolioPaymentTableView extends ExcelTableView {
     @Override
     protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
-        sheet.setColumnWidth(DESCRIPTION.ordinal(), 100 * 256);
+        sheet.setColumnWidth(CASH_RUB.ordinal(), 18 * 256);
+        sheet.setColumnWidth(DESCRIPTION.ordinal(), 120 * 256);
     }
 
     @Override

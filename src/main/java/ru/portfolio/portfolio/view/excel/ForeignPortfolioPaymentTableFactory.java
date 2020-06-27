@@ -41,17 +41,21 @@ import static ru.portfolio.portfolio.view.excel.ForeignPortfolioPaymentTableHead
 @RequiredArgsConstructor
 @Slf4j
 public class ForeignPortfolioPaymentTableFactory implements TableFactory {
+    /** tax accounted by {@link TaxExcelTableFactory} */
     private static final CashFlowType[] PAY_TYPES = new CashFlowType[]{AMORTIZATION, REDEMPTION, COUPON, DIVIDEND};
-    // TODO DAYS() excel function not impl by Apache POI: https://bz.apache.org/bugzilla/show_bug.cgi?id=58468
     private final EventCashFlowRepository eventCashFlowRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
 
     @Override
     public Table create(Portfolio portfolio) {
-        Table table = new Table();
-        List<EventCashFlow> cashFlows = eventCashFlowRepository
-                .findByPortfolioIdAndCashFlowTypeIdInOrderByTimestamp(
+        List<EventCashFlow> cashFlows = getCashFlows(portfolio);
+        return getTable(cashFlows);
+    }
+
+    private ArrayList<EventCashFlow> getCashFlows(Portfolio portfolio) {
+        return eventCashFlowRepository
+                .findByPortfolioIdAndCashFlowTypeIdInOrderByTimestampDesc(
                         portfolio.getId(),
                         Stream.of(PAY_TYPES)
                                 .map(CashFlowType::getId)
@@ -59,13 +63,16 @@ public class ForeignPortfolioPaymentTableFactory implements TableFactory {
                 .stream()
                 .map(eventCashFlowConverter::fromEntity)
                 .collect(Collectors.toCollection(ArrayList::new));
+    }
 
+    private Table getTable(List<EventCashFlow> cashFlows) {
+        Table table = new Table();
         for (EventCashFlow cash : cashFlows) {
             Table.Record record = new Table.Record();
             record.put(DATE, cash.getTimestamp());
             record.put(ForeignPortfolioPaymentTableHeader.CASH, cash.getValue());
             record.put(CURRENCY, cash.getCurrency());
-            record.put(CASH_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash,
+            record.put(CASH_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash.getCurrency(),
                     ForeignPortfolioPaymentTableHeader.CASH, EXCHANGE_RATE));
             record.put(DESCRIPTION, cash.getDescription());
             table.add(record);
