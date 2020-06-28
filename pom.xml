@@ -15,7 +15,7 @@
     <description>Investing Portfolio</description>
 
     <properties>
-        <java.version>12</java.version>
+        <java.version>14</java.version>
     </properties>
 
     <dependencies>
