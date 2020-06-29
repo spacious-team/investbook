@@ -10,13 +10,13 @@
     </parent>
     <groupId>ru.portfolio</groupId>
     <artifactId>portfolio</artifactId>
-    <version>2020.7.1</version>
+    <version>2020.8-SNAPSHOT</version>
     <name>portfolio</name>
     <description>Investing Portfolio</description>
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.installed.version>20.7.1</win.installed.version>
+        <win.msi.version>20.8</win.msi.version>
         <java.version>14</java.version>
     </properties>
 
@@ -175,11 +175,11 @@
                         <version>0.0.4</version>
                         <configuration>
                             <type>MSI</type>
-                            <name>${project.name}</name>
-                            <appVersion>${win.installed.version}</appVersion>
+                            <name>Portfolio</name>
+                            <appVersion>${win.msi.version}</appVersion>
                             <vendor>${project.groupId}</vendor>
                             <description>${project.description}</description>
-                            <copyright>Portfolio, Copyright (C) 2020 Vitalii Ananev</copyright>
+                            <copyright>Portfolio, Copyright (C) 2020 Vitalii Ananev (an-vitek@ya.ru)</copyright>
                             <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
                             <arguments>
                                 <argument>--spring.profiles.active=core,h2,win-installed,conf</argument>
@@ -198,7 +198,7 @@
                                 <configuration>
                                     <winDirChooser>true</winDirChooser>
                                     <winMenu>true</winMenu>
-                                    <winMenuGroup>${project.name}</winMenuGroup>
+                                    <winMenuGroup>Portfolio</winMenuGroup>
                                     <winShortcut>true</winShortcut>
                                 </configuration>
                             </execution>
