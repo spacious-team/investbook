@@ -1,3 +1,21 @@
+<!--
+  ~ Portfolio
+  ~ Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
 <assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
@@ -7,7 +25,7 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>src/main/assembly</directory>
+            <directory>src/main/assembly/zip</directory>
             <outputDirectory/>
             <includes>
                 <include>*</include>
@@ -28,6 +46,10 @@
         </file>
         <file>
             <source>README.md</source>
+            <outputDirectory/>
+        </file>
+        <file>
+            <source>LICENSE</source>
             <outputDirectory/>
         </file>
     </files>
