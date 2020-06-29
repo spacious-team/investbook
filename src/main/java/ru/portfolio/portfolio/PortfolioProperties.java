@@ -32,6 +32,6 @@ import java.nio.file.Paths;
 @Setter
 public class PortfolioProperties {
 
-    private Path reportBackupPath = Paths.get(System.getProperty("user.home", ""), "portfolio-report-backups");
+    private Path reportBackupPath = Paths.get(System.getProperty("user.home", ""), "portfolio", "report-backups");
 
 }

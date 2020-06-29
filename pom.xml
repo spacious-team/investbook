@@ -10,11 +10,13 @@
     </parent>
     <groupId>ru.portfolio</groupId>
     <artifactId>portfolio</artifactId>
-    <version>2020.8-SNAPSHOT</version>
+    <version>2020.7.1</version>
     <name>portfolio</name>
     <description>Investing Portfolio</description>
 
     <properties>
+        <!-- Valid version is (0-255).(0-255).(0-65535) -->
+        <win.installed.version>20.7.1</win.installed.version>
         <java.version>14</java.version>
     </properties>
 
@@ -114,6 +116,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>zip</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -121,7 +124,21 @@
                         <configuration>
                             <appendAssemblyId>false</appendAssemblyId>
                             <descriptors>
-                                <descriptor>src/main/assembly/zip.xml</descriptor>
+                                <descriptor>src/main/assembly/zip/zip.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>jpackage</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>jpackage</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/main/assembly/jpackage/dir.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>
@@ -140,5 +157,56 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>on-windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <!-- jpackage requires https://wixtoolset.org/releases/ (only Wix, Toolset not required) -->
+                        <groupId>org.panteleyev</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>0.0.4</version>
+                        <configuration>
+                            <type>MSI</type>
+                            <name>${project.name}</name>
+                            <appVersion>${win.installed.version}</appVersion>
+                            <vendor>${project.groupId}</vendor>
+                            <description>${project.description}</description>
+                            <copyright>Portfolio, Copyright (C) 2020 Vitalii Ananev</copyright>
+                            <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
+                            <arguments>
+                                <argument>--spring.profiles.active=core,h2,win-installed,conf</argument>
+                            </arguments>
+                            <input>${project.build.directory}/jpackage/jpackage/</input>
+                            <icon>${project.basedir}/src/main/assembly/jpackage/icon.ico</icon>
+                            <destination>${project.build.directory}/jpackage</destination>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>win</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <winDirChooser>true</winDirChooser>
+                                    <winMenu>true</winMenu>
+                                    <winMenuGroup>${project.name}</winMenuGroup>
+                                    <winShortcut>true</winShortcut>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
