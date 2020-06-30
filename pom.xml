@@ -11,8 +11,17 @@
     <groupId>ru.portfolio</groupId>
     <artifactId>portfolio</artifactId>
     <version>2020.8-SNAPSHOT</version>
+
     <name>portfolio</name>
     <description>Investing Portfolio</description>
+    <url>https://github.com/vananiev/portfolio</url>
+
+    <licenses>
+        <license>
+            <name>GNU GPLv3</name>
+            <url>https://www.gnu.org/licenses/gpl-3.0.html</url>
+        </license>
+    </licenses>
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
