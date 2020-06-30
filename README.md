@@ -31,14 +31,11 @@
   ![tax](https://user-images.githubusercontent.com/11336712/78156502-8e78c180-7447-11ea-9259-445c85d75a65.png)
 
 ### Установка
-1. Создать папку `C:\Program Files\Java\`, скачать и открыть архив
-   [Java 14](https://download.java.net/java/GA/jdk14/076bab302c7b4508975440c56f6cc26a/36/GPL/openjdk-14_windows-x64_bin.zip),
-   скопировать папку `jdk-14` из архива и вставить ее в `C:\Program Files\Java\`.
-1. Скачать со страницы [приложения](https://github.com/vananiev/portfolio/releases/latest)
-   архив `portfolio.zip` и распаковать в любую удобную папку.
+Скачать со страницы [проекта](https://github.com/vananiev/portfolio/releases/latest) установщик `portfolio.msi`
+и запустить его.
 
-Подробная инструкция по установке и запуску приложения для операционных систем [windows](docs/install-on-windows.md)
-и [linux](docs/install-on-linux.md).
+Можете обратиться к более подробной инструкции по установке и работе с приложением для операционных систем
+[windows](docs/install-on-windows.md) и [linux](docs/install-on-linux.md).
 
 ### Работа с приложением
 Запустите приложение через ярлык на рабочем столе Windows, в браузере перейдите по адресу http://localhost
