@@ -182,7 +182,7 @@
                             <copyright>Portfolio, Copyright (C) 2020 Vitalii Ananev (an-vitek@ya.ru)</copyright>
                             <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
                             <arguments>
-                                <argument>--spring.profiles.active=core,h2,win-installed,conf</argument>
+                                <argument>--spring.config.additional-location=file:./app/</argument>
                             </arguments>
                             <input>${project.build.directory}/jpackage/jpackage/</input>
                             <icon>${project.basedir}/src/main/assembly/jpackage/icon.ico</icon>
