@@ -1,5 +1,5 @@
 /*
- * Portfolio
+ * InvestBook
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.portfolio.portfolio.parser.psb;
+package ru.investbook.parser.psb;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,8 +24,8 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
-import ru.portfolio.portfolio.PortfolioApplication;
-import ru.portfolio.portfolio.parser.ReportParserService;
+import ru.investbook.PortfolioApplication;
+import ru.investbook.parser.ReportParserService;
 
 import java.io.IOException;
 import java.nio.file.Paths;

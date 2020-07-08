@@ -31,7 +31,7 @@
   ![tax](https://user-images.githubusercontent.com/11336712/78156502-8e78c180-7447-11ea-9259-445c85d75a65.png)
 
 ### Установка
-Скачать со страницы [проекта](https://github.com/vananiev/portfolio/releases/latest) установщик `portfolio.msi`
+Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest) установщик `.msi`
 и запустить его.
 
 Можете обратиться к более подробной инструкции по установке и работе с приложением для операционных систем
