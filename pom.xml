@@ -12,7 +12,7 @@
     <artifactId>investbook</artifactId>
     <version>2020.8-SNAPSHOT</version>
 
-    <name>portfolio</name>
+    <name>investbook</name>
     <description>Investor Accounting Book</description>
     <url>https://github.com/spacious-team/investbook</url>
 
@@ -184,11 +184,11 @@
                         <version>0.0.4</version>
                         <configuration>
                             <type>MSI</type>
-                            <name>Portfolio</name>
+                            <name>Investbook</name>
                             <appVersion>${win.msi.version}</appVersion>
                             <vendor>${project.groupId}</vendor>
                             <description>${project.description}</description>
-                            <copyright>Portfolio, Copyright (C) 2020 Vitalii Ananev (an-vitek@ya.ru)</copyright>
+                            <copyright>InvestBook, Copyright (C) 2020 Spacious Team (https://github.com/spacious-team)</copyright>
                             <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
                             <arguments>
                                 <argument>--spring.config.additional-location=file:./app/</argument>
@@ -207,7 +207,7 @@
                                 <configuration>
                                     <winDirChooser>true</winDirChooser>
                                     <winMenu>true</winMenu>
-                                    <winMenuGroup>Portfolio</winMenuGroup>
+                                    <winMenuGroup>Investbook</winMenuGroup>
                                     <winShortcut>true</winShortcut>
                                 </configuration>
                             </execution>
