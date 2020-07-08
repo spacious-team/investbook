@@ -8,13 +8,13 @@
         <version>2.3.1.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>ru.portfolio</groupId>
-    <artifactId>portfolio</artifactId>
+    <groupId>ru.investbook</groupId>
+    <artifactId>investbook</artifactId>
     <version>2020.8-SNAPSHOT</version>
 
     <name>portfolio</name>
-    <description>Investing Portfolio</description>
-    <url>https://github.com/vananiev/portfolio</url>
+    <description>Investor Accounting Book</description>
+    <url>https://github.com/spacious-team/investbook</url>
 
     <licenses>
         <license>
