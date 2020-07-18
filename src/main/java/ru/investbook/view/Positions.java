@@ -50,6 +50,11 @@ public class Positions {
         this.transactions = transactions;
         this.redemptions = redemptions;
         updateSecuritiesPastPositions(transactions);
+        processTransactions(transactions);
+        processRedemptions(redemptions);
+    }
+
+    private void processTransactions(Deque<Transaction> transactions) {
         for (Transaction transaction : transactions) {
             if (isIncreasePosition(transaction)) {
                 this.openedPositions.add(new OpenedPosition(transaction));
@@ -57,6 +62,9 @@ public class Positions {
                 closePositions(transaction, CashFlowType.PRICE);
             }
         }
+    }
+
+    private void processRedemptions(Deque<SecurityEventCashFlow> redemptions) {
         if (!redemptions.isEmpty() && (redemptions.peek() != null)) {
             String isin = redemptions.peek().getIsin();
             updateSecuritiesPastPositions(redemptions.stream()
