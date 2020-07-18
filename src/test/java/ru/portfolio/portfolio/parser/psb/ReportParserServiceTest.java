@@ -24,14 +24,14 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
-import ru.investbook.PortfolioApplication;
+import ru.investbook.InvestbookApplication;
 import ru.investbook.parser.ReportParserService;
 
 import java.io.IOException;
 import java.nio.file.Paths;
 
 @Ignore
-@SpringBootTest(classes = PortfolioApplication.class)
+@SpringBootTest(classes = InvestbookApplication.class)
 public class ReportParserServiceTest extends AbstractTestNGSpringContextTests {
 
     @Autowired

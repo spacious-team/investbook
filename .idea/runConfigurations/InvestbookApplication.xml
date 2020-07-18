@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="PortfolioApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <module name="portfolio" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="ru.portfolio.portfolio.PortfolioApplication" />
+  <configuration default="false" name="InvestbookApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="investbook" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="ru.investbook.InvestbookApplication" />
     <option name="VM_PARAMETERS" value="-Dspring.profiles.active=core,dev" />
     <option name="ALTERNATIVE_JRE_PATH" />
     <method v="2">
