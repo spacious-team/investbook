@@ -8,15 +8,24 @@
         <version>2.3.1.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>ru.portfolio</groupId>
-    <artifactId>portfolio</artifactId>
-    <version>2020.7.1</version>
-    <name>portfolio</name>
-    <description>Investing Portfolio</description>
+    <groupId>ru.investbook</groupId>
+    <artifactId>investbook</artifactId>
+    <version>2020.7.2</version>
+
+    <name>investbook</name>
+    <description>Investor Accounting Book</description>
+    <url>https://github.com/spacious-team/investbook</url>
+
+    <licenses>
+        <license>
+            <name>GNU GPLv3</name>
+            <url>https://www.gnu.org/licenses/gpl-3.0.html</url>
+        </license>
+    </licenses>
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.installed.version>20.7.1</win.installed.version>
+        <win.msi.version>20.7.2</win.msi.version>
         <java.version>14</java.version>
     </properties>
 
@@ -175,14 +184,14 @@
                         <version>0.0.4</version>
                         <configuration>
                             <type>MSI</type>
-                            <name>${project.name}</name>
-                            <appVersion>${win.installed.version}</appVersion>
+                            <name>Investbook</name>
+                            <appVersion>${win.msi.version}</appVersion>
                             <vendor>${project.groupId}</vendor>
                             <description>${project.description}</description>
-                            <copyright>Portfolio, Copyright (C) 2020 Vitalii Ananev</copyright>
+                            <copyright>InvestBook, Copyright (C) 2020 Spacious Team (https://github.com/spacious-team)</copyright>
                             <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
                             <arguments>
-                                <argument>--spring.profiles.active=core,h2,win-installed,conf</argument>
+                                <argument>--spring.config.additional-location=file:./app/</argument>
                             </arguments>
                             <input>${project.build.directory}/jpackage/jpackage/</input>
                             <icon>${project.basedir}/src/main/assembly/jpackage/icon.ico</icon>
@@ -198,7 +207,7 @@
                                 <configuration>
                                     <winDirChooser>true</winDirChooser>
                                     <winMenu>true</winMenu>
-                                    <winMenuGroup>${project.name}</winMenuGroup>
+                                    <winMenuGroup>Investbook</winMenuGroup>
                                     <winShortcut>true</winShortcut>
                                 </configuration>
                             </execution>

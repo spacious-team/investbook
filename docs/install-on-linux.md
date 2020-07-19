@@ -2,30 +2,30 @@
 
 Поддерживаетя любая версия linux.
 1. Проверить версию java
-```shell script
-$ java -version
-```
+   ```shell script
+   $ java -version
+   ```
    Если версия 14 или выше, пропустите следующий пункт.
 1. Скачать [Java 14](https://download.java.net/java/GA/jdk14.0.1/664493ef4a6946b186ff29eb326336a2/7/GPL/openjdk-14.0.1_linux-x64_bin.tar.gz)
    и распаковать папку `jdk-14.0.1` в директорию `/opt`.
-1. Скачать со страницы [проекта](https://github.com/vananiev/portfolio/releases/latest)
-   архив `portfolio.zip` и распаковать в директорию `/opt`.
+1. Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest)
+   архив `.zip` и распаковать в директорию `/opt`.
 1. В директории приложения найти файл `start.sh`, раскомментировать и актуализировать `JAVA_HOME`
-```shell script
-$ export JAVA_HOME=/opt/jdk-14.0.1
-```
+   ```shell script
+   $ export JAVA_HOME=/opt/jdk-14.0.1
+   ```
 1. Запустить приложение
-```shell script
-$ sh start.sh
-```
+   ```shell script
+   $ sh start.sh
+   ```
 1. Открыть в  браузере сайт http://localhost (это локальный сайт, запущенный приложением на вашем компьютере).
 1. Перейти по ссылке `1. Загрузить отчеты брокера`, выбрать отчеты брокера за период, который хотите проанализировать,
    затем выбрать из выпадающего меню вашего брокера и нажать кнопку `загрузить`.
-1. Дождаться окончания загрузки и нажать на ссылку `[назад]`.
+1. Дождаться окончания загрузки и нажать на ссылку `[ok]`.
 1. Нажать ссылку `2. Скачать анализ загруженных отчетов`.
 
 ### Обновление приложения
-Скачать со станицы [приложения](https://github.com/vananiev/portfolio/releases/latest) архив `portfolio.zip` и
+Скачать со станицы [приложения](https://github.com/vananiev/spacious-team/investbook/latest) архив `.zip` и
 распаковать в директорию `/opt`. Приложение готово к запуску файлом `start.sh`.
    
 

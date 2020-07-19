@@ -1,5 +1,5 @@
 /*
- * Portfolio
+ * InvestBook
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.portfolio.portfolio.parser.psb;
+package ru.investbook.parser.psb;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
-import ru.portfolio.portfolio.pojo.Security;
+import ru.investbook.pojo.Security;
 
 import java.io.IOException;
 import java.util.List;
