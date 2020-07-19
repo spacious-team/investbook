@@ -10,7 +10,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2020.8-SNAPSHOT</version>
+    <version>2020.7.2</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
