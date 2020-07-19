@@ -21,12 +21,15 @@ package ru.investbook.view.excel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.pojo.Portfolio;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;
+
+import java.util.Optional;
 
 import static ru.investbook.view.excel.SecuritiesDepositAndWithdrawalExcelTableHeader.*;
 
@@ -45,7 +48,9 @@ public class SecuritiesDepositAndWithdrawalExcelTableFactory implements TableFac
             table.add(record);
             record.put(DATE, transactionEntity.getTimestamp());
             record.put(COUNT, transactionEntity.getCount());
-            record.put(SECURITY, transactionEntity.getSecurity().getName());
+            SecurityEntity securityEntity = transactionEntity.getSecurity();
+            record.put(SECURITY, Optional.ofNullable(securityEntity.getName())
+                    .orElse(securityEntity.getIsin()));
         }
         return table;
     }

@@ -150,7 +150,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
 
     @Query("SELECT t FROM TransactionEntity t " +
             "LEFT OUTER JOIN TransactionCashFlowEntity c " +
-            "ON t.pk.id = c.pk.transactionId AND t.pk.portfolio = c.pk.portfolio AND c.pk.type = 1 " +
+            "ON t.pk.id = c.pk.transactionId AND t.pk.portfolio = c.pk.portfolio " +
             "WHERE c.pk.type IS NULL AND t.pk.portfolio = :#{#portfolio.id}")
     Collection<TransactionEntity> findDepositAndWithdrawalTransactions(@Param("portfolio") Portfolio portfolio);
 }

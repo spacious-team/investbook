@@ -25,7 +25,7 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>src/main/assembly/dir</directory>
+            <directory>src/main/assembly/jpackage</directory>
             <outputDirectory/>
             <includes>
                 <include>*</include>
