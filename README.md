@@ -25,6 +25,8 @@
   ![derivatives-market](https://user-images.githubusercontent.com/11336712/78156504-8f115800-7447-11ea-87e5-3cd4c34aab47.png)
 - доходность сделок на валютном рынке;  
   ![foreighn-market](https://user-images.githubusercontent.com/11336712/84881751-fa59e600-b096-11ea-8b83-19d1c1229d73.png)
+- ввод и вывод ценных бумаг с/на другие счета;  
+  ![securities-deposit-withdrawal](https://user-images.githubusercontent.com/11336712/87883425-f3185600-ca0f-11ea-9677-4689aa6a4ee5.png)
 - доходность портфеля, пополнения, списания, переводы с/на другие счета;  
   ![cash-in](https://user-images.githubusercontent.com/11336712/78156505-8f115800-7447-11ea-8f6d-6a34c21dfc89.png)
 - налоговая нагрузка.  
