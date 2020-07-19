@@ -169,12 +169,12 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         SecurityType securityType = getSecurityType(security);
         switch (securityType) {
             case STOCK_OR_BOND:
-                return  getPurchaseCost(security, positions)
+                return getPurchaseCost(security, positions)
                         .add(getPurchaseAccruedInterest(security, positions));
             case DERIVATIVE:
                 return getDerivativeProfit(portfolio, security);
             case CURRENCY_PAIR:
-                return  getPurchaseCost(security, positions);
+                return getPurchaseCost(security, positions);
         }
         throw new IllegalArgumentException("Не поддерживаемый тип ценной бумаги " + security);
     }
@@ -186,18 +186,46 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         SecurityType securityType = getSecurityType(security);
         switch (securityType) {
             case STOCK_OR_BOND:
-                BigDecimal purchaseCost = getTotal(positions.getTransactions(), CashFlowType.PRICE);
-                return positions.getRedemptions()
-                        .stream()
-                        .map(SecurityEventCashFlow::getValue)
-                        .map(BigDecimal::abs)
-                        .reduce(purchaseCost, BigDecimal::add);
+                return getStockOrBondPurchaseCost(positions);
             case DERIVATIVE:
                 return getTotal(positions.getTransactions(), CashFlowType.DERIVATIVE_PRICE);
             case CURRENCY_PAIR:
                 return getTotal(positions.getTransactions(), CashFlowType.PRICE);
         }
         throw new IllegalArgumentException("Не поддерживаемый тип ценной бумаги " + security);
+    }
+
+    /**
+     * Разница цен продаж и покупок. Не учитывается цена покупки, если ЦБ выведена со счета, не учитывается цена
+     * продажи, если ЦБ введена на счет
+     */
+    private BigDecimal getStockOrBondPurchaseCost(Positions positions) {
+        BigDecimal purchaseCost = positions.getOpenedPositions()
+                .stream()
+                .map(openPosition -> getTransactionValue(openPosition.getOpenTransaction(), CashFlowType.PRICE)
+                        .map(value -> value.multiply(getOpenAmountMultiplier(openPosition))))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .reduce(BigDecimal.ZERO, BigDecimal::add); // если ценная бумага не вводилась на счет, а была куплена (есть цена покупки)
+        for (ClosedPosition closedPosition : positions.getClosedPositions()) {
+            BigDecimal openPrice = getTransactionValue(closedPosition.getOpenTransaction(), CashFlowType.PRICE)
+                    .map(value -> value.multiply(getOpenAmountMultiplier(closedPosition)))
+                    .orElse(null);
+            BigDecimal closePrice = getTransactionValue(closedPosition.getCloseTransaction(), CashFlowType.PRICE)
+                    .map(value -> value.multiply(getClosedAmountMultiplier(closedPosition)))
+                    // redemption closing price will be taken into account later
+                    .orElseGet(() -> (closedPosition.getClosingEvent() == CashFlowType.REDEMPTION) ? BigDecimal.ZERO : null);
+            if (openPrice != null && closePrice != null) {
+                // если ценная бумага не вводилась и не выводилась со счета, а была куплена и продана
+                // (есть цены покупки и продажи)
+                purchaseCost = purchaseCost.add(openPrice).add(closePrice);
+            }
+        }
+        return positions.getRedemptions()
+                .stream()
+                .map(SecurityEventCashFlow::getValue)
+                .map(BigDecimal::abs)
+                .reduce(purchaseCost, BigDecimal::add);
     }
 
     /**
@@ -220,6 +248,9 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     }
 
     private Optional<BigDecimal> getTransactionValue(Transaction t, CashFlowType type) {
+        if (t.getId() == null) { // redemption
+            return Optional.empty();
+        }
         return transactionCashFlowRepository
                 .findByPkPortfolioAndPkTransactionIdAndPkType(t.getPortfolio(), t.getId(), type.getId())
                 .map(TransactionCashFlowEntity::getValue);
@@ -232,5 +263,27 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 .stream()
                 .map(SecurityEventCashFlowEntity::getValue)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal getOpenAmountMultiplier(OpenedPosition openedPosition) {
+        int positionCount = Math.abs(openedPosition.getCount());
+        int transactionCount = Math.abs(openedPosition.getOpenTransaction().getCount());
+        if (positionCount == transactionCount) {
+            return BigDecimal.ONE;
+        } else {
+            return BigDecimal.valueOf(positionCount)
+                    .divide(BigDecimal.valueOf(transactionCount), 6, RoundingMode.HALF_UP);
+        }
+    }
+
+    private BigDecimal getClosedAmountMultiplier(ClosedPosition closedPosition) {
+        int positionCount = Math.abs(closedPosition.getCount());
+        int transactionCount = Math.abs(closedPosition.getCloseTransaction().getCount());
+        if (positionCount == transactionCount) {
+            return BigDecimal.ONE;
+        } else {
+            return BigDecimal.valueOf(positionCount)
+                    .divide(BigDecimal.valueOf(transactionCount), 6, RoundingMode.HALF_UP);
+        }
     }
 }

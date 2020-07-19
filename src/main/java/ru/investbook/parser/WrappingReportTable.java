@@ -20,6 +20,7 @@ package ru.investbook.parser;
 
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,5 +33,14 @@ public class WrappingReportTable<RowType> implements ReportTable<RowType> {
     public WrappingReportTable(BrokerReport report, List<RowType> data) {
         this.report = report;
         this.data = Collections.unmodifiableList(data);
+    }
+
+    public WrappingReportTable(BrokerReport report, ReportTable<RowType>... tables) {
+        List<RowType> data = new ArrayList<>();
+        for (ReportTable<RowType> table : tables) {
+            data.addAll(table.getData());
+        }
+        this.report = report;
+        this.data = data;
     }
 }

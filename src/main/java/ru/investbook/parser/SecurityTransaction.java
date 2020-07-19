@@ -59,13 +59,15 @@ public class SecurityTransaction {
 
     public List<TransactionCashFlow> getTransactionCashFlows() {
         List<TransactionCashFlow> list = new ArrayList<>(3);
-        list.add(TransactionCashFlow.builder()
-                .transactionId(transactionId)
-                .portfolio(portfolio)
-                .eventType(CashFlowType.PRICE)
-                .value(value)
-                .currency(valueCurrency)
-                .build());
+        if (value.abs().compareTo(minValue) >= 0) {
+            list.add(TransactionCashFlow.builder()
+                    .transactionId(transactionId)
+                    .portfolio(portfolio)
+                    .eventType(CashFlowType.PRICE)
+                    .value(value)
+                    .currency(valueCurrency)
+                    .build());
+        }
         if (accruedInterest.abs().compareTo(minValue) >= 0) { // for securities accrued interest = 0
             list.add(TransactionCashFlow.builder()
                     .transactionId(transactionId)

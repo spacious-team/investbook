@@ -21,6 +21,8 @@ package ru.investbook.parser.uralsib;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import ru.investbook.parser.ExcelTable;
+import ru.investbook.parser.ReportTable;
+import ru.investbook.parser.SecurityTransaction;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.Security;
 import ru.investbook.pojo.SecurityEventCashFlow;
@@ -44,7 +46,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable<SecurityEve
 
     public CouponAmortizationRedemptionTable(UralsibBrokerReport report,
                                              PortfolioSecuritiesTable securitiesTable,
-                                             SecurityTransactionTable securityTransactionTable) {
+                                             ReportTable<SecurityTransaction> securityTransactionTable) {
         super(report, securitiesTable, securityTransactionTable);
         this.redemptionDates = new SecurityRedemptionTable(report).getData();
     }
