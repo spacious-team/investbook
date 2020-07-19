@@ -31,6 +31,7 @@ public class ExcelView {
     private final StockMarketProfitExcelTableView stockMarketProfitExcelTableView;
     private final DerivativesMarketProfitExcelTableView derivativesMarketProfitExcelTableView;
     private final ForeignMarketProfitExcelTableView foreignMarketProfitExcelTableView;
+    private final SecuritiesDepositAndWithdrawalExcelTableView securitiesDepositAndWithdrawalExcelTableView;
     private final CashFlowExcelTableView cashFlowExcelTableView;
     private final TaxExcelTableView taxExcelTableView;
 
@@ -42,6 +43,7 @@ public class ExcelView {
         stockMarketProfitExcelTableView.writeTo(book, styles, portfolio -> portfolio + " (фондовый)");
         derivativesMarketProfitExcelTableView.writeTo(book, styles, portfolio -> portfolio + " (срочный)");
         foreignMarketProfitExcelTableView.writeTo(book, styles, portfolio -> portfolio + " (валюта)");
+        securitiesDepositAndWithdrawalExcelTableView.writeTo(book, styles, portfolio -> portfolio + " (ввод-вывод цб)");
         cashFlowExcelTableView.writeTo(book, styles, portfolio -> "Доходность (" + portfolio + ")");
         taxExcelTableView.writeTo(book, styles, portfolio -> "Налог (" + portfolio + ")");
         if (book.getNumberOfSheets() == 0) {

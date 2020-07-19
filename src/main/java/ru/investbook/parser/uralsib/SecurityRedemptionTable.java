@@ -29,17 +29,17 @@ import java.util.Map;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static ru.investbook.parser.uralsib.SecurityRedemptionTable.SecurityRedemptionTableHeader.*;
+import static ru.investbook.parser.uralsib.SecurityRedemptionTable.SecurityFlowTableHeader.*;
 
 /**
  * Builds list of (security name; redemption date) tuples
  */
 public class SecurityRedemptionTable extends AbstractReportTable<Map.Entry<String, Instant>> {
-    private static final String TABLE_NAME = "ДВИЖЕНИЕ ЦЕННЫХ БУМАГ ЗА ОТЧЕТНЫЙ ПЕРИОД";
+    static final String TABLE_NAME = "ДВИЖЕНИЕ ЦЕННЫХ БУМАГ ЗА ОТЧЕТНЫЙ ПЕРИОД";
     private static final String REDEMPTION_DESCRIPTION = "Списание ЦБ после погашения";
 
     public SecurityRedemptionTable(UralsibBrokerReport report) {
-        super(report, TABLE_NAME, "", SecurityRedemptionTableHeader.class);
+        super(report, TABLE_NAME, "", SecurityFlowTableHeader.class);
     }
 
     @Override
@@ -51,15 +51,18 @@ public class SecurityRedemptionTable extends AbstractReportTable<Map.Entry<Strin
                 emptyList();
     }
 
-    enum SecurityRedemptionTableHeader implements TableColumnDescription {
+    enum SecurityFlowTableHeader implements TableColumnDescription {
+        ID("№", "операции"),
         OPERATION("тип операции"),
         DATE("дата"),
-        NAME("наименование");
+        NAME("наименование"),
+        CFI("номер гос. регистрации"),
+        COUNT("количество цб");
 
         @Getter
         private final TableColumn column;
 
-        SecurityRedemptionTableHeader(String... words) {
+        SecurityFlowTableHeader(String... words) {
             this.column = TableColumnImpl.of(words);
         }
     }

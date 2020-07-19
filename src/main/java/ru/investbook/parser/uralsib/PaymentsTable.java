@@ -48,7 +48,7 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
 
     public PaymentsTable(UralsibBrokerReport report,
                          PortfolioSecuritiesTable securitiesTable,
-                         SecurityTransactionTable securityTransactionTable) {
+                         ReportTable<SecurityTransaction> securityTransactionTable) {
         super(report, TABLE_NAME, "", PaymentsTableHeader.class);
         this.securitiesIncomingCount = securitiesTable.getData();
         this.securityTransactions = securityTransactionTable.getData();

@@ -114,9 +114,17 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         Transaction transaction = position.getOpenTransaction();
         row.put(OPEN_DATE, transaction.getTimestamp());
         row.put(COUNT, Math.abs(position.getCount()) * Integer.signum(transaction.getCount()));
-        row.put(OPEN_PRICE, getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount()));
+        BigDecimal openPrice = getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount());
+        if (openPrice == null && (position instanceof ClosedPosition)) {
+            // ЦБ введены, а не куплены, принимаем цену покупки = цене продажи, чтобы не было финфнсового результата
+            Transaction closeTransaction = ((ClosedPosition) position).getCloseTransaction();
+            openPrice = getTransactionCashFlow(closeTransaction, CashFlowType.PRICE, 1d / closeTransaction.getCount());
+        }
+        row.put(OPEN_PRICE, openPrice);
+        if (openPrice != null) {
+            row.put(OPEN_AMOUNT, openPrice.multiply(BigDecimal.valueOf(position.getCount())));
+        }
         double multiplier = Math.abs(1d * position.getCount() / transaction.getCount());
-        row.put(OPEN_AMOUNT, getTransactionCashFlow(transaction, CashFlowType.PRICE, multiplier));
         row.put(OPEN_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier));
         row.put(OPEN_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multiplier));
         return row;
@@ -140,6 +148,10 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             default:
                 throw new IllegalArgumentException("ЦБ " + transaction.getIsin() +
                         " не может быть закрыта событием типа " + position.getClosingEvent());
+        }
+        if (closeAmount == null) {
+            // ЦБ выведены со счета, а не прданы, принимаем цену продажи = цене покупки, чтобы не было фин. результата
+            closeAmount = getTransactionCashFlow(position.getOpenTransaction(), CashFlowType.PRICE, multiplier);
         }
         row.put(CLOSE_AMOUNT, closeAmount);
         row.put(CLOSE_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier));

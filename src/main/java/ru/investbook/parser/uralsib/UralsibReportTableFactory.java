@@ -35,7 +35,7 @@ public class UralsibReportTableFactory implements ReportTableFactory {
     private final UralsibBrokerReport report;
     private final PortfolioSecuritiesTable portfolioSecuritiesTable;
     @Getter
-    private final SecurityTransactionTable securityTransactionTable;
+    private final ReportTable<SecurityTransaction> securityTransactionTable;
     @Getter
     private final PortfolioPropertyTable portfolioPropertyTable;
     @Getter
@@ -47,7 +47,9 @@ public class UralsibReportTableFactory implements ReportTableFactory {
         this.report = report;
         this.portfolioPropertyTable = new PortfolioPropertyTable(report, foreignExchangeRateService);
         this.portfolioSecuritiesTable = new PortfolioSecuritiesTable(report);
-        this.securityTransactionTable = new SecurityTransactionTable(report, portfolioPropertyTable);
+        this.securityTransactionTable = new WrappingReportTable<>(report,
+                new SecurityTransactionTable(report, portfolioPropertyTable),
+                new SecurityDepositAndWithdrawalTable(report, portfolioSecuritiesTable));
         this.couponAmortizationRedemptionTable =
                 new CouponAmortizationRedemptionTable(report, portfolioSecuritiesTable, securityTransactionTable);
         this.dividendTable = new DividendTable(report, portfolioSecuritiesTable, securityTransactionTable);
