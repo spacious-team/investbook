@@ -130,7 +130,10 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         row.put(CELL_COUNT, Optional.ofNullable(
                 transactionRepository.findBySecurityIsinAndPkPortfolioCellCount(security, portfolio))
                 .orElse(0L) +
-                positions.getRedemptions().size());
+                positions.getRedemptions()
+                        .stream()
+                        .mapToInt(SecurityEventCashFlow::getCount)
+                        .sum());
         int count = getCount(positions);
         row.put(COUNT, count);
         if (count == 0) {
