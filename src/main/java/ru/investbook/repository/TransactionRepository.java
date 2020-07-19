@@ -147,4 +147,10 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "AND count < 0")
     Long findBySecurityIsinAndPkPortfolioCellCount(@Param("security") Security security,
                                                    @Param("portfolio") Portfolio portfolio);
+
+    @Query("SELECT t FROM TransactionEntity t " +
+            "LEFT OUTER JOIN TransactionCashFlowEntity c " +
+            "ON t.pk.id = c.pk.transactionId AND t.pk.portfolio = c.pk.portfolio AND c.pk.type = 1 " +
+            "WHERE c.pk.type IS NULL AND t.pk.portfolio = :#{#portfolio.id}")
+    Collection<TransactionEntity> findDepositAndWithdrawalTransactions(@Param("portfolio") Portfolio portfolio);
 }
