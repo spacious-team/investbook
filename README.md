@@ -16,9 +16,9 @@
   на срочном рынке и усредненной цены покупки валюты);  
   ![portfolio](https://user-images.githubusercontent.com/11336712/85202150-04851a00-b30d-11ea-90b2-df266df956fe.png)
 - детализация дивидендных, купонных и амортизационных выплат;  
-  ![portfolio-payment](https://user-images.githubusercontent.com/11336712/85927924-e3df3600-b8b1-11ea-8eab-6634cb0805d0.png)
+  ![portfolio-payment](https://user-images.githubusercontent.com/11336712/87985795-def25880-cae4-11ea-9425-5cb5e70f76b9.png)
 - детализация дивидендных, купонных и амортизационных выплат, начисленные по акциям и облигациям со связанного счета ИИС;  
-  ![foreign-portfolio-payment](https://user-images.githubusercontent.com/11336712/84598929-e6379e00-ae76-11ea-9a9f-608780c0ff7e.png)
+  ![foreign-portfolio-payment](https://user-images.githubusercontent.com/11336712/87988115-7907d000-cae8-11ea-9ec7-d56a120aac89.png)
 - доходность сделок на фондовом рынке;  
   ![stock-market](https://user-images.githubusercontent.com/11336712/78156498-8de02b00-7447-11ea-833c-cfc755bd7558.png)
 - доходность сделок на срочном рынке;  
