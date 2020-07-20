@@ -52,7 +52,7 @@ public class ForeignPortfolioPaymentTableView extends ExcelTableView {
         total.put(DATE, "Итого:");
         total.put(CASH_RUB, "=SUM(" +
                 CASH_RUB.getColumnIndex() + "3:" +
-                CASH_RUB.getColumnIndex() + "100000)");
+                CASH_RUB.getColumnIndex() + "100000)/2");
         return total;
     }
 

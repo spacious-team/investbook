@@ -77,18 +77,19 @@ public abstract class ExcelTableView {
     protected void writeTable(Table table,
                               Sheet sheet,
                               CellStyles styles) {
-        if (table.isEmpty()) return;
+        if (table == null || table.isEmpty()) return;
         Class<? extends TableHeader> headerType = getHeaderType(table);
+        if (headerType == null) return;
         writeHeader(sheet, headerType, styles.getHeaderStyle());
         Table.Record totalRow = getTotalRow();
         if (totalRow != null && !totalRow.isEmpty()) {
             table.addFirst(totalRow);
         }
         int rowNum = 0;
-        for (Map<? extends TableHeader, Object> transactionProfit : table) {
+        for (Map<? extends TableHeader, Object> tableRow : table) {
             Row row = sheet.createRow(++rowNum);
             for (TableHeader header : headerType.getEnumConstants()) {
-                Object value = transactionProfit.get(header);
+                Object value = tableRow.get(header);
                 if (value == null) {
                     continue;
                 }
