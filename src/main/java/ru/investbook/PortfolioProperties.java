@@ -34,4 +34,5 @@ public class PortfolioProperties {
 
     private Path reportBackupPath = Paths.get(System.getProperty("user.home", ""), "investbook", "report-backups");
 
+    private boolean openHomePageAfterStart = false;
 }

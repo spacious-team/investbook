@@ -18,14 +18,29 @@
 
 package ru.investbook;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
 @SpringBootApplication
+@Component
+@RequiredArgsConstructor
 public class InvestbookApplication {
+
+    private final PortfolioProperties properties;
 
     public static void main(String[] args) {
         SpringApplication.run(InvestbookApplication.class, args);
     }
 
+    @EventListener
+    public void onApplicationEvent(ServletWebServerInitializedEvent event) {
+        if (properties.isOpenHomePageAfterStart()) {
+            int port = event.getWebServer().getPort();
+            BrowserHomePageOpener.open("http://localhost:" + port);
+        }
+    }
 }
