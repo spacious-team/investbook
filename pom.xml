@@ -10,7 +10,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2020.8-SNAPSHOT</version>
+    <version>2020.8</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -186,7 +186,7 @@
                             <type>MSI</type>
                             <name>Investbook</name>
                             <appVersion>${win.msi.version}</appVersion>
-                            <vendor>${project.groupId}</vendor>
+                            <vendor>Spacious Team</vendor>
                             <description>${project.description}</description>
                             <copyright>InvestBook, Copyright (C) 2020 Spacious Team (https://github.com/spacious-team)</copyright>
                             <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
