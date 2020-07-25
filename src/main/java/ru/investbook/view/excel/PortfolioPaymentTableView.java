@@ -42,14 +42,15 @@ public class PortfolioPaymentTableView extends ExcelTableView {
     @Override
     protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
+        sheet.setColumnWidth(SECURITY.ordinal(), 45 * 256);
         sheet.setColumnWidth(CASH_RUB.ordinal(), 18 * 256);
-        sheet.setColumnWidth(DESCRIPTION.ordinal(), 120 * 256);
+        sheet.setColumnWidth(PAYMENT_TYPE.ordinal(), 23 * 256);
     }
 
     @Override
     protected Table.Record getTotalRow() {
         Table.Record total = Table.newRecord();
-        total.put(DATE, "Итого:");
+        total.put(SECURITY, "Итого:");
         total.put(COUNT, "=SUM(" +
                 COUNT.getColumnIndex() + "3:" +
                 COUNT.getColumnIndex() + "100000)");
@@ -64,14 +65,18 @@ public class PortfolioPaymentTableView extends ExcelTableView {
         super.sheetPostCreate(sheet, styles);
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue;
-            Cell cell = row.getCell(DESCRIPTION.ordinal());
+            Cell cell = row.getCell(SECURITY.ordinal());
+            if (cell != null) {
+                cell.setCellStyle(styles.getLeftAlignedTextStyle());
+            }
+            cell = row.getCell(PAYMENT_TYPE.ordinal());
             if (cell != null) {
                 cell.setCellStyle(styles.getLeftAlignedTextStyle());
             }
         }
         for (Cell cell : sheet.getRow(1)) {
             if (cell == null) continue;
-            if (cell.getColumnIndex() == DATE.ordinal()) {
+            if (cell.getColumnIndex() == SECURITY.ordinal()) {
                 cell.setCellStyle(styles.getTotalTextStyle());
             } else if (cell.getColumnIndex() == COUNT.ordinal()) {
                 cell.setCellStyle(styles.getIntStyle());

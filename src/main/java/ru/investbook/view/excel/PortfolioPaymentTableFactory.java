@@ -102,7 +102,8 @@ public class PortfolioPaymentTableFactory implements TableFactory {
                 record.put(CURRENCY, cash.getCurrency());
                 record.put(CASH_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash.getCurrency(),
                         PortfolioPaymentTableHeader.CASH, EXCHANGE_RATE));
-                record.put(DESCRIPTION, getDescription(cash));
+                record.put(PAYMENT_TYPE, getPaymentType(cash));
+                record.put(SECURITY, getSecurityName(cash));
                 table.add(record);
                 sumRowCount++;
             }
@@ -116,34 +117,25 @@ public class PortfolioPaymentTableFactory implements TableFactory {
 
     private void calcTotalRecord(Table.Record monthTotalRecord, Month month, int sumRowCount) {
         if (sumRowCount != 0) {
-            monthTotalRecord.put(DATE, StringUtils.capitalize(month.getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault())));
+            monthTotalRecord.put(SECURITY, StringUtils.capitalize(month.getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault())));
             monthTotalRecord.put(CASH_RUB, "=SUM(OFFSET(" + CASH_RUB.getCellAddr() + ",1,0," + sumRowCount + ",1))");
         }
     }
 
-    private String getDescription(SecurityEventCashFlow cash) {
-        String paymentType = "Выплата";
-        switch (cash.getEventType()) {
-            case DIVIDEND:
-                paymentType = "Дивиденды";
-                break;
-            case COUPON:
-                paymentType = "Купоны";
-                break;
-            case REDEMPTION:
-                paymentType = "Погашение облигации";
-                break;
-            case AMORTIZATION:
-                paymentType = "Амортизация облигаци";
-                break;
-            case TAX:
-                paymentType = "Удержание налога c выплаты";
-                break;
-        }
-        String security = securityRepository.findByIsin(cash.getIsin())
+    private static String getPaymentType(SecurityEventCashFlow cash) {
+        return switch (cash.getEventType()) {
+            case DIVIDEND -> "Дивиденды";
+            case COUPON -> "Купоны";
+            case REDEMPTION -> "Погашение облигации";
+            case AMORTIZATION -> "Амортизация облигаци";
+            case TAX -> "Удержание налога";
+            default -> null;
+        };
+    }
+
+    private String getSecurityName(SecurityEventCashFlow cash) {
+       return securityRepository.findByIsin(cash.getIsin())
                 .map(SecurityEntity::getName)
-                .map(name -> name + " (" + cash.getIsin() + ")")
                 .orElse(cash.getIsin());
-        return paymentType + " по " + security;
     }
 }
