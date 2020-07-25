@@ -21,6 +21,7 @@ package ru.investbook.view;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.pojo.CashFlowType;
@@ -137,12 +138,10 @@ public class PaidInterestFactory {
         BigDecimal payPerOne = cash.getValue().divide(BigDecimal.valueOf(cash.getCount()), 6, RoundingMode.HALF_UP);
         for (Position position : paidPositions) {
             int count = position.getCount();
-            if (count <= 0) {
-                throw new IllegalArgumentException("Internal error: payment could not be done for short position");
-            }
+            Assert.isTrue(count > 0, "Internal error: payment could not be done for short position");
             BigDecimal pay = payPerOne
                     .multiply(BigDecimal.valueOf(count))
-                    .setScale(2, RoundingMode.DOWN);
+                    .setScale(6, RoundingMode.HALF_UP);
             payments.computeIfAbsent(position, key -> new ArrayList<>())
                     .add(cash.toBuilder()
                             .count(count)
