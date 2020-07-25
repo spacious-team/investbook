@@ -122,7 +122,7 @@ public abstract class ExcelTableView {
                 }
             }
         }
-        sheetPostCreate(sheet, styles);
+        sheetPostCreate(sheet, headerType, styles);
     }
 
     private Class<? extends TableHeader> getHeaderType(Table table) {
@@ -146,14 +146,14 @@ public abstract class ExcelTableView {
             sheet.setColumnWidth(header.ordinal(), 14 * 256);
         }
         sheet.createFreezePane(0, 1);
-        sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, (headerType.getEnumConstants().length - 1)));
     }
 
     protected Table.Record getTotalRow() {
         return new Table.Record();
     }
 
-    protected void sheetPostCreate(Sheet sheet, CellStyles styles) {
+    protected void sheetPostCreate(Sheet sheet, Class<? extends TableHeader> headerType, CellStyles styles) {
         sheet.setZoom(93); // show all columns for 24 inch monitor for securities sheet
+        sheet.setAutoFilter(new CellRangeAddress(0, sheet.getLastRowNum(), 0, (headerType.getEnumConstants().length - 1)));
     }
 }
