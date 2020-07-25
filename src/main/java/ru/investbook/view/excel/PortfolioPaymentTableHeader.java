@@ -24,12 +24,13 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum PortfolioPaymentTableHeader implements ExcelTableHeader {
+    SECURITY("Бумага"),
     DATE("Дата"),
     COUNT("Количество бумаг"),
+    PAYMENT_TYPE("Тип выплаты"),
     CASH("Сумма выплаты"),
     CURRENCY("Валюта"),
     CASH_RUB("Выплата, руб"),
-    DESCRIPTION("Описание"),
     CURRENCY_NAME("Валюта"),
     EXCHANGE_RATE("Курс, руб");
 
