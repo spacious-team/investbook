@@ -77,18 +77,19 @@ public abstract class ExcelTableView {
     protected void writeTable(Table table,
                               Sheet sheet,
                               CellStyles styles) {
-        if (table.isEmpty()) return;
+        if (table == null || table.isEmpty()) return;
         Class<? extends TableHeader> headerType = getHeaderType(table);
+        if (headerType == null) return;
         writeHeader(sheet, headerType, styles.getHeaderStyle());
         Table.Record totalRow = getTotalRow();
         if (totalRow != null && !totalRow.isEmpty()) {
             table.addFirst(totalRow);
         }
         int rowNum = 0;
-        for (Map<? extends TableHeader, Object> transactionProfit : table) {
+        for (Map<? extends TableHeader, Object> tableRow : table) {
             Row row = sheet.createRow(++rowNum);
             for (TableHeader header : headerType.getEnumConstants()) {
-                Object value = transactionProfit.get(header);
+                Object value = tableRow.get(header);
                 if (value == null) {
                     continue;
                 }
@@ -121,7 +122,7 @@ public abstract class ExcelTableView {
                 }
             }
         }
-        sheetPostCreate(sheet, styles);
+        sheetPostCreate(sheet, headerType, styles);
     }
 
     private Class<? extends TableHeader> getHeaderType(Table table) {
@@ -145,14 +146,14 @@ public abstract class ExcelTableView {
             sheet.setColumnWidth(header.ordinal(), 14 * 256);
         }
         sheet.createFreezePane(0, 1);
-        sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, (headerType.getEnumConstants().length - 1)));
     }
 
     protected Table.Record getTotalRow() {
         return new Table.Record();
     }
 
-    protected void sheetPostCreate(Sheet sheet, CellStyles styles) {
+    protected void sheetPostCreate(Sheet sheet, Class<? extends TableHeader> headerType, CellStyles styles) {
         sheet.setZoom(93); // show all columns for 24 inch monitor for securities sheet
+        sheet.setAutoFilter(new CellRangeAddress(0, sheet.getLastRowNum(), 0, (headerType.getEnumConstants().length - 1)));
     }
 }

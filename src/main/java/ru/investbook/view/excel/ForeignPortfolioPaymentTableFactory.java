@@ -21,6 +21,7 @@ package ru.investbook.view.excel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.EventCashFlow;
@@ -29,8 +30,14 @@ import ru.investbook.repository.EventCashFlowRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,19 +74,47 @@ public class ForeignPortfolioPaymentTableFactory implements TableFactory {
 
     private Table getTable(List<EventCashFlow> cashFlows) {
         Table table = new Table();
-        for (EventCashFlow cash : cashFlows) {
-            Table.Record record = new Table.Record();
-            record.put(DATE, cash.getTimestamp());
-            record.put(ForeignPortfolioPaymentTableHeader.CASH, cash.getValue());
-            record.put(CURRENCY, cash.getCurrency());
-            record.put(CASH_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash.getCurrency(),
-                    ForeignPortfolioPaymentTableHeader.CASH, EXCHANGE_RATE));
-            record.put(DESCRIPTION, cash.getDescription());
-            table.add(record);
-        }
         if (!cashFlows.isEmpty()) {
-            foreignExchangeRateTableFactory.appendExchangeRates(table, CURRENCY_NAME, EXCHANGE_RATE);
+            table.add(new Table.Record());
+            Table.Record monthTotalRecord = new Table.Record();
+            table.add(monthTotalRecord);
+            Month month = null;
+            int sumRowCount = 0;
+            for (EventCashFlow cash : cashFlows) {
+                Instant timestamp = cash.getTimestamp();
+                Month currentMonth = LocalDate.ofInstant(timestamp, ZoneId.systemDefault()).getMonth();
+                if (month == null) {
+                    month = currentMonth;
+                } else if (currentMonth != month) {
+                    calcTotalRecord(monthTotalRecord, month, sumRowCount);
+                    table.add(new Table.Record());
+                    monthTotalRecord = new Table.Record();
+                    table.add(monthTotalRecord);
+                    month = currentMonth;
+                    sumRowCount = 0;
+                }
+                Table.Record record = new Table.Record();
+                record.put(DATE, timestamp);
+                record.put(ForeignPortfolioPaymentTableHeader.CASH, cash.getValue());
+                record.put(CURRENCY, cash.getCurrency());
+                record.put(CASH_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash.getCurrency(),
+                        ForeignPortfolioPaymentTableHeader.CASH, EXCHANGE_RATE));
+                record.put(DESCRIPTION, cash.getDescription());
+                table.add(record);
+                sumRowCount++;
+            }
+            calcTotalRecord(monthTotalRecord, month, sumRowCount);
+            if (!cashFlows.isEmpty()) {
+                foreignExchangeRateTableFactory.appendExchangeRates(table, CURRENCY_NAME, EXCHANGE_RATE);
+            }
         }
         return table;
+    }
+
+    private void calcTotalRecord(Table.Record monthTotalRecord, Month month, int sumRowCount) {
+        if (sumRowCount != 0) {
+            monthTotalRecord.put(DATE, StringUtils.capitalize(month.getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault())));
+            monthTotalRecord.put(CASH_RUB, "=SUM(OFFSET(" + CASH_RUB.getCellAddr() + ",1,0," + sumRowCount + ",1))");
+        }
     }
 }

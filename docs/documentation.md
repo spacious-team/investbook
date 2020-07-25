@@ -6,5 +6,6 @@
 1. [Настройка](configuration.md)
 1. [Смена СУБД](dbms-changing.md)
 1. [Как внести свой вклад](CONTRIBUTING.md)
+1. [Документация разработчика](developer-guide.md)
 
 

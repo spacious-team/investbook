@@ -91,8 +91,8 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected void sheetPostCreate(Sheet sheet, CellStyles styles) {
-        super.sheetPostCreate(sheet, styles);
+    protected void sheetPostCreate(Sheet sheet, Class<? extends TableHeader> headerType, CellStyles styles) {
+        super.sheetPostCreate(sheet, headerType, styles);
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue;
             Cell cell = row.getCell(SECURITY.ordinal());

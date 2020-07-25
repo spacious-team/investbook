@@ -52,13 +52,13 @@ public class ForeignPortfolioPaymentTableView extends ExcelTableView {
         total.put(DATE, "Итого:");
         total.put(CASH_RUB, "=SUM(" +
                 CASH_RUB.getColumnIndex() + "3:" +
-                CASH_RUB.getColumnIndex() + "100000)");
+                CASH_RUB.getColumnIndex() + "100000)/2");
         return total;
     }
 
     @Override
-    protected void sheetPostCreate(Sheet sheet, CellStyles styles) {
-        super.sheetPostCreate(sheet, styles);
+    protected void sheetPostCreate(Sheet sheet, Class<? extends TableHeader> headerType, CellStyles styles) {
+        super.sheetPostCreate(sheet, headerType, styles);
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue;
             Cell cell = row.getCell(DESCRIPTION.ordinal());
