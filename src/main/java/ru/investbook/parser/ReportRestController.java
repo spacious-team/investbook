@@ -106,7 +106,7 @@ public class ReportRestController {
                             }).collect(Collectors.joining("</br></br> - ",
                                     "<b>Ошибка загрузки отчетов</b> <a href=\"/\">[назад]</a><br/>" +
                                     "<span style=\"font-size: smaller; color: gray;\">Вы можете " +
-                                    "<a href=\"https://github.com/vananiev/portfolio/issues\">сообщить</a> об ошибке " +
+                                    "<a href=\"https://github.com/spacious-team/investbook/issues\">сообщить</a> об ошибке " +
                                     "разработчикам</span></br></br> - ",
                                     "")));
         }

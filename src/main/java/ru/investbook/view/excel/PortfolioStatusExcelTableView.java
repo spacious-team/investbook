@@ -67,9 +67,11 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         for (TableHeader header : headerType.getEnumConstants()) {
-            sheet.setColumnWidth(header.ordinal(), 16 * 256);
+            sheet.setColumnWidth(header.ordinal(), 15 * 256);
         }
         sheet.setColumnWidth(SECURITY.ordinal(), 45 * 256);
+        sheet.setColumnWidth(COMMISSION.ordinal(), 12 * 256);
+        sheet.setColumnWidth(AMORTIZATION.ordinal(), 16 * 256);
         sheet.setColumnWidth(TAX.ordinal(), 19 * 256);
     }
 
@@ -98,9 +100,12 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         super.sheetPostCreate(sheet, headerType, styles);
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue;
-            Cell cell = row.getCell(SECURITY.ordinal());
-            if (cell != null) {
+            Cell cell;
+            if ((cell = row.getCell(SECURITY.ordinal())) != null) {
                 cell.setCellStyle(styles.getLeftAlignedTextStyle());
+            }
+            if ((cell = row.getCell(PROPORTION.ordinal())) != null) {
+                cell.setCellStyle(styles.getPercentStyle());
             }
         }
         for (Cell cell : sheet.getRow(1)) {
@@ -111,8 +116,10 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
                 cell.setCellStyle(styles.getIntStyle());
             } else if (cell.getColumnIndex() == CELL_COUNT.ordinal()){
                 cell.setCellStyle(styles.getIntStyle());
-            } else if (cell.getColumnIndex() == COUNT.ordinal()){
+            } else if (cell.getColumnIndex() == COUNT.ordinal()) {
                 cell.setCellStyle(styles.getIntStyle());
+            } else if (cell.getColumnIndex() == PROPORTION.ordinal()) {
+                cell.setCellStyle(styles.getPercentStyle());
             } else {
                 cell.setCellStyle(styles.getTotalRowStyle());
             }
