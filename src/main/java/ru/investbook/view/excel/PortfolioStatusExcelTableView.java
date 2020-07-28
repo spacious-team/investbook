@@ -18,10 +18,13 @@
 
 package ru.investbook.view.excel;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xddf.usermodel.chart.*;
+import org.apache.poi.xssf.usermodel.XSSFChart;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
@@ -38,6 +41,7 @@ import java.util.function.UnaryOperator;
 import static ru.investbook.view.excel.PortfolioStatusExcelTableHeader.*;
 
 @Component
+@Slf4j
 public class PortfolioStatusExcelTableView extends ExcelTableView {
 
     private final TransactionCashFlowRepository transactionCashFlowRepository;
@@ -123,6 +127,38 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
             } else {
                 cell.setCellStyle(styles.getTotalRowStyle());
             }
+        }
+        addPieChart(sheet);
+    }
+
+    private void addPieChart(Sheet _sheet) {
+        try {
+            int chartHeight = 36;
+            XSSFSheet sheet = (XSSFSheet) _sheet;
+            int rowCount = sheet.getLastRowNum();
+            XSSFDrawing drawing = sheet.createDrawingPatriarch();
+            ClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0,
+                    0, rowCount + 2, PROPORTION.ordinal() + 1, rowCount + 2 + chartHeight);
+
+            XSSFChart chart = drawing.createChart(anchor);
+            chart.setTitleText("Состав портфеля");
+            chart.setTitleOverlay(false);
+            XDDFChartLegend legend = chart.getOrAddLegend();
+            legend.setPosition(LegendPosition.BOTTOM);
+
+            XDDFDataSource<String> securities = XDDFDataSourcesFactory.fromStringCellRange(sheet,
+                    new CellRangeAddress(2, rowCount, SECURITY.ordinal(), SECURITY.ordinal()));
+            XDDFNumericalDataSource<Double> proportions = XDDFDataSourcesFactory.fromNumericCellRange(sheet,
+                    new CellRangeAddress(2, rowCount, PROPORTION.ordinal(), PROPORTION.ordinal()));
+
+            XDDFChartData data = chart.createData(ChartTypes.PIE, null, null);
+            data.setVaryColors(true);
+            data.addSeries(securities, proportions);
+            chart.plot(data);
+        } catch (Exception e) {
+            String message = "Не могу построить график на вкладке '{}', возможно закрыты все позиции";
+            log.info(message, _sheet.getSheetName());
+            log.debug(message, _sheet.getSheetName(), e);
         }
     }
 }
