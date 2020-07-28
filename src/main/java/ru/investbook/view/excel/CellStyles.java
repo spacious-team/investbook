@@ -33,6 +33,7 @@ public class CellStyles {
     private final CellStyle dateStyle;
     private final CellStyle moneyStyle;
     private final CellStyle intStyle;
+    private final CellStyle percentStyle;
 
     public CellStyles(XSSFWorkbook book) {
         this.defaultStyle = createDefaultStyle(book);
@@ -43,6 +44,7 @@ public class CellStyles {
         this.dateStyle = createDateStyle(book);
         this.moneyStyle = createMoneyStyle(book);
         this.intStyle = createIntegerStyle(book);
+        this.percentStyle = createPercentStyle(book);
     }
 
     protected static XSSFCellStyle createHeaderStyle(XSSFWorkbook book) {
@@ -87,6 +89,13 @@ public class CellStyles {
         XSSFCellStyle style = createDefaultStyle(book);
         CreationHelper createHelper = book.getCreationHelper();
         style.setDataFormat(createHelper.createDataFormat().getFormat("_-* # ### ##0.00_р_._-;-* # ### ##0.00_р_._-;_-* \"-\"??_р_._-;_-@_-"));
+        return style;
+    }
+
+    protected static XSSFCellStyle createPercentStyle(XSSFWorkbook book) {
+        XSSFCellStyle style = createDefaultStyle(book);
+        CreationHelper createHelper = book.getCreationHelper();
+        style.setDataFormat(createHelper.createDataFormat().getFormat("0.0%"));
         return style;
     }
 

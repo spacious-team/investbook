@@ -186,21 +186,13 @@ public class ExcelTableHelper {
     }
 
     private static boolean compare(Object value, Cell cell, BiPredicate<String, Object> stringPredicate) {
-        switch (cell.getCellType()) {
-            case BLANK:
-                if (value == null || value.equals("")) return true;
-                return false;
-            case STRING:
-                if (stringPredicate.test(cell.getStringCellValue(), value)) return true;
-                return false;
-            case NUMERIC:
-                if (value instanceof Number && cell.getNumericCellValue() == ((Number) value).doubleValue()) return true;
-                return false;
-            case BOOLEAN:
-                if (value.equals(cell.getBooleanCellValue())) return true;
-                return false;
-        }
-        return false;
+        return switch (cell.getCellType()) {
+            case BLANK -> value == null || value.equals("");
+            case STRING -> stringPredicate.test(cell.getStringCellValue(), value);
+            case NUMERIC -> value instanceof Number && cell.getNumericCellValue() == ((Number) value).doubleValue();
+            case BOOLEAN -> value.equals(cell.getBooleanCellValue());
+            default -> false;
+        };
     }
 
     public static Cell getCell(Sheet sheet, CellAddress address) {
@@ -209,11 +201,10 @@ public class ExcelTableHelper {
 
     public static long getLongCellValue(Cell cell) {
         CellType type = cell.getCellType();
-        if (type == CellType.NUMERIC) {
-            return Double.valueOf(cell.getNumericCellValue()).longValue();
-        } else {
-            return Long.parseLong(cell.getStringCellValue());
-        }
+        return switch (type) {
+            case NUMERIC -> Double.valueOf(cell.getNumericCellValue()).longValue();
+            default -> Long.parseLong(cell.getStringCellValue());
+        };
     }
 
     public static BigDecimal getCurrencyCellValue(Cell cell) {

@@ -44,6 +44,7 @@ import static ru.investbook.view.excel.PortfolioStatusExcelTableHeader.*;
 @RequiredArgsConstructor
 @Slf4j
 public class PortfolioStatusExcelTableFactory implements TableFactory {
+    private static final String PROPORTION_FORMULA = getProportionFormula();
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
@@ -98,9 +99,10 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         Positions positions = positionsFactory.get(portfolio, security);
         PaidInterest paidInterest = paidInterestFactory.get(portfolio, security);
         Table.Record row = new Table.Record();
+        SecurityType securityType = getSecurityType(security);
         row.put(SECURITY,
                 Optional.ofNullable(security.getName())
-                        .orElse((getSecurityType(security) == SecurityType.CURRENCY_PAIR) ?
+                        .orElse((securityType == SecurityType.CURRENCY_PAIR) ?
                                 getCurrencyPair(security.getIsin()) :
                                 security.getIsin()));
         row.put(FIRST_TRNSACTION_DATE,
@@ -145,6 +147,9 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             row.put(AVERAGE_ACCRUED_INTEREST, getPurchaseAccruedInterest(security, positions)
                     .abs()
                     .divide(BigDecimal.valueOf(Math.max(1, Math.abs(count))), 2, RoundingMode.CEILING));
+            if (securityType == SecurityType.STOCK_OR_BOND || securityType == SecurityType.CURRENCY_PAIR) {
+                row.put(PROPORTION, PROPORTION_FORMULA);
+            }
         }
         row.put(COMMISSION, getTotal(positions.getTransactions(), CashFlowType.COMMISSION).abs());
         row.put(COUPON, paidInterest.sumPaymentsForType(CashFlowType.COUPON));
@@ -285,5 +290,16 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             return BigDecimal.valueOf(positionCount)
                     .divide(BigDecimal.valueOf(transactionCount), 6, RoundingMode.HALF_UP);
         }
+    }
+
+    private static String getProportionFormula() {
+        return "=((" + AVERAGE_PRICE.getCellAddr() + "+" + AVERAGE_ACCRUED_INTEREST.getCellAddr() + ")*" + COUNT.getCellAddr() +
+                "-" + AMORTIZATION.getCellAddr() + ")" +
+                "/(SUMPRODUCT(" + AVERAGE_PRICE.getColumnIndex() + "3:" + AVERAGE_PRICE.getColumnIndex() + "100000," +
+                COUNT.getColumnIndex() + "3:" + COUNT.getColumnIndex() + "100000)" +
+                "+SUMPRODUCT(" + AVERAGE_ACCRUED_INTEREST.getColumnIndex() + "3:" + AVERAGE_ACCRUED_INTEREST.getColumnIndex() + "100000," +
+                COUNT.getColumnIndex() + "3:" + COUNT.getColumnIndex() + "100000)" +
+                "-SUMIF(" + COUNT.getColumnIndex() + "3:" + COUNT.getColumnIndex() + "100000,\">0\"," +
+                AMORTIZATION.getColumnIndex() + "3:" + AMORTIZATION.getColumnIndex() + "100000))";
     }
 }

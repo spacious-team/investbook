@@ -39,7 +39,8 @@ public enum PortfolioStatusExcelTableHeader implements ExcelTableHeader {
     DIVIDEND("Дивиденды"),
     TAX("Налог (удержанный)"),
     GROSS_PROFIT("Курсовой доход"),
-    PROFIT("Прибыль");
+    PROFIT("Прибыль"),
+    PROPORTION("Доля, %");
 
     private final String description;
 }
