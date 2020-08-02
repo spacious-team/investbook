@@ -29,7 +29,7 @@ public class BrowserHomePageOpener {
 
     static void open(String url) {
         Logger log = LoggerFactory.getLogger(BrowserHomePageOpener.class);
-        log.info("Opening browser with home page \"{}\"", url);
+        log.info("Opening browser with home page \"{}\" ...", url);
         String os = System.getProperty("os.name").toLowerCase();
         Runtime rt = Runtime.getRuntime();
         try {
@@ -53,6 +53,7 @@ public class BrowserHomePageOpener {
                 }
                 rt.exec(new String[]{"sh", "-c", cmd.toString()});
             }
+            log.info("Home page \"{}\" opening try finished successfully", url);
         } catch (Exception e) {
             log.info("Can't open home page \"{}\" with browser", url, e);
         }
