@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent;
+import org.springframework.context.ApplicationContextException;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +34,14 @@ public class InvestbookApplication {
     private final PortfolioProperties properties;
 
     public static void main(String[] args) {
-        SpringApplication.run(InvestbookApplication.class, args);
+        try {
+            SpringApplication app = new SpringApplication(InvestbookApplication.class);
+            app.addListeners(new ApplicationFailedRunListener());
+            app.run(args);
+        } catch (ApplicationContextException e) {
+            // gh-81 do not show "Failed to launch JVM"
+            System.exit(0);
+        }
     }
 
     @EventListener
