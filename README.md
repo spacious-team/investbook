@@ -36,11 +36,11 @@
 - доходность сделок на валютном рынке;  
   ![foreighn-market](https://user-images.githubusercontent.com/11336712/84881751-fa59e600-b096-11ea-8b83-19d1c1229d73.png)
 - ввод и вывод ценных бумаг с/на другие счета;  
-  ![securities-deposit-withdrawal](https://user-images.githubusercontent.com/11336712/87883425-f3185600-ca0f-11ea-9677-4689aa6a4ee5.png)
+  <img src="https://user-images.githubusercontent.com/11336712/87883425-f3185600-ca0f-11ea-9677-4689aa6a4ee5.png" width="40%"/>
 - доходность портфеля, пополнения, списания, переводы с/на другие счета;  
-  ![cash-in](https://user-images.githubusercontent.com/11336712/78156505-8f115800-7447-11ea-8f6d-6a34c21dfc89.png)
+  ![cash-in](https://user-images.githubusercontent.com/11336712/90821058-fb2f2280-e33a-11ea-858d-8941a1eebd30.png)
 - налоговая нагрузка.  
-  ![tax](https://user-images.githubusercontent.com/11336712/78156502-8e78c180-7447-11ea-9259-445c85d75a65.png)
+  <img src="https://user-images.githubusercontent.com/11336712/90821578-ccfe1280-e33b-11ea-9e53-5362968d1dcf.png" width="55%"/>
 
 ### Установка
 Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest) установщик `.msi`
