@@ -21,9 +21,11 @@ package ru.investbook.view.excel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Value;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.pojo.Portfolio;
@@ -37,6 +39,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 
 import static ru.investbook.view.excel.StockMarketProfitExcelTableHeader.ROW_NUM_PLACE_HOLDER;
 
@@ -45,9 +48,12 @@ public abstract class ExcelTableView {
     protected final PortfolioRepository portfolioRepository;
     protected final TableFactory tableFactory;
     protected final PortfolioConverter portfolioConverter;
+    private final Pattern camelCaseWordBoundaryPattern = Pattern.compile("(?<=[a-z])(?=[A-Z][a-z])");
     @Getter
     @Setter
     private Portfolio portfolio;
+    @Value("${server.port}")
+    private int serverPort;
 
     public void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator) {
         for (PortfolioEntity entity : getPortfolios()) {
@@ -139,13 +145,30 @@ public abstract class ExcelTableView {
     protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         Row row = sheet.createRow(0);
         row.setHeight((short)-1);
+        CreationHelper createHelper = sheet.getWorkbook().getCreationHelper();
         for (TableHeader header : headerType.getEnumConstants()) {
             Cell cell = row.createCell(header.ordinal());
             cell.setCellValue(header.getDescription());
             cell.setCellStyle(style);
             sheet.setColumnWidth(header.ordinal(), 14 * 256);
+            Hyperlink link = getHyperlink(createHelper, header);
+            cell.setHyperlink(link);
         }
         sheet.createFreezePane(0, 1);
+    }
+
+    protected Hyperlink getHyperlink(CreationHelper createHelper, TableHeader header) {
+        Hyperlink link = createHelper.createHyperlink(HyperlinkType.URL);
+        String pageNameInCamelCase = this.getClass()
+                .getSimpleName()
+                .replace("ExcelTableView", "");
+        String pageName = camelCaseWordBoundaryPattern.matcher(pageNameInCamelCase)
+                .replaceAll("-")
+                .toLowerCase();
+        String fragmentId = header.toString().toLowerCase().replace("_", "-");
+        link.setAddress("http://localhost" + ((serverPort == 80) ? "" : (":" + serverPort)) +
+                "/user-guide/" + pageName + ".html#" + fragmentId);
+        return link;
     }
 
     protected Table.Record getTotalRow() {

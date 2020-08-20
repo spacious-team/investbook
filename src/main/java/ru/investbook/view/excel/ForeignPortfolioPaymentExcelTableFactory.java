@@ -22,13 +22,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import ru.investbook.converter.SecurityEventCashFlowConverter;
-import ru.investbook.entity.SecurityEntity;
+import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.pojo.CashFlowType;
+import ru.investbook.pojo.EventCashFlow;
 import ru.investbook.pojo.Portfolio;
-import ru.investbook.pojo.SecurityEventCashFlow;
-import ru.investbook.repository.SecurityEventCashFlowRepository;
-import ru.investbook.repository.SecurityRepository;
+import ru.investbook.repository.EventCashFlowRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;
 
@@ -44,37 +42,37 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ru.investbook.pojo.CashFlowType.*;
-import static ru.investbook.view.excel.PortfolioPaymentTableHeader.*;
+import static ru.investbook.view.excel.ForeignPortfolioPaymentExcelTableHeader.*;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class PortfolioPaymentTableFactory implements TableFactory {
-    private static final CashFlowType[] PAY_TYPES = new CashFlowType[]{AMORTIZATION, REDEMPTION, COUPON, DIVIDEND, TAX};
-    private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
-    private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
-    private final SecurityRepository securityRepository;
+public class ForeignPortfolioPaymentExcelTableFactory implements TableFactory {
+    /** tax accounted by {@link TaxExcelTableFactory} */
+    private static final CashFlowType[] PAY_TYPES = new CashFlowType[]{AMORTIZATION, REDEMPTION, COUPON, DIVIDEND};
+    private final EventCashFlowRepository eventCashFlowRepository;
+    private final EventCashFlowConverter eventCashFlowConverter;
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
 
     @Override
     public Table create(Portfolio portfolio) {
-        List<SecurityEventCashFlow> cashFlows = getCashFlows(portfolio);
+        List<EventCashFlow> cashFlows = getCashFlows(portfolio);
         return getTable(cashFlows);
     }
 
-    private ArrayList<SecurityEventCashFlow> getCashFlows(Portfolio portfolio) {
-        return securityEventCashFlowRepository
+    private ArrayList<EventCashFlow> getCashFlows(Portfolio portfolio) {
+        return eventCashFlowRepository
                 .findByPortfolioIdAndCashFlowTypeIdInOrderByTimestampDesc(
                         portfolio.getId(),
                         Stream.of(PAY_TYPES)
                                 .map(CashFlowType::getId)
                                 .collect(Collectors.toList()))
                 .stream()
-                .map(securityEventCashFlowConverter::fromEntity)
+                .map(eventCashFlowConverter::fromEntity)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private Table getTable(List<SecurityEventCashFlow> cashFlows) {
+    private Table getTable(List<EventCashFlow> cashFlows) {
         Table table = new Table();
         if (!cashFlows.isEmpty()) {
             table.add(new Table.Record());
@@ -82,7 +80,7 @@ public class PortfolioPaymentTableFactory implements TableFactory {
             table.add(monthTotalRecord);
             Month month = null;
             int sumRowCount = 0;
-            for (SecurityEventCashFlow cash : cashFlows) {
+            for (EventCashFlow cash : cashFlows) {
                 Instant timestamp = cash.getTimestamp();
                 Month currentMonth = LocalDate.ofInstant(timestamp, ZoneId.systemDefault()).getMonth();
                 if (month == null) {
@@ -97,13 +95,11 @@ public class PortfolioPaymentTableFactory implements TableFactory {
                 }
                 Table.Record record = new Table.Record();
                 record.put(DATE, timestamp);
-                record.put(COUNT, cash.getCount());
-                record.put(PortfolioPaymentTableHeader.CASH, cash.getValue());
+                record.put(ForeignPortfolioPaymentExcelTableHeader.CASH, cash.getValue());
                 record.put(CURRENCY, cash.getCurrency());
                 record.put(CASH_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash.getCurrency(),
-                        PortfolioPaymentTableHeader.CASH, EXCHANGE_RATE));
-                record.put(PAYMENT_TYPE, getPaymentType(cash));
-                record.put(SECURITY, getSecurityName(cash));
+                        ForeignPortfolioPaymentExcelTableHeader.CASH, EXCHANGE_RATE));
+                record.put(DESCRIPTION, cash.getDescription());
                 table.add(record);
                 sumRowCount++;
             }
@@ -117,25 +113,8 @@ public class PortfolioPaymentTableFactory implements TableFactory {
 
     private void calcTotalRecord(Table.Record monthTotalRecord, Month month, int sumRowCount) {
         if (sumRowCount != 0) {
-            monthTotalRecord.put(SECURITY, StringUtils.capitalize(month.getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault())));
+            monthTotalRecord.put(DATE, StringUtils.capitalize(month.getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault())));
             monthTotalRecord.put(CASH_RUB, "=SUM(OFFSET(" + CASH_RUB.getCellAddr() + ",1,0," + sumRowCount + ",1))");
         }
-    }
-
-    private static String getPaymentType(SecurityEventCashFlow cash) {
-        return switch (cash.getEventType()) {
-            case DIVIDEND -> "Дивиденды";
-            case COUPON -> "Купоны";
-            case REDEMPTION -> "Погашение облигации";
-            case AMORTIZATION -> "Амортизация облигаци";
-            case TAX -> "Удержание налога";
-            default -> null;
-        };
-    }
-
-    private String getSecurityName(SecurityEventCashFlow cash) {
-       return securityRepository.findByIsin(cash.getIsin())
-                .map(SecurityEntity::getName)
-                .orElse(cash.getIsin());
     }
 }
