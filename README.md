@@ -20,26 +20,27 @@
 с момента открытия счета, будущие удержания налогов, - это не полный перечень информации, которую рассчитывает приложение.
 
 Все что нужно - это подгружать свежие отчеты брокера. По каждому счету и валюте будет доступна следующая информация:
-- текущие позиции, усредненные цены покупок и доходности ценных бумаг в портфеле (с учетом хеджирующих позиций
-  на срочном рынке и усредненной цены покупки валюты);  
+- текущие позиции, усредненные цены покупок и доходности ценных бумаг в [портфеле](src/main/asciidoc/portfolio-status.adoc)
+  (с учетом хеджирующих позиций на срочном рынке и усредненной цены покупки валюты);  
   ![portfolio](https://user-images.githubusercontent.com/11336712/88589398-be387e80-d061-11ea-87b2-1a7f929d4ff1.png)
 - доля ценной бумаги (по балансовой стоимости) в портфеле;  
   ![proportion](https://user-images.githubusercontent.com/11336712/88717010-8cd6b600-d128-11ea-901f-2b3fcee96f07.png)  
-- детализация дивидендных, купонных и амортизационных выплат;  
+- детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/portfolio-payment.adoc);  
   ![portfolio-payment](https://user-images.githubusercontent.com/11336712/88460806-93a2c600-cea7-11ea-8ac9-95406fd6cec8.png)
-- детализация дивидендных, купонных и амортизационных выплат, начисленные по акциям и облигациям со связанного счета ИИС;  
+- детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/foreign-portfolio-payment.adoc),
+  начисленные по акциям и облигациям со связанного счета ИИС;  
   ![foreign-portfolio-payment](https://user-images.githubusercontent.com/11336712/87988115-7907d000-cae8-11ea-9ec7-d56a120aac89.png)
-- доходность сделок на фондовом рынке;  
+- доходность сделок на [фондовом](src/main/asciidoc/stock-market-profit.adoc) рынке;  
   ![stock-market](https://user-images.githubusercontent.com/11336712/78156498-8de02b00-7447-11ea-833c-cfc755bd7558.png)
-- доходность сделок на срочном рынке;  
+- доходность сделок на [срочном](src/main/asciidoc/derivatives-market-profit.adoc) рынке;  
   ![derivatives-market](https://user-images.githubusercontent.com/11336712/78156504-8f115800-7447-11ea-87e5-3cd4c34aab47.png)
-- доходность сделок на валютном рынке;  
+- доходность сделок на [валютном](src/main/asciidoc/foreign-market-profit.adoc) рынке;  
   ![foreighn-market](https://user-images.githubusercontent.com/11336712/84881751-fa59e600-b096-11ea-8b83-19d1c1229d73.png)
-- ввод и вывод ценных бумаг с/на другие счета;  
+- [ввод и вывод](src/main/asciidoc/securities-deposit-and-withdrawal.adoc) ценных бумаг с/на другие счета;  
   <img src="https://user-images.githubusercontent.com/11336712/87883425-f3185600-ca0f-11ea-9677-4689aa6a4ee5.png" width="40%"/>
-- доходность портфеля, пополнения, списания, переводы с/на другие счета;  
+- [доходность](src/main/asciidoc/cash-flow.adoc) портфеля, пополнения, списания, переводы с/на другие счета;  
   ![cash-in](https://user-images.githubusercontent.com/11336712/90821058-fb2f2280-e33a-11ea-858d-8941a1eebd30.png)
-- налоговая нагрузка.  
+- [налоговая](src/main/asciidoc/tax.adoc) нагрузка.  
   <img src="https://user-images.githubusercontent.com/11336712/90821578-ccfe1280-e33b-11ea-9e53-5362968d1dcf.png" width="55%"/>
 
 ### Установка
