@@ -105,7 +105,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         .orElse((securityType == SecurityType.CURRENCY_PAIR) ?
                                 getCurrencyPair(security.getIsin()) :
                                 security.getIsin()));
-        row.put(FIRST_TRNSACTION_DATE,
+        row.put(FIRST_TRANSACTION_DATE,
                 transactionRepository
                         .findFirstBySecurityIsinAndPkPortfolioOrderByTimestampAsc(security.getIsin(), portfolio.getId())
                         .map(TransactionEntity::getTimestamp)

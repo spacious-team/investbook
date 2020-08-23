@@ -26,8 +26,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ExcelView {
     private final PortfolioStatusExcelTableView portfolioStatusExcelTableView;
-    private final PortfolioPaymentTableView portfolioPaymentTableView;
-    private final ForeignPortfolioPaymentTableView foreignPortfolioPaymentTableView;
+    private final PortfolioPaymentExcelTableView portfolioPaymentTableView;
+    private final ForeignPortfolioPaymentExcelTableView foreignPortfolioPaymentTableView;
     private final StockMarketProfitExcelTableView stockMarketProfitExcelTableView;
     private final DerivativesMarketProfitExcelTableView derivativesMarketProfitExcelTableView;
     private final ForeignMarketProfitExcelTableView foreignMarketProfitExcelTableView;

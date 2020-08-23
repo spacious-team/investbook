@@ -119,6 +119,13 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -154,15 +161,28 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <version>2.0.0</version>
                 <executions>
                     <execution>
+                        <id>generate-html-doc</id>
+                        <phase>generate-resources</phase>
                         <goals>
-                            <goal>build-info</goal>
+                            <goal>process-asciidoc</goal>
                         </goals>
+                        <configuration>
+                            <outputDirectory>target/classes/static/user-guide/</outputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <attributes>
+                        <project-version>${project.version}</project-version>
+                        <linkcss>true</linkcss>
+                        <source-highlighter>coderay</source-highlighter>
+                    </attributes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

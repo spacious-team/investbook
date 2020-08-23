@@ -28,14 +28,14 @@ import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableHeader;
 
-import static ru.investbook.view.excel.ForeignPortfolioPaymentTableHeader.*;
+import static ru.investbook.view.excel.ForeignPortfolioPaymentExcelTableHeader.*;
 
 @Component
-public class ForeignPortfolioPaymentTableView extends ExcelTableView {
+public class ForeignPortfolioPaymentExcelTableView extends ExcelTableView {
 
-    public ForeignPortfolioPaymentTableView(PortfolioRepository portfolioRepository,
-                                            ForeignPortfolioPaymentTableFactory tableFactory,
-                                            PortfolioConverter portfolioConverter) {
+    public ForeignPortfolioPaymentExcelTableView(PortfolioRepository portfolioRepository,
+                                                 ForeignPortfolioPaymentExcelTableFactory tableFactory,
+                                                 PortfolioConverter portfolioConverter) {
         super(portfolioRepository, tableFactory, portfolioConverter);
     }
 

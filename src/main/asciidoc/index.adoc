@@ -1,0 +1,11 @@
+= Описание отчета, формируемого приложением, о брокерском счете
+
+. <<portfolio-status.adoc#,Таблица "Портфель">>
+. <<portfolio-payment.adoc#,Таблица "Выплаты">>
+. <<foreign-portfolio-payment.adoc#,Таблица "Внешние выплаты">>
+. <<stock-market-profit.adoc#,Таблица "Фондовый рынок">>
+. <<derivatives-market-profit.adoc#,Таблица "Срочный рынок">>
+. <<foreign-market-profit.adoc#,Таблица "Валютный рынок">>
+. <<securities-deposit-and-withdrawal.adoc#,Таблица "Ввод-вывод ценных бумаг">>
+. <<cash-flow.adoc#,Таблица "Доходноcть портфеля">>
+. <<tax.adoc#,Таблица "Налог">>

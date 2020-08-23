@@ -91,7 +91,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         totalRow.put(COUNT, "=SUMPRODUCT(ABS(" +
                 COUNT.getColumnIndex() + "3:" +
                 COUNT.getColumnIndex() + "100000))");
-        totalRow.remove(FIRST_TRNSACTION_DATE);
+        totalRow.remove(FIRST_TRANSACTION_DATE);
         totalRow.remove(LAST_TRANSACTION_DATE);
         totalRow.remove(LAST_EVENT_DATE);
         totalRow.remove(AVERAGE_PRICE);
