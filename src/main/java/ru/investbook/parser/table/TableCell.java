@@ -30,4 +30,6 @@ public interface TableCell {
     TableCellType getCellType();
 
     String getStringCellValue();
+
+    long getLongCellValue();
 }

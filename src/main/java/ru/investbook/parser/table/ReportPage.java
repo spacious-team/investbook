@@ -35,10 +35,6 @@ public interface ReportPage {
 
     int getLastRowNum();
 
-    String getStringCellValue(TableCell cell);
-
-    long getLongCellValue(TableCell cell);
-
     BiPredicate<String, Object> CELL_STRING_EQUALS = (cell, searchingValue) ->
             searchingValue != null && cell.trim().toLowerCase().startsWith(searchingValue.toString().trim().toLowerCase());
 

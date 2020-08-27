@@ -42,7 +42,12 @@ public class ExcelTableCell implements TableCell {
 
     @Override
     public String getStringCellValue() {
-        return cell.getStringCellValue();
+        return ExcelTableHelper.getStringCellValue(cell);
+    }
+
+    @Override
+    public long getLongCellValue() {
+        return ExcelTableHelper.getLongCellValue(cell);
     }
 
     public TableCellType getCellType() {

@@ -95,11 +95,11 @@ public class UralsibBrokerReport implements BrokerReport {
             for (TableCell cell : reportPage.getRow(address.getRow())) {
                 if (cell != null && cell.getColumnIndex() > address.getColumn()) {
                     if (cell.getCellType() == TableCellType.STRING) {
-                        return reportPage.getStringCellValue(cell)
+                        return cell.getStringCellValue()
                                 .replace("_invest", "")
                                 .replace("SP", "");
                     } else if (cell.getCellType() == TableCellType.NUMERIC) {
-                        return String.valueOf(reportPage.getLongCellValue(cell));
+                        return String.valueOf(cell.getLongCellValue());
                     }
                 }
             }

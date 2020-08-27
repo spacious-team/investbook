@@ -100,7 +100,7 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
             }
             List<PortfolioProperty> exchangeRates = new ArrayList<>();
             TableCell cell = report.getReportPage().getRow(address.getRow() + 1).getCell(0);
-            String text = report.getReportPage().getStringCellValue(cell);
+            String text = cell.getStringCellValue();
             String[] words = text.split(" ");
             for (int i = 0; i < words.length; i++) {
                 try {

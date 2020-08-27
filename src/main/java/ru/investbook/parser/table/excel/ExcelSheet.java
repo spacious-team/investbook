@@ -24,7 +24,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellAddress;
 import ru.investbook.parser.table.ReportPage;
-import ru.investbook.parser.table.TableCell;
 import ru.investbook.parser.table.TableCellAddress;
 import ru.investbook.parser.table.TableRow;
 
@@ -61,15 +60,5 @@ public class ExcelSheet implements ReportPage {
     @Override
     public int getLastRowNum() {
         return sheet.getLastRowNum();
-    }
-
-    @Override
-    public String getStringCellValue(TableCell cell) {
-        return ExcelTableHelper.getStringCellValue(((ExcelTableCell) cell).getCell());
-    }
-
-    @Override
-    public long getLongCellValue(TableCell cell) {
-        return ExcelTableHelper.getLongCellValue(((ExcelTableCell) cell).getCell());
     }
 }

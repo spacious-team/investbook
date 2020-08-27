@@ -88,7 +88,7 @@ public class PsbBrokerReport implements BrokerReport {
             TableCellAddress address = reportPage.find(PORTFOLIO_MARKER);
             for (TableCell cell : reportPage.getRow(address.getRow())) {
                 if (cell != null && cell.getColumnIndex() > address.getColumn() && cell.getCellType() == TableCellType.STRING) {
-                    String value = reportPage.getStringCellValue(cell);
+                    String value = cell.getStringCellValue();
                     return value.contains("/") ? value.split("/")[0] : value;
                 }
             }
@@ -105,7 +105,7 @@ public class PsbBrokerReport implements BrokerReport {
             TableCellAddress address = reportPage.find(REPORT_DATE_MARKER);
             for (TableCell cell : reportPage.getRow(address.getRow())) {
                 if (cell != null && cell.getColumnIndex() > address.getColumn() && cell.getCellType() == TableCellType.STRING) {
-                    return convertToInstant(reportPage.getStringCellValue(cell).split(" ")[3]);
+                    return convertToInstant(cell.getStringCellValue().split(" ")[3]);
                 }
             }
             throw new IllegalArgumentException(
