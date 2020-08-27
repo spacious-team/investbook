@@ -24,13 +24,15 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellAddress;
 import ru.investbook.parser.table.ReportPage;
+import ru.investbook.parser.table.TableCellAddress;
 
 import java.math.BigDecimal;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
+import static ru.investbook.parser.table.TableCellAddress.NOT_FOUND;
+
 class ExcelTableHelper {
-    static final CellAddress NOT_FOUND = new CellAddress(-1, -1);
 
     static boolean rowContains(Row row, Object value) {
         return rowContains(row.getSheet(), row.getRowNum(), value);
@@ -40,11 +42,11 @@ class ExcelTableHelper {
         return find(sheet, value, rowNum, rowNum + 1, String::equals) != NOT_FOUND;
     }
 
-    static CellAddress find(Sheet sheet, Object value) {
+    static TableCellAddress find(Sheet sheet, Object value) {
         return find(sheet, value, 0);
     }
 
-    private static CellAddress find(Sheet sheet, Object value, int startRow) {
+    private static TableCellAddress find(Sheet sheet, Object value, int startRow) {
         return find(sheet, value, startRow, sheet.getLastRowNum());
     }
 
@@ -52,7 +54,7 @@ class ExcelTableHelper {
      * @param startRow search rows start from this
      * @param endRow search rows excluding this
      */
-    private static CellAddress find(Sheet sheet, Object value, int startRow, int endRow) {
+    private static TableCellAddress find(Sheet sheet, Object value, int startRow, int endRow) {
         return find(sheet, value, startRow, endRow, ReportPage.CELL_STRING_EQUALS);
     }
 
@@ -61,7 +63,7 @@ class ExcelTableHelper {
      * @param endRow search rows excluding this
      * @param stringPredicate cell and value comparing bi-predicate if cell value type is string
      */
-    static CellAddress find(Sheet sheet, Object value, int startRow, int endRow, BiPredicate<String, Object> stringPredicate) {
+    static TableCellAddress find(Sheet sheet, Object value, int startRow, int endRow, BiPredicate<String, Object> stringPredicate) {
         return find(sheet, value, startRow, endRow, 0, Integer.MAX_VALUE, stringPredicate);
     }
 
@@ -72,7 +74,7 @@ class ExcelTableHelper {
      * @param startColumn search columns start from this
      * @param endColumn search columns excluding this
      */
-    static CellAddress find(Sheet sheet, Object value, int startRow, int endRow,
+    private static TableCellAddress find(Sheet sheet, Object value, int startRow, int endRow,
                                    int startColumn, int endColumn,
                                    BiPredicate<String, Object> stringPredicate) {
         if (sheet.getLastRowNum() == -1) {
@@ -92,7 +94,8 @@ class ExcelTableHelper {
                     int column = cell.getColumnIndex();
                     if (startColumn <= column && column < endColumn && cell.getCellType() == type) {
                         if (compare(value, cell, stringPredicate)) {
-                            return cell.getAddress();
+                            CellAddress address = cell.getAddress();
+                            new TableCellAddress(address.getRow(), address.getColumn());
                         }
                     }
                 }
@@ -101,14 +104,15 @@ class ExcelTableHelper {
         return NOT_FOUND;
     }
 
-    private static CellAddress findByPredicate(Sheet sheet, int startRow, Predicate<Cell> predicate) {
+    private static TableCellAddress findByPredicate(Sheet sheet, int startRow, Predicate<Cell> predicate) {
         int endRow = sheet.getLastRowNum();
         for(int rowNum = startRow; rowNum < endRow; rowNum++) {
             Row row = sheet.getRow(rowNum);
             if (row == null) continue;
             for (Cell cell : row) {
                 if (predicate.test(cell)) {
-                    return cell.getAddress();
+                    CellAddress address = cell.getAddress();
+                    new TableCellAddress(address.getRow(), address.getColumn());
                 }
             }
         }
@@ -139,10 +143,6 @@ class ExcelTableHelper {
             case BOOLEAN -> value.equals(cell.getBooleanCellValue());
             default -> false;
         };
-    }
-
-    private static Cell getCell(Sheet sheet, CellAddress address) {
-        return sheet.getRow(address.getRow()).getCell(address.getColumn());
     }
 
     static long getLongCellValue(Cell cell) {

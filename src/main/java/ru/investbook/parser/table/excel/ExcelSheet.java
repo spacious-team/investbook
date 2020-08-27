@@ -22,7 +22,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellAddress;
 import ru.investbook.parser.table.ReportPage;
 import ru.investbook.parser.table.TableCellAddress;
 import ru.investbook.parser.table.TableRow;
@@ -37,18 +36,12 @@ public class ExcelSheet implements ReportPage {
 
     @Override
     public TableCellAddress find(Object value) {
-        CellAddress address = ExcelTableHelper.find(sheet, value);
-        return (address.equals(ExcelTableHelper.NOT_FOUND)) ?
-                TableCellAddress.NOT_FOUND :
-                new TableCellAddress(address.getRow(), address.getColumn());
+        return ExcelTableHelper.find(sheet, value);
     }
 
     @Override
     public TableCellAddress find(Object value, int startRow, int endRow, BiPredicate<String, Object> stringPredicate) {
-        CellAddress address = ExcelTableHelper.find(sheet, value, startRow, endRow, stringPredicate);
-        return (address.equals(ExcelTableHelper.NOT_FOUND)) ?
-                TableCellAddress.NOT_FOUND :
-                new TableCellAddress(address.getRow(), address.getColumn());
+        return ExcelTableHelper.find(sheet, value, startRow, endRow, stringPredicate);
     }
 
     @Override
