@@ -84,36 +84,15 @@ public class ExcelTable extends AbstractTable {
         return row.getCell(columnIndices.get(columnDescription.getColumn()));
     }
 
-    private Cell getRawCell(TableRow row, TableColumnDescription columnDescription) {
-        return ((ExcelTableRow) row).getRow().getCell(columnIndices.get(columnDescription.getColumn()));
-    }
-
-    private TableCell getCell(TableCellAddress address) {
-        Cell rawCell = getRawCell(address);
-        return (rawCell == null) ? null : new ExcelTableCell(rawCell);
-    }
-
-    private Cell getRawCell(TableCellAddress address) {
-        return ((ExcelSheet) reportPage).getSheet().getRow(address.getRow()).getCell(address.getColumn());
-    }
-
     /**
      * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
      */
     public int getIntCellValueOrDefault(TableRow row, TableColumnDescription columnDescription, int defaultValue) {
-        try {
-            return getIntCellValue(row, columnDescription);
-        } catch (Exception e) {
-            return defaultValue;
-        }
+        return (int) getLongCellValueOrDefault(row, columnDescription, defaultValue);
     }
 
     public int getIntCellValue(TableRow row, TableColumnDescription columnDescription) {
         return (int) getLongCellValue(row, columnDescription);
-    }
-
-    public long getIntCellValue(TableCellAddress address) {
-        return (int) getLongCellValue(address);
     }
 
     /**
@@ -130,11 +109,6 @@ public class ExcelTable extends AbstractTable {
     public long getLongCellValue(TableRow row, TableColumnDescription columnDescription) {
         return ExcelTableHelper.getLongCellValue(getRawCell(row, columnDescription));
     }
-
-    public long getLongCellValue(TableCellAddress address) {
-        return ExcelTableHelper.getLongCellValue(getRawCell(address));
-    }
-
     /**
      * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
      */
@@ -150,10 +124,6 @@ public class ExcelTable extends AbstractTable {
         return ExcelTableHelper.getCurrencyCellValue(getRawCell(row, columnDescription));
     }
 
-    public BigDecimal getCurrencyCellValue(TableCellAddress address) {
-        return ExcelTableHelper.getCurrencyCellValue(getRawCell(address));
-    }
-
     public String getStringCellValueOrDefault(TableRow row, TableColumnDescription columnDescription, String defaultValue) {
         try {
             return getStringCellValue(row, columnDescription);
@@ -166,7 +136,7 @@ public class ExcelTable extends AbstractTable {
         return ExcelTableHelper.getStringCellValue(getRawCell(row, columnDescription));
     }
 
-    public String getStringCellValue(TableCellAddress address) {
-        return ExcelTableHelper.getStringCellValue(getRawCell(address));
+    private Cell getRawCell(TableRow row, TableColumnDescription columnDescription) {
+        return ((ExcelTableRow) row).getRow().getCell(columnIndices.get(columnDescription.getColumn()));
     }
 }
