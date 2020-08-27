@@ -19,10 +19,10 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
-import ru.investbook.parser.ExcelTable;
 import ru.investbook.parser.ReportTable;
 import ru.investbook.parser.SecurityTransaction;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.Security;
 import ru.investbook.pojo.SecurityEventCashFlow;
@@ -52,7 +52,7 @@ public class DividendTable extends PaymentsTable<SecurityEventCashFlow> {
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> getRow(ExcelTable table, Row row) {
+    protected Collection<SecurityEventCashFlow> getRow(Table table, TableRow row) {
         String action = table.getStringCellValue(row, OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         String description = table.getStringCellValue(row, DESCRIPTION);
@@ -87,7 +87,7 @@ public class DividendTable extends PaymentsTable<SecurityEventCashFlow> {
         return data;
     }
 
-    private BigDecimal getTax(ExcelTable table, Row row) {
+    private BigDecimal getTax(Table table, TableRow row) {
         String description = table.getStringCellValue(row, DESCRIPTION);
         Matcher matcher = taxInformationPattern.matcher(description.toLowerCase());
         if (matcher.find()) {

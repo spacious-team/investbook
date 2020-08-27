@@ -20,9 +20,10 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
 import ru.investbook.parser.*;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableCellType;
+import ru.investbook.parser.table.TableRow;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -42,9 +43,9 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
     }
 
     @Override
-    protected Collection<ForeignExchangeTransaction> getRow(ExcelTable table, Row row) {
+    protected Collection<ForeignExchangeTransaction> getRow(Table table, TableRow row) {
         long transactionId;
-        if (table.getCell(row, TRANSACTION).getCellType() == CellType.STRING) {
+        if (table.getCell(row, TRANSACTION).getCellType() == TableCellType.STRING) {
             String value = table.getStringCellValue(row, TRANSACTION);
             try {
                 // some numbers represented by string type cells
@@ -55,7 +56,7 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
                 }
                 return emptyList();
             }
-        } else if (table.getCell(row, TRANSACTION).getCellType() == CellType.NUMERIC) {
+        } else if (table.getCell(row, TRANSACTION).getCellType() == TableCellType.NUMERIC) {
             transactionId = table.getLongCellValue(row, TRANSACTION);
         } else {
             return emptyList();

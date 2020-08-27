@@ -21,8 +21,9 @@ package ru.investbook.parser.uralsib;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
 import ru.investbook.parser.*;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
     }
 
     @Override
-    protected Collection<DerivativeTransaction> getRow(ExcelTable table, Row row) {
+    protected Collection<DerivativeTransaction> getRow(Table table, TableRow row) {
         Long transactionId = SecurityTransactionTable.getTransactionId(table, row, TRANSACTION);
         if (transactionId == null) return emptyList();
 

@@ -20,8 +20,9 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
 import ru.investbook.parser.*;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 
 import java.util.Collection;
 
@@ -39,7 +40,7 @@ public class PortfolioCashTable extends AbstractReportTable<PortfolioCash> {
     }
 
     @Override
-    protected Collection<PortfolioCash> getRow(ExcelTable table, Row row) {
+    protected Collection<PortfolioCash> getRow(Table table, TableRow row) {
         return singletonList(PortfolioCash.builder()
                 .section("all")
                 .value(table.getCurrencyCellValue(row, VALUE))

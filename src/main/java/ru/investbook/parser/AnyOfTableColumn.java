@@ -21,7 +21,7 @@ package ru.investbook.parser;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import org.apache.poi.ss.usermodel.Row;
+import ru.investbook.parser.table.TableRow;
 
 import java.util.Arrays;
 
@@ -37,7 +37,7 @@ public class AnyOfTableColumn implements TableColumn {
     }
 
     @Override
-    public int getColumnIndex(int firstColumnForSearch, Row... headerRows) {
+    public int getColumnIndex(int firstColumnForSearch, TableRow... headerRows) {
         for (TableColumn c : columns) {
             try {
                 return c.getColumnIndex(firstColumnForSearch, headerRows);

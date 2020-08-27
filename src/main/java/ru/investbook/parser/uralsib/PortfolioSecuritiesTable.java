@@ -23,8 +23,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
-import ru.investbook.parser.*;
+import ru.investbook.parser.AbstractReportTable;
+import ru.investbook.parser.TableColumn;
+import ru.investbook.parser.TableColumnDescription;
+import ru.investbook.parser.TableColumnImpl;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 import ru.investbook.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInformation;
 import ru.investbook.pojo.Security;
 
@@ -43,7 +47,7 @@ public class PortfolioSecuritiesTable extends AbstractReportTable<ReportSecurity
     }
 
     @Override
-    protected Collection<ReportSecurityInformation> getRow(ExcelTable table, Row row) {
+    protected Collection<ReportSecurityInformation> getRow(Table table, TableRow row) {
         Security security = Security.builder()
                 .isin(table.getStringCellValue(row, ISIN))
                 .name(table.getStringCellValue(row, NAME))

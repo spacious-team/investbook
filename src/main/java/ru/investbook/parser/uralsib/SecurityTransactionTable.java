@@ -20,8 +20,9 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
 import ru.investbook.parser.*;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -45,7 +46,7 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
     }
 
     @Override
-    protected Collection<SecurityTransaction> getRow(ExcelTable table, Row row) {
+    protected Collection<SecurityTransaction> getRow(Table table, TableRow row) {
         Long transactionId = getTransactionId(table, row, TRANSACTION);
         if (transactionId == null) return emptyList();
 
@@ -80,7 +81,7 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
                 .build());
     }
 
-    static Long getTransactionId(ExcelTable table, Row row, TableColumnDescription column) {
+    static Long getTransactionId(Table table, TableRow row, TableColumnDescription column) {
         switch (table.getCell(row, column).getCellType()) {
             case STRING:
                 try {

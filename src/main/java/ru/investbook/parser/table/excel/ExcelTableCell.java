@@ -16,21 +16,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser;
+package ru.investbook.parser.table.excel;
 
-import ru.investbook.parser.table.TableRow;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Cell;
+import ru.investbook.parser.table.TableCell;
+import ru.investbook.parser.table.TableCellType;
 
-public class OptionalTableColumn implements TableColumn {
+@RequiredArgsConstructor
+public class ExcelTableCell implements TableCell {
 
-    public static TableColumn of(TableColumn column) {
-        return AnyOfTableColumn.of(column, TableColumn.NOCOLUMN);
-    }
+    @Getter
+    private final Cell cell;
 
-    private OptionalTableColumn() {
+    @Override
+    public int getRowIndex() {
+        return cell.getRowIndex();
     }
 
     @Override
-    public int getColumnIndex(int firstColumnForSearch, TableRow... headerRows) {
-        return -1;
+    public int getColumnIndex() {
+        return cell.getColumnIndex();
+    }
+
+    @Override
+    public String getStringCellValue() {
+        return cell.getStringCellValue();
+    }
+
+    public TableCellType getCellType() {
+        return TableCellType.valueOf(cell.getCellType().toString());
     }
 }

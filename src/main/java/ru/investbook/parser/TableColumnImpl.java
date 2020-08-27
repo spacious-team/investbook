@@ -20,9 +20,9 @@ package ru.investbook.parser;
 
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
+import ru.investbook.parser.table.TableCell;
+import ru.investbook.parser.table.TableCellType;
+import ru.investbook.parser.table.TableRow;
 
 import java.util.Arrays;
 
@@ -41,11 +41,11 @@ public class TableColumnImpl implements TableColumn {
                 .toArray(String[]::new);
     }
 
-    public int getColumnIndex(int firstColumnForSearch, Row... headerRows) {
-        for (Row header : headerRows) {
+    public int getColumnIndex(int firstColumnForSearch, TableRow... headerRows) {
+        for (TableRow header : headerRows) {
             next_cell:
-            for (Cell cell : header) {
-                if (cell != null && cell.getColumnIndex() >= firstColumnForSearch && cell.getCellType() == CellType.STRING) {
+            for (TableCell cell : header) {
+                if (cell != null && cell.getColumnIndex() >= firstColumnForSearch && cell.getCellType() == TableCellType.STRING) {
                     String colName = cell.getStringCellValue();
                     if (colName != null) {
                         colName = colName.toLowerCase();

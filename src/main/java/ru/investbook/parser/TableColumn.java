@@ -18,7 +18,7 @@
 
 package ru.investbook.parser;
 
-import org.apache.poi.ss.usermodel.Row;
+import ru.investbook.parser.table.TableRow;
 
 public interface TableColumn {
     TableColumn NOCOLUMN = (i, j) -> -1;
@@ -31,7 +31,7 @@ public interface TableColumn {
      * @param headerRows header rows
      * @return column index of table
      */
-    default int getColumnIndex(Row... headerRows) {
+    default int getColumnIndex(TableRow... headerRows) {
         return getColumnIndex(0, headerRows);
     }
 
@@ -40,5 +40,5 @@ public interface TableColumn {
      * @param headerRows header rows
      * @return column index of table
      */
-    int getColumnIndex(int firstColumnForSearch, Row... headerRows);
+    int getColumnIndex(int firstColumnForSearch, TableRow... headerRows);
 }

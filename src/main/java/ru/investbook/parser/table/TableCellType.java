@@ -16,21 +16,46 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser;
+package ru.investbook.parser.table;
 
-import ru.investbook.parser.table.TableRow;
+import org.apache.poi.ss.formula.FormulaType;
+import org.apache.poi.ss.usermodel.FormulaError;
 
-public class OptionalTableColumn implements TableColumn {
+public enum TableCellType {
+    /**
+     * Unknown type, used to represent a state prior to initialization or the
+     * lack of a concrete type.
+     * For internal use only.
+     */
+    _NONE,
 
-    public static TableColumn of(TableColumn column) {
-        return AnyOfTableColumn.of(column, TableColumn.NOCOLUMN);
-    }
+    /**
+     * Numeric cell type (whole numbers, fractional numbers, dates)
+     */
+    NUMERIC,
 
-    private OptionalTableColumn() {
-    }
+    /** String (text) cell type */
+    STRING,
 
-    @Override
-    public int getColumnIndex(int firstColumnForSearch, TableRow... headerRows) {
-        return -1;
-    }
+    /**
+     * Formula cell type
+     * @see FormulaType
+     */
+    FORMULA,
+
+    /**
+     * Blank cell type
+     */
+    BLANK,
+
+    /**
+     * Boolean cell type
+     */
+    BOOLEAN,
+
+    /**
+     * Error cell type
+     * @see FormulaError
+     */
+    ERROR;
 }

@@ -20,14 +20,14 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
 import ru.investbook.parser.*;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 
 import java.util.Collection;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static ru.investbook.parser.ExcelTableHelper.rowContains;
 import static ru.investbook.parser.psb.PortfolioCashTable.CashTableHeader.*;
 
 @Slf4j
@@ -42,8 +42,8 @@ public class PortfolioCashTable extends AbstractReportTable<PortfolioCash> {
     }
 
     @Override
-    protected Collection<PortfolioCash> getRow(ExcelTable table, Row row) {
-        return rowContains(table, row, INVALID_TEXT) ?
+    protected Collection<PortfolioCash> getRow(Table table, TableRow row) {
+        return row.rowContains(INVALID_TEXT) ?
                 emptyList() :
                 singletonList(PortfolioCash.builder()
                         .section(table.getStringCellValue(row, SECTION))
