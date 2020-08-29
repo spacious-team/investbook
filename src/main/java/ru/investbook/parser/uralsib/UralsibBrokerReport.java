@@ -29,7 +29,6 @@ import ru.investbook.parser.BrokerReport;
 import ru.investbook.parser.table.ReportPage;
 import ru.investbook.parser.table.TableCell;
 import ru.investbook.parser.table.TableCellAddress;
-import ru.investbook.parser.table.TableCellType;
 import ru.investbook.parser.table.excel.ExcelSheet;
 
 import java.io.IOException;
@@ -94,12 +93,13 @@ public class UralsibBrokerReport implements BrokerReport {
             TableCellAddress address = reportPage.find(PORTFOLIO_MARKER);
             for (TableCell cell : reportPage.getRow(address.getRow())) {
                 if (cell != null && cell.getColumnIndex() > address.getColumn()) {
-                    if (cell.getCellType() == TableCellType.STRING) {
-                        return cell.getStringCellValue()
+                    Object value = cell.getValue();
+                    if (value instanceof String) {
+                        return value.toString()
                                 .replace("_invest", "")
                                 .replace("SP", "");
-                    } else if (cell.getCellType() == TableCellType.NUMERIC) {
-                        return String.valueOf(cell.getLongCellValue());
+                    } else if (value instanceof Number) {
+                        return String.valueOf(((Number) value).longValue());
                     }
                 }
             }

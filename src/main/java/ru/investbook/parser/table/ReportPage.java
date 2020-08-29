@@ -38,6 +38,9 @@ public interface ReportPage {
     BiPredicate<String, Object> CELL_STRING_EQUALS = (cell, searchingValue) ->
             searchingValue != null && cell.trim().toLowerCase().startsWith(searchingValue.toString().trim().toLowerCase());
 
+    /**
+     * Get table range, table ends with predefined string in one of the row cells
+     */
     default TableCellRange getTableCellRange(String tableName, int headersRowCount, String tableFooterString) {
         TableCellAddress startAddress = find(tableName);
         if (startAddress.equals(TableCellAddress.NOT_FOUND)) {
@@ -71,9 +74,10 @@ public interface ReportPage {
                 break; // all row cells blank
             }
             for (TableCell cell : row) {
+                Object value;
                 if (!(cell == null
-                        || cell.getCellType() == TableCellType.BLANK
-                        || (cell.getCellType() == TableCellType.STRING && cell.getStringCellValue().isEmpty()))) {
+                        || ((value = cell.getValue()) == null)
+                        || (value instanceof String) && (value.toString().isEmpty()))) {
                     // not empty
                     continue LAST_ROW;
                 }

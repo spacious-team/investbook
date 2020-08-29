@@ -49,12 +49,26 @@ public interface Table extends Iterable<TableRow> {
 
     TableCell getCell(TableRow row, TableColumnDescription columnDescription);
 
+    Object getCellValue(TableRow row, TableColumnDescription columnDescription);
+
+    /**
+     * @throws RuntimeException if can't extract int value
+     */
     int getIntCellValue(TableRow row, TableColumnDescription columnDescription);
 
+    /**
+     * @throws RuntimeException if can't extract long value
+     */
     long getLongCellValue(TableRow row, TableColumnDescription columnDescription);
 
+    /**
+     * @throws RuntimeException if can't extract BigDecimal value
+     */
     BigDecimal getCurrencyCellValue(TableRow row, TableColumnDescription columnDescription);
 
+    /**
+     * @throws RuntimeException if can't extract string value
+     */
     String getStringCellValue(TableRow row, TableColumnDescription columnDescription);
 
     /**

@@ -21,7 +21,6 @@ package ru.investbook.parser;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import ru.investbook.parser.table.TableCell;
-import ru.investbook.parser.table.TableCellType;
 import ru.investbook.parser.table.TableRow;
 
 import java.util.Arrays;
@@ -45,17 +44,15 @@ public class TableColumnImpl implements TableColumn {
         for (TableRow header : headerRows) {
             next_cell:
             for (TableCell cell : header) {
-                if (cell != null && cell.getColumnIndex() >= firstColumnForSearch && cell.getCellType() == TableCellType.STRING) {
-                    String colName = cell.getStringCellValue();
-                    if (colName != null) {
-                        colName = colName.toLowerCase();
-                        for (String word : words) {
-                            if (!containsWord(colName, word)) {
-                                continue next_cell;
-                            }
+                Object value;
+                if (cell != null && cell.getColumnIndex() >= firstColumnForSearch && ((value = cell.getValue()) instanceof String)) {
+                    String colName = value.toString().toLowerCase();
+                    for (String word : words) {
+                        if (!containsWord(colName, word)) {
+                            continue next_cell;
                         }
-                        return cell.getColumnIndex();
                     }
+                    return cell.getColumnIndex();
                 }
             }
         }

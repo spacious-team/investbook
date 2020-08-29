@@ -27,7 +27,6 @@ import ru.investbook.parser.BrokerReport;
 import ru.investbook.parser.table.ReportPage;
 import ru.investbook.parser.table.TableCell;
 import ru.investbook.parser.table.TableCellAddress;
-import ru.investbook.parser.table.TableCellType;
 import ru.investbook.parser.table.excel.ExcelSheet;
 
 import java.io.IOException;
@@ -87,9 +86,10 @@ public class PsbBrokerReport implements BrokerReport {
         try {
             TableCellAddress address = reportPage.find(PORTFOLIO_MARKER);
             for (TableCell cell : reportPage.getRow(address.getRow())) {
-                if (cell != null && cell.getColumnIndex() > address.getColumn() && cell.getCellType() == TableCellType.STRING) {
-                    String value = cell.getStringCellValue();
-                    return value.contains("/") ? value.split("/")[0] : value;
+                Object value;
+                if (cell != null && cell.getColumnIndex() > address.getColumn() && ((value = cell.getValue()) instanceof String)) {
+                    String string = value.toString();
+                    return string.contains("/") ? string.split("/")[0] : string;
                 }
             }
             throw new IllegalArgumentException(
@@ -104,8 +104,9 @@ public class PsbBrokerReport implements BrokerReport {
 
             TableCellAddress address = reportPage.find(REPORT_DATE_MARKER);
             for (TableCell cell : reportPage.getRow(address.getRow())) {
-                if (cell != null && cell.getColumnIndex() > address.getColumn() && cell.getCellType() == TableCellType.STRING) {
-                    return convertToInstant(cell.getStringCellValue().split(" ")[3]);
+                Object value;
+                if (cell != null && cell.getColumnIndex() > address.getColumn() && ((value = cell.getValue()) instanceof String)) {
+                    return convertToInstant(value.toString().split(" ")[3]);
                 }
             }
             throw new IllegalArgumentException(

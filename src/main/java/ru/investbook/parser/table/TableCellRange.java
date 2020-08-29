@@ -18,10 +18,14 @@
 
 package ru.investbook.parser.table;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 @Getter
+@EqualsAndHashCode
+@ToString
 @RequiredArgsConstructor
 public class TableCellRange {
     public static final TableCellRange EMPTY_RANGE = new TableCellRange(0, 0, 0, 0);

@@ -18,10 +18,7 @@
 
 package ru.investbook.parser.table.excel;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellAddress;
 import ru.investbook.parser.table.ReportPage;
 import ru.investbook.parser.table.TableCellAddress;
@@ -95,7 +92,7 @@ class ExcelTableHelper {
                     if (startColumn <= column && column < endColumn && cell.getCellType() == type) {
                         if (compare(value, cell, stringPredicate)) {
                             CellAddress address = cell.getAddress();
-                            new TableCellAddress(address.getRow(), address.getColumn());
+                            return new TableCellAddress(address.getRow(), address.getColumn());
                         }
                     }
                 }
@@ -112,7 +109,7 @@ class ExcelTableHelper {
             for (Cell cell : row) {
                 if (predicate.test(cell)) {
                     CellAddress address = cell.getAddress();
-                    new TableCellAddress(address.getRow(), address.getColumn());
+                    return new TableCellAddress(address.getRow(), address.getColumn());
                 }
             }
         }
@@ -145,20 +142,54 @@ class ExcelTableHelper {
         };
     }
 
-    static long getLongCellValue(Cell cell) {
-        CellType type = cell.getCellType();
-        return switch (type) {
-            case NUMERIC -> Double.valueOf(cell.getNumericCellValue()).longValue();
-            default -> Long.parseLong(cell.getStringCellValue());
+    static Object getCellValue(Cell cell) {
+        return switch (cell.getCellType()) {
+            case STRING -> cell.getStringCellValue();
+            case NUMERIC -> cell.getNumericCellValue(); // return double
+            case BLANK -> null;
+            case BOOLEAN -> cell.getBooleanCellValue();
+            case FORMULA -> getCachedFormulaValue(cell);
+            case ERROR -> throw new RuntimeException("Ячейка содержит ошибку вычисления формулы: " +
+                    FormulaError.forInt(cell.getErrorCellValue()));
+            case _NONE -> null;
         };
     }
 
+    private static Object getCachedFormulaValue(Cell cell) {
+        return switch (cell.getCachedFormulaResultType()) {
+            case BOOLEAN -> cell.getBooleanCellValue();
+            case NUMERIC -> cell.getNumericCellValue();
+            case STRING -> cell.getRichStringCellValue();
+            case ERROR -> throw new RuntimeException("Ячейка не содержит кешированный результат формулы: " +
+                    FormulaError.forInt(cell.getErrorCellValue()));
+            default -> null; //never should occur
+        };
+    }
+
+    /**
+     * @throws RuntimeException if can't extract long value
+     */
+    static long getLongCellValue(Cell cell) {
+        Object value = getCellValue(cell);
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        } else {
+            return Long.parseLong(value.toString());
+        }
+    }
+
+    /**
+     * @throws RuntimeException if can't extract BigDecomal value
+     */
     static BigDecimal getCurrencyCellValue(Cell cell) {
-        double cellValue = cell.getNumericCellValue();
+        double cellValue = (double) getCellValue(cell);
         return (Math.abs(cellValue - 0.01d) < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
     }
 
+    /**
+     * @throws RuntimeException if can't extract string value
+     */
     static String getStringCellValue(Cell cell) {
-        return (cell.getCellType() == CellType.BLANK) ? "" : cell.getStringCellValue();
+        return getCellValue(cell).toString();
     }
 }

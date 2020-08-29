@@ -24,12 +24,15 @@ public interface TableCell {
 
     int getColumnIndex();
 
-    /**
-     * Remove is can
-     */
-    TableCellType getCellType();
+    Object getValue();
 
+    /**
+     * @throws RuntimeException if can't extract string value
+     */
     String getStringCellValue();
 
+    /**
+     * @throws RuntimeException if can't extract long value
+     */
     long getLongCellValue();
 }

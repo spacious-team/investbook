@@ -22,7 +22,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import ru.investbook.parser.table.TableCell;
-import ru.investbook.parser.table.TableCellType;
 
 @RequiredArgsConstructor
 public class ExcelTableCell implements TableCell {
@@ -41,6 +40,11 @@ public class ExcelTableCell implements TableCell {
     }
 
     @Override
+    public Object getValue() {
+        return ExcelTableHelper.getCellValue(cell);
+    }
+
+    @Override
     public String getStringCellValue() {
         return ExcelTableHelper.getStringCellValue(cell);
     }
@@ -48,9 +52,5 @@ public class ExcelTableCell implements TableCell {
     @Override
     public long getLongCellValue() {
         return ExcelTableHelper.getLongCellValue(cell);
-    }
-
-    public TableCellType getCellType() {
-        return TableCellType.valueOf(cell.getCellType().toString());
     }
 }

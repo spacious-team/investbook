@@ -86,7 +86,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
                 .portfolio(getReport().getPortfolio())
                 .value(value)
                 .currency("RUB"); // FORTS, only RUB
-        String action = table.getCell(row, DerivativeCashFlowTableHeader.OPERATION).getStringCellValue().toLowerCase();
+        String action = table.getStringCellValue(row, DerivativeCashFlowTableHeader.OPERATION).toLowerCase();
         switch (action) {
             case "вариационная маржа":
                 String contract = table.getStringCellValue(row, DerivativeCashFlowTableHeader.CONTRACT)

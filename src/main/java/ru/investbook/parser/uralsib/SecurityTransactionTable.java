@@ -82,18 +82,11 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
     }
 
     static Long getTransactionId(Table table, TableRow row, TableColumnDescription column) {
-        switch (table.getCell(row, column).getCellType()) {
-            case STRING:
-                try {
-                    // some numbers represented by string type cells
-                    return Long.parseLong(table.getStringCellValue(row, column));
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-            case NUMERIC:
-                return table.getLongCellValue(row, column);
-            default:
-                return null;
+        try {
+            // some numbers represented by string type cells
+            return table.getLongCellValue(row, column);
+        } catch (Exception e) {
+            return null;
         }
     }
 

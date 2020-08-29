@@ -18,10 +18,14 @@
 
 package ru.investbook.parser.table;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 @Getter
+@EqualsAndHashCode
+@ToString
 @RequiredArgsConstructor
 public class TableCellAddress {
     public static final TableCellAddress NOT_FOUND = new TableCellAddress(-1, -1);

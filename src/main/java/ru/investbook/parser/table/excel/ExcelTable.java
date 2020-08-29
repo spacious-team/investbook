@@ -84,6 +84,11 @@ public class ExcelTable extends AbstractTable {
         return row.getCell(columnIndices.get(columnDescription.getColumn()));
     }
 
+    @Override
+    public Object getCellValue(TableRow row, TableColumnDescription columnDescription) {
+        return ExcelTableHelper.getCellValue(getRawCell(row, columnDescription));
+    }
+
     /**
      * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
      */
