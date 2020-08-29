@@ -19,9 +19,9 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
 import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.parser.ExcelTable;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.SecurityEventCashFlow;
 
@@ -42,7 +42,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
         super(report, PaymentsTable.TABLE_NAME, "", PaymentsTable.PaymentsTableHeader.class);
     }
 
-    protected Collection<SecurityEventCashFlow> getRow(ExcelTable table, Row row) {
+    protected Collection<SecurityEventCashFlow> getRow(Table table, TableRow row) {
         String action = table.getStringCellValue(row, OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         if (!action.equalsIgnoreCase("вариационная маржа")) {
@@ -58,7 +58,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
                 .build());
     }
 
-    private String getContract(ExcelTable table, Row row) {
+    private String getContract(Table table, TableRow row) {
         String description = table.getStringCellValue(row, DESCRIPTION);
         Matcher matcher = contractPattern.matcher(description);
         if (matcher.find()) {

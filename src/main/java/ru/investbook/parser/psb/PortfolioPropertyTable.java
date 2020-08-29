@@ -20,8 +20,10 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
 import ru.investbook.parser.*;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
+import ru.investbook.parser.table.excel.ExcelTable;
 import ru.investbook.pojo.PortfolioProperty;
 import ru.investbook.pojo.PortfolioPropertyType;
 
@@ -55,16 +57,16 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
     }
 
     private static ExcelTable getSummaryTable(PsbBrokerReport report) {
-        ExcelTable table = ExcelTable.of(report.getSheet(), SUMMARY_TABLE, ASSETS, SummaryTableHeader.class);
+        ExcelTable table = ExcelTable.of(report.getReportPage(), SUMMARY_TABLE, ASSETS, SummaryTableHeader.class);
         if (table.isEmpty()) {
             throw new IllegalArgumentException("Таблица '" + SUMMARY_TABLE + "' не найдена");
         }
         return table;
     }
 
-    protected static Collection<PortfolioProperty> getTotalAssets(ExcelTable table, PsbBrokerReport report) {
+    protected static Collection<PortfolioProperty> getTotalAssets(Table table, PsbBrokerReport report) {
         try {
-            Row row = table.findRow(ASSETS);
+            TableRow row = table.findRow(ASSETS);
             if (row == null) {
                 return emptyList();
             }
@@ -80,9 +82,9 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
         }
     }
 
-    protected static Collection<PortfolioProperty> getExchangeRate(ExcelTable table, PsbBrokerReport report) {
+    protected static Collection<PortfolioProperty> getExchangeRate(Table table, PsbBrokerReport report) {
         try {
-            Row row = table.findRow(EXCHANGE_RATE_ROW);
+            TableRow row = table.findRow(EXCHANGE_RATE_ROW);
             if (row == null) {
                 return emptyList();
             }
@@ -98,8 +100,8 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
         }
     }
 
-    private static Collection<PortfolioProperty> createExchangeRateProperty(PsbBrokerReport report, ExcelTable table,
-                                                                            Row row, SummaryTableHeader currency,
+    private static Collection<PortfolioProperty> createExchangeRateProperty(PsbBrokerReport report, Table table,
+                                                                            TableRow row, SummaryTableHeader currency,
                                                                             PortfolioPropertyType property) {
         try {
             BigDecimal exchangeRate = table.getCurrencyCellValue(row, currency);

@@ -16,21 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser;
+package ru.investbook.parser.table;
 
-import ru.investbook.parser.table.TableRow;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-public class OptionalTableColumn implements TableColumn {
+@Getter
+@EqualsAndHashCode
+@ToString
+@RequiredArgsConstructor
+public class TableCellAddress {
+    public static final TableCellAddress NOT_FOUND = new TableCellAddress(-1, -1);
 
-    public static TableColumn of(TableColumn column) {
-        return AnyOfTableColumn.of(column, TableColumn.NOCOLUMN);
-    }
-
-    private OptionalTableColumn() {
-    }
-
-    @Override
-    public int getColumnIndex(int firstColumnForSearch, TableRow... headerRows) {
-        return -1;
-    }
+    private final int row;
+    private final int column;
 }

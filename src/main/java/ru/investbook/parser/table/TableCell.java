@@ -16,21 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser;
+package ru.investbook.parser.table;
 
-import ru.investbook.parser.table.TableRow;
+public interface TableCell {
 
-public class OptionalTableColumn implements TableColumn {
+    int getRowIndex();
 
-    public static TableColumn of(TableColumn column) {
-        return AnyOfTableColumn.of(column, TableColumn.NOCOLUMN);
-    }
+    int getColumnIndex();
 
-    private OptionalTableColumn() {
-    }
+    Object getValue();
 
-    @Override
-    public int getColumnIndex(int firstColumnForSearch, TableRow... headerRows) {
-        return -1;
-    }
+    /**
+     * @throws RuntimeException if can't extract string value
+     */
+    String getStringCellValue();
 }

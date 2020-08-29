@@ -20,9 +20,9 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
 import ru.investbook.parser.*;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -42,21 +42,22 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
     }
 
     @Override
-    protected Collection<ForeignExchangeTransaction> getRow(ExcelTable table, Row row) {
+    protected Collection<ForeignExchangeTransaction> getRow(Table table, TableRow row) {
         long transactionId;
-        if (table.getCell(row, TRANSACTION).getCellType() == CellType.STRING) {
-            String value = table.getStringCellValue(row, TRANSACTION);
+        Object cellValue = table.getCellValue(row, TRANSACTION);
+        if (cellValue instanceof String) {
+            String stringValue = cellValue.toString();
             try {
                 // some numbers represented by string type cells
-                transactionId = Long.parseLong(value);
+                transactionId = Long.parseLong(stringValue);
             } catch (NumberFormatException e) {
-                if (value.startsWith(CONTRACT_PREFIX)) {
-                    instrument = value.substring(CONTRACT_PREFIX.length()).trim();
+                if (stringValue.startsWith(CONTRACT_PREFIX)) {
+                    instrument = stringValue.substring(CONTRACT_PREFIX.length()).trim();
                 }
                 return emptyList();
             }
-        } else if (table.getCell(row, TRANSACTION).getCellType() == CellType.NUMERIC) {
-            transactionId = table.getLongCellValue(row, TRANSACTION);
+        } else if (cellValue instanceof Number) {
+            transactionId = ((Number) cellValue).longValue();
         } else {
             return emptyList();
         }

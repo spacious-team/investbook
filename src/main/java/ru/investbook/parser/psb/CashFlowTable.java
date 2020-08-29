@@ -20,8 +20,12 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
-import ru.investbook.parser.*;
+import ru.investbook.parser.AbstractReportTable;
+import ru.investbook.parser.TableColumn;
+import ru.investbook.parser.TableColumnDescription;
+import ru.investbook.parser.TableColumnImpl;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.EventCashFlow;
 
@@ -42,7 +46,7 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
     }
 
     @Override
-    protected Collection<EventCashFlow> getRow(ExcelTable table, Row row) {
+    protected Collection<EventCashFlow> getRow(Table table, TableRow row) {
         String action = table.getStringCellValue(row, OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         CashFlowType type = CashFlowType.CASH;

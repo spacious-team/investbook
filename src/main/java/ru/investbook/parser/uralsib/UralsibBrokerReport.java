@@ -23,14 +23,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import ru.investbook.parser.BrokerReport;
-import ru.investbook.parser.ExcelTableHelper;
+import ru.investbook.parser.table.ReportPage;
+import ru.investbook.parser.table.TableCell;
+import ru.investbook.parser.table.TableCellAddress;
+import ru.investbook.parser.table.excel.ExcelSheet;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,7 +55,7 @@ public class UralsibBrokerReport implements BrokerReport {
 
     private final Workbook book;
     @Getter
-    private final Sheet sheet;
+    private final ReportPage reportPage;
     @Getter
     private final String portfolio;
     @Getter
@@ -68,17 +67,17 @@ public class UralsibBrokerReport implements BrokerReport {
         ZipEntry zipEntry = zis.getNextEntry();
         this.path = Paths.get(zipEntry.getName());
         this.book = getWorkBook(this.path.getFileName().toString(), zis);
-        this.sheet = book.getSheetAt(0);
-        this.portfolio = getPortfolio(this.sheet);
-        this.reportDate = getReportDate(this.sheet);
+        this.reportPage = new ExcelSheet(book.getSheetAt(0));
+        this.portfolio = getPortfolio(this.reportPage);
+        this.reportDate = getReportDate(this.reportPage);
     }
 
     public UralsibBrokerReport(String excelFileName, InputStream is) throws IOException {
         this.path = Paths.get(excelFileName);
         this.book = getWorkBook(excelFileName, is);
-        this.sheet = book.getSheetAt(0);
-        this.portfolio = getPortfolio(this.sheet);
-        this.reportDate = getReportDate(this.sheet);
+        this.reportPage = new ExcelSheet(book.getSheetAt(0));
+        this.portfolio = getPortfolio(this.reportPage);
+        this.reportDate = getReportDate(this.reportPage);
     }
 
     private Workbook getWorkBook(String excelFileName, InputStream is) throws IOException {
@@ -89,17 +88,18 @@ public class UralsibBrokerReport implements BrokerReport {
         }
     }
 
-    private static String getPortfolio(Sheet sheet) {
+    private static String getPortfolio(ReportPage reportPage) {
         try {
-            CellAddress address = ExcelTableHelper.find(sheet, PORTFOLIO_MARKER);
-            for (Cell cell : sheet.getRow(address.getRow())) {
+            TableCellAddress address = reportPage.find(PORTFOLIO_MARKER);
+            for (TableCell cell : reportPage.getRow(address.getRow())) {
                 if (cell != null && cell.getColumnIndex() > address.getColumn()) {
-                    if (cell.getCellType() == CellType.STRING) {
-                        return ExcelTableHelper.getStringCellValue(cell)
+                    Object value = cell.getValue();
+                    if (value instanceof String) {
+                        return value.toString()
                                 .replace("_invest", "")
                                 .replace("SP", "");
-                    } else if (cell.getCellType() == CellType.NUMERIC) {
-                        return String.valueOf(ExcelTableHelper.getLongCellValue(cell));
+                    } else if (value instanceof Number) {
+                        return String.valueOf(((Number) value).longValue());
                     }
                 }
             }
@@ -110,14 +110,14 @@ public class UralsibBrokerReport implements BrokerReport {
         }
     }
 
-    private Instant getReportDate(Sheet sheet) {
+    private Instant getReportDate(ReportPage reportPage) {
         try {
-            CellAddress address = ExcelTableHelper.find(sheet, REPORT_DATE_MARKER, 0, Integer.MAX_VALUE,
+            TableCellAddress address = reportPage.find(REPORT_DATE_MARKER, 0, Integer.MAX_VALUE,
                     (cell, value) -> cell.toLowerCase().contains(value.toString()));
             return convertToInstant(
                     Lists.reverse(
                             Arrays.asList(
-                                    sheet.getRow(address.getRow())
+                                    reportPage.getRow(address.getRow())
                                             .getCell(address.getColumn())
                                             .getStringCellValue()
                                             .split(" ")))

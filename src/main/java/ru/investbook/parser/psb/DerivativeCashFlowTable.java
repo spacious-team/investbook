@@ -21,8 +21,13 @@ package ru.investbook.parser.psb;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
-import ru.investbook.parser.*;
+import ru.investbook.parser.AbstractReportTable;
+import ru.investbook.parser.TableColumn;
+import ru.investbook.parser.TableColumnDescription;
+import ru.investbook.parser.TableColumnImpl;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
+import ru.investbook.parser.table.excel.ExcelTable;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.SecurityEventCashFlow;
 
@@ -48,12 +53,12 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> parseTable(ExcelTable table) {
+    protected Collection<SecurityEventCashFlow> parseTable(Table table) {
         return hasOpenContract() ? super.parseTable(table) : Collections.emptyList();
     }
 
     private boolean hasOpenContract() {
-        ExcelTable countTable = ExcelTable.of(getReport().getSheet(), TABLE2_NAME, TABLE_END_TEXT, ContractCountTableHeader.class);
+        ExcelTable countTable = ExcelTable.of(getReport().getReportPage(), TABLE2_NAME, TABLE_END_TEXT, ContractCountTableHeader.class);
         List<AbstractMap.SimpleEntry<String, Integer>> counts = countTable.getData(getReport().getPath(), DerivativeCashFlowTable::getCount);
         this.contractCount = counts.stream()
                 .filter(e -> e.getValue() != 0)
@@ -61,7 +66,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
         return !this.contractCount.isEmpty();
     }
 
-    private static AbstractMap.SimpleEntry<String, Integer> getCount(ExcelTable table, Row row) {
+    private static AbstractMap.SimpleEntry<String, Integer> getCount(Table table, TableRow row) {
         String contract = table.getStringCellValue(row, CONTRACT);
         int incomingCount = Math.abs(table.getIntCellValue(row, INCOMING));
         int outgoingCount = Math.abs(table.getIntCellValue(row, OUTGOING));
@@ -73,7 +78,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> getRow(ExcelTable table, Row row) {
+    protected Collection<SecurityEventCashFlow> getRow(Table table, TableRow row) {
         BigDecimal value = table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.INCOMING)
                 .subtract(table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.OUTGOING));
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
@@ -81,7 +86,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
                 .portfolio(getReport().getPortfolio())
                 .value(value)
                 .currency("RUB"); // FORTS, only RUB
-        String action = table.getCell(row, DerivativeCashFlowTableHeader.OPERATION).getStringCellValue().toLowerCase();
+        String action = table.getStringCellValue(row, DerivativeCashFlowTableHeader.OPERATION).toLowerCase();
         switch (action) {
             case "вариационная маржа":
                 String contract = table.getStringCellValue(row, DerivativeCashFlowTableHeader.CONTRACT)

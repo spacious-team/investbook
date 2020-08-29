@@ -19,8 +19,12 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
-import org.apache.poi.ss.usermodel.Row;
-import ru.investbook.parser.*;
+import ru.investbook.parser.AbstractReportTable;
+import ru.investbook.parser.TableColumn;
+import ru.investbook.parser.TableColumnDescription;
+import ru.investbook.parser.TableColumnImpl;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 
 import java.time.Instant;
 import java.util.AbstractMap;
@@ -43,7 +47,7 @@ public class SecurityRedemptionTable extends AbstractReportTable<Map.Entry<Strin
     }
 
     @Override
-    protected Collection<Map.Entry<String, Instant>> getRow(ExcelTable table, Row row) {
+    protected Collection<Map.Entry<String, Instant>> getRow(Table table, TableRow row) {
         return table.getStringCellValue(row, OPERATION).equalsIgnoreCase(REDEMPTION_DESCRIPTION) ?
                 singletonList(new AbstractMap.SimpleEntry<>(
                         table.getStringCellValue(row, NAME),

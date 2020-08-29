@@ -21,14 +21,13 @@ package ru.investbook.parser.psb;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import ru.investbook.parser.BrokerReport;
-import ru.investbook.parser.ExcelTableHelper;
+import ru.investbook.parser.table.ReportPage;
+import ru.investbook.parser.table.TableCell;
+import ru.investbook.parser.table.TableCellAddress;
+import ru.investbook.parser.table.excel.ExcelSheet;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,7 +50,7 @@ public class PsbBrokerReport implements BrokerReport {
 
     private final Workbook book;
     @Getter
-    private final Sheet sheet;
+    private final ReportPage reportPage;
     @Getter
     private final String portfolio;
     @Getter
@@ -70,9 +69,9 @@ public class PsbBrokerReport implements BrokerReport {
     public PsbBrokerReport(String excelFileName, InputStream is) throws IOException {
         this.path = Paths.get(excelFileName);
         this.book = getWorkBook(excelFileName, is);
-        this.sheet = book.getSheetAt(0);
-        this.portfolio = getPortfolio(this.sheet);
-        this.reportDate = getReportDate(this.sheet);
+        this.reportPage = new ExcelSheet(book.getSheetAt(0));
+        this.portfolio = getPortfolio(this.reportPage);
+        this.reportDate = getReportDate(this.reportPage);
     }
 
     private Workbook getWorkBook(String excelFileName, InputStream is) throws IOException {
@@ -83,13 +82,14 @@ public class PsbBrokerReport implements BrokerReport {
         }
     }
 
-    private static String getPortfolio(Sheet sheet) {
+    private static String getPortfolio(ReportPage reportPage) {
         try {
-            CellAddress address = ExcelTableHelper.find(sheet, PORTFOLIO_MARKER);
-            for (Cell cell : sheet.getRow(address.getRow())) {
-                if (cell != null && cell.getColumnIndex() > address.getColumn() && cell.getCellType() == CellType.STRING) {
-                    String value = ExcelTableHelper.getStringCellValue(cell);
-                    return value.contains("/") ? value.split("/")[0] : value;
+            TableCellAddress address = reportPage.find(PORTFOLIO_MARKER);
+            for (TableCell cell : reportPage.getRow(address.getRow())) {
+                Object value;
+                if (cell != null && cell.getColumnIndex() > address.getColumn() && ((value = cell.getValue()) instanceof String)) {
+                    String string = value.toString();
+                    return string.contains("/") ? string.split("/")[0] : string;
                 }
             }
             throw new IllegalArgumentException(
@@ -99,13 +99,14 @@ public class PsbBrokerReport implements BrokerReport {
         }
     }
 
-    private Instant getReportDate(Sheet sheet) {
+    private Instant getReportDate(ReportPage reportPage) {
         try {
 
-            CellAddress address = ExcelTableHelper.find(sheet, REPORT_DATE_MARKER);
-            for (Cell cell : sheet.getRow(address.getRow())) {
-                if (cell != null && cell.getColumnIndex() > address.getColumn() && cell.getCellType() == CellType.STRING) {
-                    return convertToInstant(ExcelTableHelper.getStringCellValue(cell).split(" ")[3]);
+            TableCellAddress address = reportPage.find(REPORT_DATE_MARKER);
+            for (TableCell cell : reportPage.getRow(address.getRow())) {
+                Object value;
+                if (cell != null && cell.getColumnIndex() > address.getColumn() && ((value = cell.getValue()) instanceof String)) {
+                    return convertToInstant(value.toString().split(" ")[3]);
                 }
             }
             throw new IllegalArgumentException(
