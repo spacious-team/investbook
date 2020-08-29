@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.investbook.parser.TableColumn;
 import ru.investbook.parser.TableColumnDescription;
 
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -141,6 +142,38 @@ public abstract class AbstractTable implements Table {
             collection.addAll(mergeDuplicates.apply(equalsObject, element));
         } else {
             collection.add(element);
+        }
+    }
+
+    public int getIntCellValueOrDefault(TableRow row, TableColumnDescription columnDescription, int defaultValue) {
+        try {
+            return getIntCellValue(row, columnDescription);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    public long getLongCellValueOrDefault(TableRow row, TableColumnDescription columnDescription, long defaultValue) {
+        try {
+            return getLongCellValue(row, columnDescription);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    public BigDecimal getCurrencyCellValueOrDefault(TableRow row, TableColumnDescription columnDescription, BigDecimal defaultValue) {
+        try {
+            return getCurrencyCellValue(row, columnDescription);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    public String getStringCellValueOrDefault(TableRow row, TableColumnDescription columnDescription, String defaultValue) {
+        try {
+            return getStringCellValue(row, columnDescription);
+        } catch (Exception e) {
+            return defaultValue;
         }
     }
 

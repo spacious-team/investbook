@@ -22,7 +22,10 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import ru.investbook.parser.TableColumnDescription;
-import ru.investbook.parser.table.*;
+import ru.investbook.parser.table.AbstractTable;
+import ru.investbook.parser.table.ReportPage;
+import ru.investbook.parser.table.TableCellRange;
+import ru.investbook.parser.table.TableRow;
 
 import java.math.BigDecimal;
 
@@ -80,61 +83,21 @@ public class ExcelTable extends AbstractTable {
         super(reportPage, tableName, tableRange, headerDescription, headersRowCount);
     }
 
-    public TableCell getCell(TableRow row, TableColumnDescription columnDescription) {
-        return row.getCell(columnIndices.get(columnDescription.getColumn()));
-    }
-
     @Override
     public Object getCellValue(TableRow row, TableColumnDescription columnDescription) {
         return ExcelTableHelper.getCellValue(getRawCell(row, columnDescription));
-    }
-
-    /**
-     * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
-     */
-    public int getIntCellValueOrDefault(TableRow row, TableColumnDescription columnDescription, int defaultValue) {
-        return (int) getLongCellValueOrDefault(row, columnDescription, defaultValue);
     }
 
     public int getIntCellValue(TableRow row, TableColumnDescription columnDescription) {
         return (int) getLongCellValue(row, columnDescription);
     }
 
-    /**
-     * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
-     */
-    public long getLongCellValueOrDefault(TableRow row, TableColumnDescription columnDescription, long defaultValue) {
-        try {
-            return getLongCellValue(row, columnDescription);
-        } catch (Exception e) {
-            return defaultValue;
-        }
-    }
-
     public long getLongCellValue(TableRow row, TableColumnDescription columnDescription) {
         return ExcelTableHelper.getLongCellValue(getRawCell(row, columnDescription));
-    }
-    /**
-     * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
-     */
-    public BigDecimal getCurrencyCellValueOrDefault(TableRow row, TableColumnDescription columnDescription, BigDecimal defaultValue) {
-        try {
-            return getCurrencyCellValue(row, columnDescription);
-        } catch (Exception e) {
-            return defaultValue;
-        }
     }
 
     public BigDecimal getCurrencyCellValue(TableRow row, TableColumnDescription columnDescription) {
         return ExcelTableHelper.getCurrencyCellValue(getRawCell(row, columnDescription));
-    }
-
-    public String getStringCellValueOrDefault(TableRow row, TableColumnDescription columnDescription, String defaultValue) {
-        try {
-            return getStringCellValue(row, columnDescription);
-        } catch (Exception e) {
-            return defaultValue;
-        }
     }
 
     public String getStringCellValue(TableRow row, TableColumnDescription columnDescription) {

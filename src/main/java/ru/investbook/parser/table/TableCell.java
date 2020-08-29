@@ -30,9 +30,4 @@ public interface TableCell {
      * @throws RuntimeException if can't extract string value
      */
     String getStringCellValue();
-
-    /**
-     * @throws RuntimeException if can't extract long value
-     */
-    long getLongCellValue();
 }

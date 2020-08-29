@@ -47,8 +47,6 @@ public interface Table extends Iterable<TableRow> {
      */
     TableRow findRow(Object value);
 
-    TableCell getCell(TableRow row, TableColumnDescription columnDescription);
-
     Object getCellValue(TableRow row, TableColumnDescription columnDescription);
 
     /**
@@ -70,6 +68,21 @@ public interface Table extends Iterable<TableRow> {
      * @throws RuntimeException if can't extract string value
      */
     String getStringCellValue(TableRow row, TableColumnDescription columnDescription);
+
+    /**
+     * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
+     */
+    int getIntCellValueOrDefault(TableRow row, TableColumnDescription columnDescription, int defaultValue);
+
+    /**
+     * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
+     */
+    long getLongCellValueOrDefault(TableRow row, TableColumnDescription columnDescription, long defaultValue);
+
+    /**
+     * @return return cell value or defaultValue if the cell is missing or the type does not match the expected
+     */
+    BigDecimal getCurrencyCellValueOrDefault(TableRow row, TableColumnDescription columnDescription, BigDecimal defaultValue);
 
     /**
      * @return return cell value or defaultValue if the cell is missing or the type does not match the expected

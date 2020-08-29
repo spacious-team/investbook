@@ -48,9 +48,4 @@ public class ExcelTableCell implements TableCell {
     public String getStringCellValue() {
         return ExcelTableHelper.getStringCellValue(cell);
     }
-
-    @Override
-    public long getLongCellValue() {
-        return ExcelTableHelper.getLongCellValue(cell);
-    }
 }
