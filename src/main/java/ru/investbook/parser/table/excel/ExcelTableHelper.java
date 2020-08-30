@@ -20,7 +20,6 @@ package ru.investbook.parser.table.excel;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellAddress;
-import ru.investbook.parser.table.ReportPage;
 import ru.investbook.parser.table.TableCellAddress;
 
 import java.math.BigDecimal;
@@ -31,47 +30,15 @@ import static ru.investbook.parser.table.TableCellAddress.NOT_FOUND;
 
 class ExcelTableHelper {
 
-    static boolean rowContains(Row row, Object value) {
-        return rowContains(row.getSheet(), row.getRowNum(), value);
-    }
-
-    private static boolean rowContains(Sheet sheet, int rowNum, Object value) {
-        return find(sheet, value, rowNum, rowNum + 1, String::equals) != NOT_FOUND;
-    }
-
-    static TableCellAddress find(Sheet sheet, Object value) {
-        return find(sheet, value, 0);
-    }
-
-    private static TableCellAddress find(Sheet sheet, Object value, int startRow) {
-        return find(sheet, value, startRow, sheet.getLastRowNum());
-    }
-
-    /**
-     * @param startRow search rows start from this
-     * @param endRow search rows excluding this
-     */
-    private static TableCellAddress find(Sheet sheet, Object value, int startRow, int endRow) {
-        return find(sheet, value, startRow, endRow, ReportPage.CELL_STRING_EQUALS);
-    }
-
-    /**
-     * @param startRow search rows start from this
-     * @param endRow search rows excluding this
-     * @param stringPredicate cell and value comparing bi-predicate if cell value type is string
-     */
-    static TableCellAddress find(Sheet sheet, Object value, int startRow, int endRow, BiPredicate<String, Object> stringPredicate) {
-        return find(sheet, value, startRow, endRow, 0, Integer.MAX_VALUE, stringPredicate);
-    }
-
     /**
      * @param value searching value
      * @param startRow search rows start from this
-     * @param endRow search rows excluding this
+     * @param endRow search rows excluding this, can handle values greater than real rows count
      * @param startColumn search columns start from this
-     * @param endColumn search columns excluding this
+     * @param endColumn search columns excluding this, can handle values greater than real columns count
+     * @return table table cell address or {@link TableCellAddress#NOT_FOUND}
      */
-    private static TableCellAddress find(Sheet sheet, Object value, int startRow, int endRow,
+    static TableCellAddress find(Sheet sheet, Object value, int startRow, int endRow,
                                    int startColumn, int endColumn,
                                    BiPredicate<String, Object> stringPredicate) {
         if (sheet.getLastRowNum() == -1) {
@@ -136,7 +103,7 @@ class ExcelTableHelper {
         return switch (cell.getCellType()) {
             case BLANK -> value == null || value.equals("");
             case STRING -> stringPredicate.test(cell.getStringCellValue(), value);
-            case NUMERIC -> value instanceof Number && cell.getNumericCellValue() == ((Number) value).doubleValue();
+            case NUMERIC -> (value instanceof Number) && (cell.getNumericCellValue() - ((Number) value).doubleValue()) < 1e-6;
             case BOOLEAN -> value.equals(cell.getBooleanCellValue());
             default -> false;
         };
@@ -179,7 +146,7 @@ class ExcelTableHelper {
     }
 
     /**
-     * @throws RuntimeException if can't extract BigDecomal value
+     * @throws RuntimeException if can't extract BigDecimal value
      */
     static BigDecimal getCurrencyCellValue(Cell cell) {
         double cellValue = (double) getCellValue(cell);

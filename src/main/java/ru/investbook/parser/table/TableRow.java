@@ -23,17 +23,21 @@ import lombok.RequiredArgsConstructor;
 import java.util.Iterator;
 import java.util.function.Function;
 
+@RequiredArgsConstructor
 public abstract class TableRow implements Iterable<TableCell> {
 
-    abstract public TableCell getCell(int i);
+    /**
+     * @return cell ot null if cell does not exists
+     */
+    public abstract TableCell getCell(int i);
 
-    abstract public int getRowNum();
+    public abstract int getRowNum();
 
-    abstract public int getFirstCellNum();
+    public abstract int getFirstCellNum();
 
-    abstract public int getLastCellNum();
+    public abstract int getLastCellNum();
 
-    abstract public boolean rowContains(Object value);
+    public abstract boolean rowContains(Object value);
 
     @RequiredArgsConstructor
     protected static class TableRowIterator<T> implements Iterator<TableCell> {

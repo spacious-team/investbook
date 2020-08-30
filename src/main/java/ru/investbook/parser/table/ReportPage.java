@@ -22,21 +22,60 @@ import java.util.function.BiPredicate;
 
 public interface ReportPage {
 
-    TableCellAddress find(Object value);
+    BiPredicate<String, Object> CELL_STRING_EQUALS = (cell, searchingValue) ->
+            searchingValue != null && cell.trim().toLowerCase().startsWith(searchingValue.toString().trim().toLowerCase());
+
+    /**
+     * @return table table cell address or {@link TableCellAddress#NOT_FOUND}
+     */
+    default TableCellAddress find(Object value) {
+        return find(value, 0);
+    }
+
+    /**
+     * @return table table cell address or {@link TableCellAddress#NOT_FOUND}
+     */
+    default TableCellAddress find(Object value, int startRow) {
+        return find(value, startRow, Integer.MAX_VALUE);
+    }
 
     /**
      * @param startRow search rows start from this
-     * @param endRow search rows excluding this
-     * @param stringPredicate cell and value comparing bi-predicate if cell value type is string
+     * @param endRow search rows excluding this, can handle values greater than real rows count
+     * @return table table cell address or {@link TableCellAddress#NOT_FOUND}
      */
-    TableCellAddress find(Object value, int startRow, int endRow, BiPredicate<String, Object> stringPredicate);
+    default TableCellAddress find(Object value, int startRow, int endRow) {
+        return find(value, startRow, endRow, ReportPage.CELL_STRING_EQUALS);
+    }
 
-    TableRow getRow(int Row);
+    /**
+     * @param startRow search rows start from this
+     * @param endRow search rows excluding this, can handle values greater than real rows count
+     * @param stringPredicate cell and value comparing bi-predicate if cell value type is string
+     * @return table table cell address or {@link TableCellAddress#NOT_FOUND}
+     */
+    default TableCellAddress find(Object value, int startRow, int endRow, BiPredicate<String, Object> stringPredicate) {
+        return find(value, startRow, endRow, 0, Integer.MAX_VALUE, stringPredicate);
+    }
+
+    /**
+     * @param value searching value
+     * @param startRow search rows start from this
+     * @param endRow search rows excluding this, can handle values greater than real rows count
+     * @param startColumn search columns start from this
+     * @param endColumn search columns excluding this, can handle values greater than real columns count
+     * @return table table cell address or {@link TableCellAddress#NOT_FOUND}
+     */
+    TableCellAddress find(Object value, int startRow, int endRow,
+                                         int startColumn, int endColumn,
+                                         BiPredicate<String, Object> stringPredicate);
+
+    /**
+     * @return row object or null is row does not exist
+     */
+    TableRow getRow(int i);
 
     int getLastRowNum();
-
-    BiPredicate<String, Object> CELL_STRING_EQUALS = (cell, searchingValue) ->
-            searchingValue != null && cell.trim().toLowerCase().startsWith(searchingValue.toString().trim().toLowerCase());
 
     /**
      * Get table range, table ends with predefined string in one of the row cells

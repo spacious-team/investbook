@@ -30,11 +30,6 @@ public class ExcelTableCell implements TableCell {
     private final Cell cell;
 
     @Override
-    public int getRowIndex() {
-        return cell.getRowIndex();
-    }
-
-    @Override
     public int getColumnIndex() {
         return cell.getColumnIndex();
     }

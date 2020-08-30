@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.table.excel;
+package ru.investbook.parser.table.xml;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
+import nl.fountain.xelem.excel.Cell;
+import nl.fountain.xelem.excel.Row;
 import ru.investbook.parser.table.TableCell;
 import ru.investbook.parser.table.TableRow;
 
@@ -30,38 +30,39 @@ import java.util.Iterator;
 import static ru.investbook.parser.table.TableCellAddress.NOT_FOUND;
 
 @RequiredArgsConstructor
-public class ExcelTableRow extends TableRow {
+public class XmlTableRow extends TableRow {
 
     @Getter
     private final Row row;
 
+    @Override
     public TableCell getCell(int i) {
-        Cell cell = row.getCell(i);
-        return (cell == null) ? null : new ExcelTableCell(cell);
+        Cell cell = row.getCellAt(i);
+        return (cell == null) ? null : new XmlTableCell(cell);
     }
 
     @Override
     public int getRowNum() {
-        return row.getRowNum();
+        return row.getIndex();
     }
 
     @Override
     public int getFirstCellNum() {
-        return row.getFirstCellNum();
+        return row.getCellMap().firstKey();
     }
 
     @Override
     public int getLastCellNum() {
-        return row.getLastCellNum();
+        return row.getCellMap().lastKey();
     }
 
+    @Override
     public boolean rowContains(Object value) {
-        return ExcelTableHelper.find(row.getSheet(), value, row.getRowNum(), row.getRowNum() + 1,
-                0, Integer.MAX_VALUE, String::equals) != NOT_FOUND;
+        return XmlTableHelper.find(row, value, 0, Integer.MAX_VALUE, String::equals) != NOT_FOUND;
     }
 
     @Override
     public Iterator<TableCell> iterator() {
-        return new TableRowIterator<>(row.iterator(), ExcelTableCell::new);
+        return new TableRowIterator<>(row.cellIterator(), XmlTableCell::new);
     }
 }
