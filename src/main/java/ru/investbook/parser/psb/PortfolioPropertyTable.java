@@ -21,9 +21,7 @@ package ru.investbook.parser.psb;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import ru.investbook.parser.*;
-import ru.investbook.parser.table.Table;
-import ru.investbook.parser.table.TableRow;
-import ru.investbook.parser.table.excel.ExcelTable;
+import ru.investbook.parser.table.*;
 import ru.investbook.pojo.PortfolioProperty;
 import ru.investbook.pojo.PortfolioPropertyType;
 
@@ -49,15 +47,17 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
 
     @Override
     protected Collection<PortfolioProperty> parseTable() {
-        ExcelTable table = getSummaryTable((PsbBrokerReport) getReport());
+        Table table = getSummaryTable((PsbBrokerReport) getReport());
         Collection<PortfolioProperty> data = new ArrayList<>();
         data.addAll(getTotalAssets(table, (PsbBrokerReport) getReport()));
         data.addAll(getExchangeRate(table, (PsbBrokerReport) getReport()));
         return data;
     }
 
-    private static ExcelTable getSummaryTable(PsbBrokerReport report) {
-        ExcelTable table = ExcelTable.of(report.getReportPage(), SUMMARY_TABLE, ASSETS, SummaryTableHeader.class);
+    private static Table getSummaryTable(PsbBrokerReport report) {
+        ReportPage reportPage = report.getReportPage();
+        TableFactory tableFactory = TableFactoryRegistry.get(reportPage);
+        Table table = tableFactory.create(reportPage, SUMMARY_TABLE, ASSETS, SummaryTableHeader.class);
         if (table.isEmpty()) {
             throw new IllegalArgumentException("Таблица '" + SUMMARY_TABLE + "' не найдена");
         }

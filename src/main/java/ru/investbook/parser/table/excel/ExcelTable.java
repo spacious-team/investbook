@@ -33,53 +33,11 @@ import java.math.BigDecimal;
 @ToString(callSuper = true)
 public class ExcelTable extends AbstractTable {
 
-    public static ExcelTable of(ReportPage reportPage, String tableName, String tableFooterString,
-                                Class<? extends TableColumnDescription> headerDescription) {
-        return of(reportPage, tableName, tableFooterString, headerDescription, 1);
-    }
-
-    public static ExcelTable of(ReportPage reportPage, String tableName,
-                                Class<? extends TableColumnDescription> headerDescription) {
-        return of(reportPage, tableName, headerDescription, 1);
-    }
-
-    public static ExcelTable of(ReportPage reportPage, String tableName, String tableFooterString,
-                                Class<? extends TableColumnDescription> headerDescription,
-                                int headersRowCount) {
-        ExcelTable table = new ExcelTable(reportPage, tableName,
-                reportPage.getTableCellRange(tableName, headersRowCount, tableFooterString),
-                headerDescription,
-                headersRowCount);
-        table.setLastTableRowContainsTotalData(true);
-        return table;
-    }
-
-    public static ExcelTable of(ReportPage reportPage, String tableName,
-                                Class<? extends TableColumnDescription> headerDescription,
-                                int headersRowCount) {
-        ExcelTable table = new ExcelTable(reportPage, tableName,
-                reportPage.getTableCellRange(tableName, headersRowCount),
-                headerDescription,
-                headersRowCount);
-        table.setLastTableRowContainsTotalData(false);
-        return table;
-    }
-
-    public static ExcelTable ofNoName(ReportPage reportPage, String madeUpTableName, String firstLineText,
-                                      Class<? extends TableColumnDescription> headerDescription,
-                                      int headersRowCount) {
-        TableCellRange range = reportPage.getTableCellRange(firstLineText, headersRowCount);
-        if (!range.equals(TableCellRange.EMPTY_RANGE)) {
-            range = new TableCellRange(range.getFirstRow() - 1, range.getLastRow(),
-                    range.getFirstColumn(), range.getLastColumn());
-        }
-        ExcelTable table = new ExcelTable(reportPage, madeUpTableName, range, headerDescription, headersRowCount);
-        table.setLastTableRowContainsTotalData(true);
-        return table;
-    }
-
-    private ExcelTable(ReportPage reportPage, String tableName, TableCellRange tableRange,
-                       Class<? extends TableColumnDescription> headerDescription, int headersRowCount) {
+    ExcelTable(ReportPage reportPage,
+               String tableName,
+               TableCellRange tableRange,
+               Class<? extends TableColumnDescription> headerDescription,
+               int headersRowCount) {
         super(reportPage, tableName, tableRange, headerDescription, headersRowCount);
     }
 

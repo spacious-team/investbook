@@ -42,6 +42,8 @@ public interface Table extends Iterable<TableRow> {
                                     BiPredicate<T, T> equalityChecker,
                                     BiFunction<T, T, Collection<T>> mergeDuplicates);
 
+    boolean isEmpty();
+
     /**
      * @return row containing given value or null if not found
      */

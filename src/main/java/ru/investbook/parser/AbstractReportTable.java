@@ -19,9 +19,7 @@
 package ru.investbook.parser;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.investbook.parser.table.Table;
-import ru.investbook.parser.table.TableRow;
-import ru.investbook.parser.table.excel.ExcelTable;
+import ru.investbook.parser.table.*;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -57,9 +55,11 @@ public abstract class AbstractReportTable<RowType> extends InitializableReportTa
     @Override
     protected Collection<RowType> parseTable() {
         try {
-            ExcelTable table = (tableFooter != null && !tableFooter.isEmpty()) ?
-                    ExcelTable.of(getReport().getReportPage(), tableName, tableFooter, headerDescription, headersRowCount) :
-                    ExcelTable.of(getReport().getReportPage(), tableName, headerDescription, headersRowCount);
+            ReportPage reportPage = getReport().getReportPage();
+            TableFactory tableFactory = TableFactoryRegistry.get(reportPage);
+            Table table = (tableFooter != null && !tableFooter.isEmpty()) ?
+                    tableFactory.create(reportPage, tableName, tableFooter, headerDescription, headersRowCount) :
+                    tableFactory.create(reportPage, tableName, headerDescription, headersRowCount);
             return parseTable(table);
         } catch (Exception e) {
             throw new RuntimeException("Ошибка при парсинге таблицы '" + this.tableName + "' " +

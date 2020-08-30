@@ -84,13 +84,9 @@ public class PsbBrokerReport implements BrokerReport {
 
     private static String getPortfolio(ReportPage reportPage) {
         try {
-            TableCellAddress address = reportPage.find(PORTFOLIO_MARKER);
-            for (TableCell cell : reportPage.getRow(address.getRow())) {
-                Object value;
-                if (cell != null && cell.getColumnIndex() > address.getColumn() && ((value = cell.getValue()) instanceof String)) {
-                    String string = value.toString();
-                    return string.contains("/") ? string.split("/")[0] : string;
-                }
+            String value = getValueByMarker(reportPage, PORTFOLIO_MARKER);
+            if (value != null) {
+                return value.contains("/") ? value.split("/")[0] : value;
             }
             throw new IllegalArgumentException(
                     "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + " XXX'");
@@ -101,19 +97,26 @@ public class PsbBrokerReport implements BrokerReport {
 
     private Instant getReportDate(ReportPage reportPage) {
         try {
-
-            TableCellAddress address = reportPage.find(REPORT_DATE_MARKER);
-            for (TableCell cell : reportPage.getRow(address.getRow())) {
-                Object value;
-                if (cell != null && cell.getColumnIndex() > address.getColumn() && ((value = cell.getValue()) instanceof String)) {
-                    return convertToInstant(value.toString().split(" ")[3]);
-                }
+            String value = getValueByMarker(reportPage, REPORT_DATE_MARKER);
+            if (value != null) {
+                return convertToInstant(value.split(" ")[3]);
             }
             throw new IllegalArgumentException(
                     "Не найдена дата отчета по заданному шаблону '" + REPORT_DATE_MARKER + " XXX'");
         } catch (Exception e) {
             throw new RuntimeException("Ошибка поиска даты отчета");
         }
+    }
+
+    public static String getValueByMarker(ReportPage reportPage, String marker) {
+        TableCellAddress address = reportPage.find(marker);
+        for (TableCell cell : reportPage.getRow(address.getRow())) {
+            Object value;
+            if (cell != null && cell.getColumnIndex() > address.getColumn() && ((value = cell.getValue()) instanceof String)) {
+                return value.toString();
+            }
+        }
+        return null;
     }
 
     public Instant convertToInstant(String value) {
