@@ -40,7 +40,7 @@ public class XmlReportPage implements ReportPage {
 
     @Override
     public TableRow getRow(int i) {
-        Row row = sheet.getRowAt(i);
+        Row row = sheet.getRowAt(i + 1);
         return (row == null) ? null : new XmlTableRow(row);
     }
 

@@ -42,7 +42,7 @@ class XmlTableHelper {
             value = ((Number) value).doubleValue();
         }
         for(int rowNum = startRow; rowNum < endRow; rowNum++) {
-            Row row = sheet.getRowAt(rowNum);
+            Row row = sheet.getRowAt(rowNum + 1);
             TableCellAddress address;
             if ((address = find(row, value, startColumn, endColumn, stringPredicate)) != null) {
                 return address;
@@ -53,13 +53,14 @@ class XmlTableHelper {
 
     static TableCellAddress find(Row row, Object value, int startColumn, int endColumn,
                                  BiPredicate<String, Object> stringPredicate) {
-        if (row == null) return null;
-        for (Cell cell : row.getCells()) {
-            if (cell != null) {
-                int column = cell.getIndex();
-                if (startColumn <= column && column < endColumn) {
-                    if (compare(value, cell, stringPredicate)) {
-                        return new TableCellAddress(row.getIndex(), cell.getIndex());
+        if (row != null) {
+            for (Cell cell : row.getCells()) {
+                if (cell != null) {
+                    int column = cell.getIndex() - 1;
+                    if (startColumn <= column && column < endColumn) {
+                        if (compare(value, cell, stringPredicate)) {
+                            return new TableCellAddress(row.getIndex() - 1, column);
+                        }
                     }
                 }
             }
@@ -68,7 +69,7 @@ class XmlTableHelper {
     }
 
     static int getLastRowNum(Worksheet sheet) {
-        return sheet.getTable().getRowMap().lastKey();
+        return sheet.getTable().getRowMap().lastKey() - 1;
     }
 
     private static boolean compare(Object value, Cell cell, BiPredicate<String, Object> stringPredicate) {

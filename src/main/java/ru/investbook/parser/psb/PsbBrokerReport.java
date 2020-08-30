@@ -112,7 +112,10 @@ public class PsbBrokerReport implements BrokerReport {
         TableCellAddress address = reportPage.find(marker);
         for (TableCell cell : reportPage.getRow(address.getRow())) {
             Object value;
-            if (cell != null && cell.getColumnIndex() > address.getColumn() && ((value = cell.getValue()) instanceof String)) {
+            if (cell != null
+                    && cell.getColumnIndex() > address.getColumn()
+                    && (value = cell.getValue()) instanceof String
+                    && !((String) value).isBlank()) {
                 return value.toString();
             }
         }

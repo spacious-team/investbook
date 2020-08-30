@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.table.xml;
 
+import nl.fountain.xelem.excel.Cell;
 import ru.investbook.parser.TableColumnDescription;
 import ru.investbook.parser.table.AbstractTable;
 import ru.investbook.parser.table.ReportPage;
@@ -38,7 +39,7 @@ public class XmlTable extends AbstractTable {
 
     @Override
     public Object getCellValue(TableRow row, TableColumnDescription columnDescription) {
-        return ((XmlTableRow) row).getRow().getCellAt(columnIndices.get(columnDescription.getColumn())).getData();
+        return getRawCell((XmlTableRow) row, columnDescription).getData();
     }
 
     @Override
@@ -61,6 +62,10 @@ public class XmlTable extends AbstractTable {
 
     @Override
     public String getStringCellValue(TableRow row, TableColumnDescription columnDescription) {
-        return ((XmlTableRow) row).getRow().getCellAt(columnIndices.get(columnDescription.getColumn())).getData$();
+        return getRawCell((XmlTableRow) row, columnDescription).getData$();
+    }
+
+    private Cell getRawCell(XmlTableRow row, TableColumnDescription columnDescription) {
+        return row.getRow().getCellAt(columnIndices.get(columnDescription.getColumn()));
     }
 }

@@ -29,7 +29,7 @@ public class XmlTableCell implements TableCell {
 
     @Override
     public int getColumnIndex() {
-        return cell.getIndex();
+        return cell.getIndex() - 1;
     }
 
     @Override

@@ -37,23 +37,23 @@ public class XmlTableRow extends TableRow {
 
     @Override
     public TableCell getCell(int i) {
-        Cell cell = row.getCellAt(i);
+        Cell cell = row.getCellAt(i + 1);
         return (cell == null) ? null : new XmlTableCell(cell);
     }
 
     @Override
     public int getRowNum() {
-        return row.getIndex();
+        return row.getIndex() - 1;
     }
 
     @Override
     public int getFirstCellNum() {
-        return row.getCellMap().firstKey();
+        return row.getCellMap().firstKey() - 1;
     }
 
     @Override
     public int getLastCellNum() {
-        return row.getCellMap().lastKey();
+        return row.getCellMap().lastKey() - 1;
     }
 
     @Override
@@ -63,6 +63,6 @@ public class XmlTableRow extends TableRow {
 
     @Override
     public Iterator<TableCell> iterator() {
-        return new TableRowIterator<>(row.cellIterator(), XmlTableCell::new);
+        return new TableRowIterator<>(row.getCells().iterator(), XmlTableCell::new);
     }
 }
