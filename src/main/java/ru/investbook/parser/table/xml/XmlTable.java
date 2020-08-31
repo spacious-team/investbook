@@ -26,8 +26,11 @@ import ru.investbook.parser.table.TableCellRange;
 import ru.investbook.parser.table.TableRow;
 
 import java.math.BigDecimal;
+import java.util.regex.Pattern;
 
 public class XmlTable extends AbstractTable {
+
+    private static final Pattern spacePattern = Pattern.compile("\\s");
 
     XmlTable(ReportPage reportPage,
                        String tableName,
@@ -44,20 +47,29 @@ public class XmlTable extends AbstractTable {
 
     @Override
     public int getIntCellValue(TableRow row, TableColumnDescription columnDescription) {
-        Double numberValue = (Double) getCellValue(row, columnDescription);
-        return numberValue.intValue();
+        return (int) getLongCellValue(row, columnDescription);
     }
 
     @Override
     public long getLongCellValue(TableRow row, TableColumnDescription columnDescription) {
-        Double numberValue = (Double) getCellValue(row, columnDescription);
-        return numberValue.longValue();
+        Object cellValue = getCellValue(row, columnDescription);
+        if (cellValue instanceof Number) {
+            return ((Number) cellValue).longValue();
+        } else {
+            return Long.parseLong(spacePattern.matcher(cellValue.toString()).replaceAll(""));
+        }
     }
 
     @Override
     public BigDecimal getCurrencyCellValue(TableRow row, TableColumnDescription columnDescription) {
-        double cellValue = (double) getCellValue(row, columnDescription);
-        return (Math.abs(cellValue - 0.01d) < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
+        Object cellValue = getCellValue(row, columnDescription);
+        double number;
+        if (cellValue instanceof Number) {
+            number = ((Number) cellValue).doubleValue();
+        } else {
+            number = Double.parseDouble(spacePattern.matcher(cellValue.toString()).replaceAll(""));
+        }
+        return (Math.abs(number - 0.01d) < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(number);
     }
 
     @Override

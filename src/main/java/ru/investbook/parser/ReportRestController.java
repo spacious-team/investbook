@@ -30,6 +30,7 @@ import ru.investbook.PortfolioProperties;
 import ru.investbook.parser.psb.PsbBrokerReport;
 import ru.investbook.parser.psb.PsbReportTableFactory;
 import ru.investbook.parser.psb.foreignmarket.PsbBrokerForeignMarketReport;
+import ru.investbook.parser.psb.foreignmarket.PsbForeignMarketReportTableFactory;
 import ru.investbook.parser.uralsib.UralsibBrokerReport;
 import ru.investbook.parser.uralsib.UralsibReportTableFactory;
 import ru.investbook.view.ForeignExchangeRateService;
@@ -153,8 +154,8 @@ public class ReportRestController {
 
     private void parsePsbForeignMarketReport(MultipartFile report) {
         try (PsbBrokerForeignMarketReport brokerReport = new PsbBrokerForeignMarketReport(report.getOriginalFilename(), report.getInputStream())) {
-            //ReportTableFactory reportTableFactory = new PsbReportTableFactory(brokerReport);
-            //reportParserService.parse(reportTableFactory);
+            ReportTableFactory reportTableFactory = new PsbForeignMarketReportTableFactory(brokerReport);
+            reportParserService.parse(reportTableFactory);
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
             log.warn(error, e);

@@ -25,10 +25,13 @@ import ru.investbook.parser.table.TableCellAddress;
 import java.math.BigDecimal;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import static ru.investbook.parser.table.TableCellAddress.NOT_FOUND;
 
 class ExcelTableHelper {
+
+    private static final Pattern spacePattern = Pattern.compile("\\s");
 
     /**
      * @param value searching value
@@ -141,7 +144,7 @@ class ExcelTableHelper {
         if (value instanceof Number) {
             return ((Number) value).longValue();
         } else {
-            return Long.parseLong(value.toString());
+            return Long.parseLong(spacePattern.matcher(value.toString()).replaceAll(""));
         }
     }
 
@@ -149,8 +152,14 @@ class ExcelTableHelper {
      * @throws RuntimeException if can't extract BigDecimal value
      */
     static BigDecimal getCurrencyCellValue(Cell cell) {
-        double cellValue = (double) getCellValue(cell);
-        return (Math.abs(cellValue - 0.01d) < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(cellValue);
+        Object cellValue = getCellValue(cell);
+        double number;
+        if (cellValue instanceof Number) {
+            number = ((Number) cellValue).doubleValue();
+        } else {
+            number = Double.parseDouble(spacePattern.matcher(cellValue.toString()).replaceAll(""));
+        }
+        return (Math.abs(number - 0.01d) < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(number);
     }
 
     /**
