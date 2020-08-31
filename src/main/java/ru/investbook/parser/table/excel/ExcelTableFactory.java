@@ -29,7 +29,7 @@ import ru.investbook.parser.table.TableFactory;
 public class ExcelTableFactory implements TableFactory {
     @Override
     public boolean canHandle(ReportPage reportPage) {
-        return reportPage instanceof ExcelSheet;
+        return (reportPage instanceof ExcelSheet);
     }
 
     @Override

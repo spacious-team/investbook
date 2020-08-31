@@ -24,13 +24,12 @@ import ru.investbook.parser.table.AbstractTable;
 import ru.investbook.parser.table.ReportPage;
 import ru.investbook.parser.table.Table;
 import ru.investbook.parser.table.TableFactory;
-import ru.investbook.parser.table.excel.ExcelSheet;
 
 @Component
 public class XmlTableFactory implements TableFactory {
     @Override
     public boolean canHandle(ReportPage reportPage) {
-        return reportPage instanceof ExcelSheet;
+        return (reportPage instanceof XmlReportPage);
     }
 
     @Override

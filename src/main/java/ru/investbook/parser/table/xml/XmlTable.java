@@ -66,6 +66,6 @@ public class XmlTable extends AbstractTable {
     }
 
     private Cell getRawCell(XmlTableRow row, TableColumnDescription columnDescription) {
-        return row.getRow().getCellAt(columnIndices.get(columnDescription.getColumn()));
+        return row.getRow().getCellAt(columnIndices.get(columnDescription.getColumn()) + 1);
     }
 }
