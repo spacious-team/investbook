@@ -22,7 +22,7 @@ import java.util.function.BiPredicate;
 
 public interface ReportPage {
 
-    BiPredicate<String, Object> CELL_STRING_EQUALS = (cell, searchingValue) ->
+    BiPredicate<String, Object> CELL_STRING_STARTS_WITH = (cell, searchingValue) ->
             searchingValue != null && cell.trim().toLowerCase().startsWith(searchingValue.toString().trim().toLowerCase());
 
     /**
@@ -45,7 +45,7 @@ public interface ReportPage {
      * @return table table cell address or {@link TableCellAddress#NOT_FOUND}
      */
     default TableCellAddress find(Object value, int startRow, int endRow) {
-        return find(value, startRow, endRow, ReportPage.CELL_STRING_EQUALS);
+        return find(value, startRow, endRow, ReportPage.CELL_STRING_STARTS_WITH);
     }
 
     /**
@@ -70,6 +70,23 @@ public interface ReportPage {
                                          int startColumn, int endColumn,
                                          BiPredicate<String, Object> stringPredicate);
 
+
+    /**
+     * For vertical table of key-value records (table with two columns), search and return value for requested key.
+     */
+    default Object getNextColumnValue(String firstColumnValue) {
+        TableCellAddress address = find(firstColumnValue);
+        for (TableCell cell : getRow(address.getRow())) {
+            if (cell != null && cell.getColumnIndex() > address.getColumn()) {
+                Object value = cell.getValue();
+                if (value != null && (!(value instanceof String) || !((String) value).isBlank())) {
+                    return value;
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * @return row object or null is row does not exist
      */
@@ -86,7 +103,7 @@ public interface ReportPage {
             return TableCellRange.EMPTY_RANGE;
         }
         TableCellAddress endAddress = find(tableFooterString, startAddress.getRow() + headersRowCount + 1,
-                getLastRowNum(), ReportPage.CELL_STRING_EQUALS);
+                getLastRowNum(), ReportPage.CELL_STRING_STARTS_WITH);
         if (endAddress.equals(TableCellAddress.NOT_FOUND)) {
             return TableCellRange.EMPTY_RANGE;
         }

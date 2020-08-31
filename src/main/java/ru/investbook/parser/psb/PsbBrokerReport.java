@@ -25,8 +25,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import ru.investbook.parser.BrokerReport;
 import ru.investbook.parser.table.ReportPage;
-import ru.investbook.parser.table.TableCell;
-import ru.investbook.parser.table.TableCellAddress;
 import ru.investbook.parser.table.excel.ExcelSheet;
 
 import java.io.IOException;
@@ -84,7 +82,7 @@ public class PsbBrokerReport implements BrokerReport {
 
     private static String getPortfolio(ReportPage reportPage) {
         try {
-            String value = getValueByMarker(reportPage, PORTFOLIO_MARKER);
+            String value = String.valueOf(reportPage.getNextColumnValue(PORTFOLIO_MARKER));
             if (value != null) {
                 return value.contains("/") ? value.split("/")[0] : value;
             }
@@ -97,7 +95,7 @@ public class PsbBrokerReport implements BrokerReport {
 
     private Instant getReportDate(ReportPage reportPage) {
         try {
-            String value = getValueByMarker(reportPage, REPORT_DATE_MARKER);
+            String value = String.valueOf(reportPage.getNextColumnValue(REPORT_DATE_MARKER));
             if (value != null) {
                 return convertToInstant(value.split(" ")[3]);
             }
@@ -108,21 +106,8 @@ public class PsbBrokerReport implements BrokerReport {
         }
     }
 
-    public static String getValueByMarker(ReportPage reportPage, String marker) {
-        TableCellAddress address = reportPage.find(marker);
-        for (TableCell cell : reportPage.getRow(address.getRow())) {
-            Object value;
-            if (cell != null
-                    && cell.getColumnIndex() > address.getColumn()
-                    && (value = cell.getValue()) instanceof String
-                    && !((String) value).isBlank()) {
-                return value.toString();
-            }
-        }
-        return null;
-    }
-
     public Instant convertToInstant(String value) {
+        value = value.trim();
         if (value.contains(":")) {
             return LocalDateTime.parse(value, PsbBrokerReport.dateTimeFormatter).atZone(PsbBrokerReport.zoneId).toInstant();
         } else {

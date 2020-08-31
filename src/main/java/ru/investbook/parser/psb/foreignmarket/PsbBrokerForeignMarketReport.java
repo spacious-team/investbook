@@ -25,7 +25,6 @@ import nl.fountain.xelem.lex.ExcelReader;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import ru.investbook.parser.BrokerReport;
-import ru.investbook.parser.psb.PsbBrokerReport;
 import ru.investbook.parser.table.ReportPage;
 import ru.investbook.parser.table.xml.XmlReportPage;
 
@@ -45,7 +44,8 @@ import java.time.format.DateTimeFormatter;
 @EqualsAndHashCode(of = "path")
 public class PsbBrokerForeignMarketReport implements BrokerReport {
     private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
-    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter dateFormatterWithDot = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter dateFormatterWithSlash = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
     private static final String PORTFOLIO_MARKER = "Договор №:";
     private static final String REPORT_DATE_MARKER = "ОТЧЕТ БРОКЕРА";
@@ -94,9 +94,9 @@ public class PsbBrokerForeignMarketReport implements BrokerReport {
 
     private static String getPortfolio(ReportPage reportPage) {
         try {
-            String value = PsbBrokerReport.getValueByMarker(reportPage, PORTFOLIO_MARKER);
+            String value = String.valueOf(reportPage.getNextColumnValue(PORTFOLIO_MARKER));
             if (value != null) {
-                return value.contains("/") ? value.split("/")[0] : value;
+                return (value.contains("/") ? value.split("/")[0] : value) + "V";
             }
             throw new IllegalArgumentException(
                     "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + " XXX'");
@@ -107,7 +107,7 @@ public class PsbBrokerForeignMarketReport implements BrokerReport {
 
     private Instant getReportDate(ReportPage reportPage) {
         try {
-            String value = PsbBrokerReport.getValueByMarker(reportPage, REPORT_DATE_MARKER);
+            String value = String.valueOf(reportPage.getNextColumnValue(REPORT_DATE_MARKER));
             if (value != null) {
                 return convertToInstant(value.split(" ")[3]);
             }
@@ -119,10 +119,13 @@ public class PsbBrokerForeignMarketReport implements BrokerReport {
     }
 
     public Instant convertToInstant(String value) {
+        value = value.trim();
         if (value.contains(":")) {
             return LocalDateTime.parse(value, PsbBrokerForeignMarketReport.dateTimeFormatter).atZone(PsbBrokerForeignMarketReport.zoneId).toInstant();
+        } else if (value.contains("/")) {
+            return LocalDate.parse(value, PsbBrokerForeignMarketReport.dateFormatterWithSlash).atStartOfDay(PsbBrokerForeignMarketReport.zoneId).toInstant();
         } else {
-            return LocalDate.parse(value, PsbBrokerForeignMarketReport.dateFormatter).atStartOfDay(PsbBrokerForeignMarketReport.zoneId).toInstant();
+            return LocalDate.parse(value, PsbBrokerForeignMarketReport.dateFormatterWithDot).atStartOfDay(PsbBrokerForeignMarketReport.zoneId).toInstant();
         }
     }
 

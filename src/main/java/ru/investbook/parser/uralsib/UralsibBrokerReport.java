@@ -128,6 +128,7 @@ public class UralsibBrokerReport implements BrokerReport {
     }
 
     public Instant convertToInstant(String value) {
+        value = value.trim();
         if (value.contains(":")) {
             return LocalDateTime.parse(value, UralsibBrokerReport.dateTimeFormatter).atZone(UralsibBrokerReport.zoneId).toInstant();
         } else {
