@@ -75,7 +75,11 @@ public class CashFlowExcelTableView extends ExcelTableView {
         total.put(PROFIT, "=(" + LIQUIDATION_VALUE_RUB.getColumnIndex() + "2-" + CASH_RUB.getColumnIndex() + "2)"
                 + "/SUMPRODUCT("
                 + CASH_RUB.getColumnIndex() + "3:" + CASH_RUB.getColumnIndex() + "100000,"
-                + DAYS_COUNT.getColumnIndex() + "3:" + DAYS_COUNT.getColumnIndex() + "100000)*365*100");
+                + DAYS_COUNT.getColumnIndex() + "3:" + DAYS_COUNT.getColumnIndex() + "100000)"
+                // SUMMPRODUCT only positive (cash-in values), cash-out values don't generate yield
+                // formula generates 0 (negative values) or 1 (positive values)
+                + "0+(" + CASH_RUB.getColumnIndex() + "3:" + CASH_RUB.getColumnIndex() + "100000>0),"
+                + "*365*100");
         return total;
     }
 
