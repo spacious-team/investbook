@@ -62,24 +62,21 @@ public class CashFlowExcelTableView extends ExcelTableView {
     @Override
     protected Table.Record getTotalRow() {
         Table.Record total = Table.newRecord();
-        total.put(DATE, "Итого:");
-        total.put(CASH_RUB, "=SUM(" +
-                CASH_RUB.getColumnIndex() + "3:" +
-                CASH_RUB.getColumnIndex() + "100000)");
-        total.put(LIQUIDATION_VALUE_RUB, portfolioPropertyRepository
+        BigDecimal liquidationValueRub = portfolioPropertyRepository
                 .findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(
                         getPortfolio().getId(),
                         PortfolioPropertyType.TOTAL_ASSETS.name())
                 .map(e -> BigDecimal.valueOf(Double.parseDouble(e.getValue())))
-                .orElse(BigDecimal.ZERO));
-        total.put(PROFIT, "=(" + LIQUIDATION_VALUE_RUB.getColumnIndex() + "2-" + CASH_RUB.getColumnIndex() + "2)"
-                + "/SUMPRODUCT("
+                .orElse(BigDecimal.ZERO);
+        total.put(DATE, "Итого:");
+        total.put(CASH_RUB, "=SUM(" +
+                CASH_RUB.getColumnIndex() + "3:" +
+                CASH_RUB.getColumnIndex() + "100000)+" +
+                LIQUIDATION_VALUE_RUB.getCellAddr());
+        total.put(LIQUIDATION_VALUE_RUB, liquidationValueRub);
+        total.put(PROFIT, "=100*XIRR("
                 + CASH_RUB.getColumnIndex() + "3:" + CASH_RUB.getColumnIndex() + "100000,"
-                + DAYS_COUNT.getColumnIndex() + "3:" + DAYS_COUNT.getColumnIndex() + "100000)"
-                // SUMMPRODUCT only positive (cash-in values), cash-out values don't generate yield
-                // formula generates 0 (negative values) or 1 (positive values)
-                + "0+(" + CASH_RUB.getColumnIndex() + "3:" + CASH_RUB.getColumnIndex() + "100000>0),"
-                + "*365*100");
+                + DATE.getColumnIndex() + "3:" + DATE.getColumnIndex() + "100000)");
         return total;
     }
 

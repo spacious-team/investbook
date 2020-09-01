@@ -31,7 +31,7 @@ public enum CashFlowExcelTableHeader implements ExcelTableHeader {
     DAYS_COUNT("Количество дней на счету"),
     DESCRIPTION("Описание"),
     LIQUIDATION_VALUE_RUB("Ликвидная стоимость, руб"),
-    PROFIT("Доходность годовых (простая), %"),
+    PROFIT("Доходность годовых, %"),
     CURRENCY_NAME("Валюта"),
     EXCHANGE_RATE("Курс, руб");
 
