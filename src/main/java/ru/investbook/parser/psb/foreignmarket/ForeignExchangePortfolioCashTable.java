@@ -38,7 +38,6 @@ import static ru.investbook.parser.psb.foreignmarket.ForeignExchangePortfolioPro
 public class ForeignExchangePortfolioCashTable extends InitializableReportTable<PortfolioCash> {
 
     private final PortfolioPropertyTable.SummaryTableHeader[] CURRENCIES = new PortfolioPropertyTable.SummaryTableHeader[]{ RUB, USD, EUR, GBP, CHF };
-    private final BigDecimal min = BigDecimal.valueOf(0.01);
 
     public ForeignExchangePortfolioCashTable(BrokerReport report) {
         super(report);
@@ -53,8 +52,8 @@ public class ForeignExchangePortfolioCashTable extends InitializableReportTable<
         }
         Collection<PortfolioCash> cashes = new ArrayList<>();
         for (PortfolioPropertyTable.SummaryTableHeader currency : CURRENCIES) {
-            BigDecimal cash = table.getCurrencyCellValueOrDefault(row, currency, BigDecimal.ZERO);
-            if (cash.compareTo(min) > 0) {
+            BigDecimal cash = table.getCurrencyCellValueOrDefault(row, currency, null);
+            if (cash != null) {
                 cashes.add(PortfolioCash.builder()
                         .section("валютный рынок")
                         .value(cash)

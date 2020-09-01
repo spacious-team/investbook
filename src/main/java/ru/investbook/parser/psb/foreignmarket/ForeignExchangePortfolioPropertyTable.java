@@ -68,14 +68,12 @@ public class ForeignExchangePortfolioPropertyTable extends PortfolioPropertyTabl
                             .multiply(table.getCurrencyCellValueOrDefault(exchangeRateRow, GBP, BigDecimal.ZERO)))
                     .add(table.getCurrencyCellValueOrDefault(assetsRow, CHF, BigDecimal.ZERO)
                             .multiply(table.getCurrencyCellValueOrDefault(exchangeRateRow, CHF, BigDecimal.ZERO)));
-            if (totalAssets.compareTo(min) > 0) {
-                return Collections.singletonList(PortfolioProperty.builder()
-                        .portfolio(getReport().getPortfolio())
-                        .property(PortfolioPropertyType.TOTAL_ASSETS)
-                        .value(totalAssets.toString())
-                        .timestamp(getReport().getReportDate())
-                        .build());
-            }
+            return Collections.singletonList(PortfolioProperty.builder()
+                    .portfolio(getReport().getPortfolio())
+                    .property(PortfolioPropertyType.TOTAL_ASSETS)
+                    .value(totalAssets.toString())
+                    .timestamp(getReport().getReportDate())
+                    .build());
         } catch (Exception e) {
             log.info("Не могу получить стоимость активов из отчета {}", getReport().getPath().getFileName());
         }

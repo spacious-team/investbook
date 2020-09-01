@@ -40,7 +40,7 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
     public static final String SUMMARY_TABLE = "Сводная информация по счетам клиента в валюте счета";
     private static final String ASSETS = "\"СУММА АКТИВОВ\" на конец дня";
     public static final String EXCHANGE_RATE_ROW = "Курс валют ЦБ РФ";
-    protected static final BigDecimal min = BigDecimal.valueOf(0.01);
+    private static final BigDecimal min = BigDecimal.valueOf(0.01);
 
     public PortfolioPropertyTable(BrokerReport report) {
         super(report);
