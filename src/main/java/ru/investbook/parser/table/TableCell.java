@@ -16,21 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.view.excel;
+package ru.investbook.parser.table;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+public interface TableCell {
 
-@Getter
-@RequiredArgsConstructor
-public enum ForeignPortfolioPaymentTableHeader implements ExcelTableHeader {
-    DATE("Дата"),
-    CASH("Выплата по ЦБ с другого счета"),
-    CURRENCY("Валюта"),
-    CASH_RUB("Выплата, руб"),
-    DESCRIPTION("Описание"),
-    CURRENCY_NAME("Валюта"),
-    EXCHANGE_RATE("Курс, руб");
+    int getColumnIndex();
 
-    private final String description;
+    Object getValue();
+
+    /**
+     * @throws RuntimeException if can't extract string value
+     */
+    String getStringCellValue();
 }

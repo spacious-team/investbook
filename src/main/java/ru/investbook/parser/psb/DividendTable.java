@@ -20,8 +20,12 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
-import ru.investbook.parser.*;
+import ru.investbook.parser.AbstractReportTable;
+import ru.investbook.parser.TableColumn;
+import ru.investbook.parser.TableColumnDescription;
+import ru.investbook.parser.TableColumnImpl;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.SecurityEventCashFlow;
 
@@ -41,7 +45,7 @@ public class DividendTable extends AbstractReportTable<SecurityEventCashFlow> {
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> getRow(ExcelTable table, Row row) {
+    protected Collection<SecurityEventCashFlow> getRow(Table table, TableRow row) {
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .isin(table.getStringCellValue(row, ISIN))
                 .portfolio(getReport().getPortfolio())

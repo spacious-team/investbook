@@ -20,7 +20,7 @@ package ru.investbook.parser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import org.apache.poi.ss.usermodel.Row;
+import ru.investbook.parser.table.TableRow;
 
 /**
  * Implements table header kind of
@@ -47,14 +47,14 @@ public class MultiLineTableColumn implements TableColumn {
      * @param headerRows header rows count should be equal to count of row descriptors
      */
     @Override
-    public int getColumnIndex(int firstColumnForSearch, Row... headerRows) {
+    public int getColumnIndex(int firstColumnForSearch, TableRow... headerRows) {
         if (headerRows.length != rowDescriptors.length) {
             throw new RuntimeException("Внутренняя ошибка, в таблице ожидается " + rowDescriptors.length +
                     " строк в заголовке");
         }
         int columnIndex = firstColumnForSearch;
         int i = 0;
-        for (Row row : headerRows) {
+        for (TableRow row : headerRows) {
             TableColumn rowDescriptor = rowDescriptors[i++];
             columnIndex = rowDescriptor.getColumnIndex(columnIndex, row);
         }

@@ -18,10 +18,13 @@
 
 package ru.investbook.view.excel;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xddf.usermodel.chart.*;
+import org.apache.poi.xssf.usermodel.XSSFChart;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
@@ -38,6 +41,7 @@ import java.util.function.UnaryOperator;
 import static ru.investbook.view.excel.PortfolioStatusExcelTableHeader.*;
 
 @Component
+@Slf4j
 public class PortfolioStatusExcelTableView extends ExcelTableView {
 
     private final TransactionCashFlowRepository transactionCashFlowRepository;
@@ -67,9 +71,11 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         for (TableHeader header : headerType.getEnumConstants()) {
-            sheet.setColumnWidth(header.ordinal(), 16 * 256);
+            sheet.setColumnWidth(header.ordinal(), 15 * 256);
         }
         sheet.setColumnWidth(SECURITY.ordinal(), 45 * 256);
+        sheet.setColumnWidth(COMMISSION.ordinal(), 12 * 256);
+        sheet.setColumnWidth(AMORTIZATION.ordinal(), 16 * 256);
         sheet.setColumnWidth(TAX.ordinal(), 19 * 256);
     }
 
@@ -85,7 +91,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         totalRow.put(COUNT, "=SUMPRODUCT(ABS(" +
                 COUNT.getColumnIndex() + "3:" +
                 COUNT.getColumnIndex() + "100000))");
-        totalRow.remove(FIRST_TRNSACTION_DATE);
+        totalRow.remove(FIRST_TRANSACTION_DATE);
         totalRow.remove(LAST_TRANSACTION_DATE);
         totalRow.remove(LAST_EVENT_DATE);
         totalRow.remove(AVERAGE_PRICE);
@@ -98,9 +104,12 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         super.sheetPostCreate(sheet, headerType, styles);
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue;
-            Cell cell = row.getCell(SECURITY.ordinal());
-            if (cell != null) {
+            Cell cell;
+            if ((cell = row.getCell(SECURITY.ordinal())) != null) {
                 cell.setCellStyle(styles.getLeftAlignedTextStyle());
+            }
+            if ((cell = row.getCell(PROPORTION.ordinal())) != null) {
+                cell.setCellStyle(styles.getPercentStyle());
             }
         }
         for (Cell cell : sheet.getRow(1)) {
@@ -111,11 +120,45 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
                 cell.setCellStyle(styles.getIntStyle());
             } else if (cell.getColumnIndex() == CELL_COUNT.ordinal()){
                 cell.setCellStyle(styles.getIntStyle());
-            } else if (cell.getColumnIndex() == COUNT.ordinal()){
+            } else if (cell.getColumnIndex() == COUNT.ordinal()) {
                 cell.setCellStyle(styles.getIntStyle());
+            } else if (cell.getColumnIndex() == PROPORTION.ordinal()) {
+                cell.setCellStyle(styles.getPercentStyle());
             } else {
                 cell.setCellStyle(styles.getTotalRowStyle());
             }
+        }
+        addPieChart(sheet);
+    }
+
+    private void addPieChart(Sheet _sheet) {
+        try {
+            int chartHeight = 36;
+            XSSFSheet sheet = (XSSFSheet) _sheet;
+            int rowCount = sheet.getLastRowNum();
+            XSSFDrawing drawing = sheet.createDrawingPatriarch();
+            ClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0,
+                    0, rowCount + 2, PROPORTION.ordinal() + 1, rowCount + 2 + chartHeight);
+
+            XSSFChart chart = drawing.createChart(anchor);
+            chart.setTitleText("Состав портфеля");
+            chart.setTitleOverlay(false);
+            XDDFChartLegend legend = chart.getOrAddLegend();
+            legend.setPosition(LegendPosition.BOTTOM);
+
+            XDDFDataSource<String> securities = XDDFDataSourcesFactory.fromStringCellRange(sheet,
+                    new CellRangeAddress(2, rowCount, SECURITY.ordinal(), SECURITY.ordinal()));
+            XDDFNumericalDataSource<Double> proportions = XDDFDataSourcesFactory.fromNumericCellRange(sheet,
+                    new CellRangeAddress(2, rowCount, PROPORTION.ordinal(), PROPORTION.ordinal()));
+
+            XDDFChartData data = chart.createData(ChartTypes.PIE, null, null);
+            data.setVaryColors(true);
+            data.addSeries(securities, proportions);
+            chart.plot(data);
+        } catch (Exception e) {
+            String message = "Не могу построить график на вкладке '{}', возможно закрыты все позиции";
+            log.info(message, _sheet.getSheetName());
+            log.debug(message, _sheet.getSheetName(), e);
         }
     }
 }

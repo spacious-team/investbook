@@ -66,7 +66,10 @@ public class PortfolioViewRestController {
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
             String httpBody = Stream.of(sw.toString().split("\n"))
-                    .collect(joining("</br>", "<b>Ошибка сборки отчета</b></br></br>", ""));
+                    .collect(joining("</br>", "<b>Ошибка сборки отчета</b></br></br> <a href=\"/\">[назад]</a><br/>" +
+                                    "<span style=\"font-size: smaller; color: gray;\">Вы можете " +
+                                    "<a href=\"https://github.com/spacious-team/investbook/issues\">сообщить</a> об ошибке " +
+                                    "разработчикам</span></br></br> - ", ""));
             response.setContentType("text/html; charset=utf-8");
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(httpBody);

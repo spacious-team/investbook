@@ -20,8 +20,9 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
 import ru.investbook.parser.*;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 import ru.investbook.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInformation;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.EventCashFlow;
@@ -57,7 +58,7 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
     /**
      * @return security if found, null otherwise
      */
-    protected Security getSecurity(ExcelTable table, Row row, CashFlowType cashEventIfSecurityNotFound) {
+    protected Security getSecurity(Table table, TableRow row, CashFlowType cashEventIfSecurityNotFound) {
         try {
             return getSecurityIfCan(table, row);
         } catch (Exception e) {
@@ -69,14 +70,14 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
                     .currency(convertToCurrency(table.getStringCellValue(row, CURRENCY)))
                     .description(table.getStringCellValue(row, DESCRIPTION))
                     .build();
-            ExcelTable.addWithEqualityChecker(cash, eventCashFlows,
+            table.addWithEqualityChecker(cash, eventCashFlows,
                     EventCashFlow::checkEquality, EventCashFlow::mergeDuplicates);
             log.debug("Получена выплата по ценной бумаге, которой нет в портфеле: " + cash);
             return null;
         }
     }
 
-    protected Security getSecurityIfCan(ExcelTable table, Row row) {
+    protected Security getSecurityIfCan(Table table, TableRow row) {
         String description = table.getStringCellValue(row, DESCRIPTION);
         String descriptionLowercase = description.toLowerCase();
         for (ReportSecurityInformation info : securitiesIncomingCount) {

@@ -21,10 +21,8 @@ package ru.investbook.parser.uralsib;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.util.CellAddress;
 import ru.investbook.parser.*;
+import ru.investbook.parser.table.*;
 import ru.investbook.pojo.PortfolioProperty;
 import ru.investbook.pojo.PortfolioPropertyType;
 import ru.investbook.view.ForeignExchangeRateService;
@@ -65,17 +63,19 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
 
     protected static Collection<PortfolioProperty> getTotalAssets(BrokerReport report) {
         try {
-            ExcelTable table = ExcelTable.ofNoName(report.getSheet(), ASSETS_TABLE, TABLE_FIRST_HEADER_LINE,
+            ReportPage reportPage = report.getReportPage();
+            TableFactory tableFactory = TableFactoryRegistry.get(reportPage);
+            Table table = tableFactory.createOfNoName(reportPage, ASSETS_TABLE, TABLE_FIRST_HEADER_LINE,
                     SummaryTableHeader.class, 3);
             if (table.isEmpty()) {
-                table = ExcelTable.ofNoName(report.getSheet(), ASSETS_TABLE, TABLE_SECOND_HEADER_LINE,
+                table = tableFactory.createOfNoName(reportPage, ASSETS_TABLE, TABLE_SECOND_HEADER_LINE,
                         SummaryTableHeader.class, 2);
             }
             if (table.isEmpty()) {
                 log.info("Таблица '{}' не найдена", ASSETS_TABLE);
                 return emptyList();
             }
-            Row row = table.findRow(ASSETS);
+            TableRow row = table.findRow(ASSETS);
             if (row == null) {
                 return emptyList();
             }
@@ -93,13 +93,13 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
 
     protected static Collection<PortfolioProperty> getExchangeRate(BrokerReport report) {
         try {
-            CellAddress address = ExcelTableHelper.find(report.getSheet(), EXCHANGE_RATE);
-            if (address == ExcelTableHelper.NOT_FOUND) {
+            TableCellAddress address = report.getReportPage().find(EXCHANGE_RATE);
+            if (address == TableCellAddress.NOT_FOUND) {
                 return emptyList();
             }
             List<PortfolioProperty> exchangeRates = new ArrayList<>();
-            Cell cell = report.getSheet().getRow(address.getRow() + 1).getCell(0);
-            String text = ExcelTableHelper.getStringCellValue(cell);
+            TableCell cell = report.getReportPage().getRow(address.getRow() + 1).getCell(0);
+            String text = cell.getStringCellValue();
             String[] words = text.split(" ");
             for (int i = 0; i < words.length; i++) {
                 try {

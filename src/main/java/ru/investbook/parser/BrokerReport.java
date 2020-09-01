@@ -18,13 +18,13 @@
 
 package ru.investbook.parser;
 
-import org.apache.poi.ss.usermodel.Sheet;
+import ru.investbook.parser.table.ReportPage;
 
 import java.nio.file.Path;
 import java.time.Instant;
 
 public interface BrokerReport extends AutoCloseable {
-    Sheet getSheet();
+    ReportPage getReportPage();
     String getPortfolio();
     Path getPath();
     Instant getReportDate();

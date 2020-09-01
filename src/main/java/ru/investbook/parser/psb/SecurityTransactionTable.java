@@ -20,8 +20,8 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
 import ru.investbook.parser.*;
+import ru.investbook.parser.table.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -51,11 +51,13 @@ public class SecurityTransactionTable extends InitializableReportTable<SecurityT
     }
 
     private List<SecurityTransaction> parseTable(PsbBrokerReport report, String tableName) {
-        ExcelTable table = ExcelTable.of(report.getSheet(), tableName, TABLE_END_TEXT, TransactionTableHeader.class);
+        ReportPage reportPage = getReport().getReportPage();
+        TableFactory tableFactory = TableFactoryRegistry.get(reportPage);
+        Table table = tableFactory.create(report.getReportPage(), tableName, TABLE_END_TEXT, TransactionTableHeader.class);
         return table.getDataCollection(report.getPath(), this::getTransaction);
     }
 
-    private Collection<SecurityTransaction> getTransaction(ExcelTable table, Row row) {
+    private Collection<SecurityTransaction> getTransaction(Table table, TableRow row) {
         boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
         BigDecimal value = table.getCurrencyCellValue(row, VALUE);
         BigDecimal accruedInterest = table.getCurrencyCellValue(row, ACCRUED_INTEREST);

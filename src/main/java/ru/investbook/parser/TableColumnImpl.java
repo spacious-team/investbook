@@ -20,9 +20,8 @@ package ru.investbook.parser;
 
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
+import ru.investbook.parser.table.TableCell;
+import ru.investbook.parser.table.TableRow;
 
 import java.util.Arrays;
 
@@ -41,21 +40,19 @@ public class TableColumnImpl implements TableColumn {
                 .toArray(String[]::new);
     }
 
-    public int getColumnIndex(int firstColumnForSearch, Row... headerRows) {
-        for (Row header : headerRows) {
+    public int getColumnIndex(int firstColumnForSearch, TableRow... headerRows) {
+        for (TableRow header : headerRows) {
             next_cell:
-            for (Cell cell : header) {
-                if (cell != null && cell.getColumnIndex() >= firstColumnForSearch && cell.getCellType() == CellType.STRING) {
-                    String colName = cell.getStringCellValue();
-                    if (colName != null) {
-                        colName = colName.toLowerCase();
-                        for (String word : words) {
-                            if (!containsWord(colName, word)) {
-                                continue next_cell;
-                            }
+            for (TableCell cell : header) {
+                Object value;
+                if (cell != null && cell.getColumnIndex() >= firstColumnForSearch && ((value = cell.getValue()) instanceof String)) {
+                    String colName = value.toString().toLowerCase();
+                    for (String word : words) {
+                        if (!containsWord(colName, word)) {
+                            continue next_cell;
                         }
-                        return cell.getColumnIndex();
                     }
+                    return cell.getColumnIndex();
                 }
             }
         }

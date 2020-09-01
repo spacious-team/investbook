@@ -20,8 +20,9 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
 import ru.investbook.parser.*;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
     }
 
     @Override
-    protected Collection<DerivativeTransaction> parseTable(ExcelTable table) {
+    protected Collection<DerivativeTransaction> parseTable(Table table) {
         Collection<DerivativeTransaction> data = new ArrayList<>();
         data.addAll(super.parseTable(table));
         data.addAll(new DerivativeExpirationTable((PsbBrokerReport) getReport()).getData());
@@ -48,7 +49,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
     }
 
     @Override
-    protected Collection<DerivativeTransaction> getRow(ExcelTable table, Row row) {
+    protected Collection<DerivativeTransaction> getRow(Table table, TableRow row) {
         boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
         int count = table.getIntCellValue(row, COUNT);
         String type = table.getStringCellValue(row, TYPE).toLowerCase();

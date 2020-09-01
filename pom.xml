@@ -10,7 +10,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2020.8</version>
+    <version>2020.9</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -25,9 +25,16 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>20.8</win.msi.version>
+        <win.msi.version>20.9</win.msi.version>
         <java.version>14</java.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -87,6 +94,11 @@
             <version>4.1.2</version>
         </dependency>
         <dependency>
+            <groupId>com.github.VEINHORN</groupId>
+            <artifactId>xelem-wrapper</artifactId>
+            <version>e6fc9c6878</version>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>7.1.0</version>
@@ -119,6 +131,13 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -154,15 +173,28 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <version>2.0.0</version>
                 <executions>
                     <execution>
+                        <id>generate-html-doc</id>
+                        <phase>generate-resources</phase>
                         <goals>
-                            <goal>build-info</goal>
+                            <goal>process-asciidoc</goal>
                         </goals>
+                        <configuration>
+                            <outputDirectory>target/classes/static/user-guide/</outputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <attributes>
+                        <project-version>${project.version}</project-version>
+                        <linkcss>true</linkcss>
+                        <source-highlighter>coderay</source-highlighter>
+                    </attributes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

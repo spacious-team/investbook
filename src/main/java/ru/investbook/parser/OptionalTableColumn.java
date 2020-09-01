@@ -18,7 +18,7 @@
 
 package ru.investbook.parser;
 
-import org.apache.poi.ss.usermodel.Row;
+import ru.investbook.parser.table.TableRow;
 
 public class OptionalTableColumn implements TableColumn {
 
@@ -30,7 +30,7 @@ public class OptionalTableColumn implements TableColumn {
     }
 
     @Override
-    public int getColumnIndex(int firstColumnForSearch, Row... headerRows) {
+    public int getColumnIndex(int firstColumnForSearch, TableRow... headerRows) {
         return -1;
     }
 }

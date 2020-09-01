@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum PortfolioPaymentTableHeader implements ExcelTableHeader {
+public enum PortfolioPaymentExcelTableHeader implements ExcelTableHeader {
     SECURITY("Бумага"),
     DATE("Дата"),
     COUNT("Количество бумаг"),

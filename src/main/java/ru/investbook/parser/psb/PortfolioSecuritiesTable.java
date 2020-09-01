@@ -20,15 +20,18 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
-import ru.investbook.parser.*;
+import ru.investbook.parser.AbstractReportTable;
+import ru.investbook.parser.TableColumn;
+import ru.investbook.parser.TableColumnDescription;
+import ru.investbook.parser.TableColumnImpl;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 import ru.investbook.pojo.Security;
 
 import java.util.Collection;
 import java.util.Collections;
 
 import static java.util.Collections.emptyList;
-import static ru.investbook.parser.ExcelTableHelper.rowContains;
 import static ru.investbook.parser.psb.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.ISIN;
 import static ru.investbook.parser.psb.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.NAME;
 
@@ -43,8 +46,8 @@ public class PortfolioSecuritiesTable extends AbstractReportTable<Security> {
     }
 
     @Override
-    protected Collection<Security> getRow(ExcelTable table, Row row) {
-        return rowContains(table, row, INVALID_TEXT) ?
+    protected Collection<Security> getRow(Table table, TableRow row) {
+        return row.rowContains(INVALID_TEXT) ?
                 emptyList() :
                 Collections.singletonList(Security.builder()
                         .isin(table.getStringCellValue(row, ISIN))

@@ -19,10 +19,10 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
-import ru.investbook.parser.ExcelTable;
 import ru.investbook.parser.ReportTable;
 import ru.investbook.parser.SecurityTransaction;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.Security;
 import ru.investbook.pojo.SecurityEventCashFlow;
@@ -51,7 +51,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable<SecurityEve
         this.redemptionDates = new SecurityRedemptionTable(report).getData();
     }
 
-    protected Collection<SecurityEventCashFlow> getRow(ExcelTable table, Row row) {
+    protected Collection<SecurityEventCashFlow> getRow(Table table, TableRow row) {
         CashFlowType event;
         String action = table.getStringCellValue(row, OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
@@ -103,7 +103,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable<SecurityEve
         return (redemptionDate != null) && redemptionDate.equals(LocalDate.ofInstant(amortizationDay, UralsibBrokerReport.zoneId));
     }
 
-    private BigDecimal getTax(ExcelTable table, Row row) {
+    private BigDecimal getTax(Table table, TableRow row) {
         // информация о налоге по купонам облигаций не выводится в отчет брокера
         return BigDecimal.ZERO;
     }

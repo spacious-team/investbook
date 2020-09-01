@@ -18,10 +18,10 @@
 
 package ru.investbook.parser.uralsib;
 
-import org.apache.poi.ss.usermodel.Row;
 import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.parser.ExcelTable;
 import ru.investbook.parser.SecurityTransaction;
+import ru.investbook.parser.table.Table;
+import ru.investbook.parser.table.TableRow;
 import ru.investbook.pojo.Security;
 
 import java.math.BigDecimal;
@@ -46,7 +46,7 @@ public class SecurityDepositAndWithdrawalTable extends AbstractReportTable<Secur
     }
 
     @Override
-    protected Collection<SecurityTransaction> getRow(ExcelTable table, Row row) {
+    protected Collection<SecurityTransaction> getRow(Table table, TableRow row) {
         String operation = table.getStringCellValue(row, OPERATION);
         if (!operation.equalsIgnoreCase(IN_DESCRIPTION) && !operation.equalsIgnoreCase(OUT_DESCRIPTION)) {
             return Collections.emptyList();
@@ -65,7 +65,7 @@ public class SecurityDepositAndWithdrawalTable extends AbstractReportTable<Secur
                 .build());
     }
 
-    private Security getSecurity(ExcelTable table, Row row) {
+    private Security getSecurity(Table table, TableRow row) {
         String cfi = table.getStringCellValue(row, CFI);
         return securitiesIncomingCount.stream()
                 .filter(security -> security.getCfi().equals(cfi))

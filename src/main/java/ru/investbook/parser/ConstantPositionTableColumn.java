@@ -20,7 +20,7 @@ package ru.investbook.parser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import org.apache.poi.ss.usermodel.Row;
+import ru.investbook.parser.table.TableRow;
 
 @ToString
 @RequiredArgsConstructor(staticName = "of")
@@ -28,7 +28,7 @@ public class ConstantPositionTableColumn implements TableColumn {
     private final int columnIndex;
 
     @Override
-    public int getColumnIndex(int firstColumnForSearch, Row... headerRows) {
+    public int getColumnIndex(int firstColumnForSearch, TableRow... headerRows) {
         return columnIndex;
     }
 }
