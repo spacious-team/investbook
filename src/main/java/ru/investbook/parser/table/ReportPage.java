@@ -22,21 +22,77 @@ import java.util.function.BiPredicate;
 
 public interface ReportPage {
 
-    TableCellAddress find(Object value);
+    BiPredicate<String, Object> CELL_STRING_STARTS_WITH = (cell, searchingValue) ->
+            searchingValue != null && cell.trim().toLowerCase().startsWith(searchingValue.toString().trim().toLowerCase());
+
+    /**
+     * @return table table cell address or {@link TableCellAddress#NOT_FOUND}
+     */
+    default TableCellAddress find(Object value) {
+        return find(value, 0);
+    }
+
+    /**
+     * @return table table cell address or {@link TableCellAddress#NOT_FOUND}
+     */
+    default TableCellAddress find(Object value, int startRow) {
+        return find(value, startRow, Integer.MAX_VALUE);
+    }
 
     /**
      * @param startRow search rows start from this
-     * @param endRow search rows excluding this
-     * @param stringPredicate cell and value comparing bi-predicate if cell value type is string
+     * @param endRow search rows excluding this, can handle values greater than real rows count
+     * @return table table cell address or {@link TableCellAddress#NOT_FOUND}
      */
-    TableCellAddress find(Object value, int startRow, int endRow, BiPredicate<String, Object> stringPredicate);
+    default TableCellAddress find(Object value, int startRow, int endRow) {
+        return find(value, startRow, endRow, ReportPage.CELL_STRING_STARTS_WITH);
+    }
 
-    TableRow getRow(int Row);
+    /**
+     * @param startRow search rows start from this
+     * @param endRow search rows excluding this, can handle values greater than real rows count
+     * @param stringPredicate cell and value comparing bi-predicate if cell value type is string
+     * @return table table cell address or {@link TableCellAddress#NOT_FOUND}
+     */
+    default TableCellAddress find(Object value, int startRow, int endRow, BiPredicate<String, Object> stringPredicate) {
+        return find(value, startRow, endRow, 0, Integer.MAX_VALUE, stringPredicate);
+    }
+
+    /**
+     * @param value searching value
+     * @param startRow search rows start from this
+     * @param endRow search rows excluding this, can handle values greater than real rows count
+     * @param startColumn search columns start from this
+     * @param endColumn search columns excluding this, can handle values greater than real columns count
+     * @return table table cell address or {@link TableCellAddress#NOT_FOUND}
+     */
+    TableCellAddress find(Object value, int startRow, int endRow,
+                                         int startColumn, int endColumn,
+                                         BiPredicate<String, Object> stringPredicate);
+
+
+    /**
+     * For vertical table of key-value records (table with two columns), search and return value for requested key.
+     */
+    default Object getNextColumnValue(String firstColumnValue) {
+        TableCellAddress address = find(firstColumnValue);
+        for (TableCell cell : getRow(address.getRow())) {
+            if (cell != null && cell.getColumnIndex() > address.getColumn()) {
+                Object value = cell.getValue();
+                if (value != null && (!(value instanceof String) || !((String) value).isBlank())) {
+                    return value;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return row object or null is row does not exist
+     */
+    TableRow getRow(int i);
 
     int getLastRowNum();
-
-    BiPredicate<String, Object> CELL_STRING_EQUALS = (cell, searchingValue) ->
-            searchingValue != null && cell.trim().toLowerCase().startsWith(searchingValue.toString().trim().toLowerCase());
 
     /**
      * Get table range, table ends with predefined string in one of the row cells
@@ -47,7 +103,7 @@ public interface ReportPage {
             return TableCellRange.EMPTY_RANGE;
         }
         TableCellAddress endAddress = find(tableFooterString, startAddress.getRow() + headersRowCount + 1,
-                getLastRowNum(), ReportPage.CELL_STRING_EQUALS);
+                getLastRowNum(), ReportPage.CELL_STRING_STARTS_WITH);
         if (endAddress.equals(TableCellAddress.NOT_FOUND)) {
             return TableCellRange.EMPTY_RANGE;
         }

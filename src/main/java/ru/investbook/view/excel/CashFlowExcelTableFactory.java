@@ -29,6 +29,7 @@ import ru.investbook.repository.EventCashFlowRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,8 +68,19 @@ public class CashFlowExcelTableFactory implements TableFactory {
             table.add(record);
         }
         if (!cashFlows.isEmpty()) {
+            addLiquidationValueRow(table);
             foreignExchangeRateTableFactory.appendExchangeRates(table, CURRENCY_NAME, EXCHANGE_RATE);
         }
         return table;
+    }
+
+    private void addLiquidationValueRow(Table table) {
+        Table.Record record = new Table.Record();
+        record.put(DATE, Instant.now());
+        record.put(CASH, "=-" + LIQUIDATION_VALUE_RUB.getColumnIndex() + "2");
+        record.put(CURRENCY, "RUB");
+        record.put(CASH_RUB, "=" + CASH.getCellAddr());
+        record.put(DESCRIPTION, "Ликвидная стоимость активов, доступная к выводу");
+        table.add(record);
     }
 }

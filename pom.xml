@@ -29,6 +29,13 @@
         <java.version>14</java.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -85,6 +92,11 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>4.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.VEINHORN</groupId>
+            <artifactId>xelem-wrapper</artifactId>
+            <version>e6fc9c6878</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>

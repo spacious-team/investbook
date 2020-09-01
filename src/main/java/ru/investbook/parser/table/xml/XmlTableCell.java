@@ -16,16 +16,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.table;
+package ru.investbook.parser.table.xml;
 
-public interface TableCell {
+import lombok.RequiredArgsConstructor;
+import nl.fountain.xelem.excel.Cell;
+import ru.investbook.parser.table.TableCell;
 
-    int getColumnIndex();
+@RequiredArgsConstructor
+public class XmlTableCell implements TableCell {
 
-    Object getValue();
+    private final Cell cell;
 
-    /**
-     * @throws RuntimeException if can't extract string value
-     */
-    String getStringCellValue();
+    @Override
+    public int getColumnIndex() {
+        return cell.getIndex() - 1;
+    }
+
+    @Override
+    public Object getValue() {
+        return cell.getData();
+    }
+
+    @Override
+    public String getStringCellValue() {
+        return cell.getData$();
+    }
 }

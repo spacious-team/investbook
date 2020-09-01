@@ -18,14 +18,26 @@
 
 package ru.investbook.parser.table;
 
-public interface TableCell {
+import org.springframework.stereotype.Component;
 
-    int getColumnIndex();
+import java.util.ArrayList;
+import java.util.Collection;
 
-    Object getValue();
+@Component
+public class TableFactoryRegistry {
 
-    /**
-     * @throws RuntimeException if can't extract string value
-     */
-    String getStringCellValue();
+    private static final Collection<TableFactory> factories = new ArrayList<>();
+
+    public TableFactoryRegistry(Collection<TableFactory> factories) {
+        TableFactoryRegistry.factories.addAll(factories);
+    }
+
+    public static TableFactory get(ReportPage reportPage) {
+        for (TableFactory factory : factories) {
+            if (factory.canHandle(reportPage)) {
+                return factory;
+            }
+        }
+        throw new IllegalArgumentException("Нет парсера для отчета формата " + reportPage.getClass().getSimpleName());
+    }
 }

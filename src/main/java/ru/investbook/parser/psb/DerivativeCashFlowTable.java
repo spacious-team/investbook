@@ -25,9 +25,7 @@ import ru.investbook.parser.AbstractReportTable;
 import ru.investbook.parser.TableColumn;
 import ru.investbook.parser.TableColumnDescription;
 import ru.investbook.parser.TableColumnImpl;
-import ru.investbook.parser.table.Table;
-import ru.investbook.parser.table.TableRow;
-import ru.investbook.parser.table.excel.ExcelTable;
+import ru.investbook.parser.table.*;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.SecurityEventCashFlow;
 
@@ -58,7 +56,9 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
     }
 
     private boolean hasOpenContract() {
-        ExcelTable countTable = ExcelTable.of(getReport().getReportPage(), TABLE2_NAME, TABLE_END_TEXT, ContractCountTableHeader.class);
+        ReportPage reportPage = getReport().getReportPage();
+        TableFactory tableFactory = TableFactoryRegistry.get(reportPage);
+        Table countTable = tableFactory.create(reportPage, TABLE2_NAME, TABLE_END_TEXT, ContractCountTableHeader.class);
         List<AbstractMap.SimpleEntry<String, Integer>> counts = countTable.getData(getReport().getPath(), DerivativeCashFlowTable::getCount);
         this.contractCount = counts.stream()
                 .filter(e -> e.getValue() != 0)

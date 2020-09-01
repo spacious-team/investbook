@@ -22,10 +22,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.investbook.parser.*;
-import ru.investbook.parser.table.TableCell;
-import ru.investbook.parser.table.TableCellAddress;
-import ru.investbook.parser.table.TableRow;
-import ru.investbook.parser.table.excel.ExcelTable;
+import ru.investbook.parser.table.*;
 import ru.investbook.pojo.PortfolioProperty;
 import ru.investbook.pojo.PortfolioPropertyType;
 import ru.investbook.view.ForeignExchangeRateService;
@@ -66,10 +63,12 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
 
     protected static Collection<PortfolioProperty> getTotalAssets(BrokerReport report) {
         try {
-            ExcelTable table = ExcelTable.ofNoName(report.getReportPage(), ASSETS_TABLE, TABLE_FIRST_HEADER_LINE,
+            ReportPage reportPage = report.getReportPage();
+            TableFactory tableFactory = TableFactoryRegistry.get(reportPage);
+            Table table = tableFactory.createOfNoName(reportPage, ASSETS_TABLE, TABLE_FIRST_HEADER_LINE,
                     SummaryTableHeader.class, 3);
             if (table.isEmpty()) {
-                table = ExcelTable.ofNoName(report.getReportPage(), ASSETS_TABLE, TABLE_SECOND_HEADER_LINE,
+                table = tableFactory.createOfNoName(reportPage, ASSETS_TABLE, TABLE_SECOND_HEADER_LINE,
                         SummaryTableHeader.class, 2);
             }
             if (table.isEmpty()) {

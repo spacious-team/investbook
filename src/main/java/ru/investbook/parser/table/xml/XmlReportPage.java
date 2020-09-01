@@ -16,12 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.table.excel;
+package ru.investbook.parser.table.xml;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import nl.fountain.xelem.excel.Row;
+import nl.fountain.xelem.excel.Worksheet;
 import ru.investbook.parser.table.ReportPage;
 import ru.investbook.parser.table.TableCellAddress;
 import ru.investbook.parser.table.TableRow;
@@ -29,25 +28,24 @@ import ru.investbook.parser.table.TableRow;
 import java.util.function.BiPredicate;
 
 @RequiredArgsConstructor
-public class ExcelSheet implements ReportPage {
+public class XmlReportPage implements ReportPage {
 
-    @Getter
-    private final Sheet sheet;
+    private final Worksheet sheet;
 
     @Override
     public TableCellAddress find(Object value, int startRow, int endRow, int startColumn, int endColumn,
                                  BiPredicate<String, Object> stringPredicate) {
-        return ExcelTableHelper.find(sheet, value, startRow, endRow, startColumn, endColumn, stringPredicate);
+        return XmlTableHelper.find(sheet, value, startRow, endRow, startColumn, endColumn, stringPredicate);
     }
 
     @Override
     public TableRow getRow(int i) {
-        Row row = sheet.getRow(i);
-        return (row == null) ? null : new ExcelTableRow(row);
+        Row row = sheet.getRowAt(i + 1);
+        return (row == null) ? null : new XmlTableRow(row);
     }
 
     @Override
     public int getLastRowNum() {
-        return sheet.getLastRowNum();
+        return XmlTableHelper.getLastRowNum(sheet);
     }
 }

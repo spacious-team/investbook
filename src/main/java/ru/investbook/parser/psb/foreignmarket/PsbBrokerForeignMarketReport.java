@@ -16,17 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.psb;
+package ru.investbook.parser.psb.foreignmarket;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import nl.fountain.xelem.excel.Workbook;
+import nl.fountain.xelem.lex.ExcelReader;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import ru.investbook.parser.BrokerReport;
 import ru.investbook.parser.table.ReportPage;
-import ru.investbook.parser.table.excel.ExcelSheet;
+import ru.investbook.parser.table.xml.XmlReportPage;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -39,14 +42,14 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 @EqualsAndHashCode(of = "path")
-public class PsbBrokerReport implements BrokerReport {
+public class PsbBrokerForeignMarketReport implements BrokerReport {
     private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
-    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter dateFormatterWithDot = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter dateFormatterWithSlash = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
     private static final String PORTFOLIO_MARKER = "Договор №:";
     private static final String REPORT_DATE_MARKER = "ОТЧЕТ БРОКЕРА";
 
-    private final Workbook book;
     @Getter
     private final ReportPage reportPage;
     @Getter
@@ -56,35 +59,44 @@ public class PsbBrokerReport implements BrokerReport {
     @Getter
     private final Instant reportDate;
 
-    public PsbBrokerReport(String excelFileName) throws IOException {
+    public PsbBrokerForeignMarketReport(String excelFileName) throws IOException, ParserConfigurationException, SAXException {
         this(Paths.get(excelFileName));
     }
 
-    public PsbBrokerReport(Path report) throws IOException {
+    public PsbBrokerForeignMarketReport(Path report) throws IOException, ParserConfigurationException, SAXException {
         this(report.getFileName().toString(), Files.newInputStream(report));
     }
 
-    public PsbBrokerReport(String excelFileName, InputStream is) throws IOException {
-        this.path = Paths.get(excelFileName);
-        this.book = getWorkBook(excelFileName, is);
-        this.reportPage = new ExcelSheet(book.getSheetAt(0));
+    public PsbBrokerForeignMarketReport(String excelFileName, InputStream is) throws IOException, ParserConfigurationException, SAXException {
+        Workbook book = getWorkbook(is);
+        this.reportPage = new XmlReportPage(book.getWorksheetAt(0));
         this.portfolio = getPortfolio(this.reportPage);
         this.reportDate = getReportDate(this.reportPage);
+        this.path = Paths.get(excelFileName);
     }
 
-    private Workbook getWorkBook(String excelFileName, InputStream is) throws IOException {
-        if (excelFileName.endsWith(".xls")) {
-            return new HSSFWorkbook(is); // constructor close zis
-        } else {
-            return new XSSFWorkbook(is);
-        }
+    private Workbook getWorkbook(InputStream is) throws IOException, SAXException, ParserConfigurationException {
+        ExcelReader reader = new ExcelReader();
+        is = skeepNewLines(is); // required by ExcelReader
+        return reader.getWorkbook(new InputSource(is));
+    }
+
+    private InputStream skeepNewLines(InputStream is) throws IOException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(is.readAllBytes());
+        int symbol;
+        do {
+            bais.mark(8);
+            symbol = bais.read();
+        } while (symbol == '\n' || symbol == '\r');
+        bais.reset();
+        return bais;
     }
 
     private static String getPortfolio(ReportPage reportPage) {
         try {
             String value = String.valueOf(reportPage.getNextColumnValue(PORTFOLIO_MARKER));
             if (value != null) {
-                return value.contains("/") ? value.split("/")[0] : value;
+                return (value.contains("/") ? value.split("/")[0] : value) + "V";
             }
             throw new IllegalArgumentException(
                     "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + " XXX'");
@@ -109,14 +121,15 @@ public class PsbBrokerReport implements BrokerReport {
     public Instant convertToInstant(String value) {
         value = value.trim();
         if (value.contains(":")) {
-            return LocalDateTime.parse(value, PsbBrokerReport.dateTimeFormatter).atZone(PsbBrokerReport.zoneId).toInstant();
+            return LocalDateTime.parse(value, PsbBrokerForeignMarketReport.dateTimeFormatter).atZone(PsbBrokerForeignMarketReport.zoneId).toInstant();
+        } else if (value.contains("/")) {
+            return LocalDate.parse(value, PsbBrokerForeignMarketReport.dateFormatterWithSlash).atStartOfDay(PsbBrokerForeignMarketReport.zoneId).toInstant();
         } else {
-            return LocalDate.parse(value, PsbBrokerReport.dateFormatter).atStartOfDay(PsbBrokerReport.zoneId).toInstant();
+            return LocalDate.parse(value, PsbBrokerForeignMarketReport.dateFormatterWithDot).atStartOfDay(PsbBrokerForeignMarketReport.zoneId).toInstant();
         }
     }
 
     @Override
-    public void close() throws IOException {
-        this.book.close();
+    public void close() {
     }
 }

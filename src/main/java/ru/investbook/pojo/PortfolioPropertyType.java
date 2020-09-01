@@ -19,7 +19,7 @@
 package ru.investbook.pojo;
 
 public enum PortfolioPropertyType {
-    TOTAL_ASSETS,
+    TOTAL_ASSETS, // in RUB
     CASH,
     USDRUB_EXCHANGE_RATE,
     EURRUB_EXCHANGE_RATE,

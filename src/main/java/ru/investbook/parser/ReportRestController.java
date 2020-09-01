@@ -29,6 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.investbook.PortfolioProperties;
 import ru.investbook.parser.psb.PsbBrokerReport;
 import ru.investbook.parser.psb.PsbReportTableFactory;
+import ru.investbook.parser.psb.foreignmarket.PsbBrokerForeignMarketReport;
+import ru.investbook.parser.psb.foreignmarket.PsbForeignMarketReportTableFactory;
 import ru.investbook.parser.uralsib.UralsibBrokerReport;
 import ru.investbook.parser.uralsib.UralsibReportTableFactory;
 import ru.investbook.view.ForeignExchangeRateService;
@@ -72,7 +74,11 @@ public class ReportRestController {
                 String originalFileName = report.getOriginalFilename();
                 switch (broker) {
                     case PSB:
-                        parsePsbReport(report);
+                        if (!String.valueOf(originalFileName).endsWith(".xml")) {
+                            parsePsbReport(report);
+                        } else {
+                            parsePsbForeignMarketReport(report);
+                        }
                         break;
                     case URALSIB:
                         if (originalFileName != null && !originalFileName.contains("_invest_")) {
@@ -138,6 +144,17 @@ public class ReportRestController {
     private void parsePsbReport(MultipartFile report) {
         try (PsbBrokerReport brokerReport = new PsbBrokerReport(report.getOriginalFilename(), report.getInputStream())) {
             ReportTableFactory reportTableFactory = new PsbReportTableFactory(brokerReport);
+            reportParserService.parse(reportTableFactory);
+        } catch (Exception e) {
+            String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
+            log.warn(error, e);
+            throw new RuntimeException(error, e);
+        }
+    }
+
+    private void parsePsbForeignMarketReport(MultipartFile report) {
+        try (PsbBrokerForeignMarketReport brokerReport = new PsbBrokerForeignMarketReport(report.getOriginalFilename(), report.getInputStream())) {
+            ReportTableFactory reportTableFactory = new PsbForeignMarketReportTableFactory(brokerReport);
             reportParserService.parse(reportTableFactory);
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();

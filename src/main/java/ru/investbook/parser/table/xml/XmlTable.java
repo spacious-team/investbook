@@ -16,11 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.table.excel;
+package ru.investbook.parser.table.xml;
 
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Cell;
+import nl.fountain.xelem.excel.Cell;
 import ru.investbook.parser.TableColumnDescription;
 import ru.investbook.parser.table.AbstractTable;
 import ru.investbook.parser.table.ReportPage;
@@ -28,41 +26,58 @@ import ru.investbook.parser.table.TableCellRange;
 import ru.investbook.parser.table.TableRow;
 
 import java.math.BigDecimal;
+import java.util.regex.Pattern;
 
-@Slf4j
-@ToString(callSuper = true)
-public class ExcelTable extends AbstractTable {
+public class XmlTable extends AbstractTable {
 
-    ExcelTable(ReportPage reportPage,
-               String tableName,
-               TableCellRange tableRange,
-               Class<? extends TableColumnDescription> headerDescription,
-               int headersRowCount) {
+    private static final Pattern spacePattern = Pattern.compile("\\s");
+
+    XmlTable(ReportPage reportPage,
+                       String tableName,
+                       TableCellRange tableRange,
+                       Class<? extends TableColumnDescription> headerDescription,
+                       int headersRowCount) {
         super(reportPage, tableName, tableRange, headerDescription, headersRowCount);
     }
 
     @Override
     public Object getCellValue(TableRow row, TableColumnDescription columnDescription) {
-        return ExcelTableHelper.getCellValue(getRawCell(row, columnDescription));
+        return getRawCell((XmlTableRow) row, columnDescription).getData();
     }
 
+    @Override
     public int getIntCellValue(TableRow row, TableColumnDescription columnDescription) {
         return (int) getLongCellValue(row, columnDescription);
     }
 
+    @Override
     public long getLongCellValue(TableRow row, TableColumnDescription columnDescription) {
-        return ExcelTableHelper.getLongCellValue(getRawCell(row, columnDescription));
+        Object cellValue = getCellValue(row, columnDescription);
+        if (cellValue instanceof Number) {
+            return ((Number) cellValue).longValue();
+        } else {
+            return Long.parseLong(spacePattern.matcher(cellValue.toString()).replaceAll(""));
+        }
     }
 
+    @Override
     public BigDecimal getCurrencyCellValue(TableRow row, TableColumnDescription columnDescription) {
-        return ExcelTableHelper.getCurrencyCellValue(getRawCell(row, columnDescription));
+        Object cellValue = getCellValue(row, columnDescription);
+        double number;
+        if (cellValue instanceof Number) {
+            number = ((Number) cellValue).doubleValue();
+        } else {
+            number = Double.parseDouble(spacePattern.matcher(cellValue.toString()).replaceAll(""));
+        }
+        return (Math.abs(number - 0.01d) < 0) ? BigDecimal.ZERO : BigDecimal.valueOf(number);
     }
 
+    @Override
     public String getStringCellValue(TableRow row, TableColumnDescription columnDescription) {
-        return ExcelTableHelper.getStringCellValue(getRawCell(row, columnDescription));
+        return getRawCell((XmlTableRow) row, columnDescription).getData$();
     }
 
-    private Cell getRawCell(TableRow row, TableColumnDescription columnDescription) {
-        return ((ExcelTableRow) row).getRow().getCell(columnIndices.get(columnDescription.getColumn()));
+    private Cell getRawCell(XmlTableRow row, TableColumnDescription columnDescription) {
+        return row.getRow().getCellAt(columnIndices.get(columnDescription.getColumn()) + 1);
     }
 }

@@ -54,7 +54,7 @@ public class EventCashFlow {
     private BigDecimal value;
 
     @Builder.Default
-    private String currency = "RUR";
+    private String currency = "RUB";
 
     @Nullable
     private String description;
