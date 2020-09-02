@@ -49,6 +49,7 @@ public abstract class ExcelTableView {
     protected final TableFactory tableFactory;
     protected final PortfolioConverter portfolioConverter;
     private final Pattern camelCaseWordBoundaryPattern = Pattern.compile("(?<=[a-z])(?=[A-Z][a-z])");
+    private final Pattern invalidExcelSheetNameChars = Pattern.compile("[^0-9a-zA-Zа-яА-Я\\s()]");
     @Getter
     @Setter
     private Portfolio portfolio;
@@ -66,7 +67,7 @@ public abstract class ExcelTableView {
     protected void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator, Portfolio portfolio) {
         Table table = getTable(portfolio);
         if (!table.isEmpty()) {
-            Sheet sheet = book.createSheet(sheetNameCreator.apply(portfolio.getId()));
+            Sheet sheet = book.createSheet(validateExcelSheetName(sheetNameCreator.apply(portfolio.getId())));
             writeTable(table, sheet, styles);
         }
     }
@@ -78,6 +79,10 @@ public abstract class ExcelTableView {
 
     protected Table getTable(Portfolio portfolio) {
         return tableFactory.create(portfolio);
+    }
+
+    protected String validateExcelSheetName(String name) {
+        return invalidExcelSheetNameChars.matcher(name).replaceAll("-");
     }
 
     protected void writeTable(Table table,

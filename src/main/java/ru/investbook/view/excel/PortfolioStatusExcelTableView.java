@@ -61,7 +61,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         for (String currency : currencies) {
             Table table = tableFactory.create(portfolio, currency);
             if (!table.isEmpty()) {
-                Sheet sheet = book.createSheet(sheetNameCreator.apply(portfolio.getId()) + " " + currency);
+                Sheet sheet = book.createSheet(validateExcelSheetName(sheetNameCreator.apply(portfolio.getId()) + " " + currency));
                 writeTable(table, sheet, styles);
             }
         }
