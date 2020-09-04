@@ -9,3 +9,4 @@
 . <<securities-deposit-and-withdrawal.adoc#,Таблица "Ввод-вывод ценных бумаг">>
 . <<cash-flow.adoc#,Таблица "Доходноcть портфеля">>
 . <<tax.adoc#,Таблица "Налог">>
+. <<commission.adoc#,Таблица "Комиссия">>
