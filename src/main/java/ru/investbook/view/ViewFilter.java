@@ -18,10 +18,33 @@
 
 package ru.investbook.view;
 
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
 import java.time.Instant;
 
-public interface Position {
-    boolean wasOpenedAtTheInstant(Instant pastInstant);
-    boolean wasOpenedBetweenDates(Instant startDate, Instant endDate);
-    int getCount();
+@Getter
+@Builder(toBuilder = true)
+@EqualsAndHashCode
+public class ViewFilter {
+    private static final ThreadLocal<ViewFilter> filters = ThreadLocal.withInitial(() -> null);
+    public static final Instant defaultFromDate = Instant.ofEpochSecond(0);
+
+    @Builder.Default
+    private Instant fromDate = defaultFromDate;
+    @Builder.Default
+    private Instant toDate = Instant.now();
+
+    public static void set(ViewFilter viewFilter) {
+        filters.set(viewFilter);
+    }
+
+    public static ViewFilter get() {
+        return filters.get();
+    }
+
+    public static void remove() {
+        filters.remove();
+    }
 }

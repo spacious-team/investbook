@@ -35,6 +35,7 @@ import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static ru.investbook.pojo.CashFlowType.*;
 
@@ -46,18 +47,21 @@ public class PaidInterestFactory {
     private final PositionsFactory positionsFactory;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
-    private final Map<Positions, PaidInterest> paidInterestCache = new ConcurrentHashMap<>();
+    private final Map<Positions, Map<ViewFilter, PaidInterest>> paidInterestCache = new ConcurrentHashMap<>();
 
-    public PaidInterest get(Portfolio portfolio, Security security) {
-        Positions positions = positionsFactory.get(portfolio, security);
-        return paidInterestCache.computeIfAbsent(positions,
-                p -> create(portfolio.getId(), security, p));
+    public PaidInterest get(Portfolio portfolio, Security security, ViewFilter filter) {
+        ViewFilter filterTillToDate = filter.toBuilder()
+                .fromDate(ViewFilter.defaultFromDate) // need all history o positions from first security transaction
+                .build();
+        Positions positions = positionsFactory.get(portfolio, security, filterTillToDate);
+        return paidInterestCache.computeIfAbsent(positions, k -> new ConcurrentHashMap<>())
+                .computeIfAbsent(filter, k -> create(portfolio.getId(), security, positions, filter));
     }
 
-    private PaidInterest create(String portfolio, Security security, Positions positions) {
+    private PaidInterest create(String portfolio, Security security, Positions positions, ViewFilter filter) {
         PaidInterest paidInterest = new PaidInterest();
         for (CashFlowType type : PAY_TYPES) {
-            paidInterest.get(type).putAll(getPositionWithPayments(portfolio, security.getIsin(), positions, type));
+            paidInterest.get(type).putAll(getPositionWithPayments(portfolio, security.getIsin(), positions, type, filter));
         }
         return paidInterest;
     }
@@ -65,9 +69,15 @@ public class PaidInterestFactory {
     private Map<Position, List<SecurityEventCashFlow>> getPositionWithPayments(String portfolio,
                                                                                String isin,
                                                                                Positions positions,
-                                                                               CashFlowType event) {
+                                                                               CashFlowType event,
+                                                                               ViewFilter filter) {
         List<SecurityEventCashFlowEntity> accruedInterests = securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(portfolio, isin, event.getId());
+                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                        portfolio,
+                        isin,
+                        event.getId(),
+                        filter.getFromDate(),
+                        filter.getToDate());
 
         Map<Position, List<SecurityEventCashFlow>> payments = new HashMap<>();
         for (SecurityEventCashFlowEntity entity : accruedInterests) {
@@ -76,6 +86,11 @@ public class PaidInterestFactory {
                 Instant bookClosureDate = getBookClosureDate(positions.getPositionHistories(), entity);
                 Deque<Position> paidPositions = getPayedPositions(positions.getClosedPositions(), bookClosureDate);
                 paidPositions.addAll(getPayedPositions(positions.getOpenedPositions(), bookClosureDate));
+
+                // filter only positions was opened in 'filter' interval
+                paidPositions = paidPositions.stream()
+                        .filter(position -> position.wasOpenedBetweenDates(filter.getFromDate(), filter.getToDate()))
+                        .collect(Collectors.toCollection(LinkedList::new));
 
                 getPayments(cash, paidPositions).forEach((position, cashs) ->
                         cashs.forEach(securityCash ->

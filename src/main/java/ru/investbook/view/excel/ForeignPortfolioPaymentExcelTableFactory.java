@@ -29,6 +29,7 @@ import ru.investbook.pojo.Portfolio;
 import ru.investbook.repository.EventCashFlowRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;
+import ru.investbook.view.ViewFilter;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -62,11 +63,13 @@ public class ForeignPortfolioPaymentExcelTableFactory implements TableFactory {
 
     private ArrayList<EventCashFlow> getCashFlows(Portfolio portfolio) {
         return eventCashFlowRepository
-                .findByPortfolioIdAndCashFlowTypeIdInOrderByTimestampDesc(
+                .findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
                         portfolio.getId(),
                         Stream.of(PAY_TYPES)
                                 .map(CashFlowType::getId)
-                                .collect(Collectors.toList()))
+                                .collect(Collectors.toList()),
+                        ViewFilter.get().getFromDate(),
+                        ViewFilter.get().getToDate())
                 .stream()
                 .map(eventCashFlowConverter::fromEntity)
                 .collect(Collectors.toCollection(ArrayList::new));

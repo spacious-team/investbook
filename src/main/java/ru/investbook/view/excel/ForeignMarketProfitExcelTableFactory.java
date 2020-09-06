@@ -51,7 +51,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
         Table openPositionsProfit = new Table();
         Table closedPositionsProfit = new Table();
         for (String currencyPair : currencyPairs) {
-            Positions positions = positionsFactory.get(portfolio, currencyPair);
+            Positions positions = positionsFactory.get(portfolio, currencyPair, ViewFilter.get());
             openPositionsProfit.addAll(getPositionProfit(currencyPair, positions.getOpenedPositions(),
                     this::getOpenedPositionProfit));
             closedPositionsProfit.addAll(getPositionProfit(currencyPair, positions.getClosedPositions(),
@@ -67,7 +67,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
      * Returns currency pairs, for example USDRUB, EURRUB
      */
     private Collection<String> getCurrencyPairs(Portfolio portfolio) {
-        return transactionRepository.findDistinctFxCurrencyPairs(portfolio);
+        return transactionRepository.findDistinctFxCurrencyPairsAndTimestampBetween(portfolio, ViewFilter.get().getFromDate(), ViewFilter.get().getToDate());
     }
 
     private <T extends Position> Table getPositionProfit(String currencyPair,

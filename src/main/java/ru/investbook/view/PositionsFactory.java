@@ -42,54 +42,61 @@ public class PositionsFactory {
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
     private final Map<Portfolio, Map<String, Positions>> positionsCache = new ConcurrentHashMap<>();
 
-    public Positions get(Portfolio portfolio, Security security) {
-        return get(portfolio, security.getIsin());
+    public Positions get(Portfolio portfolio, Security security, ViewFilter filter) {
+        return get(portfolio, security.getIsin(), filter);
     }
 
-    public Positions get(Portfolio portfolio, String isinOrContract) {
+    public Positions get(Portfolio portfolio, String isinOrContract, ViewFilter filter) {
         return positionsCache.computeIfAbsent(portfolio, k -> new ConcurrentHashMap<>())
-                .computeIfAbsent(getCacheKey(isinOrContract), k -> create(portfolio, isinOrContract));
+                .computeIfAbsent(getCacheKey(isinOrContract, filter), k -> create(portfolio, isinOrContract, filter));
     }
 
-    private String getCacheKey(String isinOrContract) {
-        return (SecurityType.getSecurityType(isinOrContract) == SecurityType.CURRENCY_PAIR) ?
+    private String getCacheKey(String isinOrContract, ViewFilter filter) {
+        String key = (SecurityType.getSecurityType(isinOrContract) == SecurityType.CURRENCY_PAIR) ?
                 getCurrencyPair(isinOrContract) :
                 isinOrContract;
+        return key + filter.getFromDate().toString() + filter.getToDate().toString();
     }
 
-    private Positions create(Portfolio portfolio, String isinOrContract) {
+    private Positions create(Portfolio portfolio, String isinOrContract, ViewFilter filter) {
         SecurityType type = SecurityType.getSecurityType(isinOrContract);
         LinkedList<Transaction> transactions = new LinkedList<>();
         if (type == SecurityType.CURRENCY_PAIR) {
             String currencyPair = getCurrencyPair(isinOrContract);
-            transactions.addAll(getTransactions(portfolio, currencyPair + "_TOM"));
-            transactions.addAll(getTransactions(portfolio, currencyPair + "_TOD"));
+            transactions.addAll(getTransactions(portfolio, currencyPair + "_TOM", filter));
+            transactions.addAll(getTransactions(portfolio, currencyPair + "_TOD", filter));
             transactions.sort(
                     Comparator.comparing(Transaction::getTimestamp)
                             .thenComparingLong(Transaction::getId));
         } else {
-            transactions.addAll(getTransactions(portfolio, isinOrContract));
+            transactions.addAll(getTransactions(portfolio, isinOrContract, filter));
         }
         Deque<SecurityEventCashFlow> redemption = (type == SecurityType.STOCK_OR_BOND) ?
-                getRedemption(portfolio, isinOrContract) :
+                getRedemption(portfolio, isinOrContract, filter) :
                 new ArrayDeque<>(0);
         return new Positions(transactions, redemption);
     }
 
-    private LinkedList<Transaction> getTransactions(Portfolio portfolio, String isin) {
+    private LinkedList<Transaction> getTransactions(Portfolio portfolio, String isin, ViewFilter filter) {
         return transactionRepository
-                .findBySecurityIsinAndPkPortfolioOrderByTimestampAscPkIdAsc(isin, portfolio.getId())
+                .findBySecurityIsinAndPkPortfolioAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+                        isin,
+                        portfolio.getId(),
+                        filter.getFromDate(),
+                        filter.getToDate())
                 .stream()
                 .map(transactionConverter::fromEntity)
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    private Deque<SecurityEventCashFlow> getRedemption(Portfolio portfolio, String isin) {
+    private Deque<SecurityEventCashFlow> getRedemption(Portfolio portfolio, String isin, ViewFilter filter) {
         return securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(
+                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         portfolio.getId(),
                         isin,
-                        CashFlowType.REDEMPTION.getId())
+                        CashFlowType.REDEMPTION.getId(),
+                        filter.getFromDate(),
+                        filter.getToDate())
                 .stream()
                 .map(securityEventCashFlowConverter::fromEntity)
                 .collect(Collectors.toCollection(LinkedList::new));

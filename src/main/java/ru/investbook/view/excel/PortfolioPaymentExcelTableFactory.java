@@ -31,6 +31,7 @@ import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;
+import ru.investbook.view.ViewFilter;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -64,11 +65,13 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
 
     private ArrayList<SecurityEventCashFlow> getCashFlows(Portfolio portfolio) {
         return securityEventCashFlowRepository
-                .findByPortfolioIdAndCashFlowTypeIdInOrderByTimestampDesc(
+                .findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
                         portfolio.getId(),
                         Stream.of(PAY_TYPES)
                                 .map(CashFlowType::getId)
-                                .collect(Collectors.toList()))
+                                .collect(Collectors.toList()),
+                        ViewFilter.get().getFromDate(),
+                        ViewFilter.get().getToDate())
                 .stream()
                 .map(securityEventCashFlowConverter::fromEntity)
                 .collect(Collectors.toCollection(ArrayList::new));

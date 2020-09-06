@@ -24,10 +24,10 @@ import org.springframework.stereotype.Component;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.pojo.Portfolio;
-import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;
+import ru.investbook.view.ViewFilter;
 
 import java.util.Optional;
 
@@ -38,12 +38,13 @@ import static ru.investbook.view.excel.SecuritiesDepositAndWithdrawalExcelTableH
 @Slf4j
 public class SecuritiesDepositAndWithdrawalExcelTableFactory implements TableFactory {
     private final TransactionRepository transactionRepository;
-    private final SecurityRepository securityRepository;
 
     @Override
     public Table create(Portfolio portfolio) {
         Table table = new Table();
-        for (TransactionEntity transactionEntity : transactionRepository.findDepositAndWithdrawalTransactions(portfolio)) {
+        for (TransactionEntity transactionEntity :
+                transactionRepository.findByPkPortfolioAndTimestampBetweenDepositAndWithdrawalTransactions(
+                        portfolio, ViewFilter.get().getFromDate(), ViewFilter.get().getToDate())) {
             Table.Record record = new Table.Record();
             table.add(record);
             record.put(DATE, transactionEntity.getTimestamp());

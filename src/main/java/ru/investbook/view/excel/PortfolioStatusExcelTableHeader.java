@@ -29,7 +29,7 @@ public enum PortfolioStatusExcelTableHeader implements ExcelTableHeader {
     LAST_TRANSACTION_DATE("Дата последней сделки"),
     BUY_COUNT("Куплено"),
     CELL_COUNT("Продано"),
-    COUNT("Текущая позиция"),
+    COUNT("Изменение позиции"),
     AVERAGE_PRICE("Усредненная цена"),
     AVERAGE_ACCRUED_INTEREST("Усредненный НКД"),
     COMMISSION("Комиссия"),

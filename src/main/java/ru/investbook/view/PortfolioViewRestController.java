@@ -23,10 +23,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.view.excel.ExcelView;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -35,6 +36,11 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -43,21 +49,25 @@ import static java.util.stream.Collectors.joining;
 @RequiredArgsConstructor
 @Slf4j
 public class PortfolioViewRestController {
+
+    private static final String FROM_DATE_FIELD = "from-date";
+    private static final String TO_DATE_FIELD = "to-date";
+    private static final String REPORT_NAME = "investbook.xlsx";
     private final ExcelView excelView;
     private final FileSystem jimfs = Jimfs.newFileSystem();
 
-    @GetMapping("/portfolio")
-    public void getExcelView(HttpServletResponse response) throws IOException {
+    @PostMapping("/portfolio")
+    public void getExcelView(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             long t0 = System.nanoTime();
-            String fileName = "portfolio.xlsx";
-            Path path = jimfs.getPath(fileName);
+            ViewFilter.set(getViewFilter(request));
+            Path path = jimfs.getPath(REPORT_NAME);
             try (XSSFWorkbook book = new XSSFWorkbook()) {
                 excelView.writeTo(book);
                 book.write(Files.newOutputStream(path));
             }
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            response.setHeader("Content-disposition", "attachment; filename=" + fileName);
+            response.setHeader("Content-disposition", "attachment; filename=" + REPORT_NAME);
             IOUtils.copy(Files.newInputStream(path), response.getOutputStream());
             log.info("Отчет {} сформирован за {}", path.getFileName(), Duration.ofNanos(System.nanoTime() - t0));
         } catch (Exception e) {
@@ -73,7 +83,25 @@ public class PortfolioViewRestController {
             response.setContentType("text/html; charset=utf-8");
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(httpBody);
+        } finally {
+            ViewFilter.remove();
         }
         response.flushBuffer();
+    }
+
+    private ViewFilter getViewFilter(HttpServletRequest request) {
+        ViewFilter.ViewFilterBuilder viewFilterBuilder = ViewFilter.builder();
+        setViewFilterDate(request, FROM_DATE_FIELD, viewFilterBuilder::fromDate);
+        setViewFilterDate(request, TO_DATE_FIELD, viewFilterBuilder::toDate);
+        return viewFilterBuilder.build();
+    }
+
+    private void setViewFilterDate(HttpServletRequest request, String dateField, Consumer<Instant> setter) {
+        try {
+            setter.accept(LocalDate.parse(request.getParameter(dateField), DateTimeFormatter.ISO_LOCAL_DATE)
+                    .atStartOfDay(ZoneId.systemDefault())
+                    .toInstant());
+        } catch (Exception ignore) {
+        }
     }
 }
