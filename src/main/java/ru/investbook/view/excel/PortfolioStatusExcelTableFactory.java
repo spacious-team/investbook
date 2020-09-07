@@ -111,7 +111,6 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
 
     private Table.Record getSecurityStatus(Portfolio portfolio, Security security) {
         Positions positions = positionsFactory.get(portfolio, security, ViewFilter.get());
-        PaidInterest paidInterest = paidInterestFactory.get(portfolio, security, ViewFilter.get());
         Table.Record row = new Table.Record();
         SecurityType securityType = getSecurityType(security);
         row.put(SECURITY,
@@ -185,10 +184,10 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             }
         }
         row.put(COMMISSION, getTotal(positions.getTransactions(), CashFlowType.COMMISSION).abs());
-        row.put(COUPON, paidInterest.sumPaymentsForType(CashFlowType.COUPON)); // TODO like PortfolioPaymentExcelTableFactory ?
-        row.put(AMORTIZATION, paidInterest.sumPaymentsForType(CashFlowType.AMORTIZATION));
-        row.put(DIVIDEND, paidInterest.sumPaymentsForType(CashFlowType.DIVIDEND));
-        row.put(TAX, paidInterest.sumPaymentsForType(CashFlowType.TAX).abs());
+        row.put(COUPON, sumPaymentsForType(portfolio, security, CashFlowType.COUPON));
+        row.put(AMORTIZATION, sumPaymentsForType(portfolio, security, CashFlowType.AMORTIZATION));
+        row.put(DIVIDEND, sumPaymentsForType(portfolio, security, CashFlowType.DIVIDEND));
+        row.put(TAX, sumPaymentsForType(portfolio, security, CashFlowType.TAX).abs());
         row.put(PROFIT, "=" + COUPON.getCellAddr() + "+" + AMORTIZATION.getCellAddr() + "+" + DIVIDEND.getCellAddr() +
                 "+" + GROSS_PROFIT.getCellAddr() + "-" + TAX.getCellAddr() + "-" + COMMISSION.getCellAddr());
         return row;
@@ -205,16 +204,12 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
      */
     private BigDecimal getGrossProfit(Portfolio portfolio, Security security, Positions positions) {
         SecurityType securityType = getSecurityType(security);
-        switch (securityType) {
-            case STOCK_OR_BOND:
-                return getPurchaseCost(security, positions)
-                        .add(getPurchaseAccruedInterest(security, positions));
-            case DERIVATIVE:
-                return getDerivativeProfit(portfolio, security);
-            case CURRENCY_PAIR:
-                return getPurchaseCost(security, positions);
-        }
-        throw new IllegalArgumentException("Не поддерживаемый тип ценной бумаги " + security);
+        return switch (securityType) {
+            case STOCK_OR_BOND -> getPurchaseCost(security, positions)
+                    .add(getPurchaseAccruedInterest(security, positions));
+            case DERIVATIVE -> getDerivativeProfit(portfolio, security);
+            case CURRENCY_PAIR -> getPurchaseCost(security, positions);
+        };
     }
 
     /**
@@ -222,15 +217,11 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
      */
     private BigDecimal getPurchaseCost(Security security, Positions positions) {
         SecurityType securityType = getSecurityType(security);
-        switch (securityType) {
-            case STOCK_OR_BOND:
-                return getStockOrBondPurchaseCost(positions);
-            case DERIVATIVE:
-                return getTotal(positions.getTransactions(), CashFlowType.DERIVATIVE_PRICE);
-            case CURRENCY_PAIR:
-                return getTotal(positions.getTransactions(), CashFlowType.PRICE);
-        }
-        throw new IllegalArgumentException("Не поддерживаемый тип ценной бумаги " + security);
+        return switch (securityType) {
+            case STOCK_OR_BOND -> getStockOrBondPurchaseCost(positions);
+            case DERIVATIVE -> getTotal(positions.getTransactions(), CashFlowType.DERIVATIVE_PRICE);
+            case CURRENCY_PAIR -> getTotal(positions.getTransactions(), CashFlowType.PRICE);
+        };
     }
 
     /**
@@ -327,6 +318,19 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             return BigDecimal.valueOf(positionCount)
                     .divide(BigDecimal.valueOf(transactionCount), 6, RoundingMode.HALF_UP);
         }
+    }
+
+    private BigDecimal sumPaymentsForType(Portfolio portfolio, Security security, CashFlowType cashFlowType) {
+        return securityEventCashFlowRepository
+                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                        portfolio.getId(),
+                        security.getIsin(),
+                        cashFlowType.getId(),
+                        ViewFilter.get().getFromDate(),
+                        ViewFilter.get().getToDate())
+                .stream()
+                .map(SecurityEventCashFlowEntity::getValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private static String getProportionFormula() {
