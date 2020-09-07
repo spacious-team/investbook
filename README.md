@@ -76,6 +76,6 @@
 Приложение является бесплатным (разрешается использовать, распространять, копировать и вносить изменения).
 Текст лицензии доступен на [английском](https://www.gnu.org/licenses/gpl-3.0.html) и
 [русском](http://antirao.ru/gpltrans/gplru.pdf) языках, а также доступно [пояснение](https://www.gnu.org/licenses/quick-guide-gplv3.html)
-на простом языке.
+на русском языке.
 
 <img src="https://user-images.githubusercontent.com/11336712/85948991-b13e4780-b95c-11ea-9df6-a28be74c489d.png" width="100%"/>
