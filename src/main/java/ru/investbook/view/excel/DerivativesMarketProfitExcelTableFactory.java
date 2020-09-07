@@ -25,10 +25,7 @@ import ru.investbook.entity.SecurityEntity;
 import ru.investbook.pojo.*;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionRepository;
-import ru.investbook.view.DerivativeEvents;
-import ru.investbook.view.DerivativeEventsFactory;
-import ru.investbook.view.Table;
-import ru.investbook.view.TableFactory;
+import ru.investbook.view.*;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -57,7 +54,10 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
             Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
             if (securityEntity.isPresent()) {
                 Security contract = securityConverter.fromEntity(securityEntity.get());
-                DerivativeEvents derivativeEvents = derivativeEventsFactory.getDerivativeEvents(portfolio, contract);
+                DerivativeEvents derivativeEvents = derivativeEventsFactory.getDerivativeEvents(
+                        portfolio,
+                        contract,
+                        ViewFilter.get());
 
                 profit.addEmptyRecord();
                 profit.addAll(getContractProfit(contract, derivativeEvents));
@@ -67,7 +67,10 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
     }
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio) {
-        return transactionRepository.findDistinctDerivativeByPortfolioOrderByTimestampDesc(portfolio);
+        return transactionRepository.findDistinctDerivativeByPortfolioAndTimestampBetweenOrderByTimestampDesc(
+                portfolio,
+                ViewFilter.get().getFromDate(),
+                ViewFilter.get().getToDate());
     }
 
     private Table getContractProfit(Security contract, DerivativeEvents derivativeEvents) {

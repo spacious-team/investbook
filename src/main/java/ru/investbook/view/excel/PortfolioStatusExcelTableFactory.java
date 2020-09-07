@@ -75,10 +75,24 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio, String currency) {
         Collection<String> contracts = new ArrayList<>();
-        contracts.addAll(transactionRepository.findDistinctIsinByPortfolioAndCurrencyOrderByTimestampDesc(portfolio, currency));
-        contracts.addAll(transactionRepository.findDistinctFxCurrencyPairs(portfolio, currency));
+        contracts.addAll(
+                transactionRepository.findDistinctIsinByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+                        portfolio,
+                        currency,
+                        ViewFilter.get().getFromDate(),
+                        ViewFilter.get().getToDate()));
+        contracts.addAll(
+                transactionRepository.findDistinctFxCurrencyPairsAndTimestampBetween(
+                        portfolio,
+                        currency,
+                        ViewFilter.get().getFromDate(),
+                        ViewFilter.get().getToDate()));
         if (currency.equalsIgnoreCase("RUB")) {
-            contracts.addAll(transactionRepository.findDistinctDerivativeByPortfolioOrderByTimestampDesc(portfolio));
+            contracts.addAll(
+                    transactionRepository.findDistinctDerivativeByPortfolioAndTimestampBetweenOrderByTimestampDesc(
+                            portfolio,
+                            ViewFilter.get().getFromDate(),
+                            ViewFilter.get().getToDate()));
         }
         return contracts;
     }
@@ -96,8 +110,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     }
 
     private Table.Record getSecurityStatus(Portfolio portfolio, Security security) {
-        Positions positions = positionsFactory.get(portfolio, security);
-        PaidInterest paidInterest = paidInterestFactory.get(portfolio, security);
+        Positions positions = positionsFactory.get(portfolio, security, ViewFilter.get());
         Table.Record row = new Table.Record();
         SecurityType securityType = getSecurityType(security);
         row.put(SECURITY,
@@ -107,12 +120,20 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                                 security.getIsin()));
         row.put(FIRST_TRANSACTION_DATE,
                 transactionRepository
-                        .findFirstBySecurityIsinAndPkPortfolioOrderByTimestampAsc(security.getIsin(), portfolio.getId())
+                        .findFirstBySecurityIsinAndPkPortfolioAndTimestampBetweenOrderByTimestampAsc(
+                                security.getIsin(),
+                                portfolio.getId(),
+                                ViewFilter.get().getFromDate(),
+                                ViewFilter.get().getToDate())
                         .map(TransactionEntity::getTimestamp)
                         .orElse(null));
         row.put(LAST_TRANSACTION_DATE,
                 transactionRepository
-                        .findFirstBySecurityIsinAndPkPortfolioOrderByTimestampDesc(security.getIsin(), portfolio.getId())
+                        .findFirstBySecurityIsinAndPkPortfolioAndTimestampBetweenOrderByTimestampDesc(
+                                security.getIsin(),
+                                portfolio.getId(),
+                                ViewFilter.get().getFromDate(),
+                                ViewFilter.get().getToDate())
                         .map(TransactionEntity::getTimestamp)
                         .orElse(null));
         row.put(LAST_EVENT_DATE,
@@ -127,10 +148,18 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         .map(SecurityEventCashFlowEntity::getTimestamp)
                         .orElse(null));
         row.put(BUY_COUNT, Optional.ofNullable(
-                transactionRepository.findBySecurityIsinAndPkPortfolioBuyCount(security, portfolio))
+                transactionRepository.findBySecurityIsinAndPkPortfolioAndTimestampBetweenBuyCount(
+                        security,
+                        portfolio,
+                        ViewFilter.get().getFromDate(),
+                        ViewFilter.get().getToDate()))
                 .orElse(0L));
         row.put(CELL_COUNT, Optional.ofNullable(
-                transactionRepository.findBySecurityIsinAndPkPortfolioCellCount(security, portfolio))
+                transactionRepository.findBySecurityIsinAndPkPortfolioAndTimestampBetweenCellCount(
+                        security,
+                        portfolio,
+                        ViewFilter.get().getFromDate(),
+                        ViewFilter.get().getToDate()))
                 .orElse(0L) +
                 positions.getRedemptions()
                         .stream()
@@ -150,12 +179,15 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             if (securityType == SecurityType.STOCK_OR_BOND || securityType == SecurityType.CURRENCY_PAIR) {
                 row.put(PROPORTION, PROPORTION_FORMULA);
             }
+            if (securityType == SecurityType.DERIVATIVE) {
+                row.put(GROSS_PROFIT, getGrossProfit(portfolio, security, positions));
+            }
         }
         row.put(COMMISSION, getTotal(positions.getTransactions(), CashFlowType.COMMISSION).abs());
-        row.put(COUPON, paidInterest.sumPaymentsForType(CashFlowType.COUPON));
-        row.put(AMORTIZATION, paidInterest.sumPaymentsForType(CashFlowType.AMORTIZATION));
-        row.put(DIVIDEND, paidInterest.sumPaymentsForType(CashFlowType.DIVIDEND));
-        row.put(TAX, paidInterest.sumPaymentsForType(CashFlowType.TAX).abs());
+        row.put(COUPON, sumPaymentsForType(portfolio, security, CashFlowType.COUPON));
+        row.put(AMORTIZATION, sumPaymentsForType(portfolio, security, CashFlowType.AMORTIZATION));
+        row.put(DIVIDEND, sumPaymentsForType(portfolio, security, CashFlowType.DIVIDEND));
+        row.put(TAX, sumPaymentsForType(portfolio, security, CashFlowType.TAX).abs());
         row.put(PROFIT, "=" + COUPON.getCellAddr() + "+" + AMORTIZATION.getCellAddr() + "+" + DIVIDEND.getCellAddr() +
                 "+" + GROSS_PROFIT.getCellAddr() + "-" + TAX.getCellAddr() + "-" + COMMISSION.getCellAddr());
         return row;
@@ -172,16 +204,12 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
      */
     private BigDecimal getGrossProfit(Portfolio portfolio, Security security, Positions positions) {
         SecurityType securityType = getSecurityType(security);
-        switch (securityType) {
-            case STOCK_OR_BOND:
-                return getPurchaseCost(security, positions)
-                        .add(getPurchaseAccruedInterest(security, positions));
-            case DERIVATIVE:
-                return getDerivativeProfit(portfolio, security);
-            case CURRENCY_PAIR:
-                return getPurchaseCost(security, positions);
-        }
-        throw new IllegalArgumentException("Не поддерживаемый тип ценной бумаги " + security);
+        return switch (securityType) {
+            case STOCK_OR_BOND -> getPurchaseCost(security, positions)
+                    .add(getPurchaseAccruedInterest(security, positions));
+            case DERIVATIVE -> getDerivativeProfit(portfolio, security);
+            case CURRENCY_PAIR -> getPurchaseCost(security, positions);
+        };
     }
 
     /**
@@ -189,15 +217,11 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
      */
     private BigDecimal getPurchaseCost(Security security, Positions positions) {
         SecurityType securityType = getSecurityType(security);
-        switch (securityType) {
-            case STOCK_OR_BOND:
-                return getStockOrBondPurchaseCost(positions);
-            case DERIVATIVE:
-                return getTotal(positions.getTransactions(), CashFlowType.DERIVATIVE_PRICE);
-            case CURRENCY_PAIR:
-                return getTotal(positions.getTransactions(), CashFlowType.PRICE);
-        }
-        throw new IllegalArgumentException("Не поддерживаемый тип ценной бумаги " + security);
+        return switch (securityType) {
+            case STOCK_OR_BOND -> getStockOrBondPurchaseCost(positions);
+            case DERIVATIVE -> getTotal(positions.getTransactions(), CashFlowType.DERIVATIVE_PRICE);
+            case CURRENCY_PAIR -> getTotal(positions.getTransactions(), CashFlowType.PRICE);
+        };
     }
 
     /**
@@ -263,8 +287,12 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
 
     private BigDecimal getDerivativeProfit(Portfolio portfolio, Security contract) {
         return securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(
-                        portfolio.getId(), contract.getIsin(), CashFlowType.DERIVATIVE_PROFIT.getId())
+                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                        portfolio.getId(),
+                        contract.getIsin(),
+                        CashFlowType.DERIVATIVE_PROFIT.getId(),
+                        ViewFilter.get().getFromDate(),
+                        ViewFilter.get().getToDate())
                 .stream()
                 .map(SecurityEventCashFlowEntity::getValue)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -292,13 +320,29 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         }
     }
 
+    private BigDecimal sumPaymentsForType(Portfolio portfolio, Security security, CashFlowType cashFlowType) {
+        return securityEventCashFlowRepository
+                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                        portfolio.getId(),
+                        security.getIsin(),
+                        cashFlowType.getId(),
+                        ViewFilter.get().getFromDate(),
+                        ViewFilter.get().getToDate())
+                .stream()
+                .map(SecurityEventCashFlowEntity::getValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     private static String getProportionFormula() {
-        return "=((" + AVERAGE_PRICE.getCellAddr() + "+" + AVERAGE_ACCRUED_INTEREST.getCellAddr() + ")*" + COUNT.getCellAddr() +
+        return "=IF(" + COUNT.getCellAddr() + ">0,1,0)*" +
+                "((" + AVERAGE_PRICE.getCellAddr() + "+" + AVERAGE_ACCRUED_INTEREST.getCellAddr() + ")*" + COUNT.getCellAddr() +
                 "-" + AMORTIZATION.getCellAddr() + ")" +
-                "/(SUMPRODUCT(" + AVERAGE_PRICE.getColumnIndex() + "3:" + AVERAGE_PRICE.getColumnIndex() + "100000," +
-                COUNT.getColumnIndex() + "3:" + COUNT.getColumnIndex() + "100000)" +
-                "+SUMPRODUCT(" + AVERAGE_ACCRUED_INTEREST.getColumnIndex() + "3:" + AVERAGE_ACCRUED_INTEREST.getColumnIndex() + "100000," +
-                COUNT.getColumnIndex() + "3:" + COUNT.getColumnIndex() + "100000)" +
+                "/(SUMPRODUCT((0+" + AVERAGE_PRICE.getColumnIndex() + "3:" + AVERAGE_PRICE.getColumnIndex() + "100000)," +
+                "(0+" + COUNT.getColumnIndex() + "3:" + COUNT.getColumnIndex() + "100000)," +
+                "SIGN(" + COUNT.getColumnIndex() + "3:" + COUNT.getColumnIndex() + "100000>0))" +
+                "+SUMPRODUCT((0+" + AVERAGE_ACCRUED_INTEREST.getColumnIndex() + "3:" + AVERAGE_ACCRUED_INTEREST.getColumnIndex() + "100000)," +
+                "(0+" + COUNT.getColumnIndex() + "3:" + COUNT.getColumnIndex() + "100000)," +
+                "SIGN(" + COUNT.getColumnIndex() + "3:" + COUNT.getColumnIndex() + "100000>0))" +
                 "-SUMIF(" + COUNT.getColumnIndex() + "3:" + COUNT.getColumnIndex() + "100000,\">0\"," +
                 AMORTIZATION.getColumnIndex() + "3:" + AMORTIZATION.getColumnIndex() + "100000))";
     }

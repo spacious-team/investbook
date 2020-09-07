@@ -27,6 +27,7 @@ import ru.investbook.pojo.Portfolio;
 import ru.investbook.repository.EventCashFlowRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;
+import ru.investbook.view.ViewFilter;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -46,9 +47,11 @@ public class TaxExcelTableFactory implements TableFactory {
     public Table create(Portfolio portfolio) {
         Table table = new Table();
         List<EventCashFlow> cashFlows = eventCashFlowRepository
-                .findByPortfolioIdAndCashFlowTypeIdOrderByTimestamp(
+                .findByPortfolioIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
                         portfolio.getId(),
-                        CashFlowType.TAX.getId())
+                        CashFlowType.TAX.getId(),
+                        ViewFilter.get().getFromDate(),
+                        ViewFilter.get().getToDate())
                 .stream()
                 .map(eventCashFlowConverter::fromEntity)
                 .collect(Collectors.toCollection(ArrayList::new));

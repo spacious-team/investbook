@@ -26,6 +26,7 @@ import ru.investbook.entity.TransactionEntityPK;
 import ru.investbook.pojo.Portfolio;
 import ru.investbook.pojo.Security;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
@@ -39,8 +40,12 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     @Query(nativeQuery = true, value = "SELECT distinct isin FROM transaction " +
             "WHERE portfolio = :#{#portfolio.id} " +
             "AND length(isin) = 12 " +
+            "AND timestamp between :from AND :to " +
             "ORDER BY timestamp DESC")
-    Collection<String> findDistinctIsinByPortfolioOrderByTimestampDesc(@Param("portfolio") Portfolio portfolio);
+    Collection<String> findDistinctIsinByPortfolioAndTimestampBetweenOrderByTimestampDesc(
+            @Param("portfolio") Portfolio portfolio,
+            @Param("from") Instant fromDate,
+            @Param("to") Instant toDate);
 
     /**
      * Returns stock market share and bonds ISINs
@@ -52,9 +57,13 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "AND length(isin) = 12 " +
             "AND t2.type = 1 " +
             "AND t2.currency = :currency " +
+            "AND timestamp between :from AND :to " +
             "ORDER BY t1.timestamp DESC")
-    Collection<String> findDistinctIsinByPortfolioAndCurrencyOrderByTimestampDesc(@Param("portfolio") Portfolio portfolio,
-                                                                                  @Param("currency") String currency);
+    Collection<String> findDistinctIsinByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+            @Param("portfolio") Portfolio portfolio,
+            @Param("currency") String currency,
+            @Param("from") Instant fromDate,
+            @Param("to") Instant toDate);
 
     /**
      * Returns derivatives market contracts
@@ -63,8 +72,12 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "WHERE portfolio = :#{#portfolio.id} " +
             "AND length(isin) <> 12 " +
             "AND isin NOT LIKE '%_TOM' AND isin NOT LIKE '%_TOD'" +
+            "AND timestamp between :from AND :to " +
             "ORDER BY timestamp DESC")
-    Collection<String> findDistinctDerivativeByPortfolioOrderByTimestampDesc(@Param("portfolio") Portfolio portfolio);
+    Collection<String> findDistinctDerivativeByPortfolioAndTimestampBetweenOrderByTimestampDesc(
+            @Param("portfolio") Portfolio portfolio,
+            @Param("from") Instant fromDate,
+            @Param("to") Instant toDate);
 
     /**
      * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM format)
@@ -73,14 +86,18 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "WHERE portfolio = :#{#portfolio.id} " +
             "AND length(isin) <> 12 " +
             "AND (isin LIKE '%_TOM' OR isin LIKE '%_TOD')" +
+            "AND timestamp between :from AND :to " +
             "ORDER BY timestamp DESC")
-    Collection<String> findDistinctFxInstrumentByPortfolioOrderByTimestampDesc(@Param("portfolio") Portfolio portfolio);
+    Collection<String> findDistinctFxInstrumentByPortfolioAndTimestampBetweenOrderByTimestampDesc(
+            @Param("portfolio") Portfolio portfolio,
+            @Param("from") Instant fromDate,
+            @Param("to") Instant toDate);
 
     /**
      * Returns foreign exchange market currency pairs (in USDRUB format)
      */
-    default Collection<String> findDistinctFxCurrencyPairs(Portfolio portfolio) {
-        return findDistinctFxInstrumentByPortfolioOrderByTimestampDesc(portfolio)
+    default Collection<String> findDistinctFxCurrencyPairsAndTimestampBetween(Portfolio portfolio, Instant fromDate, Instant toDate) {
+        return findDistinctFxInstrumentByPortfolioAndTimestampBetweenOrderByTimestampDesc(portfolio, fromDate, toDate)
                 .stream()
                 .map(e -> e.replace("_TOD", "")
                         .replace("_TOM", ""))
@@ -99,15 +116,19 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "AND (isin LIKE '%_TOM' OR isin LIKE '%_TOD')" +
             "AND t2.type = 1 " +
             "AND t2.currency = :currency " +
+            "AND timestamp between :from AND :to " +
             "ORDER BY t1.timestamp DESC")
-    Collection<String> findDistinctFxInstrumentByPortfolioAndCurrencyOrderByTimestampDesc(@Param("portfolio") Portfolio portfolio,
-                                                                                          @Param("currency") String currency);
+    Collection<String> findDistinctFxInstrumentByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+            @Param("portfolio") Portfolio portfolio,
+            @Param("currency") String currency,
+            @Param("from") Instant fromDate,
+            @Param("to") Instant toDate);
 
     /**
      * Returns foreign exchange market currency pairs (in USDRUB format)
      */
-    default Collection<String> findDistinctFxCurrencyPairs(Portfolio portfolio, String currency) {
-        return findDistinctFxInstrumentByPortfolioAndCurrencyOrderByTimestampDesc(portfolio, currency)
+    default Collection<String> findDistinctFxCurrencyPairsAndTimestampBetween(Portfolio portfolio, String currency, Instant fromDate, Instant toDate) {
+        return findDistinctFxInstrumentByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(portfolio, currency, fromDate, toDate)
                 .stream()
                 .map(e -> e.replace("_TOD", "")
                         .replace("_TOM", ""))
@@ -115,18 +136,29 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
                 .collect(Collectors.toList());
     }
 
-    ArrayList<TransactionEntity> findBySecurityIsinAndPkPortfolioOrderByTimestampAscPkIdAsc(String isin,
-                                                                                            String portfolio);
+    ArrayList<TransactionEntity> findBySecurityIsinAndPkPortfolioAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+            String isin,
+            String portfolio,
+            Instant fromDate,
+            Instant toDate);
 
     /**
      * Return first security transaction
      */
-    Optional<TransactionEntity> findFirstBySecurityIsinAndPkPortfolioOrderByTimestampAsc(String isin, String portfolio);
+    Optional<TransactionEntity> findFirstBySecurityIsinAndPkPortfolioAndTimestampBetweenOrderByTimestampAsc(
+            String isin,
+            String portfolio,
+            Instant fromDate,
+            Instant toDate);
 
     /**
      * Return last security transaction
      */
-    Optional<TransactionEntity> findFirstBySecurityIsinAndPkPortfolioOrderByTimestampDesc(String isin, String portfolio);
+    Optional<TransactionEntity> findFirstBySecurityIsinAndPkPortfolioAndTimestampBetweenOrderByTimestampDesc(
+            String isin,
+            String portfolio,
+            Instant fromDate,
+            Instant toDate);
 
     /**
      * Return security total buy count
@@ -134,9 +166,13 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     @Query(nativeQuery = true, value = "SELECT sum(count) FROM transaction " +
             "WHERE portfolio = :#{#portfolio.id} " +
             "AND isin = :#{#security.isin} " +
+            "AND timestamp between :from AND :to " +
             "AND count > 0")
-    Long findBySecurityIsinAndPkPortfolioBuyCount(@Param("security") Security security,
-                                                  @Param("portfolio") Portfolio portfolio);
+    Long findBySecurityIsinAndPkPortfolioAndTimestampBetweenBuyCount(
+            @Param("security") Security security,
+            @Param("portfolio") Portfolio portfolio,
+            @Param("from") Instant fromDate,
+            @Param("to") Instant toDate);
 
     /**
      * Return security total cell count
@@ -144,13 +180,20 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     @Query(nativeQuery = true, value = "SELECT abs(sum(count)) FROM transaction " +
             "WHERE portfolio = :#{#portfolio.id} " +
             "AND isin = :#{#security.isin} " +
+            "AND timestamp between :from AND :to " +
             "AND count < 0")
-    Long findBySecurityIsinAndPkPortfolioCellCount(@Param("security") Security security,
-                                                   @Param("portfolio") Portfolio portfolio);
+    Long findBySecurityIsinAndPkPortfolioAndTimestampBetweenCellCount(
+            @Param("security") Security security,
+            @Param("portfolio") Portfolio portfolio,
+            @Param("from") Instant fromDate,
+            @Param("to") Instant toDate);
 
     @Query("SELECT t FROM TransactionEntity t " +
             "LEFT OUTER JOIN TransactionCashFlowEntity c " +
             "ON t.pk.id = c.pk.transactionId AND t.pk.portfolio = c.pk.portfolio " +
-            "WHERE c.pk.type IS NULL AND t.pk.portfolio = :#{#portfolio.id}")
-    Collection<TransactionEntity> findDepositAndWithdrawalTransactions(@Param("portfolio") Portfolio portfolio);
+            "WHERE c.pk.type IS NULL AND t.pk.portfolio = :#{#portfolio.id} AND t.timestamp between :from AND :to")
+    Collection<TransactionEntity> findByPkPortfolioAndTimestampBetweenDepositAndWithdrawalTransactions(
+            @Param("portfolio") Portfolio portfolio,
+            @Param("from") Instant fromDate,
+            @Param("to") Instant toDate);
 }

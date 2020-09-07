@@ -47,9 +47,9 @@ public class DerivativeEventsFactory {
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
     private final TransactionCashFlowConverter transactionCashFlowConverter;
 
-    public DerivativeEvents getDerivativeEvents(Portfolio portfolio, Security contract) {
-        Deque<Transaction> transactions = getTransactions(portfolio, contract);
-        Map<LocalDate, SecurityEventCashFlow> securityEventCashFlows = getSecurityEventCashFlows(portfolio, contract);
+    public DerivativeEvents getDerivativeEvents(Portfolio portfolio, Security contract, ViewFilter filter) {
+        Deque<Transaction> transactions = getTransactions(portfolio, contract, filter);
+        Map<LocalDate, SecurityEventCashFlow> securityEventCashFlows = getSecurityEventCashFlows(portfolio, contract, filter);
 
         LocalDate firstEventDate = getContractFirstEventDate(transactions, securityEventCashFlows);
         LocalDate lastEventDate = Optional.ofNullable(getContractLastEventDate(transactions, securityEventCashFlows))
@@ -84,22 +84,26 @@ public class DerivativeEventsFactory {
         return derivativeEvents;
     }
 
-    private LinkedList<Transaction> getTransactions(Portfolio portfolio, Security contract) {
+    private LinkedList<Transaction> getTransactions(Portfolio portfolio, Security contract, ViewFilter filter) {
         return transactionRepository
-                .findBySecurityIsinAndPkPortfolioOrderByTimestampAscPkIdAsc(
+                .findBySecurityIsinAndPkPortfolioAndTimestampBetweenOrderByTimestampAscPkIdAsc(
                         contract.getIsin(),
-                        portfolio.getId())
+                        portfolio.getId(),
+                        filter.getFromDate(),
+                        filter.getToDate())
                 .stream()
                 .map(transactionConverter::fromEntity)
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    private Map<LocalDate, SecurityEventCashFlow> getSecurityEventCashFlows(Portfolio portfolio, Security contract) {
+    private Map<LocalDate, SecurityEventCashFlow> getSecurityEventCashFlows(Portfolio portfolio, Security contract, ViewFilter filter) {
         return securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(
+                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         portfolio.getId(),
                         contract.getIsin(),
-                        CashFlowType.DERIVATIVE_PROFIT.getId())
+                        CashFlowType.DERIVATIVE_PROFIT.getId(),
+                        filter.getFromDate(),
+                        filter.getToDate())
                 .stream()
                 .map(securityEventCashFlowConverter::fromEntity)
                 .collect(Collectors.toMap(e -> getTradeDay(e.getTimestamp()), Function.identity()));
