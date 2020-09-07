@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.ContentDisposition;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.view.excel.ExcelView;
@@ -32,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,7 +54,8 @@ public class PortfolioViewRestController {
 
     private static final String FROM_DATE_FIELD = "from-date";
     private static final String TO_DATE_FIELD = "to-date";
-    private static final String REPORT_NAME = "investbook.xlsx";
+    private static final String REPORT_NAME = "investbook";
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault());
     private final ExcelView excelView;
     private final FileSystem jimfs = Jimfs.newFileSystem();
 
@@ -61,15 +64,18 @@ public class PortfolioViewRestController {
         try {
             long t0 = System.nanoTime();
             ViewFilter.set(getViewFilter(request));
-            Path path = jimfs.getPath(REPORT_NAME);
+            Path path = jimfs.getPath(getReportName(ViewFilter.get()));
             try (XSSFWorkbook book = new XSSFWorkbook()) {
                 excelView.writeTo(book);
                 book.write(Files.newOutputStream(path));
             }
+            ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
+                    .filename(String.valueOf(path.getFileName()), StandardCharsets.UTF_8)
+                    .build();
+            response.setHeader("Content-disposition", contentDisposition.toString());
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            response.setHeader("Content-disposition", "attachment; filename=" + REPORT_NAME);
             IOUtils.copy(Files.newInputStream(path), response.getOutputStream());
-            log.info("Отчет {} сформирован за {}", path.getFileName(), Duration.ofNanos(System.nanoTime() - t0));
+            log.info("Отчет '{}' сформирован за {}", path.getFileName(), Duration.ofNanos(System.nanoTime() - t0));
         } catch (Exception e) {
             log.error("Ошибка сборки отчета", e);
             StringWriter sw = new StringWriter();
@@ -103,5 +109,13 @@ public class PortfolioViewRestController {
                     .toInstant());
         } catch (Exception ignore) {
         }
+    }
+
+    private String getReportName(ViewFilter filter) {
+        Instant toDate = filter.getToDate();
+        if (toDate.isAfter(Instant.now())) {
+            toDate = Instant.now();
+        }
+        return REPORT_NAME + " с " + dateFormatter.format(filter.getFromDate()) + " по " + dateFormatter.format(toDate) + ".xlsx";
     }
 }
