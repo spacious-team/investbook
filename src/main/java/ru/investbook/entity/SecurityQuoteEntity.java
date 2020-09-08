@@ -20,6 +20,7 @@ package ru.investbook.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -31,8 +32,10 @@ import java.time.Instant;
 public class SecurityQuoteEntity {
 
     @Id
+    @GenericGenerator(name = "UseExistingOrGenerateIdGenerator", strategy = "ru.investbook.entity.UseExistingOrGenerateIdGenerator")
+    @GeneratedValue(generator = "UseExistingOrGenerateIdGenerator")
     @Column(name = "id")
-    private int id;
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "isin", referencedColumnName = "isin")

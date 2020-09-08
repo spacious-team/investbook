@@ -42,6 +42,7 @@ public class ReportTableStorage {
     private final TransactionRestController transactionRestController;
     private final TransactionCashFlowRestController transactionCashFlowRestController;
     private final PortfolioPropertyRestController portfolioPropertyRestController;
+    private final SecurityQuoteRestController securityQuoteRestController;
     private final ObjectMapper objectMapper;
 
     public boolean addPortfolio(Portfolio portfolio) {
@@ -118,6 +119,12 @@ public class ReportTableStorage {
         handlePost(
                 () -> portfolioPropertyRestController.post(property),
                 "Не могу добавить информацию о свойствах портфеля " + property);
+    }
+
+    public void addSecurityQuote(SecurityQuote securityQuote) {
+        handlePost(
+                () -> securityQuoteRestController.post(securityQuote),
+                "Не могу добавить информацию о котировке финансового инструмента " + securityQuote);
     }
 
     public void addCashInfo(ReportTable<PortfolioCash> cashTable) {

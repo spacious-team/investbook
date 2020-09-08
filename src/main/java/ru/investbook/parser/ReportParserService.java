@@ -45,6 +45,7 @@ public class ReportParserService {
                 ReportTable<DerivativeTransaction> derivativeTransactionTable = reportTableFactory.getDerivativeTransactionTable();
                 ReportTable<SecurityEventCashFlow> derivativeCashFlowTable = reportTableFactory.getDerivativeCashFlowTable();
                 ReportTable<ForeignExchangeTransaction> fxTransactionTable = reportTableFactory.getForeignExchangeTransactionTable();
+                ReportTable<SecurityQuote> securityQuoteTable = reportTableFactory.getSecurityQuoteTable();
 
                 portfolioPropertyTable.getData().forEach(storage::addPortfolioProperty);
                 storage.addCashInfo(portfolioCashTable);
@@ -68,6 +69,7 @@ public class ReportParserService {
                     }
                 });
                 fxTransactionTable.getData().forEach(storage::addTransaction);
+                securityQuoteTable.getData().forEach(storage::addSecurityQuote);
             }
         } catch (Exception e) {
             log.warn("Не могу распарсить отчет {}", reportTableFactory.getReport().getPath(), e);

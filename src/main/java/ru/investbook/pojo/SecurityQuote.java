@@ -34,7 +34,7 @@ import java.time.Instant;
 public class SecurityQuote {
 
     @NotNull
-    private final int id;
+    private final Integer id;
 
     @NotNull
     private final String isin;
