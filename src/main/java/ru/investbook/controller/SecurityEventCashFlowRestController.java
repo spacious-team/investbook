@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/security-event-cash-flows")
 public class SecurityEventCashFlowRestController extends AbstractRestController<Integer, SecurityEventCashFlow, SecurityEventCashFlowEntity> {
 
     public SecurityEventCashFlowRestController(JpaRepository<SecurityEventCashFlowEntity, Integer> repository,
@@ -37,32 +38,32 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
         super(repository, converter);
     }
 
-    @GetMapping("/security-event-cash-flows")
+    @GetMapping
     @Override
     public List<SecurityEventCashFlowEntity> get() {
         return super.get();
     }
 
-    @GetMapping("/security-event-cash-flows/{id}")
+    @GetMapping("{id}")
     @Override
     public ResponseEntity<SecurityEventCashFlowEntity> get(@PathVariable("id") Integer id) {
         return super.get(id);
     }
 
-    @PostMapping("/security-event-cash-flows")
+    @PostMapping
     @Override
     public ResponseEntity<SecurityEventCashFlowEntity> post(@Valid @RequestBody SecurityEventCashFlow event) {
         return super.post(event);
     }
 
-    @PutMapping("/security-event-cash-flows/{id}")
+    @PutMapping("{id}")
     @Override
     public ResponseEntity<SecurityEventCashFlowEntity> put(@PathVariable("id") Integer id,
                                                    @Valid @RequestBody SecurityEventCashFlow event) {
         return super.put(id, event);
     }
 
-    @DeleteMapping("/security-event-cash-flows/{id}")
+    @DeleteMapping("{id}")
     @Override
     public void delete(@PathVariable("id") Integer id) {
         super.delete(id);

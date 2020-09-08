@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/transactions")
 public class TransactionRestController extends AbstractRestController<TransactionEntityPK, Transaction, TransactionEntity> {
 
     public TransactionRestController(JpaRepository<TransactionEntity, TransactionEntityPK> repository,
@@ -41,7 +42,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
     }
 
     @Override
-    @GetMapping("/transactions")
+    @GetMapping
     protected List<TransactionEntity> get() {
         return super.get();
     }
@@ -49,14 +50,14 @@ public class TransactionRestController extends AbstractRestController<Transactio
     /**
      * see {@link AbstractRestController#get(Object)}
      */
-    @GetMapping("/transactions/portfolio/{portfolio}/id/{id}")
+    @GetMapping("/portfolio/{portfolio}/id/{id}")
     public ResponseEntity<TransactionEntity> get(@PathVariable("portfolio") String portfolio,
                                                  @PathVariable("id") Long id) {
         return super.get(getId(portfolio, id));
     }
 
     @Override
-    @PostMapping("/transactions")
+    @PostMapping
     public ResponseEntity<TransactionEntity> post(@Valid @RequestBody Transaction object) {
         return super.post(object);
     }
@@ -64,7 +65,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
     /**
      * see {@link AbstractRestController#put(Object, Object)}
      */
-    @PutMapping("/transactions/portfolio/{portfolio}/id/{id}")
+    @PutMapping("/portfolio/{portfolio}/id/{id}")
     public ResponseEntity<TransactionEntity> put(@PathVariable("portfolio") String portfolio,
                                                  @PathVariable("id") Long id,
                                                  @Valid @RequestBody Transaction object) {
@@ -74,7 +75,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
     /**
      * see {@link AbstractRestController#delete(Object)}
      */
-    @DeleteMapping("/transactions/portfolio/{portfolio}/id/{id}")
+    @DeleteMapping("/portfolio/{portfolio}/id/{id}")
     public void delete(@PathVariable("portfolio") String portfolio,
                        @PathVariable("id") Long id) {
         super.delete(getId(portfolio, id));

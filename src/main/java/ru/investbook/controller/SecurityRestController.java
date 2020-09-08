@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/securities")
 public class SecurityRestController extends AbstractRestController<String, Security, SecurityEntity> {
     private final SecurityRepository repository;
 
@@ -38,31 +39,31 @@ public class SecurityRestController extends AbstractRestController<String, Secur
         this.repository = repository;
     }
 
-    @GetMapping("/securities")
+    @GetMapping
     @Override
     public List<SecurityEntity> get() {
         return super.get();
     }
 
-    @GetMapping("/securities/{isin}")
+    @GetMapping("{isin}")
     @Override
     public ResponseEntity<SecurityEntity> get(@PathVariable("isin") String isin) {
         return super.get(isin);
     }
 
-    @PostMapping("/securities")
+    @PostMapping
     @Override
     public ResponseEntity<SecurityEntity> post(@Valid @RequestBody Security security) {
         return super.post(security);
     }
 
-    @PutMapping("/securities/{isin}")
+    @PutMapping("{isin}")
     @Override
     public ResponseEntity<SecurityEntity> put(@PathVariable("isin") String isin, @Valid @RequestBody Security security) {
         return super.put(isin, security);
     }
 
-    @DeleteMapping("/securities/{isin}")
+    @DeleteMapping("{isin}")
     @Override
     public void delete(@PathVariable("isin") String isin) {
         super.delete(isin);
