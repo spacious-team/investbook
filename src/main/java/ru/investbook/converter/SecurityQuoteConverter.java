@@ -41,6 +41,8 @@ public class SecurityQuoteConverter implements EntityConverter<SecurityQuoteEnti
         entity.setSecurity(securityEntity);
         entity.setTimestamp(quote.getTimestamp());
         entity.setQuote(quote.getQuote());
+        entity.setPrice(quote.getPrice());
+        entity.setAccruedInterest(quote.getAccruedInterest());
         return entity;
     }
 
@@ -51,6 +53,8 @@ public class SecurityQuoteConverter implements EntityConverter<SecurityQuoteEnti
                 .isin(entity.getSecurity().getIsin())
                 .timestamp(entity.getTimestamp())
                 .quote(entity.getQuote())
+                .price(entity.getPrice())
+                .accruedInterest(entity.getAccruedInterest())
                 .build();
     }
 }

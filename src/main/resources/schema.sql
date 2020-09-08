@@ -122,7 +122,9 @@ CREATE TABLE IF NOT EXISTS `security_quote` (
   `id` int(10) unsigned NOT NULL,
   `isin` varchar(64) NOT NULL COMMENT 'Ценная бумага',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Время котировки',
-  `quote` decimal(12,6) NOT NULL COMMENT 'Котировка',
+  `quote` decimal(12,6) NOT NULL COMMENT 'Котировка в валюте/пунктах, для облигации - в процентах',
+  `price` decimal(12,6)  DEFAULT NULL COMMENT 'Чистая цена в валюте/путнках, для облигации - валюта',
+  `accrued_interest` decimal(12,6)  DEFAULT NULL COMMENT 'НКД для облигаций',
   PRIMARY KEY (`id`),
   KEY `security_quote_isin_fkey` (`isin`),
   CONSTRAINT `security_quote_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE

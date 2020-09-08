@@ -45,4 +45,9 @@ public class SecurityQuote {
     @NotNull
     private final BigDecimal quote;
 
+    @NotNull
+    private final BigDecimal price;
+
+    @NotNull
+    private final BigDecimal accruedInterest;
 }

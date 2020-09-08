@@ -46,4 +46,12 @@ public class SecurityQuoteEntity {
     @Basic
     @Column(name = "quote")
     private BigDecimal quote;
+
+    @Basic
+    @Column(name = "price")
+    private BigDecimal price;
+
+    @Basic
+    @Column(name = "accrued_interest")
+    private BigDecimal accruedInterest;
 }
