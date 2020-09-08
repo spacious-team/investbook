@@ -55,7 +55,8 @@ public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
             // котировка = цене (не облигация)
             price = null;
         }
-        BigDecimal accruedInterest = table.getCurrencyCellValue(row, ACCRUED_INTEREST);
+        BigDecimal accruedInterest = table.getCurrencyCellValue(row, ACCRUED_INTEREST)
+                .divide(BigDecimal.valueOf(count), 2, RoundingMode.HALF_UP);
         if (accruedInterest.compareTo(minValue) < 0) {
             // не облигация
             accruedInterest = null;
