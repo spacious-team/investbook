@@ -23,25 +23,6 @@ CREATE TABLE IF NOT EXISTS `cash_flow_type` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Тип движения средств';
 
--- Дамп данных таблицы portfolio.cash_flow_type: ~13 rows (приблизительно)
-/*!40000 ALTER TABLE `cash_flow_type` DISABLE KEYS */;
-INSERT IGNORE INTO `cash_flow_type` (`id`, `name`) VALUES
-	(0, 'Пополнение и снятие'),
-	(1, 'Чистая стоимость сделки (без НКД)'),
-	(2, 'НКД на день сделки'),
-	(3, 'Комиссия'),
-	(4, 'Амортизация облигации'),
-	(5, 'Погашение облигации'),
-	(6, 'Купонный доход'),
-	(7, 'Дивиденды'),
-	(8, 'Вариационная маржа'),
-	(9, 'Гарантийное обеспечение'),
-	(10, 'Налог уплаченный (с купона, с дивидендов)'),
-	(11, 'Прогнозируемый налог'),
-	(12, 'Стоимость сделки с деривативом, рубли'),
-	(13, 'Стоимость сделки с деривативом, пункты');
-/*!40000 ALTER TABLE `cash_flow_type` ENABLE KEYS */;
-
 -- Дамп структуры для таблица portfolio.portfolio
 CREATE TABLE IF NOT EXISTS `portfolio` (
   `id` varchar(32) NOT NULL COMMENT 'Портфель (номер брокерского счета)',
@@ -135,6 +116,17 @@ CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
 -- Дамп данных таблицы portfolio.security_event_cash_flow: ~0 rows (приблизительно)
 /*!40000 ALTER TABLE `security_event_cash_flow` DISABLE KEYS */;
 /*!40000 ALTER TABLE `security_event_cash_flow` ENABLE KEYS */;
+
+-- Дамп структуры для таблица portfolio.security_quote
+CREATE TABLE IF NOT EXISTS `security_quote` (
+  `id` int(10) unsigned NOT NULL,
+  `isin` varchar(64) NOT NULL COMMENT 'Ценная бумага',
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Время котировки',
+  `quote` decimal(12,6) NOT NULL COMMENT 'Котировка',
+  PRIMARY KEY (`id`),
+  KEY `security_quote_isin_fkey` (`isin`),
+  CONSTRAINT `security_quote_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Котировка (цена) финансовых инструментов';
 
 -- Дамп структуры для таблица portfolio.transaction
 CREATE TABLE IF NOT EXISTS `transaction` (
