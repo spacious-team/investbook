@@ -95,6 +95,6 @@ public class UralsibReportTableFactory implements ReportTableFactory {
 
     @Override
     public ReportTable<SecurityQuote> getSecurityQuoteTable() {
-        return new EmptyReportTable<>(report);
+        return new SecurityQuoteTable(report);
     }
 }

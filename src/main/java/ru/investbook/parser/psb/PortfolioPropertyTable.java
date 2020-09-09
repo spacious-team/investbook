@@ -104,20 +104,17 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
     private Collection<PortfolioProperty> createExchangeRateProperty(Table table,
                                                                             TableRow row, SummaryTableHeader currency,
                                                                             PortfolioPropertyType property) {
-        try {
-            BigDecimal exchangeRate = table.getCurrencyCellValueOrDefault(row, currency, BigDecimal.ZERO);
-            if (exchangeRate.compareTo(min) > 0) {
-                return singletonList(PortfolioProperty.builder()
-                        .portfolio(getReport().getPortfolio())
-                        .property(property)
-                        .value(exchangeRate.toString())
-                        .timestamp(getReport().getReportDate())
-                        .build());
-            }
-        } catch (Exception e) {
-            log.info("Не могу получить обменный курс для валюты {} в файле {}", currency, getReport().getPath().getFileName());
+        BigDecimal exchangeRate = table.getCurrencyCellValueOrDefault(row, currency, BigDecimal.ZERO);
+        if (exchangeRate.compareTo(min) > 0) {
+            return singletonList(PortfolioProperty.builder()
+                    .portfolio(getReport().getPortfolio())
+                    .property(property)
+                    .value(exchangeRate.toString())
+                    .timestamp(getReport().getReportDate())
+                    .build());
+        } else {
+            return emptyList();
         }
-        return emptyList();
     }
 
     @RequiredArgsConstructor
