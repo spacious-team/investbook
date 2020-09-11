@@ -18,15 +18,18 @@
 
 package ru.investbook.parser;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Getter
 @Builder
 @EqualsAndHashCode
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class PortfolioCash {
     private String section;
     private BigDecimal value;

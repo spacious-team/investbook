@@ -18,6 +18,8 @@
 
 package ru.investbook.view.excel;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,12 +27,14 @@ import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
+import ru.investbook.parser.PortfolioCash;
 import ru.investbook.pojo.*;
 import ru.investbook.repository.*;
 import ru.investbook.view.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.*;
 
 import static ru.investbook.pojo.SecurityType.getCurrencyPair;
@@ -52,16 +56,20 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     private final SecurityConverter securityConverter;
     private final PositionsFactory positionsFactory;
     private final ForeignExchangeRateService foreignExchangeRateService;
+    private final PortfolioPropertyRepository portfolioPropertyRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public Table create(Portfolio portfolio) {
         throw new UnsupportedOperationException();
     }
 
     public Table create(Portfolio portfolio, String forCurrency) {
-        return create(portfolio, getSecuritiesIsin(portfolio, forCurrency));
+        Table table = create(portfolio, getSecuritiesIsin(portfolio, forCurrency));
+        table.add(getCashRow(portfolio, forCurrency));
+        return table;
     }
 
-    public Table create(Portfolio portfolio, Collection<String> securitiesIsin) {
+    private Table create(Portfolio portfolio, Collection<String> securitiesIsin) {
         Table table = new Table();
         for (String isin : securitiesIsin) {
             Optional<Security> security = getSecurity(isin);
@@ -95,6 +103,18 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                             ViewFilter.get().getToDate()));
         }
         return contracts;
+    }
+
+    private Table.Record getCashRow(Portfolio portfolio, String forCurrency) {
+        Table.Record row = new Table.Record();
+        Instant atTime = Instant.ofEpochSecond(
+                Math.min(
+                        ViewFilter.get().getToDate().getEpochSecond(),
+                        Instant.now().getEpochSecond()));
+        row.put(SECURITY, "Остаток денежных средств, " + forCurrency.toLowerCase());
+        row.put(LAST_TRANSACTION_DATE, atTime);
+        row.put(AVERAGE_PRICE, getCash(portfolio, forCurrency, atTime));
+        return row;
     }
 
     private Optional<Security> getSecurity(String isin) {
@@ -351,6 +371,34 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 .stream()
                 .map(SecurityEventCashFlowEntity::getValue)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * Возвращает последний известный остаток денежных средств соответствующей дате, не позже указанной.
+     *
+     * @return cash or null if value not fount in db
+     */
+    private BigDecimal getCash(Portfolio portfolio, String currency, Instant atInstant) {
+        return portfolioPropertyRepository
+                .findFirstByPortfolioIdAndPropertyAndTimestampBetweenOrderByTimestampDesc(
+                        portfolio.getId(),
+                        PortfolioPropertyType.CASH.name(),
+                        Instant.ofEpochSecond(0),
+                        atInstant)
+                .map(e -> {
+                    try {
+                        return objectMapper.readValue(e.getValue(), new TypeReference<List<PortfolioCash>>() {
+                        })
+                                .stream()
+                                .filter(portfolioCash -> currency.equals(portfolioCash.getCurrency()))
+                                .map(PortfolioCash::getValue)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    } catch (Exception ex) {
+                        return null;
+                    }
+                })
+                .orElse(null);
+
     }
 
     private static String getStockOrBondGrossProfitFormula() {
