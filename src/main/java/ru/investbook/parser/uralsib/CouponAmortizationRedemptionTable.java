@@ -97,10 +97,10 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable<SecurityEve
         LocalDate redemptionDate = redemptionDates.stream()
                 .filter(e -> securityName.equalsIgnoreCase(e.getKey()))
                 .map(Map.Entry::getValue)
-                .map(instant -> LocalDate.ofInstant(instant, UralsibBrokerReport.zoneId))
+                .map(instant -> LocalDate.ofInstant(instant, getReport().getReportZoneId()))
                 .findAny()
                 .orElse(null);
-        return (redemptionDate != null) && redemptionDate.equals(LocalDate.ofInstant(amortizationDay, UralsibBrokerReport.zoneId));
+        return (redemptionDate != null) && redemptionDate.equals(LocalDate.ofInstant(amortizationDay, getReport().getReportZoneId()));
     }
 
     private BigDecimal getTax(Table table, TableRow row) {

@@ -40,7 +40,7 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
     public static final String SUMMARY_TABLE = "Сводная информация по счетам клиента в валюте счета";
     private static final String ASSETS = "\"СУММА АКТИВОВ\" на конец дня";
     public static final String EXCHANGE_RATE_ROW = "Курс валют ЦБ РФ";
-    private static final BigDecimal min = BigDecimal.valueOf(0.01);
+    private final BigDecimal min = BigDecimal.valueOf(0.01);
 
     public PortfolioPropertyTable(BrokerReport report) {
         super(report);
@@ -75,7 +75,7 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
                     .portfolio(getReport().getPortfolio())
                     .property(PortfolioPropertyType.TOTAL_ASSETS)
                     .value(table.getCurrencyCellValue(row, RUB).toString())
-                    .timestamp(getReport().getReportDate())
+                    .timestamp(getReport().getReportEndDateTime())
                     .build());
         } catch (Exception e) {
             log.info("Не могу получить стоимость активов из отчета {}", getReport().getPath().getFileName());
@@ -110,7 +110,7 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
                     .portfolio(getReport().getPortfolio())
                     .property(property)
                     .value(exchangeRate.toString())
-                    .timestamp(getReport().getReportDate())
+                    .timestamp(getReport().getReportEndDateTime())
                     .build());
         } else {
             return emptyList();

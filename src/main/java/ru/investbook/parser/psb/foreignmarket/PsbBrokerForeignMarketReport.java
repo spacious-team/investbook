@@ -40,15 +40,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 @EqualsAndHashCode(of = "path")
 public class PsbBrokerForeignMarketReport implements BrokerReport {
-    private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
+
     private static final DateTimeFormatter dateFormatterWithDot = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private static final DateTimeFormatter dateFormatterWithSlash = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
     private static final String PORTFOLIO_MARKER = "Договор №:";
     private static final String REPORT_DATE_MARKER = "ОТЧЕТ БРОКЕРА";
+    private static final int LAST_TRADE_HOUR = 19;
 
     @Getter
     private final ReportPage reportPage;
@@ -57,7 +59,9 @@ public class PsbBrokerForeignMarketReport implements BrokerReport {
     @Getter
     private final Path path;
     @Getter
-    private final Instant reportDate;
+    private final Instant reportEndDateTime;
+    @Getter
+    private final ZoneId reportZoneId = ZoneId.of("Europe/Moscow");
 
     public PsbBrokerForeignMarketReport(String excelFileName) throws IOException, ParserConfigurationException, SAXException {
         this(Paths.get(excelFileName));
@@ -71,7 +75,7 @@ public class PsbBrokerForeignMarketReport implements BrokerReport {
         Workbook book = getWorkbook(is);
         this.reportPage = new XmlReportPage(book.getWorksheetAt(0));
         this.portfolio = getPortfolio(this.reportPage);
-        this.reportDate = getReportDate(this.reportPage);
+        this.reportEndDateTime = getReportEndDateTime(this.reportPage);
         this.path = Paths.get(excelFileName);
     }
 
@@ -105,11 +109,12 @@ public class PsbBrokerForeignMarketReport implements BrokerReport {
         }
     }
 
-    private Instant getReportDate(ReportPage reportPage) {
+    private Instant getReportEndDateTime(ReportPage reportPage) {
         try {
             String value = String.valueOf(reportPage.getNextColumnValue(REPORT_DATE_MARKER));
             if (value != null) {
-                return convertToInstant(value.split(" ")[3]);
+                return convertToInstant(value.split(" ")[3])
+                        .plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);
             }
             throw new IllegalArgumentException(
                     "Не найдена дата отчета по заданному шаблону '" + REPORT_DATE_MARKER + " XXX'");
@@ -121,11 +126,11 @@ public class PsbBrokerForeignMarketReport implements BrokerReport {
     public Instant convertToInstant(String value) {
         value = value.trim();
         if (value.contains(":")) {
-            return LocalDateTime.parse(value, PsbBrokerForeignMarketReport.dateTimeFormatter).atZone(PsbBrokerForeignMarketReport.zoneId).toInstant();
+            return LocalDateTime.parse(value, PsbBrokerForeignMarketReport.dateTimeFormatter).atZone(getReportZoneId()).toInstant();
         } else if (value.contains("/")) {
-            return LocalDate.parse(value, PsbBrokerForeignMarketReport.dateFormatterWithSlash).atStartOfDay(PsbBrokerForeignMarketReport.zoneId).toInstant();
+            return LocalDate.parse(value, PsbBrokerForeignMarketReport.dateFormatterWithSlash).atStartOfDay(getReportZoneId()).toInstant();
         } else {
-            return LocalDate.parse(value, PsbBrokerForeignMarketReport.dateFormatterWithDot).atStartOfDay(PsbBrokerForeignMarketReport.zoneId).toInstant();
+            return LocalDate.parse(value, PsbBrokerForeignMarketReport.dateFormatterWithDot).atStartOfDay(getReportZoneId()).toInstant();
         }
     }
 

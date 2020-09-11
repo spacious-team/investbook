@@ -134,7 +134,7 @@ public class ReportTableStorage {
                         .portfolio(cashTable.getReport().getPortfolio())
                         .property(PortfolioPropertyType.CASH)
                         .value(objectMapper.writeValueAsString(cashTable.getData()))
-                        .timestamp(cashTable.getReport().getReportDate())
+                        .timestamp(cashTable.getReport().getReportEndDateTime())
                         .build());
             }
         } catch (JsonProcessingException e) {

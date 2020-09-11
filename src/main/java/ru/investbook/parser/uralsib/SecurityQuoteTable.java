@@ -25,7 +25,6 @@ import ru.investbook.pojo.SecurityQuote;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -33,7 +32,6 @@ import static ru.investbook.parser.uralsib.PortfolioSecuritiesTable.PortfolioSec
 
 public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
 
-    private static final int LAST_TRADE_HOUR = 19;
     private final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
     protected SecurityQuoteTable(UralsibBrokerReport report) {
@@ -61,7 +59,7 @@ public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
         }
         return Collections.singletonList(SecurityQuote.builder()
                 .isin(table.getStringCellValue(row, ISIN))
-                .timestamp(getReport().getReportDate().plus(LAST_TRADE_HOUR, ChronoUnit.HOURS))
+                .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .price(price)
                 .accruedInterest(accruedInterest)
