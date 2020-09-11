@@ -88,15 +88,11 @@ public class ForeignExchangeRateService {
                 .orElse(BigDecimal.ZERO);
 
         if (exchangeRate.equals(BigDecimal.ZERO)) {
-            exchangeRate = BigDecimal.valueOf(75);
-            switch (currency) {
-                case "EUR":
-                    exchangeRate = BigDecimal.valueOf(85);
-                    break;
-                case "GBP":
-                    exchangeRate = BigDecimal.valueOf(95);
-                    break;
-            }
+            exchangeRate = switch (currency) {
+                case "EUR" -> BigDecimal.valueOf(90);
+                case "GBP" -> BigDecimal.valueOf(100);
+                default -> BigDecimal.valueOf(80);
+            };
             log.debug("Не могу в БД найти курс валюты {}, использую значение по умолчанию = {}",
                     currency, exchangeRate);
         }

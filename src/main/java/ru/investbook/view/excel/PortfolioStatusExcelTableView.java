@@ -74,9 +74,21 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
             sheet.setColumnWidth(header.ordinal(), 15 * 256);
         }
         sheet.setColumnWidth(SECURITY.ordinal(), 45 * 256);
+        sheet.setColumnWidth(FIRST_TRANSACTION_DATE.ordinal(), 12 * 256);
+        sheet.setColumnWidth(LAST_TRANSACTION_DATE.ordinal(), 12 * 256);
+        sheet.setColumnWidth(BUY_COUNT.ordinal(), 12 * 256);
+        sheet.setColumnWidth(CELL_COUNT.ordinal(), 12 * 256);
+        sheet.setColumnWidth(COUNT.ordinal(), 14 * 256);
+        sheet.setColumnWidth(AVERAGE_PRICE.ordinal(), 14 * 256);
+        sheet.setColumnWidth(AVERAGE_ACCRUED_INTEREST.ordinal(), 14 * 256);
         sheet.setColumnWidth(COMMISSION.ordinal(), 12 * 256);
+        sheet.setColumnWidth(LAST_EVENT_DATE.ordinal(), 14 * 256);
         sheet.setColumnWidth(AMORTIZATION.ordinal(), 16 * 256);
+        sheet.setColumnWidth(CURRENT_PRICE.ordinal(), 13 * 256);
+        sheet.setColumnWidth(CURRENT_ACCRUED_INTEREST.ordinal(), 13 * 256);
         sheet.setColumnWidth(TAX.ordinal(), 19 * 256);
+        sheet.setColumnWidth(PROFIT_PROPORTION.ordinal(), 11 * 256);
+        sheet.setColumnWidth(PROPORTION.ordinal(), 11 * 256);
     }
 
     @Override
@@ -102,6 +114,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     @Override
     protected void sheetPostCreate(Sheet sheet, Class<? extends TableHeader> headerType, CellStyles styles) {
         super.sheetPostCreate(sheet, headerType, styles);
+        sheet.setZoom(88); // show all columns for 24 inch monitor for securities sheet
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue;
             Cell cell;
@@ -109,6 +122,9 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
                 cell.setCellStyle(styles.getLeftAlignedTextStyle());
             }
             if ((cell = row.getCell(PROPORTION.ordinal())) != null) {
+                cell.setCellStyle(styles.getPercentStyle());
+            }
+            if ((cell = row.getCell(PROFIT_PROPORTION.ordinal())) != null) {
                 cell.setCellStyle(styles.getPercentStyle());
             }
         }
@@ -123,6 +139,8 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
             } else if (cell.getColumnIndex() == COUNT.ordinal()) {
                 cell.setCellStyle(styles.getIntStyle());
             } else if (cell.getColumnIndex() == PROPORTION.ordinal()) {
+                cell.setCellStyle(styles.getPercentStyle());
+            } else if (cell.getColumnIndex() == PROFIT_PROPORTION.ordinal()) {
                 cell.setCellStyle(styles.getPercentStyle());
             } else {
                 cell.setCellStyle(styles.getTotalRowStyle());

@@ -21,5 +21,10 @@ package ru.investbook.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.investbook.entity.SecurityQuoteEntity;
 
+import java.util.Optional;
+
 public interface SecurityQuoteRepository extends JpaRepository<SecurityQuoteEntity, Integer> {
+
+    Optional<SecurityQuoteEntity> findFirstBySecurityIsinOrderByTimestampDesc(String isin);
+
 }
