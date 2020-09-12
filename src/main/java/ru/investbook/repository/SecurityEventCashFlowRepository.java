@@ -44,6 +44,16 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
             String isin,
             Set<Integer> cashFlowType);
 
+    /**
+     * Return last security payment, between date-time interval
+     */
+    Optional<SecurityEventCashFlowEntity> findFirstByPortfolioIdAndSecurityIsinAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+            String portfolio,
+            String isin,
+            Set<Integer> cashFlowType,
+            Instant fromDate,
+            Instant toDat);
+
     ArrayList<SecurityEventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
             String portfolio,
             Collection<Integer> cashFlowType,
