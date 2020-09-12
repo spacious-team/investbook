@@ -92,7 +92,7 @@ public abstract class ExcelTableView {
         Class<? extends TableHeader> headerType = getHeaderType(table);
         if (headerType == null) return;
         writeHeader(sheet, headerType, styles.getHeaderStyle());
-        Table.Record totalRow = getTotalRow();
+        Table.Record totalRow = getTotalRow(table);
         if (totalRow != null && !totalRow.isEmpty()) {
             table.addFirst(totalRow);
         }
@@ -176,7 +176,7 @@ public abstract class ExcelTableView {
         return link;
     }
 
-    protected Table.Record getTotalRow() {
+    protected Table.Record getTotalRow(Table table) {
         return new Table.Record();
     }
 

@@ -52,15 +52,15 @@ public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow() {
+    protected Table.Record getTotalRow(Table table) {
         Table.Record totalRow = new Table.Record();
         totalRow.put(CONTRACT, "Итого:");
-        totalRow.put(COUNT, getSumFormula(COUNT));
+        totalRow.put(COUNT, getSumFormula(COUNT, table.size()));
         totalRow.put(AMOUNT, "=SUMPRODUCT(ABS(" +
                 AMOUNT.getColumnIndex() + "3:" +
-                AMOUNT.getColumnIndex() + "100000))");
-        totalRow.put(COMMISSION, getSumFormula(COMMISSION) + "/2");
-        totalRow.put(DERIVATIVE_PROFIT_DAY, getSumFormula(DERIVATIVE_PROFIT_DAY));
+                AMOUNT.getColumnIndex() + (table.size() + 2) + "))");
+        totalRow.put(COMMISSION, getSumFormula(COMMISSION, table.size()) + "/2");
+        totalRow.put(DERIVATIVE_PROFIT_DAY, getSumFormula(DERIVATIVE_PROFIT_DAY, table.size()));
         String profitMinusCommission = "(" + DERIVATIVE_PROFIT_DAY.getCellAddr() + "-" + COMMISSION.getCellAddr() + ")";
         totalRow.put(FORECAST_TAX, "=IF(" + profitMinusCommission + "<=0,0,0.13*" + profitMinusCommission +")");
         totalRow.put(PROFIT, "=" + DERIVATIVE_PROFIT_DAY.getCellAddr()
@@ -69,10 +69,10 @@ public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
         return totalRow;
     }
 
-    private String getSumFormula(DerivativesMarketProfitExcelTableHeader column) {
+    private String getSumFormula(DerivativesMarketProfitExcelTableHeader column, int tableSize) {
         return "=SUM(" +
                 column.getColumnIndex() + "3:" +
-                column.getColumnIndex() + "100000)";
+                column.getColumnIndex() + (tableSize + 2) + ")";
     }
 
     @Override

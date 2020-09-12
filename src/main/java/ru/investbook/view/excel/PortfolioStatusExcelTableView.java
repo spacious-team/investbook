@@ -93,17 +93,17 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow() {
+    protected Table.Record getTotalRow(Table table) {
         Table.Record totalRow = new Table.Record();
         for (PortfolioStatusExcelTableHeader column : PortfolioStatusExcelTableHeader.values()) {
             totalRow.put(column, "=SUM(" +
                     column.getColumnIndex() + "3:" +
-                    column.getColumnIndex() + "100000)");
+                    column.getColumnIndex() + (table.size() + 2) + ")");
         }
         totalRow.put(SECURITY, "Итого:");
         totalRow.put(COUNT, "=SUMPRODUCT(ABS(" +
                 COUNT.getColumnIndex() + "3:" +
-                COUNT.getColumnIndex() + "100000))");
+                COUNT.getColumnIndex() + (table.size() + 2) + "))");
         totalRow.remove(FIRST_TRANSACTION_DATE);
         totalRow.remove(LAST_TRANSACTION_DATE);
         totalRow.remove(LAST_EVENT_DATE);

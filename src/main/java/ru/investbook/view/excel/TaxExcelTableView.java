@@ -47,12 +47,12 @@ public class TaxExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow() {
+    protected Table.Record getTotalRow(Table table) {
         Table.Record total = Table.newRecord();
         total.put(DATE, "Итого:");
         total.put(TAX, "=SUM(" +
                 TAX.getColumnIndex() + "3:" +
-                TAX.getColumnIndex() + "100000)");
+                TAX.getColumnIndex() + (table.size() + 2) + ")");
         return total;
     }
 

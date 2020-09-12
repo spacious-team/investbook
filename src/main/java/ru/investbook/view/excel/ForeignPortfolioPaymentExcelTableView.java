@@ -47,12 +47,12 @@ public class ForeignPortfolioPaymentExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow() {
+    protected Table.Record getTotalRow(Table table) {
         Table.Record total = Table.newRecord();
         total.put(DATE, "Итого:");
         total.put(CASH_RUB, "=SUM(" +
                 CASH_RUB.getColumnIndex() + "3:" +
-                CASH_RUB.getColumnIndex() + "100000)/2");
+                CASH_RUB.getColumnIndex() + (table.size() + 2) + ")/2");
         return total;
     }
 
