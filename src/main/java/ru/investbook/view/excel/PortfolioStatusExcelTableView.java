@@ -103,7 +103,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         totalRow.put(SECURITY, "Итого:");
         totalRow.put(COUNT, "=SUMPRODUCT(ABS(" +
                 COUNT.getColumnIndex() + "3:" +
-                COUNT.getColumnIndex() + (table.size() + 2) + "))");
+                COUNT.getColumnIndex() + (table.size() + 2 - 1 /* without cash row */) + "))");
         totalRow.remove(FIRST_TRANSACTION_DATE);
         totalRow.remove(LAST_TRANSACTION_DATE);
         totalRow.remove(LAST_EVENT_DATE);
