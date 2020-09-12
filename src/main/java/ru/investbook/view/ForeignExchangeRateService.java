@@ -88,13 +88,7 @@ public class ForeignExchangeRateService {
                 .orElse(BigDecimal.ZERO);
 
         if (exchangeRate.equals(BigDecimal.ZERO)) {
-            exchangeRate = switch (currency) {
-                case "EUR" -> BigDecimal.valueOf(90);
-                case "GBP" -> BigDecimal.valueOf(100);
-                default -> BigDecimal.valueOf(80);
-            };
-            log.debug("Не могу в БД найти курс валюты {}, использую значение по умолчанию = {}",
-                    currency, exchangeRate);
+            exchangeRate = getDefaultExchangeRate(currency);
         }
         cache(currency, "RUB", exchangeRate);
         return exchangeRate;
@@ -157,17 +151,7 @@ public class ForeignExchangeRateService {
                 .orElse(BigDecimal.ZERO);
 
         if (exchangeRate.equals(BigDecimal.ZERO)) {
-            exchangeRate = BigDecimal.valueOf(75);
-            switch (currency) {
-                case "EUR":
-                    exchangeRate = BigDecimal.valueOf(85);
-                    break;
-                case "GBP":
-                    exchangeRate = BigDecimal.valueOf(95);
-                    break;
-            }
-            log.debug("Не могу в БД найти курс валюты {}, использую значение по умолчанию = {}",
-                    currency, exchangeRate);
+            exchangeRate = getDefaultExchangeRate(currency);
         }
         cache(currency, "RUB", localDate, exchangeRate);
         return exchangeRate;
@@ -198,5 +182,17 @@ public class ForeignExchangeRateService {
                 .computeIfAbsent(quoteCurrency, k -> new ConcurrentHashMap<>())
                 .get(localDate);
 
+    }
+
+    private static BigDecimal getDefaultExchangeRate(String currency) {
+        BigDecimal exchangeRate;
+        exchangeRate = switch (currency) {
+            case "EUR" -> BigDecimal.valueOf(90);
+            case "GBP" -> BigDecimal.valueOf(100);
+            default -> BigDecimal.valueOf(80);
+        };
+        log.debug("Не могу в БД найти курс валюты {}, использую значение по умолчанию = {}",
+                currency, exchangeRate);
+        return exchangeRate;
     }
 }

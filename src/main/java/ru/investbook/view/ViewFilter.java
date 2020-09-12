@@ -32,9 +32,9 @@ public class ViewFilter {
     public static final Instant defaultFromDate = Instant.ofEpochSecond(0);
 
     @Builder.Default
-    private Instant fromDate = defaultFromDate;
+    private final Instant fromDate = defaultFromDate;
     @Builder.Default
-    private Instant toDate = Instant.now();
+    private final Instant toDate = Instant.now();
 
     public static void set(ViewFilter viewFilter) {
         filters.set(viewFilter);

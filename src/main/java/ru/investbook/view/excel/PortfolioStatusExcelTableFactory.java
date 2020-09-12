@@ -35,6 +35,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
 
@@ -222,8 +223,15 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                                 row.put(LAST_ACCRUED_INTEREST, quote.getAccruedInterest());
                             });
                 } else if (securityType == SecurityType.CURRENCY_PAIR) {
-                    row.put(LAST_PRICE,
-                            foreignExchangeRateService.getExchangeRateToRub(getCurrencyPair(security.getIsin()).substring(0, 3)));
+                    String currency = getCurrencyPair(security.getIsin()).substring(0, 3);
+                    if (LocalDate.ofInstant(ViewFilter.get().getToDate(), ZoneId.systemDefault()).compareTo(LocalDate.now()) >= 0) {
+                        row.put(LAST_PRICE, foreignExchangeRateService.getExchangeRateToRub(currency));
+                    } else {
+                        row.put(LAST_PRICE, foreignExchangeRateService.getExchangeRateToRub(
+                                currency,
+                                ViewFilter.get().getToDate(),
+                                ZoneId.systemDefault()));
+                    }
                 }
 
                 if (securityType == SecurityType.STOCK_OR_BOND || securityType == SecurityType.CURRENCY_PAIR) {
