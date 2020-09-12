@@ -48,8 +48,8 @@ import static ru.investbook.view.excel.PortfolioStatusExcelTableHeader.*;
 public class PortfolioStatusExcelTableFactory implements TableFactory {
     private static final String STOCK_GROSS_PROFIT_FORMULA = getStockOrBondGrossProfitFormula();
     private static final String PROFIT_PROPORTION_FORMULA = getProfitProportionFormula();
+    private static final String INVESTMENT_PROPORTION_FORMULA = getInvestmentProportionFormula();
     private static final String PROPORTION_FORMULA = getProportionFormula();
-    private static final String CURRENT_PROPORTION_FORMULA = getCurrentProportionFormula();
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
@@ -117,7 +117,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         row.put(SECURITY, "Остаток денежных средств, " + forCurrency.toLowerCase());
         Optional<PortfolioProperty> portfolioCash = getPortfolioCash(portfolio, atTime);;
         row.put(LAST_EVENT_DATE, portfolioCash.map(PortfolioProperty::getTimestamp).orElse(null));
-        row.put(CURRENT_PRICE, portfolioCash.map(portfolioProperty ->
+        row.put(LAST_PRICE, portfolioCash.map(portfolioProperty ->
                 PortfolioCash.valueOf(portfolioProperty.getValue())
                         .stream()
                         .filter(cash -> forCurrency.equals(cash.getCurrency()))
@@ -126,8 +126,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 .orElse(null));
         if (ViewFilter.get().getFromDate().isBefore(instantOf2000_01_01)) {
             // режим отображения по умолчанию, скорее всего отображаем портфель с начала открытия счета,
-            // учитываем остаток денежных средств в Текущей доле (%)
-            row.put(CURRENT_PROPORTION, CURRENT_PROPORTION_FORMULA);
+            // учитываем остаток денежных средств в Доле портфеля (%)
+            row.put(PROPORTION, PROPORTION_FORMULA);
             row.put(COUNT, 1);
         }
         return row;
@@ -217,12 +217,12 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 if (securityType == SecurityType.STOCK_OR_BOND) {
                     securityQuoteRepository.findFirstBySecurityIsinOrderByTimestampDesc(security.getIsin())
                             .ifPresent(quote -> {
-                                row.put(CURRENT_PRICE, Optional.ofNullable(quote.getPrice()) // for bonds
+                                row.put(LAST_PRICE, Optional.ofNullable(quote.getPrice()) // for bonds
                                         .orElse(quote.getQuote())); // for stocks
-                                row.put(CURRENT_ACCRUED_INTEREST, quote.getAccruedInterest());
+                                row.put(LAST_ACCRUED_INTEREST, quote.getAccruedInterest());
                             });
                 } else if (securityType == SecurityType.CURRENCY_PAIR) {
-                    row.put(CURRENT_PRICE,
+                    row.put(LAST_PRICE,
                             foreignExchangeRateService.getExchangeRateToRub(getCurrencyPair(security.getIsin()).substring(0, 3)));
                 }
 
@@ -232,8 +232,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     row.put(GROSS_PROFIT, getGrossProfit(portfolio, security, positions));
                 }
                 if (securityType == SecurityType.STOCK_OR_BOND || securityType == SecurityType.CURRENCY_PAIR) {
+                    row.put(INVESTMENT_PROPORTION, INVESTMENT_PROPORTION_FORMULA);
                     row.put(PROPORTION, PROPORTION_FORMULA);
-                    row.put(CURRENT_PROPORTION, CURRENT_PROPORTION_FORMULA);
                 }
             }
             row.put(COMMISSION, getTotal(positions.getTransactions(), CashFlowType.COMMISSION).abs());
@@ -406,8 +406,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     }
 
     private static String getStockOrBondGrossProfitFormula() {
-        return "=IF(" + CURRENT_PRICE.getCellAddr() + "<>\"\",(" +
-                CURRENT_PRICE.getCellAddr() + "+" + CURRENT_ACCRUED_INTEREST.getCellAddr() + "-" +
+        return "=IF(" + LAST_PRICE.getCellAddr() + "<>\"\",(" +
+                LAST_PRICE.getCellAddr() + "+" + LAST_ACCRUED_INTEREST.getCellAddr() + "-" +
                 AVERAGE_PRICE.getCellAddr() + "-" + AVERAGE_ACCRUED_INTEREST.getCellAddr() + ")*" +
                 COUNT.getCellAddr() + ",0)";
     }
@@ -416,7 +416,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         return "=" + PROFIT.getCellAddr() + "/" + PROFIT.getColumnIndex() + "2";
     }
 
-    private static String getProportionFormula() {
+    private static String getInvestmentProportionFormula() {
         return "=IF(" + COUNT.getCellAddr() + ">0,1,0)*" +
                 "((" + AVERAGE_PRICE.getCellAddr() + "+" + AVERAGE_ACCRUED_INTEREST.getCellAddr() + ")*" + COUNT.getCellAddr() +
                 "-" + AMORTIZATION.getCellAddr() + ")" +
@@ -430,13 +430,13 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 AMORTIZATION.getColumnIndex() + "3:" + AMORTIZATION.getColumnIndex() + "100000))";
     }
 
-    private static String getCurrentProportionFormula() {
+    private static String getProportionFormula() {
         return "=IF(" + COUNT.getCellAddr() + ">0,1,0)*" +
-                "((" + CURRENT_PRICE.getCellAddr() + "+" + CURRENT_ACCRUED_INTEREST.getCellAddr() + ")*" + COUNT.getCellAddr() +
-                ")/(SUMPRODUCT((0+" + CURRENT_PRICE.getColumnIndex() + "3:" + CURRENT_PRICE.getColumnIndex() + "100000)," +
+                "((" + LAST_PRICE.getCellAddr() + "+" + LAST_ACCRUED_INTEREST.getCellAddr() + ")*" + COUNT.getCellAddr() +
+                ")/(SUMPRODUCT((0+" + LAST_PRICE.getColumnIndex() + "3:" + LAST_PRICE.getColumnIndex() + "100000)," +
                 "(0+" + COUNT.getColumnIndex() + "3:" + COUNT.getColumnIndex() + "100000)," +
                 "SIGN(" + COUNT.getColumnIndex() + "3:" + COUNT.getColumnIndex() + "100000>0))" +
-                "+SUMPRODUCT((0+" + CURRENT_ACCRUED_INTEREST.getColumnIndex() + "3:" + CURRENT_ACCRUED_INTEREST.getColumnIndex() + "100000)," +
+                "+SUMPRODUCT((0+" + LAST_ACCRUED_INTEREST.getColumnIndex() + "3:" + LAST_ACCRUED_INTEREST.getColumnIndex() + "100000)," +
                 "(0+" + COUNT.getColumnIndex() + "3:" + COUNT.getColumnIndex() + "100000)," +
                 "SIGN(" + COUNT.getColumnIndex() + "3:" + COUNT.getColumnIndex() + "100000>0)))";
     }

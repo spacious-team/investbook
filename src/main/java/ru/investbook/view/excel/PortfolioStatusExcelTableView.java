@@ -84,12 +84,12 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         sheet.setColumnWidth(COMMISSION.ordinal(), 12 * 256);
         sheet.setColumnWidth(LAST_EVENT_DATE.ordinal(), 14 * 256);
         sheet.setColumnWidth(AMORTIZATION.ordinal(), 16 * 256);
-        sheet.setColumnWidth(CURRENT_PRICE.ordinal(), 13 * 256);
-        sheet.setColumnWidth(CURRENT_ACCRUED_INTEREST.ordinal(), 13 * 256);
+        sheet.setColumnWidth(LAST_PRICE.ordinal(), 13 * 256);
+        sheet.setColumnWidth(LAST_ACCRUED_INTEREST.ordinal(), 13 * 256);
         sheet.setColumnWidth(TAX.ordinal(), 19 * 256);
         sheet.setColumnWidth(PROFIT_PROPORTION.ordinal(), 11 * 256);
+        sheet.setColumnWidth(INVESTMENT_PROPORTION.ordinal(), 11 * 256);
         sheet.setColumnWidth(PROPORTION.ordinal(), 11 * 256);
-        sheet.setColumnWidth(CURRENT_PROPORTION.ordinal(), 11 * 256);
     }
 
     @Override
@@ -125,10 +125,10 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
             if ((cell = row.getCell(PROFIT_PROPORTION.ordinal())) != null) {
                 cell.setCellStyle(styles.getPercentStyle());
             }
-            if ((cell = row.getCell(PROPORTION.ordinal())) != null) {
+            if ((cell = row.getCell(INVESTMENT_PROPORTION.ordinal())) != null) {
                 cell.setCellStyle(styles.getPercentStyle());
             }
-            if ((cell = row.getCell(CURRENT_PROPORTION.ordinal())) != null) {
+            if ((cell = row.getCell(PROPORTION.ordinal())) != null) {
                 cell.setCellStyle(styles.getPercentStyle());
             }
         }
@@ -144,9 +144,9 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
                 cell.setCellStyle(styles.getIntStyle());
             } else if (cell.getColumnIndex() == PROFIT_PROPORTION.ordinal()) {
                 cell.setCellStyle(styles.getPercentStyle());
-            } else if (cell.getColumnIndex() == PROPORTION.ordinal()) {
+            } else if (cell.getColumnIndex() == INVESTMENT_PROPORTION.ordinal()) {
                 cell.setCellStyle(styles.getPercentStyle());
-            } else if (cell.getColumnIndex() == CURRENT_PROPORTION.ordinal()) {
+            } else if (cell.getColumnIndex() == PROPORTION.ordinal()) {
                 cell.setCellStyle(styles.getPercentStyle());
             } else {
                 cell.setCellStyle(styles.getTotalRowStyle());
@@ -162,7 +162,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
             int rowCount = sheet.getLastRowNum();
             XSSFDrawing drawing = sheet.createDrawingPatriarch();
             ClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0,
-                    0, rowCount + 2, CURRENT_PROPORTION.ordinal() + 1, rowCount + 2 + chartHeight);
+                    0, rowCount + 2, PROPORTION.ordinal() + 1, rowCount + 2 + chartHeight);
 
             XSSFChart chart = drawing.createChart(anchor);
             chart.setTitleText("Состав портфеля");
@@ -173,7 +173,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
             XDDFDataSource<String> securities = XDDFDataSourcesFactory.fromStringCellRange(sheet,
                     new CellRangeAddress(2, rowCount, SECURITY.ordinal(), SECURITY.ordinal()));
             XDDFNumericalDataSource<Double> proportions = XDDFDataSourcesFactory.fromNumericCellRange(sheet,
-                    new CellRangeAddress(2, rowCount, CURRENT_PROPORTION.ordinal(), CURRENT_PROPORTION.ordinal()));
+                    new CellRangeAddress(2, rowCount, PROPORTION.ordinal(), PROPORTION.ordinal()));
 
             XDDFChartData data = chart.createData(ChartTypes.PIE, null, null);
             data.setVaryColors(true);

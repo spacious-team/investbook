@@ -38,13 +38,13 @@ public enum PortfolioStatusExcelTableHeader implements ExcelTableHeader {
     AMORTIZATION("Амортизация облигации"),
     DIVIDEND("Дивиденды"),
     TAX("Налог (удержанный)"),
-    CURRENT_PRICE("Текущая цена"),
-    CURRENT_ACCRUED_INTEREST("Текущий НКД"),
+    LAST_PRICE("Цена"),
+    LAST_ACCRUED_INTEREST("НКД"),
     GROSS_PROFIT("Курсовой доход"),
     PROFIT("Прибыль"),
     PROFIT_PROPORTION("Доля прибыли, %"),
-    PROPORTION("Доля вложений, %"),
-    CURRENT_PROPORTION("Текущая доля,\n%");
+    INVESTMENT_PROPORTION("Доля вложений, %"),
+    PROPORTION("Доля в портфеле, %");
 
     private final String description;
 }
