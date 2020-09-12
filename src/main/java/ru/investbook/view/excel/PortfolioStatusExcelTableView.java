@@ -109,6 +109,8 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         totalRow.remove(LAST_EVENT_DATE);
         totalRow.remove(AVERAGE_PRICE);
         totalRow.remove(AVERAGE_ACCRUED_INTEREST);
+        totalRow.remove(LAST_PRICE);
+        totalRow.remove(LAST_ACCRUED_INTEREST);
         return totalRow;
     }
 
