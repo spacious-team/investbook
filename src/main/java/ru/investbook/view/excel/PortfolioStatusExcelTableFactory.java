@@ -117,7 +117,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         ViewFilter.get().getToDate().getEpochSecond(),
                         Instant.now().getEpochSecond()));
         row.put(SECURITY, "Остаток денежных средств, " + forCurrency.toLowerCase());
-        Optional<PortfolioProperty> portfolioCash = getPortfolioCash(portfolio, atTime);;
+        Optional<PortfolioProperty> portfolioCash = getPortfolioCash(portfolio, atTime);
         row.put(LAST_EVENT_DATE, portfolioCash.map(PortfolioProperty::getTimestamp).orElse(null));
         row.put(LAST_PRICE, portfolioCash.map(portfolioProperty ->
                 PortfolioCash.valueOf(portfolioProperty.getValue())
@@ -156,14 +156,15 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                                 getCurrencyPair(security.getIsin()) :
                                 security.getIsin()));
         try {
-            Positions positions = positionsFactory.get(portfolio, security, ViewFilter.get());
+            ViewFilter filter = ViewFilter.get();
+            Positions positions = positionsFactory.get(portfolio, security, filter);
             row.put(FIRST_TRANSACTION_DATE,
                     transactionRepository
                             .findFirstBySecurityIsinAndPkPortfolioAndTimestampBetweenOrderByTimestampAsc(
                                     security.getIsin(),
                                     portfolio.getId(),
-                                    ViewFilter.get().getFromDate(),
-                                    ViewFilter.get().getToDate())
+                                    filter.getFromDate(),
+                                    filter.getToDate())
                             .map(TransactionEntity::getTimestamp)
                             .orElse(null));
             row.put(LAST_TRANSACTION_DATE,
@@ -171,8 +172,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                             .findFirstBySecurityIsinAndPkPortfolioAndTimestampBetweenOrderByTimestampDesc(
                                     security.getIsin(),
                                     portfolio.getId(),
-                                    ViewFilter.get().getFromDate(),
-                                    ViewFilter.get().getToDate())
+                                    filter.getFromDate(),
+                                    filter.getToDate())
                             .map(TransactionEntity::getTimestamp)
                             .orElse(null));
             row.put(LAST_EVENT_DATE,
@@ -184,22 +185,22 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                                             CashFlowType.COUPON.getId(),
                                             CashFlowType.DIVIDEND.getId(),
                                             CashFlowType.DERIVATIVE_PROFIT.getId()),
-                                    ViewFilter.get().getFromDate(), ViewFilter.get().getToDate())
+                                    filter.getFromDate(), filter.getToDate())
                             .map(SecurityEventCashFlowEntity::getTimestamp)
                             .orElse(null));
             row.put(BUY_COUNT, Optional.ofNullable(
                     transactionRepository.findBySecurityIsinAndPkPortfolioAndTimestampBetweenBuyCount(
                             security,
                             portfolio,
-                            ViewFilter.get().getFromDate(),
-                            ViewFilter.get().getToDate()))
+                            filter.getFromDate(),
+                            filter.getToDate()))
                     .orElse(0L));
             row.put(CELL_COUNT, Optional.ofNullable(
                     transactionRepository.findBySecurityIsinAndPkPortfolioAndTimestampBetweenCellCount(
                             security,
                             portfolio,
-                            ViewFilter.get().getFromDate(),
-                            ViewFilter.get().getToDate()))
+                            filter.getFromDate(),
+                            filter.getToDate()))
                     .orElse(0L) +
                     positions.getRedemptions()
                             .stream()
@@ -218,7 +219,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         .divide(BigDecimal.valueOf(Math.max(1, Math.abs(count))), 2, RoundingMode.CEILING));
 
                 if (securityType == SecurityType.STOCK_OR_BOND) {
-                    securityQuoteRepository.findFirstBySecurityIsinOrderByTimestampDesc(security.getIsin())
+                    securityQuoteRepository
+                            .findFirstBySecurityIsinAndTimestampLessThanOrderByTimestampDesc(security.getIsin(), filter.getToDate())
                             .ifPresent(quote -> {
                                 row.put(LAST_PRICE, Optional.ofNullable(quote.getPrice()) // for bonds
                                         .orElse(quote.getQuote())); // for stocks
@@ -226,12 +228,12 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                             });
                 } else if (securityType == SecurityType.CURRENCY_PAIR) {
                     String currency = getCurrencyPair(security.getIsin()).substring(0, 3);
-                    if (LocalDate.ofInstant(ViewFilter.get().getToDate(), ZoneId.systemDefault()).compareTo(LocalDate.now()) >= 0) {
+                    if (LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault()).compareTo(LocalDate.now()) >= 0) {
                         row.put(LAST_PRICE, foreignExchangeRateService.getExchangeRateToRub(currency));
                     } else {
                         row.put(LAST_PRICE, foreignExchangeRateService.getExchangeRateToRub(
                                 currency,
-                                ViewFilter.get().getToDate(),
+                                filter.getToDate(),
                                 ZoneId.systemDefault()));
                     }
                 }
