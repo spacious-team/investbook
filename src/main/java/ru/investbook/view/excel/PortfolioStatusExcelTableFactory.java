@@ -18,11 +18,10 @@
 
 package ru.investbook.view.excel;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.investbook.converter.PortfolioPropertyConverter;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
@@ -35,6 +34,8 @@ import ru.investbook.view.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.*;
 
 import static ru.investbook.pojo.SecurityType.getCurrencyPair;
@@ -55,10 +56,11 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityQuoteRepository securityQuoteRepository;
     private final SecurityConverter securityConverter;
+    private final PortfolioPropertyConverter portfolioPropertyConverter;
     private final PositionsFactory positionsFactory;
     private final ForeignExchangeRateService foreignExchangeRateService;
     private final PortfolioPropertyRepository portfolioPropertyRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Instant instantOf2000_01_01 = LocalDate.of(2000, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant();
 
     public Table create(Portfolio portfolio) {
         throw new UnsupportedOperationException();
@@ -113,8 +115,21 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         ViewFilter.get().getToDate().getEpochSecond(),
                         Instant.now().getEpochSecond()));
         row.put(SECURITY, "Остаток денежных средств, " + forCurrency.toLowerCase());
-        row.put(LAST_TRANSACTION_DATE, atTime);
-        row.put(AVERAGE_PRICE, getCash(portfolio, forCurrency, atTime));
+        Optional<PortfolioProperty> portfolioCash = getPortfolioCash(portfolio, atTime);;
+        row.put(LAST_EVENT_DATE, portfolioCash.map(PortfolioProperty::getTimestamp).orElse(null));
+        row.put(CURRENT_PRICE, portfolioCash.map(portfolioProperty ->
+                PortfolioCash.valueOf(portfolioProperty.getValue())
+                        .stream()
+                        .filter(cash -> forCurrency.equals(cash.getCurrency()))
+                        .map(PortfolioCash::getValue)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add))
+                .orElse(null));
+        if (ViewFilter.get().getFromDate().isBefore(instantOf2000_01_01)) {
+            // режим отображения по умолчанию, скорее всего отображаем портфель с начала открытия счета,
+            // учитываем остаток денежных средств в Текущей доле (%)
+            row.put(CURRENT_PROPORTION, CURRENT_PROPORTION_FORMULA);
+            row.put(COUNT, 1);
+        }
         return row;
     }
 
@@ -380,27 +395,14 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
      *
      * @return cash or null if value not fount in db
      */
-    private BigDecimal getCash(Portfolio portfolio, String currency, Instant atInstant) {
+    private Optional<PortfolioProperty> getPortfolioCash(Portfolio portfolio, Instant atInstant) {
         return portfolioPropertyRepository
                 .findFirstByPortfolioIdAndPropertyAndTimestampBetweenOrderByTimestampDesc(
                         portfolio.getId(),
                         PortfolioPropertyType.CASH.name(),
                         Instant.ofEpochSecond(0),
                         atInstant)
-                .map(e -> {
-                    try {
-                        return objectMapper.readValue(e.getValue(), new TypeReference<List<PortfolioCash>>() {
-                        })
-                                .stream()
-                                .filter(portfolioCash -> currency.equals(portfolioCash.getCurrency()))
-                                .map(PortfolioCash::getValue)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add);
-                    } catch (Exception ex) {
-                        return null;
-                    }
-                })
-                .orElse(null);
-
+                .map(portfolioPropertyConverter::fromEntity);
     }
 
     private static String getStockOrBondGrossProfitFormula() {
