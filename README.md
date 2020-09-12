@@ -22,7 +22,7 @@
 Все что нужно - это подгружать свежие отчеты брокера. По каждому счету и валюте будет доступна следующая информация:
 - текущие позиции, усредненные цены покупок и доходности ценных бумаг в [портфеле](src/main/asciidoc/portfolio-status.adoc)
   (с учетом хеджирующих позиций на срочном рынке и усредненной цены покупки валюты);  
-  ![portfolio](https://user-images.githubusercontent.com/11336712/92413815-7c1f5400-f15a-11ea-8ec1-bfdf6ff620c1.png)
+  ![portfolio](https://user-images.githubusercontent.com/11336712/93006504-c8590280-f565-11ea-947c-dc8fa5712844.png)
 - доля ценной бумаги в [портфеле](src/main/asciidoc/portfolio-status.adoc);  
   ![current-proportion](https://user-images.githubusercontent.com/11336712/88717010-8cd6b600-d128-11ea-901f-2b3fcee96f07.png)  
 - детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/portfolio-payment.adoc);  
