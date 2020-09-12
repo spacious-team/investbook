@@ -48,6 +48,7 @@ import static ru.investbook.view.excel.PortfolioStatusExcelTableHeader.*;
 @Slf4j
 public class PortfolioStatusExcelTableFactory implements TableFactory {
     private static final String STOCK_GROSS_PROFIT_FORMULA = getStockOrBondGrossProfitFormula();
+    private static final String PROFIT_FORMULA = getProfitFormula();
     private static final String PROFIT_PROPORTION_FORMULA = getProfitProportionFormula();
     private static final String INVESTMENT_PROPORTION_FORMULA = getInvestmentProportionFormula();
     private static final String PROPORTION_FORMULA = getProportionFormula();
@@ -206,7 +207,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             int count = getCount(positions);
             row.put(COUNT, count);
             if (count == 0) {
-                row.put(GROSS_PROFIT, getGrossProfit(portfolio, security, positions));
+                row.put(GROSS_PROFIT, "=" + getGrossProfit(portfolio, security, positions) + "+" + AMORTIZATION.getCellAddr());
             } else {
                 row.put(AVERAGE_PRICE, getPurchaseCost(security, positions)
                         .abs()
@@ -249,8 +250,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             row.put(AMORTIZATION, sumPaymentsForType(portfolio, security, CashFlowType.AMORTIZATION));
             row.put(DIVIDEND, sumPaymentsForType(portfolio, security, CashFlowType.DIVIDEND));
             row.put(TAX, sumPaymentsForType(portfolio, security, CashFlowType.TAX).abs());
-            row.put(PROFIT, "=" + COUPON.getCellAddr() + "+" + AMORTIZATION.getCellAddr() + "+" + DIVIDEND.getCellAddr() +
-                    "+" + GROSS_PROFIT.getCellAddr() + "-" + TAX.getCellAddr() + "-" + COMMISSION.getCellAddr());
+            row.put(PROFIT, PROFIT_FORMULA);
             row.put(PROFIT_PROPORTION, PROFIT_PROPORTION_FORMULA);
         } catch (Exception e) {
             log.error("Ошибка при формировании агрегированных данных по бумаге {}", security, e);
@@ -417,7 +417,12 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         return "=IF(" + LAST_PRICE.getCellAddr() + "<>\"\",(" +
                 LAST_PRICE.getCellAddr() + "+" + LAST_ACCRUED_INTEREST.getCellAddr() + "-" +
                 AVERAGE_PRICE.getCellAddr() + "-" + AVERAGE_ACCRUED_INTEREST.getCellAddr() + ")*" +
-                COUNT.getCellAddr() + ",0)";
+                COUNT.getCellAddr() + "+" + AMORTIZATION.getCellAddr() + ",0)";
+    }
+
+    private static String getProfitFormula() {
+        return "=" + COUPON.getCellAddr() + "+" + DIVIDEND.getCellAddr() + "+" + GROSS_PROFIT.getCellAddr() +
+                "-" + TAX.getCellAddr() + "-" + COMMISSION.getCellAddr();
     }
 
     private static String getProfitProportionFormula() {
