@@ -53,9 +53,7 @@ public class SecuritiesDepositAndWithdrawalExcelTableView extends ExcelTableView
     protected Table.Record getTotalRow(Table table) {
         Table.Record total = Table.newRecord();
         total.put(SECURITY, "Итого:");
-        total.put(COUNT, "=SUM(" +
-                COUNT.getColumnIndex() + "3:" +
-                COUNT.getColumnIndex() + (table.size() + 2) + ")");
+        total.put(COUNT, "=SUM(" + COUNT.getRange(3, table.size() + 2) + ")");
         return total;
     }
 

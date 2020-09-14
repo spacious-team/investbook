@@ -56,9 +56,7 @@ public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
         Table.Record totalRow = new Table.Record();
         totalRow.put(CONTRACT, "Итого:");
         totalRow.put(COUNT, getSumFormula(COUNT, table.size()));
-        totalRow.put(AMOUNT, "=SUMPRODUCT(ABS(" +
-                AMOUNT.getColumnIndex() + "3:" +
-                AMOUNT.getColumnIndex() + (table.size() + 2) + "))");
+        totalRow.put(AMOUNT, "=SUMPRODUCT(ABS(" + AMOUNT.getRange(3, table.size() + 2) + "))");
         totalRow.put(COMMISSION, getSumFormula(COMMISSION, table.size()) + "/2");
         totalRow.put(DERIVATIVE_PROFIT_DAY, getSumFormula(DERIVATIVE_PROFIT_DAY, table.size()));
         String profitMinusCommission = "(" + DERIVATIVE_PROFIT_DAY.getCellAddr() + "-" + COMMISSION.getCellAddr() + ")";
@@ -70,9 +68,7 @@ public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
     }
 
     private String getSumFormula(DerivativesMarketProfitExcelTableHeader column, int tableSize) {
-        return "=SUM(" +
-                column.getColumnIndex() + "3:" +
-                column.getColumnIndex() + (tableSize + 2) + ")";
+        return "=SUM(" + column.getRange(3, tableSize + 2) + ")";
     }
 
     @Override

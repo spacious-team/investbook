@@ -75,14 +75,10 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
     protected Table.Record getTotalRow(Table table) {
         Table.Record totalRow = new Table.Record();
         for (StockMarketProfitExcelTableHeader column : StockMarketProfitExcelTableHeader.values()) {
-            totalRow.put(column, "=SUM(" +
-                    column.getColumnIndex() + "3:" +
-                    column.getColumnIndex() + (table.size() + 2) + ")");
+            totalRow.put(column, "=SUM(" + column.getRange(3, table.size() + 2) + ")");
         }
         totalRow.put(SECURITY, "Итого:");
-        totalRow.put(COUNT, "=SUMPRODUCT(ABS(" +
-                COUNT.getColumnIndex() + "3:" +
-                COUNT.getColumnIndex() + (table.size() + 2) + "))");
+        totalRow.put(COUNT, "=SUMPRODUCT(ABS(" + COUNT.getRange(3, table.size() + 2) + "))");
         totalRow.remove(OPEN_DATE);
         totalRow.remove(CLOSE_DATE);
         totalRow.remove(OPEN_PRICE);
