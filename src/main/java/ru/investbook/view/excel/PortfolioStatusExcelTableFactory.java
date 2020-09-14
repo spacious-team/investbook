@@ -158,6 +158,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         .orElse((securityType == SecurityType.CURRENCY_PAIR) ?
                                 getCurrencyPair(security.getIsin()) :
                                 security.getIsin()));
+        row.put(TYPE, securityType.getDescription());
         try {
             ViewFilter filter = ViewFilter.get();
             Positions positions = positionsFactory.get(portfolio, security, filter);
@@ -439,24 +440,26 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         return "=IF(" + COUNT.getCellAddr() + ">0,1,0)*" +
                 "((" + AVERAGE_PRICE.getCellAddr() + "+" + AVERAGE_ACCRUED_INTEREST.getCellAddr() + ")*" + COUNT.getCellAddr() +
                 "-" + AMORTIZATION.getCellAddr() + ")" +
-                "/(SUMPRODUCT((0+" + AVERAGE_PRICE.getColumnIndex() + "$3:" + AVERAGE_PRICE.getColumnIndex() + "100000)," +
-                "(0+" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "100000)," +
-                "SIGN(" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "100000>0))" +
-                "+SUMPRODUCT((0+" + AVERAGE_ACCRUED_INTEREST.getColumnIndex() + "$3:" + AVERAGE_ACCRUED_INTEREST.getColumnIndex() + "100000)," +
-                "(0+" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "100000)," +
-                "SIGN(" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "100000>0))" +
-                "-SUMIF(" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "100000,\">0\"," +
-                AMORTIZATION.getColumnIndex() + "$3:" + AMORTIZATION.getColumnIndex() + "100000))";
+                "/(SUMPRODUCT((0+" + AVERAGE_PRICE.getColumnIndex() + "$3:" + AVERAGE_PRICE.getColumnIndex() + "$1000)," +
+                "(0+" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "$1000)," +
+                "SIGN(" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "$1000>0)," +
+                "(0+(" + TYPE.getColumnIndex() + "$3:" + TYPE.getColumnIndex() + "$1000<>\"" + SecurityType.DERIVATIVE.getDescription() + "\")))" +
+                "+SUMPRODUCT((0+" + AVERAGE_ACCRUED_INTEREST.getColumnIndex() + "$3:" + AVERAGE_ACCRUED_INTEREST.getColumnIndex() + "$1000)," +
+                "(0+" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "$1000)," +
+                "SIGN(" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "$1000>0))" +
+                "-SUMIF(" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "$1000,\">0\"," +
+                AMORTIZATION.getColumnIndex() + "$3:" + AMORTIZATION.getColumnIndex() + "$1000))";
     }
 
     private static String getProportionFormula() {
         return "=IF(" + COUNT.getCellAddr() + ">0,1,0)*" +
                 "((" + LAST_PRICE.getCellAddr() + "+" + LAST_ACCRUED_INTEREST.getCellAddr() + ")*" + COUNT.getCellAddr() +
-                ")/(SUMPRODUCT((0+" + LAST_PRICE.getColumnIndex() + "$3:" + LAST_PRICE.getColumnIndex() + "100000)," +
-                "(0+" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "100000)," +
-                "SIGN(" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "100000>0))" +
-                "+SUMPRODUCT((0+" + LAST_ACCRUED_INTEREST.getColumnIndex() + "3:" + LAST_ACCRUED_INTEREST.getColumnIndex() + "100000)," +
-                "(0+" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "100000)," +
-                "SIGN(" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "100000>0)))";
+                ")/(SUMPRODUCT((0+" + LAST_PRICE.getColumnIndex() + "$3:" + LAST_PRICE.getColumnIndex() + "$1000)," +
+                "(0+" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "$1000)," +
+                "SIGN(" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "$1000>0)," +
+                "(0+(" + TYPE.getColumnIndex() + "$3:" + TYPE.getColumnIndex() + "$1000<>\"" + SecurityType.DERIVATIVE.getDescription() + "\")))" +
+                "+SUMPRODUCT((0+" + LAST_ACCRUED_INTEREST.getColumnIndex() + "3:" + LAST_ACCRUED_INTEREST.getColumnIndex() + "$1000)," +
+                "(0+" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "$1000)," +
+                "SIGN(" + COUNT.getColumnIndex() + "$3:" + COUNT.getColumnIndex() + "$1000>0)))";
     }
 }

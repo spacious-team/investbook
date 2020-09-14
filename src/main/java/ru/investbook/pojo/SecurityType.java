@@ -18,8 +18,18 @@
 
 package ru.investbook.pojo;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public enum SecurityType {
-    STOCK_OR_BOND, DERIVATIVE, CURRENCY_PAIR;
+
+    STOCK_OR_BOND("акция/облигация"),
+    DERIVATIVE("срочный контракт"),
+    CURRENCY_PAIR("валюта");
+
+    @Getter
+    private final String description;
 
     public static SecurityType getSecurityType(Security security) {
         return getSecurityType(security.getIsin());

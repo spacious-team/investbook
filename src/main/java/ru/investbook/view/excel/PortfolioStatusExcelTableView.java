@@ -74,6 +74,8 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
             sheet.setColumnWidth(header.ordinal(), 15 * 256);
         }
         sheet.setColumnWidth(SECURITY.ordinal(), 45 * 256);
+        sheet.setColumnWidth(TYPE.ordinal(), 19 * 256);
+        sheet.setColumnHidden(TYPE.ordinal(), true);
         sheet.setColumnWidth(FIRST_TRANSACTION_DATE.ordinal(), 12 * 256);
         sheet.setColumnWidth(LAST_TRANSACTION_DATE.ordinal(), 12 * 256);
         sheet.setColumnWidth(BUY_COUNT.ordinal(), 12 * 256);
