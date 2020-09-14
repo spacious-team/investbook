@@ -63,6 +63,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     private final ForeignExchangeRateService foreignExchangeRateService;
     private final PortfolioPropertyRepository portfolioPropertyRepository;
     private final Instant instantOf2000_01_01 = LocalDate.of(2000, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant();
+    private final BigDecimal minCash = BigDecimal.valueOf(0.01);
 
     public Table create(Portfolio portfolio) {
         throw new UnsupportedOperationException();
@@ -117,16 +118,18 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         ViewFilter.get().getToDate().getEpochSecond(),
                         Instant.now().getEpochSecond()));
         row.put(SECURITY, "Остаток денежных средств, " + forCurrency.toLowerCase());
-        Optional<PortfolioProperty> portfolioCash = getPortfolioCash(portfolio, atTime);
-        row.put(LAST_EVENT_DATE, portfolioCash.map(PortfolioProperty::getTimestamp).orElse(null));
-        row.put(LAST_PRICE, portfolioCash.map(portfolioProperty ->
+        Optional<PortfolioProperty> portfolioCashes = getPortfolioCash(portfolio, atTime);
+        row.put(LAST_EVENT_DATE, portfolioCashes.map(PortfolioProperty::getTimestamp).orElse(null));
+        BigDecimal portfolioCash = portfolioCashes.map(portfolioProperty ->
                 PortfolioCash.valueOf(portfolioProperty.getValue())
                         .stream()
                         .filter(cash -> forCurrency.equals(cash.getCurrency()))
                         .map(PortfolioCash::getValue)
                         .reduce(BigDecimal.ZERO, BigDecimal::add))
-                .orElse(null));
-        if (ViewFilter.get().getFromDate().isBefore(instantOf2000_01_01)) {
+                .orElse(null);
+        row.put(LAST_PRICE, portfolioCash);
+        if (ViewFilter.get().getFromDate().isBefore(instantOf2000_01_01) &&
+                portfolioCash != null && portfolioCash.compareTo(minCash) >= 1) { // fix div by zero in proportion column
             // режим отображения по умолчанию, скорее всего отображаем портфель с начала открытия счета,
             // учитываем остаток денежных средств в Доле портфеля (%)
             row.put(PROPORTION, PROPORTION_FORMULA);
