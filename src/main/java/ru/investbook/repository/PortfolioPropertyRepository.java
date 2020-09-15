@@ -27,10 +27,15 @@ import java.util.Optional;
 
 public interface PortfolioPropertyRepository extends JpaRepository<PortfolioPropertyEntity, Integer> {
 
+    Optional<PortfolioPropertyEntity> findFirstByPropertyOrderByTimestampDesc(String property);
+
     Optional<PortfolioPropertyEntity> findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(String portfolio,
                                                                                             String property);
 
-    Optional<PortfolioPropertyEntity> findFirstByPropertyOrderByTimestampDesc(String property);
+    Optional<PortfolioPropertyEntity> findFirstByPortfolioIdAndPropertyAndTimestampBetweenOrderByTimestampDesc(String portfolio,
+                                                                                                               String property,
+                                                                                                               Instant startDate,
+                                                                                                               Instant endDate);
 
     List<PortfolioPropertyEntity> findByPropertyAndTimestampBetweenOrderByTimestampDesc(String property,
                                                                                         Instant startDate,

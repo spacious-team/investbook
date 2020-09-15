@@ -16,35 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.view;
+package ru.investbook.repository;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import org.springframework.data.jpa.repository.JpaRepository;
+import ru.investbook.entity.SecurityQuoteEntity;
 
 import java.time.Instant;
+import java.util.Optional;
 
-@Getter
-@Builder(toBuilder = true)
-@EqualsAndHashCode
-public class ViewFilter {
-    private static final ThreadLocal<ViewFilter> filters = ThreadLocal.withInitial(() -> null);
-    public static final Instant defaultFromDate = Instant.ofEpochSecond(0);
+public interface SecurityQuoteRepository extends JpaRepository<SecurityQuoteEntity, Integer> {
 
-    @Builder.Default
-    private final Instant fromDate = defaultFromDate;
-    @Builder.Default
-    private final Instant toDate = Instant.now();
+    Optional<SecurityQuoteEntity> findFirstBySecurityIsinAndTimestampLessThanOrderByTimestampDesc(
+            String isin,
+            Instant date);
 
-    public static void set(ViewFilter viewFilter) {
-        filters.set(viewFilter);
-    }
-
-    public static ViewFilter get() {
-        return filters.get();
-    }
-
-    public static void remove() {
-        filters.remove();
-    }
 }

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/event-cash-flows")
 public class EventCashFlowRestController extends AbstractRestController<Integer, EventCashFlow, EventCashFlowEntity> {
 
     public EventCashFlowRestController(JpaRepository<EventCashFlowEntity, Integer> repository,
@@ -37,32 +38,32 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
         super(repository, converter);
     }
 
-    @GetMapping("/event-cash-flows")
+    @GetMapping
     @Override
     public List<EventCashFlowEntity> get() {
         return super.get();
     }
 
-    @GetMapping("/event-cash-flows/{id}")
+    @GetMapping("{id}")
     @Override
     public ResponseEntity<EventCashFlowEntity> get(@PathVariable("id") Integer id) {
         return super.get(id);
     }
 
-    @PostMapping("/event-cash-flows")
+    @PostMapping
     @Override
     public ResponseEntity<EventCashFlowEntity> post(@Valid @RequestBody EventCashFlow event) {
         return super.post(event);
     }
 
-    @PutMapping("/event-cash-flows/{id}")
+    @PutMapping("{id}")
     @Override
     public ResponseEntity<EventCashFlowEntity> put(@PathVariable("id") Integer id,
                                                    @Valid @RequestBody EventCashFlow event) {
         return super.put(id, event);
     }
 
-    @DeleteMapping("/event-cash-flows/{id}")
+    @DeleteMapping("{id}")
     @Override
     public void delete(@PathVariable("id") Integer id) {
         super.delete(id);

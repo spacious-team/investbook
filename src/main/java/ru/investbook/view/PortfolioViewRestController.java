@@ -42,7 +42,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -83,9 +85,9 @@ public class PortfolioViewRestController {
             e.printStackTrace(pw);
             String httpBody = Stream.of(sw.toString().split("\n"))
                     .collect(joining("</br>", "<b>Ошибка сборки отчета</b></br></br> <a href=\"/\">[назад]</a><br/>" +
-                                    "<span style=\"font-size: smaller; color: gray;\">Вы можете " +
-                                    "<a href=\"https://github.com/spacious-team/investbook/issues\">сообщить</a> об ошибке " +
-                                    "разработчикам</span></br></br> - ", ""));
+                            "<span style=\"font-size: smaller; color: gray;\">Вы можете " +
+                            "<a href=\"https://github.com/spacious-team/investbook/issues\">сообщить</a> об ошибке " +
+                            "разработчикам</span></br></br> - ", ""));
             response.setContentType("text/html; charset=utf-8");
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(httpBody);
@@ -97,16 +99,20 @@ public class PortfolioViewRestController {
 
     private ViewFilter getViewFilter(HttpServletRequest request) {
         ViewFilter.ViewFilterBuilder viewFilterBuilder = ViewFilter.builder();
-        setViewFilterDate(request, FROM_DATE_FIELD, viewFilterBuilder::fromDate);
-        setViewFilterDate(request, TO_DATE_FIELD, viewFilterBuilder::toDate);
+        setViewFilterDate(request, FROM_DATE_FIELD, Function.identity(), viewFilterBuilder::fromDate);
+        setViewFilterDate(request, TO_DATE_FIELD,
+                instant -> instant.plus(1, ChronoUnit.DAYS).minusSeconds(1), viewFilterBuilder::toDate);
         return viewFilterBuilder.build();
     }
 
-    private void setViewFilterDate(HttpServletRequest request, String dateField, Consumer<Instant> setter) {
+    private void setViewFilterDate(HttpServletRequest request, String dateField, Function<Instant, Instant> converter,
+                                   Consumer<Instant> setter) {
         try {
-            setter.accept(LocalDate.parse(request.getParameter(dateField), DateTimeFormatter.ISO_LOCAL_DATE)
-                    .atStartOfDay(ZoneId.systemDefault())
-                    .toInstant());
+            setter.accept(
+                    converter.apply(
+                            LocalDate.parse(request.getParameter(dateField), DateTimeFormatter.ISO_LOCAL_DATE)
+                                    .atStartOfDay(ZoneId.systemDefault())
+                                    .toInstant()));
         } catch (Exception ignore) {
         }
     }

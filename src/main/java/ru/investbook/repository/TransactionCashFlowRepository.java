@@ -26,6 +26,7 @@ import ru.investbook.pojo.CashFlowType;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface TransactionCashFlowRepository extends JpaRepository<TransactionCashFlowEntity, TransactionCashFlowEntityPK> {
 
@@ -39,4 +40,8 @@ public interface TransactionCashFlowRepository extends JpaRepository<Transaction
     @Query(value = "SELECT distinct t.currency FROM TransactionCashFlowEntity t " +
             "WHERE t.pk.portfolio = :portfolio AND t.pk.type = :#{#cashFlowType.id}")
     List<String> findDistinctCurrencyByPkPortfolioAndPkType(String portfolio, CashFlowType cashFlowType);
+
+    @Query(value = "SELECT distinct t.currency FROM TransactionCashFlowEntity t " +
+            "WHERE t.pk.portfolio = :portfolio AND t.pk.type in (:#{#cashFlowTypes})")
+    List<String> findDistinctCurrencyByPkPortfolioAndPkTypeIn(String portfolio, Set<Integer> cashFlowTypes);
 }

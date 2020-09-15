@@ -47,12 +47,10 @@ public class CommissionExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow() {
+    protected Table.Record getTotalRow(Table table) {
         Table.Record total = Table.newRecord();
         total.put(DATE, "Итого:");
-        total.put(COMMISSION, "=SUM(" +
-                COMMISSION.getColumnIndex() + "3:" +
-                COMMISSION.getColumnIndex() + "100000)");
+        total.put(COMMISSION, "=SUM(" + COMMISSION.getRange(3, table.size() + 2) + ")");
         return total;
     }
 

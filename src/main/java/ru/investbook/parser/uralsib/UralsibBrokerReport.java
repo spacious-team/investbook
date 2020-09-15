@@ -40,6 +40,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -47,11 +48,11 @@ import java.util.zip.ZipInputStream;
 @RequiredArgsConstructor()
 @EqualsAndHashCode(of = "path")
 public class UralsibBrokerReport implements BrokerReport {
-    public static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
     private static final String PORTFOLIO_MARKER = "Номер счета Клиента:";
     private static final String REPORT_DATE_MARKER = "за период";
+    private static final int LAST_TRADE_HOUR = 19;
 
     private final Workbook book;
     @Getter
@@ -61,7 +62,9 @@ public class UralsibBrokerReport implements BrokerReport {
     @Getter
     private final Path path;
     @Getter
-    private final Instant reportDate;
+    private final Instant reportEndDateTime;
+    @Getter
+    private final ZoneId reportZoneId = ZoneId.of("Europe/Moscow");
 
     public UralsibBrokerReport(ZipInputStream zis) throws IOException {
         ZipEntry zipEntry = zis.getNextEntry();
@@ -69,7 +72,7 @@ public class UralsibBrokerReport implements BrokerReport {
         this.book = getWorkBook(this.path.getFileName().toString(), zis);
         this.reportPage = new ExcelSheet(book.getSheetAt(0));
         this.portfolio = getPortfolio(this.reportPage);
-        this.reportDate = getReportDate(this.reportPage);
+        this.reportEndDateTime = getReportEndDateTime(this.reportPage);
     }
 
     public UralsibBrokerReport(String excelFileName, InputStream is) throws IOException {
@@ -77,7 +80,7 @@ public class UralsibBrokerReport implements BrokerReport {
         this.book = getWorkBook(excelFileName, is);
         this.reportPage = new ExcelSheet(book.getSheetAt(0));
         this.portfolio = getPortfolio(this.reportPage);
-        this.reportDate = getReportDate(this.reportPage);
+        this.reportEndDateTime = getReportEndDateTime(this.reportPage);
     }
 
     private Workbook getWorkBook(String excelFileName, InputStream is) throws IOException {
@@ -110,7 +113,7 @@ public class UralsibBrokerReport implements BrokerReport {
         }
     }
 
-    private Instant getReportDate(ReportPage reportPage) {
+    private Instant getReportEndDateTime(ReportPage reportPage) {
         try {
             TableCellAddress address = reportPage.find(REPORT_DATE_MARKER, 0, Integer.MAX_VALUE,
                     (cell, value) -> cell.toLowerCase().contains(value.toString()));
@@ -121,7 +124,8 @@ public class UralsibBrokerReport implements BrokerReport {
                                             .getCell(address.getColumn())
                                             .getStringCellValue()
                                             .split(" ")))
-                            .get(0));
+                            .get(0))
+                    .plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);
         } catch (Exception e) {
             throw new RuntimeException("Ошибка поиска даты отчета");
         }
@@ -130,9 +134,9 @@ public class UralsibBrokerReport implements BrokerReport {
     public Instant convertToInstant(String value) {
         value = value.trim();
         if (value.contains(":")) {
-            return LocalDateTime.parse(value, UralsibBrokerReport.dateTimeFormatter).atZone(UralsibBrokerReport.zoneId).toInstant();
+            return LocalDateTime.parse(value, UralsibBrokerReport.dateTimeFormatter).atZone(getReportZoneId()).toInstant();
         } else {
-            return LocalDate.parse(value, UralsibBrokerReport.dateFormatter).atStartOfDay(UralsibBrokerReport.zoneId).toInstant();
+            return LocalDate.parse(value, UralsibBrokerReport.dateFormatter).atStartOfDay(getReportZoneId()).toInstant();
         }
     }
 

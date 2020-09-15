@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/portfolio-properties")
 public class PortfolioPropertyRestController extends AbstractRestController<Integer, PortfolioProperty, PortfolioPropertyEntity> {
 
     public PortfolioPropertyRestController(JpaRepository<PortfolioPropertyEntity, Integer> repository,
@@ -37,32 +38,32 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
         super(repository, converter);
     }
 
-    @GetMapping("/portfolio-properties")
+    @GetMapping
     @Override
     public List<PortfolioPropertyEntity> get() {
         return super.get();
     }
 
-    @GetMapping("/portfolio-properties/{id}")
+    @GetMapping("{id}")
     @Override
     public ResponseEntity<PortfolioPropertyEntity> get(@PathVariable("id") Integer id) {
         return super.get(id);
     }
 
-    @PostMapping("/portfolio-properties")
+    @PostMapping
     @Override
     public ResponseEntity<PortfolioPropertyEntity> post(@Valid @RequestBody PortfolioProperty property) {
         return super.post(property);
     }
 
-    @PutMapping("/portfolio-properties/{id}")
+    @PutMapping("{id}")
     @Override
     public ResponseEntity<PortfolioPropertyEntity> put(@PathVariable("id") Integer id,
                                                         @Valid @RequestBody PortfolioProperty property) {
         return super.put(id, property);
     }
 
-    @DeleteMapping("/portfolio-properties/{id}")
+    @DeleteMapping("{id}")
     @Override
     public void delete(@PathVariable("id") Integer id) {
         super.delete(id);

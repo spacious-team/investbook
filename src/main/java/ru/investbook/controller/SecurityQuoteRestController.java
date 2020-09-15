@@ -22,45 +22,45 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.investbook.converter.EntityConverter;
-import ru.investbook.entity.SecurityEventCashFlowEntity;
-import ru.investbook.pojo.SecurityEventCashFlow;
+import ru.investbook.entity.SecurityQuoteEntity;
+import ru.investbook.pojo.SecurityQuote;
 
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/security-event-cash-flows")
-public class SecurityEventCashFlowRestController extends AbstractRestController<Integer, SecurityEventCashFlow, SecurityEventCashFlowEntity> {
+@RequestMapping("/security-quotes")
+public class SecurityQuoteRestController extends AbstractRestController<Integer, SecurityQuote, SecurityQuoteEntity> {
 
-    public SecurityEventCashFlowRestController(JpaRepository<SecurityEventCashFlowEntity, Integer> repository,
-                                               EntityConverter<SecurityEventCashFlowEntity, SecurityEventCashFlow> converter) {
+    public SecurityQuoteRestController(JpaRepository<SecurityQuoteEntity, Integer> repository,
+                                       EntityConverter<SecurityQuoteEntity, SecurityQuote> converter) {
         super(repository, converter);
     }
 
     @GetMapping
     @Override
-    public List<SecurityEventCashFlowEntity> get() {
+    public List<SecurityQuoteEntity> get() {
         return super.get();
     }
 
     @GetMapping("{id}")
     @Override
-    public ResponseEntity<SecurityEventCashFlowEntity> get(@PathVariable("id") Integer id) {
+    public ResponseEntity<SecurityQuoteEntity> get(@PathVariable("id") Integer id) {
         return super.get(id);
     }
 
     @PostMapping
     @Override
-    public ResponseEntity<SecurityEventCashFlowEntity> post(@Valid @RequestBody SecurityEventCashFlow event) {
-        return super.post(event);
+    public ResponseEntity<SecurityQuoteEntity> post(@Valid @RequestBody SecurityQuote quote) {
+        return super.post(quote);
     }
 
     @PutMapping("{id}")
     @Override
-    public ResponseEntity<SecurityEventCashFlowEntity> put(@PathVariable("id") Integer id,
-                                                   @Valid @RequestBody SecurityEventCashFlow event) {
-        return super.put(id, event);
+    public ResponseEntity<SecurityQuoteEntity> put(@PathVariable("id") Integer id,
+                                                   @Valid @RequestBody SecurityQuote quote) {
+        return super.put(id, quote);
     }
 
     @DeleteMapping("{id}")
@@ -70,22 +70,22 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     }
 
     @Override
-    protected Optional<SecurityEventCashFlowEntity> getById(Integer id) {
+    protected Optional<SecurityQuoteEntity> getById(Integer id) {
         return repository.findById(id);
     }
 
     @Override
-    protected Integer getId(SecurityEventCashFlow object) {
+    protected Integer getId(SecurityQuote object) {
         return object.getId();
     }
 
     @Override
-    protected SecurityEventCashFlow updateId(Integer id, SecurityEventCashFlow object) {
+    protected SecurityQuote updateId(Integer id, SecurityQuote object) {
         return object.toBuilder().id(id).build();
     }
 
     @Override
     protected String getLocation() {
-        return "/security-event-cash-flows";
+        return "/security-quotes";
     }
 }

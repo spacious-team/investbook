@@ -42,6 +42,7 @@ public class ReportTableStorage {
     private final TransactionRestController transactionRestController;
     private final TransactionCashFlowRestController transactionCashFlowRestController;
     private final PortfolioPropertyRestController portfolioPropertyRestController;
+    private final SecurityQuoteRestController securityQuoteRestController;
     private final ObjectMapper objectMapper;
 
     public boolean addPortfolio(Portfolio portfolio) {
@@ -120,6 +121,12 @@ public class ReportTableStorage {
                 "Не могу добавить информацию о свойствах портфеля " + property);
     }
 
+    public void addSecurityQuote(SecurityQuote securityQuote) {
+        handlePost(
+                () -> securityQuoteRestController.post(securityQuote),
+                "Не могу добавить информацию о котировке финансового инструмента " + securityQuote);
+    }
+
     public void addCashInfo(ReportTable<PortfolioCash> cashTable) {
         try {
             if (!cashTable.getData().isEmpty()) {
@@ -127,7 +134,7 @@ public class ReportTableStorage {
                         .portfolio(cashTable.getReport().getPortfolio())
                         .property(PortfolioPropertyType.CASH)
                         .value(objectMapper.writeValueAsString(cashTable.getData()))
-                        .timestamp(cashTable.getReport().getReportDate())
+                        .timestamp(cashTable.getReport().getReportEndDateTime())
                         .build());
             }
         } catch (JsonProcessingException e) {

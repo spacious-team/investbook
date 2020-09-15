@@ -16,35 +16,39 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.view;
+package ru.investbook.pojo;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
+import org.springframework.lang.Nullable;
 
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Getter
+@ToString
 @Builder(toBuilder = true)
 @EqualsAndHashCode
-public class ViewFilter {
-    private static final ThreadLocal<ViewFilter> filters = ThreadLocal.withInitial(() -> null);
-    public static final Instant defaultFromDate = Instant.ofEpochSecond(0);
+public class SecurityQuote {
 
-    @Builder.Default
-    private final Instant fromDate = defaultFromDate;
-    @Builder.Default
-    private final Instant toDate = Instant.now();
+    @NotNull
+    private final Integer id;
 
-    public static void set(ViewFilter viewFilter) {
-        filters.set(viewFilter);
-    }
+    @NotNull
+    private final String isin;
 
-    public static ViewFilter get() {
-        return filters.get();
-    }
+    @NotNull
+    private final Instant timestamp;
 
-    public static void remove() {
-        filters.remove();
-    }
+    @NotNull
+    private final BigDecimal quote;
+
+    @Nullable
+    private final BigDecimal price;
+
+    @Nullable
+    private final BigDecimal accruedInterest;
 }

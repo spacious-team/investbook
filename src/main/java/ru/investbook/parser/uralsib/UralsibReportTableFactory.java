@@ -24,6 +24,7 @@ import ru.investbook.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInfor
 import ru.investbook.pojo.EventCashFlow;
 import ru.investbook.pojo.Security;
 import ru.investbook.pojo.SecurityEventCashFlow;
+import ru.investbook.pojo.SecurityQuote;
 import ru.investbook.view.ForeignExchangeRateService;
 
 import java.util.ArrayList;
@@ -90,5 +91,12 @@ public class UralsibReportTableFactory implements ReportTableFactory {
     @Override
     public ReportTable<SecurityEventCashFlow> getDerivativeCashFlowTable() {
         return new DerivativeCashFlowTable(report);
+    }
+
+    @Override
+    public ReportTable<SecurityQuote> getSecurityQuoteTable() {
+        return new WrappingReportTable<>(report,
+                new SecurityQuoteTable(report),
+                new DerivativeQuoteTable(report));
     }
 }

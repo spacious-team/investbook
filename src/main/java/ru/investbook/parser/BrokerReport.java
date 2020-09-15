@@ -22,11 +22,13 @@ import ru.investbook.parser.table.ReportPage;
 
 import java.nio.file.Path;
 import java.time.Instant;
+import java.time.ZoneId;
 
 public interface BrokerReport extends AutoCloseable {
     ReportPage getReportPage();
     String getPortfolio();
     Path getPath();
-    Instant getReportDate();
+    Instant getReportEndDateTime();
+    ZoneId getReportZoneId();
     Instant convertToInstant(String value);
 }

@@ -92,7 +92,7 @@ public abstract class ExcelTableView {
         Class<? extends TableHeader> headerType = getHeaderType(table);
         if (headerType == null) return;
         writeHeader(sheet, headerType, styles.getHeaderStyle());
-        Table.Record totalRow = getTotalRow();
+        Table.Record totalRow = getTotalRow(table);
         if (totalRow != null && !totalRow.isEmpty()) {
             table.addFirst(totalRow);
         }
@@ -105,31 +105,39 @@ public abstract class ExcelTableView {
                     continue;
                 }
                 Cell cell = row.createCell(header.ordinal());
-                if (value instanceof String) {
-                    String string = (String) value;
-                    if (string.startsWith("=")) {
-                        cell.setCellFormula(string.substring(1)
-                                .replace(ROW_NUM_PLACE_HOLDER, String.valueOf(rowNum + 1)));
-                        cell.setCellType(CellType.FORMULA);
-                        cell.setCellStyle(styles.getMoneyStyle());
-                    } else {
-                        cell.setCellValue(string);
+                try {
+                    if (value instanceof String) {
+                        String string = (String) value;
+                        if (string.startsWith("=")) {
+                            string = string.substring(1)
+                                    .replace(ROW_NUM_PLACE_HOLDER, String.valueOf(rowNum + 1));
+                            value = string;
+                            cell.setCellFormula(string);
+                            cell.setCellType(CellType.FORMULA);
+                            cell.setCellStyle(styles.getMoneyStyle());
+                        } else {
+                            cell.setCellValue(string);
+                            cell.setCellStyle(styles.getDefaultStyle());
+                        }
+                    } else if (value instanceof Number) {
+                        cell.setCellValue(((Number) value).doubleValue());
+                        if (value instanceof Integer || value instanceof Long
+                                || value instanceof Short || value instanceof Byte) {
+                            cell.setCellStyle(styles.getIntStyle());
+                        } else {
+                            cell.setCellStyle(styles.getMoneyStyle());
+                        }
+                    } else if (value instanceof Instant) {
+                        cell.setCellValue(((Instant) value).atZone(ZoneId.systemDefault()).toLocalDateTime());
+                        cell.setCellStyle(styles.getDateStyle());
+                    } else if (value instanceof Boolean) {
+                        cell.setCellValue((Boolean) value);
                         cell.setCellStyle(styles.getDefaultStyle());
                     }
-                } else if (value instanceof Number) {
-                    cell.setCellValue(((Number) value).doubleValue());
-                    if (value instanceof Integer || value instanceof Long
-                            || value instanceof Short || value instanceof Byte) {
-                        cell.setCellStyle(styles.getIntStyle());
-                    } else {
-                        cell.setCellStyle(styles.getMoneyStyle());
-                    }
-                } else if (value instanceof Instant) {
-                    cell.setCellValue(((Instant) value).atZone(ZoneId.systemDefault()).toLocalDateTime());
-                    cell.setCellStyle(styles.getDateStyle());
-                } else if (value instanceof Boolean) {
-                    cell.setCellValue((Boolean) value);
-                    cell.setCellStyle(styles.getDefaultStyle());
+                } catch (Exception e) {
+                    throw new RuntimeException("Не могу задать значение '" + value + "'" +
+                            " в ячейку " + cell.getAddress() +
+                            " на вкладке '" + sheet.getSheetName() + "'");
                 }
             }
         }
@@ -176,7 +184,7 @@ public abstract class ExcelTableView {
         return link;
     }
 
-    protected Table.Record getTotalRow() {
+    protected Table.Record getTotalRow(Table table) {
         return new Table.Record();
     }
 

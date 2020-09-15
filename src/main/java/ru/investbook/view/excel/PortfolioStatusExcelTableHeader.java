@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum PortfolioStatusExcelTableHeader implements ExcelTableHeader {
     SECURITY("Бумага"),
+    TYPE("Тип"),
     FIRST_TRANSACTION_DATE("Дата первой сделки"),
     LAST_TRANSACTION_DATE("Дата последней сделки"),
     BUY_COUNT("Куплено"),
@@ -38,9 +39,13 @@ public enum PortfolioStatusExcelTableHeader implements ExcelTableHeader {
     AMORTIZATION("Амортизация облигации"),
     DIVIDEND("Дивиденды"),
     TAX("Налог (удержанный)"),
+    LAST_PRICE("Цена"),
+    LAST_ACCRUED_INTEREST("НКД"),
     GROSS_PROFIT("Курсовой доход"),
     PROFIT("Прибыль"),
-    PROPORTION("Доля, %");
+    PROFIT_PROPORTION("Доля прибыли, %"),
+    INVESTMENT_PROPORTION("Доля вложений, %"),
+    PROPORTION("Доля в портфеле, %");
 
     private final String description;
 }

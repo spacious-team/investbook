@@ -21,10 +21,7 @@ package ru.investbook.parser.psb.foreignmarket;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import ru.investbook.parser.*;
-import ru.investbook.pojo.EventCashFlow;
-import ru.investbook.pojo.PortfolioProperty;
-import ru.investbook.pojo.Security;
-import ru.investbook.pojo.SecurityEventCashFlow;
+import ru.investbook.pojo.*;
 
 @RequiredArgsConstructor
 public class PsbForeignMarketReportTableFactory implements ReportTableFactory {
@@ -78,6 +75,11 @@ public class PsbForeignMarketReportTableFactory implements ReportTableFactory {
     
     @Override
     public ReportTable<SecurityEventCashFlow> getDerivativeCashFlowTable() {
+        return new EmptyReportTable<>(report);
+    }
+
+    @Override
+    public ReportTable<SecurityQuote> getSecurityQuoteTable() {
         return new EmptyReportTable<>(report);
     }
 }
