@@ -37,14 +37,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 @EqualsAndHashCode(of = "path")
 public class PsbBrokerReport implements BrokerReport {
-    private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
     private static final String PORTFOLIO_MARKER = "Договор №:";
     private static final String REPORT_DATE_MARKER = "ОТЧЕТ БРОКЕРА";
+    private static final int LAST_TRADE_HOUR = 19;
 
     private final Workbook book;
     @Getter
@@ -54,7 +55,9 @@ public class PsbBrokerReport implements BrokerReport {
     @Getter
     private final Path path;
     @Getter
-    private final Instant reportDate;
+    private final Instant reportEndDateTime;
+    @Getter
+    private final ZoneId reportZoneId = ZoneId.of("Europe/Moscow");
 
     public PsbBrokerReport(String excelFileName) throws IOException {
         this(Paths.get(excelFileName));
@@ -69,7 +72,7 @@ public class PsbBrokerReport implements BrokerReport {
         this.book = getWorkBook(excelFileName, is);
         this.reportPage = new ExcelSheet(book.getSheetAt(0));
         this.portfolio = getPortfolio(this.reportPage);
-        this.reportDate = getReportDate(this.reportPage);
+        this.reportEndDateTime = getReportEndDateTime(this.reportPage);
     }
 
     private Workbook getWorkBook(String excelFileName, InputStream is) throws IOException {
@@ -93,11 +96,12 @@ public class PsbBrokerReport implements BrokerReport {
         }
     }
 
-    private Instant getReportDate(ReportPage reportPage) {
+    private Instant getReportEndDateTime(ReportPage reportPage) {
         try {
             String value = String.valueOf(reportPage.getNextColumnValue(REPORT_DATE_MARKER));
             if (value != null) {
-                return convertToInstant(value.split(" ")[3]);
+                return convertToInstant(value.split(" ")[3])
+                        .plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);
             }
             throw new IllegalArgumentException(
                     "Не найдена дата отчета по заданному шаблону '" + REPORT_DATE_MARKER + " XXX'");
@@ -109,9 +113,9 @@ public class PsbBrokerReport implements BrokerReport {
     public Instant convertToInstant(String value) {
         value = value.trim();
         if (value.contains(":")) {
-            return LocalDateTime.parse(value, PsbBrokerReport.dateTimeFormatter).atZone(PsbBrokerReport.zoneId).toInstant();
+            return LocalDateTime.parse(value, PsbBrokerReport.dateTimeFormatter).atZone(getReportZoneId()).toInstant();
         } else {
-            return LocalDate.parse(value, PsbBrokerReport.dateFormatter).atStartOfDay(PsbBrokerReport.zoneId).toInstant();
+            return LocalDate.parse(value, PsbBrokerReport.dateFormatter).atStartOfDay(getReportZoneId()).toInstant();
         }
     }
 

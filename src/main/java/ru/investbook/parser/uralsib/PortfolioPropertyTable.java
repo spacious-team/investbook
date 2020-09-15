@@ -83,7 +83,7 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
                     .portfolio(report.getPortfolio())
                     .property(PortfolioPropertyType.TOTAL_ASSETS)
                     .value(table.getCurrencyCellValue(row, RUB).toString())
-                    .timestamp(report.getReportDate())
+                    .timestamp(report.getReportEndDateTime())
                     .build());
         } catch (Exception e) {
             log.info("Не могу распарсить таблицу '{}' в файле {}", ASSETS_TABLE, report.getPath().getFileName(), e);
@@ -111,7 +111,7 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
                                 .portfolio(report.getPortfolio())
                                 .property(ForeignExchangeRateService.getExchangePropertyFor(currency))
                                 .value(exchangeRate.toString())
-                                .timestamp(report.getReportDate())
+                                .timestamp(report.getReportEndDateTime())
                                 .build());
                     }
                 } catch (Exception e) {
@@ -147,7 +147,7 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
         }
         if (exchangeRate.equals(BigDecimal.ZERO)) {
             exchangeRate = foreignExchangeRateService.getExchangeRate(baseCurrency, quoteCurrency,
-                    transactionInstant, UralsibBrokerReport.zoneId);
+                    transactionInstant, getReport().getReportZoneId());
         }
         return exchangeRate;
     }

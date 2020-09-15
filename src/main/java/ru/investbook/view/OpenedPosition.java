@@ -18,7 +18,9 @@
 
 package ru.investbook.view;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import ru.investbook.pojo.Transaction;
 
 import java.time.Instant;
@@ -27,6 +29,8 @@ import static java.lang.Integer.signum;
 import static java.lang.Math.abs;
 
 @Getter
+@ToString
+@EqualsAndHashCode
 public class OpenedPosition implements Position {
     private final Transaction openTransaction;
     /**
@@ -58,6 +62,12 @@ public class OpenedPosition implements Position {
     @Override
     public boolean wasOpenedAtTheInstant(Instant instant) {
         return openTransaction.getTimestamp().isBefore(instant);
+    }
+
+    @Override
+    public boolean wasOpenedBetweenDates(Instant startDate, Instant endDate) {
+        return startDate.isBefore(endDate) &&
+                openTransaction.getTimestamp().isBefore(endDate);
     }
 
     @Override

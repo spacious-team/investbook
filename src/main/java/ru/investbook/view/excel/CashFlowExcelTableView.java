@@ -60,7 +60,7 @@ public class CashFlowExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow() {
+    protected Table.Record getTotalRow(Table table) {
         Table.Record total = Table.newRecord();
         BigDecimal liquidationValueRub = portfolioPropertyRepository
                 .findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(
@@ -70,13 +70,12 @@ public class CashFlowExcelTableView extends ExcelTableView {
                 .orElse(BigDecimal.ZERO);
         total.put(DATE, "Итого:");
         total.put(CASH_RUB, "=SUM(" +
-                CASH_RUB.getColumnIndex() + "3:" +
-                CASH_RUB.getColumnIndex() + "100000)+" +
+                CASH_RUB.getRange(3, table.size() + 2) + ")+" +
                 LIQUIDATION_VALUE_RUB.getCellAddr());
         total.put(LIQUIDATION_VALUE_RUB, liquidationValueRub);
         total.put(PROFIT, "=100*XIRR("
-                + CASH_RUB.getColumnIndex() + "3:" + CASH_RUB.getColumnIndex() + "100000,"
-                + DATE.getColumnIndex() + "3:" + DATE.getColumnIndex() + "100000)");
+                + CASH_RUB.getRange(3, table.size() + 2) + ","
+                + DATE.getRange(3, table.size() + 2) + ")");
         return total;
     }
 

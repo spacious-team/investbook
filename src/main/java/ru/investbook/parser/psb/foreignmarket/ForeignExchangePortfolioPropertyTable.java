@@ -72,7 +72,7 @@ public class ForeignExchangePortfolioPropertyTable extends PortfolioPropertyTabl
                     .portfolio(getReport().getPortfolio())
                     .property(PortfolioPropertyType.TOTAL_ASSETS)
                     .value(totalAssets.toString())
-                    .timestamp(getReport().getReportDate())
+                    .timestamp(getReport().getReportEndDateTime())
                     .build());
         } catch (Exception e) {
             log.info("Не могу получить стоимость активов из отчета {}", getReport().getPath().getFileName());

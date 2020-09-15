@@ -21,6 +21,7 @@ package ru.investbook.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
@@ -28,10 +29,12 @@ import java.util.Set;
 
 public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityEventCashFlowEntity, Integer> {
 
-    ArrayList<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(
+    ArrayList<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
             String portfolio,
             String isin,
-            int cashFlowType);
+            int cashFlowType,
+            Instant fromDate,
+            Instant toDate);
 
     /**
      * Return last security payment
@@ -41,6 +44,19 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
             String isin,
             Set<Integer> cashFlowType);
 
-    ArrayList<SecurityEventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdInOrderByTimestampDesc(String portfolio,
-                                                                                                    Collection<Integer> cashFlowType);
+    /**
+     * Return last security payment, between date-time interval
+     */
+    Optional<SecurityEventCashFlowEntity> findFirstByPortfolioIdAndSecurityIsinAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+            String portfolio,
+            String isin,
+            Set<Integer> cashFlowType,
+            Instant fromDate,
+            Instant toDat);
+
+    ArrayList<SecurityEventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+            String portfolio,
+            Collection<Integer> cashFlowType,
+            Instant fromDate,
+            Instant toDate);
 }

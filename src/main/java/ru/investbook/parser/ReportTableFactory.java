@@ -18,10 +18,7 @@
 
 package ru.investbook.parser;
 
-import ru.investbook.pojo.EventCashFlow;
-import ru.investbook.pojo.PortfolioProperty;
-import ru.investbook.pojo.Security;
-import ru.investbook.pojo.SecurityEventCashFlow;
+import ru.investbook.pojo.*;
 
 public interface ReportTableFactory {
     BrokerReport getReport();
@@ -45,4 +42,6 @@ public interface ReportTableFactory {
     ReportTable<SecurityEventCashFlow> getDividendTable();
 
     ReportTable<SecurityEventCashFlow> getDerivativeCashFlowTable();
+
+    ReportTable<SecurityQuote> getSecurityQuoteTable();
 }

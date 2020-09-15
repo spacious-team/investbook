@@ -26,6 +26,7 @@ import ru.investbook.parser.table.TableRow;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -45,8 +46,10 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
         if (!table.getStringCellValue(row, POSITION_SWAP).trim().equalsIgnoreCase("нет")) {
             return emptyList();
         }
-        Instant transactionDate = getReport().convertToInstant(table.getStringCellValue(row, DATE_TIME));
-        if (!getReport().getReportDate().equals(transactionDate)) {
+        Instant transactionInstant = convertToInstant(table.getStringCellValue(row, DATE_TIME));
+        LocalDate transactionDate = LocalDate.ofInstant(transactionInstant, getReport().getReportZoneId());
+        LocalDate reportDate = LocalDate.ofInstant(getReport().getReportEndDateTime(), getReport().getReportZoneId());
+        if (!reportDate.equals(transactionDate)) {
             return emptyList();
         }
         String notUniqTransactionId = table.getStringCellValue(row, TRANSACTION);
@@ -60,7 +63,7 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
         String contract = table.getStringCellValue(row, CONTRACT);
         String quoteCurrency = contract.substring(3, 6).toUpperCase(); // extracts RUB from USDRUB_TOM
         return Collections.singletonList(ForeignExchangeTransaction.builder()
-                .timestamp(transactionDate)
+                .timestamp(transactionInstant)
                 .transactionId(transactionId)
                 .portfolio(getReport().getPortfolio())
                 .instrument(contract)

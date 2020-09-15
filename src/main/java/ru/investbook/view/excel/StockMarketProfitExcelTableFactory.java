@@ -52,7 +52,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     private final PaidInterestFactory paidInterestFactory;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final ForeignExchangeRateService foreignExchangeRateService;
-    private final PositionsFactory positionsAndPaidInterestRegistry;
+    private final PositionsFactory positionsFactory;
 
     public Table create(Portfolio portfolio) {
         return create(portfolio, getSecuritiesIsin(portfolio));
@@ -69,8 +69,8 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
             if (securityEntity.isPresent()) {
                 Security security = securityConverter.fromEntity(securityEntity.get());
-                Positions positions = positionsAndPaidInterestRegistry.get(portfolio, security);
-                PaidInterest paidInterest = paidInterestFactory.get(portfolio, security);
+                Positions positions = positionsFactory.get(portfolio, security, ViewFilter.get());
+                PaidInterest paidInterest = paidInterestFactory.get(portfolio, security, ViewFilter.get());
                 openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(),
                         paidInterest, this::getOpenedPositionProfit));
                 closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(),
@@ -86,11 +86,18 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     }
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio) {
-        return transactionRepository.findDistinctIsinByPortfolioOrderByTimestampDesc(portfolio);
+        return transactionRepository.findDistinctIsinByPortfolioAndTimestampBetweenOrderByTimestampDesc(
+                portfolio,
+                ViewFilter.get().getFromDate(),
+                ViewFilter.get().getToDate());
     }
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio, String currency) {
-        return transactionRepository.findDistinctIsinByPortfolioAndCurrencyOrderByTimestampDesc(portfolio, currency);
+        return transactionRepository.findDistinctIsinByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+                portfolio,
+                currency,
+                ViewFilter.get().getFromDate(),
+                ViewFilter.get().getToDate());
     }
 
     private <T extends Position> Table getPositionProfit(Security security,
@@ -196,10 +203,12 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
 
     private BigDecimal getRedemptionCashFlow(String portfolio, String isin, double multiplier) {
         List<SecurityEventCashFlowEntity> cashFlows = securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdOrderByTimestampAsc(
+                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         portfolio,
                         isin,
-                        CashFlowType.REDEMPTION.getId());
+                        CashFlowType.REDEMPTION.getId(),
+                        ViewFilter.get().getFromDate(),
+                        ViewFilter.get().getToDate());
         if (cashFlows.isEmpty()) {
             return null;
         } else if (cashFlows.size() != 1) {

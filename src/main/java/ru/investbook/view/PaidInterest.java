@@ -23,7 +23,6 @@ import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.SecurityEventCashFlow;
 import ru.investbook.pojo.Transaction;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,15 +42,6 @@ public class PaidInterest {
     public List<SecurityEventCashFlow> get(CashFlowType payType, Position position) {
         List<SecurityEventCashFlow> value = this.get(payType).get(position);
         return (value != null) ? value : Collections.emptyList();
-    }
-
-    public BigDecimal sumPaymentsForType(CashFlowType type) {
-        return get(type)
-                .values()
-                .stream()
-                .flatMap(Collection::stream)
-                .map(SecurityEventCashFlow::getValue)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     static Position getFictitiousPositionPayment(SecurityEventCashFlow cash) {

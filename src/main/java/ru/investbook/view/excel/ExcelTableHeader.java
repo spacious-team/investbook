@@ -30,4 +30,8 @@ public interface ExcelTableHeader extends TableHeader {
     default char getColumnIndex() {
         return  (char) ('A' + this.ordinal());
     }
+
+    default String getRange(int startRowNum, int endRowNum) {
+        return "" + getColumnIndex() + startRowNum + ":" + getColumnIndex() + endRowNum;
+    }
 }

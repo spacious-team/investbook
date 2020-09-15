@@ -22,9 +22,9 @@
 Все что нужно - это подгружать свежие отчеты брокера. По каждому счету и валюте будет доступна следующая информация:
 - текущие позиции, усредненные цены покупок и доходности ценных бумаг в [портфеле](src/main/asciidoc/portfolio-status.adoc)
   (с учетом хеджирующих позиций на срочном рынке и усредненной цены покупки валюты);  
-  ![portfolio](https://user-images.githubusercontent.com/11336712/88589398-be387e80-d061-11ea-87b2-1a7f929d4ff1.png)
-- доля ценной бумаги (по балансовой стоимости) в портфеле;  
-  ![proportion](https://user-images.githubusercontent.com/11336712/88717010-8cd6b600-d128-11ea-901f-2b3fcee96f07.png)  
+  ![portfolio](https://user-images.githubusercontent.com/11336712/93006504-c8590280-f565-11ea-947c-dc8fa5712844.png)
+- доля ценной бумаги в [портфеле](src/main/asciidoc/portfolio-status.adoc);  
+  ![current-proportion](https://user-images.githubusercontent.com/11336712/88717010-8cd6b600-d128-11ea-901f-2b3fcee96f07.png)  
 - детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/portfolio-payment.adoc);  
   ![portfolio-payment](https://user-images.githubusercontent.com/11336712/88460806-93a2c600-cea7-11ea-8ac9-95406fd6cec8.png)
 - детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/foreign-portfolio-payment.adoc),
@@ -42,6 +42,8 @@
   ![cash-in](https://user-images.githubusercontent.com/11336712/90821058-fb2f2280-e33a-11ea-858d-8941a1eebd30.png)
 - [налоговая](src/main/asciidoc/tax.adoc) нагрузка.  
   <img src="https://user-images.githubusercontent.com/11336712/90821578-ccfe1280-e33b-11ea-9e53-5362968d1dcf.png" width="55%"/>
+- [комиссия](src/main/asciidoc/commission.adoc) брокера  
+  <img src="https://user-images.githubusercontent.com/11336712/92284436-a1b61e80-ef0a-11ea-9eed-9a948089bcff.png" width="65%"/>
 
 ### Установка
 Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest) установщик `.msi`
@@ -72,5 +74,8 @@
 
 ### Лицензия
 Приложение является бесплатным (разрешается использовать, распространять, копировать и вносить изменения).
+Текст лицензии доступен на [английском](https://www.gnu.org/licenses/gpl-3.0.html) и
+[русском](http://antirao.ru/gpltrans/gplru.pdf) языках, а также доступно [пояснение](https://www.gnu.org/licenses/quick-guide-gplv3.html)
+на русском языке.
 
 <img src="https://user-images.githubusercontent.com/11336712/85948991-b13e4780-b95c-11ea-9df6-a28be74c489d.png" width="100%"/>

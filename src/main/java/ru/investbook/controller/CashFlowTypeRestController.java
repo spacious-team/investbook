@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.entity.CashFlowTypeEntity;
 import ru.investbook.repository.CashFlowTypeRepository;
@@ -30,16 +31,17 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/cash-flow-types")
 public class CashFlowTypeRestController {
 
     private final CashFlowTypeRepository cashFlowTypeRepository;
 
-    @GetMapping("/cash-flow-types")
+    @GetMapping
     public Iterable<CashFlowTypeEntity> getCashFlowType() {
         return cashFlowTypeRepository.findAll();
     }
 
-    @GetMapping("/cash-flow-types/{id}")
+    @GetMapping("{id}")
     public ResponseEntity<CashFlowTypeEntity> getCashFlowType(@PathVariable("id") Integer id) {
         Optional<CashFlowTypeEntity> result = cashFlowTypeRepository.findById(id);
         return result

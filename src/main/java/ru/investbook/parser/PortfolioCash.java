@@ -18,17 +18,34 @@
 
 package ru.investbook.parser;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Collections;
 
 @Getter
 @Builder
 @EqualsAndHashCode
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class PortfolioCash {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     private String section;
     private BigDecimal value;
     private String currency;
+
+    public static Collection<PortfolioCash> valueOf(String value) {
+        try {
+            return objectMapper.readValue(value, new TypeReference<>() {
+            });
+        } catch (Exception ex) {
+            return Collections.emptyList();
+        }
+    }
 }

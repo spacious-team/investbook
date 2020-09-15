@@ -18,13 +18,17 @@
 
 package ru.investbook.view;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.Transaction;
 
 import java.time.Instant;
 
 @Getter
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class ClosedPosition extends OpenedPosition {
     private final Transaction closeTransaction;
     private final CashFlowType closingEvent;
@@ -44,5 +48,11 @@ public class ClosedPosition extends OpenedPosition {
     public boolean wasOpenedAtTheInstant(Instant instant) {
         return getOpenTransaction().getTimestamp().isBefore(instant) &&
                 instant.isBefore(getCloseTransaction().getTimestamp());
+    }
+
+    @Override
+    public boolean wasOpenedBetweenDates(Instant startDate, Instant endDate) {
+        return super.wasOpenedBetweenDates(startDate, endDate) &&
+                getCloseTransaction().getTimestamp().isAfter(startDate);
     }
 }

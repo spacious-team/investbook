@@ -22,5 +22,6 @@ import java.time.Instant;
 
 public interface Position {
     boolean wasOpenedAtTheInstant(Instant pastInstant);
+    boolean wasOpenedBetweenDates(Instant startDate, Instant endDate);
     int getCount();
 }

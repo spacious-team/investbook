@@ -48,15 +48,11 @@ public class PortfolioPaymentExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow() {
+    protected Table.Record getTotalRow(Table table) {
         Table.Record total = Table.newRecord();
         total.put(SECURITY, "Итого:");
-        total.put(COUNT, "=SUM(" +
-                COUNT.getColumnIndex() + "3:" +
-                COUNT.getColumnIndex() + "100000)");
-        total.put(CASH_RUB, "=SUM(" +
-                CASH_RUB.getColumnIndex() + "3:" +
-                CASH_RUB.getColumnIndex() + "100000)/2");
+        total.put(COUNT, "=SUM(" + COUNT.getRange(3, table.size() + 2) + ")");
+        total.put(CASH_RUB, "=SUM(" + CASH_RUB.getRange(3, table.size() + 2) + ")/2");
         return total;
     }
 

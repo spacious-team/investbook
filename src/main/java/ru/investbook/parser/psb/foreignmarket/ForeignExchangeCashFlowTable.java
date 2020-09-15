@@ -106,7 +106,7 @@ public class ForeignExchangeCashFlowTable extends AbstractReportTable<EventCashF
                 return singletonList(EventCashFlow.builder()
                         .portfolio(getReport().getPortfolio())
                         .eventType(CashFlowType.COMMISSION)
-                        .timestamp(getReport().getReportDate())
+                        .timestamp(getReport().getReportEndDateTime())
                         .value(brockerCommission)
                         .currency("RUB")
                         .description("Комиссия брокера за обналичивание валюты")

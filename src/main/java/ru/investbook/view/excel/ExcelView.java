@@ -34,6 +34,7 @@ public class ExcelView {
     private final SecuritiesDepositAndWithdrawalExcelTableView securitiesDepositAndWithdrawalExcelTableView;
     private final CashFlowExcelTableView cashFlowExcelTableView;
     private final TaxExcelTableView taxExcelTableView;
+    private final CommissionExcelTableView commissionExcelTableView;
 
     public void writeTo(XSSFWorkbook book) {
         CellStyles styles = new CellStyles(book);
@@ -46,6 +47,7 @@ public class ExcelView {
         securitiesDepositAndWithdrawalExcelTableView.writeTo(book, styles, portfolio -> portfolio + " (ввод-вывод цб)");
         cashFlowExcelTableView.writeTo(book, styles, portfolio -> "Доходность (" + portfolio + ")");
         taxExcelTableView.writeTo(book, styles, portfolio -> "Налог (" + portfolio + ")");
+        commissionExcelTableView.writeTo(book, styles, portfolio -> "Комиссия (" + portfolio + ")");
         if (book.getNumberOfSheets() == 0) {
             book.createSheet("пустой отчет");
         }

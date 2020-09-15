@@ -30,38 +30,39 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/issuers")
 public class IssuerRestController extends AbstractRestController<Long, Issuer, IssuerEntity> {
 
     public IssuerRestController(JpaRepository<IssuerEntity, Long> repository, EntityConverter<IssuerEntity, Issuer> converter) {
         super(repository, converter);
     }
 
-    @GetMapping("/issuers")
+    @GetMapping
     @Override
     public List<IssuerEntity> get() {
         return super.get();
     }
 
-    @GetMapping("/issuers/{inn}")
+    @GetMapping("{inn}")
     @Override
     public ResponseEntity<IssuerEntity> get(@PathVariable("inn") Long inn) {
         return super.get(inn);
     }
 
-    @PostMapping("/issuers")
+    @PostMapping
     @Override
     public ResponseEntity<IssuerEntity> post(@Valid @RequestBody Issuer issuer) {
         return super.post(issuer);
     }
 
-    @PutMapping("/issuers/{inn}")
+    @PutMapping("{inn}")
     @Override
     public ResponseEntity<IssuerEntity> put(@PathVariable("inn") Long inn,
                                                   @Valid @RequestBody Issuer issuer) {
         return super.put(inn, issuer);
     }
 
-    @DeleteMapping("/issuers/{inn}")
+    @DeleteMapping("{inn}")
     @Override
     public void delete(@PathVariable("inn") Long inn) {
         super.delete(inn);
