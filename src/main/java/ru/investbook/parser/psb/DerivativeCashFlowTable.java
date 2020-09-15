@@ -41,8 +41,8 @@ import static ru.investbook.parser.psb.DerivativeCashFlowTable.ContractCountTabl
 public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCashFlow> {
 
     private static final String TABLE1_NAME = "Прочие операции";
-    private static final String TABLE2_NAME = "Движение стандартных контрактов";
-    private static final String TABLE_END_TEXT = "Итого";
+    static final String TABLE2_NAME = "Движение стандартных контрактов";
+    static final String TABLE_END_TEXT = "Итого";
     @Getter(AccessLevel.PRIVATE)
     private Map<String, Integer> contractCount = Collections.emptyMap();
 
@@ -114,7 +114,10 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
         INCOMING("входящий остаток"),
         OUTGOING("исходящий остаток"),
         BUY("зачислено"),
-        CELL("списано");
+        CELL("списано"),
+        PRICE("цена закрытия", "руб"),
+        PRICE_TICK("шаг цены"),
+        PRICE_TICK_VALUE("стоимость шага цены");
 
         @Getter
         private final TableColumn column;

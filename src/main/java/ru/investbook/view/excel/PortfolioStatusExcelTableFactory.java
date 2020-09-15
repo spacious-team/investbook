@@ -222,15 +222,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         .abs()
                         .divide(BigDecimal.valueOf(Math.max(1, Math.abs(count))), 2, RoundingMode.CEILING));
 
-                if (securityType == SecurityType.STOCK_OR_BOND) {
-                    securityQuoteRepository
-                            .findFirstBySecurityIsinAndTimestampLessThanOrderByTimestampDesc(security.getIsin(), filter.getToDate())
-                            .ifPresent(quote -> {
-                                row.put(LAST_PRICE, Optional.ofNullable(quote.getPrice()) // for bonds
-                                        .orElse(quote.getQuote())); // for stocks
-                                row.put(LAST_ACCRUED_INTEREST, quote.getAccruedInterest());
-                            });
-                } else if (securityType == SecurityType.CURRENCY_PAIR) {
+                if (securityType == SecurityType.CURRENCY_PAIR) {
                     String currency = getCurrencyPair(security.getIsin()).substring(0, 3);
                     if (LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault()).compareTo(LocalDate.now()) >= 0) {
                         row.put(LAST_PRICE, foreignExchangeRateService.getExchangeRateToRub(currency));
@@ -240,6 +232,18 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                                 filter.getToDate(),
                                 ZoneId.systemDefault()));
                     }
+                } else {
+                    securityQuoteRepository
+                            .findFirstBySecurityIsinAndTimestampLessThanOrderByTimestampDesc(security.getIsin(), filter.getToDate())
+                            .ifPresent(quote -> {
+                                if (securityType == SecurityType.STOCK_OR_BOND) {
+                                    row.put(LAST_PRICE, Optional.ofNullable(quote.getPrice()) // for bonds
+                                            .orElse(quote.getQuote())); // for stocks
+                                    row.put(LAST_ACCRUED_INTEREST, quote.getAccruedInterest());
+                                } else if (securityType == SecurityType.DERIVATIVE) {
+                                    row.put(LAST_PRICE, quote.getPrice());
+                                }
+                            });
                 }
 
                 if (securityType == SecurityType.STOCK_OR_BOND || securityType == SecurityType.CURRENCY_PAIR) {

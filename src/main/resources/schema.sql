@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS `security_quote` (
   `isin` varchar(64) NOT NULL COMMENT 'Ценная бумага',
   `timestamp` timestamp NOT NULL COMMENT 'Время котировки',
   `quote` decimal(12,6) NOT NULL COMMENT 'Котировка в валюте/пунктах, для облигации - в процентах',
-  `price` decimal(12,6)  DEFAULT NULL COMMENT 'Чистая цена в валюте/путнках, для облигации - валюта',
+  `price` decimal(12,6)  DEFAULT NULL COMMENT 'Чистая цена в валюте, для облигации и срочных контрактов - в валюте',
   `accrued_interest` decimal(12,6)  DEFAULT NULL COMMENT 'НКД для облигаций',
   PRIMARY KEY (`id`),
   UNIQUE KEY `security_quote_isin_timestamp_uniq_ix` (`isin`, `timestamp`),

@@ -22,6 +22,7 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -45,9 +46,9 @@ public class SecurityQuote {
     @NotNull
     private final BigDecimal quote;
 
-    @NotNull
+    @Nullable
     private final BigDecimal price;
 
-    @NotNull
+    @Nullable
     private final BigDecimal accruedInterest;
 }
