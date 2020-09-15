@@ -36,6 +36,7 @@ import ru.investbook.view.Table;
 import ru.investbook.view.TableHeader;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.UnaryOperator;
 
 import static ru.investbook.view.excel.PortfolioStatusExcelTableHeader.*;
@@ -56,8 +57,9 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
 
     @Override
     protected void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator, Portfolio portfolio) {
-        List<String> currencies = transactionCashFlowRepository
-                .findDistinctCurrencyByPkPortfolioAndPkType(portfolio.getId(), CashFlowType.PRICE);
+        List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPkPortfolioAndPkTypeIn(
+                portfolio.getId(),
+                Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId()));
         for (String currency : currencies) {
             Table table = tableFactory.create(portfolio, currency);
             if (!table.isEmpty()) {

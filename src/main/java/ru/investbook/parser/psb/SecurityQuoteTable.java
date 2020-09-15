@@ -45,8 +45,11 @@ public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
         if (row.rowContains(PortfolioSecuritiesTable.INVALID_TEXT)) {
             return emptyList();
         }
-        BigDecimal amount = table.getCurrencyCellValue(row, AMOUNT);
         int count = table.getIntCellValue(row, OUTGOING);
+        if (count == 0) {
+            return emptyList();
+        }
+        BigDecimal amount = table.getCurrencyCellValue(row, AMOUNT);
         BigDecimal price = amount.divide(BigDecimal.valueOf(count), 4, RoundingMode.HALF_UP);
         BigDecimal quote = table.getCurrencyCellValue(row, QUOTE);
         if (price.subtract(quote).abs().compareTo(minValue) < 0) {
