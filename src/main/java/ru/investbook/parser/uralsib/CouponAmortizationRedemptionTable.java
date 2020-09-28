@@ -39,7 +39,7 @@ import static java.util.Collections.emptyList;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
-public class CouponAmortizationRedemptionTable extends PaymentsTable<SecurityEventCashFlow> {
+public class CouponAmortizationRedemptionTable extends PaymentsTable {
 
     private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
     private final List<Map.Entry<String, Instant>> redemptionDates;

@@ -37,11 +37,6 @@ public interface Table extends Iterable<TableRow> {
                                   BiPredicate<T, T> equalityChecker,
                                   BiFunction<T, T, Collection<T>> mergeDuplicates);
 
-    <T> void addWithEqualityChecker(T element,
-                                    Collection<T> collection,
-                                    BiPredicate<T, T> equalityChecker,
-                                    BiFunction<T, T, Collection<T>> mergeDuplicates);
-
     boolean isEmpty();
 
     /**
