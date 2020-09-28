@@ -21,31 +21,31 @@ package ru.investbook.parser.uralsib;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import ru.investbook.parser.*;
+import ru.investbook.parser.table.AbstractTable;
 import ru.investbook.parser.table.Table;
 import ru.investbook.parser.table.TableRow;
 import ru.investbook.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInformation;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.EventCashFlow;
 import ru.investbook.pojo.Security;
+import ru.investbook.pojo.SecurityEventCashFlow;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 import static ru.investbook.parser.uralsib.UralsibBrokerReport.convertToCurrency;
 
 @Slf4j
-abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
+abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> {
 
     static final String TABLE_NAME = "ДВИЖЕНИЕ ДЕНЕЖНЫХ СРЕДСТВ ЗА ОТЧЕТНЫЙ ПЕРИОД";
     // human readable name -> incoming count
     private final List<ReportSecurityInformation> securitiesIncomingCount;
     private final List<SecurityTransaction> securityTransactions;
     private final Collection<EventCashFlow> eventCashFlows = new ArrayList<>();
+    private String currentRowDescription = "";
 
     public PaymentsTable(UralsibBrokerReport report,
                          PortfolioSecuritiesTable securitiesTable,
@@ -53,6 +53,17 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
         super(report, TABLE_NAME, "", PaymentsTableHeader.class);
         this.securitiesIncomingCount = securitiesTable.getData();
         this.securityTransactions = securityTransactionTable.getData();
+    }
+
+    @Override
+    protected Collection<SecurityEventCashFlow> parseTable(Table table) {
+        return table.getDataCollection(getReport().getPath(), this::getRowAndSaveDescription,
+                this::checkEquality, this::mergeDuplicates);
+    }
+
+    private Collection<SecurityEventCashFlow> getRowAndSaveDescription(Table table, TableRow row) {
+        currentRowDescription = table.getStringCellValue(row, DESCRIPTION);
+        return getRow(table, row);
     }
 
     /**
@@ -70,7 +81,7 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
                     .currency(convertToCurrency(table.getStringCellValue(row, CURRENCY)))
                     .description(table.getStringCellValue(row, DESCRIPTION))
                     .build();
-            table.addWithEqualityChecker(cash, eventCashFlows,
+            AbstractTable.addWithEqualityChecker(cash, eventCashFlows,
                     EventCashFlow::checkEquality, EventCashFlow::mergeDuplicates);
             log.debug("Получена выплата по ценной бумаге, которой нет в портфеле: " + cash);
             return null;
@@ -129,6 +140,34 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
     public Collection<EventCashFlow> getEventCashFlows() {
         initializeIfNeed();
         return eventCashFlows;
+    }
+
+    @Override
+    protected boolean checkEquality(SecurityEventCashFlow cash1, SecurityEventCashFlow cash2) {
+        return SecurityEventCashFlow.checkEquality(cash1, cash2);
+    }
+
+    @Override
+    protected Collection<SecurityEventCashFlow> mergeDuplicates(SecurityEventCashFlow cash1, SecurityEventCashFlow cash2) {
+        // gh-78: обе выплаты должны быть сохранены. Одна вы плата выполнена по текущему портфелю, другая - по связанному ИИС.
+        // К сожалению, сохраняем обе выплаты как по внешнему портфелю, т.к. брокер по выплате не указал количество ЦБ
+        // ни по одной из выплат, поэтому не возможно определить какая из выплат относится к текущему портфелю.
+        AbstractTable.addWithEqualityChecker(cast(cash1), eventCashFlows,
+                EventCashFlow::checkEquality, EventCashFlow::mergeDuplicates);
+        AbstractTable.addWithEqualityChecker(cast(cash2), eventCashFlows,
+                EventCashFlow::checkEquality, EventCashFlow::mergeDuplicates);
+        return Collections.emptyList();
+    }
+
+    private EventCashFlow cast(SecurityEventCashFlow cash) {
+        return EventCashFlow.builder()
+                .portfolio(cash.getPortfolio())
+                .timestamp(cash.getTimestamp())
+                .eventType(cash.getEventType())
+                .value(cash.getValue())
+                .currency(cash.getCurrency())
+                .description(currentRowDescription)
+                .build();
     }
 
     enum PaymentsTableHeader implements TableColumnDescription {

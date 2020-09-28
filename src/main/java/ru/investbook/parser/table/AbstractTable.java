@@ -126,7 +126,7 @@ public abstract class AbstractTable implements Table {
         return data;
     }
 
-    public <T> void addWithEqualityChecker(T element,
+    public static <T> void addWithEqualityChecker(T element,
                                                   Collection<T> collection,
                                                   BiPredicate<T, T> equalityChecker,
                                                   BiFunction<T, T, Collection<T>> mergeDuplicates) {

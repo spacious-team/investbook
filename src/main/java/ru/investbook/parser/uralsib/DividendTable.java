@@ -39,7 +39,7 @@ import static java.util.Collections.emptyList;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
-public class DividendTable extends PaymentsTable<SecurityEventCashFlow> {
+public class DividendTable extends PaymentsTable {
 
     private static final String DIVIDEND_ACTION = "Доход по финансовым инструментам";
     private final Pattern taxInformationPattern = Pattern.compile("налог в размере ([0-9\\.]+) удержан");
