@@ -19,5 +19,5 @@
 package ru.investbook.parser;
 
 public enum BrokerType {
-    PSB, URALSIB
+    PSB, URALSIB, VTB
 }

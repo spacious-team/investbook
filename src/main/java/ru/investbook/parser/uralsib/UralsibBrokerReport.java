@@ -20,12 +20,8 @@ package ru.investbook.parser.uralsib;
 
 import com.google.common.collect.Lists;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import ru.investbook.parser.BrokerReport;
+import ru.investbook.parser.AbstractBrokerReport;
 import ru.investbook.parser.table.ReportPage;
 import ru.investbook.parser.table.TableCell;
 import ru.investbook.parser.table.TableCellAddress;
@@ -36,59 +32,35 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-@RequiredArgsConstructor()
-@EqualsAndHashCode(of = "path")
-public class UralsibBrokerReport implements BrokerReport {
-    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+@EqualsAndHashCode(callSuper = true)
+public class UralsibBrokerReport extends AbstractBrokerReport {
     private static final String PORTFOLIO_MARKER = "Номер счета Клиента:";
     private static final String REPORT_DATE_MARKER = "за период";
-    private static final int LAST_TRADE_HOUR = 19;
-
     private final Workbook book;
-    @Getter
-    private final ReportPage reportPage;
-    @Getter
-    private final String portfolio;
-    @Getter
-    private final Path path;
-    @Getter
-    private final Instant reportEndDateTime;
-    @Getter
-    private final ZoneId reportZoneId = ZoneId.of("Europe/Moscow");
 
     public UralsibBrokerReport(ZipInputStream zis) throws IOException {
         ZipEntry zipEntry = zis.getNextEntry();
-        this.path = Paths.get(zipEntry.getName());
-        this.book = getWorkBook(this.path.getFileName().toString(), zis);
-        this.reportPage = new ExcelSheet(book.getSheetAt(0));
-        this.portfolio = getPortfolio(this.reportPage);
-        this.reportEndDateTime = getReportEndDateTime(this.reportPage);
+        Path path = Paths.get(zipEntry.getName());
+        this.book = getWorkBook(path.getFileName().toString(), zis);
+        ReportPage reportPage = new ExcelSheet(book.getSheetAt(0));
+        setPath(path);
+        setReportPage(reportPage);
+        setPortfolio(getPortfolio(reportPage));
+        setReportEndDateTime(getReportEndDateTime(reportPage));
     }
 
     public UralsibBrokerReport(String excelFileName, InputStream is) throws IOException {
-        this.path = Paths.get(excelFileName);
         this.book = getWorkBook(excelFileName, is);
-        this.reportPage = new ExcelSheet(book.getSheetAt(0));
-        this.portfolio = getPortfolio(this.reportPage);
-        this.reportEndDateTime = getReportEndDateTime(this.reportPage);
-    }
-
-    private Workbook getWorkBook(String excelFileName, InputStream is) throws IOException {
-        if (excelFileName.endsWith(".xls")) {
-            return new HSSFWorkbook(is); // constructor close zis
-        } else {
-            return new XSSFWorkbook(is);
-        }
+        ReportPage reportPage = new ExcelSheet(book.getSheetAt(0));
+        setPath(Paths.get(excelFileName));
+        setReportPage(reportPage);
+        setPortfolio(getPortfolio(reportPage));
+        setReportEndDateTime(getReportEndDateTime(reportPage));
     }
 
     private static String getPortfolio(ReportPage reportPage) {
@@ -128,15 +100,6 @@ public class UralsibBrokerReport implements BrokerReport {
                     .plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);
         } catch (Exception e) {
             throw new RuntimeException("Ошибка поиска даты отчета");
-        }
-    }
-
-    public Instant convertToInstant(String value) {
-        value = value.trim();
-        if (value.contains(":")) {
-            return LocalDateTime.parse(value, UralsibBrokerReport.dateTimeFormatter).atZone(getReportZoneId()).toInstant();
-        } else {
-            return LocalDate.parse(value, UralsibBrokerReport.dateFormatter).atStartOfDay(getReportZoneId()).toInstant();
         }
     }
 
