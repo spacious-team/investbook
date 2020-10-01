@@ -27,13 +27,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.investbook.PortfolioProperties;
-import ru.investbook.parser.psb.PsbBrokerReport;
-import ru.investbook.parser.psb.PsbReportTables;
-import ru.investbook.parser.psb.foreignmarket.PsbBrokerForeignMarketReport;
-import ru.investbook.parser.psb.foreignmarket.PsbForeignMarketReportTables;
-import ru.investbook.parser.uralsib.UralsibBrokerReport;
-import ru.investbook.parser.uralsib.UralsibReportTables;
-import ru.investbook.parser.vtb.VtbReportTables;
 import ru.investbook.view.ForeignExchangeRateService;
 
 import java.io.*;
@@ -54,6 +47,7 @@ public class ReportRestController {
     private final ForeignExchangeRateService foreignExchangeRateService;
     private final PortfolioProperties portfolioProperties;
     private final Collection<BrokerReportFactory> brokerReportFactories;
+    private final Collection<ReportTablesFactory> reportTablesFactories;
 
     @PostMapping("/reports")
     public ResponseEntity<String> post(@RequestParam("reports") MultipartFile[] reports,
@@ -72,21 +66,13 @@ public class ReportRestController {
                 Path path = saveToBackup(broker, report);
                 String originalFileName = report.getOriginalFilename();
                 switch (broker) {
-                    case PSB:
-                        if (!String.valueOf(originalFileName).endsWith(".xml")) {
-                            parsePsbReport(report);
-                        } else {
-                            parsePsbForeignMarketReport(report);
-                        }
-                        break;
                     case URALSIB:
                         if (originalFileName != null && !originalFileName.contains("_invest_")) {
                             log.warn("Рекомендуется загружать отчеты, содержащие в имени файла слово 'invest'");
                         }
-                        parseUralsibReport(report);
-                        break;
+                    case PSB:
                     case VTB:
-                        parseVtbReport(report);
+                        parseReport(report);
                         break;
                     default:
                         throw new IllegalArgumentException("Неизвестный формат " + format);
@@ -139,42 +125,9 @@ public class ReportRestController {
         return path;
     }
 
-    private void parsePsbReport(MultipartFile report) {
+    private void parseReport(MultipartFile report) {
         try (BrokerReport brokerReport = getBrokerReport(report)) {
-            ReportTables reportTables = new PsbReportTables((PsbBrokerReport) brokerReport);
-            reportParserService.parse(reportTables);
-        } catch (Exception e) {
-            String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
-            log.warn(error, e);
-            throw new RuntimeException(error, e);
-        }
-    }
-
-    private void parsePsbForeignMarketReport(MultipartFile report) {
-        try (BrokerReport brokerReport = getBrokerReport(report)) {
-            ReportTables reportTables = new PsbForeignMarketReportTables((PsbBrokerForeignMarketReport) brokerReport);
-            reportParserService.parse(reportTables);
-        } catch (Exception e) {
-            String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
-            log.warn(error, e);
-            throw new RuntimeException(error, e);
-        }
-    }
-
-    private void parseUralsibReport(MultipartFile report) {
-        try (BrokerReport brokerReport =  getBrokerReport(report)) {
-            ReportTables reportTables = new UralsibReportTables((UralsibBrokerReport) brokerReport, foreignExchangeRateService);
-            reportParserService.parse(reportTables);
-        } catch (Exception e) {
-            String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
-            log.warn(error, e);
-            throw new RuntimeException(error, e);
-        }
-    }
-
-    private void parseVtbReport(MultipartFile report) {
-        try (BrokerReport brokerReport = getBrokerReport(report)) {
-            ReportTables reportTables = new VtbReportTables(brokerReport);
+            ReportTables reportTables = getReportTables(brokerReport);
             reportParserService.parse(reportTables);
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
@@ -203,5 +156,15 @@ public class ReportRestController {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         inputStream.transferTo(out);
         return new ByteArrayInputStream(out.toByteArray());
+    }
+
+    private ReportTables getReportTables(BrokerReport brokerReport) {
+        for (ReportTablesFactory reportTablesFactory : reportTablesFactories) {
+            if (reportTablesFactory.canCreate(brokerReport)) {
+                return reportTablesFactory.create(brokerReport);
+            }
+        }
+        throw new IllegalArgumentException(
+                "Can't fina ReportTablesFactory for broker report of type: " + brokerReport.getClass().getSimpleName());
     }
 }
