@@ -22,6 +22,7 @@ import lombok.EqualsAndHashCode;
 import org.apache.poi.ss.usermodel.Workbook;
 import ru.investbook.parser.AbstractBrokerReport;
 import ru.investbook.parser.table.ReportPage;
+import ru.investbook.parser.table.TableCellAddress;
 import ru.investbook.parser.table.excel.ExcelSheet;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ import java.time.temporal.ChronoUnit;
 
 @EqualsAndHashCode(callSuper = true)
 public class PsbBrokerReport extends AbstractBrokerReport {
+    public static final String UNIQ_TEXT = "Брокер: ПАО \"Промсвязьбанк\"";
     private static final String PORTFOLIO_MARKER = "Договор №:";
     private static final String REPORT_DATE_MARKER = "ОТЧЕТ БРОКЕРА";
 
@@ -47,14 +49,20 @@ public class PsbBrokerReport extends AbstractBrokerReport {
         this(report.getFileName().toString(), Files.newInputStream(report));
     }
 
-    public PsbBrokerReport(String excelFileName, InputStream is) throws IOException {
-        Path path = Paths.get(excelFileName);
+    public PsbBrokerReport(String excelFileName, InputStream is) {
         this.book = getWorkBook(excelFileName, is);
-        ExcelSheet reportPage = new ExcelSheet(book.getSheetAt(0));
-        setPath(path);
+        ReportPage reportPage = new ExcelSheet(book.getSheetAt(0));
+        checkReportFormat(excelFileName, reportPage);
+        setPath(Paths.get(excelFileName));
         setReportPage(reportPage);
         setPortfolio(getPortfolio(reportPage));
         setReportEndDateTime(getReportEndDateTime(reportPage));
+    }
+
+    public static void checkReportFormat(String excelFileName, ReportPage reportPage) {
+        if (reportPage.find(UNIQ_TEXT, 3, 4) == TableCellAddress.NOT_FOUND) {
+            throw new RuntimeException("В файле " + excelFileName + " не содержится отчет брокера Промсвязьбанк");
+        }
     }
 
     private static String getPortfolio(ReportPage reportPage) {

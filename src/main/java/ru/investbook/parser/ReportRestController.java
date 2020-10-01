@@ -33,22 +33,19 @@ import ru.investbook.parser.psb.foreignmarket.PsbBrokerForeignMarketReport;
 import ru.investbook.parser.psb.foreignmarket.PsbForeignMarketReportTableFactory;
 import ru.investbook.parser.uralsib.UralsibBrokerReport;
 import ru.investbook.parser.uralsib.UralsibReportTableFactory;
-import ru.investbook.parser.vtb.VtbBrokerReport;
 import ru.investbook.parser.vtb.VtbReportTableFactory;
 import ru.investbook.view.ForeignExchangeRateService;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.zip.ZipInputStream;
 
 @RestController
 @RequiredArgsConstructor
@@ -57,6 +54,7 @@ public class ReportRestController {
     private final ReportParserService reportParserService;
     private final ForeignExchangeRateService foreignExchangeRateService;
     private final PortfolioProperties portfolioProperties;
+    private final Collection<BrokerReportFactory> brokerReportFactories;
 
     @PostMapping("/reports")
     public ResponseEntity<String> post(@RequestParam("reports") MultipartFile[] reports,
@@ -86,11 +84,7 @@ public class ReportRestController {
                         if (originalFileName != null && !originalFileName.contains("_invest_")) {
                             log.warn("Рекомендуется загружать отчеты, содержащие в имени файла слово 'invest'");
                         }
-                        if (originalFileName != null && !originalFileName.toLowerCase().endsWith(".zip")) {
-                            parseUralsibReport(report);
-                        } else {
-                            parseUralsibZipReport(report);
-                        }
+                        parseUralsibReport(report);
                         break;
                     case VTB:
                         parseVtbReport(report);
@@ -147,8 +141,8 @@ public class ReportRestController {
     }
 
     private void parsePsbReport(MultipartFile report) {
-        try (PsbBrokerReport brokerReport = new PsbBrokerReport(report.getOriginalFilename(), report.getInputStream())) {
-            ReportTableFactory reportTableFactory = new PsbReportTableFactory(brokerReport);
+        try (BrokerReport brokerReport = getBrokerReport(report)) {
+            ReportTableFactory reportTableFactory = new PsbReportTableFactory((PsbBrokerReport) brokerReport);
             reportParserService.parse(reportTableFactory);
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
@@ -158,8 +152,8 @@ public class ReportRestController {
     }
 
     private void parsePsbForeignMarketReport(MultipartFile report) {
-        try (PsbBrokerForeignMarketReport brokerReport = new PsbBrokerForeignMarketReport(report.getOriginalFilename(), report.getInputStream())) {
-            ReportTableFactory reportTableFactory = new PsbForeignMarketReportTableFactory(brokerReport);
+        try (BrokerReport brokerReport = getBrokerReport(report)) {
+            ReportTableFactory reportTableFactory = new PsbForeignMarketReportTableFactory((PsbBrokerForeignMarketReport) brokerReport);
             reportParserService.parse(reportTableFactory);
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
@@ -171,31 +165,13 @@ public class ReportRestController {
     private void parseUralsibReport(MultipartFile report) {
         parseUralsibReport(report, () -> {
             try {
-                return new UralsibBrokerReport(report.getOriginalFilename(), report.getInputStream());
+                return (UralsibBrokerReport) getBrokerReport(report);
             } catch (Exception e) {
                 String error = "Отчет предоставлен в неверном формате " + report.getOriginalFilename();
                 log.warn(error, e);
                 throw new RuntimeException(error, e);
             }
         });
-    }
-
-    private void parseUralsibZipReport(MultipartFile report) {
-        try (ZipInputStream zis = new ZipInputStream(report.getInputStream())) {
-            parseUralsibReport(report, () -> {
-                try {
-                    return new UralsibBrokerReport(zis);
-                } catch (Exception e) {
-                    String error = "Отчет предоставлен в неверном формате " + report.getOriginalFilename();
-                    log.warn(error, e);
-                    throw new RuntimeException(error, e);
-                }
-            });
-        } catch (IOException e) {
-            String error = "Не могу открыть zip архив " + report.getOriginalFilename();
-            log.warn(error, e);
-            throw new RuntimeException(error, e);
-        }
     }
 
     private void parseUralsibReport(MultipartFile report, Supplier<UralsibBrokerReport> reportSupplier) {
@@ -210,7 +186,7 @@ public class ReportRestController {
     }
 
     private void parseVtbReport(MultipartFile report) {
-        try (VtbBrokerReport brokerReport = new VtbBrokerReport(report.getOriginalFilename(), report.getInputStream())) {
+        try (BrokerReport brokerReport = getBrokerReport(report)) {
             ReportTableFactory reportTableFactory = new VtbReportTableFactory(brokerReport);
             reportParserService.parse(reportTableFactory);
         } catch (Exception e) {
@@ -218,5 +194,27 @@ public class ReportRestController {
             log.warn(error, e);
             throw new RuntimeException(error, e);
         }
+    }
+
+    private BrokerReport getBrokerReport(MultipartFile report) throws IOException {
+        BrokerReport brokerReport = null;
+        // converting to input stream supporting mark
+        ByteArrayInputStream is = castToBayteArrayInputStream(report.getInputStream());
+        for (BrokerReportFactory brokerReportFactory : brokerReportFactories) {
+            brokerReport = brokerReportFactory.create(report.getOriginalFilename(), is);
+            if (brokerReport != null) {
+                break;
+            }
+        }
+        if (brokerReport == null) {
+            throw new IllegalArgumentException("Неизвестный формат отчета " + report.getOriginalFilename());
+        }
+        return brokerReport;
+    }
+
+    private static ByteArrayInputStream castToBayteArrayInputStream(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        inputStream.transferTo(out);
+        return new ByteArrayInputStream(out.toByteArray());
     }
 }

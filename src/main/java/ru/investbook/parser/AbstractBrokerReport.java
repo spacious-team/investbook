@@ -21,6 +21,7 @@ package ru.investbook.parser;
 import lombok.*;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.util.CloseIgnoringInputStream;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import ru.investbook.parser.table.ReportPage;
 
@@ -58,11 +59,16 @@ public abstract class AbstractBrokerReport implements BrokerReport {
     @Getter
     private final ZoneId reportZoneId = ZoneId.of("Europe/Moscow");
 
-    protected Workbook getWorkBook(String excelFileName, InputStream is) throws IOException {
-        if (excelFileName.endsWith(".xls")) {
-            return new HSSFWorkbook(is); // constructor close zis
-        } else {
-            return new XSSFWorkbook(is);
+    protected Workbook getWorkBook(String excelFileName, InputStream is) {
+        try {
+            is = new CloseIgnoringInputStream(is); // HSSFWorkbook() constructor close is
+            if (excelFileName.endsWith(".xls")) {
+                return new HSSFWorkbook(is); // constructor close is
+            } else {
+                return new XSSFWorkbook(is);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Не смог открыть excel файл", e);
         }
     }
 

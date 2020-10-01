@@ -22,6 +22,7 @@ import lombok.EqualsAndHashCode;
 import org.apache.poi.ss.usermodel.Workbook;
 import ru.investbook.parser.AbstractBrokerReport;
 import ru.investbook.parser.table.ReportPage;
+import ru.investbook.parser.table.TableCellAddress;
 import ru.investbook.parser.table.excel.ExcelSheet;
 
 import java.io.IOException;
@@ -33,19 +34,27 @@ import java.time.temporal.ChronoUnit;
 
 @EqualsAndHashCode(callSuper = true)
 public class VtbBrokerReport extends AbstractBrokerReport {
+    private static final String UNIQ_TEXT = VtbBrokerReport.REPORT_DATE_MARKER;
     private static final String PORTFOLIO_MARKER = "№ субсчета:";
     private static final String REPORT_DATE_MARKER = "Отчет Банка ВТБ";
 
     private final Workbook book;
 
-    public VtbBrokerReport(String excelFileName, InputStream is) throws IOException {
-        Path path = Paths.get(excelFileName);
+    public VtbBrokerReport(String excelFileName, InputStream is) {
         this.book = getWorkBook(excelFileName, is);
-        ExcelSheet reportPage = new ExcelSheet(book.getSheetAt(0));
+        ReportPage reportPage = new ExcelSheet(book.getSheetAt(0));
+        Path path = Paths.get(excelFileName);
+        checkReportFormat(path, reportPage);
         setPath(path);
         setReportPage(reportPage);
         setPortfolio(getPortfolio(reportPage));
         setReportEndDateTime(getReportEndDateTime(reportPage));
+    }
+
+    private static void checkReportFormat(Path path, ReportPage reportPage) {
+        if (reportPage.find(UNIQ_TEXT, 1, 2) == TableCellAddress.NOT_FOUND) {
+            throw new RuntimeException("В файле " + path + " не содержится отчет брокера ВТБ");
+        }
     }
 
     private static String getPortfolio(ReportPage reportPage) {
