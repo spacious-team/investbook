@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.psb;
+package ru.investbook.parser.psb.foreignmarket;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -24,64 +24,62 @@ import ru.investbook.parser.*;
 import ru.investbook.pojo.*;
 
 @RequiredArgsConstructor
-public class PsbReportTableFactory implements ReportTableFactory {
+public class PsbForeignMarketReportTables implements ReportTables {
     @Getter
-    private final PsbBrokerReport report;
+    private final PsbBrokerForeignMarketReport report;
 
     @Override
-    public ReportTable<PortfolioCash> createPortfolioCashTable() {
-        return new PortfolioCashTable(report);
+    public ReportTable<PortfolioCash> getPortfolioCashTable() {
+        return new ForeignExchangePortfolioCashTable(report);
     }
         
     @Override
     public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
-        return new PortfolioPropertyTable(report);
+        return new ForeignExchangePortfolioPropertyTable(report);
     }
     
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
-        return new CashFlowTable(report);
+        return new ForeignExchangeCashFlowTable(report);
     }
     
     @Override
     public ReportTable<Security> getPortfolioSecuritiesTable() {
-        return new PortfolioSecuritiesTable(report);
+        return new EmptyReportTable<>(report);
     }
     
     @Override
     public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
-        return new SecurityTransactionTable(report);
-    }
-
-    @Override
-    public ReportTable<DerivativeTransaction> getDerivativeTransactionTable() {
-        return new DerivativeTransactionTable(report);
-    }
-
-    @Override
-    public ReportTable<ForeignExchangeTransaction> getForeignExchangeTransactionTable() {
         return new EmptyReportTable<>(report);
     }
 
     @Override
+    public ReportTable<DerivativeTransaction> getDerivativeTransactionTable() {
+        return new EmptyReportTable<>(report);
+    }
+
+    @Override
+    public ReportTable<ForeignExchangeTransaction> getForeignExchangeTransactionTable() {
+        return new ForeignExchangeTransactionTable(report);
+    }
+
+    @Override
     public ReportTable<SecurityEventCashFlow> getCouponAmortizationRedemptionTable() {
-        return new CouponAmortizationRedemptionTable(report);
+        return new EmptyReportTable<>(report);
     }
     
     @Override
     public ReportTable<SecurityEventCashFlow> getDividendTable() {
-        return new DividendTable(report);
+        return new EmptyReportTable<>(report);
     }
     
     @Override
     public ReportTable<SecurityEventCashFlow> getDerivativeCashFlowTable() {
-        return new DerivativeCashFlowTable(report);
+        return new EmptyReportTable<>(report);
     }
 
     @Override
     public ReportTable<SecurityQuote> getSecurityQuoteTable() {
-        return new WrappingReportTable<>(report,
-                new SecurityQuoteTable(report),
-                new DerivativeQuoteTable(report));
+        return new EmptyReportTable<>(report);
     }
 }

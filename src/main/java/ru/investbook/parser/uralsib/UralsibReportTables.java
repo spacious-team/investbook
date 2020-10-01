@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class UralsibReportTableFactory implements ReportTableFactory {
+public class UralsibReportTables implements ReportTables {
     @Getter
     private final UralsibBrokerReport report;
     private final PortfolioSecuritiesTable portfolioSecuritiesTable;
@@ -44,7 +44,7 @@ public class UralsibReportTableFactory implements ReportTableFactory {
     @Getter
     private final DividendTable dividendTable;
 
-    public UralsibReportTableFactory(UralsibBrokerReport report, ForeignExchangeRateService foreignExchangeRateService) {
+    public UralsibReportTables(UralsibBrokerReport report, ForeignExchangeRateService foreignExchangeRateService) {
         this.report = report;
         this.portfolioPropertyTable = new PortfolioPropertyTable(report, foreignExchangeRateService);
         this.portfolioSecuritiesTable = new PortfolioSecuritiesTable(report);
@@ -57,7 +57,7 @@ public class UralsibReportTableFactory implements ReportTableFactory {
     }
 
     @Override
-    public ReportTable<PortfolioCash> createPortfolioCashTable() {
+    public ReportTable<PortfolioCash> getPortfolioCashTable() {
         return new PortfolioCashTable(report);
     }
     

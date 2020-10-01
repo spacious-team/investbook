@@ -28,12 +28,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.investbook.PortfolioProperties;
 import ru.investbook.parser.psb.PsbBrokerReport;
-import ru.investbook.parser.psb.PsbReportTableFactory;
+import ru.investbook.parser.psb.PsbReportTables;
 import ru.investbook.parser.psb.foreignmarket.PsbBrokerForeignMarketReport;
-import ru.investbook.parser.psb.foreignmarket.PsbForeignMarketReportTableFactory;
+import ru.investbook.parser.psb.foreignmarket.PsbForeignMarketReportTables;
 import ru.investbook.parser.uralsib.UralsibBrokerReport;
-import ru.investbook.parser.uralsib.UralsibReportTableFactory;
-import ru.investbook.parser.vtb.VtbReportTableFactory;
+import ru.investbook.parser.uralsib.UralsibReportTables;
+import ru.investbook.parser.vtb.VtbReportTables;
 import ru.investbook.view.ForeignExchangeRateService;
 
 import java.io.*;
@@ -141,8 +141,8 @@ public class ReportRestController {
 
     private void parsePsbReport(MultipartFile report) {
         try (BrokerReport brokerReport = getBrokerReport(report)) {
-            ReportTableFactory reportTableFactory = new PsbReportTableFactory((PsbBrokerReport) brokerReport);
-            reportParserService.parse(reportTableFactory);
+            ReportTables reportTables = new PsbReportTables((PsbBrokerReport) brokerReport);
+            reportParserService.parse(reportTables);
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
             log.warn(error, e);
@@ -152,9 +152,8 @@ public class ReportRestController {
 
     private void parsePsbForeignMarketReport(MultipartFile report) {
         try (BrokerReport brokerReport = getBrokerReport(report)) {
-            ReportTableFactory reportTableFactory
-                    = new PsbForeignMarketReportTableFactory((PsbBrokerForeignMarketReport) brokerReport);
-            reportParserService.parse(reportTableFactory);
+            ReportTables reportTables = new PsbForeignMarketReportTables((PsbBrokerForeignMarketReport) brokerReport);
+            reportParserService.parse(reportTables);
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
             log.warn(error, e);
@@ -164,9 +163,8 @@ public class ReportRestController {
 
     private void parseUralsibReport(MultipartFile report) {
         try (BrokerReport brokerReport =  getBrokerReport(report)) {
-            ReportTableFactory reportTableFactory =
-                    new UralsibReportTableFactory((UralsibBrokerReport) brokerReport, foreignExchangeRateService);
-            reportParserService.parse(reportTableFactory);
+            ReportTables reportTables = new UralsibReportTables((UralsibBrokerReport) brokerReport, foreignExchangeRateService);
+            reportParserService.parse(reportTables);
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
             log.warn(error, e);
@@ -176,8 +174,8 @@ public class ReportRestController {
 
     private void parseVtbReport(MultipartFile report) {
         try (BrokerReport brokerReport = getBrokerReport(report)) {
-            ReportTableFactory reportTableFactory = new VtbReportTableFactory(brokerReport);
-            reportParserService.parse(reportTableFactory);
+            ReportTables reportTables = new VtbReportTables(brokerReport);
+            reportParserService.parse(reportTables);
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
             log.warn(error, e);
