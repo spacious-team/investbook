@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @RestController
@@ -153,7 +152,8 @@ public class ReportRestController {
 
     private void parsePsbForeignMarketReport(MultipartFile report) {
         try (BrokerReport brokerReport = getBrokerReport(report)) {
-            ReportTableFactory reportTableFactory = new PsbForeignMarketReportTableFactory((PsbBrokerForeignMarketReport) brokerReport);
+            ReportTableFactory reportTableFactory
+                    = new PsbForeignMarketReportTableFactory((PsbBrokerForeignMarketReport) brokerReport);
             reportParserService.parse(reportTableFactory);
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
@@ -163,20 +163,9 @@ public class ReportRestController {
     }
 
     private void parseUralsibReport(MultipartFile report) {
-        parseUralsibReport(report, () -> {
-            try {
-                return (UralsibBrokerReport) getBrokerReport(report);
-            } catch (Exception e) {
-                String error = "Отчет предоставлен в неверном формате " + report.getOriginalFilename();
-                log.warn(error, e);
-                throw new RuntimeException(error, e);
-            }
-        });
-    }
-
-    private void parseUralsibReport(MultipartFile report, Supplier<UralsibBrokerReport> reportSupplier) {
-        try (UralsibBrokerReport brokerReport = reportSupplier.get()) {
-            ReportTableFactory reportTableFactory = new UralsibReportTableFactory(brokerReport, foreignExchangeRateService);
+        try (BrokerReport brokerReport =  getBrokerReport(report)) {
+            ReportTableFactory reportTableFactory =
+                    new UralsibReportTableFactory((UralsibBrokerReport) brokerReport, foreignExchangeRateService);
             reportParserService.parse(reportTableFactory);
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
