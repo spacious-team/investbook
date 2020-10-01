@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.vtb;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.investbook.parser.AbstractBrokerReportFactory;
 import ru.investbook.parser.BrokerReport;
@@ -26,16 +27,21 @@ import java.io.InputStream;
 import java.util.regex.Pattern;
 
 @Component
+@Slf4j
 public class VtbBrokerReportFactory extends AbstractBrokerReportFactory {
 
     private final Pattern expectedFileNamePattern = Pattern.compile(".*");
 
     @Override
     public BrokerReport create(String excelFileName, InputStream is) {
-        return create(
+        BrokerReport brokerReport = create(
                 expectedFileNamePattern,
                 excelFileName,
                 is,
                 VtbBrokerReport::new);
+        if (brokerReport != null) {
+            log.info("Обнаружен отчет '{}' брокера ВТБ", excelFileName);
+        }
+        return brokerReport;
     }
 }

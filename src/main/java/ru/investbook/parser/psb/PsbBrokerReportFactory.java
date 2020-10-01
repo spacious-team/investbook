@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.psb;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.investbook.parser.AbstractBrokerReportFactory;
 import ru.investbook.parser.BrokerReport;
@@ -26,16 +27,17 @@ import java.io.InputStream;
 import java.util.regex.Pattern;
 
 @Component
+@Slf4j
 public class PsbBrokerReportFactory extends AbstractBrokerReportFactory {
 
     private final Pattern expectedFileNamePattern = Pattern.compile("^[0-9()\\-]+\\.xls(x)?$");
 
     @Override
     public BrokerReport create(String excelFileName, InputStream is) {
-        return create(
-                expectedFileNamePattern,
-                excelFileName,
-                is,
-                PsbBrokerReport::new);
+        BrokerReport brokerReport = create(expectedFileNamePattern, excelFileName, is, PsbBrokerReport::new);
+        if (brokerReport != null) {
+            log.info("Обнаружен отчет '{}' фондового и срочного рынков Промсвязьбанк брокера", excelFileName);
+        }
+        return brokerReport;
     }
 }
