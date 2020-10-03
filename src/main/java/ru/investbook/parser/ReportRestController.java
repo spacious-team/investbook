@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,10 +34,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -51,30 +49,17 @@ public class ReportRestController {
 
     @PostMapping("/reports")
     public ResponseEntity<String> post(@RequestParam("reports") MultipartFile[] reports,
-                                       @RequestParam(name = "format", required = false) String format) {
-        if (format == null || format.isEmpty()) {
-            format = "psb";
-        }
-        BrokerType broker = BrokerType.valueOf(format.toUpperCase());
+                                       @RequestParam(name = "broker", required = false) String broker) {
         List<Exception> exceptions = new ArrayList<>();
         for (MultipartFile report : reports) {
             try {
-                if (report == null || report.isEmpty()) {
-                    continue;
+                if (report != null && !report.isEmpty()) {
+                    long t0 = System.nanoTime();
+                    String brokerName = parseReport(report, broker);
+                    Path path = saveToBackup(brokerName, report);
+                    log.info("Загрузка отчета {} завершена за {}, бекап отчета сохранен в {}", report.getOriginalFilename(),
+                            Duration.ofNanos(System.nanoTime() - t0), path.toAbsolutePath());
                 }
-                long t0 = System.nanoTime();
-                Path path = saveToBackup(broker, report);
-                switch (broker) {
-                    case URALSIB:
-                    case PSB:
-                    case VTB:
-                        parseReport(report);
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Неизвестный формат " + format);
-                }
-                log.info("Загрузка отчета {} завершена за {}, бекап отчета сохранен в {}", report.getOriginalFilename(),
-                        Duration.ofNanos(System.nanoTime() - t0), path.toAbsolutePath());
             } catch (Exception e) {
                 exceptions.add(e);
             }
@@ -91,9 +76,9 @@ public class ReportRestController {
                                 return sw.toString().replace("\n", "</br>");
                             }).collect(Collectors.joining("</br></br> - ",
                                     "<b>Ошибка загрузки отчетов</b> <a href=\"/\">[назад]</a><br/>" +
-                                    "<span style=\"font-size: smaller; color: gray;\">Вы можете " +
-                                    "<a href=\"https://github.com/spacious-team/investbook/issues\">сообщить</a> об ошибке " +
-                                    "разработчикам</span></br></br> - ",
+                                            "<span style=\"font-size: smaller; color: gray;\">Вы можете " +
+                                            "<a href=\"https://github.com/spacious-team/investbook/issues\">сообщить</a> об ошибке " +
+                                            "разработчикам</span></br></br> - ",
                                     "")));
         }
     }
@@ -101,10 +86,11 @@ public class ReportRestController {
     /**
      * @return backup file
      */
-    private Path saveToBackup(BrokerType broker, MultipartFile report) throws IOException {
+    private Path saveToBackup(String brokerName, MultipartFile report) throws IOException {
+        Objects.requireNonNull(brokerName, "Наименование брокера, предоставившего отчет, не определено");
         byte[] bytes = report.getBytes();
         String originalFilename = report.getOriginalFilename();
-        Path backupPath = portfolioProperties.getReportBackupPath().resolve(broker.name().toLowerCase());
+        Path backupPath = portfolioProperties.getReportBackupPath().resolve(brokerName);
         Files.createDirectories(backupPath);
         Path path = backupPath.resolve((originalFilename != null) ?
                 originalFilename :
@@ -121,10 +107,17 @@ public class ReportRestController {
         return path;
     }
 
-    private void parseReport(MultipartFile report) {
-        try (BrokerReport brokerReport = getBrokerReport(report)) {
-            ReportTables reportTables = getReportTables(brokerReport);
+    /**
+     * @param report           report
+     * @param providedByBroker broker what generates report, may be null if unknown
+     * @return the exact name of the broker providing the report
+     * @throws RuntimeException if report has broken format or parser not found
+     */
+    private String parseReport(MultipartFile report, String providedByBroker) {
+        try (BrokerNameAndReport brokerNameAndReport = getBrokerReport(report, providedByBroker)) {
+            ReportTables reportTables = getReportTables(brokerNameAndReport.brokerReport());
             reportParserService.parse(reportTables);
+            return brokerNameAndReport.brokerName();
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
             log.warn(error, e);
@@ -132,20 +125,47 @@ public class ReportRestController {
         }
     }
 
-    private BrokerReport getBrokerReport(MultipartFile report) throws IOException {
+    private BrokerNameAndReport getBrokerReport(MultipartFile report, String providedByBroker) throws IOException {
+        if (StringUtils.isEmpty(providedByBroker)) {
+            return getReportOfUnknownBroker(report);
+        } else {
+            return getReportOfKnownBroker(report, providedByBroker);
+        }
+    }
+
+    private BrokerNameAndReport getReportOfUnknownBroker(MultipartFile report) throws IOException {
         BrokerReport brokerReport = null;
-        // converting to input stream supporting mark
+        // convert to mark supporting input stream
         ByteArrayInputStream is = castToBayteArrayInputStream(report.getInputStream());
         for (BrokerReportFactory brokerReportFactory : brokerReportFactories) {
             brokerReport = brokerReportFactory.create(report.getOriginalFilename(), is);
             if (brokerReport != null) {
-                break;
+                return new BrokerNameAndReport(brokerReportFactory.getBrokerName(), brokerReport);
             }
         }
-        if (brokerReport == null) {
-            throw new IllegalArgumentException("Неизвестный формат отчета " + report.getOriginalFilename());
-        }
-        return brokerReport;
+        throw new IllegalArgumentException("Неизвестный формат отчета " + report.getOriginalFilename());
+    }
+
+    private BrokerNameAndReport getReportOfKnownBroker(MultipartFile report, String providedByBroker) throws IOException {
+        ByteArrayInputStream is = castToBayteArrayInputStream(report.getInputStream());
+        return Optional.ofNullable(findBrokerReportFactory(providedByBroker))
+                .map(f -> {
+                    BrokerReport brokerReport = f.create(report.getOriginalFilename(), is);
+                    if (brokerReport != null) {
+                        return new BrokerNameAndReport(f.getBrokerName(), brokerReport);
+                    } else {
+                        return null;
+                    }
+                })
+                .orElseThrow(() -> new IllegalArgumentException("Файл " + report.getOriginalFilename() +
+                        " не является отчетом брокера " + providedByBroker));
+    }
+
+    private BrokerReportFactory findBrokerReportFactory(String broker) {
+        return brokerReportFactories.stream()
+                .filter(b -> b.getBrokerName().equalsIgnoreCase(broker))
+                .findAny()
+                .orElse(null);
     }
 
     private static ByteArrayInputStream castToBayteArrayInputStream(InputStream inputStream) throws IOException {
@@ -162,5 +182,12 @@ public class ReportRestController {
         }
         throw new IllegalArgumentException(
                 "Can't fina ReportTablesFactory for broker report of type: " + brokerReport.getClass().getSimpleName());
+    }
+
+    private static record BrokerNameAndReport(String brokerName, BrokerReport brokerReport) implements AutoCloseable {
+        @Override
+        public void close() throws Exception {
+            brokerReport.close();
+        }
     }
 }

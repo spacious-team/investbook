@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.uralsib;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.investbook.parser.AbstractBrokerReportFactory;
@@ -31,6 +32,8 @@ import java.util.zip.ZipInputStream;
 @Slf4j
 public class UralsibBrokerReportFactory extends AbstractBrokerReportFactory {
 
+    @Getter
+    private final String brokerName = "Уралсиб";
     private final Pattern zippedExpectedFileNamePattern = Pattern.compile("^brok_rpt_.*\\.xls(x)?\\.zip$");
     private final Pattern expectedFileNamePattern = Pattern.compile("^brok_rpt_.*\\.xls(x)?$");
 

@@ -29,4 +29,6 @@ public interface BrokerReportFactory {
      * @throws IllegalArgumentException if InputStream is not supports mark
      */
     BrokerReport create(String excelFileName, InputStream is);
+
+    String getBrokerName();
 }

@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.psb;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.investbook.parser.AbstractBrokerReportFactory;
@@ -30,6 +31,8 @@ import java.util.regex.Pattern;
 @Slf4j
 public class PsbBrokerReportFactory extends AbstractBrokerReportFactory {
 
+    @Getter
+    private final String brokerName = "Промсвязьбанк";
     private final Pattern expectedFileNamePattern = Pattern.compile("^[0-9()\\-]+\\.xls(x)?$");
 
     @Override
