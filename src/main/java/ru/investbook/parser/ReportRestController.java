@@ -18,17 +18,20 @@
 
 package ru.investbook.parser;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.investbook.PortfolioProperties;
-import ru.investbook.view.ForeignExchangeRateService;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -37,17 +40,29 @@ import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
+@RequestMapping("/reports")
 @Slf4j
 public class ReportRestController {
     private final ReportParserService reportParserService;
-    private final ForeignExchangeRateService foreignExchangeRateService;
     private final PortfolioProperties portfolioProperties;
     private final Collection<BrokerReportFactory> brokerReportFactories;
     private final Collection<ReportTablesFactory> reportTablesFactories;
 
-    @PostMapping("/reports")
+
+    @GetMapping
+    public String getReports(Model model) {
+        Collection<String> brokerNames = brokerReportFactories.stream()
+                .map(BrokerReportFactory::getBrokerName)
+                .map(String::toLowerCase)
+                .distinct()
+                .collect(Collectors.toList());
+        model.addAttribute("brokerNames", brokerNames);
+        return "reports";
+    }
+
+    @PostMapping
     public ResponseEntity<String> post(@RequestParam("reports") MultipartFile[] reports,
                                        @RequestParam(name = "broker", required = false) String broker) {
         List<Exception> exceptions = new ArrayList<>();
@@ -115,9 +130,9 @@ public class ReportRestController {
      */
     private String parseReport(MultipartFile report, String providedByBroker) {
         try (BrokerNameAndReport brokerNameAndReport = getBrokerReport(report, providedByBroker)) {
-            ReportTables reportTables = getReportTables(brokerNameAndReport.brokerReport());
+            ReportTables reportTables = getReportTables(brokerNameAndReport.getBrokerReport());
             reportParserService.parse(reportTables);
-            return brokerNameAndReport.brokerName();
+            return brokerNameAndReport.getBrokerName();
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
             log.warn(error, e);
@@ -148,7 +163,7 @@ public class ReportRestController {
 
     private BrokerNameAndReport getReportOfKnownBroker(MultipartFile report, String providedByBroker) throws IOException {
         ByteArrayInputStream is = castToBayteArrayInputStream(report.getInputStream());
-        return Optional.ofNullable(findBrokerReportFactory(providedByBroker))
+        return findBrokerReportFactory(providedByBroker).stream()
                 .map(f -> {
                     BrokerReport brokerReport = f.create(report.getOriginalFilename(), is);
                     if (brokerReport != null) {
@@ -157,15 +172,16 @@ public class ReportRestController {
                         return null;
                     }
                 })
+                .filter(Objects::nonNull)
+                .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Файл " + report.getOriginalFilename() +
                         " не является отчетом брокера " + providedByBroker));
     }
 
-    private BrokerReportFactory findBrokerReportFactory(String broker) {
+    private Collection<BrokerReportFactory> findBrokerReportFactory(String broker) {
         return brokerReportFactories.stream()
                 .filter(b -> b.getBrokerName().equalsIgnoreCase(broker))
-                .findAny()
-                .orElse(null);
+                .collect(Collectors.toList());
     }
 
     private static ByteArrayInputStream castToBayteArrayInputStream(InputStream inputStream) throws IOException {
@@ -184,7 +200,12 @@ public class ReportRestController {
                 "Can't fina ReportTablesFactory for broker report of type: " + brokerReport.getClass().getSimpleName());
     }
 
-    private static record BrokerNameAndReport(String brokerName, BrokerReport brokerReport) implements AutoCloseable {
+    @Getter
+    @RequiredArgsConstructor
+    private static class BrokerNameAndReport implements AutoCloseable {
+        private final String brokerName;
+        private final BrokerReport brokerReport;
+
         @Override
         public void close() throws Exception {
             brokerReport.close();
