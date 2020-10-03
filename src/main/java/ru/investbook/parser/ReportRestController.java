@@ -33,6 +33,8 @@ import ru.investbook.parser.psb.foreignmarket.PsbBrokerForeignMarketReport;
 import ru.investbook.parser.psb.foreignmarket.PsbForeignMarketReportTableFactory;
 import ru.investbook.parser.uralsib.UralsibBrokerReport;
 import ru.investbook.parser.uralsib.UralsibReportTableFactory;
+import ru.investbook.parser.vtb.VtbBrokerReport;
+import ru.investbook.parser.vtb.VtbReportTableFactory;
 import ru.investbook.view.ForeignExchangeRateService;
 
 import java.io.IOException;
@@ -89,6 +91,9 @@ public class ReportRestController {
                         } else {
                             parseUralsibZipReport(report);
                         }
+                        break;
+                    case VTB:
+                        parseVtbReport(report);
                         break;
                     default:
                         throw new IllegalArgumentException("Неизвестный формат " + format);
@@ -196,6 +201,17 @@ public class ReportRestController {
     private void parseUralsibReport(MultipartFile report, Supplier<UralsibBrokerReport> reportSupplier) {
         try (UralsibBrokerReport brokerReport = reportSupplier.get()) {
             ReportTableFactory reportTableFactory = new UralsibReportTableFactory(brokerReport, foreignExchangeRateService);
+            reportParserService.parse(reportTableFactory);
+        } catch (Exception e) {
+            String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
+            log.warn(error, e);
+            throw new RuntimeException(error, e);
+        }
+    }
+
+    private void parseVtbReport(MultipartFile report) {
+        try (VtbBrokerReport brokerReport = new VtbBrokerReport(report.getOriginalFilename(), report.getInputStream())) {
+            ReportTableFactory reportTableFactory = new VtbReportTableFactory(brokerReport);
             reportParserService.parse(reportTableFactory);
         } catch (Exception e) {
             String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
