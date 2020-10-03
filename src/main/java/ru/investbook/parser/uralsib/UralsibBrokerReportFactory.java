@@ -52,6 +52,9 @@ public class UralsibBrokerReportFactory extends AbstractBrokerReportFactory {
         }
         if (brokerReport != null) {
             log.info("Обнаружен отчет '{}' Уралсиб брокера", excelFileName);
+            if (!excelFileName.contains("_invest_")) {
+                log.warn("Рекомендуется загружать отчеты Уралсиб брокера, содержащие в имени файла слово 'invest'");
+            }
         }
         return brokerReport;
     }

@@ -64,12 +64,8 @@ public class ReportRestController {
                 }
                 long t0 = System.nanoTime();
                 Path path = saveToBackup(broker, report);
-                String originalFileName = report.getOriginalFilename();
                 switch (broker) {
                     case URALSIB:
-                        if (originalFileName != null && !originalFileName.contains("_invest_")) {
-                            log.warn("Рекомендуется загружать отчеты, содержащие в имени файла слово 'invest'");
-                        }
                     case PSB:
                     case VTB:
                         parseReport(report);
