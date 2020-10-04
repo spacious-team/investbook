@@ -24,12 +24,12 @@ import ru.investbook.parser.*;
 import ru.investbook.pojo.*;
 
 @RequiredArgsConstructor
-public class VtbReportTableFactory implements ReportTableFactory {
+public class VtbReportTables implements ReportTables {
     @Getter
     private final BrokerReport report;
 
     @Override
-    public ReportTable<PortfolioCash> createPortfolioCashTable() {
+    public ReportTable<PortfolioCash> getPortfolioCashTable() {
         return new EmptyReportTable<>(report);
     }
         

@@ -48,7 +48,7 @@ public class ReportParserServiceTest extends AbstractTestNGSpringContextTests {
     @Test(dataProvider = "report")
     void testParse(String report) throws IOException {
         PsbBrokerReport brokerReport = new PsbBrokerReport(Paths.get(report));
-        PsbReportTableFactory reportTableFactory = new PsbReportTableFactory(brokerReport);
+        PsbReportTables reportTableFactory = new PsbReportTables(brokerReport);
         reportParserService.parse(reportTableFactory);
     }
 

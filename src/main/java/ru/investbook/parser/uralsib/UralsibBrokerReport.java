@@ -39,28 +39,44 @@ import java.util.zip.ZipInputStream;
 
 @EqualsAndHashCode(callSuper = true)
 public class UralsibBrokerReport extends AbstractBrokerReport {
+    private static final String UNIQ_TEXT = "Брокер: ООО \"УРАЛСИБ Брокер\"";
     private static final String PORTFOLIO_MARKER = "Номер счета Клиента:";
     private static final String REPORT_DATE_MARKER = "за период";
     private final Workbook book;
 
-    public UralsibBrokerReport(ZipInputStream zis) throws IOException {
-        ZipEntry zipEntry = zis.getNextEntry();
-        Path path = Paths.get(zipEntry.getName());
-        this.book = getWorkBook(path.getFileName().toString(), zis);
+    public UralsibBrokerReport(ZipInputStream zis) {
+        try {
+            ZipEntry zipEntry = zis.getNextEntry();
+            Path path = Paths.get(zipEntry.getName());
+            this.book = getWorkBook(path.getFileName().toString(), zis);
+            ReportPage reportPage = new ExcelSheet(book.getSheetAt(0));
+            checkReportFormat(path, reportPage);
+            setPath(path);
+            setReportPage(reportPage);
+            setPortfolio(getPortfolio(reportPage));
+            setReportEndDateTime(getReportEndDateTime(reportPage));
+        } catch (Exception e) {
+            throw new RuntimeException("Не смог открыть excel файл", e);
+        }
+    }
+
+    public UralsibBrokerReport(String excelFileName, InputStream is) {
+        this.book = getWorkBook(excelFileName, is);
         ReportPage reportPage = new ExcelSheet(book.getSheetAt(0));
+        Path path = Paths.get(excelFileName);
+        checkReportFormat(path, reportPage);
         setPath(path);
         setReportPage(reportPage);
         setPortfolio(getPortfolio(reportPage));
         setReportEndDateTime(getReportEndDateTime(reportPage));
     }
 
-    public UralsibBrokerReport(String excelFileName, InputStream is) throws IOException {
-        this.book = getWorkBook(excelFileName, is);
-        ReportPage reportPage = new ExcelSheet(book.getSheetAt(0));
-        setPath(Paths.get(excelFileName));
-        setReportPage(reportPage);
-        setPortfolio(getPortfolio(reportPage));
-        setReportEndDateTime(getReportEndDateTime(reportPage));
+    private static void checkReportFormat(Path path, ReportPage reportPage) {
+        if (reportPage.find(
+                UNIQ_TEXT, 0, 1, (cell, expectedText) -> cell.contains(expectedText.toString()))
+                == TableCellAddress.NOT_FOUND) {
+            throw new RuntimeException("В файле " + path + " не содержится отчет брокера Уралсиб");
+        }
     }
 
     private static String getPortfolio(ReportPage reportPage) {

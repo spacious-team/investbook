@@ -22,12 +22,11 @@ import lombok.EqualsAndHashCode;
 import nl.fountain.xelem.excel.Workbook;
 import nl.fountain.xelem.lex.ExcelReader;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import ru.investbook.parser.AbstractBrokerReport;
+import ru.investbook.parser.psb.PsbBrokerReport;
 import ru.investbook.parser.table.ReportPage;
 import ru.investbook.parser.table.xml.XmlReportPage;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,19 +43,24 @@ public class PsbBrokerForeignMarketReport extends AbstractBrokerReport {
     private static final String PORTFOLIO_MARKER = "Договор №:";
     private static final String REPORT_DATE_MARKER = "ОТЧЕТ БРОКЕРА";
 
-    public PsbBrokerForeignMarketReport(String excelFileName, InputStream is) throws IOException, ParserConfigurationException, SAXException {
+    public PsbBrokerForeignMarketReport(String excelFileName, InputStream is) {
         Workbook book = getWorkbook(is);
         ReportPage reportPage = new XmlReportPage(book.getWorksheetAt(0));
+        PsbBrokerReport.checkReportFormat(excelFileName, reportPage);
         setPath(Paths.get(excelFileName));
         setReportPage(reportPage);
         setPortfolio(getPortfolio(reportPage));
         setReportEndDateTime(getReportEndDateTime(reportPage));
     }
 
-    private static Workbook getWorkbook(InputStream is) throws IOException, SAXException, ParserConfigurationException {
-        ExcelReader reader = new ExcelReader();
-        is = skeepNewLines(is); // required by ExcelReader
-        return reader.getWorkbook(new InputSource(is));
+    private static Workbook getWorkbook(InputStream is) {
+        try {
+            ExcelReader reader = new ExcelReader();
+            is = skeepNewLines(is); // required by ExcelReader
+            return reader.getWorkbook(new InputSource(is));
+        } catch (Exception e) {
+            throw new RuntimeException("Не смог открыть xml файл", e);
+        }
     }
 
     private static InputStream skeepNewLines(InputStream is) throws IOException {

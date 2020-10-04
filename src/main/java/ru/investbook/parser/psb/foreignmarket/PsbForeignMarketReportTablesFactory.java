@@ -16,8 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser;
+package ru.investbook.parser.psb.foreignmarket;
 
-public enum BrokerType {
-    PSB, URALSIB, VTB
+import org.springframework.stereotype.Component;
+import ru.investbook.parser.BrokerReport;
+import ru.investbook.parser.ReportTables;
+import ru.investbook.parser.ReportTablesFactory;
+
+@Component
+public class PsbForeignMarketReportTablesFactory implements ReportTablesFactory {
+    @Override
+    public boolean canCreate(BrokerReport brokerReport) {
+        return (brokerReport instanceof PsbBrokerForeignMarketReport);
+    }
+
+    @Override
+    public ReportTables create(BrokerReport brokerReport) {
+        return new PsbForeignMarketReportTables((PsbBrokerForeignMarketReport) brokerReport);
+    }
 }
