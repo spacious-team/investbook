@@ -83,6 +83,10 @@ public class VtbBrokerReport extends AbstractBrokerReport {
         }
     }
 
+    public static String convertToCurrency(String value) {
+        return value.replace("RUR", "RUB"); // vtb uses RUR (used till 1998) code in reports
+    }
+
     @Override
     public void close() throws IOException {
         this.book.close();

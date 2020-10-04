@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `portfolio_property` (
   `portfolio` varchar(32) NOT NULL,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `property` varchar(64) NOT NULL,
-  `value` varchar(256) NOT NULL,
+  `value` varchar(1024) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `portfolio_property_portfolio_timestamp_property_uniq_ix` (`portfolio`,`timestamp`,`property`),
   KEY `portfolio_property_portfolio_ix` (`portfolio`),
