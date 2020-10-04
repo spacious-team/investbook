@@ -20,7 +20,7 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import ru.investbook.parser.*;
-import ru.investbook.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInformation;
+import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
 import ru.investbook.pojo.EventCashFlow;
 import ru.investbook.pojo.Security;
 import ru.investbook.pojo.SecurityEventCashFlow;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class UralsibReportTables implements ReportTables {
     @Getter
     private final UralsibBrokerReport report;
-    private final PortfolioSecuritiesTable portfolioSecuritiesTable;
+    private final SecuritiesTable portfolioSecuritiesTable;
     @Getter
     private final ReportTable<SecurityTransaction> securityTransactionTable;
     @Getter
@@ -47,7 +47,7 @@ public class UralsibReportTables implements ReportTables {
     public UralsibReportTables(UralsibBrokerReport report, ForeignExchangeRateService foreignExchangeRateService) {
         this.report = report;
         this.portfolioPropertyTable = new PortfolioPropertyTable(report, foreignExchangeRateService);
-        this.portfolioSecuritiesTable = new PortfolioSecuritiesTable(report);
+        this.portfolioSecuritiesTable = new SecuritiesTable(report);
         this.securityTransactionTable = new WrappingReportTable<>(report,
                 new SecurityTransactionTable(report, portfolioPropertyTable),
                 new SecurityDepositAndWithdrawalTable(report, portfolioSecuritiesTable));
@@ -57,8 +57,8 @@ public class UralsibReportTables implements ReportTables {
     }
 
     @Override
-    public ReportTable<PortfolioCash> getPortfolioCashTable() {
-        return new PortfolioCashTable(report);
+    public ReportTable<PortfolioCash> getCashTable() {
+        return new CashTable(report);
     }
     
     @Override
@@ -71,7 +71,7 @@ public class UralsibReportTables implements ReportTables {
     }
     
     @Override
-    public ReportTable<Security> getPortfolioSecuritiesTable() {
+    public ReportTable<Security> getSecuritiesTable() {
         return new WrappingReportTable<>(report, portfolioSecuritiesTable.getData()
                 .stream()
                 .map(ReportSecurityInformation::getSecurity)

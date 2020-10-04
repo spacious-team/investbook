@@ -27,13 +27,13 @@ import ru.investbook.parser.table.TableRow;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class VtbPortfolioCashTable extends AbstractReportTable<PortfolioCash> {
+public class VtbCashTable extends AbstractReportTable<PortfolioCash> {
 
     private static final String TABLE_NAME = "Отчет об остатках денежных средств";
     private static final String TABLE_FOOTER = "Сумма денежных средств";
 
 
-    protected VtbPortfolioCashTable(BrokerReport report) {
+    protected VtbCashTable(BrokerReport report) {
         super(report, TABLE_NAME, TABLE_FOOTER, VtbCashTableHeader.class, 3);
     }
 

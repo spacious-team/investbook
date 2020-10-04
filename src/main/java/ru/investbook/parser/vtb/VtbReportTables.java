@@ -34,8 +34,8 @@ public class VtbReportTables implements ReportTables {
     }
 
     @Override
-    public ReportTable<PortfolioCash> getPortfolioCashTable() {
-        return new VtbPortfolioCashTable(report);
+    public ReportTable<PortfolioCash> getCashTable() {
+        return new VtbCashTable(report);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class VtbReportTables implements ReportTables {
     }
     
     @Override
-    public ReportTable<Security> getPortfolioSecuritiesTable() {
+    public ReportTable<Security> getSecuritiesTable() {
         return new EmptyReportTable<>(report);
     }
     

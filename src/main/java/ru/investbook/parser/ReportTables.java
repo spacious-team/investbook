@@ -25,11 +25,11 @@ public interface ReportTables {
 
     ReportTable<PortfolioProperty> getPortfolioPropertyTable();
 
-    ReportTable<PortfolioCash> getPortfolioCashTable();
+    ReportTable<PortfolioCash> getCashTable();
 
     ReportTable<EventCashFlow> getCashFlowTable();
 
-    ReportTable<Security> getPortfolioSecuritiesTable();
+    ReportTable<Security> getSecuritiesTable();
 
     ReportTable<SecurityTransaction> getSecurityTransactionTable();
 

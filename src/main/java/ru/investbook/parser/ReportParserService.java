@@ -35,10 +35,10 @@ public class ReportParserService {
                     .id(reportTables.getReport().getPortfolio())
                     .build());
             if (isAdded) {
-                ReportTable<PortfolioCash> portfolioCashTable = reportTables.getPortfolioCashTable();
+                ReportTable<PortfolioCash> portfolioCashTable = reportTables.getCashTable();
                 ReportTable<PortfolioProperty> portfolioPropertyTable = reportTables.getPortfolioPropertyTable();
                 ReportTable<EventCashFlow> cashFlowTable = reportTables.getCashFlowTable();
-                ReportTable<Security> portfolioSecuritiesTable = reportTables.getPortfolioSecuritiesTable();
+                ReportTable<Security> portfolioSecuritiesTable = reportTables.getSecuritiesTable();
                 ReportTable<SecurityTransaction> securityTransactionTable = reportTables.getSecurityTransactionTable();
                 ReportTable<SecurityEventCashFlow> couponAndAmortizationTable = reportTables.getCouponAmortizationRedemptionTable();
                 ReportTable<SecurityEventCashFlow> dividendTable = reportTables.getDividendTable();

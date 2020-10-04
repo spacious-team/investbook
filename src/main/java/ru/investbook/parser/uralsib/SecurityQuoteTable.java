@@ -28,15 +28,15 @@ import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Collections;
 
-import static ru.investbook.parser.uralsib.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.*;
+import static ru.investbook.parser.uralsib.SecuritiesTable.SecuritiesTableHeader.*;
 
 public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
 
     private final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
     protected SecurityQuoteTable(UralsibBrokerReport report) {
-        super(report, PortfolioSecuritiesTable.TABLE_NAME, PortfolioSecuritiesTable.TABLE_END_TEXT,
-                PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.class);
+        super(report, SecuritiesTable.TABLE_NAME, SecuritiesTable.TABLE_END_TEXT,
+                SecuritiesTable.SecuritiesTableHeader.class);
     }
 
     @Override

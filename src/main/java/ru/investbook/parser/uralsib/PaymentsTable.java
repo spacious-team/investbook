@@ -24,7 +24,7 @@ import ru.investbook.parser.*;
 import ru.investbook.parser.table.AbstractTable;
 import ru.investbook.parser.table.Table;
 import ru.investbook.parser.table.TableRow;
-import ru.investbook.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInformation;
+import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.EventCashFlow;
 import ru.investbook.pojo.Security;
@@ -48,7 +48,7 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
     private String currentRowDescription = "";
 
     public PaymentsTable(UralsibBrokerReport report,
-                         PortfolioSecuritiesTable securitiesTable,
+                         SecuritiesTable securitiesTable,
                          ReportTable<SecurityTransaction> securityTransactionTable) {
         super(report, TABLE_NAME, "", PaymentsTableHeader.class);
         this.securitiesIncomingCount = securitiesTable.getData();

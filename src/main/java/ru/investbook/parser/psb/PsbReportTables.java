@@ -34,8 +34,8 @@ public class PsbReportTables implements ReportTables {
     }
 
     @Override
-    public ReportTable<PortfolioCash> getPortfolioCashTable() {
-        return new PortfolioCashTable(report);
+    public ReportTable<PortfolioCash> getCashTable() {
+        return new CashTable(report);
     }
 
     @Override
@@ -44,8 +44,8 @@ public class PsbReportTables implements ReportTables {
     }
     
     @Override
-    public ReportTable<Security> getPortfolioSecuritiesTable() {
-        return new PortfolioSecuritiesTable(report);
+    public ReportTable<Security> getSecuritiesTable() {
+        return new SecuritiesTable(report);
     }
     
     @Override

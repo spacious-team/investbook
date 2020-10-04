@@ -37,6 +37,6 @@ public class PortfolioCashTableTest {
 
     @Test(dataProvider = "cash_in")
     void testIsin(String report, BigDecimal expectedCash) throws IOException {
-        assertEquals(new PortfolioCashTable(new PsbBrokerReport(report)).getData().get(0).getValue(), expectedCash);
+        assertEquals(new CashTable(new PsbBrokerReport(report)).getData().get(0).getValue(), expectedCash);
     }
 }

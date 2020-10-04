@@ -34,8 +34,8 @@ public class PsbForeignMarketReportTables implements ReportTables {
     }
 
     @Override
-    public ReportTable<PortfolioCash> getPortfolioCashTable() {
-        return new ForeignExchangePortfolioCashTable(report);
+    public ReportTable<PortfolioCash> getCashTable() {
+        return new ForeignExchangeCashTable(report);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class PsbForeignMarketReportTables implements ReportTables {
     }
     
     @Override
-    public ReportTable<Security> getPortfolioSecuritiesTable() {
+    public ReportTable<Security> getSecuritiesTable() {
         return new EmptyReportTable<>(report);
     }
     

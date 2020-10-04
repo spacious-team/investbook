@@ -29,20 +29,20 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static java.util.Collections.emptyList;
-import static ru.investbook.parser.psb.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.*;
+import static ru.investbook.parser.psb.SecuritiesTable.SecuritiesTableHeader.*;
 
 public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
 
     private final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
     public SecurityQuoteTable(PsbBrokerReport report) {
-        super(report, PortfolioSecuritiesTable.TABLE_NAME, PortfolioSecuritiesTable.TABLE_END_TEXT,
-                PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.class);
+        super(report, SecuritiesTable.TABLE_NAME, SecuritiesTable.TABLE_END_TEXT,
+                SecuritiesTable.SecuritiesTableHeader.class);
     }
 
     @Override
     protected Collection<SecurityQuote> getRow(Table table, TableRow row) {
-        if (row.rowContains(PortfolioSecuritiesTable.INVALID_TEXT)) {
+        if (row.rowContains(SecuritiesTable.INVALID_TEXT)) {
             return emptyList();
         }
         int count = table.getIntCellValue(row, OUTGOING);
