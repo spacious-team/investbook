@@ -29,15 +29,15 @@ public class PsbReportTables implements ReportTables {
     private final PsbBrokerReport report;
 
     @Override
-    public ReportTable<PortfolioCash> getPortfolioCashTable() {
-        return new PortfolioCashTable(report);
-    }
-        
-    @Override
     public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
         return new PortfolioPropertyTable(report);
     }
-    
+
+    @Override
+    public ReportTable<PortfolioCash> getPortfolioCashTable() {
+        return new PortfolioCashTable(report);
+    }
+
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
         return new CashFlowTable(report);

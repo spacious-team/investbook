@@ -43,7 +43,7 @@ public abstract class AbstractBrokerReportFactory implements BrokerReportFactory
         }
         Assert.isTrue(is.markSupported(), "Provided input stream doesn't supports mark");
         is = new CloseIgnoringInputStream(is); // do not close stream
-        is.mark(1024);
+        is.mark(Integer.MAX_VALUE);
         Exception exception = null;
         try {
             return brokerReportProvider.apply(excelFileName, is);

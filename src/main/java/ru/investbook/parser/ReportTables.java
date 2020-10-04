@@ -23,9 +23,9 @@ import ru.investbook.pojo.*;
 public interface ReportTables {
     BrokerReport getReport();
 
-    ReportTable<PortfolioCash> getPortfolioCashTable();
-
     ReportTable<PortfolioProperty> getPortfolioPropertyTable();
+
+    ReportTable<PortfolioCash> getPortfolioCashTable();
 
     ReportTable<EventCashFlow> getCashFlowTable();
 

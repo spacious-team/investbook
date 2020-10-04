@@ -68,27 +68,21 @@ public class PsbBrokerReport extends AbstractBrokerReport {
     private static String getPortfolio(ReportPage reportPage) {
         try {
             String value = String.valueOf(reportPage.getNextColumnValue(PORTFOLIO_MARKER));
-            if (value != null) {
-                return value.contains("/") ? value.split("/")[0] : value;
-            }
+            return value.contains("/") ? value.split("/")[0] : value;
+        } catch (Exception e) {
             throw new IllegalArgumentException(
                     "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + " XXX'");
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка поиска номера Брокерского счета в отчете");
         }
     }
 
     private Instant getReportEndDateTime(ReportPage reportPage) {
         try {
             String value = String.valueOf(reportPage.getNextColumnValue(REPORT_DATE_MARKER));
-            if (value != null) {
-                return convertToInstant(value.split(" ")[3])
-                        .plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);
-            }
+            return convertToInstant(value.split(" ")[3])
+                    .plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);
+        } catch (Exception e) {
             throw new IllegalArgumentException(
                     "Не найдена дата отчета по заданному шаблону '" + REPORT_DATE_MARKER + " XXX'");
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка поиска даты отчета");
         }
     }
 
