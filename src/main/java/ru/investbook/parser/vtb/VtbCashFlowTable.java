@@ -19,13 +19,19 @@
 package ru.investbook.parser.vtb;
 
 import lombok.Getter;
+import org.springframework.util.StringUtils;
 import ru.investbook.parser.*;
 import ru.investbook.parser.table.Table;
 import ru.investbook.parser.table.TableRow;
+import ru.investbook.parser.table.excel.ExcelTable;
+import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.EventCashFlow;
 
 import java.util.Collection;
 import java.util.Collections;
+
+import static java.util.Collections.singletonList;
+import static ru.investbook.parser.vtb.VtbCashFlowTable.VtbCashFlowTableHeader.*;
 
 public class VtbCashFlowTable extends AbstractReportTable<EventCashFlow> {
 
@@ -37,15 +43,45 @@ public class VtbCashFlowTable extends AbstractReportTable<EventCashFlow> {
 
     @Override
     protected Collection<EventCashFlow> getRow(Table table, TableRow row) {
-        return Collections.emptyList();
+        String operation = String.valueOf(table.getStringCellValueOrDefault(row, OPERATION, ""))
+                .toLowerCase()
+                .trim();
+        CashFlowType type = switch (operation) {
+            case "зачисление денежных средств" -> CashFlowType.CASH;
+            case "списание денежных средств" -> CashFlowType.CASH;
+            case "ндфл" -> CashFlowType.TAX;
+            default -> null;
+        };
+        if (type == null) {
+            return Collections.emptyList();
+        }
+        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
+        return singletonList(EventCashFlow.builder()
+                .portfolio(getReport().getPortfolio())
+                .eventType(type)
+                .timestamp(((ExcelTable) table).getDateCellValue(row, DATE).toInstant())
+                .value(table.getCurrencyCellValue(row, VALUE))
+                .currency(VtbBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
+                .description(StringUtils.isEmpty(description) ? null : description)
+                .build());
+    }
+
+    @Override
+    protected boolean checkEquality(EventCashFlow flow1, EventCashFlow flow2) {
+        return EventCashFlow.checkEquality(flow1, flow2);
+    }
+
+    @Override
+    protected Collection<EventCashFlow> mergeDuplicates(EventCashFlow old, EventCashFlow nw) {
+        return EventCashFlow.mergeDuplicates(old, nw);
     }
 
     @Getter
-    private enum VtbCashFlowTableHeader implements TableColumnDescription {
+    enum VtbCashFlowTableHeader implements TableColumnDescription {
         DATE("дата"),
         VALUE("сумма"),
         CURRENCY("валюта"),
-        TYPE("тип операции"),
+        OPERATION("тип операции"),
         DESCRIPTION("комментарий");
 
         private final TableColumn column;
