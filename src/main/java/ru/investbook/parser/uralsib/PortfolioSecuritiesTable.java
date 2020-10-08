@@ -64,7 +64,7 @@ public class PortfolioSecuritiesTable extends AbstractReportTable<ReportSecurity
         ISIN("isin"),
         CFI("cfi"),
         INCOMING_COUNT("количество", "на начало периода"),
-        COUNT("плановое количество цб"),
+        OUTGOING_COUNT("количество", "на конец периода"),
         QUOTE("цена закрытия одной цб без учета нкд"),
         AMOUNT("Стоимость позиции по цене закрытия"),
         ACCRUED_INTEREST("^нкд$");
