@@ -1,5 +1,5 @@
 /*
- * InvestBook
+ * Portfolio
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,27 +16,5 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.psb;
-
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Ignore;
-import org.testng.annotations.Test;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-
-import static org.testng.Assert.assertEquals;
-
-@Ignore
-public class PortfolioCashTableTest {
-
-    @DataProvider(name = "cash_in")
-    Object[][] getData() {
-        return new Object[][] {{"E:\\1.xlsx", BigDecimal.valueOf(350.37)}};
-    }
-
-    @Test(dataProvider = "cash_in")
-    void testIsin(String report, BigDecimal expectedCash) throws IOException {
-        assertEquals(new CashTable(new PsbBrokerReport(report)).getData().get(0).getValue(), expectedCash);
-    }
-}
+ALTER TABLE `portfolio_property`
+    CHANGE COLUMN `value` VARCHAR(1024) NOT NULL;

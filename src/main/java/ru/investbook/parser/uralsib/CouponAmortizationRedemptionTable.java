@@ -45,7 +45,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
     private final List<Map.Entry<String, Instant>> redemptionDates;
 
     public CouponAmortizationRedemptionTable(UralsibBrokerReport report,
-                                             PortfolioSecuritiesTable securitiesTable,
+                                             SecuritiesTable securitiesTable,
                                              ReportTable<SecurityTransaction> securityTransactionTable) {
         super(report, securitiesTable, securityTransactionTable);
         this.redemptionDates = new SecurityRedemptionTable(report).getData();

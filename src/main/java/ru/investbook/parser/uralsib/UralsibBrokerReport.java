@@ -108,8 +108,7 @@ public class UralsibBrokerReport extends AbstractBrokerReport {
             return convertToInstant(
                     Lists.reverse(
                             Arrays.asList(
-                                    reportPage.getRow(address.getRow())
-                                            .getCell(address.getColumn())
+                                    reportPage.getCell(address)
                                             .getStringCellValue()
                                             .split(" ")))
                             .get(0))

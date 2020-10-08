@@ -29,23 +29,23 @@ public class VtbReportTables implements ReportTables {
     private final BrokerReport report;
 
     @Override
-    public ReportTable<PortfolioCash> getPortfolioCashTable() {
-        return new EmptyReportTable<>(report);
-    }
-        
-    @Override
     public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
-        return new EmptyReportTable<>(report);
+        return new VtbPortfolioPropertyTable(report);
     }
-    
+
+    @Override
+    public ReportTable<PortfolioCash> getCashTable() {
+        return new VtbCashTable(report);
+    }
+
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
-        return new EmptyReportTable<>(report);
+        return new VtbCashFlowTable(report);
     }
     
     @Override
-    public ReportTable<Security> getPortfolioSecuritiesTable() {
-        return new EmptyReportTable<>(report);
+    public ReportTable<Security> getSecuritiesTable() {
+        return new VtbSecuritiesTable(report);
     }
     
     @Override

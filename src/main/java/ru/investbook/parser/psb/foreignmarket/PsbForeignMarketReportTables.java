@@ -29,22 +29,22 @@ public class PsbForeignMarketReportTables implements ReportTables {
     private final PsbBrokerForeignMarketReport report;
 
     @Override
-    public ReportTable<PortfolioCash> getPortfolioCashTable() {
-        return new ForeignExchangePortfolioCashTable(report);
-    }
-        
-    @Override
     public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
         return new ForeignExchangePortfolioPropertyTable(report);
     }
-    
+
+    @Override
+    public ReportTable<PortfolioCash> getCashTable() {
+        return new ForeignExchangeCashTable(report);
+    }
+
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
         return new ForeignExchangeCashFlowTable(report);
     }
     
     @Override
-    public ReportTable<Security> getPortfolioSecuritiesTable() {
+    public ReportTable<Security> getSecuritiesTable() {
         return new EmptyReportTable<>(report);
     }
     

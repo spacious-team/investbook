@@ -32,17 +32,17 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static java.util.Collections.emptyList;
-import static ru.investbook.parser.psb.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.ISIN;
-import static ru.investbook.parser.psb.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.NAME;
+import static ru.investbook.parser.psb.SecuritiesTable.SecuritiesTableHeader.ISIN;
+import static ru.investbook.parser.psb.SecuritiesTable.SecuritiesTableHeader.NAME;
 
 @Slf4j
-public class PortfolioSecuritiesTable extends AbstractReportTable<Security> {
+public class SecuritiesTable extends AbstractReportTable<Security> {
     static final String TABLE_NAME = "Портфель на конец дня на биржевом рынке";
     static final String TABLE_END_TEXT = "* цена последней сделки (на организованных торгах)";
     static final String INVALID_TEXT = "Итого в валюте цены";
 
-    public PortfolioSecuritiesTable(PsbBrokerReport report) {
-        super(report, TABLE_NAME, TABLE_END_TEXT, PortfolioSecuritiesTableHeader.class);
+    public SecuritiesTable(PsbBrokerReport report) {
+        super(report, TABLE_NAME, TABLE_END_TEXT, SecuritiesTableHeader.class);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class PortfolioSecuritiesTable extends AbstractReportTable<Security> {
                         .build());
     }
 
-    enum PortfolioSecuritiesTableHeader implements TableColumnDescription {
+    enum SecuritiesTableHeader implements TableColumnDescription {
         NAME("наименование"),
         ISIN("isin"),
         OUTGOING("исходящий", "остаток"),
@@ -68,7 +68,7 @@ public class PortfolioSecuritiesTable extends AbstractReportTable<Security> {
 
         @Getter
         private final TableColumn column;
-        PortfolioSecuritiesTableHeader(String... words) {
+        SecuritiesTableHeader(String... words) {
             this.column = TableColumnImpl.of(words);
         }
     }

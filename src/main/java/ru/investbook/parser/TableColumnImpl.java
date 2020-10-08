@@ -60,6 +60,6 @@ public class TableColumnImpl implements TableColumn {
     }
 
     private boolean containsWord(String text, String word) {
-        return text.matches("(^|.*\\b|.*\\s)" + word + "(\\b.*|\\s.*|$)");
+        return text.matches("(^|(.|\\n)*\\b|(.|\\n)*\\s)" + word + "(\\b(.|\\n)*|\\s(.|\\n)*|$)");
     }
 }

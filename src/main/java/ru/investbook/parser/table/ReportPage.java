@@ -94,6 +94,10 @@ public interface ReportPage {
 
     int getLastRowNum();
 
+    default TableCell getCell(TableCellAddress address) {
+        return getRow(address.getRow()).getCell(address.getColumn());
+    }
+
     /**
      * Get table range, table ends with predefined string in one of the row cells
      */

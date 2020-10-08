@@ -46,7 +46,7 @@ public class DividendTable extends PaymentsTable {
     private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
     public DividendTable(UralsibBrokerReport report,
-                         PortfolioSecuritiesTable securitiesTable,
+                         SecuritiesTable securitiesTable,
                          ReportTable<SecurityTransaction> securityTransactionTable) {
         super(report, securitiesTable, securityTransactionTable);
     }

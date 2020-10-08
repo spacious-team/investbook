@@ -59,7 +59,11 @@ public class VtbBrokerReport extends AbstractBrokerReport {
 
     private static String getPortfolio(ReportPage reportPage) {
         try {
-            return String.valueOf(reportPage.getNextColumnValue(PORTFOLIO_MARKER));
+            Object value = reportPage.getNextColumnValue(PORTFOLIO_MARKER);
+            if (value instanceof Number) {
+                value = ((Number) value).intValue();
+            }
+            return String.valueOf(value);
         } catch (Exception e) {
             throw new RuntimeException("В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + " XXX'");
         }
@@ -67,16 +71,20 @@ public class VtbBrokerReport extends AbstractBrokerReport {
 
     private Instant getReportEndDateTime(ReportPage reportPage) {
         try {
-            String value = String.valueOf(reportPage.getNextColumnValue(REPORT_DATE_MARKER));
-            if (value != null) {
-                return convertToInstant(value.split(" ")[9])
-                        .plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);
-            }
+            TableCellAddress address = reportPage.find(REPORT_DATE_MARKER, 1, 2);
+            String value = reportPage.getCell(address)
+                    .getStringCellValue()
+                    .split(" ")[9];
+            return convertToInstant(value)
+                    .plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);
+        } catch (Exception e) {
             throw new IllegalArgumentException(
                     "Не найдена дата отчета по заданному шаблону '" + REPORT_DATE_MARKER + " XXX'");
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка поиска даты отчета");
         }
+    }
+
+    public static String convertToCurrency(String value) {
+        return value.replace("RUR", "RUB"); // vtb uses RUR (used till 1998) code in reports
     }
 
     @Override

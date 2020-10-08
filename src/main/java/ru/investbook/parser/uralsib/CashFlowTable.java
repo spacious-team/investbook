@@ -19,6 +19,7 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import ru.investbook.parser.AbstractReportTable;
 import ru.investbook.parser.table.Table;
 import ru.investbook.parser.table.TableRow;
@@ -48,7 +49,7 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
     protected Collection<EventCashFlow> getRow(Table table, TableRow row) {
         String action = table.getStringCellValue(row, OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
-        String description = table.getStringCellValue(row, DESCRIPTION);
+        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
         CashFlowType type;
         switch (action) {
             case"ввод дс":
@@ -83,7 +84,7 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
                 .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
                 .value(table.getCurrencyCellValue(row, VALUE))
                 .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
-                .description((description == null || description.isEmpty())? null : description)
+                .description(StringUtils.isEmpty(description) ? null : description)
                 .build());
     }
 

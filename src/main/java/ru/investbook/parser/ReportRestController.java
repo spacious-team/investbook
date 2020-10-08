@@ -134,7 +134,7 @@ public class ReportRestController {
             reportParserService.parse(reportTables);
             return brokerNameAndReport.getBrokerName();
         } catch (Exception e) {
-            String error = "Произошла ошибка парсинга отчета " + report.getOriginalFilename();
+            String error = "Произошла ошибка парсинга отчета '" + report.getOriginalFilename() + "'";
             log.warn(error, e);
             throw new RuntimeException(error, e);
         }
@@ -158,7 +158,7 @@ public class ReportRestController {
                 return new BrokerNameAndReport(brokerReportFactory.getBrokerName(), brokerReport);
             }
         }
-        throw new IllegalArgumentException("Неизвестный формат отчета " + report.getOriginalFilename());
+        throw new IllegalArgumentException("Неизвестный формат отчета '" + report.getOriginalFilename() + "'");
     }
 
     private BrokerNameAndReport getReportOfKnownBroker(MultipartFile report, String providedByBroker) throws IOException {
