@@ -36,7 +36,7 @@ import static ru.investbook.parser.uralsib.UralsibBrokerReport.convertToCurrency
 @Slf4j
 public class SecurityTransactionTable extends AbstractReportTable<SecurityTransaction> {
     private static final String TABLE_NAME = "Биржевые сделки с ценными бумагами в отчетном периоде";
-    private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
+    private final BigDecimal minValue = BigDecimal.valueOf(0.01);
     private final PortfolioPropertyTable portfolioPropertyTable;
 
     public SecurityTransactionTable(UralsibBrokerReport report,

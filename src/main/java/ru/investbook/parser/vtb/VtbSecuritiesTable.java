@@ -59,7 +59,7 @@ public class VtbSecuritiesTable extends AbstractReportTable<Security> {
     enum VtbSecuritiesTableHeader implements TableColumnDescription {
         NAME_AND_ISIN("наименование", "isin"),
         SECTION("площадка"),
-        OUTGOING("плановый исходящий остаток"),
+        OUTGOING("исходящий остаток"),
         CURRENCY("валюта цены"),
         QUOTE("цена", "для облигаций"),
         FACE_VALUE("номинал"),
