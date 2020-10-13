@@ -80,6 +80,6 @@ public class VtbReportTables implements ReportTables {
 
     @Override
     public ReportTable<SecurityQuote> getSecurityQuoteTable() {
-        return new EmptyReportTable<>(report);
+        return new VtbSecurityQuoteTable(report);
     }
 }
