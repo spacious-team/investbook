@@ -38,26 +38,26 @@ import java.util.StringJoiner;
 @EqualsAndHashCode
 public class EventCashFlow {
     @Nullable // autoincrement
-    private Integer id;
+    private final Integer id;
 
     @NotNull
-    private String portfolio;
+    private final String portfolio;
 
     @NotNull
-    private Instant timestamp;
+    private final Instant timestamp;
 
     @NotNull
     @JsonProperty("event-type")
-    private CashFlowType eventType;
+    private final CashFlowType eventType;
 
     @NotNull
-    private BigDecimal value;
+    private final BigDecimal value;
 
     @Builder.Default
-    private String currency = "RUB";
+    private final String currency = "RUB";
 
     @Nullable
-    private String description;
+    private final String description;
 
     /**
      * Checks DB unique index constraint

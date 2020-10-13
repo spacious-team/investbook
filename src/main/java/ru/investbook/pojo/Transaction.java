@@ -32,17 +32,17 @@ import java.time.Instant;
 @EqualsAndHashCode
 public class Transaction {
     @NotNull
-    private Long id;
+    private final Long id;
 
     @NotNull
-    private String portfolio;
+    private final String portfolio;
 
     @NotNull
-    private String isin;
+    private final String isin;
 
     @NotNull
-    private Instant timestamp;
+    private final Instant timestamp;
 
     @NotNull
-    private int count;
+    private final int count;
 }
