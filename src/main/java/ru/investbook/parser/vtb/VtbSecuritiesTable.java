@@ -33,8 +33,8 @@ import static ru.investbook.parser.vtb.VtbSecuritiesTable.VtbSecuritiesTableHead
 
 public class VtbSecuritiesTable extends AbstractReportTable<Security> {
 
-    private static final String TABLE_NAME = "Отчет об остатках ценных бумаг";
-    private static final String TABLE_FOOTER = "ИТОГО:";
+    static final String TABLE_NAME = "Отчет об остатках ценных бумаг";
+    static final String TABLE_FOOTER = "ИТОГО:";
 
     protected VtbSecuritiesTable(BrokerReport report) {
         super(report, TABLE_NAME, TABLE_FOOTER, VtbSecuritiesTableHeader.class);
@@ -59,7 +59,7 @@ public class VtbSecuritiesTable extends AbstractReportTable<Security> {
     enum VtbSecuritiesTableHeader implements TableColumnDescription {
         NAME_AND_ISIN("наименование", "isin"),
         SECTION("площадка"),
-        OUTGOING("плановый исходящий остаток"),
+        OUTGOING("исходящий остаток"),
         CURRENCY("валюта цены"),
         QUOTE("цена", "для облигаций"),
         FACE_VALUE("номинал"),

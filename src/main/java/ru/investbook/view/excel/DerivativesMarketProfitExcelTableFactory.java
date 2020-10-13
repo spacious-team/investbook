@@ -77,6 +77,7 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
         Table contractProfit = new Table();
         BigDecimal totalCommission = BigDecimal.ZERO;
         BigDecimal totalProfit = BigDecimal.ZERO;
+        BigDecimal totalProfitInPoints = BigDecimal.ZERO;
         int totalContractCount = 0;
         for (DerivativeEvents.DerivativeDailyEvents dailyEvents : derivativeEvents.getDerivativeDailyEvents()) {
             Table.Record record = new Table.Record();
@@ -94,8 +95,12 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
                     record.put(DATE, transaction.getTimestamp());
                     record.put(DIRECTION, (transaction.getCount() > 0) ? "покупка" : "продажа");
                     record.put(COUNT, Math.abs(transaction.getCount()));
-                    record.put(QUOTE, Optional.ofNullable(transactionCashFlows.get(CashFlowType.DERIVATIVE_QUOTE))
-                            .map(TransactionCashFlow::getValue)
+                    Optional<BigDecimal> amountInQuotes = Optional.ofNullable(transactionCashFlows.get(CashFlowType.DERIVATIVE_QUOTE))
+                            .map(TransactionCashFlow::getValue);
+                    totalProfitInPoints = amountInQuotes
+                            .map(totalProfitInPoints::add)
+                            .orElse(totalProfitInPoints);
+                    record.put(QUOTE, amountInQuotes
                             .map(q -> "=" + q + "/" + Math.abs(transaction.getCount()))
                             .orElse(null));
                     record.put(AMOUNT, Optional.ofNullable(transactionCashFlows.get(CashFlowType.DERIVATIVE_PRICE))
@@ -125,6 +130,7 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
         total.put(DIRECTION, "Итого");
         total.put(COUNT, totalContractCount);
         total.put(COMMISSION, totalCommission);
+        total.put(QUOTE, totalProfitInPoints);
         total.put(DERIVATIVE_PROFIT_TOTAL, totalProfit);
         total.put(FORECAST_TAX, TAX_FORMULA);
         total.put(PROFIT, PROFIT_FORMULA);

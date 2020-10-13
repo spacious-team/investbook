@@ -50,12 +50,12 @@ public class VtbReportTables implements ReportTables {
     
     @Override
     public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
-        return new EmptyReportTable<>(report);
+        return new VtbSecurityTransactionTable(report);
     }
 
     @Override
     public ReportTable<DerivativeTransaction> getDerivativeTransactionTable() {
-        return new EmptyReportTable<>(report);
+        return new VtbDerivativeTransactionTable(report);
     }
 
     @Override
@@ -80,6 +80,6 @@ public class VtbReportTables implements ReportTables {
 
     @Override
     public ReportTable<SecurityQuote> getSecurityQuoteTable() {
-        return new EmptyReportTable<>(report);
+        return new VtbSecurityQuoteTable(report);
     }
 }
