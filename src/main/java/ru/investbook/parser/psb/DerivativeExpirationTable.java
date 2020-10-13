@@ -49,15 +49,12 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
         BigDecimal value;
         BigDecimal valueInPoints;
         switch (type) {
-            case "фьючерс":
+            case "фьючерс" -> {
                 value = table.getCurrencyCellValue(row, VALUE);
                 valueInPoints = table.getCurrencyCellValue(row, QUOTE).multiply(BigDecimal.valueOf(count));
-                break;
-            case "опцион":
-                value = valueInPoints = BigDecimal.ZERO;
-                break;
-            default:
-                throw new IllegalArgumentException("Не известный контракт '" + type + "'"); // unexpected contract
+            }
+            case "опцион" -> value = valueInPoints = BigDecimal.ZERO;
+            default -> throw new IllegalArgumentException("Не известный контракт '" + type + "'"); // unexpected contract
         }
         if (isBuy) {
             value = value.negate();

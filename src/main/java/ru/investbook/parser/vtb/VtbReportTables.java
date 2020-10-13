@@ -55,7 +55,7 @@ public class VtbReportTables implements ReportTables {
 
     @Override
     public ReportTable<DerivativeTransaction> getDerivativeTransactionTable() {
-        return new EmptyReportTable<>(report);
+        return new VtbDerivativeTransactionTable(report);
     }
 
     @Override

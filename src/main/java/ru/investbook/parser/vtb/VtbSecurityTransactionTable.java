@@ -74,7 +74,7 @@ public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTra
                 .build());
     }
 
-    private static Long getTransactionId(String id) {
+    static Long getTransactionId(String id) {
         long numbericId = 0;
         for (char symbol : id.toCharArray()) {
             numbericId *= 10;
