@@ -40,7 +40,10 @@ public class VtbReportTables implements ReportTables {
 
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
-        return new VtbCashFlowTable(report);
+        return new WrappingReportTable<>(
+                report,
+                new VtbCashFlowTable(report),
+                new VtbDividendTable(report));
     }
     
     @Override

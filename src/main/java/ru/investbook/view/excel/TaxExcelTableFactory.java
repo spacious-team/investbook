@@ -58,16 +58,18 @@ public class TaxExcelTableFactory implements TableFactory {
                 .collect(Collectors.toCollection(ArrayList::new));
 
         for (EventCashFlow cash : cashFlows) {
-            Table.Record record = new Table.Record();
-            record.put(DATE, cash.getTimestamp());
-            record.put(TAX, Optional.ofNullable(cash.getValue())
-                    .map(BigDecimal::negate)
-                    .orElse(BigDecimal.ZERO));
-            record.put(CURRENCY, cash.getCurrency());
-            record.put(TAX_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash.getCurrency(),
-                    TAX, EXCHANGE_RATE));
-            record.put(DESCRIPTION, cash.getDescription());
-            table.add(record);
+            if (isNotDividendOrCouponTax(cash.getDescription())) {
+                Table.Record record = new Table.Record();
+                record.put(DATE, cash.getTimestamp());
+                record.put(TAX, Optional.ofNullable(cash.getValue())
+                        .map(BigDecimal::negate)
+                        .orElse(BigDecimal.ZERO));
+                record.put(CURRENCY, cash.getCurrency());
+                record.put(TAX_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash.getCurrency(),
+                        TAX, EXCHANGE_RATE));
+                record.put(DESCRIPTION, cash.getDescription());
+                table.add(record);
+            }
         }
 
         if (!cashFlows.isEmpty()) {
@@ -75,5 +77,13 @@ public class TaxExcelTableFactory implements TableFactory {
         }
 
         return table;
+    }
+
+    static boolean isNotDividendOrCouponTax(String description) {
+        if (description == null) {
+            return true;
+        }
+        String lowercasedDescription = description.toLowerCase();
+        return !lowercasedDescription.contains("дивиденд") && !lowercasedDescription.contains("купон");
     }
 }

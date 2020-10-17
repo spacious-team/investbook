@@ -44,13 +44,14 @@ import java.util.stream.Stream;
 
 import static ru.investbook.pojo.CashFlowType.*;
 import static ru.investbook.view.excel.ForeignPortfolioPaymentExcelTableHeader.*;
+import static ru.investbook.view.excel.TaxExcelTableFactory.isNotDividendOrCouponTax;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class ForeignPortfolioPaymentExcelTableFactory implements TableFactory {
     /** tax accounted by {@link TaxExcelTableFactory} */
-    private static final CashFlowType[] PAY_TYPES = new CashFlowType[]{AMORTIZATION, REDEMPTION, COUPON, DIVIDEND};
+    private static final CashFlowType[] PAY_TYPES = new CashFlowType[]{AMORTIZATION, REDEMPTION, COUPON, DIVIDEND, TAX};
     private final EventCashFlowRepository eventCashFlowRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
@@ -84,6 +85,9 @@ public class ForeignPortfolioPaymentExcelTableFactory implements TableFactory {
             Month month = null;
             int sumRowCount = 0;
             for (EventCashFlow cash : cashFlows) {
+                if (cash.getEventType() == TAX && isNotDividendOrCouponTax(cash.getDescription())) {
+                    continue;
+                }
                 Instant timestamp = cash.getTimestamp();
                 Month currentMonth = LocalDate.ofInstant(timestamp, ZoneId.systemDefault()).getMonth();
                 if (month == null) {
