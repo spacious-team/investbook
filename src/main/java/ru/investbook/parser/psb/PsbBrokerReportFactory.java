@@ -33,7 +33,7 @@ public class PsbBrokerReportFactory extends AbstractBrokerReportFactory {
 
     @Getter
     private final String brokerName = "Промсвязьбанк";
-    private final Pattern expectedFileNamePattern = Pattern.compile("^[0-9()\\-]+\\.xls(x)?$");
+    private final Pattern expectedFileNamePattern = Pattern.compile("^[0-9]+\\([^()]+\\)[0-9\\-]+\\.xls(x)?$");
 
     @Override
     public BrokerReport create(String excelFileName, InputStream is) {

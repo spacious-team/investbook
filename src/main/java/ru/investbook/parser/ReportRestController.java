@@ -91,6 +91,7 @@ public class ReportRestController {
                                 return sw.toString().replace("\n", "</br>");
                             }).collect(Collectors.joining("</br></br> - ",
                                     "<b>Ошибка загрузки отчетов</b> <a href=\"/\">[назад]</a><br/>" +
+                                            (StringUtils.isEmpty(broker) ? "Попробуйте повторить загрузку, указав Брокера<br/>" : "") +
                                             "<span style=\"font-size: smaller; color: gray;\">Вы можете " +
                                             "<a href=\"https://github.com/spacious-team/investbook/issues\">сообщить</a> об ошибке " +
                                             "разработчикам</span></br></br> - ",
