@@ -57,26 +57,28 @@ public class TaxExcelTableFactory implements TableFactory {
                 .map(eventCashFlowConverter::fromEntity)
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        for (EventCashFlow cash : cashFlows) {
-            if (isNotDividendOrCouponTax(cash.getDescription())) {
-                Table.Record record = new Table.Record();
-                record.put(DATE, cash.getTimestamp());
-                record.put(TAX, Optional.ofNullable(cash.getValue())
-                        .map(BigDecimal::negate)
-                        .orElse(BigDecimal.ZERO));
-                record.put(CURRENCY, cash.getCurrency());
-                record.put(TAX_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash.getCurrency(),
-                        TAX, EXCHANGE_RATE));
-                record.put(DESCRIPTION, cash.getDescription());
-                table.add(record);
-            }
-        }
+        cashFlows.stream()
+                .filter(cash -> isNotDividendOrCouponTax(cash.getDescription()))
+                .forEach(cash -> addRecordToTable(table, cash));
 
         if (!cashFlows.isEmpty()) {
             foreignExchangeRateTableFactory.appendExchangeRates(table, CURRENCY_NAME, EXCHANGE_RATE);
         }
 
         return table;
+    }
+
+    private void addRecordToTable(Table table, EventCashFlow cash) {
+        Table.Record record = new Table.Record();
+        record.put(DATE, cash.getTimestamp());
+        record.put(TAX, Optional.ofNullable(cash.getValue())
+                .map(BigDecimal::negate)
+                .orElse(BigDecimal.ZERO));
+        record.put(CURRENCY, cash.getCurrency());
+        record.put(TAX_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash.getCurrency(),
+                TAX, EXCHANGE_RATE));
+        record.put(DESCRIPTION, cash.getDescription());
+        table.add(record);
     }
 
     static boolean isNotDividendOrCouponTax(String description) {
