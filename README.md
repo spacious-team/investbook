@@ -41,9 +41,9 @@
   <img src="https://user-images.githubusercontent.com/11336712/87883425-f3185600-ca0f-11ea-9677-4689aa6a4ee5.png" width="40%"/>
 - [доходность](src/main/asciidoc/cash-flow.adoc) портфеля, пополнения, списания, переводы с/на другие счета;  
   ![cash-in](https://user-images.githubusercontent.com/11336712/90821058-fb2f2280-e33a-11ea-858d-8941a1eebd30.png)
-- [налоговая](src/main/asciidoc/tax.adoc) нагрузка.  
-  <img src="https://user-images.githubusercontent.com/11336712/90821578-ccfe1280-e33b-11ea-9e53-5362968d1dcf.png" width="55%"/>
-- [комиссия](src/main/asciidoc/commission.adoc) брокера  
+- [налоговая](src/main/asciidoc/tax.adoc) нагрузка;  
+  ![tax](https://user-images.githubusercontent.com/11336712/96353102-b83ac280-10d1-11eb-9024-b0de4f4b153e.png)
+- [комиссия](src/main/asciidoc/commission.adoc) брокера.  
   <img src="https://user-images.githubusercontent.com/11336712/92284436-a1b61e80-ef0a-11ea-9eed-9a948089bcff.png" width="65%"/>
 
 ### Установка

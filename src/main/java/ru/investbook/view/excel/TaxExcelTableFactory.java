@@ -42,6 +42,7 @@ import static ru.investbook.view.excel.TaxExcelTableHeader.*;
 public class TaxExcelTableFactory implements TableFactory {
     private final EventCashFlowRepository eventCashFlowRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
+    private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
 
     @Override
     public Table create(Portfolio portfolio) {
@@ -63,9 +64,16 @@ public class TaxExcelTableFactory implements TableFactory {
                     .map(BigDecimal::negate)
                     .orElse(BigDecimal.ZERO));
             record.put(CURRENCY, cash.getCurrency());
+            record.put(TAX_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash.getCurrency(),
+                    TAX, EXCHANGE_RATE));
             record.put(DESCRIPTION, cash.getDescription());
             table.add(record);
         }
+
+        if (!cashFlows.isEmpty()) {
+            foreignExchangeRateTableFactory.appendExchangeRates(table, CURRENCY_NAME, EXCHANGE_RATE);
+        }
+
         return table;
     }
 }
