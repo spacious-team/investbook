@@ -30,10 +30,14 @@ import ru.investbook.pojo.EventCashFlow;
 import ru.investbook.pojo.Security;
 import ru.investbook.pojo.SecurityEventCashFlow;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.lang.Double.parseDouble;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 import static ru.investbook.parser.uralsib.UralsibBrokerReport.convertToCurrency;
 
@@ -41,10 +45,12 @@ import static ru.investbook.parser.uralsib.UralsibBrokerReport.convertToCurrency
 abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> {
 
     static final String TABLE_NAME = "ДВИЖЕНИЕ ДЕНЕЖНЫХ СРЕДСТВ ЗА ОТЧЕТНЫЙ ПЕРИОД";
+    protected static final BigDecimal minValue = BigDecimal.valueOf(0.01);
     // human readable name -> incoming count
     private final List<ReportSecurityInformation> securitiesIncomingCount;
     private final List<SecurityTransaction> securityTransactions;
     private final Collection<EventCashFlow> eventCashFlows = new ArrayList<>();
+    private final Pattern taxInformationPattern = Pattern.compile("налог в размере ([0-9.]+) удержан");
     private String currentRowDescription = "";
 
     public PaymentsTable(UralsibBrokerReport report,
@@ -73,16 +79,28 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
         try {
             return getSecurityIfCan(table, row);
         } catch (Exception e) {
-            EventCashFlow cash = EventCashFlow.builder()
+            EventCashFlow.EventCashFlowBuilder builder = EventCashFlow.builder()
                     .portfolio(getReport().getPortfolio())
                     .timestamp(getReport().convertToInstant(table.getStringCellValue(row, DATE)))
-                    .eventType(cashEventIfSecurityNotFound)
-                    .value(table.getCurrencyCellValue(row, VALUE))
                     .currency(convertToCurrency(table.getStringCellValue(row, CURRENCY)))
-                    .description(table.getStringCellValue(row, DESCRIPTION))
+                    .description(table.getStringCellValue(row, DESCRIPTION));
+            BigDecimal tax = getTax(table, row);
+            BigDecimal value = table.getCurrencyCellValue(row, VALUE)
+                    .add(tax.abs());
+            EventCashFlow cash = builder
+                    .eventType(cashEventIfSecurityNotFound)
+                    .value(value)
                     .build();
             AbstractTable.addWithEqualityChecker(cash, eventCashFlows,
                     EventCashFlow::checkEquality, EventCashFlow::mergeDuplicates);
+            if (tax.abs().compareTo(minValue) >= 0) {
+                EventCashFlow taxEventCash = builder
+                        .eventType(CashFlowType.TAX)
+                        .value(tax.negate())
+                        .build();
+                AbstractTable.addWithEqualityChecker(taxEventCash, eventCashFlows,
+                        EventCashFlow::checkEquality, EventCashFlow::mergeDuplicates);
+            }
             log.debug("Получена выплата по ценной бумаге, которой нет в портфеле: " + cash);
             return null;
         }
@@ -105,6 +123,19 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
 
     private boolean contains(String description, String securityParameter) {
         return securityParameter != null && description.contains(securityParameter.toLowerCase());
+    }
+
+    protected BigDecimal getTax(Table table, TableRow row) {
+        String description = table.getStringCellValue(row, DESCRIPTION);
+        Matcher matcher = taxInformationPattern.matcher(description.toLowerCase());
+        if (matcher.find()) {
+            try {
+                return BigDecimal.valueOf(parseDouble(matcher.group(1)));
+            } catch (Exception e) {
+                log.info("Не смогу выделить сумму налога из описания: {}", description);
+            }
+        }
+        return BigDecimal.ZERO;
     }
 
     protected Integer getSecurityCount(Security security, Instant atInstant) {

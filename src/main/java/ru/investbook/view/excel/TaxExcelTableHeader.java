@@ -27,7 +27,10 @@ public enum TaxExcelTableHeader implements ExcelTableHeader {
     DATE("Дата"),
     TAX("Налог"),
     CURRENCY("Валюта"),
-    DESCRIPTION("Описание");
+    TAX_RUB("Налог, руб"),
+    DESCRIPTION("Описание"),
+    CURRENCY_NAME("Валюта"),
+    EXCHANGE_RATE("Курс, руб");
 
     private final String description;
 }

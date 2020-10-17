@@ -35,7 +35,7 @@ import static ru.investbook.parser.vtb.VtbCashFlowTable.VtbCashFlowTableHeader.*
 
 public class VtbCashFlowTable extends AbstractReportTable<EventCashFlow> {
 
-    private static final String TABLE_NAME = "Движение денежных средств";
+    static final String TABLE_NAME = "Движение денежных средств";
 
     public VtbCashFlowTable(BrokerReport report) {
         super(report, TABLE_NAME, null, VtbCashFlowTableHeader.class);

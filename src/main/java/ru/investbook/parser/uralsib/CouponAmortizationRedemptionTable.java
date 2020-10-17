@@ -75,20 +75,25 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
             }
         }
 
+        BigDecimal tax = getTax(table, row);
+        BigDecimal value = table.getCurrencyCellValue(row, VALUE)
+                .add(tax.abs());
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .isin(security.getIsin())
                 .portfolio(getReport().getPortfolio())
                 .count(getSecurityCount(security, timestamp))
                 .eventType(event)
                 .timestamp(timestamp)
-                .value(table.getCurrencyCellValue(row, VALUE))
+                .value(value)
                 .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)));
         Collection<SecurityEventCashFlow> data = new ArrayList<>();
         data.add(builder.build());
 
-        BigDecimal tax = getTax(table, row);
         if (tax.abs().compareTo(minValue) >= 0) {
-            data.add(builder.eventType(CashFlowType.TAX).value(tax).build());
+            data.add(builder
+                    .eventType(CashFlowType.TAX)
+                    .value(tax.negate())
+                    .build());
         }
         return data;
     }
@@ -103,7 +108,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
         return (redemptionDate != null) && redemptionDate.equals(LocalDate.ofInstant(amortizationDay, getReport().getReportZoneId()));
     }
 
-    private BigDecimal getTax(Table table, TableRow row) {
+    protected BigDecimal getTax(Table table, TableRow row) {
         // информация о налоге по купонам облигаций не выводится в отчет брокера
         return BigDecimal.ZERO;
     }
