@@ -31,10 +31,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import static java.lang.Double.parseDouble;
 import static java.util.Collections.emptyList;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
@@ -42,8 +39,6 @@ import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 public class DividendTable extends PaymentsTable {
 
     private static final String DIVIDEND_ACTION = "Доход по финансовым инструментам";
-    private final Pattern taxInformationPattern = Pattern.compile("налог в размере ([0-9\\.]+) удержан");
-    private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
     public DividendTable(UralsibBrokerReport report,
                          SecuritiesTable securitiesTable,
@@ -65,38 +60,27 @@ public class DividendTable extends PaymentsTable {
         if (security == null) return emptyList();
         Instant timestamp = getReport().convertToInstant(table.getStringCellValue(row, DATE));
 
+        BigDecimal tax = getTax(table, row);
+        BigDecimal value = table.getCurrencyCellValue(row, VALUE)
+                .add(tax.abs());
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .isin(security.getIsin())
                 .portfolio(getReport().getPortfolio())
                 .count(getSecurityCount(security, timestamp))
                 .eventType(CashFlowType.DIVIDEND)
                 .timestamp(timestamp)
-                .value(table.getCurrencyCellValue(row, VALUE))
+                .value(value)
                 .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)));
 
         Collection<SecurityEventCashFlow> data = new ArrayList<>();
         data.add(builder.build());
 
-        BigDecimal tax = getTax(table, row).negate();
         if (tax.abs().compareTo(minValue) >= 0) {
             data.add(builder
                     .eventType(CashFlowType.TAX)
-                    .value(tax)
+                    .value(tax.negate())
                     .build());
         }
         return data;
-    }
-
-    private BigDecimal getTax(Table table, TableRow row) {
-        String description = table.getStringCellValue(row, DESCRIPTION);
-        Matcher matcher = taxInformationPattern.matcher(description.toLowerCase());
-        if (matcher.find()) {
-            try {
-                return BigDecimal.valueOf(parseDouble(matcher.group(1)));
-            } catch (Exception e) {
-                log.info("Не смогу выделить сумму налога из описания: {}", description);
-            }
-        }
-        return BigDecimal.ZERO;
     }
 }
