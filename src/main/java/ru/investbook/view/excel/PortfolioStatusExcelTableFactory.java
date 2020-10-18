@@ -437,7 +437,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     }
 
     private static String getProfitProportionFormula() {
-        return "=" + PROFIT.getCellAddr() + "/" + PROFIT.getColumnIndex() + "2";
+        return "=" + PROFIT.getCellAddr() + "/ABS(" + PROFIT.getColumnIndex() + "2)";
     }
 
     private static String getInvestmentProportionFormula() {
