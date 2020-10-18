@@ -80,7 +80,7 @@ public class PsbReportTables implements ReportTables {
 
     @Override
     public ReportTable<SecurityQuote> getSecurityQuoteTable() {
-        return new WrappingReportTable<>(report,
+        return WrappingReportTable.of(
                 new SecurityQuoteTable(report),
                 new DerivativeQuoteTable(report));
     }

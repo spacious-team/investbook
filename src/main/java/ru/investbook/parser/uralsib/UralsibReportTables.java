@@ -48,7 +48,7 @@ public class UralsibReportTables implements ReportTables {
         this.report = report;
         this.portfolioPropertyTable = new PortfolioPropertyTable(report, foreignExchangeRateService);
         this.portfolioSecuritiesTable = new SecuritiesTable(report);
-        this.securityTransactionTable = new WrappingReportTable<>(report,
+        this.securityTransactionTable = WrappingReportTable.of(
                 new SecurityTransactionTable(report, portfolioPropertyTable),
                 new SecurityDepositAndWithdrawalTable(report, portfolioSecuritiesTable));
         this.couponAmortizationRedemptionTable =
@@ -95,7 +95,7 @@ public class UralsibReportTables implements ReportTables {
 
     @Override
     public ReportTable<SecurityQuote> getSecurityQuoteTable() {
-        return new WrappingReportTable<>(report,
+        return WrappingReportTable.of(
                 new SecurityQuoteTable(report),
                 new DerivativeQuoteTable(report));
     }
