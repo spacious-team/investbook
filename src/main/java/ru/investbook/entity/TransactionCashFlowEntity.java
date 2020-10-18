@@ -20,6 +20,7 @@ package ru.investbook.entity;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -27,6 +28,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "transaction_cash_flow")
 @Data
+@EqualsAndHashCode(of = "pk")
 @JsonSerialize(using = TransactionCashFlowEntitySerializer.class)
 public class TransactionCashFlowEntity {
     @EmbeddedId
@@ -50,9 +52,4 @@ public class TransactionCashFlowEntity {
     @Basic
     @Column(name = "currency")
     private String currency = "RUR";
-
-    @Override
-    public int hashCode() {
-        return this.getPk().hashCode();
-    }
 }

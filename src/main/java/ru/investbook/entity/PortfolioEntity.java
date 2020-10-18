@@ -19,6 +19,7 @@
 package ru.investbook.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,13 +29,9 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "portfolio")
 @Data
+@EqualsAndHashCode(of = "id")
 public class PortfolioEntity {
     @Id
     @Column(name = "id")
     private String id;
-
-    @Override
-    public int hashCode() {
-        return id.hashCode();
-    }
 }
