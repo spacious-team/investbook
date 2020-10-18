@@ -40,20 +40,23 @@ public class VtbReportTables implements ReportTables {
 
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
-        return new WrappingReportTable<>(
-                report,
+        return WrappingReportTable.of(
                 new VtbCashFlowTable(report),
                 new VtbDividendTable(report));
     }
     
     @Override
     public ReportTable<Security> getSecuritiesTable() {
-        return new VtbSecuritiesTable(report);
+        return WrappingReportTable.of(
+                new VtbSecuritiesTable(report),
+                new VtbSecurityFlowTable(report));
     }
     
     @Override
     public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
-        return new VtbSecurityTransactionTable(report);
+        return WrappingReportTable.of(
+                new VtbSecurityTransactionTable(report),
+                new VtbSecurityDepositAndWithdrawalTable(report));
     }
 
     @Override

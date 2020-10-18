@@ -19,8 +19,10 @@
 package ru.investbook.parser;
 
 import lombok.Getter;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,6 +37,21 @@ public class WrappingReportTable<RowType> implements ReportTable<RowType> {
         this.data = Collections.unmodifiableList(data);
     }
 
+    @SafeVarargs
+    public static <T> WrappingReportTable<T> of(ReportTable<T>... tables) {
+        Assert.isTrue(tables.length > 0, "Can't wrap, report tables not provided");
+        BrokerReport report = tables[0].getReport();
+        boolean isAllReportsIsSame = Arrays.stream(tables)
+                .map(ReportTable::getReport)
+                .filter(tableReport -> tableReport != report)
+                .findAny()
+                .isEmpty();
+        Assert.isTrue(isAllReportsIsSame, "Wrapping report tables should be built for same broker report");
+        return new WrappingReportTable<>(report, tables);
+
+    }
+
+    @SafeVarargs
     public WrappingReportTable(BrokerReport report, ReportTable<RowType>... tables) {
         List<RowType> data = new ArrayList<>();
         for (ReportTable<RowType> table : tables) {
