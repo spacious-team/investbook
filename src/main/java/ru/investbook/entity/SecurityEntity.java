@@ -20,12 +20,14 @@ package ru.investbook.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "security")
 @Data
+@EqualsAndHashCode(of = "isin")
 public class SecurityEntity {
     @Id
     @Basic
@@ -43,9 +45,4 @@ public class SecurityEntity {
     @JoinColumn(name = "issuer_inn", referencedColumnName = "inn")
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private IssuerEntity issuer;
-
-    @Override
-    public int hashCode() {
-        return getIsin().hashCode();
-    }
 }

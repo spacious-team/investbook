@@ -33,6 +33,7 @@ public abstract class ReportTableAdapter<RowType> implements ReportTable<RowType
     @Getter
     private final List<RowType> data = new ArrayList<>();
 
+    @SafeVarargs
     protected ReportTableAdapter(ReportTable<RowType>... tables) {
         Set<BrokerReport> reports = Arrays.stream(tables).map(ReportTable::getReport).collect(Collectors.toSet());
         if (reports.size() == 1) {

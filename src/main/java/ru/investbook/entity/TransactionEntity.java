@@ -20,6 +20,7 @@ package ru.investbook.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
@@ -31,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Entity
 @Table(name = "transaction")
 @Data
+@EqualsAndHashCode(of = "pk")
 @ToString(exclude = {"transactionCashFlows"})
 public class TransactionEntity {
 
@@ -67,10 +69,5 @@ public class TransactionEntity {
     public void removeTransactionCashFlow(TransactionCashFlowEntity cash) {
         this.transactionCashFlows.remove(cash);
         cash.setTransaction(null);
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getPk().hashCode();
     }
 }
