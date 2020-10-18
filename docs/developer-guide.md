@@ -1,4 +1,4 @@
-`Java 14` `Spring Boot` `Jpackage`
+`Java 15` `Spring Boot` `Jpackage`
 
 ### Клонирование кода и импорт в среду разработки
 Клонируйте репозиторий
