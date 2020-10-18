@@ -17,4 +17,4 @@
  */
 
 ALTER TABLE `portfolio_property`
-    CHANGE COLUMN `value` VARCHAR(1024) NOT NULL;
+    ALTER COLUMN `value` VARCHAR(1024) NOT NULL;
