@@ -20,16 +20,16 @@ package ru.investbook.parser;
 
 import ru.investbook.pojo.*;
 
-public interface ReportTableFactory {
+public interface ReportTables {
     BrokerReport getReport();
-
-    ReportTable<PortfolioCash> createPortfolioCashTable();
 
     ReportTable<PortfolioProperty> getPortfolioPropertyTable();
 
+    ReportTable<PortfolioCash> getCashTable();
+
     ReportTable<EventCashFlow> getCashFlowTable();
 
-    ReportTable<Security> getPortfolioSecuritiesTable();
+    ReportTable<Security> getSecuritiesTable();
 
     ReportTable<SecurityTransaction> getSecurityTransactionTable();
 

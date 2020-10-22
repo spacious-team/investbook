@@ -38,9 +38,9 @@ public class SecurityDepositAndWithdrawalTable extends AbstractReportTable<Secur
     private static final String TABLE_NAME = SecurityRedemptionTable.TABLE_NAME;
     private static final String IN_DESCRIPTION = "ввод цб";
     private static final String OUT_DESCRIPTION = "вывод цб";
-    private final List<PortfolioSecuritiesTable.ReportSecurityInformation> securitiesIncomingCount;
+    private final List<SecuritiesTable.ReportSecurityInformation> securitiesIncomingCount;
 
-    public SecurityDepositAndWithdrawalTable(UralsibBrokerReport report, PortfolioSecuritiesTable securitiesTable) {
+    public SecurityDepositAndWithdrawalTable(UralsibBrokerReport report, SecuritiesTable securitiesTable) {
         super(report, TABLE_NAME, "", SecurityRedemptionTable.SecurityFlowTableHeader.class);
         this.securitiesIncomingCount = securitiesTable.getData();
     }
@@ -69,7 +69,7 @@ public class SecurityDepositAndWithdrawalTable extends AbstractReportTable<Secur
         String cfi = table.getStringCellValue(row, CFI);
         return securitiesIncomingCount.stream()
                 .filter(security -> security.getCfi().equals(cfi))
-                .map(PortfolioSecuritiesTable.ReportSecurityInformation::getSecurity)
+                .map(SecuritiesTable.ReportSecurityInformation::getSecurity)
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Не могу найти ISIN для ЦБ с CFI = " + cfi));
     }

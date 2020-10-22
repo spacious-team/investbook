@@ -113,7 +113,6 @@ public abstract class ExcelTableView {
                                     .replace(ROW_NUM_PLACE_HOLDER, String.valueOf(rowNum + 1));
                             value = string;
                             cell.setCellFormula(string);
-                            cell.setCellType(CellType.FORMULA);
                             cell.setCellStyle(styles.getMoneyStyle());
                         } else {
                             cell.setCellValue(string);

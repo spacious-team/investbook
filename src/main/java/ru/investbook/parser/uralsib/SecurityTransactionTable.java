@@ -28,15 +28,15 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static ru.investbook.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.*;
-import static ru.investbook.parser.uralsib.UralsibBrokerReport.convertToCurrency;
 
 @Slf4j
 public class SecurityTransactionTable extends AbstractReportTable<SecurityTransaction> {
     private static final String TABLE_NAME = "Биржевые сделки с ценными бумагами в отчетном периоде";
-    private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
+    private final BigDecimal minValue = BigDecimal.valueOf(0.01);
     private final PortfolioPropertyTable portfolioPropertyTable;
 
     public SecurityTransactionTable(UralsibBrokerReport report,
@@ -57,11 +57,11 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
             value = value.negate();
             accruedInterest = accruedInterest.negate();
         }
+        String valueCurrency = getCurrency(table, row, VALUE_CURRENCY, value, "RUB");
         BigDecimal marketCommission = table.getCurrencyCellValue(row, MARKET_COMMISSION);
-        String marketCommissionCurrency = convertToCurrency(table.getStringCellValue(row, MARKET_COMMISSION_CURRENCY));
+        String marketCommissionCurrency = getCurrency(table, row, MARKET_COMMISSION_CURRENCY, marketCommission, valueCurrency);
         BigDecimal brokerCommission = table.getCurrencyCellValue(row, BROKER_COMMISSION);
-        String brokerCommissionCurrency = convertToCurrency(table.getStringCellValue(row, BROKER_COMMISSION_CURRENCY));
-        String valueCurrency = convertToCurrency(table.getStringCellValue(row, VALUE_CURRENCY));
+        String brokerCommissionCurrency = getCurrency(table, row, BROKER_COMMISSION_CURRENCY, brokerCommission, valueCurrency);
         Instant timestamp = getReport().convertToInstant(table.getStringCellValue(row, DATE_TIME));
         BigDecimal commission = getConvertedCommission(marketCommission, marketCommissionCurrency, valueCurrency, timestamp)
                 .add(getConvertedCommission(brokerCommission, brokerCommissionCurrency, valueCurrency, timestamp))
@@ -88,6 +88,17 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private String getCurrency(Table table, TableRow row, TableColumnDescription currencyColumn,
+                               BigDecimal commission, String defaultCurrency) {
+        return Optional.ofNullable(
+                table.getStringCellValueOrDefault(row, currencyColumn, null))
+                .or(() -> (commission.abs().compareTo(minValue) < 0) ?
+                        Optional.ofNullable(defaultCurrency) :
+                        Optional.empty())
+                .map(UralsibBrokerReport::convertToCurrency)
+                .orElseThrow(() -> new RuntimeException("No currency provided in column " + currencyColumn));
     }
 
     /**

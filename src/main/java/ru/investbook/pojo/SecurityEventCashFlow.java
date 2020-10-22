@@ -37,29 +37,29 @@ import java.util.Collections;
 @EqualsAndHashCode
 public class SecurityEventCashFlow {
     @Nullable // autoincrement
-    private Integer id;
+    private final Integer id;
 
     @NotNull
-    private String portfolio;
+    private final String portfolio;
 
     @NotNull
-    private Instant timestamp;
+    private final Instant timestamp;
 
     @NotNull
-    private String isin;
+    private final String isin;
 
     @NotNull
-    private Integer count;
+    private final Integer count;
 
     @NotNull
     @JsonProperty("event-type")
-    private CashFlowType eventType;
+    private final CashFlowType eventType;
 
     @NotNull
-    private BigDecimal value;
+    private final BigDecimal value;
 
     @Builder.Default
-    private String currency = "RUR";
+    private final String currency = "RUR";
 
     /**
      * Checks DB unique index constraint

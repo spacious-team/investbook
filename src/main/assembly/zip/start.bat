@@ -1,5 +1,5 @@
 # Задать путь к распакованному архиву с Java
-set JAVA_HOME=C:\Program Files\Java\jdk-14
+#set JAVA_HOME=C:\Program Files\Java\jdk-15
 
 # Запуск приложения
 chcp 65001

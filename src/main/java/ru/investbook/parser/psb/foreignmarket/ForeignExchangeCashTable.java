@@ -35,11 +35,11 @@ import static ru.investbook.parser.psb.PortfolioPropertyTable.SummaryTableHeader
 import static ru.investbook.parser.psb.foreignmarket.ForeignExchangePortfolioPropertyTable.ASSETS;
 
 @Slf4j
-public class ForeignExchangePortfolioCashTable extends InitializableReportTable<PortfolioCash> {
+public class ForeignExchangeCashTable extends InitializableReportTable<PortfolioCash> {
 
     private final PortfolioPropertyTable.SummaryTableHeader[] CURRENCIES = new PortfolioPropertyTable.SummaryTableHeader[]{ RUB, USD, EUR, GBP, CHF };
 
-    public ForeignExchangePortfolioCashTable(BrokerReport report) {
+    public ForeignExchangeCashTable(BrokerReport report) {
         super(report);
     }
 

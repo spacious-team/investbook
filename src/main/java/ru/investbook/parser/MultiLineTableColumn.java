@@ -22,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import ru.investbook.parser.table.TableRow;
 
+import java.util.Arrays;
+
 /**
  * Implements table header kind of
  * <pre>
@@ -41,6 +43,12 @@ public class MultiLineTableColumn implements TableColumn {
      */
     public static MultiLineTableColumn of(TableColumn... rowDescriptors) {
         return new MultiLineTableColumn(rowDescriptors);
+    }
+
+    public static MultiLineTableColumn of(String... rowDescriptors) {
+        return new MultiLineTableColumn(Arrays.stream(rowDescriptors)
+                .map(TableColumnImpl::of)
+                .toArray(TableColumn[]::new));
     }
 
     /**

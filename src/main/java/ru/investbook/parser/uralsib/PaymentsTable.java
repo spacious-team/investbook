@@ -21,38 +21,55 @@ package ru.investbook.parser.uralsib;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import ru.investbook.parser.*;
+import ru.investbook.parser.table.AbstractTable;
 import ru.investbook.parser.table.Table;
 import ru.investbook.parser.table.TableRow;
-import ru.investbook.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInformation;
+import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.EventCashFlow;
 import ru.investbook.pojo.Security;
+import ru.investbook.pojo.SecurityEventCashFlow;
 
+import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.lang.Double.parseDouble;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 import static ru.investbook.parser.uralsib.UralsibBrokerReport.convertToCurrency;
 
 @Slf4j
-abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
+abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> {
 
     static final String TABLE_NAME = "ДВИЖЕНИЕ ДЕНЕЖНЫХ СРЕДСТВ ЗА ОТЧЕТНЫЙ ПЕРИОД";
+    protected static final BigDecimal minValue = BigDecimal.valueOf(0.01);
     // human readable name -> incoming count
     private final List<ReportSecurityInformation> securitiesIncomingCount;
     private final List<SecurityTransaction> securityTransactions;
     private final Collection<EventCashFlow> eventCashFlows = new ArrayList<>();
+    private final Pattern taxInformationPattern = Pattern.compile("налог в размере ([0-9.]+) удержан");
+    private String currentRowDescription = "";
 
     public PaymentsTable(UralsibBrokerReport report,
-                         PortfolioSecuritiesTable securitiesTable,
+                         SecuritiesTable securitiesTable,
                          ReportTable<SecurityTransaction> securityTransactionTable) {
         super(report, TABLE_NAME, "", PaymentsTableHeader.class);
         this.securitiesIncomingCount = securitiesTable.getData();
         this.securityTransactions = securityTransactionTable.getData();
+    }
+
+    @Override
+    protected Collection<SecurityEventCashFlow> parseTable(Table table) {
+        return table.getDataCollection(getReport().getPath(), this::getRowAndSaveDescription,
+                this::checkEquality, this::mergeDuplicates);
+    }
+
+    private Collection<SecurityEventCashFlow> getRowAndSaveDescription(Table table, TableRow row) {
+        currentRowDescription = table.getStringCellValue(row, DESCRIPTION);
+        return getRow(table, row);
     }
 
     /**
@@ -62,16 +79,28 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
         try {
             return getSecurityIfCan(table, row);
         } catch (Exception e) {
-            EventCashFlow cash = EventCashFlow.builder()
+            EventCashFlow.EventCashFlowBuilder builder = EventCashFlow.builder()
                     .portfolio(getReport().getPortfolio())
                     .timestamp(getReport().convertToInstant(table.getStringCellValue(row, DATE)))
-                    .eventType(cashEventIfSecurityNotFound)
-                    .value(table.getCurrencyCellValue(row, VALUE))
                     .currency(convertToCurrency(table.getStringCellValue(row, CURRENCY)))
-                    .description(table.getStringCellValue(row, DESCRIPTION))
+                    .description(table.getStringCellValue(row, DESCRIPTION));
+            BigDecimal tax = getTax(table, row);
+            BigDecimal value = table.getCurrencyCellValue(row, VALUE)
+                    .add(tax.abs());
+            EventCashFlow cash = builder
+                    .eventType(cashEventIfSecurityNotFound)
+                    .value(value)
                     .build();
-            table.addWithEqualityChecker(cash, eventCashFlows,
+            AbstractTable.addWithEqualityChecker(cash, eventCashFlows,
                     EventCashFlow::checkEquality, EventCashFlow::mergeDuplicates);
+            if (tax.abs().compareTo(minValue) >= 0) {
+                EventCashFlow taxEventCash = builder
+                        .eventType(CashFlowType.TAX)
+                        .value(tax.negate())
+                        .build();
+                AbstractTable.addWithEqualityChecker(taxEventCash, eventCashFlows,
+                        EventCashFlow::checkEquality, EventCashFlow::mergeDuplicates);
+            }
             log.debug("Получена выплата по ценной бумаге, которой нет в портфеле: " + cash);
             return null;
         }
@@ -94,6 +123,19 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
 
     private boolean contains(String description, String securityParameter) {
         return securityParameter != null && description.contains(securityParameter.toLowerCase());
+    }
+
+    protected BigDecimal getTax(Table table, TableRow row) {
+        String description = table.getStringCellValue(row, DESCRIPTION);
+        Matcher matcher = taxInformationPattern.matcher(description.toLowerCase());
+        if (matcher.find()) {
+            try {
+                return BigDecimal.valueOf(parseDouble(matcher.group(1)));
+            } catch (Exception e) {
+                log.info("Не смогу выделить сумму налога из описания: {}", description);
+            }
+        }
+        return BigDecimal.ZERO;
     }
 
     protected Integer getSecurityCount(Security security, Instant atInstant) {
@@ -129,6 +171,34 @@ abstract class PaymentsTable<RowType> extends AbstractReportTable<RowType> {
     public Collection<EventCashFlow> getEventCashFlows() {
         initializeIfNeed();
         return eventCashFlows;
+    }
+
+    @Override
+    protected boolean checkEquality(SecurityEventCashFlow cash1, SecurityEventCashFlow cash2) {
+        return SecurityEventCashFlow.checkEquality(cash1, cash2);
+    }
+
+    @Override
+    protected Collection<SecurityEventCashFlow> mergeDuplicates(SecurityEventCashFlow cash1, SecurityEventCashFlow cash2) {
+        // gh-78: обе выплаты должны быть сохранены. Одна вы плата выполнена по текущему портфелю, другая - по связанному ИИС.
+        // К сожалению, сохраняем обе выплаты как по внешнему портфелю, т.к. брокер по выплате не указал количество ЦБ
+        // ни по одной из выплат, поэтому не возможно определить какая из выплат относится к текущему портфелю.
+        AbstractTable.addWithEqualityChecker(cast(cash1), eventCashFlows,
+                EventCashFlow::checkEquality, EventCashFlow::mergeDuplicates);
+        AbstractTable.addWithEqualityChecker(cast(cash2), eventCashFlows,
+                EventCashFlow::checkEquality, EventCashFlow::mergeDuplicates);
+        return Collections.emptyList();
+    }
+
+    private EventCashFlow cast(SecurityEventCashFlow cash) {
+        return EventCashFlow.builder()
+                .portfolio(cash.getPortfolio())
+                .timestamp(cash.getTimestamp())
+                .eventType(cash.getEventType())
+                .value(cash.getValue())
+                .currency(cash.getCurrency())
+                .description(currentRowDescription)
+                .build();
     }
 
     enum PaymentsTableHeader implements TableColumnDescription {

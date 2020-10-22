@@ -56,16 +56,15 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
         BigDecimal value;
         BigDecimal valueInPoints;
         switch (type) {
-            case "опцион":
+            case "опцион" -> {
                 value = table.getCurrencyCellValue(row, OPTION_PRICE).multiply(BigDecimal.valueOf(count));
                 valueInPoints = table.getCurrencyCellValue(row, OPTION_QUOTE).multiply(BigDecimal.valueOf(count));
-                break;
-            case "фьючерс":
+            }
+            case "фьючерс" -> {
                 value = table.getCurrencyCellValue(row, VALUE);
                 valueInPoints = table.getCurrencyCellValue(row, QUOTE).multiply(BigDecimal.valueOf(count));
-                break;
-            default:
-                throw new IllegalArgumentException("Не известный контракт " + type);
+            }
+            default -> throw new IllegalArgumentException("Не известный контракт " + type);
         }
         if (isBuy) {
             value = value.negate();

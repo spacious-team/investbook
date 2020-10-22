@@ -35,18 +35,18 @@ import java.math.BigDecimal;
 public class TransactionCashFlow {
     @NotNull
     @JsonProperty("transaction-id")
-    private Long transactionId;
+    private final Long transactionId;
 
     @NotNull
-    private String portfolio;
+    private final String portfolio;
 
     @NotNull
     @JsonProperty("event-type")
-    private CashFlowType eventType;
+    private final CashFlowType eventType;
 
     @NotNull
-    private BigDecimal value;
+    private final BigDecimal value;
 
     @Builder.Default
-    private String currency = "RUR";
+    private final String currency = "RUR";
 }

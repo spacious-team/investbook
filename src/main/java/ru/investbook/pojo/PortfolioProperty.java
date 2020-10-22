@@ -33,17 +33,17 @@ import java.time.Instant;
 @EqualsAndHashCode
 public class PortfolioProperty {
     @Nullable // autoincrement
-    private Integer id;
+    private final Integer id;
 
     @NotNull
-    private String portfolio;
+    private final String portfolio;
 
     @Nullable
-    private Instant timestamp;
+    private final Instant timestamp;
 
     @NotNull
-    private PortfolioPropertyType property;
+    private final PortfolioPropertyType property;
 
     @NotNull
-    private String value;
+    private final String value;
 }

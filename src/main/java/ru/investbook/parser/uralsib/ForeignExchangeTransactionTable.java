@@ -88,7 +88,7 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
     }
 
     enum FxTransactionTableHeader implements TableColumnDescription {
-        DATE_TIME("дата", "исполнения"),
+        DATE_TIME("дата", "сделки"), // не "дата исполнения", иначе не примутся в расчет сделки выполненные без обналичивания валюты
         TRANSACTION("номер сделки"),
         DIRECTION("вид", "сделки"),
         COUNT("кол-во","шт"),

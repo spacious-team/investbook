@@ -29,23 +29,23 @@ import ru.investbook.pojo.*;
 public class ReportParserService {
     private final ReportTableStorage storage;
 
-    public void parse(ReportTableFactory reportTableFactory) {
+    public void parse(ReportTables reportTables) {
         try {
             boolean isAdded = storage.addPortfolio(Portfolio.builder()
-                    .id(reportTableFactory.getReport().getPortfolio())
+                    .id(reportTables.getReport().getPortfolio())
                     .build());
             if (isAdded) {
-                ReportTable<PortfolioCash> portfolioCashTable = reportTableFactory.createPortfolioCashTable();
-                ReportTable<PortfolioProperty> portfolioPropertyTable = reportTableFactory.getPortfolioPropertyTable();
-                ReportTable<EventCashFlow> cashFlowTable = reportTableFactory.getCashFlowTable();
-                ReportTable<Security> portfolioSecuritiesTable = reportTableFactory.getPortfolioSecuritiesTable();
-                ReportTable<SecurityTransaction> securityTransactionTable = reportTableFactory.getSecurityTransactionTable();
-                ReportTable<SecurityEventCashFlow> couponAndAmortizationTable = reportTableFactory.getCouponAmortizationRedemptionTable();
-                ReportTable<SecurityEventCashFlow> dividendTable = reportTableFactory.getDividendTable();
-                ReportTable<DerivativeTransaction> derivativeTransactionTable = reportTableFactory.getDerivativeTransactionTable();
-                ReportTable<SecurityEventCashFlow> derivativeCashFlowTable = reportTableFactory.getDerivativeCashFlowTable();
-                ReportTable<ForeignExchangeTransaction> fxTransactionTable = reportTableFactory.getForeignExchangeTransactionTable();
-                ReportTable<SecurityQuote> securityQuoteTable = reportTableFactory.getSecurityQuoteTable();
+                ReportTable<PortfolioCash> portfolioCashTable = reportTables.getCashTable();
+                ReportTable<PortfolioProperty> portfolioPropertyTable = reportTables.getPortfolioPropertyTable();
+                ReportTable<EventCashFlow> cashFlowTable = reportTables.getCashFlowTable();
+                ReportTable<Security> portfolioSecuritiesTable = reportTables.getSecuritiesTable();
+                ReportTable<SecurityTransaction> securityTransactionTable = reportTables.getSecurityTransactionTable();
+                ReportTable<SecurityEventCashFlow> couponAndAmortizationTable = reportTables.getCouponAmortizationRedemptionTable();
+                ReportTable<SecurityEventCashFlow> dividendTable = reportTables.getDividendTable();
+                ReportTable<DerivativeTransaction> derivativeTransactionTable = reportTables.getDerivativeTransactionTable();
+                ReportTable<SecurityEventCashFlow> derivativeCashFlowTable = reportTables.getDerivativeCashFlowTable();
+                ReportTable<ForeignExchangeTransaction> fxTransactionTable = reportTables.getForeignExchangeTransactionTable();
+                ReportTable<SecurityQuote> securityQuoteTable = reportTables.getSecurityQuoteTable();
 
                 portfolioPropertyTable.getData().forEach(storage::addPortfolioProperty);
                 storage.addCashInfo(portfolioCashTable);
@@ -72,7 +72,7 @@ public class ReportParserService {
                 securityQuoteTable.getData().forEach(storage::addSecurityQuote);
             }
         } catch (Exception e) {
-            log.warn("Не могу распарсить отчет {}", reportTableFactory.getReport().getPath(), e);
+            log.warn("Не могу распарсить отчет {}", reportTables.getReport().getPath(), e);
             throw new RuntimeException(e);
         }
     }

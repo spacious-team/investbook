@@ -1,34 +1,84 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <title>Финансовая книга инвестора</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <style>
         .grey-smaller     { font-size: smaller; color: gray; }
         .grey-small-input { font-size: small;   color: gray; border: 0; }
+        .active-text      { text-decoration: none; color: gray; }
+        .inactive-text    { text-decoration: line-through; color: #D0D0D0; }
     </style>
 </head>
 <body>
 <ol>
-    <li><a href="reports.html">Загрузить отчеты брокера</a></li>
+    <li><a href="/reports">Загрузить отчеты брокера</a></li>
     <li>
-        <a href="#" onclick="document.getElementById('get-portfolio').submit(); return false;">Скачать анализ загруженных отчетов</a>
+        <a onclick="document.getElementById('get-portfolio').submit(); return false;" href="#">Скачать анализ загруженных отчетов</a>
         <a href="/user-guide/index.html" style="color: gray">[описание формата]</a>
         <form action="/portfolio" method="POST" id="get-portfolio" class="grey-smaller">
-            <label>за период с <input id="from-date" name="from-date" type="date" class="grey-small-input"/></label>
-            <label>по <input id="to-date" name="to-date" type="date" class="grey-small-input"/></label>
+            <a onclick="selectPeriodView()" id="perion-link" class="inactive-text" href="#" title="выбрать период">за период</a>
+            <span class="inactive-text" style="text-decoration: none">/</span>
+            <a onclick="selectTillDateView()" id="till-link" class="active-text" href="#" title="выбрать дату">на дату</a>
+            <label id="from-date-label" for="from-date" style="display: none">&emsp; с</label>
+            <input id="from-date" name="from-date" type="date" class="grey-small-input" style="display: none"/>
+            <label id="to-date-label" for="to-date"></label>
+            <input id="to-date" name="to-date" type="date" class="grey-small-input"/>
         </form>
     </li>
 </ol>
 <p class="grey-smaller">
     Ваша версия приложения <span th:text="${buildProperties.version}">не актуальна</span>.
     Проверить обновление можно на
-    <a href="https://github.com/spacious-team/investbook/releases/latest" class="grey-smaller">github</a>
-    странице проекта. Если вы закончили работу, приложение можно <a href="/shutdown">завершить</a>.
+    <a href="https://github.com/spacious-team/investbook/releases/latest" style="color: gray">github</a>
+    странице проекта. Telegram-канал техподдержки <a href="https://t.me/investbook_support" style="color: gray">@investbook_support</a>.
+    Если вы закончили работу, приложение можно <a href="/shutdown" style="color: gray">завершить</a>.
 </p>
-</body>
 <script type="text/javascript">
     document.getElementById('from-date').value = '1997-09-22';
-    document.getElementById('to-date').value = '2030-08-30';
+    document.getElementById('to-date').value = new Date().toISOString().substr(0, 10);
+
+    function selectPeriodView() {
+        document.getElementById('from-date').style.display = 'inline'
+        document.getElementById('from-date-label').style.display = 'inline'
+        document.getElementById('to-date-label').style.display = 'inline'
+        let periodLink = document.getElementById('perion-link');
+        let tillLink = document.getElementById('till-link');
+        periodLink.classList.add('active-text')
+        periodLink.classList.remove('inactive-text')
+        tillLink.classList.add('inactive-text')
+        tillLink.classList.remove('active-text')
+    }
+
+    function selectTillDateView() {
+        document.getElementById('from-date').value = '1997-09-22';
+        document.getElementById('from-date').style.display = 'none'
+        document.getElementById('from-date-label').style.display = 'none'
+        document.getElementById('to-date-label').style.display = 'none'
+        let periodLink = document.getElementById('perion-link');
+        let tillLink = document.getElementById('till-link');
+        periodLink.classList.add('inactive-text')
+        periodLink.classList.remove('active-text')
+        tillLink.classList.add('active-text')
+        tillLink.classList.remove('inactive-text')
+    }
 </script>
+</body>
 </html>

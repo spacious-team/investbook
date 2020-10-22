@@ -20,6 +20,7 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import ru.investbook.parser.AbstractReportTable;
 import ru.investbook.parser.TableColumn;
 import ru.investbook.parser.TableColumnDescription;
@@ -68,7 +69,7 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
         if (type == CashFlowType.CASH && !table.getStringCellValue(row, DESCRIPTION).isEmpty()) {
             return emptyList(); // cash in/out records has no description
         }
-        String description = table.getStringCellValue(row, DESCRIPTION);
+        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, null);
         return singletonList(EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(type)
@@ -76,7 +77,7 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
                 .value(table.getCurrencyCellValue(row, VALUE)
                         .multiply(BigDecimal.valueOf(isPositive ? 1 : -1)))
                 .currency(table.getStringCellValue(row, CURRENCY))
-                .description((description == null || description.isEmpty())? null : description)
+                .description(StringUtils.isEmpty(description) ? null : description)
                 .build());
     }
 

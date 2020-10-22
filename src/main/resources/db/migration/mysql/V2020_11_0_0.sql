@@ -1,5 +1,5 @@
 /*
- * InvestBook
+ * Portfolio
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,8 +16,5 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser;
-
-public enum BrokerType {
-    PSB, URALSIB
-}
+ALTER TABLE `portfolio_property`
+    CHANGE COLUMN `value` `value` VARCHAR(1024) NOT NULL AFTER `property`;

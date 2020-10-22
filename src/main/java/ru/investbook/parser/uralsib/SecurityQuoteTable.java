@@ -28,15 +28,15 @@ import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Collections;
 
-import static ru.investbook.parser.uralsib.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.*;
+import static ru.investbook.parser.uralsib.SecuritiesTable.SecuritiesTableHeader.*;
 
 public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
 
     private final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
     protected SecurityQuoteTable(UralsibBrokerReport report) {
-        super(report, PortfolioSecuritiesTable.TABLE_NAME, PortfolioSecuritiesTable.TABLE_END_TEXT,
-                PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.class);
+        super(report, SecuritiesTable.TABLE_NAME, SecuritiesTable.TABLE_END_TEXT,
+                SecuritiesTable.SecuritiesTableHeader.class);
     }
 
     @Override
@@ -45,7 +45,10 @@ public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
         if (amount == null) {
             return Collections.emptyList();
         }
-        int count = table.getIntCellValue(row, COUNT);
+        int count = table.getIntCellValue(row, OUTGOING_COUNT);
+        if (count == 0) {
+            return Collections.emptyList();
+        }
         BigDecimal price = amount.divide(BigDecimal.valueOf(count), 4, RoundingMode.HALF_UP);
         BigDecimal quote = table.getCurrencyCellValue(row, QUOTE);
         if (price.subtract(quote).abs().compareTo(minValue) < 0) {

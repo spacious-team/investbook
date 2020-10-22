@@ -43,6 +43,7 @@ public class TaxExcelTableView extends ExcelTableView {
     protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         sheet.setColumnWidth(TAX.ordinal(), 30 * 256);
+        sheet.setColumnWidth(TAX_RUB.ordinal(), 30 * 256);
         sheet.setColumnWidth(DESCRIPTION.ordinal(), 65 * 256);
     }
 
@@ -50,7 +51,7 @@ public class TaxExcelTableView extends ExcelTableView {
     protected Table.Record getTotalRow(Table table) {
         Table.Record total = Table.newRecord();
         total.put(DATE, "Итого:");
-        total.put(TAX, "=SUM(" + TAX.getRange(3, table.size() + 2) + ")");
+        total.put(TAX_RUB, "=SUM(" + TAX_RUB.getRange(3, table.size() + 2) + ")");
         return total;
     }
 

@@ -20,6 +20,7 @@ package ru.investbook.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -30,6 +31,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "security_event_cash_flow")
 @Data
+@EqualsAndHashCode(of = "id")
 public class SecurityEventCashFlowEntity {
     @Id
     @GenericGenerator(name = "UseExistingOrGenerateIdGenerator", strategy = "ru.investbook.entity.UseExistingOrGenerateIdGenerator")
@@ -67,9 +69,4 @@ public class SecurityEventCashFlowEntity {
     @Basic
     @Column(name = "currency")
     private String currency = "RUR";
-
-    @Override
-    public int hashCode() {
-        return getId().hashCode();
-    }
 }

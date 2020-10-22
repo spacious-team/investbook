@@ -28,6 +28,8 @@ import ru.investbook.parser.table.TableCellRange;
 import ru.investbook.parser.table.TableRow;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Slf4j
 @ToString(callSuper = true)
@@ -46,20 +48,32 @@ public class ExcelTable extends AbstractTable {
         return ExcelTableHelper.getCellValue(getRawCell(row, columnDescription));
     }
 
+    @Override
     public int getIntCellValue(TableRow row, TableColumnDescription columnDescription) {
         return (int) getLongCellValue(row, columnDescription);
     }
 
+    @Override
     public long getLongCellValue(TableRow row, TableColumnDescription columnDescription) {
         return ExcelTableHelper.getLongCellValue(getRawCell(row, columnDescription));
     }
 
+    @Override
     public BigDecimal getCurrencyCellValue(TableRow row, TableColumnDescription columnDescription) {
         return ExcelTableHelper.getCurrencyCellValue(getRawCell(row, columnDescription));
     }
 
+    @Override
     public String getStringCellValue(TableRow row, TableColumnDescription columnDescription) {
         return ExcelTableHelper.getStringCellValue(getRawCell(row, columnDescription));
+    }
+
+    public Date getDateCellValue(TableRow row, TableColumnDescription columnDescription) {
+        return getRawCell(row, columnDescription).getDateCellValue();
+    }
+
+    public LocalDateTime getLocalDateTimeCellValue(TableRow row, TableColumnDescription columnDescription) {
+        return getRawCell(row, columnDescription).getLocalDateTimeCellValue();
     }
 
     private Cell getRawCell(TableRow row, TableColumnDescription columnDescription) {

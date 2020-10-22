@@ -20,7 +20,7 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import ru.investbook.parser.*;
-import ru.investbook.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInformation;
+import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
 import ru.investbook.pojo.EventCashFlow;
 import ru.investbook.pojo.Security;
 import ru.investbook.pojo.SecurityEventCashFlow;
@@ -31,10 +31,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class UralsibReportTableFactory implements ReportTableFactory {
+public class UralsibReportTables implements ReportTables {
     @Getter
     private final UralsibBrokerReport report;
-    private final PortfolioSecuritiesTable portfolioSecuritiesTable;
+    private final SecuritiesTable portfolioSecuritiesTable;
     @Getter
     private final ReportTable<SecurityTransaction> securityTransactionTable;
     @Getter
@@ -44,11 +44,11 @@ public class UralsibReportTableFactory implements ReportTableFactory {
     @Getter
     private final DividendTable dividendTable;
 
-    public UralsibReportTableFactory(UralsibBrokerReport report, ForeignExchangeRateService foreignExchangeRateService) {
+    public UralsibReportTables(UralsibBrokerReport report, ForeignExchangeRateService foreignExchangeRateService) {
         this.report = report;
         this.portfolioPropertyTable = new PortfolioPropertyTable(report, foreignExchangeRateService);
-        this.portfolioSecuritiesTable = new PortfolioSecuritiesTable(report);
-        this.securityTransactionTable = new WrappingReportTable<>(report,
+        this.portfolioSecuritiesTable = new SecuritiesTable(report);
+        this.securityTransactionTable = WrappingReportTable.of(
                 new SecurityTransactionTable(report, portfolioPropertyTable),
                 new SecurityDepositAndWithdrawalTable(report, portfolioSecuritiesTable));
         this.couponAmortizationRedemptionTable =
@@ -57,8 +57,8 @@ public class UralsibReportTableFactory implements ReportTableFactory {
     }
 
     @Override
-    public ReportTable<PortfolioCash> createPortfolioCashTable() {
-        return new PortfolioCashTable(report);
+    public ReportTable<PortfolioCash> getCashTable() {
+        return new CashTable(report);
     }
     
     @Override
@@ -71,7 +71,7 @@ public class UralsibReportTableFactory implements ReportTableFactory {
     }
     
     @Override
-    public ReportTable<Security> getPortfolioSecuritiesTable() {
+    public ReportTable<Security> getSecuritiesTable() {
         return new WrappingReportTable<>(report, portfolioSecuritiesTable.getData()
                 .stream()
                 .map(ReportSecurityInformation::getSecurity)
@@ -95,7 +95,7 @@ public class UralsibReportTableFactory implements ReportTableFactory {
 
     @Override
     public ReportTable<SecurityQuote> getSecurityQuoteTable() {
-        return new WrappingReportTable<>(report,
+        return WrappingReportTable.of(
                 new SecurityQuoteTable(report),
                 new DerivativeQuoteTable(report));
     }

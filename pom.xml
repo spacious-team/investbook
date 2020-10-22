@@ -5,12 +5,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.1.RELEASE</version>
+        <version>2.3.4.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2020.10</version>
+    <version>2020.11</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -25,8 +25,8 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>20.10</win.msi.version>
-        <java.version>14</java.version>
+        <win.msi.version>20.11</win.msi.version>
+        <java.version>15</java.version>
     </properties>
 
     <repositories>

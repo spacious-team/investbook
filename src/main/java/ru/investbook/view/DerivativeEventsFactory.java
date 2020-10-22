@@ -128,7 +128,7 @@ public class DerivativeEventsFactory {
     private LocalDate getContractLastEventDate(Deque<Transaction> transactions,
                                                Map<LocalDate, SecurityEventCashFlow> securityEventCashFlows) {
         LocalDate lastTransactionDate, lastEventDate;
-        lastEventDate = lastTransactionDate = Optional.ofNullable(transactions.peekFirst())
+        lastEventDate = lastTransactionDate = Optional.ofNullable(transactions.peekLast())
                 .map(t -> ZonedDateTime.ofInstant(t.getTimestamp(), MOEX_TIMEZONE).toLocalDate())
                 .orElse(null);
         ArrayList<LocalDate> cashFlows = new ArrayList<>(securityEventCashFlows.keySet());

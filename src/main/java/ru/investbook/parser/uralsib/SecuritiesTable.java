@@ -29,21 +29,21 @@ import ru.investbook.parser.TableColumnDescription;
 import ru.investbook.parser.TableColumnImpl;
 import ru.investbook.parser.table.Table;
 import ru.investbook.parser.table.TableRow;
-import ru.investbook.parser.uralsib.PortfolioSecuritiesTable.ReportSecurityInformation;
+import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
 import ru.investbook.pojo.Security;
 
 import java.util.Collection;
 
 import static java.util.Collections.singletonList;
-import static ru.investbook.parser.uralsib.PortfolioSecuritiesTable.PortfolioSecuritiesTableHeader.*;
+import static ru.investbook.parser.uralsib.SecuritiesTable.SecuritiesTableHeader.*;
 
 @Slf4j
-public class PortfolioSecuritiesTable extends AbstractReportTable<ReportSecurityInformation> {
+public class SecuritiesTable extends AbstractReportTable<ReportSecurityInformation> {
     static final String TABLE_NAME = "СОСТОЯНИЕ ПОРТФЕЛЯ ЦЕННЫХ БУМАГ";
     static final String TABLE_END_TEXT = "Итого:";
 
-    public PortfolioSecuritiesTable(UralsibBrokerReport report) {
-        super(report, TABLE_NAME, TABLE_END_TEXT, PortfolioSecuritiesTableHeader.class);
+    public SecuritiesTable(UralsibBrokerReport report) {
+        super(report, TABLE_NAME, TABLE_END_TEXT, SecuritiesTableHeader.class);
     }
 
     @Override
@@ -59,19 +59,19 @@ public class PortfolioSecuritiesTable extends AbstractReportTable<ReportSecurity
                 .build());
     }
 
-    enum PortfolioSecuritiesTableHeader implements TableColumnDescription {
+    enum SecuritiesTableHeader implements TableColumnDescription {
         NAME("наименование"),
         ISIN("isin"),
         CFI("cfi"),
         INCOMING_COUNT("количество", "на начало периода"),
-        COUNT("плановое количество цб"),
+        OUTGOING_COUNT("количество", "на конец периода"),
         QUOTE("цена закрытия одной цб без учета нкд"),
         AMOUNT("Стоимость позиции по цене закрытия"),
         ACCRUED_INTEREST("^нкд$");
 
         @Getter
         private final TableColumn column;
-        PortfolioSecuritiesTableHeader(String... words) {
+        SecuritiesTableHeader(String... words) {
             this.column = TableColumnImpl.of(words);
         }
     }
