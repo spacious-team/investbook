@@ -58,7 +58,7 @@ public class TaxExcelTableFactory implements TableFactory {
                 .collect(Collectors.toCollection(ArrayList::new));
 
         cashFlows.stream()
-                .filter(cash -> isNotDividendOrCouponTax(cash.getDescription()))
+                .filter(cash -> !isDividendOrCouponTax(cash.getDescription()))
                 .forEach(cash -> addRecordToTable(table, cash));
 
         if (!cashFlows.isEmpty()) {
@@ -81,11 +81,11 @@ public class TaxExcelTableFactory implements TableFactory {
         table.add(record);
     }
 
-    static boolean isNotDividendOrCouponTax(String description) {
+    static boolean isDividendOrCouponTax(String description) {
         if (description == null) {
-            return true;
+            return false;
         }
         String lowercasedDescription = description.toLowerCase();
-        return !lowercasedDescription.contains("дивиденд") && !lowercasedDescription.contains("купон");
+        return lowercasedDescription.contains("дивиденд") || lowercasedDescription.contains("купон");
     }
 }

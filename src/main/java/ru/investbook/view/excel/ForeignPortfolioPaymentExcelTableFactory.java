@@ -44,7 +44,7 @@ import java.util.stream.Stream;
 
 import static ru.investbook.pojo.CashFlowType.*;
 import static ru.investbook.view.excel.ForeignPortfolioPaymentExcelTableHeader.*;
-import static ru.investbook.view.excel.TaxExcelTableFactory.isNotDividendOrCouponTax;
+import static ru.investbook.view.excel.TaxExcelTableFactory.isDividendOrCouponTax;
 
 @Component
 @RequiredArgsConstructor
@@ -78,6 +78,9 @@ public class ForeignPortfolioPaymentExcelTableFactory implements TableFactory {
 
     private Table getTable(List<EventCashFlow> cashFlows) {
         Table table = new Table();
+        cashFlows = cashFlows.stream()
+                .filter(cash -> cash.getEventType() != TAX || isDividendOrCouponTax(cash.getDescription()))
+                .collect(Collectors.toList());
         if (!cashFlows.isEmpty()) {
             table.add(new Table.Record());
             Table.Record monthTotalRecord = new Table.Record();
@@ -85,9 +88,6 @@ public class ForeignPortfolioPaymentExcelTableFactory implements TableFactory {
             Month month = null;
             int sumRowCount = 0;
             for (EventCashFlow cash : cashFlows) {
-                if (cash.getEventType() == TAX && isNotDividendOrCouponTax(cash.getDescription())) {
-                    continue;
-                }
                 Instant timestamp = cash.getTimestamp();
                 Month currentMonth = LocalDate.ofInstant(timestamp, ZoneId.systemDefault()).getMonth();
                 if (month == null) {
