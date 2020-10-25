@@ -2,7 +2,7 @@
 
 #### Оглавление
 1. [Установка и работа на windows](install-on-windows.md)
-1. [Установка и работа на linux](install-on-linux.md)
+1. [Установка и работа на mac и linux](install-on-linux.md)
 1. [Описание отчета, формируемого приложением, о брокерском счете](/src/main/asciidoc/index.adoc)
 1. [Настройка](configuration.md)
 1. [Смена СУБД](dbms-changing.md)
