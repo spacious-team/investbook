@@ -99,7 +99,7 @@ public abstract class AbstractTable implements Table {
      * Extracts objects from excel table without duplicate objects handling (duplicated row are both will be returned)
      */
     public <T> List<T> getDataCollection(Path file, BiFunction<? super Table, TableRow, Collection<T>> rowExtractor) {
-        return getDataCollection(file, rowExtractor, Object::equals, (older, newer) -> Arrays.asList(older, newer));
+        return getDataCollection(file, rowExtractor, Object::equals, Arrays::asList);
     }
 
     /**

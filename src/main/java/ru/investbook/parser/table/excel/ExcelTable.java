@@ -19,7 +19,6 @@
 package ru.investbook.parser.table.excel;
 
 import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import ru.investbook.parser.TableColumnDescription;
 import ru.investbook.parser.table.AbstractTable;
@@ -31,7 +30,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-@Slf4j
 @ToString(callSuper = true)
 public class ExcelTable extends AbstractTable {
 
