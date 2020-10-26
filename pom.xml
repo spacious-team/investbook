@@ -23,6 +23,10 @@
         </license>
     </licenses>
 
+    <scm>
+        <url>https://github.com/spacious-team/investbook</url>
+    </scm>
+
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
         <win.msi.version>20.11</win.msi.version>
