@@ -128,6 +128,11 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.spacious-team</groupId>
+            <artifactId>table-wrapper-api</artifactId>
+            <version>9f97274283</version>
+        </dependency>
     </dependencies>
 
     <build>

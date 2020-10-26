@@ -19,10 +19,10 @@
 package ru.investbook.parser.vtb;
 
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.table_wrapper.api.Table;
+import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.AbstractReportTable;
 import ru.investbook.parser.BrokerReport;
-import ru.investbook.parser.table.Table;
-import ru.investbook.parser.table.TableRow;
 import ru.investbook.parser.table.excel.ExcelTable;
 import ru.investbook.parser.uralsib.UralsibBrokerReport;
 import ru.investbook.parser.vtb.VtbCashFlowTable.VtbCashFlowTableHeader;

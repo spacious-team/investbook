@@ -20,9 +20,9 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import ru.investbook.parser.*;
-import ru.investbook.parser.table.Table;
-import ru.investbook.parser.table.TableRow;
+import org.spacious_team.table_wrapper.api.*;
+import ru.investbook.parser.AbstractReportTable;
+import ru.investbook.parser.DerivativeTransaction;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

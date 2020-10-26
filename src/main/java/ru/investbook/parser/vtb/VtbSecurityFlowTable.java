@@ -20,9 +20,9 @@ package ru.investbook.parser.vtb;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import ru.investbook.parser.*;
-import ru.investbook.parser.table.Table;
-import ru.investbook.parser.table.TableRow;
+import org.spacious_team.table_wrapper.api.*;
+import ru.investbook.parser.AbstractReportTable;
+import ru.investbook.parser.BrokerReport;
 import ru.investbook.pojo.Security;
 
 import java.util.Collection;

@@ -21,7 +21,7 @@ package ru.investbook.parser.table.excel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
-import ru.investbook.parser.table.TableCell;
+import org.spacious_team.table_wrapper.api.TableCell;
 
 @RequiredArgsConstructor
 public class ExcelTableCell implements TableCell {

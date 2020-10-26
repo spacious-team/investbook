@@ -21,12 +21,12 @@ package ru.investbook.parser.table.xml;
 import nl.fountain.xelem.excel.Cell;
 import nl.fountain.xelem.excel.Row;
 import nl.fountain.xelem.excel.Worksheet;
-import ru.investbook.parser.table.TableCellAddress;
+import org.spacious_team.table_wrapper.api.TableCellAddress;
 
 import java.util.Date;
 import java.util.function.BiPredicate;
 
-import static ru.investbook.parser.table.TableCellAddress.NOT_FOUND;
+import static org.spacious_team.table_wrapper.api.TableCellAddress.NOT_FOUND;
 
 class XmlTableHelper {
 

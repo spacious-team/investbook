@@ -21,9 +21,9 @@ package ru.investbook.parser.table.xml;
 import lombok.RequiredArgsConstructor;
 import nl.fountain.xelem.excel.Row;
 import nl.fountain.xelem.excel.Worksheet;
-import ru.investbook.parser.table.ReportPage;
-import ru.investbook.parser.table.TableCellAddress;
-import ru.investbook.parser.table.TableRow;
+import org.spacious_team.table_wrapper.api.ReportPage;
+import org.spacious_team.table_wrapper.api.TableCellAddress;
+import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.util.function.BiPredicate;
 

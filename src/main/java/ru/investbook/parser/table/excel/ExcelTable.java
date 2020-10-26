@@ -20,11 +20,7 @@ package ru.investbook.parser.table.excel;
 
 import lombok.ToString;
 import org.apache.poi.ss.usermodel.Cell;
-import ru.investbook.parser.TableColumnDescription;
-import ru.investbook.parser.table.AbstractTable;
-import ru.investbook.parser.table.ReportPage;
-import ru.investbook.parser.table.TableCellRange;
-import ru.investbook.parser.table.TableRow;
+import org.spacious_team.table_wrapper.api.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

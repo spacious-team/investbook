@@ -23,7 +23,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.util.CloseIgnoringInputStream;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import ru.investbook.parser.table.ReportPage;
+import org.spacious_team.table_wrapper.api.ReportPage;
 
 import java.io.IOException;
 import java.io.InputStream;

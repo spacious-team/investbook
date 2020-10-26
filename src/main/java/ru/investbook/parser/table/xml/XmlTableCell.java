@@ -20,7 +20,7 @@ package ru.investbook.parser.table.xml;
 
 import lombok.RequiredArgsConstructor;
 import nl.fountain.xelem.excel.Cell;
-import ru.investbook.parser.table.TableCell;
+import org.spacious_team.table_wrapper.api.TableCell;
 
 @RequiredArgsConstructor
 public class XmlTableCell implements TableCell {
