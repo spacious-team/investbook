@@ -85,8 +85,8 @@
 
 ### Лицензия
 Приложение является бесплатным (разрешается использовать, распространять, копировать и вносить изменения).
-Текст лицензии доступен на [английском](https://www.gnu.org/licenses/gpl-3.0.html) и
-[русском](http://antirao.ru/gpltrans/gplru.pdf) языках, а также доступно [пояснение](https://www.gnu.org/licenses/quick-guide-gplv3.html)
+Текст лицензии доступен на [английском](https://www.gnu.org/licenses/agpl-3.0.html) и
+[русском](http://antirao.ru/gpltrans/agplru.pdf) языках, а также доступно [пояснение](https://www.gnu.org/licenses/quick-guide-gplv3.html)
 и ответы на [вопросы](https://www.gnu.org/licenses/gpl-faq.ru.html) на русском языке.
 
 Лицензия подразумевает, что приложение передано обществу. Версия приложения на этом сайте всегда будет распространяться
