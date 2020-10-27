@@ -19,9 +19,10 @@
 package ru.investbook.parser.vtb;
 
 import lombok.Getter;
-import ru.investbook.parser.*;
-import ru.investbook.parser.table.Table;
-import ru.investbook.parser.table.TableRow;
+import org.spacious_team.table_wrapper.api.*;
+import ru.investbook.parser.AbstractReportTable;
+import ru.investbook.parser.BrokerReport;
+import ru.investbook.parser.DerivativeTransaction;
 import ru.investbook.parser.table.excel.ExcelTable;
 
 import java.math.BigDecimal;

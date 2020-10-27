@@ -20,9 +20,9 @@ package ru.investbook.parser.psb;
 
 import lombok.EqualsAndHashCode;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.spacious_team.table_wrapper.api.ReportPage;
+import org.spacious_team.table_wrapper.api.TableCellAddress;
 import ru.investbook.parser.AbstractBrokerReport;
-import ru.investbook.parser.table.ReportPage;
-import ru.investbook.parser.table.TableCellAddress;
 import ru.investbook.parser.table.excel.ExcelSheet;
 
 import java.io.IOException;

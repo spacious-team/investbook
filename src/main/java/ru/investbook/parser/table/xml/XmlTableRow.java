@@ -22,12 +22,12 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import nl.fountain.xelem.excel.Cell;
 import nl.fountain.xelem.excel.Row;
-import ru.investbook.parser.table.TableCell;
-import ru.investbook.parser.table.TableRow;
+import org.spacious_team.table_wrapper.api.TableCell;
+import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.util.Iterator;
 
-import static ru.investbook.parser.table.TableCellAddress.NOT_FOUND;
+import static org.spacious_team.table_wrapper.api.TableCellAddress.NOT_FOUND;
 
 @RequiredArgsConstructor
 public class XmlTableRow extends TableRow {

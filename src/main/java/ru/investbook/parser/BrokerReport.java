@@ -18,7 +18,7 @@
 
 package ru.investbook.parser;
 
-import ru.investbook.parser.table.ReportPage;
+import org.spacious_team.table_wrapper.api.ReportPage;
 
 import java.nio.file.Path;
 import java.time.Instant;

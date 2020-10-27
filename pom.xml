@@ -23,6 +23,10 @@
         </license>
     </licenses>
 
+    <scm>
+        <url>https://github.com/spacious-team/investbook</url>
+    </scm>
+
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
         <win.msi.version>20.11</win.msi.version>
@@ -123,6 +127,11 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.spacious-team</groupId>
+            <artifactId>table-wrapper-api</artifactId>
+            <version>2020.12</version>
         </dependency>
     </dependencies>
 

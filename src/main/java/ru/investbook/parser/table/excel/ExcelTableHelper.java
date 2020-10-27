@@ -20,14 +20,14 @@ package ru.investbook.parser.table.excel;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellAddress;
-import ru.investbook.parser.table.TableCellAddress;
+import org.spacious_team.table_wrapper.api.TableCellAddress;
 
 import java.math.BigDecimal;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import static ru.investbook.parser.table.TableCellAddress.NOT_FOUND;
+import static org.spacious_team.table_wrapper.api.TableCellAddress.NOT_FOUND;
 
 class ExcelTableHelper {
 
@@ -42,8 +42,8 @@ class ExcelTableHelper {
      * @return table table cell address or {@link TableCellAddress#NOT_FOUND}
      */
     static TableCellAddress find(Sheet sheet, Object value, int startRow, int endRow,
-                                   int startColumn, int endColumn,
-                                   BiPredicate<String, Object> stringPredicate) {
+                                 int startColumn, int endColumn,
+                                 BiPredicate<String, Object> stringPredicate) {
         if (sheet.getLastRowNum() == -1) {
             return NOT_FOUND;
         } else if (endRow > sheet.getLastRowNum()) {

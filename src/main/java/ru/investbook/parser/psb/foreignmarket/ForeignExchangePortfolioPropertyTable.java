@@ -19,9 +19,13 @@
 package ru.investbook.parser.psb.foreignmarket;
 
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.table_wrapper.api.ReportPage;
+import org.spacious_team.table_wrapper.api.Table;
+import org.spacious_team.table_wrapper.api.TableFactory;
+import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.BrokerReport;
 import ru.investbook.parser.psb.PortfolioPropertyTable;
-import ru.investbook.parser.table.*;
+import ru.investbook.parser.table.TableFactoryRegistry;
 import ru.investbook.pojo.PortfolioProperty;
 import ru.investbook.pojo.PortfolioPropertyType;
 

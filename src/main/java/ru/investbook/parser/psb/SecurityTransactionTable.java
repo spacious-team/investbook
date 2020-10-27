@@ -20,8 +20,10 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import ru.investbook.parser.*;
-import ru.investbook.parser.table.*;
+import org.spacious_team.table_wrapper.api.*;
+import ru.investbook.parser.InitializableReportTable;
+import ru.investbook.parser.SecurityTransaction;
+import ru.investbook.parser.table.TableFactoryRegistry;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

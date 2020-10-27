@@ -18,6 +18,8 @@
 
 package ru.investbook.parser.table;
 
+import org.spacious_team.table_wrapper.api.ReportPage;
+import org.spacious_team.table_wrapper.api.TableFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

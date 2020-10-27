@@ -19,11 +19,7 @@
 package ru.investbook.parser.table.xml;
 
 import nl.fountain.xelem.excel.Cell;
-import ru.investbook.parser.TableColumnDescription;
-import ru.investbook.parser.table.AbstractTable;
-import ru.investbook.parser.table.ReportPage;
-import ru.investbook.parser.table.TableCellRange;
-import ru.investbook.parser.table.TableRow;
+import org.spacious_team.table_wrapper.api.*;
 
 import java.math.BigDecimal;
 import java.util.regex.Pattern;

@@ -18,9 +18,9 @@
 
 package ru.investbook.parser.vtb;
 
+import org.spacious_team.table_wrapper.api.ReportPage;
 import ru.investbook.parser.BrokerReport;
 import ru.investbook.parser.InitializableReportTable;
-import ru.investbook.parser.table.ReportPage;
 import ru.investbook.pojo.PortfolioProperty;
 import ru.investbook.pojo.PortfolioPropertyType;
 

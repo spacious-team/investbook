@@ -23,12 +23,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.table_wrapper.api.*;
 import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.parser.TableColumn;
-import ru.investbook.parser.TableColumnDescription;
-import ru.investbook.parser.TableColumnImpl;
-import ru.investbook.parser.table.Table;
-import ru.investbook.parser.table.TableRow;
 import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
 import ru.investbook.pojo.Security;
 

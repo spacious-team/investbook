@@ -18,12 +18,8 @@
 
 package ru.investbook.parser.table.excel;
 
+import org.spacious_team.table_wrapper.api.*;
 import org.springframework.stereotype.Component;
-import ru.investbook.parser.TableColumnDescription;
-import ru.investbook.parser.table.AbstractTable;
-import ru.investbook.parser.table.ReportPage;
-import ru.investbook.parser.table.Table;
-import ru.investbook.parser.table.TableFactory;
 
 @Component
 public class ExcelTableFactory implements TableFactory {

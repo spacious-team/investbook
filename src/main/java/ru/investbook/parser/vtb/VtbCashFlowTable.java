@@ -19,10 +19,10 @@
 package ru.investbook.parser.vtb;
 
 import lombok.Getter;
+import org.spacious_team.table_wrapper.api.*;
 import org.springframework.util.StringUtils;
-import ru.investbook.parser.*;
-import ru.investbook.parser.table.Table;
-import ru.investbook.parser.table.TableRow;
+import ru.investbook.parser.AbstractReportTable;
+import ru.investbook.parser.BrokerReport;
 import ru.investbook.parser.table.excel.ExcelTable;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.EventCashFlow;

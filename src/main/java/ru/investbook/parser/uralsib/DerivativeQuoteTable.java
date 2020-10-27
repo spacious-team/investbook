@@ -19,12 +19,8 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
+import org.spacious_team.table_wrapper.api.*;
 import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.parser.TableColumn;
-import ru.investbook.parser.TableColumnDescription;
-import ru.investbook.parser.TableColumnImpl;
-import ru.investbook.parser.table.Table;
-import ru.investbook.parser.table.TableRow;
 import ru.investbook.pojo.SecurityQuote;
 
 import java.math.BigDecimal;
