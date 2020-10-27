@@ -88,16 +88,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-            <version>4.1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>4.1.2</version>
-        </dependency>
-        <dependency>
             <groupId>com.github.VEINHORN</groupId>
             <artifactId>xelem-wrapper</artifactId>
             <version>e6fc9c6878</version>
@@ -130,7 +120,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
-            <artifactId>table-wrapper-api</artifactId>
+            <artifactId>table-wrapper-excel-impl</artifactId>
             <version>2020.12</version>
         </dependency>
     </dependencies>

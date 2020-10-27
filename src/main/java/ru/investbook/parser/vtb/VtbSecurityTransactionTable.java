@@ -21,10 +21,10 @@ package ru.investbook.parser.vtb;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.table_wrapper.api.*;
+import org.spacious_team.table_wrapper.excel.ExcelTable;
 import ru.investbook.parser.AbstractReportTable;
 import ru.investbook.parser.BrokerReport;
 import ru.investbook.parser.SecurityTransaction;
-import ru.investbook.parser.table.excel.ExcelTable;
 import ru.investbook.parser.uralsib.UralsibBrokerReport;
 
 import java.math.BigDecimal;

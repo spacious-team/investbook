@@ -16,31 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.table.excel;
+package ru.investbook.parser.table;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.Cell;
-import org.spacious_team.table_wrapper.api.TableCell;
+import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor
-public class ExcelTableCell implements TableCell {
-
-    @Getter
-    private final Cell cell;
-
-    @Override
-    public int getColumnIndex() {
-        return cell.getColumnIndex();
-    }
-
-    @Override
-    public Object getValue() {
-        return ExcelTableHelper.getCellValue(cell);
-    }
-
-    @Override
-    public String getStringCellValue() {
-        return ExcelTableHelper.getStringCellValue(cell);
-    }
+@Component
+public class ExcelTableFactory extends org.spacious_team.table_wrapper.excel.ExcelTableFactory {
 }
