@@ -26,8 +26,8 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.BrokerReport;
 import ru.investbook.parser.InitializableReportTable;
 import ru.investbook.parser.PortfolioCash;
+import ru.investbook.parser.TableFactoryRegistry;
 import ru.investbook.parser.psb.PortfolioPropertyTable;
-import ru.investbook.parser.table.TableFactoryRegistry;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

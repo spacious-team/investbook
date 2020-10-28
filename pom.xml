@@ -88,11 +88,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.github.VEINHORN</groupId>
-            <artifactId>xelem-wrapper</artifactId>
-            <version>e6fc9c6878</version>
-        </dependency>
-        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>7.1.0</version>
@@ -121,6 +116,11 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-excel-impl</artifactId>
+            <version>2020.12</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.spacious-team</groupId>
+            <artifactId>table-wrapper-xml-impl</artifactId>
             <version>2020.12</version>
         </dependency>
     </dependencies>

@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.table_wrapper.api.*;
 import ru.investbook.parser.BrokerReport;
 import ru.investbook.parser.InitializableReportTable;
-import ru.investbook.parser.table.TableFactoryRegistry;
+import ru.investbook.parser.TableFactoryRegistry;
 import ru.investbook.pojo.PortfolioProperty;
 import ru.investbook.pojo.PortfolioPropertyType;
 import ru.investbook.view.ForeignExchangeRateService;

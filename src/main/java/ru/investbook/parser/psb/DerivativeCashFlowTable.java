@@ -23,7 +23,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.table_wrapper.api.*;
 import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.parser.table.TableFactoryRegistry;
+import ru.investbook.parser.TableFactoryRegistry;
 import ru.investbook.pojo.CashFlowType;
 import ru.investbook.pojo.SecurityEventCashFlow;
 

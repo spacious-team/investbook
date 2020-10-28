@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.table;
+package ru.investbook.parser;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class ExcelTableFactory extends org.spacious_team.table_wrapper.excel.ExcelTableFactory {
+public class XmlTableFactory extends org.spacious_team.table_wrapper.xml.XmlTableFactory {
 }

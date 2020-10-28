@@ -20,7 +20,6 @@ package ru.investbook.parser;
 
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.table_wrapper.api.*;
-import ru.investbook.parser.table.TableFactoryRegistry;
 
 import java.time.Instant;
 import java.util.Arrays;
