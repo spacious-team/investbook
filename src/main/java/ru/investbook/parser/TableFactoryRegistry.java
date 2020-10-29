@@ -19,9 +19,11 @@
 package ru.investbook.parser;
 
 import lombok.extern.slf4j.Slf4j;
-import org.reflections.Reflections;
 import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.api.TableFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Constructor;
@@ -31,20 +33,20 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static java.lang.System.nanoTime;
+
 @Component
 @Slf4j
 public class TableFactoryRegistry {
 
     private static final Collection<TableFactory> factories = new ArrayList<>();
 
-    public TableFactoryRegistry(Collection<TableFactory> factories) {
+    public TableFactoryRegistry(Collection<TableFactory> tableFactories) {
         log.info("Scanning implementations of {} ", TableFactory.class);
-        long t0 = System.nanoTime();
-        TableFactoryRegistry.factories.addAll(factories);
+        long t0 = nanoTime();
+        factories.addAll(tableFactories);
         findTableFactories();
-        log.info("{} implementations of table factories found in {}: {}",
-                factories.size(),
-                Duration.ofNanos(System.nanoTime() - t0),
+        log.info("{} implementations of table tableFactories found in {}: {}", tableFactories.size(), Duration.ofNanos(nanoTime() - t0),
                 factories.stream()
                         .map(TableFactory::getClass)
                         .collect(Collectors.toList()));
@@ -62,30 +64,24 @@ public class TableFactoryRegistry {
     private void findTableFactories() {
         String tableWrapperApiPackage = TableFactory.class.getPackage().getName();
         String tableWrapperPackage = tableWrapperApiPackage.substring(0, tableWrapperApiPackage.lastIndexOf('.'));
-        Reflections reflections = new Reflections(tableWrapperPackage);
-        reflections.getSubTypesOf(TableFactory.class)
+        ClassPathScanningCandidateComponentProvider scanner =
+                new ClassPathScanningCandidateComponentProvider(false);
+        scanner.addIncludeFilter(new AssignableTypeFilter(TableFactory.class));
+        scanner.findCandidateComponents(tableWrapperPackage)
                 .stream()
-                .map(TableFactoryRegistry::getTableFactoryConstructor)
-                .filter(Objects::nonNull)
-                .map(TableFactoryRegistry::getTableFactoryInstance)
+                .map(BeanDefinition::getBeanClassName)
+                .map(TableFactoryRegistry::getInstance)
                 .filter(Objects::nonNull)
                 .forEach(factories::add);
     }
 
-    private static Constructor<? extends TableFactory> getTableFactoryConstructor(Class<? extends TableFactory> clazz) {
+    private static TableFactory getInstance(String className) {
         try {
-            return clazz.getConstructor();
+            Class<?> clazz = Class.forName(className);
+            Constructor<?> constructor = clazz.getConstructor();
+            return (TableFactory) constructor.newInstance();
         } catch (Exception e) {
-            log.error("Can't find default public constructor for table factory class " + clazz, e);
-            return null;
-        }
-    }
-
-    private static TableFactory getTableFactoryInstance(Constructor<? extends TableFactory> constructor) {
-        try {
-            return constructor.newInstance();
-        } catch (Exception e) {
-            log.trace("Can't create instance of " + constructor, e);
+            log.trace("Can't create instance of " + className, e);
             return null;
         }
     }
