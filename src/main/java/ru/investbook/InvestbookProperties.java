@@ -27,10 +27,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Component
-@ConfigurationProperties("portfolio")
+@ConfigurationProperties("investbook")
 @Getter
 @Setter
-public class PortfolioProperties {
+public class InvestbookProperties {
 
     private Path reportBackupPath = Paths.get(System.getProperty("user.home", ""), "investbook", "report-backups");
 
