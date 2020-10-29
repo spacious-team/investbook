@@ -25,11 +25,13 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.stereotype.Component;
+import ru.investbook.InvestbookProperties;
 
 import java.lang.reflect.Constructor;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -41,12 +43,14 @@ public class TableFactoryRegistry {
 
     private static final Collection<TableFactory> factories = new ArrayList<>();
 
-    public TableFactoryRegistry(Collection<TableFactory> tableFactories) {
-        log.info("Scanning implementations of {} ", TableFactory.class);
+    public TableFactoryRegistry(Collection<TableFactory> tableFactories, InvestbookProperties properties) {
         long t0 = nanoTime();
+        Collection<String> tableFactoryPackages = new HashSet<>();
+        tableFactoryPackages.add(getDefaultTableFactoryPackage());
+        tableFactoryPackages.addAll(properties.getTableParsers());
+        tableFactoryPackages.forEach(TableFactoryRegistry::addTableFactories);
         factories.addAll(tableFactories);
-        findTableFactories();
-        log.info("{} implementations of table tableFactories found in {}: {}", tableFactories.size(), Duration.ofNanos(nanoTime() - t0),
+        log.info("{} implementations of table factory found in {}: {}", factories.size(), Duration.ofNanos(nanoTime() - t0),
                 factories.stream()
                         .map(TableFactory::getClass)
                         .collect(Collectors.toList()));
@@ -61,13 +65,15 @@ public class TableFactoryRegistry {
         throw new IllegalArgumentException("Нет парсера для отчета формата " + reportPage.getClass().getSimpleName());
     }
 
-    private void findTableFactories() {
+    private static String getDefaultTableFactoryPackage() {
         String tableWrapperApiPackage = TableFactory.class.getPackage().getName();
-        String tableWrapperPackage = tableWrapperApiPackage.substring(0, tableWrapperApiPackage.lastIndexOf('.'));
-        ClassPathScanningCandidateComponentProvider scanner =
-                new ClassPathScanningCandidateComponentProvider(false);
+        return tableWrapperApiPackage.substring(0, tableWrapperApiPackage.lastIndexOf('.'));
+    }
+
+    private static void addTableFactories(String basePackage) {
+        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
         scanner.addIncludeFilter(new AssignableTypeFilter(TableFactory.class));
-        scanner.findCandidateComponents(tableWrapperPackage)
+        scanner.findCandidateComponents(basePackage)
                 .stream()
                 .map(BeanDefinition::getBeanClassName)
                 .map(TableFactoryRegistry::getInstance)

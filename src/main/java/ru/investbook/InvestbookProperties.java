@@ -25,6 +25,8 @@ import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Collections;
 
 @Component
 @ConfigurationProperties("investbook")
@@ -35,4 +37,10 @@ public class InvestbookProperties {
     private Path reportBackupPath = Paths.get(System.getProperty("user.home", ""), "investbook", "report-backups");
 
     private boolean openHomePageAfterStart = false;
+
+    /**
+     * Configures extensions packages which provides TableFactory interfaces.
+     * Do not configure {@link org.spacious_team.table_wrapper} package, because it configured by default.
+     */
+    private Collection<String> tableParsers = Collections.emptyList();
 }
