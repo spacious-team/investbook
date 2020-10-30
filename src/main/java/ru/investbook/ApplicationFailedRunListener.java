@@ -31,7 +31,7 @@ public class ApplicationFailedRunListener implements ApplicationListener<Applica
     @Override
     public void onApplicationEvent(ApplicationFailedEvent event) {
         ConfigurableEnvironment environment = event.getApplicationContext().getEnvironment();
-        if (environment.getProperty("portfolio.open-home-page-after-start", Boolean.class, false)) {
+        if (environment.getProperty("investbook.open-home-page-after-start", Boolean.class, false)) {
             log.info("Application run failed. May be application was run a second time, trying to open the application page...");
             int port = environment.getProperty("server.port", Integer.class, 8080);
             BrowserHomePageOpener.open("http://localhost:" + port);

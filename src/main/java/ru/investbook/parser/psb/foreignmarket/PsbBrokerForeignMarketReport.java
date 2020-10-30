@@ -22,10 +22,10 @@ import lombok.EqualsAndHashCode;
 import nl.fountain.xelem.excel.Workbook;
 import nl.fountain.xelem.lex.ExcelReader;
 import org.spacious_team.table_wrapper.api.ReportPage;
+import org.spacious_team.table_wrapper.xml.XmlReportPage;
 import org.xml.sax.InputSource;
 import ru.investbook.parser.AbstractBrokerReport;
 import ru.investbook.parser.psb.PsbBrokerReport;
-import ru.investbook.parser.table.xml.XmlReportPage;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

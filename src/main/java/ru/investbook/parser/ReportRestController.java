@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import ru.investbook.PortfolioProperties;
+import ru.investbook.InvestbookProperties;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ReportRestController {
     private final ReportParserService reportParserService;
-    private final PortfolioProperties portfolioProperties;
+    private final InvestbookProperties investbookProperties;
     private final Collection<BrokerReportFactory> brokerReportFactories;
     private final Collection<ReportTablesFactory> reportTablesFactories;
 
@@ -106,7 +106,7 @@ public class ReportRestController {
         Objects.requireNonNull(brokerName, "Наименование брокера, предоставившего отчет, не определено");
         byte[] bytes = report.getBytes();
         String originalFilename = report.getOriginalFilename();
-        Path backupPath = portfolioProperties.getReportBackupPath().resolve(brokerName);
+        Path backupPath = investbookProperties.getReportBackupPath().resolve(brokerName);
         Files.createDirectories(backupPath);
         Path path = backupPath.resolve((originalFilename != null) ?
                 originalFilename :

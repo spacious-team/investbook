@@ -24,8 +24,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.api.TableCell;
 import org.spacious_team.table_wrapper.api.TableCellAddress;
+import org.spacious_team.table_wrapper.excel.ExcelSheet;
 import ru.investbook.parser.AbstractBrokerReport;
-import ru.investbook.parser.table.excel.ExcelSheet;
 
 import java.io.IOException;
 import java.io.InputStream;

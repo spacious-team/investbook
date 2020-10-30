@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class InvestbookApplication {
 
-    private final PortfolioProperties properties;
+    private final InvestbookProperties properties;
 
     public static void main(String[] args) {
         try {

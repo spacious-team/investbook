@@ -16,30 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.table;
+package ru.investbook;
 
-import org.spacious_team.table_wrapper.api.ReportPage;
-import org.spacious_team.table_wrapper.api.TableFactory;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Collections;
 
 @Component
-public class TableFactoryRegistry {
+@ConfigurationProperties("investbook")
+@Getter
+@Setter
+public class InvestbookProperties {
 
-    private static final Collection<TableFactory> factories = new ArrayList<>();
+    private Path reportBackupPath = Paths.get(System.getProperty("user.home", ""), "investbook", "report-backups");
 
-    public TableFactoryRegistry(Collection<TableFactory> factories) {
-        TableFactoryRegistry.factories.addAll(factories);
-    }
+    private boolean openHomePageAfterStart = false;
 
-    public static TableFactory get(ReportPage reportPage) {
-        for (TableFactory factory : factories) {
-            if (factory.canHandle(reportPage)) {
-                return factory;
-            }
-        }
-        throw new IllegalArgumentException("Нет парсера для отчета формата " + reportPage.getClass().getSimpleName());
-    }
+    /**
+     * Configures extensions packages which provides TableFactory interfaces.
+     * Do not configure {@link org.spacious_team.table_wrapper} package, because it configured by default.
+     */
+    private Collection<String> tableParsers = Collections.emptyList();
 }
