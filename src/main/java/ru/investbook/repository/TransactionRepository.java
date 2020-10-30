@@ -18,13 +18,13 @@
 
 package ru.investbook.repository;
 
+import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Security;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.entity.TransactionEntityPK;
-import ru.investbook.pojo.Portfolio;
-import ru.investbook.pojo.Security;
 
 import java.time.Instant;
 import java.util.ArrayList;

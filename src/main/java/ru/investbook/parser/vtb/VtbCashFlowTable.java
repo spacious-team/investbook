@@ -19,13 +19,13 @@
 package ru.investbook.parser.vtb;
 
 import lombok.Getter;
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.EventCashFlow;
+import org.spacious_team.broker.report_parser.api.AbstractReportTable;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.*;
 import org.spacious_team.table_wrapper.excel.ExcelTable;
 import org.springframework.util.StringUtils;
-import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.parser.BrokerReport;
-import ru.investbook.pojo.CashFlowType;
-import ru.investbook.pojo.EventCashFlow;
 
 import java.util.Collection;
 import java.util.Collections;

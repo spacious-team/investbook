@@ -18,7 +18,7 @@
 
 package ru.investbook.view;
 
-import ru.investbook.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Portfolio;
 
 public interface TableFactory {
 

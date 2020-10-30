@@ -23,7 +23,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.api.TableCellAddress;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
-import ru.investbook.parser.AbstractBrokerReport;
+import ru.investbook.parser.AbstractExcelBrokerReport;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +33,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 @EqualsAndHashCode(callSuper = true)
-public class VtbBrokerReport extends AbstractBrokerReport {
+public class VtbBrokerReport extends AbstractExcelBrokerReport {
     private static final String UNIQ_TEXT = VtbBrokerReport.REPORT_DATE_MARKER;
     private static final String PORTFOLIO_MARKER = "№ субсчета:";
     private static final String REPORT_DATE_MARKER = "Отчет Банка ВТБ";

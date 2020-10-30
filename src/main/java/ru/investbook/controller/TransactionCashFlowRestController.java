@@ -18,13 +18,13 @@
 
 package ru.investbook.controller;
 
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.investbook.converter.TransactionCashFlowConverter;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntityPK;
-import ru.investbook.pojo.CashFlowType;
-import ru.investbook.pojo.TransactionCashFlow;
 import ru.investbook.repository.TransactionCashFlowRepository;
 
 import java.net.URI;

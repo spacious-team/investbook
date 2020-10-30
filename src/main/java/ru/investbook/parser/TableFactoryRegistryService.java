@@ -19,7 +19,7 @@
 package ru.investbook.parser;
 
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.table_wrapper.api.ReportPage;
+import org.spacious_team.broker.report_parser.api.TableFactoryRegistry;
 import org.spacious_team.table_wrapper.api.TableFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -29,7 +29,6 @@ import ru.investbook.InvestbookProperties;
 
 import java.lang.reflect.Constructor;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -39,46 +38,39 @@ import static java.lang.System.nanoTime;
 
 @Component
 @Slf4j
-public class TableFactoryRegistry {
+public class TableFactoryRegistryService {
 
-    private static final Collection<TableFactory> factories = new ArrayList<>();
-
-    public TableFactoryRegistry(Collection<TableFactory> tableFactories, InvestbookProperties properties) {
+    public TableFactoryRegistryService(Collection<TableFactory> tableFactories, InvestbookProperties properties) {
         long t0 = nanoTime();
         Collection<String> tableFactoryPackages = new HashSet<>();
         tableFactoryPackages.add(getDefaultTableFactoryPackage());
         tableFactoryPackages.addAll(properties.getTableParsers());
-        tableFactoryPackages.forEach(TableFactoryRegistry::addTableFactories);
-        factories.addAll(tableFactories);
+        tableFactoryPackages.stream()
+                .map(TableFactoryRegistryService::findTableFactories)
+                .flatMap(Collection::stream)
+                .forEach(TableFactoryRegistry::add);
+        tableFactories.forEach(TableFactoryRegistry::add);
+        Collection<TableFactory> factories = TableFactoryRegistry.getAll();
         log.info("{} implementations of table factory found in {}: {}", factories.size(), Duration.ofNanos(nanoTime() - t0),
                 factories.stream()
                         .map(TableFactory::getClass)
                         .collect(Collectors.toList()));
     }
 
-    public static TableFactory get(ReportPage reportPage) {
-        for (TableFactory factory : factories) {
-            if (factory.canHandle(reportPage)) {
-                return factory;
-            }
-        }
-        throw new IllegalArgumentException("Нет парсера для отчета формата " + reportPage.getClass().getSimpleName());
+    private static Collection<TableFactory> findTableFactories(String basePackage) {
+        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
+        scanner.addIncludeFilter(new AssignableTypeFilter(TableFactory.class));
+        return scanner.findCandidateComponents(basePackage)
+                .stream()
+                .map(BeanDefinition::getBeanClassName)
+                .map(TableFactoryRegistryService::getInstance)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     private static String getDefaultTableFactoryPackage() {
         String tableWrapperApiPackage = TableFactory.class.getPackage().getName();
         return tableWrapperApiPackage.substring(0, tableWrapperApiPackage.lastIndexOf('.'));
-    }
-
-    private static void addTableFactories(String basePackage) {
-        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
-        scanner.addIncludeFilter(new AssignableTypeFilter(TableFactory.class));
-        scanner.findCandidateComponents(basePackage)
-                .stream()
-                .map(BeanDefinition::getBeanClassName)
-                .map(TableFactoryRegistry::getInstance)
-                .filter(Objects::nonNull)
-                .forEach(factories::add);
     }
 
     private static TableFactory getInstance(String className) {
@@ -87,7 +79,6 @@ public class TableFactoryRegistry {
             Constructor<?> constructor = clazz.getConstructor();
             return (TableFactory) constructor.newInstance();
         } catch (Exception e) {
-            log.trace("Can't create instance of " + className, e);
             return null;
         }
     }

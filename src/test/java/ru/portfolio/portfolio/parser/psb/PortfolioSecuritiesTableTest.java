@@ -18,10 +18,10 @@
 
 package ru.investbook.parser.psb;
 
+import org.spacious_team.broker.pojo.Security;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
-import ru.investbook.pojo.Security;
 
 import java.io.IOException;
 import java.util.List;

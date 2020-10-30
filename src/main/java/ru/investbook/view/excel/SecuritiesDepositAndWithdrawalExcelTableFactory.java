@@ -20,10 +20,10 @@ package ru.investbook.view.excel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionEntity;
-import ru.investbook.pojo.Portfolio;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;

@@ -18,13 +18,13 @@
 
 package ru.investbook.controller;
 
+import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.entity.TransactionEntityPK;
-import ru.investbook.pojo.Transaction;
 
 import javax.validation.Valid;
 import java.net.URI;

@@ -19,10 +19,10 @@
 package ru.investbook.view;
 
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.*;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
 import ru.investbook.converter.TransactionConverter;
-import ru.investbook.pojo.*;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
 
@@ -30,7 +30,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static ru.investbook.pojo.SecurityType.getCurrencyPair;
+import static org.spacious_team.broker.pojo.SecurityType.getCurrencyPair;
 
 @Component
 @RequiredArgsConstructor

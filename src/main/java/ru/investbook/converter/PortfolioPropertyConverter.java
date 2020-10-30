@@ -19,11 +19,11 @@
 package ru.investbook.converter;
 
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.PortfolioProperty;
+import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.springframework.stereotype.Component;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.PortfolioPropertyEntity;
-import ru.investbook.pojo.PortfolioProperty;
-import ru.investbook.pojo.PortfolioPropertyType;
 import ru.investbook.repository.PortfolioRepository;
 
 @Component

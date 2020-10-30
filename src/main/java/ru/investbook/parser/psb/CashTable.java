@@ -20,9 +20,9 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.report_parser.api.AbstractReportTable;
+import org.spacious_team.broker.report_parser.api.PortfolioCash;
 import org.spacious_team.table_wrapper.api.*;
-import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.parser.PortfolioCash;
 
 import java.util.Collection;
 

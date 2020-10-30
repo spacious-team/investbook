@@ -19,10 +19,10 @@
 package ru.investbook.converter;
 
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.SecurityQuote;
 import org.springframework.stereotype.Component;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityQuoteEntity;
-import ru.investbook.pojo.SecurityQuote;
 import ru.investbook.repository.SecurityRepository;
 
 @Component

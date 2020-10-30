@@ -18,11 +18,11 @@
 
 package ru.investbook.controller;
 
+import org.spacious_team.broker.pojo.Security;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
-import ru.investbook.pojo.Security;
 import ru.investbook.repository.SecurityRepository;
 
 import javax.validation.Valid;

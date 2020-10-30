@@ -25,7 +25,7 @@ import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.api.TableCell;
 import org.spacious_team.table_wrapper.api.TableCellAddress;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
-import ru.investbook.parser.AbstractBrokerReport;
+import ru.investbook.parser.AbstractExcelBrokerReport;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +38,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 @EqualsAndHashCode(callSuper = true)
-public class UralsibBrokerReport extends AbstractBrokerReport {
+public class UralsibBrokerReport extends AbstractExcelBrokerReport {
     private static final String UNIQ_TEXT = "Брокер: ООО \"УРАЛСИБ Брокер\"";
     private static final String PORTFOLIO_MARKER = "Номер счета Клиента:";
     private static final String REPORT_DATE_MARKER = "за период";

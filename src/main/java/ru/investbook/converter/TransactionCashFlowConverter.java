@@ -19,12 +19,12 @@
 package ru.investbook.converter;
 
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.springframework.stereotype.Component;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntityPK;
 import ru.investbook.entity.TransactionEntityPK;
-import ru.investbook.pojo.CashFlowType;
-import ru.investbook.pojo.TransactionCashFlow;
 import ru.investbook.repository.CashFlowTypeRepository;
 import ru.investbook.repository.TransactionRepository;
 

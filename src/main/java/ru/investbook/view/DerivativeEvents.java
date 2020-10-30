@@ -20,11 +20,11 @@ package ru.investbook.view;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.broker.pojo.Transaction;
+import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.springframework.lang.Nullable;
-import ru.investbook.pojo.CashFlowType;
-import ru.investbook.pojo.SecurityEventCashFlow;
-import ru.investbook.pojo.Transaction;
-import ru.investbook.pojo.TransactionCashFlow;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

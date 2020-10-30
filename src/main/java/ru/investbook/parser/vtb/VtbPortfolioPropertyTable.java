@@ -18,11 +18,11 @@
 
 package ru.investbook.parser.vtb;
 
+import org.spacious_team.broker.pojo.PortfolioProperty;
+import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.spacious_team.broker.report_parser.api.InitializableReportTable;
 import org.spacious_team.table_wrapper.api.ReportPage;
-import ru.investbook.parser.BrokerReport;
-import ru.investbook.parser.InitializableReportTable;
-import ru.investbook.pojo.PortfolioProperty;
-import ru.investbook.pojo.PortfolioPropertyType;
 
 import java.util.ArrayList;
 import java.util.Collection;

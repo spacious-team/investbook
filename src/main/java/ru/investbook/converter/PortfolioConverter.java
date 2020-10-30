@@ -19,9 +19,9 @@
 package ru.investbook.converter;
 
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
 import ru.investbook.entity.PortfolioEntity;
-import ru.investbook.pojo.Portfolio;
 
 @Component
 @RequiredArgsConstructor

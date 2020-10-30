@@ -20,10 +20,10 @@ package ru.investbook.parser.vtb;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.report_parser.api.AbstractReportTable;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.spacious_team.broker.report_parser.api.PortfolioCash;
 import org.spacious_team.table_wrapper.api.*;
-import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.parser.BrokerReport;
-import ru.investbook.parser.PortfolioCash;
 
 import java.util.ArrayList;
 import java.util.Collection;

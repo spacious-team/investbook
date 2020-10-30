@@ -18,46 +18,16 @@
 
 package ru.investbook.parser;
 
-import lombok.*;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.util.CloseIgnoringInputStream;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.spacious_team.table_wrapper.api.ReportPage;
+import org.spacious_team.broker.report_parser.api.AbstractBrokerReport;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 
-@RequiredArgsConstructor
-@EqualsAndHashCode(of = "path")
-public abstract class AbstractBrokerReport implements BrokerReport {
-
-    protected static final int LAST_TRADE_HOUR = 19;
-    @Setter(AccessLevel.PROTECTED)
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    @Setter(AccessLevel.PROTECTED)
-    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-
-    @Getter
-    @Setter(AccessLevel.PROTECTED)
-    private Path path;
-    @Getter
-    @Setter(AccessLevel.PROTECTED)
-    private String portfolio;
-    @Getter
-    @Setter(AccessLevel.PROTECTED)
-    private ReportPage reportPage;
-    @Getter
-    @Setter(AccessLevel.PROTECTED)
-    private Instant reportEndDateTime;
-    @Getter
-    private final ZoneId reportZoneId = ZoneId.of("Europe/Moscow");
+public abstract class AbstractExcelBrokerReport extends AbstractBrokerReport {
 
     protected Workbook getWorkBook(String excelFileName, InputStream is) {
         try {
@@ -72,12 +42,4 @@ public abstract class AbstractBrokerReport implements BrokerReport {
         }
     }
 
-    public Instant convertToInstant(String value) {
-        value = value.trim();
-        if (value.contains(":")) {
-            return LocalDateTime.parse(value, dateTimeFormatter).atZone(getReportZoneId()).toInstant();
-        } else {
-            return LocalDate.parse(value, dateFormatter).atStartOfDay(getReportZoneId()).toInstant();
-        }
-    }
 }

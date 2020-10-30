@@ -19,11 +19,11 @@
 package ru.investbook.converter;
 
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.entity.TransactionEntityPK;
-import ru.investbook.pojo.Transaction;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 

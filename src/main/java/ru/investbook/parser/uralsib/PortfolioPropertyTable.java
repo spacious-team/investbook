@@ -21,12 +21,12 @@ package ru.investbook.parser.uralsib;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.PortfolioProperty;
+import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.spacious_team.broker.report_parser.api.InitializableReportTable;
+import org.spacious_team.broker.report_parser.api.TableFactoryRegistry;
 import org.spacious_team.table_wrapper.api.*;
-import ru.investbook.parser.BrokerReport;
-import ru.investbook.parser.InitializableReportTable;
-import ru.investbook.parser.TableFactoryRegistry;
-import ru.investbook.pojo.PortfolioProperty;
-import ru.investbook.pojo.PortfolioPropertyType;
 import ru.investbook.view.ForeignExchangeRateService;
 
 import java.math.BigDecimal;

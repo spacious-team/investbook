@@ -20,9 +20,9 @@ package ru.investbook.parser.psb.foreignmarket;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.report_parser.api.AbstractReportTable;
+import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.table_wrapper.api.*;
-import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.parser.ForeignExchangeTransaction;
 
 import java.math.BigDecimal;
 import java.time.Instant;

@@ -19,10 +19,10 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.spacious_team.broker.report_parser.api.ReportTables;
+import org.spacious_team.broker.report_parser.api.ReportTablesFactory;
 import org.springframework.stereotype.Component;
-import ru.investbook.parser.BrokerReport;
-import ru.investbook.parser.ReportTables;
-import ru.investbook.parser.ReportTablesFactory;
 import ru.investbook.view.ForeignExchangeRateService;
 
 @Component

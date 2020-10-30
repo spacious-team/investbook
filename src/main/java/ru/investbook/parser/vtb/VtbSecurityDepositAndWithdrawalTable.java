@@ -18,12 +18,12 @@
 
 package ru.investbook.parser.vtb;
 
+import org.spacious_team.broker.report_parser.api.AbstractReportTable;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.spacious_team.table_wrapper.excel.ExcelTable;
-import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.parser.BrokerReport;
-import ru.investbook.parser.SecurityTransaction;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

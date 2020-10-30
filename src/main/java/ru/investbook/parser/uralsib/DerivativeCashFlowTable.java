@@ -19,11 +19,11 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
-import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.pojo.CashFlowType;
-import ru.investbook.pojo.SecurityEventCashFlow;
 
 import java.util.Collection;
 import java.util.regex.Matcher;

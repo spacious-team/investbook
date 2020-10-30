@@ -18,11 +18,11 @@
 
 package ru.investbook.parser.uralsib;
 
+import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.report_parser.api.AbstractReportTable;
+import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
-import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.parser.SecurityTransaction;
-import ru.investbook.pojo.Security;
 
 import java.math.BigDecimal;
 import java.util.Collection;
