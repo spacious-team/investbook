@@ -19,12 +19,12 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
-import ru.investbook.parser.*;
+import org.spacious_team.broker.pojo.EventCashFlow;
+import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.report_parser.api.*;
 import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
-import ru.investbook.pojo.EventCashFlow;
-import ru.investbook.pojo.Security;
-import ru.investbook.pojo.SecurityEventCashFlow;
-import ru.investbook.pojo.SecurityQuote;
 import ru.investbook.view.ForeignExchangeRateService;
 
 import java.util.ArrayList;

@@ -20,9 +20,9 @@ package ru.investbook.view;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import ru.investbook.pojo.CashFlowType;
-import ru.investbook.pojo.SecurityEventCashFlow;
-import ru.investbook.pojo.Transaction;
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.broker.pojo.Transaction;
 
 import java.util.Deque;
 import java.util.LinkedList;

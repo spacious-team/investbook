@@ -21,7 +21,7 @@ package ru.investbook.view;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import ru.investbook.pojo.Transaction;
+import org.spacious_team.broker.pojo.Transaction;
 
 import java.time.Instant;
 

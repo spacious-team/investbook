@@ -18,10 +18,10 @@
 
 package ru.investbook.parser.psb;
 
+import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
-import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.pojo.SecurityQuote;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

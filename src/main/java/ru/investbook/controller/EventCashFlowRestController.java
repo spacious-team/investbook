@@ -18,12 +18,12 @@
 
 package ru.investbook.controller;
 
+import org.spacious_team.broker.pojo.EventCashFlow;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.EventCashFlowEntity;
-import ru.investbook.pojo.EventCashFlow;
 
 import javax.validation.Valid;
 import java.util.List;

@@ -20,8 +20,9 @@ package ru.investbook.parser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.*;
+import org.spacious_team.broker.report_parser.api.*;
 import org.springframework.stereotype.Service;
-import ru.investbook.pojo.*;
 
 @Service
 @Slf4j

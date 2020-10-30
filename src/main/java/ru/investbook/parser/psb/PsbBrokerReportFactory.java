@@ -20,9 +20,9 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.report_parser.api.AbstractBrokerReportFactory;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.springframework.stereotype.Component;
-import ru.investbook.parser.AbstractBrokerReportFactory;
-import ru.investbook.parser.BrokerReport;
 
 import java.io.InputStream;
 import java.util.regex.Pattern;

@@ -19,10 +19,10 @@
 package ru.investbook.view.excel;
 
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
-import ru.investbook.pojo.CashFlowType;
-import ru.investbook.pojo.Portfolio;
-import ru.investbook.pojo.Transaction;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.view.*;

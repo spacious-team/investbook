@@ -18,11 +18,11 @@
 
 package ru.investbook.controller;
 
+import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.entity.PortfolioEntity;
-import ru.investbook.pojo.Portfolio;
 import ru.investbook.repository.PortfolioRepository;
 
 import javax.validation.Valid;

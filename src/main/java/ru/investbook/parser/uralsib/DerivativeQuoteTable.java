@@ -19,9 +19,9 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
+import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.*;
-import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.pojo.SecurityQuote;
 
 import java.math.BigDecimal;
 import java.util.Collection;

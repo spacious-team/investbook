@@ -18,9 +18,9 @@
 
 package ru.investbook.converter;
 
+import org.spacious_team.broker.pojo.Issuer;
 import org.springframework.stereotype.Component;
 import ru.investbook.entity.IssuerEntity;
-import ru.investbook.pojo.Issuer;
 
 @Component
 public class IssuerConverter implements EntityConverter<IssuerEntity, Issuer>  {

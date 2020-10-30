@@ -20,16 +20,16 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.report_parser.api.AbstractReportTable;
+import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.table_wrapper.api.*;
-import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.parser.DerivativeTransaction;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static ru.investbook.parser.DerivativeTransaction.QUOTE_CURRENCY;
+import static org.spacious_team.broker.report_parser.api.DerivativeTransaction.QUOTE_CURRENCY;
 import static ru.investbook.parser.psb.DerivativeExpirationTable.ExpirationTableHeader.*;
 
 @Slf4j

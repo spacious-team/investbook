@@ -20,8 +20,8 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import ru.investbook.parser.*;
-import ru.investbook.pojo.*;
+import org.spacious_team.broker.pojo.*;
+import org.spacious_team.broker.report_parser.api.*;
 
 @RequiredArgsConstructor
 public class PsbReportTables implements ReportTables {

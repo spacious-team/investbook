@@ -18,11 +18,11 @@
 
 package ru.investbook.repository;
 
+import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntityPK;
-import ru.investbook.pojo.CashFlowType;
 
 import java.util.List;
 import java.util.Optional;

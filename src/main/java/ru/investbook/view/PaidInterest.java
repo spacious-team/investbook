@@ -19,9 +19,9 @@
 package ru.investbook.view;
 
 import lombok.Getter;
-import ru.investbook.pojo.CashFlowType;
-import ru.investbook.pojo.SecurityEventCashFlow;
-import ru.investbook.pojo.Transaction;
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.broker.pojo.Transaction;
 
 import java.time.Instant;
 import java.util.*;

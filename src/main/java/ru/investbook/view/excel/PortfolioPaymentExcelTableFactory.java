@@ -20,13 +20,13 @@ package ru.investbook.view.excel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
 import ru.investbook.entity.SecurityEntity;
-import ru.investbook.pojo.CashFlowType;
-import ru.investbook.pojo.Portfolio;
-import ru.investbook.pojo.SecurityEventCashFlow;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.view.Table;
@@ -44,7 +44,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static ru.investbook.pojo.CashFlowType.*;
+import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static ru.investbook.view.excel.PortfolioPaymentExcelTableHeader.*;
 
 @Component

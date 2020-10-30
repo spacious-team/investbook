@@ -20,8 +20,8 @@ package ru.investbook.view;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.springframework.stereotype.Service;
-import ru.investbook.pojo.PortfolioPropertyType;
 import ru.investbook.repository.PortfolioPropertyRepository;
 
 import java.math.BigDecimal;

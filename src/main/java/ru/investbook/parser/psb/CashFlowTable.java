@@ -20,11 +20,11 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.EventCashFlow;
+import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.*;
 import org.springframework.util.StringUtils;
-import ru.investbook.parser.AbstractReportTable;
-import ru.investbook.pojo.CashFlowType;
-import ru.investbook.pojo.EventCashFlow;
 
 import java.math.BigDecimal;
 import java.util.Collection;
