@@ -24,7 +24,7 @@ import nl.fountain.xelem.lex.ExcelReader;
 import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.xml.XmlReportPage;
 import org.xml.sax.InputSource;
-import ru.investbook.parser.AbstractBrokerReport;
+import ru.investbook.parser.AbstractExcelBrokerReport;
 import ru.investbook.parser.psb.PsbBrokerReport;
 
 import java.io.ByteArrayInputStream;
@@ -37,7 +37,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 @EqualsAndHashCode(callSuper = true)
-public class PsbBrokerForeignMarketReport extends AbstractBrokerReport {
+public class PsbBrokerForeignMarketReport extends AbstractExcelBrokerReport {
 
     private static final DateTimeFormatter dateFormatterWithSlash = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final String PORTFOLIO_MARKER = "Договор №:";
