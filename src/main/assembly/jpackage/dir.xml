@@ -42,6 +42,10 @@
             <outputDirectory/>
         </file>
         <file>
+            <source>src/main/assembly/zip/extensions/README.md</source>
+            <outputDirectory>extensions</outputDirectory>
+        </file>
+        <file>
             <source>README.md</source>
             <outputDirectory/>
         </file>

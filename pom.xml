@@ -167,6 +167,11 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <!-- use org.springframework.boot.loader.PropertiesLauncher instead of JarLauncher
+                    (https://docs.spring.io/spring-boot/docs/current/maven-plugin/usage.html).
+                    PropertiesLauncher reads settings from resources/loader.properties
+                    (https://docs.spring.io/spring-boot/docs/current/reference/html/executable-jar.html#executable-jar-property-launcher-features) -->
+                    <layout>ZIP</layout>
                 </configuration>
             </plugin>
             <plugin>
@@ -252,6 +257,9 @@
                             <description>${project.description}</description>
                             <copyright>InvestBook, Copyright (C) 2020 Spacious Team (https://github.com/spacious-team)</copyright>
                             <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
+                            <javaOptions>
+                                <javaOption>-Dloader.path=./app/extensions</javaOption>
+                            </javaOptions>
                             <arguments>
                                 <argument>--spring.config.additional-location=file:./app/</argument>
                             </arguments>
