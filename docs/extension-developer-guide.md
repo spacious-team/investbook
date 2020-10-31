@@ -104,14 +104,14 @@ public class MyReportTablesFactory implements ReportTablesFactory {
     }
 }
 ```
-Расширение готово загружать данные в `Investbook`. Соберите jar-архив вашего расширения
+Расширение готово загружать данные в Investbook. Соберите jar-архив вашего расширения
 ```shell script
 mvn clean install
 ```
 
 #### Тестирование расширения
-Выгрузите исходный код `Investbook` из [репозитория|https://github.com/spacious-team/investbook] и в `pom.xml`
-в секции `dependencies` подключите ваше расширение
+Выгрузите исходный код Investbook из [репозитория](https://github.com/spacious-team/investbook) и в pom.xml
+в секции "dependencies" подключите ваше расширение
 ```
 <dependencies>
     ...
@@ -122,8 +122,8 @@ mvn clean install
     </dependency>
 </dependencies>
 ```
-Запустите `Investbook` и [загрузите](/docs/install-on-windows.md) отчеты нового брокера.
+Запустите Investbook и [загрузите](/docs/install-on-windows.md) отчеты нового брокера.
 
 #### Распространиение расширения
-Вы можете передать jar-архив с вашим расширением другим пользователям приложения `Investbook` платно или бесплатно.
+Вы можете передать jar-архив с вашим расширением другим пользователям приложения Investbook платно или бесплатно.
 Пользователи, получив расширение, сохранят его в необходимой директории и, перезапустив приложение, смогут использовать его.

@@ -109,7 +109,7 @@
 Помочь можно, расширяя или корректируя [документацию](https://github.com/spacious-team/investbook/files/5398264/github.docx),
 [сообщая](https://github.com/spacious-team/investbook/issues/new/choose) о проблемах в работе приложения,
 [предлагая](https://github.com/spacious-team/investbook/issues/new/choose) новую функциональность или дорабатывая код
-приложения `Investbook`.
+приложения Investbook.
 
 Также существует функционал [расширений](/docs/extension-developer-guide.md), который позволяет сторонним разработчикам
 расширить список поддерживаемых "из коробки" [брокеров](#брокеры). Расширения могут быть подключены по желанию пользователей
