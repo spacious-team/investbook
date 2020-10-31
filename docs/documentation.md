@@ -10,5 +10,6 @@
 1. [Как внести свой вклад](CONTRIBUTING.md)
 1. [Кодекс поведения](CODE_OF_CONDUCT.md)
 1. [Документация разработчика](developer-guide.md)
+1. [Разработка расширения для поддержки нового Брокера](extension-developer-guide.md)
 
 
