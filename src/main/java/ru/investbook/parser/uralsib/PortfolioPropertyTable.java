@@ -34,11 +34,11 @@ import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static java.lang.Double.parseDouble;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static ru.investbook.parser.uralsib.PortfolioPropertyTable.SummaryTableHeader.RUB;
 
 @Slf4j
@@ -73,19 +73,24 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
                 table = tableFactory.createOfNoName(reportPage, ASSETS_TABLE, TABLE_SECOND_HEADER_LINE,
                         SummaryTableHeader.class, 2);
             }
+
+            PortfolioProperty.PortfolioPropertyBuilder propertyBuilder = PortfolioProperty.builder()
+                    .portfolio(report.getPortfolio())
+                    .timestamp(report.getReportEndDateTime())
+                    .property(PortfolioPropertyType.TOTAL_ASSETS);
+
             if (table.isEmpty()) {
-                log.info("Таблица '{}' не найдена", ASSETS_TABLE);
-                return emptyList();
+                log.info("Таблица '{}' не найдена, считаю, что активы равны 0", ASSETS_TABLE);
+                return singletonList(propertyBuilder
+                        .value("0")
+                        .build());
             }
             TableRow row = table.findRow(ASSETS);
             if (row == null) {
                 return emptyList();
             }
-            return Collections.singletonList(PortfolioProperty.builder()
-                    .portfolio(report.getPortfolio())
-                    .property(PortfolioPropertyType.TOTAL_ASSETS)
+            return singletonList(propertyBuilder
                     .value(table.getCurrencyCellValue(row, RUB).toString())
-                    .timestamp(report.getReportEndDateTime())
                     .build());
         } catch (Exception e) {
             log.info("Не могу распарсить таблицу '{}' в файле {}", ASSETS_TABLE, report.getPath().getFileName(), e);
