@@ -18,15 +18,19 @@
 
 package ru.investbook.parser.vtb;
 
+import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.InitializableReportTable;
-import org.spacious_team.table_wrapper.api.ReportPage;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singleton;
+
+@Slf4j
 public class VtbPortfolioPropertyTable extends InitializableReportTable<PortfolioProperty> {
 
     private static final String TOTAL_ASSETS = "ОЦЕНКА активов (по курсу ЦБ с учётом незавершенных сделок)";
@@ -39,22 +43,26 @@ public class VtbPortfolioPropertyTable extends InitializableReportTable<Portfoli
     @Override
     protected Collection<PortfolioProperty> parseTable() {
         Collection<PortfolioProperty> data = new ArrayList<>();
-        ReportPage reportPage = getReport().getReportPage();
-        data.add(buildPortfolioProperty(
-                        PortfolioPropertyType.TOTAL_ASSETS,
-                        reportPage.getNextColumnValue(TOTAL_ASSETS).toString()));
-        data.add(buildPortfolioProperty(
-                        PortfolioPropertyType.USDRUB_EXCHANGE_RATE,
-                        reportPage.getNextColumnValue(USD_EXCHANGE_RATE).toString()));
+        data.addAll(buildPortfolioProperty(
+                PortfolioPropertyType.TOTAL_ASSETS,
+                TOTAL_ASSETS));
+        data.addAll(buildPortfolioProperty(
+                PortfolioPropertyType.USDRUB_EXCHANGE_RATE,
+                USD_EXCHANGE_RATE));
         return data;
     }
 
-    private PortfolioProperty buildPortfolioProperty(PortfolioPropertyType property, String value) {
-        return PortfolioProperty.builder()
-                .portfolio(getReport().getPortfolio())
-                .timestamp(getReport().getReportEndDateTime())
-                .property(property)
-                .value(value)
-                .build();
+    private Collection<PortfolioProperty> buildPortfolioProperty(PortfolioPropertyType property, String rowHeader) {
+        try {
+            return singleton(PortfolioProperty.builder()
+                    .portfolio(getReport().getPortfolio())
+                    .timestamp(getReport().getReportEndDateTime())
+                    .property(property)
+                    .value(getReport().getReportPage().getNextColumnValue(rowHeader).toString())
+                    .build());
+        } catch (Exception e) {
+            log.warn("Не удалось распарсить свойство '{}' из {}", rowHeader, getReport().getPath());
+            return emptyList();
+        }
     }
 }
