@@ -47,7 +47,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>20.11</win.msi.version>
+        <win.msi.version>20.12</win.msi.version>
         <java.version>15</java.version>
     </properties>
 
@@ -248,7 +248,7 @@
                         <!-- jpackage requires https://wixtoolset.org/releases/ (only Wix, Toolset not required) -->
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
-                        <version>0.0.4</version>
+                        <version>1.2.1</version>
                         <configuration>
                             <type>MSI</type>
                             <name>Investbook</name>
