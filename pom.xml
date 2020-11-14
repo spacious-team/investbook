@@ -144,7 +144,7 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>2020.12</version>
+            <version>develop-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

@@ -27,14 +27,18 @@ import org.spacious_team.table_wrapper.api.*;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-import static ru.investbook.parser.vtb.VtbSecuritiesTable.VtbSecuritiesTableHeader.NAME_AND_ISIN;
+import static ru.investbook.parser.vtb.VtbSecuritiesTable.VtbSecuritiesTableHeader.NAME_REGNUMBER_ISIN;
 import static ru.investbook.parser.vtb.VtbSecuritiesTable.VtbSecuritiesTableHeader.SECTION;
 
 public class VtbSecuritiesTable extends AbstractReportTable<Security> {
 
     static final String TABLE_NAME = "Отчет об остатках ценных бумаг";
     static final String TABLE_FOOTER = "ИТОГО:";
+    // security registration number -> isin
+    private final Map<String, String> securityRegNumberToIsin = new HashMap<>();
 
     protected VtbSecuritiesTable(BrokerReport report) {
         super(report, TABLE_NAME, TABLE_FOOTER, VtbSecuritiesTableHeader.class);
@@ -45,19 +49,26 @@ public class VtbSecuritiesTable extends AbstractReportTable<Security> {
         if (table.getCellValue(row, SECTION) == null) {
             return Collections.emptyList(); // sub-header row
         }
-        String[] nameAndIsin = table.getStringCellValue(row, NAME_AND_ISIN).split(",");
-        String name = nameAndIsin[0].trim();
-        String isin = nameAndIsin[2].toUpperCase().trim();
+        String[] description = table.getStringCellValue(row, NAME_REGNUMBER_ISIN).split(",");
+        String name = description[0].trim();
+        String registrationNumber = description[1].toUpperCase().trim();
+        String isin = description[2].toUpperCase().trim();
+        securityRegNumberToIsin.put(registrationNumber, isin);
         return Collections.singleton(Security.builder()
                 .isin(isin)
                 .name(name)
                 .build());
     }
 
+    public Map<String, String> getSecurityRegNumberToIsin() {
+        initializeIfNeed();
+        return securityRegNumberToIsin;
+    }
+
     @Getter
     @RequiredArgsConstructor
     enum VtbSecuritiesTableHeader implements TableColumnDescription {
-        NAME_AND_ISIN("наименование", "isin"),
+        NAME_REGNUMBER_ISIN("наименование", "гос. регистрации", "isin"),
         SECTION("площадка"),
         OUTGOING("исходящий остаток"),
         CURRENCY("валюта цены"),

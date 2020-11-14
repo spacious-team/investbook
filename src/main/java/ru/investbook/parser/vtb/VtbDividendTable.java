@@ -26,7 +26,6 @@ import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.spacious_team.table_wrapper.excel.ExcelTable;
-import ru.investbook.parser.uralsib.UralsibBrokerReport;
 import ru.investbook.parser.vtb.VtbCashFlowTable.VtbCashFlowTableHeader;
 
 import java.math.BigDecimal;
@@ -37,13 +36,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Double.parseDouble;
+import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
 import static ru.investbook.parser.vtb.VtbCashFlowTable.VtbCashFlowTableHeader.*;
 
 @Slf4j
 public class VtbDividendTable extends AbstractReportTable<EventCashFlow> {
 
-    private final Pattern taxInformationPattern = Pattern.compile("удержан налог (в размере )?([0-9.]+)([^.]+)");
-    private final BigDecimal minValue = BigDecimal.valueOf(0.01);
+    private static final Pattern taxInformationPattern = Pattern.compile("удержан налог (в размере )?([0-9.]+)([^.]+)");
 
     protected VtbDividendTable(BrokerReport report) {
         super(report, VtbCashFlowTable.TABLE_NAME, null, VtbCashFlowTableHeader.class);
@@ -59,7 +58,7 @@ public class VtbDividendTable extends AbstractReportTable<EventCashFlow> {
         String description = table.getStringCellValue(row, DESCRIPTION);
 
         Collection<EventCashFlow> data = new ArrayList<>();
-        BigDecimal tax = getTax(description);
+        BigDecimal tax = getTax(description.toLowerCase());
         BigDecimal value = table.getCurrencyCellValue(row, VALUE)
                 .add(tax.abs());
         EventCashFlow.EventCashFlowBuilder builder = EventCashFlow.builder()
@@ -67,7 +66,7 @@ public class VtbDividendTable extends AbstractReportTable<EventCashFlow> {
                 .eventType(CashFlowType.DIVIDEND)
                 .timestamp(((ExcelTable) table).getDateCellValue(row, DATE).toInstant())
                 .value(value)
-                .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
+                .currency(VtbBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
                 .description(description);
         data.add(builder.build());
         if (tax.abs().compareTo(minValue) >= 0) {
@@ -79,8 +78,8 @@ public class VtbDividendTable extends AbstractReportTable<EventCashFlow> {
         return data;
     }
 
-    private BigDecimal getTax(String description) {
-        Matcher matcher = taxInformationPattern.matcher(description.toLowerCase());
+    static BigDecimal getTax(String description) {
+        Matcher matcher = taxInformationPattern.matcher(description);
         if (matcher.find()) {
             try {
                 return BigDecimal.valueOf(parseDouble(matcher.group(2)));

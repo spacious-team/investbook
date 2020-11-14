@@ -27,6 +27,7 @@ import ru.investbook.parser.AbstractExcelBrokerReport;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -37,6 +38,7 @@ public class VtbBrokerReport extends AbstractExcelBrokerReport {
     private static final String UNIQ_TEXT = VtbBrokerReport.REPORT_DATE_MARKER;
     private static final String PORTFOLIO_MARKER = "№ субсчета:";
     private static final String REPORT_DATE_MARKER = "Отчет Банка ВТБ";
+    static final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
     private final Workbook book;
 

@@ -19,14 +19,27 @@
 package ru.investbook.parser.vtb;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.*;
 import org.spacious_team.broker.report_parser.api.*;
 
-@RequiredArgsConstructor
 public class VtbReportTables implements ReportTables {
     @Getter
     private final BrokerReport report;
+    @Getter
+    private final ReportTable<Security> securitiesTable;
+    @Getter
+    private final VtbCouponAmortizationRedemptionTable couponAmortizationRedemptionTable;
+
+    public VtbReportTables(BrokerReport report) {
+        this.report = report;
+        VtbSecuritiesTable vtbSecuritiesTable = new VtbSecuritiesTable(report);
+        VtbSecurityFlowTable vtbSecurityFlowTable = new VtbSecurityFlowTable(report);
+        this.securitiesTable = WrappingReportTable.of(vtbSecuritiesTable, vtbSecurityFlowTable);
+        SecurityRegNumberToIsinConverter securityRegNumberToIsinConverter = new SecurityRegNumberToIsinConverterImpl(
+                vtbSecuritiesTable, vtbSecurityFlowTable);
+        this.couponAmortizationRedemptionTable = new VtbCouponAmortizationRedemptionTable(
+                report, securityRegNumberToIsinConverter);
+    }
 
     @Override
     public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
@@ -42,16 +55,10 @@ public class VtbReportTables implements ReportTables {
     public ReportTable<EventCashFlow> getCashFlowTable() {
         return WrappingReportTable.of(
                 new VtbCashFlowTable(report),
-                new VtbDividendTable(report));
+                new VtbDividendTable(report),
+                WrappingReportTable.of(report, couponAmortizationRedemptionTable.getExternalBondPayments()));
     }
-    
-    @Override
-    public ReportTable<Security> getSecuritiesTable() {
-        return WrappingReportTable.of(
-                new VtbSecuritiesTable(report),
-                new VtbSecurityFlowTable(report));
-    }
-    
+
     @Override
     public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
         return WrappingReportTable.of(
@@ -69,11 +76,6 @@ public class VtbReportTables implements ReportTables {
         return new EmptyReportTable<>(report);
     }
 
-    @Override
-    public ReportTable<SecurityEventCashFlow> getCouponAmortizationRedemptionTable() {
-        return new EmptyReportTable<>(report);
-    }
-    
     @Override
     public ReportTable<SecurityEventCashFlow> getDividendTable() {
         return new EmptyReportTable<>(report);

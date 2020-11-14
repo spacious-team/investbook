@@ -50,7 +50,7 @@ public class VtbSecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
                 .orElse(null);
         BigDecimal accruedInterest = table.getCurrencyCellValueOrDefault(row, ACCRUED_INTEREST, null);
         return Collections.singletonList(SecurityQuote.builder()
-                .isin(table.getStringCellValue(row, NAME_AND_ISIN).split(",")[2].trim())
+                .isin(table.getStringCellValue(row, NAME_REGNUMBER_ISIN).split(",")[2].trim())
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .price(price)
