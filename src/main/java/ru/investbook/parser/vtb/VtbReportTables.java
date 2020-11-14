@@ -73,7 +73,7 @@ public class VtbReportTables implements ReportTables {
 
     @Override
     public ReportTable<ForeignExchangeTransaction> getForeignExchangeTransactionTable() {
-        return new EmptyReportTable<>(report);
+        return new VtbForeignExchangeTransactionTable(report);
     }
 
     @Override

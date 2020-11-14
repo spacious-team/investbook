@@ -26,11 +26,9 @@ import org.spacious_team.table_wrapper.api.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 
-import static java.util.Collections.emptyList;
 import static ru.investbook.parser.psb.foreignmarket.ForeignExchangeTransactionTable.FxTransactionTableHeader.*;
 
 @Slf4j
@@ -43,18 +41,10 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
 
     @Override
     protected Collection<ForeignExchangeTransaction> getRow(Table table, TableRow row) {
-        if (!table.getStringCellValue(row, POSITION_SWAP).trim().equalsIgnoreCase("нет")) {
-            return emptyList();
-        }
-        Instant transactionInstant = convertToInstant(table.getStringCellValue(row, DATE_TIME));
-        LocalDate transactionDate = LocalDate.ofInstant(transactionInstant, getReport().getReportZoneId());
-        LocalDate reportDate = LocalDate.ofInstant(getReport().getReportEndDateTime(), getReport().getReportZoneId());
-        if (!reportDate.equals(transactionDate)) {
-            return emptyList();
-        }
+        String dateTime = table.getStringCellValue(row, DATE_TIME); // 08.02.2019 23:37
+        Instant transactionInstant = convertToInstant(dateTime);
         String notUniqTransactionId = table.getStringCellValue(row, TRANSACTION);
-        String orderDateTime = table.getStringCellValue(row, ORDER_DATE_TIME); // 08.02.2019 23:37
-        long transactionId = Long.parseLong(notUniqTransactionId + orderDateTime.replaceAll("[.\\s:]", ""));
+        long transactionId = Long.parseLong(notUniqTransactionId + dateTime.replaceAll("[.\\s:]", ""));
         boolean isBuy = table.getStringCellValue(row, DIRECTION).trim().equalsIgnoreCase("К");
         BigDecimal value = table.getCurrencyCellValue(row, VALUE);
         if (isBuy) {
@@ -77,8 +67,7 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
 
     enum FxTransactionTableHeader implements TableColumnDescription {
         TRANSACTION("номер сделки"),
-        ORDER_DATE_TIME("дата", "заключения сделки"),
-        DATE_TIME("дата", "исполнения"),
+        DATE_TIME("дата", "заключения сделки"), // учет по дате сделки, а не дате исполнения, чтобы учесть неисполненные сделки
         CONTRACT("инструмент"),
         DIRECTION("направление", "сделки"),
         COUNT("объем","в валюте лота"),
