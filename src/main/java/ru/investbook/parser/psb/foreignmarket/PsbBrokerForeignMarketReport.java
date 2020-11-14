@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
@@ -40,6 +41,7 @@ import java.time.temporal.ChronoUnit;
 public class PsbBrokerForeignMarketReport extends AbstractExcelBrokerReport {
 
     private static final DateTimeFormatter dateFormatterWithSlash = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
     private static final String PORTFOLIO_MARKER = "Договор №:";
     private static final String REPORT_DATE_MARKER = "ОТЧЕТ БРОКЕРА";
 
@@ -101,6 +103,8 @@ public class PsbBrokerForeignMarketReport extends AbstractExcelBrokerReport {
         if (value.contains("/")) {
             return LocalDate.parse(value, PsbBrokerForeignMarketReport.dateFormatterWithSlash)
                     .atStartOfDay(getReportZoneId()).toInstant();
+        } else if (value.contains(":") && value.length() == 16) {
+            return LocalDateTime.parse(value, dateTimeFormatter).atZone(getReportZoneId()).toInstant();
         } else {
             return super.convertToInstant(value);
         }
