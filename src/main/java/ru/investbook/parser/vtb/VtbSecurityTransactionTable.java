@@ -56,8 +56,8 @@ public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTra
             value = value.negate();
             accruedInterest = accruedInterest.negate();
         }
-        BigDecimal commission = table.getCurrencyCellValue(row, BROKER_CLEARING_COMMISSION)
-                .add(table.getCurrencyCellValue(row, BROKER_TRANSACTION_COMMISSION))
+        BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
+                .add(table.getCurrencyCellValue(row, BROKER_COMMISSION))
                 .negate();
         String currency = VtbBrokerReport.convertToCurrency(table.getStringCellValue(row, VALUE_CURRENCY));
         return Collections.singleton(SecurityTransaction.builder()
@@ -97,8 +97,8 @@ public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTra
         VALUE_WITH_ACCRUED_INTEREST("сумма сделки в валюте расчетов", "с учетом НКД"),
         ACCRUED_INTEREST("НКД", "по сделке в валюте расчетов"),
         VALUE_CURRENCY("Валюта расчетов"),
-        BROKER_CLEARING_COMMISSION("Комиссия Банка за расчет по сделке"),
-        BROKER_TRANSACTION_COMMISSION("Комиссия Банка за заключение сделки");
+        MARKET_COMMISSION("Комиссия Банка за расчет по сделке"),
+        BROKER_COMMISSION("Комиссия Банка за заключение сделки");
 
         @Getter
         private final TableColumn column;
