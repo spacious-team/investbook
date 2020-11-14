@@ -35,6 +35,9 @@ public class VtbPortfolioPropertyTable extends InitializableReportTable<Portfoli
 
     private static final String TOTAL_ASSETS = "ОЦЕНКА активов (по курсу ЦБ с учётом незавершенных сделок)";
     private static final String USD_EXCHANGE_RATE = "Курс USD (по курсу ЦБ на конечную дату отчета)";
+    private static final String EUR_EXCHANGE_RATE = "Курс EUR (по курсу ЦБ на конечную дату отчета)";
+    private static final String CHF_EXCHANGE_RATE = "Курс CHF (по курсу ЦБ на конечную дату отчета)";
+    private static final String GBP_EXCHANGE_RATE = "Курс GBP (по курсу ЦБ на конечную дату отчета)";
 
     public VtbPortfolioPropertyTable(BrokerReport report) {
         super(report);
@@ -49,6 +52,15 @@ public class VtbPortfolioPropertyTable extends InitializableReportTable<Portfoli
         data.addAll(buildPortfolioProperty(
                 PortfolioPropertyType.USDRUB_EXCHANGE_RATE,
                 USD_EXCHANGE_RATE));
+        data.addAll(buildPortfolioProperty(
+                PortfolioPropertyType.EURRUB_EXCHANGE_RATE,
+                EUR_EXCHANGE_RATE));
+        data.addAll(buildPortfolioProperty(
+                PortfolioPropertyType.CHFRUB_EXCHANGE_RATE,
+                CHF_EXCHANGE_RATE));
+        data.addAll(buildPortfolioProperty(
+                PortfolioPropertyType.GBPRUB_EXCHANGE_RATE,
+                GBP_EXCHANGE_RATE));
         return data;
     }
 
@@ -61,7 +73,7 @@ public class VtbPortfolioPropertyTable extends InitializableReportTable<Portfoli
                     .value(getReport().getReportPage().getNextColumnValue(rowHeader).toString())
                     .build());
         } catch (Exception e) {
-            log.warn("Не удалось распарсить свойство '{}' из {}", rowHeader, getReport().getPath());
+            log.info("Не удалось распарсить свойство '{}' из {}", rowHeader, getReport().getPath());
             return emptyList();
         }
     }

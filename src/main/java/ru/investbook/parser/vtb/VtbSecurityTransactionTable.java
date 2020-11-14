@@ -25,18 +25,17 @@ import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.*;
 import org.spacious_team.table_wrapper.excel.ExcelTable;
-import ru.investbook.parser.uralsib.UralsibBrokerReport;
 
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 
+import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
 import static ru.investbook.parser.vtb.VtbSecurityTransactionTable.VtbSecurityTransactionTableHeader.*;
 
 public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTransaction> {
 
     private static final String TABLE_NAME = "Завершенные в отчетном периоде сделки с ценными бумагами (обязательства прекращены)";
-    private final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
     protected VtbSecurityTransactionTable(BrokerReport report) {
         super(report, TABLE_NAME, null, VtbSecurityTransactionTableHeader.class);
@@ -60,7 +59,7 @@ public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTra
         BigDecimal commission = table.getCurrencyCellValue(row, BROKER_CLEARING_COMMISSION)
                 .add(table.getCurrencyCellValue(row, BROKER_TRANSACTION_COMMISSION))
                 .negate();
-        String currency = UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, VALUE_CURRENCY));
+        String currency = VtbBrokerReport.convertToCurrency(table.getStringCellValue(row, VALUE_CURRENCY));
         return Collections.singleton(SecurityTransaction.builder()
                 .timestamp(((ExcelTable) table).getDateCellValue(row, DATE).toInstant())
                 .transactionId(getTransactionId(table.getStringCellValue(row, TRANSACTION)))
@@ -85,7 +84,7 @@ public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTra
                 numbericId += symbol;
             }
         }
-        return  numbericId;
+        return  Math.abs(numbericId);
     }
 
     @RequiredArgsConstructor

@@ -27,10 +27,15 @@ import org.spacious_team.table_wrapper.api.*;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-import static ru.investbook.parser.vtb.VtbSecurityFlowTable.VtbSecurityFlowTableHeader.NAME_AND_ISIN;
+import static ru.investbook.parser.vtb.VtbSecurityFlowTable.VtbSecurityFlowTableHeader.NAME_REGNUMBER_ISIN;
 
 public class VtbSecurityFlowTable extends AbstractReportTable<Security> {
+
+    // security registration number -> isin
+    private final Map<String, String> securityRegNumberToIsin = new HashMap<>();
 
     protected VtbSecurityFlowTable(BrokerReport report) {
         super(report, VtbSecurityDepositAndWithdrawalTable.TABLE_NAME, null, VtbSecurityFlowTableHeader.class);
@@ -38,19 +43,26 @@ public class VtbSecurityFlowTable extends AbstractReportTable<Security> {
 
     @Override
     protected Collection<Security> getRow(Table table, TableRow row) {
-        String[] nameAndIsin = table.getStringCellValue(row, NAME_AND_ISIN).split(",");
-        String name = nameAndIsin[0].trim();
-        String isin = nameAndIsin[2].toUpperCase().trim();
+        String[] description = table.getStringCellValue(row, NAME_REGNUMBER_ISIN).split(",");
+        String name = description[0].trim();
+        String registrationNumber = description[1].toUpperCase().trim();
+        String isin = description[2].toUpperCase().trim();
+        securityRegNumberToIsin.put(registrationNumber, isin);
         return Collections.singleton(Security.builder()
                 .isin(isin)
                 .name(name)
                 .build());
     }
 
+    public Map<String, String> getSecurityRegNumberToIsin() {
+        initializeIfNeed();
+        return securityRegNumberToIsin;
+    }
+
     @Getter
     @RequiredArgsConstructor
     enum VtbSecurityFlowTableHeader implements TableColumnDescription {
-        NAME_AND_ISIN("наименование", "isin"),
+        NAME_REGNUMBER_ISIN("наименование", "гос. регистрации", "isin"),
         DATE("дата"),
         COUNT("количество"),
         OPERATION("тип операции"),

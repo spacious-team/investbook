@@ -65,7 +65,7 @@ public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<S
         }
 
         String portfolio = getReport().getPortfolio();
-        String isin = table.getStringCellValue(row, NAME_AND_ISIN).split(",")[2].trim();
+        String isin = table.getStringCellValue(row, NAME_REGNUMBER_ISIN).split(",")[2].trim();
         Instant timestamp = ((ExcelTable) table).getDateCellValue(row, DATE).toInstant();
         Long transactionId = generateTransactionId(portfolio, timestamp, isin);
         return Collections.singleton(
