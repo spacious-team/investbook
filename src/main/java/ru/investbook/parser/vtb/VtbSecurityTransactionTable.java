@@ -84,7 +84,7 @@ public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTra
                 numbericId += symbol;
             }
         }
-        return  numbericId;
+        return  Math.abs(numbericId);
     }
 
     @RequiredArgsConstructor
