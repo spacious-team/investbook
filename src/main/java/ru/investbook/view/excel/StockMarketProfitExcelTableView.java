@@ -87,6 +87,17 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
+    protected void sheetPreCreate(Sheet sheet, Table table) {
+        super.sheetPreCreate(sheet, table);
+        if (table.stream().noneMatch(record -> record.containsKey(TAX_LIABILITY))) {
+            // Брокеры являются агентами по акциям отечественных бумаг на мосбирже
+            sheet.setColumnHidden(TAX_LIABILITY.ordinal(), true); // нет обязательств
+        } else {
+            sheet.setZoom(88); // show all columns for 24 inch monitor for securities sheet
+        }
+    }
+
+    @Override
     protected void sheetPostCreate(Sheet sheet, Class<? extends TableHeader> headerType, CellStyles styles) {
         super.sheetPostCreate(sheet, headerType, styles);
         for (Row row : sheet) {

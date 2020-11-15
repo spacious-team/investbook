@@ -92,6 +92,7 @@ public abstract class ExcelTableView {
         Class<? extends TableHeader> headerType = getHeaderType(table);
         if (headerType == null) return;
         writeHeader(sheet, headerType, styles.getHeaderStyle());
+        sheetPreCreate(sheet, table);
         Table.Record totalRow = getTotalRow(table);
         if (totalRow != null && !totalRow.isEmpty()) {
             table.addFirst(totalRow);
@@ -187,8 +188,11 @@ public abstract class ExcelTableView {
         return new Table.Record();
     }
 
-    protected void sheetPostCreate(Sheet sheet, Class<? extends TableHeader> headerType, CellStyles styles) {
+    protected void sheetPreCreate(Sheet sheet, Table table) {
         sheet.setZoom(93); // show all columns for 24 inch monitor for securities sheet
+    }
+
+    protected void sheetPostCreate(Sheet sheet, Class<? extends TableHeader> headerType, CellStyles styles) {
         sheet.setAutoFilter(new CellRangeAddress(0, sheet.getLastRowNum(), 0, (headerType.getEnumConstants().length - 1)));
     }
 }
