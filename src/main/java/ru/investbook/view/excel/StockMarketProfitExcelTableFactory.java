@@ -43,6 +43,7 @@ import static ru.investbook.view.excel.StockMarketProfitExcelTableHeader.*;
 @Component
 @RequiredArgsConstructor
 public class StockMarketProfitExcelTableFactory implements TableFactory {
+    private static final String TAX_LIABILITY_FORMULA = getTaxLiabilityFormula();
     // isin -> security price currency
     private final Map<String, String> securityCurrencies = new ConcurrentHashMap<>();
     private final TransactionRepository transactionRepository;
@@ -174,13 +175,24 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         return position.getOpenTransaction().getCount() > 0;
     }
 
-    private Table.Record getPaidInterestProfit(Position position,
-                                               PaidInterest paidInterest) {
+    private Table.Record getPaidInterestProfit(Position position, PaidInterest paidInterest) {
         Table.Record info = new Table.Record();
-        info.put(COUPON, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.COUPON, position)));
-        info.put(AMORTIZATION, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.AMORTIZATION, position)));
-        info.put(DIVIDEND, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.DIVIDEND, position)));
-        info.put(TAX, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.TAX, position)));
+        String coupon = convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.COUPON, position));
+        String amortization = convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.AMORTIZATION, position));
+        String dividend = convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.DIVIDEND, position));
+        String tax = convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.TAX, position));
+        info.put(COUPON, coupon);
+        info.put(AMORTIZATION, amortization);
+        info.put(DIVIDEND, dividend);
+        info.put(TAX, tax);
+        if (coupon != null || dividend != null) {
+            if (paidInterest.getCurrency()
+                    .filter("RUB"::equals)
+                    .isEmpty()) {
+                // считаем, что подписан W-8BEN, 10% налога удержаны иностранным эмитентом, нужно доплатить 3%
+                info.put(TAX_LIABILITY, TAX_LIABILITY_FORMULA);
+            }
+        }
         return info;
     }
 
@@ -269,6 +281,12 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         return "=IF(" + forecastTaxFormula + "<0,0,0.13*(" + forecastTaxFormula + "))";
     }
 
+    private static String getTaxLiabilityFormula() {
+        String payments = "(" + COUPON.getCellAddr() + "+" + DIVIDEND.getCellAddr() + ")";
+        String tax = TAX.getCellAddr();
+        return "=MAX(0,(0.13*" + payments + "-" + tax + "))";
+    }
+
     private String getClosedPositionProfit(boolean isLongPosition) {
         String open = "(" + OPEN_AMOUNT.getCellAddr() + "+" + OPEN_ACCRUED_INTEREST.getCellAddr() + ")";
         String close = "(" + CLOSE_AMOUNT.getCellAddr() + "+" + CLOSE_ACCRUED_INTEREST.getCellAddr() + ")";
@@ -276,7 +294,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         String closeCommission = CLOSE_COMMISSION.getCellAddr();
         String commission = "(" + openCommission + "+" + closeCommission + ")";
         String payments = "(" + COUPON.getCellAddr() + "+" + AMORTIZATION.getCellAddr() + "+" + DIVIDEND.getCellAddr() + ")";
-        String tax = "(" + TAX.getCellAddr() + "+" + FORECAST_TAX.getCellAddr() + ")";
+        String tax = "(" + TAX.getCellAddr() + "+" + TAX_LIABILITY.getCellAddr() + "+" + FORECAST_TAX.getCellAddr() + ")";
 
         String buy = isLongPosition ? open : close;
         String cell = isLongPosition ? close : open;

@@ -115,9 +115,14 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     }
 
     @Override
+    protected void sheetPreCreate(Sheet sheet, Table table) {
+        super.sheetPreCreate(sheet, table);
+        sheet.setZoom(85); // show all columns for 24 inch monitor for securities sheet
+    }
+
+    @Override
     protected void sheetPostCreate(Sheet sheet, Class<? extends TableHeader> headerType, CellStyles styles) {
         super.sheetPostCreate(sheet, headerType, styles);
-        sheet.setZoom(85); // show all columns for 24 inch monitor for securities sheet
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue;
             Cell cell;
