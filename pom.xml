@@ -28,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2020.12-SNAPSHOT</version>
+    <version>2020.12</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -144,7 +144,7 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>develop-SNAPSHOT</version>
+            <version>2020.12.1</version>
         </dependency>
     </dependencies>
 
