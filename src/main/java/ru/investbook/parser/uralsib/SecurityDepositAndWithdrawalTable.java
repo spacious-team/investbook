@@ -53,7 +53,7 @@ public class SecurityDepositAndWithdrawalTable extends AbstractReportTable<Secur
         }
         return Collections.singletonList(SecurityTransaction.builder()
                 .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
-                .transactionId(Long.parseLong(table.getStringCellValue(row, ID).replaceAll("\\D", "")))
+                .transactionId(table.getStringCellValue(row, ID))
                 .portfolio(getReport().getPortfolio())
                 .isin(getSecurity(table, row).getIsin())
                 .count(table.getIntCellValue(row, COUNT))

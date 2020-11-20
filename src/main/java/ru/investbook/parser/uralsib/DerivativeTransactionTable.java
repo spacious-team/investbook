@@ -44,7 +44,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
 
     @Override
     protected Collection<DerivativeTransaction> getRow(Table table, TableRow row) {
-        Long transactionId = SecurityTransactionTable.getTransactionId(table, row, TRANSACTION);
+        String transactionId = SecurityTransactionTable.getTransactionId(table, row, TRANSACTION);
         if (transactionId == null) return emptyList();
 
         boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");

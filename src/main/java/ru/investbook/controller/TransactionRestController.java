@@ -52,7 +52,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
      */
     @GetMapping("/portfolio/{portfolio}/id/{id}")
     public ResponseEntity<TransactionEntity> get(@PathVariable("portfolio") String portfolio,
-                                                 @PathVariable("id") Long id) {
+                                                 @PathVariable("id") String id) {
         return super.get(getId(portfolio, id));
     }
 
@@ -67,7 +67,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
      */
     @PutMapping("/portfolio/{portfolio}/id/{id}")
     public ResponseEntity<TransactionEntity> put(@PathVariable("portfolio") String portfolio,
-                                                 @PathVariable("id") Long id,
+                                                 @PathVariable("id") String id,
                                                  @Valid @RequestBody Transaction object) {
         return super.put(getId(portfolio, id), object);
     }
@@ -77,7 +77,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
      */
     @DeleteMapping("/portfolio/{portfolio}/id/{id}")
     public void delete(@PathVariable("portfolio") String portfolio,
-                       @PathVariable("id") Long id) {
+                       @PathVariable("id") String id) {
         super.delete(getId(portfolio, id));
     }
 
@@ -91,7 +91,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
         return getId(object.getPortfolio(), object.getId());
     }
 
-    private TransactionEntityPK getId(String portfolio, long transactionId) {
+    private TransactionEntityPK getId(String portfolio, String transactionId) {
         TransactionEntityPK pk = new TransactionEntityPK();
         pk.setId(transactionId);
         pk.setPortfolio(portfolio);

@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS `security_quote` (
 
 -- Дамп структуры для таблица portfolio.transaction
 CREATE TABLE IF NOT EXISTS `transaction` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Номер сделки в системе учета брокера',
+  `id` varchar(32) NOT NULL COMMENT 'Номер сделки в системе учета брокера',
   `portfolio` varchar(32) NOT NULL COMMENT 'Портфель (номер брокерского счета)',
   `isin` varchar(64) NOT NULL COMMENT 'Ценная бумага',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Фактическое время исполнения сделки',
@@ -169,7 +169,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
 
 -- Дамп структуры для таблица portfolio.transaction_cash_flow
 CREATE TABLE IF NOT EXISTS `transaction_cash_flow` (
-  `transaction_id` bigint(20) unsigned NOT NULL COMMENT 'ID транзакции',
+  `transaction_id` varchar(32) NOT NULL COMMENT 'ID транзакции',
   `portfolio` varchar(32) NOT NULL COMMENT 'ID портфеля',
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(12,2) NOT NULL COMMENT 'Размер',

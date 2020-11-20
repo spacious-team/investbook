@@ -74,7 +74,7 @@ public class SecurityTransactionTable extends InitializableReportTable<SecurityT
                 .negate();
         return Collections.singletonList(SecurityTransaction.builder()
                 .timestamp(getReport().convertToInstant(table.getStringCellValue(row, DATE_TIME)))
-                .transactionId(table.getLongCellValue(row, TRANSACTION))
+                .transactionId(String.valueOf(table.getLongCellValue(row, TRANSACTION))) // may be double numbers in future
                 .portfolio(getReport().getPortfolio())
                 .isin(table.getStringCellValue(row, ISIN))
                 .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))

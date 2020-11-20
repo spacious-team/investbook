@@ -58,10 +58,11 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
      */
     protected ResponseEntity<Entity> post(Pojo object) {
         try {
-            if (getId(object) == null) {
+            ID id = getId(object);
+            if (id == null) {
                 return createEntity(object);
             }
-            Optional<Entity> result = getById(getId(object));
+            Optional<Entity> result = getById(id);
             if (result.isPresent()) {
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)

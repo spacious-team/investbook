@@ -62,7 +62,7 @@ public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTra
         String currency = VtbBrokerReport.convertToCurrency(table.getStringCellValue(row, VALUE_CURRENCY));
         return Collections.singleton(SecurityTransaction.builder()
                 .timestamp(((ExcelTable) table).getDateCellValue(row, DATE).toInstant())
-                .transactionId(getTransactionId(table.getStringCellValue(row, TRANSACTION)))
+                .transactionId(table.getStringCellValue(row, TRANSACTION))
                 .portfolio(getReport().getPortfolio())
                 .isin(isin)
                 .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
@@ -74,18 +74,6 @@ public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTra
                 .build());
     }
 
-    static Long getTransactionId(String id) {
-        long numbericId = 0;
-        for (char symbol : id.toCharArray()) {
-            numbericId *= 10;
-            if (Character.isDigit(symbol)) {
-                numbericId += Character.getNumericValue(symbol);
-            } else {
-                numbericId += symbol;
-            }
-        }
-        return  Math.abs(numbericId);
-    }
 
     @RequiredArgsConstructor
     enum VtbSecurityTransactionTableHeader implements TableColumnDescription {

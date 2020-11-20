@@ -47,7 +47,7 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
 
     @Override
     protected Collection<SecurityTransaction> getRow(Table table, TableRow row) {
-        Long transactionId = getTransactionId(table, row, TRANSACTION);
+        String transactionId = getTransactionId(table, row, TRANSACTION);
         if (transactionId == null) return emptyList();
 
         boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
@@ -81,10 +81,10 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
                 .build());
     }
 
-    static Long getTransactionId(Table table, TableRow row, TableColumnDescription column) {
+    static String getTransactionId(Table table, TableRow row, TableColumnDescription column) {
         try {
-            // some numbers represented by string type cells
-            return table.getLongCellValue(row, column);
+            // some numbers (doubles) represented by string type cells
+            return String.valueOf(table.getLongCellValue(row, column));
         } catch (Exception e) {
             return null;
         }

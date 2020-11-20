@@ -30,7 +30,7 @@ import java.io.Serializable;
 @Data
 public class TransactionCashFlowEntityPK implements Serializable {
     @Column(name = "transaction_id")
-    private long transactionId;
+    private String transactionId;
 
     @Column(name = "portfolio")
     private String portfolio;

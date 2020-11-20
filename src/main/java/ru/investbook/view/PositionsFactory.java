@@ -67,7 +67,7 @@ public class PositionsFactory {
             transactions.addAll(getTransactions(portfolio, currencyPair + "_TOD", filter));
             transactions.sort(
                     Comparator.comparing(Transaction::getTimestamp)
-                            .thenComparingLong(Transaction::getId));
+                            .thenComparing(Transaction::getId));
         } else {
             transactions.addAll(getTransactions(portfolio, isinOrContract, filter));
         }
