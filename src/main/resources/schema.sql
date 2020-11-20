@@ -1,3 +1,21 @@
+/*
+ * InvestBook
+ * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 -- --------------------------------------------------------
 -- Хост:                         127.0.0.1
 -- Версия сервера:               10.4.12-MariaDB - mariadb.org binary distribution
@@ -133,7 +151,7 @@ CREATE TABLE IF NOT EXISTS `security_quote` (
 
 -- Дамп структуры для таблица portfolio.transaction
 CREATE TABLE IF NOT EXISTS `transaction` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Номер сделки в системе учета брокера',
+  `id` varchar(32) NOT NULL COMMENT 'Номер сделки в системе учета брокера',
   `portfolio` varchar(32) NOT NULL COMMENT 'Портфель (номер брокерского счета)',
   `isin` varchar(64) NOT NULL COMMENT 'Ценная бумага',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Фактическое время исполнения сделки',
@@ -151,7 +169,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
 
 -- Дамп структуры для таблица portfolio.transaction_cash_flow
 CREATE TABLE IF NOT EXISTS `transaction_cash_flow` (
-  `transaction_id` bigint(20) unsigned NOT NULL COMMENT 'ID транзакции',
+  `transaction_id` varchar(32) NOT NULL COMMENT 'ID транзакции',
   `portfolio` varchar(32) NOT NULL COMMENT 'ID портфеля',
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(12,2) NOT NULL COMMENT 'Размер',

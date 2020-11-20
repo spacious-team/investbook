@@ -3,16 +3,16 @@
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -21,6 +21,10 @@ package ru.investbook.parser;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.spacious_team.broker.report_parser.api.BrokerReportFactory;
+import org.spacious_team.broker.report_parser.api.ReportTables;
+import org.spacious_team.broker.report_parser.api.ReportTablesFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -31,7 +35,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import ru.investbook.PortfolioProperties;
+import ru.investbook.InvestbookProperties;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -46,7 +50,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ReportRestController {
     private final ReportParserService reportParserService;
-    private final PortfolioProperties portfolioProperties;
+    private final InvestbookProperties investbookProperties;
     private final Collection<BrokerReportFactory> brokerReportFactories;
     private final Collection<ReportTablesFactory> reportTablesFactories;
 
@@ -106,7 +110,7 @@ public class ReportRestController {
         Objects.requireNonNull(brokerName, "Наименование брокера, предоставившего отчет, не определено");
         byte[] bytes = report.getBytes();
         String originalFilename = report.getOriginalFilename();
-        Path backupPath = portfolioProperties.getReportBackupPath().resolve(brokerName);
+        Path backupPath = investbookProperties.getReportBackupPath().resolve(brokerName);
         Files.createDirectories(backupPath);
         Path path = backupPath.resolve((originalFilename != null) ?
                 originalFilename :

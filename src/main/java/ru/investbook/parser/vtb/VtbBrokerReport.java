@@ -3,16 +3,16 @@
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -20,23 +20,25 @@ package ru.investbook.parser.vtb;
 
 import lombok.EqualsAndHashCode;
 import org.apache.poi.ss.usermodel.Workbook;
-import ru.investbook.parser.AbstractBrokerReport;
-import ru.investbook.parser.table.ReportPage;
-import ru.investbook.parser.table.TableCellAddress;
-import ru.investbook.parser.table.excel.ExcelSheet;
+import org.spacious_team.table_wrapper.api.ReportPage;
+import org.spacious_team.table_wrapper.api.TableCellAddress;
+import org.spacious_team.table_wrapper.excel.ExcelSheet;
+import ru.investbook.parser.AbstractExcelBrokerReport;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 @EqualsAndHashCode(callSuper = true)
-public class VtbBrokerReport extends AbstractBrokerReport {
+public class VtbBrokerReport extends AbstractExcelBrokerReport {
     private static final String UNIQ_TEXT = VtbBrokerReport.REPORT_DATE_MARKER;
     private static final String PORTFOLIO_MARKER = "№ субсчета:";
     private static final String REPORT_DATE_MARKER = "Отчет Банка ВТБ";
+    static final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
     private final Workbook book;
 

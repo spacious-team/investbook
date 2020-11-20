@@ -3,16 +3,16 @@
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -25,10 +25,10 @@ import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.beans.factory.annotation.Value;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.entity.PortfolioEntity;
-import ru.investbook.pojo.Portfolio;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;
@@ -92,6 +92,7 @@ public abstract class ExcelTableView {
         Class<? extends TableHeader> headerType = getHeaderType(table);
         if (headerType == null) return;
         writeHeader(sheet, headerType, styles.getHeaderStyle());
+        sheetPreCreate(sheet, table);
         Table.Record totalRow = getTotalRow(table);
         if (totalRow != null && !totalRow.isEmpty()) {
             table.addFirst(totalRow);
@@ -187,8 +188,11 @@ public abstract class ExcelTableView {
         return new Table.Record();
     }
 
-    protected void sheetPostCreate(Sheet sheet, Class<? extends TableHeader> headerType, CellStyles styles) {
+    protected void sheetPreCreate(Sheet sheet, Table table) {
         sheet.setZoom(93); // show all columns for 24 inch monitor for securities sheet
+    }
+
+    protected void sheetPostCreate(Sheet sheet, Class<? extends TableHeader> headerType, CellStyles styles) {
         sheet.setAutoFilter(new CellRangeAddress(0, sheet.getLastRowNum(), 0, (headerType.getEnumConstants().length - 1)));
     }
 }

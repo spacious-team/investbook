@@ -3,28 +3,28 @@
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package ru.investbook.controller;
 
+import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.entity.TransactionEntityPK;
-import ru.investbook.pojo.Transaction;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -52,7 +52,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
      */
     @GetMapping("/portfolio/{portfolio}/id/{id}")
     public ResponseEntity<TransactionEntity> get(@PathVariable("portfolio") String portfolio,
-                                                 @PathVariable("id") Long id) {
+                                                 @PathVariable("id") String id) {
         return super.get(getId(portfolio, id));
     }
 
@@ -67,7 +67,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
      */
     @PutMapping("/portfolio/{portfolio}/id/{id}")
     public ResponseEntity<TransactionEntity> put(@PathVariable("portfolio") String portfolio,
-                                                 @PathVariable("id") Long id,
+                                                 @PathVariable("id") String id,
                                                  @Valid @RequestBody Transaction object) {
         return super.put(getId(portfolio, id), object);
     }
@@ -77,7 +77,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
      */
     @DeleteMapping("/portfolio/{portfolio}/id/{id}")
     public void delete(@PathVariable("portfolio") String portfolio,
-                       @PathVariable("id") Long id) {
+                       @PathVariable("id") String id) {
         super.delete(getId(portfolio, id));
     }
 
@@ -91,7 +91,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
         return getId(object.getPortfolio(), object.getId());
     }
 
-    private TransactionEntityPK getId(String portfolio, long transactionId) {
+    private TransactionEntityPK getId(String portfolio, String transactionId) {
         TransactionEntityPK pk = new TransactionEntityPK();
         pk.setId(transactionId);
         pk.setPortfolio(portfolio);

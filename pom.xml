@@ -1,4 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -10,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2020.11</version>
+    <version>2020.12</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -18,14 +36,18 @@
 
     <licenses>
         <license>
-            <name>GNU GPLv3</name>
-            <url>https://www.gnu.org/licenses/gpl-3.0.html</url>
+            <name>GNU Affero GPLv3</name>
+            <url>https://www.gnu.org/licenses/agpl-3.0.html</url>
         </license>
     </licenses>
 
+    <scm>
+        <url>https://github.com/spacious-team/investbook</url>
+    </scm>
+
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>20.11</win.msi.version>
+        <win.msi.version>20.12</win.msi.version>
         <java.version>15</java.version>
     </properties>
 
@@ -84,21 +106,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-            <version>4.1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>4.1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.VEINHORN</groupId>
-            <artifactId>xelem-wrapper</artifactId>
-            <version>e6fc9c6878</version>
-        </dependency>
-        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>7.1.0</version>
@@ -124,6 +131,21 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.spacious-team</groupId>
+            <artifactId>table-wrapper-excel-impl</artifactId>
+            <version>2020.12</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.spacious-team</groupId>
+            <artifactId>table-wrapper-xml-impl</artifactId>
+            <version>2020.12</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.spacious-team</groupId>
+            <artifactId>broker-report-parser-api</artifactId>
+            <version>2020.12.1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -138,6 +160,19 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                    <!-- use org.springframework.boot.loader.PropertiesLauncher instead of JarLauncher
+                    (https://docs.spring.io/spring-boot/docs/current/maven-plugin/usage.html).
+                    PropertiesLauncher reads settings from resources/loader.properties
+                    (https://docs.spring.io/spring-boot/docs/current/reference/html/executable-jar.html#executable-jar-property-launcher-features) -->
+                    <layout>ZIP</layout>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -213,7 +248,7 @@
                         <!-- jpackage requires https://wixtoolset.org/releases/ (only Wix, Toolset not required) -->
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
-                        <version>0.0.4</version>
+                        <version>1.2.1</version>
                         <configuration>
                             <type>MSI</type>
                             <name>Investbook</name>
@@ -222,6 +257,9 @@
                             <description>${project.description}</description>
                             <copyright>InvestBook, Copyright (C) 2020 Spacious Team (https://github.com/spacious-team)</copyright>
                             <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
+                            <javaOptions>
+                                <javaOption>-Dloader.path=./app/extensions</javaOption>
+                            </javaOptions>
                             <arguments>
                                 <argument>--spring.config.additional-location=file:./app/</argument>
                             </arguments>

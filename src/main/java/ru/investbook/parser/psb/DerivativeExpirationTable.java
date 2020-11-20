@@ -3,16 +3,16 @@
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -20,16 +20,16 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import ru.investbook.parser.*;
-import ru.investbook.parser.table.Table;
-import ru.investbook.parser.table.TableRow;
+import org.spacious_team.broker.report_parser.api.AbstractReportTable;
+import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
+import org.spacious_team.table_wrapper.api.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static ru.investbook.parser.DerivativeTransaction.QUOTE_CURRENCY;
+import static org.spacious_team.broker.report_parser.api.DerivativeTransaction.QUOTE_CURRENCY;
 import static ru.investbook.parser.psb.DerivativeExpirationTable.ExpirationTableHeader.*;
 
 @Slf4j
@@ -68,7 +68,7 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
                 DerivativeTransaction.builder()
                         .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
                         .portfolio(getReport().getPortfolio())
-                        .transactionId(table.getLongCellValue(row, TRANSACTION))
+                        .transactionId(String.valueOf(table.getLongCellValue(row, TRANSACTION)))
                         .contract(table.getStringCellValue(row, CONTRACT))
                         .count((isBuy ? 1 : -1) * count);
         transactionInfo.add(builder

@@ -3,33 +3,33 @@
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package ru.investbook.parser.vtb;
 
 import lombok.Getter;
-import ru.investbook.parser.*;
-import ru.investbook.parser.table.Table;
-import ru.investbook.parser.table.TableRow;
-import ru.investbook.parser.table.excel.ExcelTable;
+import org.spacious_team.broker.report_parser.api.AbstractReportTable;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
+import org.spacious_team.table_wrapper.api.*;
+import org.spacious_team.table_wrapper.excel.ExcelTable;
 
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 
 import static ru.investbook.parser.vtb.VtbDerivativeTransactionTable.VtbDerivativeTransactionTableHeader.*;
-import static ru.investbook.parser.vtb.VtbSecurityTransactionTable.getTransactionId;
 
 public class VtbDerivativeTransactionTable extends AbstractReportTable<DerivativeTransaction> {
 
@@ -53,7 +53,7 @@ public class VtbDerivativeTransactionTable extends AbstractReportTable<Derivativ
                 .negate();
         return Collections.singleton(DerivativeTransaction.builder()
                 .timestamp(((ExcelTable) table).getDateCellValue(row, DATE_TIME).toInstant())
-                .transactionId(getTransactionId(table.getStringCellValue(row, TRANSACTION)))
+                .transactionId(table.getStringCellValue(row, TRANSACTION))
                 .portfolio(getReport().getPortfolio())
                 .contract(table.getStringCellValue(row, CONTRACT))
                 .count((isBuy ? 1 : -1) * count)

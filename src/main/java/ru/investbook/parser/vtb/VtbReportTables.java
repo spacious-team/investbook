@@ -3,30 +3,43 @@
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package ru.investbook.parser.vtb;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import ru.investbook.parser.*;
-import ru.investbook.pojo.*;
+import org.spacious_team.broker.pojo.*;
+import org.spacious_team.broker.report_parser.api.*;
 
-@RequiredArgsConstructor
 public class VtbReportTables implements ReportTables {
     @Getter
     private final BrokerReport report;
+    @Getter
+    private final ReportTable<Security> securitiesTable;
+    @Getter
+    private final VtbCouponAmortizationRedemptionTable couponAmortizationRedemptionTable;
+
+    public VtbReportTables(BrokerReport report) {
+        this.report = report;
+        VtbSecuritiesTable vtbSecuritiesTable = new VtbSecuritiesTable(report);
+        VtbSecurityFlowTable vtbSecurityFlowTable = new VtbSecurityFlowTable(report);
+        this.securitiesTable = WrappingReportTable.of(vtbSecuritiesTable, vtbSecurityFlowTable);
+        SecurityRegNumberToIsinConverter securityRegNumberToIsinConverter = new SecurityRegNumberToIsinConverterImpl(
+                vtbSecuritiesTable, vtbSecurityFlowTable);
+        this.couponAmortizationRedemptionTable = new VtbCouponAmortizationRedemptionTable(
+                report, securityRegNumberToIsinConverter);
+    }
 
     @Override
     public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
@@ -42,16 +55,10 @@ public class VtbReportTables implements ReportTables {
     public ReportTable<EventCashFlow> getCashFlowTable() {
         return WrappingReportTable.of(
                 new VtbCashFlowTable(report),
-                new VtbDividendTable(report));
+                new VtbDividendTable(report),
+                WrappingReportTable.of(report, couponAmortizationRedemptionTable.getExternalBondPayments()));
     }
-    
-    @Override
-    public ReportTable<Security> getSecuritiesTable() {
-        return WrappingReportTable.of(
-                new VtbSecuritiesTable(report),
-                new VtbSecurityFlowTable(report));
-    }
-    
+
     @Override
     public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
         return WrappingReportTable.of(
@@ -66,14 +73,9 @@ public class VtbReportTables implements ReportTables {
 
     @Override
     public ReportTable<ForeignExchangeTransaction> getForeignExchangeTransactionTable() {
-        return new EmptyReportTable<>(report);
+        return new VtbForeignExchangeTransactionTable(report);
     }
 
-    @Override
-    public ReportTable<SecurityEventCashFlow> getCouponAmortizationRedemptionTable() {
-        return new EmptyReportTable<>(report);
-    }
-    
     @Override
     public ReportTable<SecurityEventCashFlow> getDividendTable() {
         return new EmptyReportTable<>(report);

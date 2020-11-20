@@ -3,16 +3,16 @@
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -21,11 +21,11 @@ package ru.investbook.parser.psb.foreignmarket;
 import lombok.EqualsAndHashCode;
 import nl.fountain.xelem.excel.Workbook;
 import nl.fountain.xelem.lex.ExcelReader;
+import org.spacious_team.table_wrapper.api.ReportPage;
+import org.spacious_team.table_wrapper.xml.XmlReportPage;
 import org.xml.sax.InputSource;
-import ru.investbook.parser.AbstractBrokerReport;
+import ru.investbook.parser.AbstractExcelBrokerReport;
 import ru.investbook.parser.psb.PsbBrokerReport;
-import ru.investbook.parser.table.ReportPage;
-import ru.investbook.parser.table.xml.XmlReportPage;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -33,13 +33,15 @@ import java.io.InputStream;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 @EqualsAndHashCode(callSuper = true)
-public class PsbBrokerForeignMarketReport extends AbstractBrokerReport {
+public class PsbBrokerForeignMarketReport extends AbstractExcelBrokerReport {
 
     private static final DateTimeFormatter dateFormatterWithSlash = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
     private static final String PORTFOLIO_MARKER = "Договор №:";
     private static final String REPORT_DATE_MARKER = "ОТЧЕТ БРОКЕРА";
 
@@ -101,6 +103,8 @@ public class PsbBrokerForeignMarketReport extends AbstractBrokerReport {
         if (value.contains("/")) {
             return LocalDate.parse(value, PsbBrokerForeignMarketReport.dateFormatterWithSlash)
                     .atStartOfDay(getReportZoneId()).toInstant();
+        } else if (value.contains(":") && value.length() == 16) {
+            return LocalDateTime.parse(value, dateTimeFormatter).atZone(getReportZoneId()).toInstant();
         } else {
             return super.convertToInstant(value);
         }

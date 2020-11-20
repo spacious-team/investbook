@@ -3,16 +3,16 @@
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -21,11 +21,11 @@ package ru.investbook.parser.uralsib;
 import com.google.common.collect.Lists;
 import lombok.EqualsAndHashCode;
 import org.apache.poi.ss.usermodel.Workbook;
-import ru.investbook.parser.AbstractBrokerReport;
-import ru.investbook.parser.table.ReportPage;
-import ru.investbook.parser.table.TableCell;
-import ru.investbook.parser.table.TableCellAddress;
-import ru.investbook.parser.table.excel.ExcelSheet;
+import org.spacious_team.table_wrapper.api.ReportPage;
+import org.spacious_team.table_wrapper.api.TableCell;
+import org.spacious_team.table_wrapper.api.TableCellAddress;
+import org.spacious_team.table_wrapper.excel.ExcelSheet;
+import ru.investbook.parser.AbstractExcelBrokerReport;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +38,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 @EqualsAndHashCode(callSuper = true)
-public class UralsibBrokerReport extends AbstractBrokerReport {
+public class UralsibBrokerReport extends AbstractExcelBrokerReport {
     private static final String UNIQ_TEXT = "Брокер: ООО \"УРАЛСИБ Брокер\"";
     private static final String PORTFOLIO_MARKER = "Номер счета Клиента:";
     private static final String REPORT_DATE_MARKER = "за период";

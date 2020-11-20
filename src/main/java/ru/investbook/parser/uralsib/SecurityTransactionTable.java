@@ -3,16 +3,16 @@
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -20,9 +20,9 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import ru.investbook.parser.*;
-import ru.investbook.parser.table.Table;
-import ru.investbook.parser.table.TableRow;
+import org.spacious_team.broker.report_parser.api.AbstractReportTable;
+import org.spacious_team.broker.report_parser.api.SecurityTransaction;
+import org.spacious_team.table_wrapper.api.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -47,7 +47,7 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
 
     @Override
     protected Collection<SecurityTransaction> getRow(Table table, TableRow row) {
-        Long transactionId = getTransactionId(table, row, TRANSACTION);
+        String transactionId = getTransactionId(table, row, TRANSACTION);
         if (transactionId == null) return emptyList();
 
         boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
@@ -81,10 +81,10 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
                 .build());
     }
 
-    static Long getTransactionId(Table table, TableRow row, TableColumnDescription column) {
+    static String getTransactionId(Table table, TableRow row, TableColumnDescription column) {
         try {
-            // some numbers represented by string type cells
-            return table.getLongCellValue(row, column);
+            // some numbers (doubles) represented by string type cells
+            return String.valueOf(table.getLongCellValue(row, column));
         } catch (Exception e) {
             return null;
         }

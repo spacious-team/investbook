@@ -3,16 +3,16 @@
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -20,10 +20,10 @@ package ru.investbook.parser.psb;
 
 import lombok.EqualsAndHashCode;
 import org.apache.poi.ss.usermodel.Workbook;
-import ru.investbook.parser.AbstractBrokerReport;
-import ru.investbook.parser.table.ReportPage;
-import ru.investbook.parser.table.TableCellAddress;
-import ru.investbook.parser.table.excel.ExcelSheet;
+import org.spacious_team.table_wrapper.api.ReportPage;
+import org.spacious_team.table_wrapper.api.TableCellAddress;
+import org.spacious_team.table_wrapper.excel.ExcelSheet;
+import ru.investbook.parser.AbstractExcelBrokerReport;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +34,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 @EqualsAndHashCode(callSuper = true)
-public class PsbBrokerReport extends AbstractBrokerReport {
+public class PsbBrokerReport extends AbstractExcelBrokerReport {
     public static final String UNIQ_TEXT = "Брокер: ПАО \"Промсвязьбанк\"";
     private static final String PORTFOLIO_MARKER = "Договор №:";
     private static final String REPORT_DATE_MARKER = "ОТЧЕТ БРОКЕРА";

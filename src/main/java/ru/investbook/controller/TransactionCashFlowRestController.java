@@ -3,28 +3,28 @@
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package ru.investbook.controller;
 
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.investbook.converter.TransactionCashFlowConverter;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntityPK;
-import ru.investbook.pojo.CashFlowType;
-import ru.investbook.pojo.TransactionCashFlow;
 import ru.investbook.repository.TransactionCashFlowRepository;
 
 import java.net.URI;
@@ -51,7 +51,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
 
     @GetMapping("/portfolio/{portfolio}/id/{transaction-id}")
     protected List<TransactionCashFlowEntity> get(@PathVariable("portfolio") String portfolio,
-                                                  @PathVariable("transaction-id") long transactionId) {
+                                                  @PathVariable("transaction-id") String transactionId) {
         return transactionCashFlowRepository.findByPkPortfolioAndPkTransactionId(portfolio, transactionId);
     }
 
@@ -60,7 +60,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
      */
     @GetMapping("/portfolio/{portfolio}/id/{transaction-id}/events/{event-type}")
     public ResponseEntity<TransactionCashFlowEntity> get(@PathVariable("portfolio") String portfolio,
-                                                         @PathVariable("transaction-id") long transactionId,
+                                                         @PathVariable("transaction-id") String transactionId,
                                                          @PathVariable("event-type") int eventType) {
         return super.get(getId(portfolio, transactionId, eventType));
     }
@@ -76,7 +76,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
      */
     @PutMapping("/portfolio/{portfolio}/id/{transaction-id}/events/{event-type}")
     public ResponseEntity<TransactionCashFlowEntity> put(@PathVariable("portfolio") String portfolio,
-                                                         @PathVariable("transaction-id") long transactionId,
+                                                         @PathVariable("transaction-id") String transactionId,
                                                          @PathVariable("event-type") int eventType,
                                                          @RequestBody TransactionCashFlow object) {
         return super.put(getId(portfolio, transactionId, eventType), object);
@@ -87,7 +87,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
      */
     @DeleteMapping("/portfolio/{portfolio}/id/{transaction-id}/events/{event-type}")
     public void delete(@PathVariable("portfolio") String portfolio,
-                       @PathVariable("transaction-id") long transactionId,
+                       @PathVariable("transaction-id") String transactionId,
                        @PathVariable("event-type") int eventType) {
         super.delete(getId(portfolio, transactionId, eventType));
     }
@@ -102,7 +102,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
         return getId(object.getPortfolio(), object.getTransactionId(), object.getEventType().getId());
     }
 
-    private TransactionCashFlowEntityPK getId(String portfolio, long transactionId, int eventType) {
+    private TransactionCashFlowEntityPK getId(String portfolio, String transactionId, int eventType) {
         TransactionCashFlowEntityPK pk = new TransactionCashFlowEntityPK();
         pk.setTransactionId(transactionId);
         pk.setPortfolio(portfolio);

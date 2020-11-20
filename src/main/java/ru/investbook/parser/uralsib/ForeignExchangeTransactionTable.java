@@ -3,16 +3,16 @@
  * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -20,9 +20,9 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import ru.investbook.parser.*;
-import ru.investbook.parser.table.Table;
-import ru.investbook.parser.table.TableRow;
+import org.spacious_team.broker.report_parser.api.AbstractReportTable;
+import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
+import org.spacious_team.table_wrapper.api.*;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -43,13 +43,13 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
 
     @Override
     protected Collection<ForeignExchangeTransaction> getRow(Table table, TableRow row) {
-        long transactionId;
+        String transactionId;
         Object cellValue = table.getCellValue(row, TRANSACTION);
         if (cellValue instanceof String) {
             String stringValue = cellValue.toString();
             try {
-                // some numbers represented by string type cells
-                transactionId = Long.parseLong(stringValue);
+                // some numbers (doubles) represented by string type cells
+                transactionId = String.valueOf(Long.parseLong(stringValue));
             } catch (NumberFormatException e) {
                 if (stringValue.startsWith(CONTRACT_PREFIX)) {
                     instrument = stringValue.substring(CONTRACT_PREFIX.length()).trim();
@@ -57,7 +57,8 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
                 return emptyList();
             }
         } else if (cellValue instanceof Number) {
-            transactionId = ((Number) cellValue).longValue();
+            // double
+            transactionId = String.valueOf(((Number) cellValue).longValue());
         } else {
             return emptyList();
         }
