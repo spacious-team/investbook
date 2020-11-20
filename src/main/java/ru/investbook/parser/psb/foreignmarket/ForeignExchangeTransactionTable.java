@@ -44,7 +44,7 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
         String dateTime = table.getStringCellValue(row, DATE_TIME); // 08.02.2019 23:37
         Instant transactionInstant = convertToInstant(dateTime);
         String notUniqTransactionId = table.getStringCellValue(row, TRANSACTION);
-        long transactionId = Long.parseLong(notUniqTransactionId + dateTime.replaceAll("[.\\s:]", ""));
+        String transactionId = notUniqTransactionId + dateTime.replaceAll("[.\\s:]", "");
         boolean isBuy = table.getStringCellValue(row, DIRECTION).trim().equalsIgnoreCase("К");
         BigDecimal value = table.getCurrencyCellValue(row, VALUE);
         if (isBuy) {

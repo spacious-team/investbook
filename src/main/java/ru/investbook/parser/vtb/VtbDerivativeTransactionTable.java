@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static ru.investbook.parser.vtb.VtbDerivativeTransactionTable.VtbDerivativeTransactionTableHeader.*;
-import static ru.investbook.parser.vtb.VtbSecurityTransactionTable.getTransactionId;
 
 public class VtbDerivativeTransactionTable extends AbstractReportTable<DerivativeTransaction> {
 
@@ -54,7 +53,7 @@ public class VtbDerivativeTransactionTable extends AbstractReportTable<Derivativ
                 .negate();
         return Collections.singleton(DerivativeTransaction.builder()
                 .timestamp(((ExcelTable) table).getDateCellValue(row, DATE_TIME).toInstant())
-                .transactionId(getTransactionId(table.getStringCellValue(row, TRANSACTION)))
+                .transactionId(table.getStringCellValue(row, TRANSACTION))
                 .portfolio(getReport().getPortfolio())
                 .contract(table.getStringCellValue(row, CONTRACT))
                 .count((isBuy ? 1 : -1) * count)

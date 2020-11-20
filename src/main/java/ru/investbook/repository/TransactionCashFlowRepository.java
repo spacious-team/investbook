@@ -31,10 +31,10 @@ import java.util.Set;
 public interface TransactionCashFlowRepository extends JpaRepository<TransactionCashFlowEntity, TransactionCashFlowEntityPK> {
 
     List<TransactionCashFlowEntity> findByPkPortfolioAndPkTransactionId(String portfolio,
-                                                                        long transactionId);
+                                                                        String transactionId);
 
     Optional<TransactionCashFlowEntity> findByPkPortfolioAndPkTransactionIdAndPkType(String portfolio,
-                                                                                     long transactionId,
+                                                                                     String transactionId,
                                                                                      int cashFlowType);
 
     @Query(value = "SELECT distinct t.currency FROM TransactionCashFlowEntity t " +

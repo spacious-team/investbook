@@ -76,7 +76,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
         List<DerivativeTransaction> transactionInfo = new ArrayList<>(2);
         DerivativeTransaction.DerivativeTransactionBuilder builder = DerivativeTransaction.builder()
                 .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
-                .transactionId(Long.parseLong(table.getStringCellValue(row, TRANSACTION)))
+                .transactionId(String.valueOf(table.getLongCellValue(row, TRANSACTION))) // double numbers
                 .portfolio(getReport().getPortfolio())
                 .contract(table.getStringCellValue(row, CONTRACT))
                 .count((isBuy ? 1 : -1) * count);

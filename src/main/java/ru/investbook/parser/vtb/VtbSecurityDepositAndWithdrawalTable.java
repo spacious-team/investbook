@@ -26,7 +26,6 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import org.spacious_team.table_wrapper.excel.ExcelTable;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
@@ -67,7 +66,7 @@ public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<S
         String portfolio = getReport().getPortfolio();
         String isin = table.getStringCellValue(row, NAME_REGNUMBER_ISIN).split(",")[2].trim();
         Instant timestamp = ((ExcelTable) table).getDateCellValue(row, DATE).toInstant();
-        Long transactionId = generateTransactionId(portfolio, timestamp, isin);
+        String transactionId = generateTransactionId(portfolio, timestamp, isin);
         return Collections.singleton(
                 SecurityTransaction.builder()
                         .transactionId(transactionId)
@@ -83,11 +82,8 @@ public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<S
                         .build());
     }
 
-    private static Long generateTransactionId(String portfolio, Instant instant, String isin) {
-        messageDigest.update((portfolio + isin).getBytes());
-        return Math.abs(
-                new BigInteger(1, messageDigest.digest(), 0, 8)
-                        .longValue()
-                        + instant.getEpochSecond());
+    private static String generateTransactionId(String portfolio, Instant instant, String isin) {
+        String id = instant.getEpochSecond() + isin + portfolio;
+        return id.substring(0, Math.min(32, id.length()));
     }
 }

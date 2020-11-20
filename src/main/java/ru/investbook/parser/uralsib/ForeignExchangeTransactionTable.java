@@ -43,13 +43,13 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
 
     @Override
     protected Collection<ForeignExchangeTransaction> getRow(Table table, TableRow row) {
-        long transactionId;
+        String transactionId;
         Object cellValue = table.getCellValue(row, TRANSACTION);
         if (cellValue instanceof String) {
             String stringValue = cellValue.toString();
             try {
-                // some numbers represented by string type cells
-                transactionId = Long.parseLong(stringValue);
+                // some numbers (doubles) represented by string type cells
+                transactionId = String.valueOf(Long.parseLong(stringValue));
             } catch (NumberFormatException e) {
                 if (stringValue.startsWith(CONTRACT_PREFIX)) {
                     instrument = stringValue.substring(CONTRACT_PREFIX.length()).trim();
@@ -57,7 +57,8 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
                 return emptyList();
             }
         } else if (cellValue instanceof Number) {
-            transactionId = ((Number) cellValue).longValue();
+            // double
+            transactionId = String.valueOf(((Number) cellValue).longValue());
         } else {
             return emptyList();
         }

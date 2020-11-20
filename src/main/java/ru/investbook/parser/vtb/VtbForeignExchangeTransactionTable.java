@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static ru.investbook.parser.vtb.VtbForeignExchangeTransactionTable.FxTransactionTableHeader.*;
-import static ru.investbook.parser.vtb.VtbSecurityTransactionTable.getTransactionId;
 
 public class VtbForeignExchangeTransactionTable extends AbstractReportTable<ForeignExchangeTransaction> {
 
@@ -52,7 +51,7 @@ public class VtbForeignExchangeTransactionTable extends AbstractReportTable<Fore
                 .negate();
         return Collections.singletonList(ForeignExchangeTransaction.builder()
                 .timestamp(((ExcelTable) table).getDateCellValue(row, DATE_TIME).toInstant())
-                .transactionId(getTransactionId(table.getStringCellValue(row, TRANSACTION)))
+                .transactionId(table.getStringCellValue(row, TRANSACTION))
                 .portfolio(getReport().getPortfolio())
                 .instrument(table.getStringCellValue(row, INSTRUMENT))
                 .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
