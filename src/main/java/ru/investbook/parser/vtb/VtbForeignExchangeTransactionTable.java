@@ -33,7 +33,7 @@ import static ru.investbook.parser.vtb.VtbForeignExchangeTransactionTable.FxTran
 
 public class VtbForeignExchangeTransactionTable extends AbstractReportTable<ForeignExchangeTransaction> {
 
-    private static final String TABLE_NAME = "Завершенные в отчетном периоде сделки с иностранной валютой (обязательства прекращены)";
+    private static final String TABLE_NAME = "Заключенные в отчетном периоде сделки с иностранной валютой";
 
     protected VtbForeignExchangeTransactionTable(BrokerReport report) {
         super(report, TABLE_NAME, null, FxTransactionTableHeader.class);

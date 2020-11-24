@@ -26,26 +26,16 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import org.spacious_team.table_wrapper.excel.ExcelTable;
 
 import java.math.BigDecimal;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
 import static ru.investbook.parser.vtb.VtbSecurityFlowTable.VtbSecurityFlowTableHeader.*;
 
 public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<SecurityTransaction> {
 
     static final String TABLE_NAME = "Движение ценных бумаг";
-    private static final MessageDigest messageDigest;
 
-    static {
-        try {
-            messageDigest = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private final Map<String, Integer> bondRedemptions = new HashMap<>(1);
 
     protected VtbSecurityDepositAndWithdrawalTable(BrokerReport report) {
         super(report, TABLE_NAME, null, VtbSecurityFlowTable.VtbSecurityFlowTableHeader.class);
@@ -59,6 +49,11 @@ public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<S
             case "вывод цб": // указывался при сплите акций APPL 4:1 (count = +3) и TSLA 5:1 (count = +4)
             case "ввод цб": // догадка, нет примера отчета
                 break;
+            case "погашение цб":
+                String isin = table.getStringCellValue(row, NAME_REGNUMBER_ISIN).split(",")[2].trim();
+                Integer count = Math.abs(table.getIntCellValue(row, COUNT));
+                bondRedemptions.put(isin, count);
+                // no break;
             default:
                 return Collections.emptyList();
         }
@@ -85,5 +80,10 @@ public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<S
     private static String generateTransactionId(String portfolio, Instant instant, String isin) {
         String id = instant.getEpochSecond() + isin + portfolio;
         return id.substring(0, Math.min(32, id.length()));
+    }
+
+    public Optional<Integer> getBondRedemptionCount(String isin) {
+        initializeIfNeed();
+        return Optional.ofNullable(bondRedemptions.get(isin));
     }
 }

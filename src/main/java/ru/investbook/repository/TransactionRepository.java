@@ -71,7 +71,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     @Query(nativeQuery = true, value = "SELECT distinct isin FROM transaction " +
             "WHERE portfolio = :#{#portfolio.id} " +
             "AND length(isin) <> 12 " +
-            "AND isin NOT LIKE '%_TOM' AND isin NOT LIKE '%_TOD'" +
+            "AND isin NOT LIKE '______\\_%' " +
             "AND timestamp between :from AND :to " +
             "ORDER BY timestamp DESC")
     Collection<String> findDistinctDerivativeByPortfolioAndTimestampBetweenOrderByTimestampDesc(
@@ -80,12 +80,12 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             @Param("to") Instant toDate);
 
     /**
-     * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM format)
+     * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM, USDRUB_CNGD format)
      */
     @Query(nativeQuery = true, value = "SELECT distinct isin FROM transaction " +
             "WHERE portfolio = :#{#portfolio.id} " +
             "AND length(isin) <> 12 " +
-            "AND (isin LIKE '%_TOM' OR isin LIKE '%_TOD')" +
+            "AND isin LIKE '______\\_%' " +
             "AND timestamp between :from AND :to " +
             "ORDER BY timestamp DESC")
     Collection<String> findDistinctFxInstrumentByPortfolioAndTimestampBetweenOrderByTimestampDesc(
@@ -96,24 +96,37 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Returns foreign exchange market currency pairs (in USDRUB format)
      */
-    default Collection<String> findDistinctFxCurrencyPairsAndTimestampBetween(Portfolio portfolio, Instant fromDate, Instant toDate) {
+    default Collection<String> findDistinctFxCurrencyPairByPortfolioAndTimestampBetween(
+            Portfolio portfolio,
+            Instant fromDate,
+            Instant toDate) {
         return findDistinctFxInstrumentByPortfolioAndTimestampBetweenOrderByTimestampDesc(portfolio, fromDate, toDate)
                 .stream()
-                .map(e -> e.replace("_TOD", "")
-                        .replace("_TOM", ""))
+                .map(e -> e.substring(0, Math.min(6, e.length())))
                 .distinct()
                 .collect(Collectors.toList());
     }
 
+    default Collection<String> findDistinctFxInstrumentByPortfolioAndCurrencyPairAndTimestampBetween(
+            Portfolio portfolio,
+            String currencyPair,
+            Instant fromDate,
+            Instant toDate) {
+        return findDistinctFxInstrumentByPortfolioAndTimestampBetweenOrderByTimestampDesc(portfolio, fromDate, toDate)
+                .stream()
+                .filter(contract -> contract.startsWith(currencyPair))
+                .collect(Collectors.toList());
+    }
+
     /**
-     * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM format)
+     * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM, USDRUB_CNGD format)
      */
     @Query(nativeQuery = true, value = "SELECT DISTINCT isin FROM transaction as t1 " +
             "JOIN transaction_cash_flow as t2 " +
             "ON t1.id = t2.transaction_id " +
             "AND t1.portfolio = :#{#portfolio.id} " +
             "AND length(isin) <> 12 " +
-            "AND (isin LIKE '%_TOM' OR isin LIKE '%_TOD')" +
+            "AND isin LIKE '______\\_%' " +
             "AND t2.type = 1 " +
             "AND t2.currency = :currency " +
             "AND timestamp between :from AND :to " +
@@ -127,11 +140,14 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Returns foreign exchange market currency pairs (in USDRUB format)
      */
-    default Collection<String> findDistinctFxCurrencyPairsAndTimestampBetween(Portfolio portfolio, String currency, Instant fromDate, Instant toDate) {
+    default Collection<String> findDistinctFxCurrencyPairByPortfolioAndCurrencyAndTimestampBetween(
+            Portfolio portfolio,
+            String currency,
+            Instant fromDate,
+            Instant toDate) {
         return findDistinctFxInstrumentByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(portfolio, currency, fromDate, toDate)
                 .stream()
-                .map(e -> e.replace("_TOD", "")
-                        .replace("_TOM", ""))
+                .map(e -> e.substring(0, Math.min(6, e.length())))
                 .distinct()
                 .collect(Collectors.toList());
     }
