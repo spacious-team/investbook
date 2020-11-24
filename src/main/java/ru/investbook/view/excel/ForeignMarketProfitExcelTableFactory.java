@@ -67,7 +67,10 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
      * Returns currency pairs, for example USDRUB, EURRUB
      */
     private Collection<String> getCurrencyPairs(Portfolio portfolio) {
-        return transactionRepository.findDistinctFxCurrencyPairsAndTimestampBetween(portfolio, ViewFilter.get().getFromDate(), ViewFilter.get().getToDate());
+        return transactionRepository.findDistinctFxCurrencyPairByPortfolioAndTimestampBetween(
+                portfolio,
+                ViewFilter.get().getFromDate(),
+                ViewFilter.get().getToDate());
     }
 
     private <T extends Position> Table getPositionProfit(String currencyPair,
