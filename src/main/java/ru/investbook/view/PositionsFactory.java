@@ -51,6 +51,10 @@ public class PositionsFactory {
                 .computeIfAbsent(getCacheKey(isinOrContract, filter), k -> create(portfolio, isinOrContract, filter));
     }
 
+    public void invalidateCache() {
+        positionsCache.clear();
+    }
+
     private String getCacheKey(String isinOrContract, ViewFilter filter) {
         String key = (SecurityType.getSecurityType(isinOrContract) == SecurityType.CURRENCY_PAIR) ?
                 getCurrencyPair(isinOrContract) :
@@ -60,16 +64,23 @@ public class PositionsFactory {
 
     private Positions create(Portfolio portfolio, String isinOrContract, ViewFilter filter) {
         SecurityType type = SecurityType.getSecurityType(isinOrContract);
-        LinkedList<Transaction> transactions = new LinkedList<>();
+        LinkedList<Transaction> transactions;
         if (type == SecurityType.CURRENCY_PAIR) {
             String currencyPair = getCurrencyPair(isinOrContract);
-            transactions.addAll(getTransactions(portfolio, currencyPair + "_TOM", filter));
-            transactions.addAll(getTransactions(portfolio, currencyPair + "_TOD", filter));
+            transactions = transactionRepository
+                    .findDistinctFxInstrumentByPortfolioAndCurrencyPairAndTimestampBetween(
+                            portfolio,
+                            currencyPair,
+                            filter.getFromDate(),
+                            filter.getToDate())
+                    .stream()
+                    .flatMap(contract -> getTransactions(portfolio, contract, filter).stream())
+                    .collect(Collectors.toCollection(LinkedList::new));
             transactions.sort(
                     Comparator.comparing(Transaction::getTimestamp)
                             .thenComparing(Transaction::getId));
         } else {
-            transactions.addAll(getTransactions(portfolio, isinOrContract, filter));
+            transactions = getTransactions(portfolio, isinOrContract, filter);
         }
         Deque<SecurityEventCashFlow> redemption = (type == SecurityType.STOCK_OR_BOND) ?
                 getRedemption(portfolio, isinOrContract, filter) :
