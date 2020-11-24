@@ -24,18 +24,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
+import ru.investbook.view.PositionsFactory;
 
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
+import static org.spacious_team.broker.pojo.CashFlowType.REDEMPTION;
+
 @RestController
 @RequestMapping("/security-event-cash-flows")
 public class SecurityEventCashFlowRestController extends AbstractRestController<Integer, SecurityEventCashFlow, SecurityEventCashFlowEntity> {
+    private final PositionsFactory positionsFactory;
 
     public SecurityEventCashFlowRestController(JpaRepository<SecurityEventCashFlowEntity, Integer> repository,
-                                               EntityConverter<SecurityEventCashFlowEntity, SecurityEventCashFlow> converter) {
+                                               EntityConverter<SecurityEventCashFlowEntity, SecurityEventCashFlow> converter,
+                                               PositionsFactory positionsFactory) {
         super(repository, converter);
+        this.positionsFactory = positionsFactory;
     }
 
     @GetMapping
@@ -53,6 +59,7 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @PostMapping
     @Override
     public ResponseEntity<SecurityEventCashFlowEntity> post(@Valid @RequestBody SecurityEventCashFlow event) {
+        if (event.getEventType() == REDEMPTION) positionsFactory.invalidateCache();
         return super.post(event);
     }
 
@@ -60,12 +67,14 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @Override
     public ResponseEntity<SecurityEventCashFlowEntity> put(@PathVariable("id") Integer id,
                                                    @Valid @RequestBody SecurityEventCashFlow event) {
+        if (event.getEventType() == REDEMPTION) positionsFactory.invalidateCache();
         return super.put(id, event);
     }
 
     @DeleteMapping("{id}")
     @Override
     public void delete(@PathVariable("id") Integer id) {
+        positionsFactory.invalidateCache();
         super.delete(id);
     }
 

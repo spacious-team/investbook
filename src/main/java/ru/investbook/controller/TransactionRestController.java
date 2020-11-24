@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.entity.TransactionEntityPK;
+import ru.investbook.view.PositionsFactory;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -35,10 +36,13 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/transactions")
 public class TransactionRestController extends AbstractRestController<TransactionEntityPK, Transaction, TransactionEntity> {
+    private final PositionsFactory positionsFactory;
 
     public TransactionRestController(JpaRepository<TransactionEntity, TransactionEntityPK> repository,
-                                     EntityConverter<TransactionEntity, Transaction> converter) {
+                                     EntityConverter<TransactionEntity, Transaction> converter,
+                                     PositionsFactory positionsFactory) {
         super(repository, converter);
+        this.positionsFactory = positionsFactory;
     }
 
     @Override
@@ -59,6 +63,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
     @Override
     @PostMapping
     public ResponseEntity<TransactionEntity> post(@Valid @RequestBody Transaction object) {
+        positionsFactory.invalidateCache();
         return super.post(object);
     }
 
@@ -69,6 +74,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
     public ResponseEntity<TransactionEntity> put(@PathVariable("portfolio") String portfolio,
                                                  @PathVariable("id") String id,
                                                  @Valid @RequestBody Transaction object) {
+        positionsFactory.invalidateCache();
         return super.put(getId(portfolio, id), object);
     }
 
@@ -78,6 +84,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
     @DeleteMapping("/portfolio/{portfolio}/id/{id}")
     public void delete(@PathVariable("portfolio") String portfolio,
                        @PathVariable("id") String id) {
+        positionsFactory.invalidateCache();
         super.delete(getId(portfolio, id));
     }
 

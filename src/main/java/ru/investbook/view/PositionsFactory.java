@@ -51,6 +51,10 @@ public class PositionsFactory {
                 .computeIfAbsent(getCacheKey(isinOrContract, filter), k -> create(portfolio, isinOrContract, filter));
     }
 
+    public void invalidateCache() {
+        positionsCache.clear();
+    }
+
     private String getCacheKey(String isinOrContract, ViewFilter filter) {
         String key = (SecurityType.getSecurityType(isinOrContract) == SecurityType.CURRENCY_PAIR) ?
                 getCurrencyPair(isinOrContract) :
