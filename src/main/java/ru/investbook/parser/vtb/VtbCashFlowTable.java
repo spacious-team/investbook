@@ -46,8 +46,10 @@ public class VtbCashFlowTable extends AbstractReportTable<EventCashFlow> {
         String operation = String.valueOf(table.getStringCellValueOrDefault(row, OPERATION, ""))
                 .toLowerCase()
                 .trim();
+        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
         CashFlowType type = switch (operation) {
-            case "зачисление денежных средств" -> CashFlowType.CASH;
+            case "зачисление денежных средств" ->
+                    description.contains("погаш. номин.ст-ти обл") ? null : CashFlowType.CASH;
             case "списание денежных средств" -> CashFlowType.CASH;
             case "ндфл" -> CashFlowType.TAX;
             default -> null;
@@ -55,7 +57,6 @@ public class VtbCashFlowTable extends AbstractReportTable<EventCashFlow> {
         if (type == null) {
             return Collections.emptyList();
         }
-        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
         return singletonList(EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(type)

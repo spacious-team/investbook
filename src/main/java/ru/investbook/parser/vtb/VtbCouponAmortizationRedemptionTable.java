@@ -53,11 +53,15 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractReportTable<Se
             Pattern.compile("\\b([\\w]+),\\s+частичное досроч")
     };
     private final SecurityRegNumberToIsinConverter regNumberToIsinConverter;
+    private final VtbSecurityDepositAndWithdrawalTable vtbSecurityDepositAndWithdrawalTable;
     private final Collection<EventCashFlow> externalBondPayments = new ArrayList<>();
 
-    protected VtbCouponAmortizationRedemptionTable(BrokerReport report, SecurityRegNumberToIsinConverter regNumberToIsinConverter) {
+    protected VtbCouponAmortizationRedemptionTable(BrokerReport report,
+                                                   SecurityRegNumberToIsinConverter regNumberToIsinConverter,
+                                                   VtbSecurityDepositAndWithdrawalTable vtbSecurityDepositAndWithdrawalTable) {
         super(report, TABLE_NAME, null, VtbCashFlowTable.VtbCashFlowTableHeader.class);
         this.regNumberToIsinConverter = regNumberToIsinConverter;
+        this.vtbSecurityDepositAndWithdrawalTable = vtbSecurityDepositAndWithdrawalTable;
     }
 
     @Override
@@ -70,8 +74,8 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractReportTable<Se
         CashFlowType eventType = switch (operation) {
             case "купонный доход" -> CashFlowType.COUPON;
             case "погашение ценных бумаг" -> lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч") ?
-                    CashFlowType.AMORTIZATION :
-                    CashFlowType.REDEMPTION;
+                    CashFlowType.AMORTIZATION : null;
+            case "зачисление денежных средств" -> description.contains("погаш. номин.ст-ти обл") ? CashFlowType.REDEMPTION : null;
             default -> null;
         };
         if (eventType == null) {
@@ -85,10 +89,16 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractReportTable<Se
         try {
             String isin = getIsin(lowercaseDescription, regNumberToIsinConverter);
             int count = switch (eventType) {
-                case COUPON -> value.divide(getCouponPerOneBond(lowercaseDescription), 2, RoundingMode.HALF_UP)
+                case COUPON ->
+                        value.divide(getCouponPerOneBond(lowercaseDescription), 2, RoundingMode.HALF_UP)
                         .intValueExact();
-                default -> value.divide(getAmortizationPerOneBond(lowercaseDescription), 2, RoundingMode.HALF_UP)
+                case AMORTIZATION ->
+                        value.divide(getAmortizationPerOneBond(lowercaseDescription), 2, RoundingMode.HALF_UP)
                         .intValueExact();
+                case REDEMPTION ->
+                        vtbSecurityDepositAndWithdrawalTable.getBondRedemptionCount(isin)
+                                .orElseThrow(() -> new IllegalArgumentException("Не удалось определить количество погашенных облигаций " + isin));
+                default -> throw new UnsupportedOperationException();
             };
             SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                     .portfolio(getReport().getPortfolio())
