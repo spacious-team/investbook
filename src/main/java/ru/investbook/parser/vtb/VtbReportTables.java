@@ -29,6 +29,7 @@ public class VtbReportTables implements ReportTables {
     private final ReportTable<Security> securitiesTable;
     @Getter
     private final VtbCouponAmortizationRedemptionTable couponAmortizationRedemptionTable;
+    private VtbSecurityDepositAndWithdrawalTable vtbSecurityDepositAndWithdrawalTable;
 
     public VtbReportTables(BrokerReport report) {
         this.report = report;
@@ -37,8 +38,9 @@ public class VtbReportTables implements ReportTables {
         this.securitiesTable = WrappingReportTable.of(vtbSecuritiesTable, vtbSecurityFlowTable);
         SecurityRegNumberToIsinConverter securityRegNumberToIsinConverter = new SecurityRegNumberToIsinConverterImpl(
                 vtbSecuritiesTable, vtbSecurityFlowTable);
+        this.vtbSecurityDepositAndWithdrawalTable = new VtbSecurityDepositAndWithdrawalTable(report);
         this.couponAmortizationRedemptionTable = new VtbCouponAmortizationRedemptionTable(
-                report, securityRegNumberToIsinConverter);
+                report, securityRegNumberToIsinConverter, vtbSecurityDepositAndWithdrawalTable);
     }
 
     @Override
@@ -63,7 +65,7 @@ public class VtbReportTables implements ReportTables {
     public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
         return WrappingReportTable.of(
                 new VtbSecurityTransactionTable(report),
-                new VtbSecurityDepositAndWithdrawalTable(report));
+                vtbSecurityDepositAndWithdrawalTable);
     }
 
     @Override
