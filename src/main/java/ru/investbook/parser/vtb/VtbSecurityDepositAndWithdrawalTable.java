@@ -45,6 +45,7 @@ public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<S
     protected Collection<SecurityTransaction> getRow(Table table, TableRow row) {
         String operation = table.getStringCellValueOrDefault(row, OPERATION, "").toLowerCase().trim();
         switch (operation) {
+            case "перевод цб": // перевод между субсчетами
             case "конвертация цб":
             case "вывод цб": // указывался при сплите акций APPL 4:1 (count = +3) и TSLA 5:1 (count = +4)
             case "ввод цб": // догадка, нет примера отчета
