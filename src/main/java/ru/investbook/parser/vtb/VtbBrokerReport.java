@@ -36,7 +36,8 @@ import java.time.temporal.ChronoUnit;
 @EqualsAndHashCode(callSuper = true)
 public class VtbBrokerReport extends AbstractExcelBrokerReport {
     private static final String UNIQ_TEXT = VtbBrokerReport.REPORT_DATE_MARKER;
-    private static final String PORTFOLIO_MARKER = "№ субсчета:";
+    private static final String ACCOUNT_MARKER = "№ и дата Соглашения";
+    private static final String SUBACCOUNT_MARKER = "№ субсчета:";
     private static final String REPORT_DATE_MARKER = "Отчет Банка ВТБ";
     static final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
@@ -61,13 +62,17 @@ public class VtbBrokerReport extends AbstractExcelBrokerReport {
 
     private static String getPortfolio(ReportPage reportPage) {
         try {
-            Object value = reportPage.getNextColumnValue(PORTFOLIO_MARKER);
-            if (value instanceof Number) {
-                value = ((Number) value).intValue();
+            Object account = reportPage.getNextColumnValue(ACCOUNT_MARKER);
+            Object subAccount = reportPage.getNextColumnValue(SUBACCOUNT_MARKER);
+            if (account instanceof Number) account = ((Number) account).intValue();
+            if (subAccount instanceof Number) subAccount = ((Number) subAccount).intValue();
+            if (account.equals(subAccount)) {
+                return String.valueOf(account);
+            } else {
+                return account + "-" + subAccount;
             }
-            return String.valueOf(value);
         } catch (Exception e) {
-            throw new RuntimeException("В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + " XXX'");
+            throw new RuntimeException("В отчете не найден номер договора по заданному шаблону '" + SUBACCOUNT_MARKER + " XXX'");
         }
     }
 
