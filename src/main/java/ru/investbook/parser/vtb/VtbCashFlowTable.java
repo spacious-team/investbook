@@ -51,6 +51,7 @@ public class VtbCashFlowTable extends AbstractReportTable<EventCashFlow> {
             case "зачисление денежных средств" ->
                     description.contains("погаш. номин.ст-ти обл") ? null : CashFlowType.CASH;
             case "списание денежных средств" -> CashFlowType.CASH;
+            case "перевод денежных средств" -> CashFlowType.CASH; // перевод ДС на другой субсчет
             case "ндфл" -> CashFlowType.TAX;
             default -> null;
         };
