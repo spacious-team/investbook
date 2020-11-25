@@ -73,7 +73,7 @@ public class VtbPortfolioPropertyTable extends InitializableReportTable<Portfoli
                     .value(getReport().getReportPage().getNextColumnValue(rowHeader).toString())
                     .build());
         } catch (Exception e) {
-            log.info("Не удалось распарсить свойство '{}' из {}", rowHeader, getReport().getPath());
+            log.debug("Не удалось распарсить свойство '{}' из {}", rowHeader, getReport().getPath());
             return emptyList();
         }
     }
