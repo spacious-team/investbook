@@ -32,6 +32,7 @@ public enum CashFlowExcelTableHeader implements ExcelTableHeader {
     DESCRIPTION("Описание"),
     LIQUIDATION_VALUE_RUB("Ликвидная стоимость, руб"),
     PROFIT("Доходность годовых, %"),
+    CASH_BALANCE("Остаток денежных средств"),
     CURRENCY_NAME("Валюта"),
     EXCHANGE_RATE("Курс, руб");
 

@@ -46,6 +46,7 @@ import static ru.investbook.view.excel.PortfolioStatusExcelTableHeader.*;
 @RequiredArgsConstructor
 @Slf4j
 public class PortfolioStatusExcelTableFactory implements TableFactory {
+    static final BigDecimal minCash = BigDecimal.valueOf(0.01);
     private static final String STOCK_GROSS_PROFIT_FORMULA = getStockOrBondGrossProfitFormula();
     private static final String PROFIT_FORMULA = getProfitFormula();
     private static final String PROFIT_PROPORTION_FORMULA = getProfitProportionFormula();
@@ -62,7 +63,6 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     private final ForeignExchangeRateService foreignExchangeRateService;
     private final PortfolioPropertyRepository portfolioPropertyRepository;
     private final Instant instantOf2000_01_01 = LocalDate.of(2000, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant();
-    private final BigDecimal minCash = BigDecimal.valueOf(0.01);
 
     public Table create(Portfolio portfolio) {
         throw new UnsupportedOperationException();
@@ -110,10 +110,9 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
 
     private Table.Record getCashRow(Portfolio portfolio, String forCurrency) {
         Table.Record row = new Table.Record();
-        Instant atTime = Instant.ofEpochSecond(
-                Math.min(
-                        ViewFilter.get().getToDate().getEpochSecond(),
-                        Instant.now().getEpochSecond()));
+        Instant atTime = Instant.ofEpochSecond(Math.min(
+                ViewFilter.get().getToDate().getEpochSecond(),
+                Instant.now().getEpochSecond()));
         row.put(SECURITY, "Остаток денежных средств, " + forCurrency.toLowerCase());
         Optional<PortfolioProperty> portfolioCashes = getPortfolioCash(portfolio, atTime);
         row.put(LAST_EVENT_DATE, portfolioCashes.map(PortfolioProperty::getTimestamp).orElse(null));
@@ -395,8 +394,6 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
 
     /**
      * Возвращает последний известный остаток денежных средств соответствующей дате, не позже указанной.
-     *
-     * @return cash or null if value not fount in db
      */
     private Optional<PortfolioProperty> getPortfolioCash(Portfolio portfolio, Instant atInstant) {
         return portfolioPropertyRepository
