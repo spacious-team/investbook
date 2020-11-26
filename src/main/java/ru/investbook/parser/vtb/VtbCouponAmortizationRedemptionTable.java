@@ -71,13 +71,28 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractReportTable<Se
                 .toLowerCase();
         String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
         String lowercaseDescription = description.toLowerCase();
-        CashFlowType eventType = switch (operation) {
-            case "купонный доход" -> CashFlowType.COUPON;
-            case "погашение ценных бумаг" -> lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч") ?
-                    CashFlowType.AMORTIZATION : null;
-            case "зачисление денежных средств" -> description.contains("погаш. номин.ст-ти обл") ? CashFlowType.REDEMPTION : null;
-            default -> null;
-        };
+        CashFlowType eventType = null;
+        switch (operation) {
+            case "купонный доход":
+                eventType = CashFlowType.COUPON;
+                break;
+            case "погашение ценных бумаг":
+                if (lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч")) {
+                    eventType = CashFlowType.AMORTIZATION;
+                } else if (lowercaseDescription.contains("погаш. номин.ст-ти обл")) { // предположение
+                    eventType = CashFlowType.REDEMPTION;
+                }
+                break;
+            case "зачисление денежных средств":
+                if (lowercaseDescription.contains("погаш. номин.ст-ти обл")) {
+                    eventType = CashFlowType.REDEMPTION;
+                } else if (lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч")) {
+                    eventType = CashFlowType.AMORTIZATION;
+                } else if (lowercaseDescription.contains("куп. дох. по обл")) {
+                    eventType = CashFlowType.COUPON;
+                }
+                break;
+        }
         if (eventType == null) {
             return Collections.emptyList();
         }
@@ -89,15 +104,12 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractReportTable<Se
         try {
             String isin = getIsin(lowercaseDescription, regNumberToIsinConverter);
             int count = switch (eventType) {
-                case COUPON ->
-                        value.divide(getCouponPerOneBond(lowercaseDescription), 2, RoundingMode.HALF_UP)
+                case COUPON -> value.divide(getCouponPerOneBond(lowercaseDescription), 2, RoundingMode.HALF_UP)
                         .intValueExact();
-                case AMORTIZATION ->
-                        value.divide(getAmortizationPerOneBond(lowercaseDescription), 2, RoundingMode.HALF_UP)
+                case AMORTIZATION -> value.divide(getAmortizationPerOneBond(lowercaseDescription), 2, RoundingMode.HALF_UP)
                         .intValueExact();
-                case REDEMPTION ->
-                        vtbSecurityDepositAndWithdrawalTable.getBondRedemptionCount(isin)
-                                .orElseThrow(() -> new IllegalArgumentException("Не удалось определить количество погашенных облигаций " + isin));
+                case REDEMPTION -> vtbSecurityDepositAndWithdrawalTable.getBondRedemptionCount(isin)
+                        .orElseThrow(() -> new IllegalArgumentException("Не удалось определить количество погашенных облигаций " + isin));
                 default -> throw new UnsupportedOperationException();
             };
             SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()

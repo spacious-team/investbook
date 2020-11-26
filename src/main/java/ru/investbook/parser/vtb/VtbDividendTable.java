@@ -52,10 +52,11 @@ public class VtbDividendTable extends AbstractReportTable<EventCashFlow> {
     protected Collection<EventCashFlow> getRow(Table table, TableRow row) {
         String operation = String.valueOf(table.getStringCellValueOrDefault(row, OPERATION, ""))
                 .trim();
-        if (!operation.equalsIgnoreCase("Дивиденды")) {
+        String description = table.getStringCellValue(row, DESCRIPTION);
+        if (!operation.equalsIgnoreCase("Дивиденды") &&
+                !description.toLowerCase().contains("дивиденды")) { // предположение
             return Collections.emptyList();
         }
-        String description = table.getStringCellValue(row, DESCRIPTION);
 
         Collection<EventCashFlow> data = new ArrayList<>();
         BigDecimal tax = getTax(description.toLowerCase());

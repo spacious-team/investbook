@@ -47,10 +47,15 @@ public class VtbCashFlowTable extends AbstractReportTable<EventCashFlow> {
                 .toLowerCase()
                 .trim();
         String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
+        String lowercaseDescription = description.toLowerCase();
         CashFlowType type = switch (operation) {
-            case "зачисление денежных средств" ->
-                    description.contains("погаш. номин.ст-ти обл") ? null : CashFlowType.CASH;
+            case "зачисление денежных средств" -> lowercaseDescription.contains("погаш. номин.ст-ти обл") ||
+                    lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч") ||
+                    lowercaseDescription.contains("куп. дох. по обл") ||
+                    lowercaseDescription.contains("дивиденды") // предположение
+                    ? null : CashFlowType.CASH;
             case "списание денежных средств" -> CashFlowType.CASH;
+            case "перевод денежных средств" -> CashFlowType.CASH; // перевод ДС на другой субсчет
             case "ндфл" -> CashFlowType.TAX;
             default -> null;
         };
