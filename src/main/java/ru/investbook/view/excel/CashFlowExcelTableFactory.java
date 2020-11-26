@@ -23,15 +23,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.report_parser.api.PortfolioCash;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.EventCashFlowConverter;
+import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.repository.EventCashFlowRepository;
+import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;
+import ru.investbook.view.ViewFilter;
 
+import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.investbook.view.excel.CashFlowExcelTableHeader.*;
@@ -45,6 +50,7 @@ public class CashFlowExcelTableFactory implements TableFactory {
     private final EventCashFlowRepository eventCashFlowRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
+    private final PortfolioPropertyRepository portfolioPropertyRepository;
 
     @Override
     public Table create(Portfolio portfolio) {
@@ -69,8 +75,8 @@ public class CashFlowExcelTableFactory implements TableFactory {
         }
         if (!cashFlows.isEmpty()) {
             addLiquidationValueRow(table);
-            foreignExchangeRateTableFactory.appendExchangeRates(table, CURRENCY_NAME, EXCHANGE_RATE);
         }
+        appendCurrencyInfo(portfolio, table);
         return table;
     }
 
@@ -82,5 +88,62 @@ public class CashFlowExcelTableFactory implements TableFactory {
         record.put(CASH_RUB, "=" + CASH.getCellAddr());
         record.put(DESCRIPTION, "Ликвидная стоимость активов, доступная к выводу");
         table.add(record);
+    }
+
+    private void appendCurrencyInfo(Portfolio portfolio, Table table) {
+        foreignExchangeRateTableFactory.appendExchangeRates(table, CURRENCY_NAME, EXCHANGE_RATE);
+        appendCashBalance(portfolio, table);
+    }
+
+    public void appendCashBalance(Portfolio portfolio, Table table) {
+        Map<String, BigDecimal> currencyToValues = getCashBalances(portfolio);
+        Table.Record rubCashBalanceRecord = null;
+        for (Table.Record record : table) {
+            String currency = Optional.ofNullable((String) record.get(CURRENCY_NAME))
+                    .map(String::toUpperCase)
+                    .orElse(null);
+            if (currency != null) {
+                BigDecimal value = currencyToValues.get(currency);
+                record.put(CASH_BALANCE, value);
+            } else {
+                rubCashBalanceRecord = record;
+                break;
+            }
+        }
+        // print RUB after all already printed currencies
+        BigDecimal rubCash = currencyToValues.get("RUB");
+        if (rubCash != null) {
+            if (rubCashBalanceRecord == null) {
+                rubCashBalanceRecord = new Table.Record();
+                table.add(rubCashBalanceRecord);
+            }
+            rubCashBalanceRecord.put(CASH_BALANCE, rubCash);
+            rubCashBalanceRecord.put(CURRENCY_NAME, "RUB");
+            rubCashBalanceRecord.put(EXCHANGE_RATE, 1);
+        }
+    }
+
+    private Map<String, BigDecimal> getCashBalances(Portfolio portfolio) {
+        Instant atTime = Instant.ofEpochSecond(Math.min(
+                ViewFilter.get().getToDate().getEpochSecond(),
+                Instant.now().getEpochSecond()));
+        return getPortfolioCash(portfolio, atTime)
+                .map(PortfolioCash::valueOf)
+                .orElse(Collections.emptyList())
+                .stream()
+                .collect(Collectors.toMap(c -> c.getCurrency().toUpperCase(), PortfolioCash::getValue, BigDecimal::add));
+    }
+
+    /**
+     * Возвращает последний известный остаток денежных средств соответствующей дате, не позже указанной.
+     */
+    private Optional<String> getPortfolioCash(Portfolio portfolio, Instant atInstant) {
+        return portfolioPropertyRepository
+                .findFirstByPortfolioIdAndPropertyAndTimestampBetweenOrderByTimestampDesc(
+                        portfolio.getId(),
+                        PortfolioPropertyType.CASH.name(),
+                        Instant.ofEpochSecond(0),
+                        atInstant)
+                .map(PortfolioPropertyEntity::getValue);
     }
 }
