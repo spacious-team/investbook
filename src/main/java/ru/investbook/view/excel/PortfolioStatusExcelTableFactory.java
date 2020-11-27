@@ -194,7 +194,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             int count = getCount(positions);
             row.put(COUNT, count);
             if (count == 0) {
-                row.put(GROSS_PROFIT, "=" + getGrossProfit(portfolio, security, positions) + "+" + AMORTIZATION.getCellAddr());
+                row.put(GROSS_PROFIT, "=" + getGrossProfit(portfolio, security, positions) +
+                        ((securityType == SecurityType.STOCK_OR_BOND) ? ("+" + AMORTIZATION.getCellAddr()) : ""));
             } else {
                 row.put(AVERAGE_PRICE, getPurchaseCost(security, positions)
                         .abs()
