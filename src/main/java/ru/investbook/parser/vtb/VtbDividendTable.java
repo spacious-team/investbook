@@ -53,6 +53,7 @@ public class VtbDividendTable extends AbstractReportTable<EventCashFlow> {
         String operation = String.valueOf(table.getStringCellValueOrDefault(row, OPERATION, ""))
                 .trim();
         String description = table.getStringCellValue(row, DESCRIPTION);
+        // gh-170
         if (!operation.equalsIgnoreCase("Дивиденды") &&
                 !description.toLowerCase().contains("дивиденды")) { // предположение
             return Collections.emptyList();

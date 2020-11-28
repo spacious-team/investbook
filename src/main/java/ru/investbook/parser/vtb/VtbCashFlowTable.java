@@ -49,13 +49,11 @@ public class VtbCashFlowTable extends AbstractReportTable<EventCashFlow> {
         String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
         String lowercaseDescription = description.toLowerCase();
         CashFlowType type = switch (operation) {
-            case "зачисление денежных средств" -> lowercaseDescription.contains("погаш. номин.ст-ти обл") ||
-                    lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч") ||
-                    lowercaseDescription.contains("куп. дох. по обл") ||
-                    lowercaseDescription.contains("дивиденды") // предположение
-                    ? null : CashFlowType.CASH;
+            // gh-170
+            case "зачисление денежных средств" -> isCash(lowercaseDescription) ? CashFlowType.CASH : null;
             case "списание денежных средств" -> CashFlowType.CASH;
             case "перевод денежных средств" -> CashFlowType.CASH; // перевод ДС на другой субсчет
+            case "перераспределение дохода между субсчетами / торговыми площадками" -> CashFlowType.CASH; // выплаты субсчета проходят через основной счет
             case "ндфл" -> CashFlowType.TAX;
             default -> null;
         };
@@ -70,6 +68,13 @@ public class VtbCashFlowTable extends AbstractReportTable<EventCashFlow> {
                 .currency(VtbBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
                 .description(StringUtils.isEmpty(description) ? null : description)
                 .build());
+    }
+
+    private boolean isCash(String lowercaseDescription) {
+        return !(lowercaseDescription.contains("погаш. номин.ст-ти обл") ||
+                lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч") ||
+                lowercaseDescription.contains("куп. дох. по обл") ||
+                lowercaseDescription.contains("дивиденды"));
     }
 
     @Override

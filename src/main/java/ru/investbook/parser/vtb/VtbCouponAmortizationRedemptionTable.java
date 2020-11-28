@@ -73,6 +73,7 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractReportTable<Se
         String lowercaseDescription = description.toLowerCase();
         CashFlowType eventType = null;
         switch (operation) {
+            // gh-170
             case "купонный доход":
                 eventType = CashFlowType.COUPON;
                 break;
@@ -131,7 +132,7 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractReportTable<Se
             return data;
         } catch (Exception e) {
             log.warn("Выплата будет сохранена без привязки к ISIN облигации: {}", description, e);
-            addToExternalBonPayments(timestamp, eventType, value, tax, currency, description);
+            addToExternalBondPayment(timestamp, eventType, value, tax, currency, description);
             return Collections.emptyList();
         }
     }
@@ -166,7 +167,7 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractReportTable<Se
         throw new IllegalArgumentException("Не смогу выделить размер купона на одну облигацию из описания: " + description);
     }
 
-    private void addToExternalBonPayments(Instant timestamp,
+    private void addToExternalBondPayment(Instant timestamp,
                                           CashFlowType eventType,
                                           BigDecimal value,
                                           BigDecimal tax,
