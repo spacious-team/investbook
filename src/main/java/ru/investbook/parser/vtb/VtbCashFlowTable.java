@@ -18,59 +18,52 @@
 
 package ru.investbook.parser.vtb;
 
-import lombok.Getter;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.table_wrapper.api.*;
-import org.spacious_team.table_wrapper.excel.ExcelTable;
 import org.springframework.util.StringUtils;
 
 import java.util.Collection;
 import java.util.Collections;
 
 import static java.util.Collections.singletonList;
-import static ru.investbook.parser.vtb.VtbCashFlowTable.VtbCashFlowTableHeader.*;
 
-public class VtbCashFlowTable extends AbstractReportTable<EventCashFlow> {
+public class VtbCashFlowTable extends AbstractVtbCashFlowTable<EventCashFlow> {
 
-    static final String TABLE_NAME = "Движение денежных средств";
-
-    public VtbCashFlowTable(BrokerReport report) {
-        super(report, TABLE_NAME, null, VtbCashFlowTableHeader.class);
+    public VtbCashFlowTable(CashFlowEventTable cashFlowEventTable) {
+        super(cashFlowEventTable);
     }
 
     @Override
-    protected Collection<EventCashFlow> getRow(Table table, TableRow row) {
-        String operation = String.valueOf(table.getStringCellValueOrDefault(row, OPERATION, ""))
-                .toLowerCase()
-                .trim();
-        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
-        String lowercaseDescription = description.toLowerCase();
-        CashFlowType type = switch (operation) {
+    protected Collection<EventCashFlow> getRow(CashFlowEventTable.CashFlowEvent event) {
+        CashFlowType type = getType(event);
+        if (type == null) {
+            return Collections.emptyList();
+        }
+        String description = event.getDescription();
+        return singletonList(EventCashFlow.builder()
+                .portfolio(getReport().getPortfolio())
+                .eventType(type)
+                .timestamp(event.getDate())
+                .value(event.getValue())
+                .currency(event.getCurrency())
+                .description(StringUtils.isEmpty(description) ? null : description)
+                .build());
+    }
+
+    private CashFlowType getType(CashFlowEventTable.CashFlowEvent event) {
+        return switch (event.getOperation()) {
             // gh-170
-            case "зачисление денежных средств" -> isCash(lowercaseDescription) ? CashFlowType.CASH : null;
+            case "зачисление денежных средств" -> isCash(event.getDescription()) ? CashFlowType.CASH : null;
             case "списание денежных средств" -> CashFlowType.CASH;
             case "перевод денежных средств" -> CashFlowType.CASH; // перевод ДС на другой субсчет
             case "перераспределение дохода между субсчетами / торговыми площадками" -> CashFlowType.CASH; // выплаты субсчета проходят через основной счет
             case "ндфл" -> CashFlowType.TAX;
             default -> null;
         };
-        if (type == null) {
-            return Collections.emptyList();
-        }
-        return singletonList(EventCashFlow.builder()
-                .portfolio(getReport().getPortfolio())
-                .eventType(type)
-                .timestamp(((ExcelTable) table).getDateCellValue(row, DATE).toInstant())
-                .value(table.getCurrencyCellValue(row, VALUE))
-                .currency(VtbBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
-                .description(StringUtils.isEmpty(description) ? null : description)
-                .build());
     }
 
-    private boolean isCash(String lowercaseDescription) {
+    private boolean isCash(String description) {
+        String lowercaseDescription = description.toLowerCase();
         return !(lowercaseDescription.contains("погаш. номин.ст-ти обл") ||
                 lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч") ||
                 lowercaseDescription.contains("куп. дох. по обл") ||
@@ -85,20 +78,5 @@ public class VtbCashFlowTable extends AbstractReportTable<EventCashFlow> {
     @Override
     protected Collection<EventCashFlow> mergeDuplicates(EventCashFlow old, EventCashFlow nw) {
         return EventCashFlow.mergeDuplicates(old, nw);
-    }
-
-    @Getter
-    enum VtbCashFlowTableHeader implements TableColumnDescription {
-        DATE("дата"),
-        VALUE("сумма"),
-        CURRENCY("валюта"),
-        OPERATION("тип операции"),
-        DESCRIPTION("комментарий");
-
-        private final TableColumn column;
-
-        VtbCashFlowTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
-        }
     }
 }
