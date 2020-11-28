@@ -31,6 +31,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Double.parseDouble;
+import static org.spacious_team.broker.pojo.CashFlowType.DIVIDEND;
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
 
 @Slf4j
@@ -44,21 +45,19 @@ public class VtbDividendTable extends AbstractVtbCashFlowTable<EventCashFlow> {
 
     @Override
     protected Collection<EventCashFlow> getRow(CashFlowEventTable.CashFlowEvent event) {
-        String description = event.getDescription();
-        String lowercaseDescription = description.toLowerCase();
-        // gh-170
-        if (!event.getOperation().equals("дивиденды") &&
-                !lowercaseDescription.contains("дивиденды")) { // предположение
+        CashFlowType eventType = event.getEventType();
+        if (eventType != DIVIDEND) { // предположение
             return Collections.emptyList();
         }
 
         Collection<EventCashFlow> data = new ArrayList<>();
-        BigDecimal tax = getTax(lowercaseDescription);
+        String description = event.getDescription();
+        BigDecimal tax = getTax(description.toLowerCase());
         BigDecimal value = event.getValue()
                 .add(tax.abs());
         EventCashFlow.EventCashFlowBuilder builder = EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
-                .eventType(CashFlowType.DIVIDEND)
+                .eventType(eventType)
                 .timestamp(event.getDate())
                 .value(value)
                 .currency(event.getCurrency())

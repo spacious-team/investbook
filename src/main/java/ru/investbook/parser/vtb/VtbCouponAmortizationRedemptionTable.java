@@ -33,6 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Double.parseDouble;
+import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
 
 @Slf4j
@@ -59,11 +60,11 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
 
     @Override
     protected Collection<SecurityEventCashFlow> getRow(CashFlowEventTable.CashFlowEvent event) {
-        String lowercaseDescription = event.getDescription().toLowerCase();
-        CashFlowType eventType = getCashFlowType(event, lowercaseDescription);
-        if (eventType == null) {
+        CashFlowType eventType = event.getEventType();
+        if (eventType != COUPON && eventType != AMORTIZATION && eventType != REDEMPTION) {
             return Collections.emptyList();
         }
+        String lowercaseDescription = event.getLowercaseDescription();
         BigDecimal tax = VtbDividendTable.getTax(lowercaseDescription);
         BigDecimal value = event.getValue()
                 .add(tax.abs());
@@ -100,31 +101,6 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
             addToExternalBondPayment(event, eventType, value, tax);
             return Collections.emptyList();
         }
-    }
-
-    private CashFlowType getCashFlowType(CashFlowEventTable.CashFlowEvent event, String lowercaseDescription) {
-        switch (event.getOperation()) {
-            // gh-170
-            case "купонный доход":
-                return CashFlowType.COUPON;
-            case "погашение ценных бумаг":
-                if (lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч")) {
-                    return CashFlowType.AMORTIZATION;
-                } else if (lowercaseDescription.contains("погаш. номин.ст-ти обл")) { // предположение
-                    return CashFlowType.REDEMPTION;
-                }
-                break;
-            case "зачисление денежных средств":
-                if (lowercaseDescription.contains("погаш. номин.ст-ти обл")) {
-                    return CashFlowType.REDEMPTION;
-                } else if (lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч")) {
-                    return CashFlowType.AMORTIZATION;
-                } else if (lowercaseDescription.contains("куп. дох. по обл")) {
-                    return CashFlowType.COUPON;
-                }
-                break;
-        }
-        return null;
     }
 
     private static String getIsin(String description, SecurityRegNumberToIsinConverter regNumberToIsinConverter) {

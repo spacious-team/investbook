@@ -26,6 +26,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static java.util.Collections.singletonList;
+import static org.spacious_team.broker.pojo.CashFlowType.CASH;
+import static org.spacious_team.broker.pojo.CashFlowType.TAX;
 
 public class VtbCashFlowTable extends AbstractVtbCashFlowTable<EventCashFlow> {
 
@@ -35,8 +37,8 @@ public class VtbCashFlowTable extends AbstractVtbCashFlowTable<EventCashFlow> {
 
     @Override
     protected Collection<EventCashFlow> getRow(CashFlowEventTable.CashFlowEvent event) {
-        CashFlowType type = getType(event);
-        if (type == null) {
+        CashFlowType type = event.getEventType();
+        if (type != CASH && type != TAX) {
             return Collections.emptyList();
         }
         String description = event.getDescription();
@@ -48,26 +50,6 @@ public class VtbCashFlowTable extends AbstractVtbCashFlowTable<EventCashFlow> {
                 .currency(event.getCurrency())
                 .description(StringUtils.isEmpty(description) ? null : description)
                 .build());
-    }
-
-    private CashFlowType getType(CashFlowEventTable.CashFlowEvent event) {
-        return switch (event.getOperation()) {
-            // gh-170
-            case "зачисление денежных средств" -> isCash(event.getDescription()) ? CashFlowType.CASH : null;
-            case "списание денежных средств" -> CashFlowType.CASH;
-            case "перевод денежных средств" -> CashFlowType.CASH; // перевод ДС на другой субсчет
-            case "перераспределение дохода между субсчетами / торговыми площадками" -> CashFlowType.CASH; // выплаты субсчета проходят через основной счет
-            case "ндфл" -> CashFlowType.TAX;
-            default -> null;
-        };
-    }
-
-    private boolean isCash(String description) {
-        String lowercaseDescription = description.toLowerCase();
-        return !(lowercaseDescription.contains("погаш. номин.ст-ти обл") ||
-                lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч") ||
-                lowercaseDescription.contains("куп. дох. по обл") ||
-                lowercaseDescription.contains("дивиденды"));
     }
 
     @Override

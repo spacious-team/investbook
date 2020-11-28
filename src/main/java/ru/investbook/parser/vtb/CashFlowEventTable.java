@@ -21,6 +21,8 @@ package ru.investbook.parser.vtb;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.*;
@@ -78,8 +80,9 @@ public class CashFlowEventTable extends AbstractReportTable<CashFlowEventTable.C
         return data;
     }
 
-    @Builder
     @Getter
+    @Slf4j
+    @Builder
     @EqualsAndHashCode
     static class CashFlowEvent {
         private static final String duplicateOperation = "Перераспределение дохода между субсчетами / торговыми площадками";
@@ -88,6 +91,7 @@ public class CashFlowEventTable extends AbstractReportTable<CashFlowEventTable.C
         private final String currency;
         private final String operation;
         private final String description;
+        private String lowercaseDescription;
 
         boolean isSubaccountPaymentEvent(CashFlowEvent pairedEvent) {
             return date.equals(pairedEvent.date) &&
@@ -98,6 +102,55 @@ public class CashFlowEventTable extends AbstractReportTable<CashFlowEventTable.C
                             StringUtils.isEmpty(pairedEvent.description) :
                             description.equals(pairedEvent.description));
         }
+
+        String getLowercaseDescription() {
+            if (lowercaseDescription == null) {
+                lowercaseDescription = description.toLowerCase();
+            }
+            return lowercaseDescription;
+        }
+
+        CashFlowType getEventType() {
+            String lowercaseDescription = getLowercaseDescription();
+            switch (operation) {
+                // gh-170
+                case "дивиденды":
+                    return CashFlowType.DIVIDEND;
+                case "купонный доход":
+                    return CashFlowType.COUPON;
+                case "погашение ценных бумаг":
+                    if (lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч")) {
+                        return CashFlowType.AMORTIZATION;
+                    } else if (lowercaseDescription.contains("погаш. номин.ст-ти обл")) { // предположение
+                        return CashFlowType.REDEMPTION;
+                    }
+                    throw new IllegalArgumentException("Неожиданное значение: " + description);
+                case "зачисление денежных средств":
+                    if (lowercaseDescription.contains("дивиденды")) {
+                        return CashFlowType.DIVIDEND;
+                    } else if (lowercaseDescription.contains("погаш. номин.ст-ти обл")) {
+                        return CashFlowType.REDEMPTION;
+                    } else if (lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч")) {
+                        return CashFlowType.AMORTIZATION;
+                    } else if (lowercaseDescription.contains("куп. дох. по обл")) {
+                        return CashFlowType.COUPON;
+                    } else {
+                        return CashFlowType.CASH;
+                    }
+                case "списание денежных средств":
+                    return CashFlowType.CASH;
+                case "перевод денежных средств":
+                    return CashFlowType.CASH; // перевод ДС на другой субсчет
+                case "перераспределение дохода между субсчетами / торговыми площадками":
+                    return CashFlowType.CASH; // выплаты субсчета проходят через основной счет
+                case "ндфл":
+                    return CashFlowType.TAX;
+                default:
+                    log.debug("Проигнорирована операция '{}': {}", operation, description);
+                    return null;
+            }
+        }
+
     }
 
     @Getter
