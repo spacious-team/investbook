@@ -27,8 +27,8 @@ import java.util.function.BiPredicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.*;
-import static org.spacious_team.table_wrapper.api.AbstractTable.*;
+import static java.util.Collections.unmodifiableCollection;
+import static org.spacious_team.table_wrapper.api.AbstractTable.addWithEqualityChecker;
 
 public abstract class AbstractVtbCashFlowTable<RowType> extends InitializableReportTable<RowType> {
 

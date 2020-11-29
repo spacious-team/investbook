@@ -20,8 +20,19 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.spacious_team.broker.pojo.*;
-import org.spacious_team.broker.report_parser.api.*;
+import org.spacious_team.broker.pojo.EventCashFlow;
+import org.spacious_team.broker.pojo.PortfolioProperty;
+import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
+import org.spacious_team.broker.report_parser.api.EmptyReportTable;
+import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
+import org.spacious_team.broker.report_parser.api.PortfolioCash;
+import org.spacious_team.broker.report_parser.api.ReportTable;
+import org.spacious_team.broker.report_parser.api.ReportTables;
+import org.spacious_team.broker.report_parser.api.SecurityTransaction;
+import org.spacious_team.broker.report_parser.api.WrappingReportTable;
 
 @RequiredArgsConstructor
 public class PsbReportTables implements ReportTables {

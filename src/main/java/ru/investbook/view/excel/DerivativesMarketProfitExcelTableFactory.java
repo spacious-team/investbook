@@ -19,13 +19,22 @@
 package ru.investbook.view.excel;
 
 import lombok.RequiredArgsConstructor;
-import org.spacious_team.broker.pojo.*;
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.broker.pojo.Transaction;
+import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionRepository;
-import ru.investbook.view.*;
+import ru.investbook.view.DerivativeEvents;
+import ru.investbook.view.DerivativeEventsFactory;
+import ru.investbook.view.Table;
+import ru.investbook.view.TableFactory;
+import ru.investbook.view.ViewFilter;
 
 import java.math.BigDecimal;
 import java.util.Collection;

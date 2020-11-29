@@ -25,7 +25,14 @@ import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
-import ru.investbook.view.*;
+import ru.investbook.view.ClosedPosition;
+import ru.investbook.view.OpenedPosition;
+import ru.investbook.view.Position;
+import ru.investbook.view.Positions;
+import ru.investbook.view.PositionsFactory;
+import ru.investbook.view.Table;
+import ru.investbook.view.TableFactory;
+import ru.investbook.view.ViewFilter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

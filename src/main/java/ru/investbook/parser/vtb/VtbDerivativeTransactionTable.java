@@ -22,7 +22,11 @@ import lombok.Getter;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
-import org.spacious_team.table_wrapper.api.*;
+import org.spacious_team.table_wrapper.api.Table;
+import org.spacious_team.table_wrapper.api.TableColumn;
+import org.spacious_team.table_wrapper.api.TableColumnDescription;
+import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableRow;
 import org.spacious_team.table_wrapper.excel.ExcelTable;
 
 import java.math.BigDecimal;

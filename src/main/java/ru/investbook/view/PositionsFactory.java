@@ -19,14 +19,23 @@
 package ru.investbook.view;
 
 import lombok.RequiredArgsConstructor;
-import org.spacious_team.broker.pojo.*;
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.broker.pojo.SecurityType;
+import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
 import ru.investbook.converter.TransactionConverter;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 

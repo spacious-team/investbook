@@ -26,7 +26,17 @@ import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.InitializableReportTable;
 import org.spacious_team.broker.report_parser.api.TableFactoryRegistry;
-import org.spacious_team.table_wrapper.api.*;
+import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
+import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
+import org.spacious_team.table_wrapper.api.ReportPage;
+import org.spacious_team.table_wrapper.api.Table;
+import org.spacious_team.table_wrapper.api.TableCell;
+import org.spacious_team.table_wrapper.api.TableCellAddress;
+import org.spacious_team.table_wrapper.api.TableColumn;
+import org.spacious_team.table_wrapper.api.TableColumnDescription;
+import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableFactory;
+import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.view.ForeignExchangeRateService;
 
 import java.math.BigDecimal;

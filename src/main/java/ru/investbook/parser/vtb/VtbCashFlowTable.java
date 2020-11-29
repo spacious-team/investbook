@@ -25,8 +25,9 @@ import org.springframework.util.StringUtils;
 import java.util.Collection;
 import java.util.Collections;
 
-import static java.util.Collections.*;
-import static org.spacious_team.broker.pojo.CashFlowType.*;
+import static java.util.Collections.singletonList;
+import static org.spacious_team.broker.pojo.CashFlowType.CASH;
+import static org.spacious_team.broker.pojo.CashFlowType.TAX;
 
 public class VtbCashFlowTable extends AbstractVtbCashFlowTable<EventCashFlow> {
 
