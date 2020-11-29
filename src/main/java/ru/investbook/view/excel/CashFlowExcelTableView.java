@@ -55,6 +55,7 @@ public class CashFlowExcelTableView extends ExcelTableView {
         sheet.setColumnWidth(DESCRIPTION.ordinal(), 50 * 256);
         sheet.setColumnWidth(LIQUIDATION_VALUE_RUB.ordinal(), 31 * 256);
         sheet.setColumnWidth(PROFIT.ordinal(), 28 * 256);
+        sheet.setColumnWidth(CASH_BALANCE.ordinal(), 19 * 256);
         sheet.setColumnWidth(CURRENCY_NAME.ordinal(), 15 * 256);
         sheet.setColumnWidth(EXCHANGE_RATE.ordinal(), 15 * 256);
     }
@@ -76,6 +77,8 @@ public class CashFlowExcelTableView extends ExcelTableView {
         total.put(PROFIT, "=100*XIRR("
                 + CASH_RUB.getRange(3, table.size() + 2) + ","
                 + DATE.getRange(3, table.size() + 2) + ")");
+        total.put(CASH_BALANCE, "=SUMPRODUCT(" + CASH_BALANCE.getRange(3, table.size() + 2) + ","
+                + EXCHANGE_RATE.getRange(3, table.size() + 2) + ")");
         return total;
     }
 

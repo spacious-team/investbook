@@ -21,12 +21,7 @@ package ru.investbook.parser.vtb;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.table_wrapper.api.Table;
-import org.spacious_team.table_wrapper.api.TableRow;
-import org.spacious_team.table_wrapper.excel.ExcelTable;
-import ru.investbook.parser.vtb.VtbCashFlowTable.VtbCashFlowTableHeader;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -36,38 +31,37 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Double.parseDouble;
+import static org.spacious_team.broker.pojo.CashFlowType.DIVIDEND;
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
-import static ru.investbook.parser.vtb.VtbCashFlowTable.VtbCashFlowTableHeader.*;
 
 @Slf4j
-public class VtbDividendTable extends AbstractReportTable<EventCashFlow> {
+public class VtbDividendTable extends AbstractVtbCashFlowTable<EventCashFlow> {
 
     private static final Pattern taxInformationPattern = Pattern.compile("удержан налог (в размере )?([0-9.]+)([^.]+)");
 
-    protected VtbDividendTable(BrokerReport report) {
-        super(report, VtbCashFlowTable.TABLE_NAME, null, VtbCashFlowTableHeader.class);
+    protected VtbDividendTable(CashFlowEventTable cashFlowEventTable) {
+        super(cashFlowEventTable);
     }
 
     @Override
-    protected Collection<EventCashFlow> getRow(Table table, TableRow row) {
-        String operation = String.valueOf(table.getStringCellValueOrDefault(row, OPERATION, ""))
-                .trim();
-        if (!operation.equalsIgnoreCase("Дивиденды")) {
+    protected Collection<EventCashFlow> getRow(CashFlowEventTable.CashFlowEvent event) {
+        CashFlowType eventType = event.getEventType();
+        if (eventType != DIVIDEND) { // предположение
             return Collections.emptyList();
         }
-        String description = table.getStringCellValue(row, DESCRIPTION);
 
         Collection<EventCashFlow> data = new ArrayList<>();
+        String description = event.getDescription();
         BigDecimal tax = getTax(description.toLowerCase());
-        BigDecimal value = table.getCurrencyCellValue(row, VALUE)
+        BigDecimal value = event.getValue()
                 .add(tax.abs());
         EventCashFlow.EventCashFlowBuilder builder = EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
-                .eventType(CashFlowType.DIVIDEND)
-                .timestamp(((ExcelTable) table).getDateCellValue(row, DATE).toInstant())
+                .eventType(eventType)
+                .timestamp(event.getDate())
                 .value(value)
-                .currency(VtbBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
-                .description(description);
+                .currency(event.getCurrency())
+                .description(StringUtils.isEmpty(description) ? null : description);
         data.add(builder.build());
         if (tax.abs().compareTo(minValue) >= 0) {
             data.add(builder

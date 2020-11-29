@@ -19,8 +19,20 @@
 package ru.investbook.parser.vtb;
 
 import lombok.Getter;
-import org.spacious_team.broker.pojo.*;
-import org.spacious_team.broker.report_parser.api.*;
+import org.spacious_team.broker.pojo.EventCashFlow;
+import org.spacious_team.broker.pojo.PortfolioProperty;
+import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
+import org.spacious_team.broker.report_parser.api.EmptyReportTable;
+import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
+import org.spacious_team.broker.report_parser.api.PortfolioCash;
+import org.spacious_team.broker.report_parser.api.ReportTable;
+import org.spacious_team.broker.report_parser.api.ReportTables;
+import org.spacious_team.broker.report_parser.api.SecurityTransaction;
+import org.spacious_team.broker.report_parser.api.WrappingReportTable;
 
 public class VtbReportTables implements ReportTables {
     @Getter
@@ -29,7 +41,8 @@ public class VtbReportTables implements ReportTables {
     private final ReportTable<Security> securitiesTable;
     @Getter
     private final VtbCouponAmortizationRedemptionTable couponAmortizationRedemptionTable;
-    private VtbSecurityDepositAndWithdrawalTable vtbSecurityDepositAndWithdrawalTable;
+    private final CashFlowEventTable cashFlowEventTable;
+    private final VtbSecurityDepositAndWithdrawalTable vtbSecurityDepositAndWithdrawalTable;
 
     public VtbReportTables(BrokerReport report) {
         this.report = report;
@@ -38,9 +51,10 @@ public class VtbReportTables implements ReportTables {
         this.securitiesTable = WrappingReportTable.of(vtbSecuritiesTable, vtbSecurityFlowTable);
         SecurityRegNumberToIsinConverter securityRegNumberToIsinConverter = new SecurityRegNumberToIsinConverterImpl(
                 vtbSecuritiesTable, vtbSecurityFlowTable);
+        this.cashFlowEventTable = new CashFlowEventTable(report);
         this.vtbSecurityDepositAndWithdrawalTable = new VtbSecurityDepositAndWithdrawalTable(report);
         this.couponAmortizationRedemptionTable = new VtbCouponAmortizationRedemptionTable(
-                report, securityRegNumberToIsinConverter, vtbSecurityDepositAndWithdrawalTable);
+                cashFlowEventTable, securityRegNumberToIsinConverter, vtbSecurityDepositAndWithdrawalTable);
     }
 
     @Override
@@ -56,8 +70,8 @@ public class VtbReportTables implements ReportTables {
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
         return WrappingReportTable.of(
-                new VtbCashFlowTable(report),
-                new VtbDividendTable(report),
+                new VtbCashFlowTable(cashFlowEventTable),
+                new VtbDividendTable(cashFlowEventTable),
                 WrappingReportTable.of(report, couponAmortizationRedemptionTable.getExternalBondPayments()));
     }
 

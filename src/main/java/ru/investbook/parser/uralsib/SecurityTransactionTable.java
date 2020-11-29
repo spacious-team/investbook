@@ -22,7 +22,13 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
-import org.spacious_team.table_wrapper.api.*;
+import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
+import org.spacious_team.table_wrapper.api.RelativePositionTableColumn;
+import org.spacious_team.table_wrapper.api.Table;
+import org.spacious_team.table_wrapper.api.TableColumn;
+import org.spacious_team.table_wrapper.api.TableColumnDescription;
+import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
 import java.time.Instant;

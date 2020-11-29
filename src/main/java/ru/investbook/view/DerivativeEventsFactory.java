@@ -19,7 +19,12 @@
 package ru.investbook.view;
 
 import lombok.RequiredArgsConstructor;
-import org.spacious_team.broker.pojo.*;
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.broker.pojo.Transaction;
+import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
 import ru.investbook.converter.TransactionCashFlowConverter;
@@ -29,9 +34,19 @@ import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
 
 import java.math.BigDecimal;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 

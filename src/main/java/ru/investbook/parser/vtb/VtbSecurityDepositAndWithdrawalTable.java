@@ -27,7 +27,11 @@ import org.spacious_team.table_wrapper.excel.ExcelTable;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static ru.investbook.parser.vtb.VtbSecurityFlowTable.VtbSecurityFlowTableHeader.*;
 
@@ -45,6 +49,7 @@ public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<S
     protected Collection<SecurityTransaction> getRow(Table table, TableRow row) {
         String operation = table.getStringCellValueOrDefault(row, OPERATION, "").toLowerCase().trim();
         switch (operation) {
+            case "перевод цб": // перевод между субсчетами
             case "конвертация цб":
             case "вывод цб": // указывался при сплите акций APPL 4:1 (count = +3) и TSLA 5:1 (count = +4)
             case "ввод цб": // догадка, нет примера отчета

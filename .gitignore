@@ -21,6 +21,7 @@ report-backups/
 *.iml
 *.ipr
 !.idea/runConfigurations
+!.idea/codeStyles
 !.idea/copyright
 
 ### NetBeans ###

@@ -27,12 +27,21 @@ import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
-import org.spacious_team.table_wrapper.api.*;
+import org.spacious_team.table_wrapper.api.AbstractTable;
+import org.spacious_team.table_wrapper.api.Table;
+import org.spacious_team.table_wrapper.api.TableColumn;
+import org.spacious_team.table_wrapper.api.TableColumnDescription;
+import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -180,7 +189,7 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
 
     @Override
     protected Collection<SecurityEventCashFlow> mergeDuplicates(SecurityEventCashFlow cash1, SecurityEventCashFlow cash2) {
-        // gh-78: обе выплаты должны быть сохранены. Одна вы плата выполнена по текущему портфелю, другая - по связанному ИИС.
+        // gh-78: обе выплаты должны быть сохранены. Одна выплата выполнена по текущему портфелю, другая - по связанному ИИС.
         // К сожалению, сохраняем обе выплаты как по внешнему портфелю, т.к. брокер по выплате не указал количество ЦБ
         // ни по одной из выплат, поэтому не возможно определить какая из выплат относится к текущему портфелю.
         AbstractTable.addWithEqualityChecker(cast(cash1), eventCashFlows,
