@@ -22,15 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.table_wrapper.api.Table;
-import org.spacious_team.table_wrapper.api.TableRow;
-import org.spacious_team.table_wrapper.excel.ExcelTable;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,12 +33,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Double.parseDouble;
+import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
-import static ru.investbook.parser.vtb.VtbCashFlowTable.TABLE_NAME;
-import static ru.investbook.parser.vtb.VtbCashFlowTable.VtbCashFlowTableHeader.*;
 
 @Slf4j
-public class VtbCouponAmortizationRedemptionTable extends AbstractReportTable<SecurityEventCashFlow> {
+public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTable<SecurityEventCashFlow> {
 
     private static final Pattern couponPerOneBondPattern = Pattern.compile("размер куп. на 1 обл\\.\\s+([0-9.]+)");
     private static final Pattern amortizationPerOneBondPattern = Pattern.compile("ном\\.на 1 обл\\.\\s+([0-9.]+)");
@@ -56,51 +50,24 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractReportTable<Se
     private final VtbSecurityDepositAndWithdrawalTable vtbSecurityDepositAndWithdrawalTable;
     private final Collection<EventCashFlow> externalBondPayments = new ArrayList<>();
 
-    protected VtbCouponAmortizationRedemptionTable(BrokerReport report,
+    protected VtbCouponAmortizationRedemptionTable(CashFlowEventTable cashFlowEventTable,
                                                    SecurityRegNumberToIsinConverter regNumberToIsinConverter,
                                                    VtbSecurityDepositAndWithdrawalTable vtbSecurityDepositAndWithdrawalTable) {
-        super(report, TABLE_NAME, null, VtbCashFlowTable.VtbCashFlowTableHeader.class);
+        super(cashFlowEventTable);
         this.regNumberToIsinConverter = regNumberToIsinConverter;
         this.vtbSecurityDepositAndWithdrawalTable = vtbSecurityDepositAndWithdrawalTable;
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> getRow(Table table, TableRow row) {
-        String operation = String.valueOf(table.getStringCellValueOrDefault(row, OPERATION, ""))
-                .trim()
-                .toLowerCase();
-        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
-        String lowercaseDescription = description.toLowerCase();
-        CashFlowType eventType = null;
-        switch (operation) {
-            case "купонный доход":
-                eventType = CashFlowType.COUPON;
-                break;
-            case "погашение ценных бумаг":
-                if (lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч")) {
-                    eventType = CashFlowType.AMORTIZATION;
-                } else if (lowercaseDescription.contains("погаш. номин.ст-ти обл")) { // предположение
-                    eventType = CashFlowType.REDEMPTION;
-                }
-                break;
-            case "зачисление денежных средств":
-                if (lowercaseDescription.contains("погаш. номин.ст-ти обл")) {
-                    eventType = CashFlowType.REDEMPTION;
-                } else if (lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч")) {
-                    eventType = CashFlowType.AMORTIZATION;
-                } else if (lowercaseDescription.contains("куп. дох. по обл")) {
-                    eventType = CashFlowType.COUPON;
-                }
-                break;
-        }
-        if (eventType == null) {
+    protected Collection<SecurityEventCashFlow> getRow(CashFlowEventTable.CashFlowEvent event) {
+        CashFlowType eventType = event.getEventType();
+        if (eventType != COUPON && eventType != AMORTIZATION && eventType != REDEMPTION) {
             return Collections.emptyList();
         }
+        String lowercaseDescription = event.getLowercaseDescription();
         BigDecimal tax = VtbDividendTable.getTax(lowercaseDescription);
-        BigDecimal value = table.getCurrencyCellValue(row, VALUE)
+        BigDecimal value = event.getValue()
                 .add(tax.abs());
-        Instant timestamp = ((ExcelTable) table).getDateCellValue(row, DATE).toInstant();
-        String currency = VtbBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY));
         try {
             String isin = getIsin(lowercaseDescription, regNumberToIsinConverter);
             int count = switch (eventType) {
@@ -115,9 +82,9 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractReportTable<Se
             SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                     .portfolio(getReport().getPortfolio())
                     .eventType(eventType)
-                    .timestamp(timestamp)
+                    .timestamp(event.getDate())
                     .value(value)
-                    .currency(currency)
+                    .currency(event.getCurrency())
                     .count(count)
                     .isin(isin);
             Collection<SecurityEventCashFlow> data = new ArrayList<>();
@@ -130,8 +97,8 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractReportTable<Se
             }
             return data;
         } catch (Exception e) {
-            log.warn("Выплата будет сохранена без привязки к ISIN облигации: {}", description, e);
-            addToExternalBonPayments(timestamp, eventType, value, tax, currency, description);
+            log.warn("Выплата будет сохранена без привязки к ISIN облигации: {}", event.getDescription(), e);
+            addToExternalBondPayment(event, eventType, value, tax);
             return Collections.emptyList();
         }
     }
@@ -166,19 +133,18 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractReportTable<Se
         throw new IllegalArgumentException("Не смогу выделить размер купона на одну облигацию из описания: " + description);
     }
 
-    private void addToExternalBonPayments(Instant timestamp,
+    private void addToExternalBondPayment(CashFlowEventTable.CashFlowEvent event,
                                           CashFlowType eventType,
                                           BigDecimal value,
-                                          BigDecimal tax,
-                                          String currency,
-                                          String description) {
+                                          BigDecimal tax) {
+        String description = event.getDescription();
         EventCashFlow.EventCashFlowBuilder builder = EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(eventType)
-                .timestamp(timestamp)
+                .timestamp(event.getDate())
                 .value(value)
-                .currency(currency)
-                .description(description);
+                .currency(event.getCurrency())
+                .description(StringUtils.isEmpty(description) ? null : description);
         externalBondPayments.add(builder.build());
         if (tax.abs().compareTo(minValue) >= 0) {
             externalBondPayments.add(builder
