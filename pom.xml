@@ -58,6 +58,16 @@
         </repository>
     </repositories>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.github.spacious-team</groupId>
+                <artifactId>table-wrapper-api</artifactId>
+                <version>2020.12.1</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
