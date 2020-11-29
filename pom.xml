@@ -28,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2020.12.1</version>
+    <version>2020.12.2</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -47,7 +47,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>20.12.1</win.msi.version>
+        <win.msi.version>20.12.2</win.msi.version>
         <java.version>15</java.version>
     </properties>
 
