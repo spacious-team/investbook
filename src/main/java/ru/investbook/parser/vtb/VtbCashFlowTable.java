@@ -25,14 +25,13 @@ import org.springframework.util.StringUtils;
 import java.util.Collection;
 import java.util.Collections;
 
-import static java.util.Collections.singletonList;
-import static org.spacious_team.broker.pojo.CashFlowType.CASH;
-import static org.spacious_team.broker.pojo.CashFlowType.TAX;
+import static java.util.Collections.*;
+import static org.spacious_team.broker.pojo.CashFlowType.*;
 
 public class VtbCashFlowTable extends AbstractVtbCashFlowTable<EventCashFlow> {
 
     public VtbCashFlowTable(CashFlowEventTable cashFlowEventTable) {
-        super(cashFlowEventTable);
+        super(cashFlowEventTable, EventCashFlow::checkEquality, EventCashFlow::mergeDuplicates);
     }
 
     @Override
@@ -50,15 +49,5 @@ public class VtbCashFlowTable extends AbstractVtbCashFlowTable<EventCashFlow> {
                 .currency(event.getCurrency())
                 .description(StringUtils.isEmpty(description) ? null : description)
                 .build());
-    }
-
-    @Override
-    protected boolean checkEquality(EventCashFlow flow1, EventCashFlow flow2) {
-        return EventCashFlow.checkEquality(flow1, flow2);
-    }
-
-    @Override
-    protected Collection<EventCashFlow> mergeDuplicates(EventCashFlow old, EventCashFlow nw) {
-        return EventCashFlow.mergeDuplicates(old, nw);
     }
 }

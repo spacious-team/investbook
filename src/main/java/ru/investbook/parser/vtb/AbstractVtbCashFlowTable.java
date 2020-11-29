@@ -21,48 +21,67 @@ package ru.investbook.parser.vtb;
 import org.spacious_team.broker.report_parser.api.InitializableReportTable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
-import static java.util.Collections.unmodifiableCollection;
-import static org.spacious_team.table_wrapper.api.AbstractTable.addWithEqualityChecker;
+import static java.util.Collections.*;
+import static org.spacious_team.table_wrapper.api.AbstractTable.*;
 
 public abstract class AbstractVtbCashFlowTable<RowType> extends InitializableReportTable<RowType> {
 
     private final Collection<CashFlowEventTable.CashFlowEvent> events;
+    private final BiPredicate<RowType, RowType> equalityChecker;
+    private final BiFunction<RowType, RowType, Collection<RowType>> duplicatesMerger;
 
     public AbstractVtbCashFlowTable(CashFlowEventTable cashFlowEventTable) {
         super(cashFlowEventTable.getReport());
         this.events = unmodifiableCollection(cashFlowEventTable.getData());
+        equalityChecker = null;
+        duplicatesMerger = null;
+    }
+
+    public AbstractVtbCashFlowTable(CashFlowEventTable cashFlowEventTable,
+                                    BiPredicate<RowType, RowType> equalityChecker,
+                                    BiFunction<RowType, RowType, Collection<RowType>> duplicatesMerger) {
+        super(cashFlowEventTable.getReport());
+        this.events = unmodifiableCollection(cashFlowEventTable.getData());
+        this.equalityChecker = equalityChecker;
+        this.duplicatesMerger = duplicatesMerger;
     }
 
     @Override
     protected Collection<RowType> parseTable() {
-        return events.stream()
-                .flatMap(e -> getRow(e).stream())
-                .collect(Collector.of(
-                        ArrayList::new,
-                        (collection, element) -> addWithEqualityChecker(
-                                element,
-                                collection,
-                                this::checkEquality,
-                                this::mergeDuplicates),
-                        (left, right) -> {
-                            left.addAll(right);
-                            return left;
-                        },
-                        Collector.Characteristics.IDENTITY_FINISH
-                ));
+        if (equalityChecker == null || duplicatesMerger == null) {
+            return events.stream()
+                    .flatMap(e -> getRow(e).stream())
+                    .collect(Collectors.toList());
+        } else {
+            return events.stream()
+                    .flatMap(e -> getRow(e).stream())
+                    .collect(toList(equalityChecker, duplicatesMerger));
+        }
+    }
+
+    private static <RowType> Collector<RowType, ArrayList<RowType>, ArrayList<RowType>> toList(
+            BiPredicate<RowType, RowType> equalityChecker,
+            BiFunction<RowType, RowType, Collection<RowType>> duplicatesMerger) {
+        return Collector.of(
+                ArrayList::new,
+                (collection, element) -> addWithEqualityChecker(
+                        element,
+                        collection,
+                        equalityChecker,
+                        duplicatesMerger),
+                (left, right) -> {
+                    left.addAll(right);
+                    return left;
+                },
+                Collector.Characteristics.IDENTITY_FINISH
+        );
     }
 
     protected abstract Collection<RowType> getRow(CashFlowEventTable.CashFlowEvent event);
-
-    protected boolean checkEquality(RowType object1, RowType object2) {
-        return object1.equals(object2);
-    }
-
-    protected Collection<RowType> mergeDuplicates(RowType oldObject, RowType newObject) {
-        return Arrays.asList(oldObject, newObject);
-    }
 }
