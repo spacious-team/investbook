@@ -77,7 +77,8 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
     }
 
     private Collection<SecurityEventCashFlow> getRowAndSaveDescription(Table table, TableRow row) {
-        currentRowDescription = table.getStringCellValue(row, DESCRIPTION);
+        // Тип операции = "Разблокировано средств ГО" имеет пустое описание, не падаем, возвращаем default
+        currentRowDescription = table.getStringCellValueOrDefault(row, DESCRIPTION, null);
         return getRow(table, row);
     }
 

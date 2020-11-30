@@ -50,7 +50,7 @@ public class DividendTable extends PaymentsTable {
     protected Collection<SecurityEventCashFlow> getRow(Table table, TableRow row) {
         String action = table.getStringCellValue(row, OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
-        String description = table.getStringCellValue(row, DESCRIPTION);
+        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
         description = String.valueOf(description).toLowerCase();
         if (!action.equalsIgnoreCase(DIVIDEND_ACTION) || !description.contains("дивиденд")) {
             return emptyList();
