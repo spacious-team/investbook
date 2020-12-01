@@ -39,7 +39,8 @@ import java.util.zip.ZipInputStream;
 
 @EqualsAndHashCode(callSuper = true)
 public class UralsibBrokerReport extends AbstractExcelBrokerReport {
-    private static final String UNIQ_TEXT = "Брокер: ООО \"УРАЛСИБ Брокер\"";
+    // "УРАЛСИБ Брокер" или "УРАЛСИБ Кэпитал - Финансовые услуги" (старый формат 2018 г)
+    private static final String UNIQ_TEXT = "Брокер: ООО \"УРАЛСИБ";
     private static final String PORTFOLIO_MARKER = "Номер счета Клиента:";
     private static final String REPORT_DATE_MARKER = "за период";
     private final Workbook book;

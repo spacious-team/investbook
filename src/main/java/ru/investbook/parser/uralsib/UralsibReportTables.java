@@ -86,7 +86,9 @@ public class UralsibReportTables implements ReportTables {
 
     @Override
     public ReportTable<DerivativeTransaction> getDerivativeTransactionTable() {
-        return new DerivativeTransactionTable(report);
+        return WrappingReportTable.of(
+                new DerivativeTransactionTable(report),
+                new DerivativeExpirationTable(report));
     }
 
     @Override

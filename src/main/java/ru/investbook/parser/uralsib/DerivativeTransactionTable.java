@@ -42,18 +42,30 @@ import static ru.investbook.parser.uralsib.DerivativeTransactionTable.FortsTable
 @Slf4j
 public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTransaction> {
     private static final String TABLE_NAME = "СДЕЛКИ С ФЬЮЧЕРСАМИ И ОПЦИОНАМИ";
-    private static final String TABLE_END_TEXT = "ДВИЖЕНИЕ ДЕНЕЖНЫХ СРЕДСТВ ЗА ОТЧЕТНЫЙ ПЕРИОД";
+    private static final String TABLE_END_TEXT = PaymentsTable.TABLE_NAME;
+    private boolean expirationTableReached = false;
 
     public DerivativeTransactionTable(UralsibBrokerReport report) {
-        super(report, TABLE_NAME, TABLE_END_TEXT, FortsTableHeader.class, 2);
+        this(report, TABLE_NAME, TABLE_END_TEXT, 2);
+    }
+
+    protected DerivativeTransactionTable(UralsibBrokerReport report, String tableName, String tableFooter, int headersRowCount) {
+        super(report, tableName, tableFooter, FortsTableHeader.class, headersRowCount);
     }
 
     @Override
     protected Collection<DerivativeTransaction> getRow(Table table, TableRow row) {
+        if (expirationTableReached) return emptyList();
         String transactionId = SecurityTransactionTable.getTransactionId(table, row, TRANSACTION);
-        if (transactionId == null) return emptyList();
+        if (transactionId == null) {
+            if (DerivativeExpirationTable.TABLE_NAME.equals(table.getStringCellValueOrDefault(row, TRANSACTION, null))) {
+                expirationTableReached = true;
+            }
+            return emptyList();
+        }
 
-        boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
+        String direction = table.getStringCellValue(row, DIRECTION);
+        boolean isBuy = direction.equalsIgnoreCase("покупка") || direction.equalsIgnoreCase("зачисление");
         int count = table.getIntCellValue(row, COUNT);
         BigDecimal valueInPoints = table.getCurrencyCellValue(row, QUOTE).multiply(BigDecimal.valueOf(count));
         BigDecimal value = table.getCurrencyCellValue(row, VALUE);
@@ -65,6 +77,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
         }
         BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
                 .add(table.getCurrencyCellValue(row, BROKER_COMMISSION))
+                .add(table.getCurrencyCellValueOrDefault(row, CLEARING_COMMISSION, BigDecimal.ZERO))
                 .negate();
         List<DerivativeTransaction> transactionInfo = new ArrayList<>(2);
         DerivativeTransaction.DerivativeTransactionBuilder builder = DerivativeTransaction.builder()
@@ -90,12 +103,16 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
 
     @RequiredArgsConstructor
     enum FortsTableHeader implements TableColumnDescription {
-        DATE_TIME("дата расчетов"),
+        DATE_TIME(AnyOfTableColumn.of(
+                TableColumnImpl.of("дата расчетов"),
+                TableColumnImpl.of("дата исполнения"))),
         TRANSACTION("номер сделки"),
         TYPE("вид контракта"),
         CONTRACT("наименование контракта"),
-        DIRECTION("вид сделки"),
-        COUNT("количество контрактов"),
+        DIRECTION(AnyOfTableColumn.of(
+                TableColumnImpl.of("вид сделки"),
+                TableColumnImpl.of("зачисление/списание"))),
+        COUNT("количество"),
         QUOTE(AnyOfTableColumn.of(
                 TableColumnImpl.of("цена фьючерса"),
                 TableColumnImpl.of("премия по опциону"))),
@@ -103,7 +120,9 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
         VALUE_CURRENCY(OptionalTableColumn.of(
                 TableColumnImpl.of("валюта суммы"))), // sometime does not exists
         MARKET_COMMISSION("комиссия тс"),
-        BROKER_COMMISSION("комиссия брокера");
+        BROKER_COMMISSION("комиссия брокера"),
+        CLEARING_COMMISSION(OptionalTableColumn.of(
+                TableColumnImpl.of("клиринговая комиссия"))); // only for Expiration table
 
         @Getter
         private final TableColumn column;

@@ -59,7 +59,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
     }
 
     private String getContract(Table table, TableRow row) {
-        String description = table.getStringCellValue(row, DESCRIPTION);
+        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
         Matcher matcher = contractPattern.matcher(description);
         if (matcher.find()) {
             return matcher.group(1);

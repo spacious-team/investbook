@@ -77,7 +77,8 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
     }
 
     private Collection<SecurityEventCashFlow> getRowAndSaveDescription(Table table, TableRow row) {
-        currentRowDescription = table.getStringCellValue(row, DESCRIPTION);
+        // Тип операции = "Разблокировано средств ГО" имеет пустое описание, не падаем, возвращаем default
+        currentRowDescription = table.getStringCellValueOrDefault(row, DESCRIPTION, null);
         return getRow(table, row);
     }
 
@@ -92,7 +93,7 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
                     .portfolio(getReport().getPortfolio())
                     .timestamp(getReport().convertToInstant(table.getStringCellValue(row, DATE)))
                     .currency(convertToCurrency(table.getStringCellValue(row, CURRENCY)))
-                    .description(table.getStringCellValue(row, DESCRIPTION));
+                    .description(table.getStringCellValueOrDefault(row, DESCRIPTION, null));
             BigDecimal tax = getTax(table, row);
             BigDecimal value = table.getCurrencyCellValue(row, VALUE)
                     .add(tax.abs());
@@ -116,7 +117,7 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
     }
 
     protected Security getSecurityIfCan(Table table, TableRow row) {
-        String description = table.getStringCellValue(row, DESCRIPTION);
+        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
         String descriptionLowercase = description.toLowerCase();
         for (ReportSecurityInformation info : securitiesIncomingCount) {
             if (info == null) continue;
@@ -135,7 +136,7 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
     }
 
     protected BigDecimal getTax(Table table, TableRow row) {
-        String description = table.getStringCellValue(row, DESCRIPTION);
+        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
         Matcher matcher = taxInformationPattern.matcher(description.toLowerCase());
         if (matcher.find()) {
             try {
