@@ -51,6 +51,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Controller
@@ -93,7 +94,9 @@ public class ReportRestController {
             }
         }
         if (exceptions.isEmpty()) {
-            return ResponseEntity.ok("Отчеты загружены <a href=\"/\">[ok]</a>");
+            return ResponseEntity.ok("""
+                    Отчеты загружены <a href="/">[ok]</a>
+                    """);
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(exceptions.stream()
@@ -102,13 +105,7 @@ public class ReportRestController {
                                 PrintWriter pw = new PrintWriter(sw);
                                 e.printStackTrace(pw);
                                 return sw.toString().replace("\n", "</br>");
-                            }).collect(Collectors.joining("</br></br> - ",
-                                    "<b>Ошибка загрузки отчетов</b> <a href=\"/\">[назад]</a><br/>" +
-                                            (StringUtils.isEmpty(broker) ? "Попробуйте повторить загрузку, указав Брокера<br/>" : "") +
-                                            "<span style=\"font-size: smaller; color: gray;\">Вы можете " +
-                                            "<a href=\"https://github.com/spacious-team/investbook/issues\">сообщить</a> об ошибке " +
-                                            "разработчикам</span></br></br> - ",
-                                    "")));
+                            }).collect(errorMessageBuilder(broker)));
         }
     }
 
@@ -212,6 +209,18 @@ public class ReportRestController {
         }
         throw new IllegalArgumentException(
                 "Can't fina ReportTablesFactory for broker report of type: " + brokerReport.getClass().getSimpleName());
+    }
+
+    private static Collector<CharSequence, ?, String> errorMessageBuilder(String broker) {
+        return Collectors.joining("</br></br> - ", """
+                <b>Ошибка загрузки отчетов</b> <a href="/">[назад]</a><br/>
+                """ + (StringUtils.isEmpty(broker) ? "Попробуйте повторить загрузку, указав Брокера<br/>" : "") + """
+                <span style="font-size: smaller; color: gray;">Вы можете
+                <a href="https://github.com/spacious-team/investbook/issues/new?labels=bug&template=bug_report.md">сообщить</a>
+                об ошибке разработчикам
+                </span>
+                </br></br> -
+                """, "");
     }
 
     @Getter
