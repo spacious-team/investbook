@@ -173,7 +173,7 @@ public class ReportTableStorage {
             if (NestedExceptionUtils.getMostSpecificCause(e).getMessage().toLowerCase().contains("duplicate")) {
                 log.debug("Дублирование информации: {}", error, e);
             } else {
-                log.warn(error);
+                log.warn(error, e);
             }
             return false;
         }
