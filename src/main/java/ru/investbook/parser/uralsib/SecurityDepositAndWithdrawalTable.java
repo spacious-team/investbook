@@ -55,7 +55,7 @@ public class SecurityDepositAndWithdrawalTable extends AbstractReportTable<Secur
                 .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
                 .transactionId(table.getStringCellValue(row, ID))
                 .portfolio(getReport().getPortfolio())
-                .isin(getSecurity(table, row).getIsin())
+                .security(getSecurity(table, row).getId())
                 .count(table.getIntCellValue(row, COUNT))
                 .value(BigDecimal.ZERO)
                 .accruedInterest(BigDecimal.ZERO)

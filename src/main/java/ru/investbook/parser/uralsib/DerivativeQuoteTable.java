@@ -52,7 +52,7 @@ public class DerivativeQuoteTable extends AbstractReportTable<SecurityQuote> {
             return emptyList();
         }
         return Collections.singletonList(SecurityQuote.builder()
-                .isin(table.getStringCellValue(row, CONTRACT))
+                .security(table.getStringCellValue(row, CONTRACT))
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .build());

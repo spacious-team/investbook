@@ -66,7 +66,7 @@ public class Positions {
 
     private void processRedemptions(Deque<SecurityEventCashFlow> redemptions) {
         if (!redemptions.isEmpty() && (redemptions.peek() != null)) {
-            String isin = redemptions.peek().getIsin();
+            String security = redemptions.peek().getSecurity();
             updateSecuritiesPastPositions(redemptions.stream()
                     .map(Positions::convertToTransaction)
                     .collect(Collectors.toCollection(LinkedList::new)));
@@ -75,7 +75,7 @@ public class Positions {
             }
             if (!this.openedPositions.isEmpty() || this.positionHistories.getLast().getOpenedPositions() != 0) {
                 log.error("Предоставлены не все транзакции по бумаге " +
-                        isin + ", в истории портфеля есть событие погашения номинала облигаций по " +
+                        security + ", в истории портфеля есть событие погашения номинала облигаций по " +
                         redemptions.stream().mapToInt(SecurityEventCashFlow::getCount).sum() +
                         " бумагам, однако в портфеле остались " + this.positionHistories.getLast().getOpenedPositions() +
                         " открытые позиции");
@@ -128,7 +128,7 @@ public class Positions {
         }
         return Transaction.builder()
                 .portfolio(redemption.getPortfolio())
-                .isin(redemption.getIsin())
+                .security(redemption.getSecurity())
                 .timestamp(redemption.getTimestamp())
                 .count(-redemption.getCount())
                 .build();

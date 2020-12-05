@@ -66,7 +66,7 @@ public class CouponAmortizationRedemptionTable extends AbstractReportTable<Secur
         BigDecimal tax = table.getCurrencyCellValue(row, TAX).negate();
 
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
-                .isin(table.getStringCellValue(row, ISIN))
+                .security(table.getStringCellValue(row, ISIN))
                 .portfolio(getReport().getPortfolio())
                 .count(table.getIntCellValue(row, COUNT))
                 .eventType(event)

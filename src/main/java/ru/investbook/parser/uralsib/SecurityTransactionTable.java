@@ -77,7 +77,7 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
                 .timestamp(timestamp)
                 .transactionId(transactionId)
                 .portfolio(getReport().getPortfolio())
-                .isin(table.getStringCellValue(row, ISIN))
+                .security(table.getStringCellValue(row, ISIN))
                 .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
                 .value(value)
                 .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)

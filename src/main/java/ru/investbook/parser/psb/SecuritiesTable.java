@@ -50,7 +50,7 @@ public class SecuritiesTable extends AbstractReportTable<Security> {
         return row.rowContains(INVALID_TEXT) ?
                 emptyList() :
                 Collections.singletonList(Security.builder()
-                        .isin(table.getStringCellValue(row, ISIN))
+                        .id(table.getStringCellValue(row, ISIN))
                         .name(table.getStringCellValue(row, NAME))
                         .build());
     }

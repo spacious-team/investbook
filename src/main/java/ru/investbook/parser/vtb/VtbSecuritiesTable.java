@@ -59,7 +59,7 @@ public class VtbSecuritiesTable extends AbstractReportTable<Security> {
         String isin = description[2].toUpperCase().trim();
         securityRegNumberToIsin.put(registrationNumber, isin);
         return Collections.singleton(Security.builder()
-                .isin(isin)
+                .id(isin)
                 .name(name)
                 .build());
     }

@@ -51,7 +51,7 @@ public class DerivativeQuoteTable extends AbstractReportTable<SecurityQuote> {
         BigDecimal quote = price.multiply(tick)
                 .divide(tickValue, 2, RoundingMode.HALF_UP);
         return Collections.singletonList(SecurityQuote.builder()
-                .isin(table.getStringCellValue(row, CONTRACT))
+                .security(table.getStringCellValue(row, CONTRACT))
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .price(price)

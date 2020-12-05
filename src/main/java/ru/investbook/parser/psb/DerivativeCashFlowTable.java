@@ -104,7 +104,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
                     throw new IllegalArgumentException("Открытых контрактов не найдено");
                 }
                 return singletonList(builder.eventType(CashFlowType.DERIVATIVE_PROFIT)
-                        .isin(contract)
+                        .security(contract)
                         .count(count)
                         .build());
             case "биржевой сбор":

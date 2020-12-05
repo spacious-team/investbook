@@ -29,7 +29,7 @@ import java.util.Set;
 
 public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityEventCashFlowEntity, Integer> {
 
-    ArrayList<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+    ArrayList<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
             String portfolio,
             String isin,
             int cashFlowType,
@@ -39,7 +39,7 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
     /**
      * Return last security payment
      */
-    Optional<SecurityEventCashFlowEntity> findFirstByPortfolioIdAndSecurityIsinAndCashFlowTypeIdInOrderByTimestampDesc(
+    Optional<SecurityEventCashFlowEntity> findFirstByPortfolioIdAndSecurityIdAndCashFlowTypeIdInOrderByTimestampDesc(
             String portfolio,
             String isin,
             Set<Integer> cashFlowType);
@@ -47,7 +47,7 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
     /**
      * Return last security payment, between date-time interval
      */
-    Optional<SecurityEventCashFlowEntity> findFirstByPortfolioIdAndSecurityIsinAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+    Optional<SecurityEventCashFlowEntity> findFirstByPortfolioIdAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
             String portfolio,
             String isin,
             Set<Integer> cashFlowType,

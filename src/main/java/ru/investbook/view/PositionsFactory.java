@@ -49,14 +49,14 @@ public class PositionsFactory {
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final TransactionConverter transactionConverter;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
-    private final Map<Portfolio, Map<String, Positions>> positionsCache = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, Positions>> positionsCache = new ConcurrentHashMap<>();
 
     public Positions get(Portfolio portfolio, Security security, ViewFilter filter) {
-        return get(portfolio, security.getIsin(), filter);
+        return get(portfolio, security.getId(), filter);
     }
 
     public Positions get(Portfolio portfolio, String isinOrContract, ViewFilter filter) {
-        return positionsCache.computeIfAbsent(portfolio, k -> new ConcurrentHashMap<>())
+        return positionsCache.computeIfAbsent(portfolio.getId(), k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(getCacheKey(isinOrContract, filter), k -> create(portfolio, isinOrContract, filter));
     }
 
@@ -77,7 +77,7 @@ public class PositionsFactory {
         if (type == SecurityType.CURRENCY_PAIR) {
             String currencyPair = getCurrencyPair(isinOrContract);
             transactions = transactionRepository
-                    .findDistinctFxInstrumentByPortfolioAndCurrencyPairAndTimestampBetween(
+                    .findDistinctFxContractByPortfolioAndCurrencyPairAndTimestampBetween(
                             portfolio,
                             currencyPair,
                             filter.getFromDate(),
@@ -99,7 +99,7 @@ public class PositionsFactory {
 
     private LinkedList<Transaction> getTransactions(Portfolio portfolio, String isin, ViewFilter filter) {
         return transactionRepository
-                .findBySecurityIsinAndPkPortfolioAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+                .findBySecurityIdAndPkPortfolioAndTimestampBetweenOrderByTimestampAscPkIdAsc(
                         isin,
                         portfolio.getId(),
                         filter.getFromDate(),
@@ -111,7 +111,7 @@ public class PositionsFactory {
 
     private Deque<SecurityEventCashFlow> getRedemption(Portfolio portfolio, String isin, ViewFilter filter) {
         return securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         portfolio.getId(),
                         isin,
                         CashFlowType.REDEMPTION.getId(),

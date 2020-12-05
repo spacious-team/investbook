@@ -49,7 +49,7 @@ public class SecuritiesTable extends AbstractReportTable<ReportSecurityInformati
     @Override
     protected Collection<ReportSecurityInformation> getRow(Table table, TableRow row) {
         Security security = Security.builder()
-                .isin(table.getStringCellValue(row, ISIN))
+                .id(table.getStringCellValue(row, ISIN))
                 .name(table.getStringCellValue(row, NAME))
                 .build();
         return singletonList(ReportSecurityInformation.builder()

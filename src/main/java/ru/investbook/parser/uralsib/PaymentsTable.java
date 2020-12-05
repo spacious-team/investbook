@@ -124,7 +124,7 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
             Security security = info.getSecurity();
             if (contains(descriptionLowercase, info.getCfi()) ||   // dividend
                     (security != null && (contains(descriptionLowercase, security.getName()) ||  // coupon, amortization, redemption
-                            contains(descriptionLowercase, security.getIsin())))) { // for future report changes
+                            contains(descriptionLowercase, security.getId())))) { // for future report changes
                 return security;
             }
         }
@@ -150,12 +150,12 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
 
     protected Integer getSecurityCount(Security security, Instant atInstant) {
         int count = securitiesIncomingCount.stream()
-                .filter(i -> i.getSecurity().getIsin().equals(security.getIsin()))
+                .filter(i -> i.getSecurity().getId().equals(security.getId()))
                 .map(ReportSecurityInformation::getIncomingCount)
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("Не найдено количество на начало периода отчета для ЦБ " + security));
         Collection<SecurityTransaction> transactions = securityTransactions.stream()
-                .filter(t -> t.getIsin().equals(security.getIsin()))
+                .filter(t -> t.getSecurity().equals(security.getId()))
                 .sorted(Comparator.comparing(SecurityTransaction::getTimestamp))
                 .collect(Collectors.toList());
         int prevCount = 0;

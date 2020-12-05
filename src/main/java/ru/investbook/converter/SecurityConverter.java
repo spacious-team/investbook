@@ -42,7 +42,7 @@ public class SecurityConverter implements EntityConverter<SecurityEntity, Securi
         SecurityEntity entity = new SecurityEntity();
         entity.setTicker(security.getTicker());
         entity.setName(security.getName());
-        entity.setIsin(security.getIsin());
+        entity.setId(security.getId());
         entity.setIssuer(issuerEntity);
         return entity;
     }
@@ -50,7 +50,7 @@ public class SecurityConverter implements EntityConverter<SecurityEntity, Securi
     @Override
     public Security fromEntity(SecurityEntity entity) {
         return Security.builder()
-                .isin(entity.getIsin())
+                .id(entity.getId())
                 .ticker(entity.getTicker())
                 .name(entity.getName())
                 .inn((entity.getIssuer() != null) ? entity.getIssuer().getInn() : null)

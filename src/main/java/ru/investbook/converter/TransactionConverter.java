@@ -37,8 +37,8 @@ public class TransactionConverter implements EntityConverter<TransactionEntity, 
     public TransactionEntity toEntity(Transaction transaction) {
         portfolioRepository.findById(transaction.getPortfolio())
                 .orElseThrow(() -> new IllegalArgumentException("В справочнике не найден брокерский счет: " + transaction.getPortfolio()));
-        SecurityEntity securityEntity = securityRepository.findByIsin(transaction.getIsin())
-                .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + transaction.getIsin()));
+        SecurityEntity securityEntity = securityRepository.findById(transaction.getSecurity())
+                .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + transaction.getSecurity()));
 
         TransactionEntityPK pk = new TransactionEntityPK();
         pk.setId(transaction.getId());
@@ -56,7 +56,7 @@ public class TransactionConverter implements EntityConverter<TransactionEntity, 
         return Transaction.builder()
                 .id(entity.getPk().getId())
                 .portfolio(entity.getPk().getPortfolio())
-                .isin(entity.getSecurity().getIsin())
+                .security(entity.getSecurity().getId())
                 .timestamp(entity.getTimestamp())
                 .count(entity.getCount())
                 .build();

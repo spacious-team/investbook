@@ -39,7 +39,7 @@ public class TransactionTableTest {
     @Test(dataProvider = "isin")
     void testIsin(String report, String firstIsin, String lastIsin) throws IOException {
         List<SecurityTransaction> data = new SecurityTransactionTable(new PsbBrokerReport(report)).getData();
-        assertEquals(data.get(0).getIsin(), firstIsin);
-        assertEquals(data.get(data.size() - 1).getIsin(), lastIsin);
+        assertEquals(data.get(0).getSecurity(), firstIsin);
+        assertEquals(data.get(data.size() - 1).getSecurity(), lastIsin);
     }
 }

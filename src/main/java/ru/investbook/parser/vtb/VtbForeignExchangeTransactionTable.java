@@ -57,7 +57,7 @@ public class VtbForeignExchangeTransactionTable extends AbstractReportTable<Fore
                 .timestamp(((ExcelTable) table).getDateCellValue(row, DATE_TIME).toInstant())
                 .transactionId(table.getStringCellValue(row, TRANSACTION))
                 .portfolio(getReport().getPortfolio())
-                .instrument(table.getStringCellValue(row, INSTRUMENT))
+                .contract(table.getStringCellValue(row, INSTRUMENT))
                 .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
                 .value(value)
                 .commission(commission)

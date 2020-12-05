@@ -69,7 +69,7 @@ public class PaidInterest {
             String isin = paidInterest.values()
                     .stream()
                     .map(Map::keySet)
-                    .map(p -> ((OpenedPosition) p).getOpenTransaction().getIsin())
+                    .map(p -> ((OpenedPosition) p).getOpenTransaction().getSecurity())
                     .findAny()
                     .orElse("<неизвестный isin>");
             log.warn("Выплаты по {} поступали в разных валютах {}", isin, currencies);
@@ -81,7 +81,7 @@ public class PaidInterest {
         return new OpenedPosition(Transaction.builder()
                 .timestamp(PaidInterest.fictitiousPositionInstant)
                 .portfolio(cash.getPortfolio())
-                .isin(cash.getIsin())
+                .security(cash.getSecurity())
                 .count(cash.getCount())
                 .build());
     }
