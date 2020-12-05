@@ -34,12 +34,12 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "security")
 @Data
-@EqualsAndHashCode(of = "isin")
+@EqualsAndHashCode(of = "id")
 public class SecurityEntity {
     @Id
     @Basic
-    @Column(name = "isin")
-    private String isin;
+    @Column(name = "id")
+    private String id;
 
     @Column(name = "ticker")
     private String ticker;

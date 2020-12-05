@@ -47,7 +47,7 @@ public class DividendTable extends AbstractReportTable<SecurityEventCashFlow> {
     @Override
     protected Collection<SecurityEventCashFlow> getRow(Table table, TableRow row) {
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
-                .isin(table.getStringCellValue(row, ISIN))
+                .security(table.getStringCellValue(row, ISIN))
                 .portfolio(getReport().getPortfolio())
                 .count(table.getIntCellValue(row, COUNT))
                 .eventType(CashFlowType.DIVIDEND)

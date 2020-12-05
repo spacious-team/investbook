@@ -160,7 +160,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     private Optional<Security> getSecurity(String isin) {
         if (getSecurityType(isin) == CURRENCY_PAIR) {
             return Optional.of(Security.builder()
-                    .isin(SecurityType.getCurrencyPair(isin))
+                    .id(SecurityType.getCurrencyPair(isin))
                     .build());
         } else {
             return securityRepository.findByIsin(isin)
@@ -174,8 +174,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         row.put(SECURITY,
                 Optional.ofNullable(security.getName())
                         .orElse((securityType == CURRENCY_PAIR) ?
-                                getCurrencyPair(security.getIsin()) :
-                                security.getIsin()));
+                                getCurrencyPair(security.getId()) :
+                                security.getId()));
         row.put(TYPE, securityType.getDescription());
         try {
             ViewFilter filter = ViewFilter.get();
@@ -190,7 +190,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 row.put(LAST_EVENT_DATE,
                         securityEventCashFlowRepository
                                 .findFirstByPortfolioIdAndSecurityIsinAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                        portfolio.getId(), security.getIsin(), Set.of(
+                                        portfolio.getId(), security.getId(), Set.of(
                                                 CashFlowType.AMORTIZATION.getId(),
                                                 CashFlowType.REDEMPTION.getId(),
                                                 CashFlowType.COUPON.getId(),
@@ -228,7 +228,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         .divide(BigDecimal.valueOf(Math.max(1, Math.abs(count))), 2, RoundingMode.CEILING));
 
                 if (securityType == CURRENCY_PAIR) {
-                    String currency = getCurrencyPair(security.getIsin()).substring(0, 3);
+                    String currency = getCurrencyPair(security.getId()).substring(0, 3);
                     if (LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault()).compareTo(LocalDate.now()) >= 0) {
                         row.put(LAST_PRICE, foreignExchangeRateService.getExchangeRateToRub(currency));
                     } else {
@@ -239,7 +239,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     }
                 } else {
                     securityQuoteRepository
-                            .findFirstBySecurityIsinAndTimestampLessThanOrderByTimestampDesc(security.getIsin(), filter.getToDate())
+                            .findFirstBySecurityIsinAndTimestampLessThanOrderByTimestampDesc(security.getId(), filter.getToDate())
                             .ifPresent(quote -> {
                                 if (securityType == STOCK_OR_BOND) {
                                     row.put(LAST_PRICE, Optional.ofNullable(quote.getPrice()) // for bonds
@@ -372,7 +372,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         return securityEventCashFlowRepository
                 .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         portfolio.getId(),
-                        contract.getIsin(),
+                        contract.getId(),
                         CashFlowType.DERIVATIVE_PROFIT.getId(),
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate())
@@ -407,7 +407,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         return securityEventCashFlowRepository
                 .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         portfolio.getId(),
-                        security.getIsin(),
+                        security.getId(),
                         cashFlowType.getId(),
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate())

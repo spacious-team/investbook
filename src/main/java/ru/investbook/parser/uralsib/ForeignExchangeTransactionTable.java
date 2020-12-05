@@ -83,7 +83,7 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
                 .timestamp(getReport().convertToInstant(table.getStringCellValue(row, DATE_TIME)))
                 .transactionId(transactionId)
                 .portfolio(getReport().getPortfolio())
-                .instrument(instrument)
+                .contract(instrument)
                 .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
                 .value(value)
                 .commission(commission)

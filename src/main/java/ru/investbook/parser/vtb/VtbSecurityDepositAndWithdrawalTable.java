@@ -72,7 +72,7 @@ public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<S
                         .transactionId(transactionId)
                         .timestamp(timestamp)
                         .portfolio(portfolio)
-                        .isin(isin)
+                        .security(isin)
                         .count(table.getIntCellValue(row, COUNT))
                         .value(BigDecimal.ZERO)
                         .accruedInterest(BigDecimal.ZERO)

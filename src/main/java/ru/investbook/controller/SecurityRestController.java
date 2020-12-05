@@ -52,10 +52,10 @@ public class SecurityRestController extends AbstractRestController<String, Secur
         return super.get();
     }
 
-    @GetMapping("{isin}")
+    @GetMapping("{id}")
     @Override
-    public ResponseEntity<SecurityEntity> get(@PathVariable("isin") String isin) {
-        return super.get(isin);
+    public ResponseEntity<SecurityEntity> get(@PathVariable("id") String id) {
+        return super.get(id);
     }
 
     @PostMapping
@@ -64,16 +64,16 @@ public class SecurityRestController extends AbstractRestController<String, Secur
         return super.post(security);
     }
 
-    @PutMapping("{isin}")
+    @PutMapping("{id}")
     @Override
-    public ResponseEntity<SecurityEntity> put(@PathVariable("isin") String isin, @Valid @RequestBody Security security) {
-        return super.put(isin, security);
+    public ResponseEntity<SecurityEntity> put(@PathVariable("id") String id, @Valid @RequestBody Security security) {
+        return super.put(id, security);
     }
 
-    @DeleteMapping("{isin}")
+    @DeleteMapping("{id}")
     @Override
-    public void delete(@PathVariable("isin") String isin) {
-        super.delete(isin);
+    public void delete(@PathVariable("id") String id) {
+        super.delete(id);
     }
 
     @Override
@@ -83,12 +83,12 @@ public class SecurityRestController extends AbstractRestController<String, Secur
 
     @Override
     protected String getId(Security object) {
-        return object.getIsin();
+        return object.getId();
     }
 
     @Override
-    protected Security updateId(String isin, Security object) {
-        return object.toBuilder().isin(isin).build();
+    protected Security updateId(String id, Security object) {
+        return object.toBuilder().id(id).build();
     }
 
     @Override

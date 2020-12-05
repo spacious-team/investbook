@@ -137,8 +137,8 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
     }
 
     private String getSecurityName(SecurityEventCashFlow cash) {
-       return securityRepository.findByIsin(cash.getIsin())
+       return securityRepository.findByIsin(cash.getSecurity())
                 .map(SecurityEntity::getName)
-                .orElse(cash.getIsin());
+                .orElse(cash.getSecurity());
     }
 }

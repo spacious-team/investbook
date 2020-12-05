@@ -115,7 +115,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
         if (position.getClosingEvent() == CashFlowType.PRICE) {
             closeAmount = getTransactionCashFlow(transaction, CashFlowType.PRICE, multiplier);
         } else {
-            throw new IllegalArgumentException("ЦБ " + transaction.getIsin() +
+            throw new IllegalArgumentException("ЦБ " + transaction.getSecurity() +
                     " не может быть закрыта событием типа " + position.getClosingEvent());
         }
         row.put(CLOSE_AMOUNT, closeAmount);

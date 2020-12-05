@@ -79,7 +79,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
         BigDecimal value = table.getCurrencyCellValue(row, VALUE)
                 .add(tax.abs());
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
-                .isin(security.getIsin())
+                .security(security.getId())
                 .portfolio(getReport().getPortfolio())
                 .count(getSecurityCount(security, timestamp))
                 .eventType(event)
