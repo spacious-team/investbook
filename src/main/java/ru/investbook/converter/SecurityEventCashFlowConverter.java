@@ -41,7 +41,7 @@ public class SecurityEventCashFlowConverter implements EntityConverter<SecurityE
     public SecurityEventCashFlowEntity toEntity(SecurityEventCashFlow eventCashFlow) {
         SecurityEntity securityEntity = null;
         if (eventCashFlow.getSecurity() != null) {
-            securityEntity = securityRepository.findByIsin(eventCashFlow.getSecurity())
+            securityEntity = securityRepository.findById(eventCashFlow.getSecurity())
                     .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + eventCashFlow.getSecurity()));
         }
         PortfolioEntity portfolioEntity = portfolioRepository.findById(eventCashFlow.getPortfolio())

@@ -78,7 +78,7 @@ public class SecurityRestController extends AbstractRestController<String, Secur
 
     @Override
     protected Optional<SecurityEntity> getById(String isin) {
-        return repository.findByIsin(isin);
+        return repository.findById(isin);
     }
 
     @Override

@@ -110,7 +110,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     private Collection<String> getSecuritiesIsin(Portfolio portfolio, String currency) {
         Collection<String> contracts = new ArrayList<>();
         contracts.addAll(
-                transactionRepository.findDistinctIsinByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+                transactionRepository.findDistinctSecurityByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
                         portfolio,
                         currency,
                         ViewFilter.get().getFromDate(),
@@ -163,7 +163,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     .id(SecurityType.getCurrencyPair(isin))
                     .build());
         } else {
-            return securityRepository.findByIsin(isin)
+            return securityRepository.findById(isin)
                     .map(securityConverter::fromEntity);
         }
     }
@@ -189,7 +189,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             if (securityType != CURRENCY_PAIR) {
                 row.put(LAST_EVENT_DATE,
                         securityEventCashFlowRepository
-                                .findFirstByPortfolioIdAndSecurityIsinAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+                                .findFirstByPortfolioIdAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
                                         portfolio.getId(), security.getId(), Set.of(
                                                 CashFlowType.AMORTIZATION.getId(),
                                                 CashFlowType.REDEMPTION.getId(),
@@ -239,7 +239,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     }
                 } else {
                     securityQuoteRepository
-                            .findFirstBySecurityIsinAndTimestampLessThanOrderByTimestampDesc(security.getId(), filter.getToDate())
+                            .findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(security.getId(), filter.getToDate())
                             .ifPresent(quote -> {
                                 if (securityType == STOCK_OR_BOND) {
                                     row.put(LAST_PRICE, Optional.ofNullable(quote.getPrice()) // for bonds
@@ -370,7 +370,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
 
     private BigDecimal getDerivativeProfit(Portfolio portfolio, Security contract) {
         return securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         portfolio.getId(),
                         contract.getId(),
                         CashFlowType.DERIVATIVE_PROFIT.getId(),
@@ -405,7 +405,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
 
     private BigDecimal sumPaymentsForType(Portfolio portfolio, Security security, CashFlowType cashFlowType) {
         return securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         portfolio.getId(),
                         security.getId(),
                         cashFlowType.getId(),

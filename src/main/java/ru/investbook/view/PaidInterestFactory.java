@@ -78,7 +78,7 @@ public class PaidInterestFactory {
                                                                                CashFlowType event,
                                                                                ViewFilter filter) {
         List<SecurityEventCashFlowEntity> accruedInterests = securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         portfolio,
                         isin,
                         event.getId(),

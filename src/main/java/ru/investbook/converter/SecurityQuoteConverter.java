@@ -32,7 +32,7 @@ public class SecurityQuoteConverter implements EntityConverter<SecurityQuoteEnti
 
     @Override
     public SecurityQuoteEntity toEntity(SecurityQuote quote) {
-        SecurityEntity securityEntity = securityRepository.findByIsin(quote.getSecurity())
+        SecurityEntity securityEntity = securityRepository.findById(quote.getSecurity())
                 .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + quote.getSecurity()));
 
 

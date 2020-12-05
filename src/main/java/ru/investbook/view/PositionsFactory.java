@@ -77,7 +77,7 @@ public class PositionsFactory {
         if (type == SecurityType.CURRENCY_PAIR) {
             String currencyPair = getCurrencyPair(isinOrContract);
             transactions = transactionRepository
-                    .findDistinctFxInstrumentByPortfolioAndCurrencyPairAndTimestampBetween(
+                    .findDistinctFxContractByPortfolioAndCurrencyPairAndTimestampBetween(
                             portfolio,
                             currencyPair,
                             filter.getFromDate(),
@@ -99,7 +99,7 @@ public class PositionsFactory {
 
     private LinkedList<Transaction> getTransactions(Portfolio portfolio, String isin, ViewFilter filter) {
         return transactionRepository
-                .findBySecurityIsinAndPkPortfolioAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+                .findBySecurityIdAndPkPortfolioAndTimestampBetweenOrderByTimestampAscPkIdAsc(
                         isin,
                         portfolio.getId(),
                         filter.getFromDate(),
@@ -111,7 +111,7 @@ public class PositionsFactory {
 
     private Deque<SecurityEventCashFlow> getRedemption(Portfolio portfolio, String isin, ViewFilter filter) {
         return securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         portfolio.getId(),
                         isin,
                         CashFlowType.REDEMPTION.getId(),

@@ -101,7 +101,7 @@ public class DerivativeEventsFactory {
 
     private LinkedList<Transaction> getTransactions(Portfolio portfolio, Security contract, ViewFilter filter) {
         return transactionRepository
-                .findBySecurityIsinAndPkPortfolioAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+                .findBySecurityIdAndPkPortfolioAndTimestampBetweenOrderByTimestampAscPkIdAsc(
                         contract.getId(),
                         portfolio.getId(),
                         filter.getFromDate(),
@@ -113,7 +113,7 @@ public class DerivativeEventsFactory {
 
     private Map<LocalDate, SecurityEventCashFlow> getSecurityEventCashFlows(Portfolio portfolio, Security contract, ViewFilter filter) {
         return securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         portfolio.getId(),
                         contract.getId(),
                         CashFlowType.DERIVATIVE_PROFIT.getId(),

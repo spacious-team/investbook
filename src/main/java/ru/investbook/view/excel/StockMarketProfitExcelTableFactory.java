@@ -85,7 +85,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         Table openPositionsProfit = new Table();
         Table closedPositionsProfit = new Table();
         for (String isin : securitiesIsin) {
-            Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
+            Optional<SecurityEntity> securityEntity = securityRepository.findById(isin);
             if (securityEntity.isPresent()) {
                 Security security = securityConverter.fromEntity(securityEntity.get());
                 Positions positions = positionsFactory.get(portfolio, security, ViewFilter.get());
@@ -105,14 +105,14 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     }
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio) {
-        return transactionRepository.findDistinctIsinByPortfolioAndTimestampBetweenOrderByTimestampDesc(
+        return transactionRepository.findDistinctSecurityByPortfolioAndTimestampBetweenOrderByTimestampDesc(
                 portfolio,
                 ViewFilter.get().getFromDate(),
                 ViewFilter.get().getToDate());
     }
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio, String currency) {
-        return transactionRepository.findDistinctIsinByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+        return transactionRepository.findDistinctSecurityByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
                 portfolio,
                 currency,
                 ViewFilter.get().getFromDate(),
@@ -233,7 +233,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
 
     private BigDecimal getRedemptionCashFlow(String portfolio, String isin, double multiplier) {
         List<SecurityEventCashFlowEntity> cashFlows = securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         portfolio,
                         isin,
                         CashFlowType.REDEMPTION.getId(),

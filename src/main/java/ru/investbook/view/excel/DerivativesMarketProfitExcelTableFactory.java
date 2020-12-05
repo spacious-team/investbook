@@ -60,7 +60,7 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
     public Table create(Portfolio portfolio) {
         Table profit = new Table();
         for (String isin : getSecuritiesIsin(portfolio)) {
-            Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
+            Optional<SecurityEntity> securityEntity = securityRepository.findById(isin);
             if (securityEntity.isPresent()) {
                 Security contract = securityConverter.fromEntity(securityEntity.get());
                 DerivativeEvents derivativeEvents = derivativeEventsFactory.getDerivativeEvents(
