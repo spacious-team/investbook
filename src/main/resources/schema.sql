@@ -98,11 +98,11 @@ CREATE TABLE IF NOT EXISTS `portfolio_property` (
 
 -- Дамп структуры для таблица portfolio.security
 CREATE TABLE IF NOT EXISTS `security` (
-  `isin` varchar(64) NOT NULL COMMENT 'ISIN код ценной бумаги',
+  `id` varchar(64) NOT NULL COMMENT 'Идентификатор ценной бумаги: ISIN - для акций, облигаций; наименование контракта - для срочного и валютного рынка',
   `ticker` varchar(16) DEFAULT NULL COMMENT 'Тикер',
-  `name` varchar(100) DEFAULT NULL COMMENT 'Полное наименование ценной бумаги или дериватива',
+  `name` varchar(100) DEFAULT NULL COMMENT 'Полное наименование ценной бумаги или контракта',
   `issuer_inn` bigint(10) unsigned DEFAULT NULL COMMENT 'Эмитент (ИНН)',
-  PRIMARY KEY (`isin`),
+  PRIMARY KEY (`id`),
   KEY `security_issuer_inn_ix` (`issuer_inn`),
   CONSTRAINT `security_issuer_inn_fkey` FOREIGN KEY (`issuer_inn`) REFERENCES `issuer` (`inn`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Общая информация по ценным бумагам';
@@ -116,17 +116,17 @@ CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `portfolio` varchar(32) NOT NULL COMMENT 'Портфель (номер брокерского счета)',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `isin` varchar(64) NOT NULL COMMENT 'ISIN инструмента, по которому произошло событие',
+  `security` varchar(64) NOT NULL COMMENT 'Инструмент, по которому произошло событие',
   `count` int(1) unsigned NOT NULL COMMENT 'Количество ЦБ, по которым произошло событие (для деривативов - опциональное поле, можно заполнять 0)',
   `type` int(10) unsigned NOT NULL COMMENT 'Причина движения',
   `value` decimal(12,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `security_event_cash_flow_timestamp_isin_type_portfolio_uniq_ix` (`timestamp`,`isin`,`type`,`portfolio`),
+  UNIQUE KEY `security_event_cash_flow_timestamp_security_type_portfolio_uniq` (`timestamp`,`security`,`type`,`portfolio`),
   KEY `security_event_cash_flow_type_ix` (`type`),
-  KEY `security_event_cash_flow_ticker_ix` (`isin`),
+  KEY `security_event_cash_flow_ticker_ix` (`security`),
   KEY `security_event_cash_flow_portfolio_ix` (`portfolio`),
-  CONSTRAINT `security_event_cash_flow_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE,
+  CONSTRAINT `security_event_cash_flow_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `security_event_cash_flow_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `security_event_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств, связанное с ЦБ';
@@ -138,28 +138,28 @@ CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
 -- Дамп структуры для таблица portfolio.security_quote
 CREATE TABLE IF NOT EXISTS `security_quote` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `isin` varchar(64) NOT NULL COMMENT 'Ценная бумага',
+  `security` varchar(64) NOT NULL COMMENT 'Инструмент (акция, облигация, контракт)',
   `timestamp` timestamp NOT NULL COMMENT 'Время котировки',
   `quote` decimal(12,6) NOT NULL COMMENT 'Котировка в валюте/пунктах, для облигации - в процентах',
   `price` decimal(12,6)  DEFAULT NULL COMMENT 'Чистая цена облигации в валюте / стоимость срочных контрактов в валюте',
   `accrued_interest` decimal(12,6)  DEFAULT NULL COMMENT 'НКД для облигаций',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `security_quote_isin_timestamp_uniq_ix` (`isin`, `timestamp`),
-  KEY `security_quote_isin_fkey` (`isin`),
-  CONSTRAINT `security_quote_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE
+  UNIQUE KEY `security_quote_security_timestamp_uniq_ix` (`security`, `timestamp`),
+  KEY `security_quote_security_fkey` (`security`),
+  CONSTRAINT `security_quote_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Котировка (цена) финансовых инструментов';
 
 -- Дамп структуры для таблица portfolio.transaction
 CREATE TABLE IF NOT EXISTS `transaction` (
   `id` varchar(32) NOT NULL COMMENT 'Номер сделки в системе учета брокера',
   `portfolio` varchar(32) NOT NULL COMMENT 'Портфель (номер брокерского счета)',
-  `isin` varchar(64) NOT NULL COMMENT 'Ценная бумага',
+  `security` varchar(64) NOT NULL COMMENT 'Инструмент (акция, облигация, контракт)',
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Фактическое время исполнения сделки',
   `count` int(1) NOT NULL COMMENT 'Покупка (+), продажа (-)',
   PRIMARY KEY (`id`,`portfolio`),
-  KEY `transaction_ticker_ix` (`isin`),
+  KEY `transaction_security_ix` (`security`),
   KEY `transaction_portfolio_ix` (`portfolio`),
-  CONSTRAINT `transaction_isin_fkey` FOREIGN KEY (`isin`) REFERENCES `security` (`isin`) ON UPDATE CASCADE,
+  CONSTRAINT `transaction_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `transaction_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Сделки';
 
