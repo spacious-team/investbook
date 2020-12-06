@@ -38,7 +38,6 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.repository.PortfolioRepository;
@@ -56,16 +55,13 @@ import static ru.investbook.view.excel.PortfolioStatusExcelTableHeader.*;
 @Slf4j
 public class PortfolioStatusExcelTableView extends ExcelTableView {
 
-    private final PortfolioConsolidatedStatusExcelTableFactory consolidatedTableFactory;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
 
     public PortfolioStatusExcelTableView(PortfolioRepository portfolioRepository,
-                                         @Qualifier("portfolioStatusExcelTableFactory") PortfolioStatusExcelTableFactory tableFactory,
+                                         PortfolioStatusExcelTableFactory tableFactory,
                                          PortfolioConverter portfolioConverter,
-                                         PortfolioConsolidatedStatusExcelTableFactory consolidatedTableFactory,
                                          TransactionCashFlowRepository transactionCashFlowRepository) {
         super(portfolioRepository, tableFactory, portfolioConverter);
-        this.consolidatedTableFactory = consolidatedTableFactory;
         this.transactionCashFlowRepository = transactionCashFlowRepository;
     }
 
@@ -74,9 +70,9 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPkTypeIn(
                 Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId()));
         for (String currency : currencies) {
-            Table table = consolidatedTableFactory.create(currency);
+            Table table = ((PortfolioStatusExcelTableFactory) tableFactory).create(currency);
             if (!table.isEmpty()) {
-                Sheet sheet = book.createSheet(validateExcelSheetName("Портфели " + currency));
+                Sheet sheet = book.createSheet(validateExcelSheetName("Портфель " + currency));
                 writeTable(table, sheet, styles);
             }
         }

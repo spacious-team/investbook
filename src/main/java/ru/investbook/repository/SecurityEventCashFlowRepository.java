@@ -36,6 +36,12 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
             Instant fromDate,
             Instant toDate);
 
+    ArrayList<SecurityEventCashFlowEntity> findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+            String isin,
+            int cashFlowType,
+            Instant fromDate,
+            Instant toDate);
+
     /**
      * Return last security payment
      */
@@ -52,7 +58,16 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
             String isin,
             Set<Integer> cashFlowType,
             Instant fromDate,
-            Instant toDat);
+            Instant toDate);
+
+    /**
+     * Return last security payment, between date-time interval
+     */
+    Optional<SecurityEventCashFlowEntity> findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+            String isin,
+            Set<Integer> cashFlowType,
+            Instant fromDate,
+            Instant toDate);
 
     ArrayList<SecurityEventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
             String portfolio,
