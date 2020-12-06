@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-ALTER TABLE `security` ALTER COLUMN `isin` RENAME TO `id`;
-ALTER TABLE `security_event_cash_flow` ALTER COLUMN `isin` RENAME TO `security`;
-ALTER TABLE `security_quote` ALTER COLUMN `isin` RENAME TO `security`;
-ALTER TABLE `transaction` ALTER COLUMN `isin` RENAME TO `security`;
+ALTER TABLE `security` ALTER COLUMN IF EXISTS `isin` RENAME TO `id`;
+ALTER TABLE `security_event_cash_flow` ALTER COLUMN IF EXISTS `isin` RENAME TO `security`;
+ALTER TABLE `security_quote` ALTER COLUMN IF EXISTS `isin` RENAME TO `security`;
+ALTER TABLE `transaction` ALTER COLUMN IF EXISTS `isin` RENAME TO `security`;
