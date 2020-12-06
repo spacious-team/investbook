@@ -47,6 +47,7 @@ import static org.spacious_team.broker.pojo.SecurityType.getCurrencyPair;
 @RequiredArgsConstructor
 public class PositionsFactory {
 
+    private static final String ALL_PORTFOLIO_KEY = "all";
     private final TransactionRepository transactionRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final TransactionConverter transactionConverter;
@@ -54,25 +55,22 @@ public class PositionsFactory {
     private final Map<String, Map<String, Positions>> positionsCache = new ConcurrentHashMap<>();
 
     public Positions get(Portfolio portfolio, Security security, ViewFilter filter) {
-        return get(
-                (portfolio != Portfolio.ALL) ? Optional.of(portfolio) : Optional.empty(),
-                security.getId(),
-                filter);
-    }
-
-    public Positions get(Optional<Portfolio> portfolio, Security security, ViewFilter filter) {
-        return get(portfolio, security.getId(), filter);
+        return get(Optional.of(portfolio), security.getId(), filter);
     }
 
     public Positions get(Portfolio portfolio, String isinOrContract, ViewFilter filter) {
         return get(Optional.of(portfolio), isinOrContract, filter);
     }
 
+    public Positions get(Optional<Portfolio> portfolio, Security security, ViewFilter filter) {
+        return get(portfolio, security.getId(), filter);
+    }
+
     public Positions get(Optional<Portfolio> portfolio, String isinOrContract, ViewFilter filter) {
         return positionsCache
                 .computeIfAbsent(
                         portfolio.map(Portfolio::getId)
-                                .orElse(Portfolio.ALL.getId()),
+                                .orElse(ALL_PORTFOLIO_KEY),
                         k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(
                         getCacheKey(isinOrContract, filter),
