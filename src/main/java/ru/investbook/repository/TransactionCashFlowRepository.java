@@ -44,4 +44,8 @@ public interface TransactionCashFlowRepository extends JpaRepository<Transaction
     @Query(value = "SELECT distinct t.currency FROM TransactionCashFlowEntity t " +
             "WHERE t.pk.portfolio = :portfolio AND t.pk.type in (:#{#cashFlowTypes})")
     List<String> findDistinctCurrencyByPkPortfolioAndPkTypeIn(String portfolio, Set<Integer> cashFlowTypes);
+
+    @Query(value = "SELECT distinct t.currency FROM TransactionCashFlowEntity t " +
+            "WHERE t.pk.type in (:#{#cashFlowTypes})")
+    List<String> findDistinctCurrencyByPkTypeIn(Set<Integer> cashFlowTypes);
 }

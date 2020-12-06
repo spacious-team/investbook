@@ -66,6 +66,22 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             @Param("to") Instant toDate);
 
     /**
+     * Returns stock market share and bonds ISINs
+     */
+    @Query(nativeQuery = true, value = "SELECT DISTINCT security FROM transaction as t1 " +
+            "JOIN transaction_cash_flow as t2 " +
+            "ON t1.id = t2.transaction_id " +
+            "AND length(security) = 12 " +
+            "AND t2.type = 1 " +
+            "AND t2.currency = :currency " +
+            "AND timestamp between :from AND :to " +
+            "ORDER BY t1.timestamp DESC")
+    Collection<String> findDistinctSecurityByCurrencyAndTimestampBetweenOrderByTimestampDesc(
+            @Param("currency") String currency,
+            @Param("from") Instant fromDate,
+            @Param("to") Instant toDate);
+
+    /**
      * Returns derivatives market contracts
      */
     @Query(nativeQuery = true, value = "SELECT distinct security FROM transaction " +
@@ -80,6 +96,18 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             @Param("to") Instant toDate);
 
     /**
+     * Returns derivatives market contracts
+     */
+    @Query(nativeQuery = true, value = "SELECT distinct security FROM transaction " +
+            "WHERE length(security) <> 12 " +
+            "AND security NOT LIKE '______\\_%' " +
+            "AND timestamp between :from AND :to " +
+            "ORDER BY timestamp DESC")
+    Collection<String> findDistinctDerivativeByTimestampBetweenOrderByTimestampDesc(
+            @Param("from") Instant fromDate,
+            @Param("to") Instant toDate);
+
+    /**
      * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM, USDRUB_CNGD format)
      */
     @Query(nativeQuery = true, value = "SELECT distinct security FROM transaction " +
@@ -90,6 +118,18 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "ORDER BY timestamp DESC")
     Collection<String> findDistinctFxContractByPortfolioAndTimestampBetweenOrderByTimestampDesc(
             @Param("portfolio") Portfolio portfolio,
+            @Param("from") Instant fromDate,
+            @Param("to") Instant toDate);
+
+    /**
+     * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM, USDRUB_CNGD format)
+     */
+    @Query(nativeQuery = true, value = "SELECT distinct security FROM transaction " +
+            "WHERE length(security) <> 12 " +
+            "AND security LIKE '______\\_%' " +
+            "AND timestamp between :from AND :to " +
+            "ORDER BY timestamp DESC")
+    Collection<String> findDistinctFxContractByTimestampBetweenOrderByTimestampDesc(
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
@@ -118,6 +158,16 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
                 .collect(Collectors.toList());
     }
 
+    default Collection<String> findDistinctFxContractByCurrencyPairAndTimestampBetween(
+            String currencyPair,
+            Instant fromDate,
+            Instant toDate) {
+        return findDistinctFxContractByTimestampBetweenOrderByTimestampDesc(fromDate, toDate)
+                .stream()
+                .filter(contract -> contract.startsWith(currencyPair))
+                .collect(Collectors.toList());
+    }
+
     /**
      * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM, USDRUB_CNGD format)
      */
@@ -138,6 +188,23 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             @Param("to") Instant toDate);
 
     /**
+     * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM, USDRUB_CNGD format)
+     */
+    @Query(nativeQuery = true, value = "SELECT DISTINCT security FROM transaction as t1 " +
+            "JOIN transaction_cash_flow as t2 " +
+            "ON t1.id = t2.transaction_id " +
+            "AND length(security) <> 12 " +
+            "AND security LIKE '______\\_%' " +
+            "AND t2.type = 1 " +
+            "AND t2.currency = :currency " +
+            "AND timestamp between :from AND :to " +
+            "ORDER BY t1.timestamp DESC")
+    Collection<String> findDistinctFxContractByCurrencyAndTimestampBetweenOrderByTimestampDesc(
+            @Param("currency") String currency,
+            @Param("from") Instant fromDate,
+            @Param("to") Instant toDate);
+
+    /**
      * Returns foreign exchange market currency pairs (in USDRUB format)
      */
     default Collection<String> findDistinctFxCurrencyPairByPortfolioAndCurrencyAndTimestampBetween(
@@ -152,9 +219,28 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns foreign exchange market currency pairs (in USDRUB format)
+     */
+    default Collection<String> findDistinctFxCurrencyPairByCurrencyAndTimestampBetween(
+            String currency,
+            Instant fromDate,
+            Instant toDate) {
+        return findDistinctFxContractByCurrencyAndTimestampBetweenOrderByTimestampDesc(currency, fromDate, toDate)
+                .stream()
+                .map(e -> e.substring(0, Math.min(6, e.length())))
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
     ArrayList<TransactionEntity> findBySecurityIdAndPkPortfolioAndTimestampBetweenOrderByTimestampAscPkIdAsc(
             String isin,
             String portfolio,
+            Instant fromDate,
+            Instant toDate);
+
+    ArrayList<TransactionEntity> findBySecurityIdAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+            String isin,
             Instant fromDate,
             Instant toDate);
 
