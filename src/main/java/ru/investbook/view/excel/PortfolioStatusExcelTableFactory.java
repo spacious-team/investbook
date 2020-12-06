@@ -58,6 +58,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.Optional;
 import java.util.Set;
@@ -75,16 +76,16 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     private static final String PROFIT_PROPORTION_FORMULA = getProfitProportionFormula();
     private static final String INVESTMENT_PROPORTION_FORMULA = getInvestmentProportionFormula();
     private static final String PROPORTION_FORMULA = getProportionFormula();
-    private final TransactionRepository transactionRepository;
+    protected final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityQuoteRepository securityQuoteRepository;
     private final SecurityConverter securityConverter;
-    private final PortfolioPropertyConverter portfolioPropertyConverter;
+    protected final PortfolioPropertyConverter portfolioPropertyConverter;
     private final PositionsFactory positionsFactory;
     private final ForeignExchangeRateService foreignExchangeRateService;
-    private final PortfolioPropertyRepository portfolioPropertyRepository;
+    protected final PortfolioPropertyRepository portfolioPropertyRepository;
     private final Instant instantOf2000_01_01 = LocalDate.of(2000, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant();
 
     public Table create(Portfolio portfolio) {
@@ -131,21 +132,25 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         return contracts;
     }
 
-    private Table.Record getCashRow(Portfolio portfolio, String forCurrency) {
+    protected Table.Record getCashRow(Portfolio portfolio, String forCurrency) {
         Table.Record row = new Table.Record();
         Instant atTime = Instant.ofEpochSecond(Math.min(
                 ViewFilter.get().getToDate().getEpochSecond(),
                 Instant.now().getEpochSecond()));
         row.put(SECURITY, "Остаток денежных средств, " + forCurrency.toLowerCase());
-        Optional<PortfolioProperty> portfolioCashes = getPortfolioCash(portfolio, atTime);
-        row.put(LAST_EVENT_DATE, portfolioCashes.map(PortfolioProperty::getTimestamp).orElse(null));
-        BigDecimal portfolioCash = portfolioCashes.map(portfolioProperty ->
-                PortfolioCash.valueOf(portfolioProperty.getValue())
-                        .stream()
-                        .filter(cash -> forCurrency.equals(cash.getCurrency()))
-                        .map(PortfolioCash::getValue)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add))
-                .orElse(null);
+        Collection<PortfolioProperty> portfolioCashes = getPortfolioCash(portfolio, atTime);
+        row.put(LAST_EVENT_DATE, portfolioCashes.stream()
+                .map(PortfolioProperty::getTimestamp)
+                .reduce((t1, t2) -> t1.isAfter(t2) ? t1 : t2)
+                .orElse(null));
+        BigDecimal portfolioCash = portfolioCashes.stream()
+                .map(portfolioProperty ->
+                        PortfolioCash.valueOf(portfolioProperty.getValue())
+                                .stream()
+                                .filter(cash -> forCurrency.equals(cash.getCurrency()))
+                                .map(PortfolioCash::getValue)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         row.put(LAST_PRICE, portfolioCash);
         if (ViewFilter.get().getFromDate().isBefore(instantOf2000_01_01) &&
                 portfolioCash != null && portfolioCash.compareTo(minCash) >= 1) { // fix div by zero in proportion column
@@ -417,16 +422,18 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     }
 
     /**
-     * Возвращает последний известный остаток денежных средств соответствующей дате, не позже указанной.
+     * Возвращает для портфеля последний известный остаток денежных средств соответствующей дате, не позже указанной.
      */
-    private Optional<PortfolioProperty> getPortfolioCash(Portfolio portfolio, Instant atInstant) {
+    protected Collection<PortfolioProperty> getPortfolioCash(Portfolio portfolio, Instant atInstant) {
         return portfolioPropertyRepository
                 .findFirstByPortfolioIdAndPropertyAndTimestampBetweenOrderByTimestampDesc(
                         portfolio.getId(),
                         PortfolioPropertyType.CASH.name(),
                         Instant.ofEpochSecond(0),
                         atInstant)
-                .map(portfolioPropertyConverter::fromEntity);
+                .map(portfolioPropertyConverter::fromEntity)
+                .map(Collections::singleton)
+                .orElse(Collections.emptySet());
     }
 
     private static String getStockOrBondGrossProfitFormula() {

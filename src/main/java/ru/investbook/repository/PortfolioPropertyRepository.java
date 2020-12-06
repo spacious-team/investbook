@@ -19,9 +19,12 @@
 package ru.investbook.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.investbook.entity.PortfolioPropertyEntity;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +39,24 @@ public interface PortfolioPropertyRepository extends JpaRepository<PortfolioProp
                                                                                                                String property,
                                                                                                                Instant startDate,
                                                                                                                Instant endDate);
+
+    @Query(nativeQuery = true, value = """
+            SELECT *
+            FROM portfolio_property AS t1
+            WHERE property = :property 
+            AND timestamp = (
+                SELECT MAX(timestamp)
+                FROM portfolio_property AS t2
+                WHERE t1.portfolio = t2.portfolio
+                AND t2.property = :property 
+                AND t2.timestamp between :from AND :to
+            )
+            ORDER BY portfolio, timestamp DESC
+            """)
+    Collection<PortfolioPropertyEntity> findDistinctOnPortfolioByPropertyAndTimestampBetweenOrderByTimestampDesc(
+            @Param("property") String property,
+            @Param("from") Instant startDate,
+            @Param("to") Instant endDate);
 
     List<PortfolioPropertyEntity> findByPropertyAndTimestampBetweenOrderByTimestampDesc(String property,
                                                                                         Instant startDate,
