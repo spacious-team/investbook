@@ -43,4 +43,6 @@ public class InvestbookProperties {
      * Do not configure {@link org.spacious_team.table_wrapper} package, because it configured by default.
      */
     private Collection<String> tableParsers = Collections.emptyList();
+
+    private boolean reportBackup = true;
 }
