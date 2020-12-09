@@ -42,6 +42,10 @@
             <outputDirectory/>
         </file>
         <file>
+            <source>src/main/resources/application-conf.properties</source>
+            <outputDirectory/>
+        </file>
+        <file>
             <source>src/main/assembly/zip/extensions/README.md</source>
             <outputDirectory>extensions</outputDirectory>
         </file>

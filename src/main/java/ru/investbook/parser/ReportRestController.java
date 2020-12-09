@@ -85,9 +85,14 @@ public class ReportRestController {
                 if (report != null && !report.isEmpty()) {
                     long t0 = System.nanoTime();
                     String brokerName = parseReport(report, broker);
-                    Path path = saveToBackup(brokerName, report);
-                    log.info("Загрузка отчета {} завершена за {}, бекап отчета сохранен в {}", report.getOriginalFilename(),
-                            Duration.ofNanos(System.nanoTime() - t0), path.toAbsolutePath());
+                    if (investbookProperties.isReportBackup()) {
+                        Path path = saveToBackup(brokerName, report);
+                        log.info("Загрузка отчета {} завершена за {}, бекап отчета сохранен в {}",
+                                report.getOriginalFilename(), Duration.ofNanos(System.nanoTime() - t0), path.toAbsolutePath());
+                    } else {
+                        log.info("Загрузка отчета {} завершена за {}, бекап отключен конфигурацией",
+                                report.getOriginalFilename(), Duration.ofNanos(System.nanoTime() - t0));
+                    }
                 }
             } catch (Exception e) {
                 exceptions.add(e);
