@@ -54,7 +54,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
                 .value(table.getCurrencyCellValue(row, VALUE))
                 .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
                 .eventType(CashFlowType.DERIVATIVE_PROFIT)
-                .isin(getContract(table, row))
+                .security(getContract(table, row))
                 .build());
     }
 

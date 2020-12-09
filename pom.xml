@@ -28,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2020.12.3</version>
+    <version>2020.13</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -47,11 +47,19 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>20.12.3</win.msi.version>
+        <win.msi.version>20.13</win.msi.version>
         <java.version>15</java.version>
     </properties>
 
     <repositories>
+        <repository>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
@@ -154,7 +162,7 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>2020.12.2</version>
+            <version>2020.13</version>
         </dependency>
     </dependencies>
 
@@ -265,7 +273,8 @@
                             <appVersion>${win.msi.version}</appVersion>
                             <vendor>Spacious Team</vendor>
                             <description>${project.description}</description>
-                            <copyright>InvestBook, Copyright (C) 2020 Spacious Team (https://github.com/spacious-team)</copyright>
+                            <copyright>InvestBook, Copyright (C) 2020 Spacious Team (https://github.com/spacious-team)
+                            </copyright>
                             <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
                             <javaOptions>
                                 <javaOption>-Dloader.path=./app/extensions</javaOption>
@@ -298,6 +307,11 @@
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>2.4.3</version>
                     </plugin>
                 </plugins>
             </build>

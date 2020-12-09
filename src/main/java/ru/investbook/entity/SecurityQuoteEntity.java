@@ -46,7 +46,7 @@ public class SecurityQuoteEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "isin", referencedColumnName = "isin")
+    @JoinColumn(name = "security", referencedColumnName = "id")
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private SecurityEntity security;
 

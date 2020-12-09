@@ -67,7 +67,7 @@ public class PaidInterestFactory {
     private PaidInterest create(String portfolio, Security security, Positions positions, ViewFilter filter) {
         PaidInterest paidInterest = new PaidInterest();
         for (CashFlowType type : PAY_TYPES) {
-            paidInterest.get(type).putAll(getPositionWithPayments(portfolio, security.getIsin(), positions, type, filter));
+            paidInterest.get(type).putAll(getPositionWithPayments(portfolio, security.getId(), positions, type, filter));
         }
         return paidInterest;
     }
@@ -78,7 +78,7 @@ public class PaidInterestFactory {
                                                                                CashFlowType event,
                                                                                ViewFilter filter) {
         List<SecurityEventCashFlowEntity> accruedInterests = securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         portfolio,
                         isin,
                         event.getId(),
@@ -133,7 +133,7 @@ public class PaidInterestFactory {
             }
         }
         if (bookClosureDate == null) {
-            throw new IllegalArgumentException("История транзакций для ЦБ " + payment.getSecurity().getIsin() +
+            throw new IllegalArgumentException("История транзакций для ЦБ " + payment.getSecurity().getId() +
                     ((payment.getSecurity().getName() != null) ? " (\"" + payment.getSecurity().getName() + "\") " : " ") +
                     "не полная, не найден день в прошлом, " +
                     "в который количество открытых позиций равно " + payForSecurities +

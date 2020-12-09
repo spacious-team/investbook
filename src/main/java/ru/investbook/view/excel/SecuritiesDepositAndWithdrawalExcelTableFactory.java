@@ -51,7 +51,7 @@ public class SecuritiesDepositAndWithdrawalExcelTableFactory implements TableFac
             record.put(COUNT, transactionEntity.getCount());
             SecurityEntity securityEntity = transactionEntity.getSecurity();
             record.put(SECURITY, Optional.ofNullable(securityEntity.getName())
-                    .orElse(securityEntity.getIsin()));
+                    .orElse(securityEntity.getId()));
         }
         return table;
     }

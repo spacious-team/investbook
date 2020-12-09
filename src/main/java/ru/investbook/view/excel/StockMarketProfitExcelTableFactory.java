@@ -85,7 +85,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         Table openPositionsProfit = new Table();
         Table closedPositionsProfit = new Table();
         for (String isin : securitiesIsin) {
-            Optional<SecurityEntity> securityEntity = securityRepository.findByIsin(isin);
+            Optional<SecurityEntity> securityEntity = securityRepository.findById(isin);
             if (securityEntity.isPresent()) {
                 Security security = securityConverter.fromEntity(securityEntity.get());
                 Positions positions = positionsFactory.get(portfolio, security, ViewFilter.get());
@@ -105,14 +105,14 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     }
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio) {
-        return transactionRepository.findDistinctIsinByPortfolioAndTimestampBetweenOrderByTimestampDesc(
+        return transactionRepository.findDistinctSecurityByPortfolioAndTimestampBetweenOrderByTimestampDesc(
                 portfolio,
                 ViewFilter.get().getFromDate(),
                 ViewFilter.get().getToDate());
     }
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio, String currency) {
-        return transactionRepository.findDistinctIsinByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+        return transactionRepository.findDistinctSecurityByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
                 portfolio,
                 currency,
                 ViewFilter.get().getFromDate(),
@@ -129,7 +129,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             record.putAll(getPaidInterestProfit(position, paidInterest));
             record.put(SECURITY,
                     Optional.ofNullable(security.getName())
-                            .orElse(security.getIsin()));
+                            .orElse(security.getId()));
             rows.add(record);
         }
         return rows;
@@ -169,10 +169,10 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                 closeAmount = getTransactionCashFlow(transaction, CashFlowType.PRICE, multiplier);
                 break;
             case REDEMPTION:
-                closeAmount = getRedemptionCashFlow(transaction.getPortfolio(), transaction.getIsin(), multiplier);
+                closeAmount = getRedemptionCashFlow(transaction.getPortfolio(), transaction.getSecurity(), multiplier);
                 break;
             default:
-                throw new IllegalArgumentException("ЦБ " + transaction.getIsin() +
+                throw new IllegalArgumentException("ЦБ " + transaction.getSecurity() +
                         " не может быть закрыта событием типа " + position.getClosingEvent());
         }
         if (closeAmount == null) {
@@ -233,7 +233,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
 
     private BigDecimal getRedemptionCashFlow(String portfolio, String isin, double multiplier) {
         List<SecurityEventCashFlowEntity> cashFlows = securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         portfolio,
                         isin,
                         CashFlowType.REDEMPTION.getId(),
@@ -263,7 +263,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
      * @return security price currency
      */
     private String getSecurityCurrency(Transaction transaction) {
-        String currency = securityCurrencies.get(transaction.getIsin());
+        String currency = securityCurrencies.get(transaction.getSecurity());
         if (currency != null) {
             return currency;
         }
@@ -274,7 +274,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                         CashFlowType.PRICE.getId())
                 .map(TransactionCashFlowEntity::getCurrency)
                 .orElseThrow();
-        securityCurrencies.put(transaction.getIsin(), currency);
+        securityCurrencies.put(transaction.getSecurity(), currency);
         return currency;
     }
 

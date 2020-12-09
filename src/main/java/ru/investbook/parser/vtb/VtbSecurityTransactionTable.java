@@ -68,7 +68,7 @@ public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTra
                 .timestamp(((ExcelTable) table).getDateCellValue(row, DATE).toInstant())
                 .transactionId(table.getStringCellValue(row, TRANSACTION))
                 .portfolio(getReport().getPortfolio())
-                .isin(isin)
+                .security(isin)
                 .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
                 .value(value)
                 .accruedInterest(accruedInterest)

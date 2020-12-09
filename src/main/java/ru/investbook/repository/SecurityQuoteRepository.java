@@ -26,7 +26,7 @@ import java.util.Optional;
 
 public interface SecurityQuoteRepository extends JpaRepository<SecurityQuoteEntity, Integer> {
 
-    Optional<SecurityQuoteEntity> findFirstBySecurityIsinAndTimestampLessThanOrderByTimestampDesc(
+    Optional<SecurityQuoteEntity> findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(
             String isin,
             Instant date);
 

@@ -29,8 +29,14 @@ import java.util.Set;
 
 public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityEventCashFlowEntity, Integer> {
 
-    ArrayList<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIsinAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+    ArrayList<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
             String portfolio,
+            String isin,
+            int cashFlowType,
+            Instant fromDate,
+            Instant toDate);
+
+    ArrayList<SecurityEventCashFlowEntity> findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
             String isin,
             int cashFlowType,
             Instant fromDate,
@@ -39,7 +45,7 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
     /**
      * Return last security payment
      */
-    Optional<SecurityEventCashFlowEntity> findFirstByPortfolioIdAndSecurityIsinAndCashFlowTypeIdInOrderByTimestampDesc(
+    Optional<SecurityEventCashFlowEntity> findFirstByPortfolioIdAndSecurityIdAndCashFlowTypeIdInOrderByTimestampDesc(
             String portfolio,
             String isin,
             Set<Integer> cashFlowType);
@@ -47,12 +53,21 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
     /**
      * Return last security payment, between date-time interval
      */
-    Optional<SecurityEventCashFlowEntity> findFirstByPortfolioIdAndSecurityIsinAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+    Optional<SecurityEventCashFlowEntity> findFirstByPortfolioIdAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
             String portfolio,
             String isin,
             Set<Integer> cashFlowType,
             Instant fromDate,
-            Instant toDat);
+            Instant toDate);
+
+    /**
+     * Return last security payment, between date-time interval
+     */
+    Optional<SecurityEventCashFlowEntity> findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+            String isin,
+            Set<Integer> cashFlowType,
+            Instant fromDate,
+            Instant toDate);
 
     ArrayList<SecurityEventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
             String portfolio,

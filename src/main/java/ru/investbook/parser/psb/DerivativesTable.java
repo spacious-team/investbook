@@ -18,43 +18,27 @@
 
 package ru.investbook.parser.psb;
 
-import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Collections;
 
-import static java.util.Collections.emptyList;
-import static ru.investbook.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.*;
+import static ru.investbook.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.CONTRACT;
 
-public class DerivativeQuoteTable extends AbstractReportTable<SecurityQuote> {
+public class DerivativesTable extends AbstractReportTable<Security> {
 
-    private final BigDecimal minValue = BigDecimal.valueOf(0.01);
-
-    public DerivativeQuoteTable(PsbBrokerReport report) {
+    public DerivativesTable(PsbBrokerReport report) {
         super(report, DerivativeCashFlowTable.TABLE2_NAME, DerivativeCashFlowTable.TABLE_END_TEXT,
                 DerivativeCashFlowTable.ContractCountTableHeader.class);
     }
 
     @Override
-    protected Collection<SecurityQuote> getRow(Table table, TableRow row) {
-        BigDecimal price = table.getCurrencyCellValue(row, PRICE);
-        BigDecimal tickValue = table.getCurrencyCellValue(row, PRICE_TICK_VALUE);
-        if (price.compareTo(minValue) < 0 || tickValue.compareTo(minValue) < 0) {
-            return emptyList();
-        }
-        BigDecimal tick = table.getCurrencyCellValue(row, PRICE_TICK);
-        BigDecimal quote = price.multiply(tick)
-                .divide(tickValue, 2, RoundingMode.HALF_UP);
-        return Collections.singletonList(SecurityQuote.builder()
-                .security(table.getStringCellValue(row, CONTRACT))
-                .timestamp(getReport().getReportEndDateTime())
-                .quote(quote)
-                .price(price)
+    protected Collection<Security> getRow(Table table, TableRow row) {
+        return Collections.singletonList(Security.builder()
+                .id(table.getStringCellValue(row, CONTRACT))
                 .build());
     }
 }

@@ -71,13 +71,13 @@ public class ReportTableStorage {
                 "Не могу сохранить Портфель " + portfolio);
     }
 
-    public boolean addSecurity(String isin) {
-        return addSecurity(isin, null);
+    public boolean addSecurity(String security) {
+        return addSecurity(security, null);
     }
 
-    public boolean addSecurity(String isin, String name) {
+    public boolean addSecurity(String security, String name) {
         return addSecurity(Security.builder()
-                .isin(isin)
+                .id(security)
                 .name(name)
                 .build());
     }
@@ -104,7 +104,7 @@ public class ReportTableStorage {
     }
 
     public void addTransaction(ForeignExchangeTransaction fxTransaction) {
-        addSecurity(fxTransaction.getInstrument());
+        addSecurity(fxTransaction.getContract());
         boolean isAdded = addTransaction(fxTransaction.getTransaction());
         if (isAdded) {
             fxTransaction.getTransactionCashFlows().forEach(this::addTransactionCashFlow);
@@ -173,7 +173,7 @@ public class ReportTableStorage {
             if (NestedExceptionUtils.getMostSpecificCause(e).getMessage().toLowerCase().contains("duplicate")) {
                 log.debug("Дублирование информации: {}", error, e);
             } else {
-                log.warn(error);
+                log.warn(error, e);
             }
             return false;
         }

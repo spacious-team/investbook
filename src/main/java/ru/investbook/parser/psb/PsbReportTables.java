@@ -56,7 +56,9 @@ public class PsbReportTables implements ReportTables {
     
     @Override
     public ReportTable<Security> getSecuritiesTable() {
-        return new SecuritiesTable(report);
+        return WrappingReportTable.of(
+                new SecuritiesTable(report),
+                new DerivativesTable(report));
     }
     
     @Override

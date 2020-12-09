@@ -86,7 +86,7 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
                     .value(value)
                     .currency(event.getCurrency())
                     .count(count)
-                    .isin(isin);
+                    .security(isin);
             Collection<SecurityEventCashFlow> data = new ArrayList<>();
             data.add(builder.build());
             if (tax.abs().compareTo(minValue) >= 0) {

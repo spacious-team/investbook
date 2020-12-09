@@ -83,7 +83,7 @@ public class SecurityTransactionTable extends InitializableReportTable<SecurityT
                 .timestamp(getReport().convertToInstant(table.getStringCellValue(row, DATE_TIME)))
                 .transactionId(String.valueOf(table.getLongCellValue(row, TRANSACTION))) // may be double numbers in future
                 .portfolio(getReport().getPortfolio())
-                .isin(table.getStringCellValue(row, ISIN))
+                .security(table.getStringCellValue(row, ISIN))
                 .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
                 .value(value)
                 .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)

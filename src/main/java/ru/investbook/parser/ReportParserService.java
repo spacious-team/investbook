@@ -65,14 +65,14 @@ public class ReportParserService {
                 cashFlowTable.getData().forEach(storage::addEventCashFlow);
                 securityTransactionTable.getData().forEach(storage::addTransaction);
                 couponAndAmortizationTable.getData().forEach(c -> {
-                    if (storage.addSecurity(c.getIsin())) { // required for amortization
+                    if (storage.addSecurity(c.getSecurity())) { // required for amortization
                         storage.addSecurityEventCashFlow(c);
                     }
                 });
                 dividendTable.getData().forEach(storage::addSecurityEventCashFlow);
                 derivativeTransactionTable.getData().forEach(storage::addTransaction);
                 derivativeCashFlowTable.getData().forEach(c -> {
-                    if (storage.addSecurity(c.getIsin())) {
+                    if (storage.addSecurity(c.getSecurity())) {
                         if (c.getCount() == null &&
                                 c.getEventType() == CashFlowType.DERIVATIVE_PROFIT) { // count is optional for derivatives
                             c = c.toBuilder().count(0).build();

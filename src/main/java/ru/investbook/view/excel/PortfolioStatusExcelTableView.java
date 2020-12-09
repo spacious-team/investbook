@@ -66,6 +66,20 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     }
 
     @Override
+    public void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator) {
+        List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPkTypeIn(
+                Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId()));
+        for (String currency : currencies) {
+            Table table = ((PortfolioStatusExcelTableFactory) tableFactory).create(currency);
+            if (!table.isEmpty()) {
+                Sheet sheet = book.createSheet(validateExcelSheetName("Портфель " + currency));
+                writeTable(table, sheet, styles);
+            }
+        }
+        super.writeTo(book, styles, sheetNameCreator);
+    }
+
+    @Override
     protected void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator, Portfolio portfolio) {
         List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPkPortfolioAndPkTypeIn(
                 portfolio.getId(),

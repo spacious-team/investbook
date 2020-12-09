@@ -40,9 +40,9 @@ public class SecurityEventCashFlowConverter implements EntityConverter<SecurityE
     @Override
     public SecurityEventCashFlowEntity toEntity(SecurityEventCashFlow eventCashFlow) {
         SecurityEntity securityEntity = null;
-        if (eventCashFlow.getIsin() != null) {
-            securityEntity = securityRepository.findByIsin(eventCashFlow.getIsin())
-                    .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + eventCashFlow.getIsin()));
+        if (eventCashFlow.getSecurity() != null) {
+            securityEntity = securityRepository.findById(eventCashFlow.getSecurity())
+                    .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + eventCashFlow.getSecurity()));
         }
         PortfolioEntity portfolioEntity = portfolioRepository.findById(eventCashFlow.getPortfolio())
                 .orElseThrow(() -> new IllegalArgumentException("В справочнике не найден брокерский счет: " + eventCashFlow.getPortfolio()));
@@ -68,7 +68,7 @@ public class SecurityEventCashFlowConverter implements EntityConverter<SecurityE
                 .portfolio(entity.getPortfolio().getId())
                 .timestamp(entity.getTimestamp())
                 .eventType(CashFlowType.valueOf(entity.getCashFlowType().getId()))
-                .isin(entity.getSecurity().getIsin())
+                .security(entity.getSecurity().getId())
                 .count(entity.getCount())
                 .value(entity.getValue())
                 .currency(entity.getCurrency())

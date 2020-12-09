@@ -61,7 +61,7 @@ public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
             accruedInterest = null;
         }
         return Collections.singletonList(SecurityQuote.builder()
-                .isin(table.getStringCellValue(row, ISIN))
+                .security(table.getStringCellValue(row, ISIN))
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .price(price)
