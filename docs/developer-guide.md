@@ -1,5 +1,5 @@
 ![java-version](https://img.shields.io/badge/Java-15-brightgreen?style=flat-square)
-![spring-boot-version](https://img.shields.io/badge/SpringBoot-2.3.4-brightgreen?style=flat-square)
+![spring-boot-version](https://img.shields.io/badge/SpringBoot-2.4.1-brightgreen?style=flat-square)
 ![jpackage-version](https://img.shields.io/badge/Jpackage-latest-brightgreen?style=flat-square)
 
 ### Инструкция для начинающих
