@@ -170,7 +170,10 @@ public class ReportTableStorage {
                 return false;
             }
         } catch (Exception e) {
-            if (NestedExceptionUtils.getMostSpecificCause(e).getMessage().toLowerCase().contains("duplicate")) {
+            Throwable cause = NestedExceptionUtils.getMostSpecificCause(e);
+            String message = cause.getMessage();
+            if (message.toLowerCase().contains("duplicate") || // MariaDB
+                    message.startsWith("Нарушение уникального индекса или первичного ключа")) { // H2
                 log.debug("Дублирование информации: {}", error, e);
             } else {
                 log.warn(error, e);
