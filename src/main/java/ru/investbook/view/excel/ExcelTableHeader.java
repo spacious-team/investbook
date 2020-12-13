@@ -27,11 +27,23 @@ public interface ExcelTableHeader extends TableHeader {
         return getColumnIndex() + ROW_NUM_PLACE_HOLDER;
     }
 
+    default String getCellAddr(int rowNum) {
+        return "" + getColumnIndex() + rowNum;
+    }
+
     default char getColumnIndex() {
         return  (char) ('A' + this.ordinal());
     }
 
+    default String getColumnRange() {
+        return "" + getColumnIndex() + ":" + getColumnIndex();
+    }
+
     default String getRange(int startRowNum, int endRowNum) {
         return "" + getColumnIndex() + startRowNum + ":" + getColumnIndex() + endRowNum;
+    }
+
+    static String getColumnsRange(ExcelTableHeader startColumn, int startRow, ExcelTableHeader endColumn, int endRow) {
+        return "" + startColumn.getColumnIndex() + startRow + ":" + endColumn.getColumnIndex() + endRow;
     }
 }

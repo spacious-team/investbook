@@ -40,6 +40,7 @@ import ru.investbook.view.TableFactory;
 import ru.investbook.view.TableHeader;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
@@ -134,6 +135,9 @@ public abstract class ExcelTableView {
                         }
                     } else if (value instanceof Instant) {
                         cell.setCellValue(((Instant) value).atZone(ZoneId.systemDefault()).toLocalDateTime());
+                        cell.setCellStyle(styles.getDateStyle());
+                    } else if (value instanceof LocalDate) {
+                        cell.setCellValue((LocalDate) value);
                         cell.setCellStyle(styles.getDateStyle());
                     } else if (value instanceof Boolean) {
                         cell.setCellValue((Boolean) value);

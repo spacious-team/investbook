@@ -27,6 +27,12 @@ public class Table extends LinkedList<Table.Record> {
         add(Record.EMPTY);
     }
 
+    public Record addNewRecord() {
+        Record record = new Record();
+        add(record);
+        return record;
+    }
+
     public static Record newRecord() {
         return new Record();
     }

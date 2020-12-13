@@ -24,7 +24,6 @@ import org.springframework.data.repository.query.Param;
 import ru.investbook.entity.PortfolioPropertyEntity;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,7 +52,7 @@ public interface PortfolioPropertyRepository extends JpaRepository<PortfolioProp
             )
             ORDER BY portfolio, timestamp DESC
             """)
-    Collection<PortfolioPropertyEntity> findDistinctOnPortfolioByPropertyAndTimestampBetweenOrderByTimestampDesc(
+    List<PortfolioPropertyEntity> findDistinctOnPortfolioByPropertyAndTimestampBetweenOrderByTimestampDesc(
             @Param("property") String property,
             @Param("from") Instant startDate,
             @Param("to") Instant endDate);
@@ -61,4 +60,9 @@ public interface PortfolioPropertyRepository extends JpaRepository<PortfolioProp
     List<PortfolioPropertyEntity> findByPropertyAndTimestampBetweenOrderByTimestampDesc(String property,
                                                                                         Instant startDate,
                                                                                         Instant endDate);
+
+    List<PortfolioPropertyEntity> findByPortfolioIdAndPropertyAndTimestampBetweenOrderByTimestampDesc(String portfolio,
+                                                                                                    String property,
+                                                                                                    Instant startDate,
+                                                                                                    Instant endDate);
 }

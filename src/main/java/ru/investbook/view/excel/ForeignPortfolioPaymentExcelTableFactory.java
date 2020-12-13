@@ -37,6 +37,7 @@ import java.time.Month;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -51,7 +52,9 @@ import static ru.investbook.view.excel.TaxExcelTableFactory.isDividendOrCouponTa
 @Slf4j
 public class ForeignPortfolioPaymentExcelTableFactory implements TableFactory {
     /** tax accounted by {@link TaxExcelTableFactory} */
-    private static final CashFlowType[] PAY_TYPES = new CashFlowType[]{AMORTIZATION, REDEMPTION, COUPON, DIVIDEND, TAX};
+    private final Collection<Integer> PAY_TYPES = Stream.of(new CashFlowType[]{AMORTIZATION, REDEMPTION, COUPON, DIVIDEND, TAX})
+            .map(CashFlowType::getId)
+            .collect(Collectors.toList());
     private final EventCashFlowRepository eventCashFlowRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
@@ -66,9 +69,7 @@ public class ForeignPortfolioPaymentExcelTableFactory implements TableFactory {
         return eventCashFlowRepository
                 .findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
                         portfolio.getId(),
-                        Stream.of(PAY_TYPES)
-                                .map(CashFlowType::getId)
-                                .collect(Collectors.toList()),
+                        PAY_TYPES,
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate())
                 .stream()

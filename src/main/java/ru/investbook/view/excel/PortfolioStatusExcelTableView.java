@@ -122,7 +122,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
 
     @Override
     protected Table.Record getTotalRow(Table table) {
-        Table.Record totalRow = new Table.Record();
+        Table.Record totalRow = Table.newRecord();
         for (PortfolioStatusExcelTableHeader column : PortfolioStatusExcelTableHeader.values()) {
             totalRow.put(column, "=SUM(" + column.getRange(3, table.size() + 2) + ")");
         }
