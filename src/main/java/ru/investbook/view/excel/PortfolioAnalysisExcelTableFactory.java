@@ -30,8 +30,10 @@ import org.spacious_team.broker.report_parser.api.PortfolioCash;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.converter.PortfolioPropertyConverter;
+import ru.investbook.entity.StockMarketIndexEntity;
 import ru.investbook.repository.EventCashFlowRepository;
 import ru.investbook.repository.PortfolioPropertyRepository;
+import ru.investbook.repository.StockMarketIndexRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;
 import ru.investbook.view.ViewFilter;
@@ -69,6 +71,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     private final PortfolioPropertyRepository portfolioPropertyRepository;
     private final PortfolioPropertyConverter portfolioPropertyConverter;
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
+    private final StockMarketIndexRepository stockMarketIndexRepository;
 
     public Table create() {
         return createTable(
@@ -98,7 +101,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                               Map<LocalDate, BigDecimal> sp500) {
         Table table = new Table();
         for (EventCashFlow cashFlow : cashFlows) {
-            Table.Record record = recordOf(table, cashFlow.getTimestamp(),  cashFlow.getCurrency());
+            Table.Record record = recordOf(table, cashFlow.getTimestamp(), cashFlow.getCurrency());
             record.merge(INVESTMENT_AMOUNT, cashFlow.getValue(), (v1, v2) -> ((BigDecimal) v1).add(((BigDecimal) v2)));
             record.putIfAbsent(INVESTMENT_AMOUNT_USD, foreignExchangeRateTableFactory
                     .cashConvertToUsdExcelFormula(cashFlow.getCurrency(), INVESTMENT_AMOUNT, EXCHANGE_RATE));
@@ -117,10 +120,10 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
             record.put(CASH_GBP, currencyValue.get("GBP"));
             record.put(TOTAL_CASH_USD,
                     foreignExchangeRateTableFactory.cashConvertToUsdExcelFormula("RUB", CASH_RUB, EXCHANGE_RATE) + "+" +
-                    CASH_USD.getCellAddr() + "+" +
-                    foreignExchangeRateTableFactory.cashConvertToUsdExcelFormula("EUR", CASH_EUR, EXCHANGE_RATE).substring(1) + "+" +
-                    foreignExchangeRateTableFactory.cashConvertToUsdExcelFormula("CHF", CASH_CHF, EXCHANGE_RATE).substring(1) + "+" +
-                    foreignExchangeRateTableFactory.cashConvertToUsdExcelFormula("GBP", CASH_GBP, EXCHANGE_RATE).substring(1));
+                            CASH_USD.getCellAddr() + "+" +
+                            foreignExchangeRateTableFactory.cashConvertToUsdExcelFormula("EUR", CASH_EUR, EXCHANGE_RATE).substring(1) + "+" +
+                            foreignExchangeRateTableFactory.cashConvertToUsdExcelFormula("CHF", CASH_CHF, EXCHANGE_RATE).substring(1) + "+" +
+                            foreignExchangeRateTableFactory.cashConvertToUsdExcelFormula("GBP", CASH_GBP, EXCHANGE_RATE).substring(1));
         }
 
         for (var entry : totalAssets.entrySet()) {
@@ -131,12 +134,6 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
             record.put(ASSETS_USD, foreignExchangeRateTableFactory
                     .cashConvertToUsdExcelFormula("RUB", ASSETS_RUB, EXCHANGE_RATE));
 
-        }
-
-        for (var record : table) {
-            LocalDate date = (LocalDate) record.get(DATE);
-            record.put(SP500, sp500.get(date));
-            record.put(SP500_GROWTH, SP500_GROWTH_FORMULA);
         }
 
         table.sort(comparing(record -> ((LocalDate) record.get(DATE))));
@@ -153,6 +150,12 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                     record.put(ASSETS_GROWTH, ASSETS_GROWTH_FORMULA);
                 }
             }
+        }
+
+        for (var record : table) {
+            LocalDate date = (LocalDate) record.get(DATE);
+            record.put(SP500, sp500.get(date));
+            record.put(SP500_GROWTH, SP500_GROWTH_FORMULA);
         }
 
         if (!table.isEmpty()) {
@@ -246,6 +249,16 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         return properties;
     }
 
+    private Map<LocalDate, BigDecimal> getSp500Index() {
+        ViewFilter viewFilter = ViewFilter.get();
+        return stockMarketIndexRepository
+                .getByDateBetweenOrderByDate(
+                        LocalDate.ofInstant(viewFilter.getFromDate(), ZoneId.systemDefault()),
+                        LocalDate.ofInstant(viewFilter.getToDate(), ZoneId.systemDefault()))
+                .stream()
+                .collect(Collectors.toMap(StockMarketIndexEntity::getDate, StockMarketIndexEntity::getSp500));
+    }
+
     /**
      * Sums cash with same currency for all portfolios and markets, group result by date.
      *
@@ -296,6 +309,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         private final String portfolio;
         private final Instant instant;
         private final Map<String, BigDecimal> currencyValue;
+
     }
 
     private LinkedHashMap<Instant, BigDecimal> getAllPortfolioTotalAssets(List<PortfolioProperty> assets) {
@@ -317,10 +331,6 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
             }
         }
         return allPortfolioSummedValues;
-    }
-
-    private Map<LocalDate, BigDecimal> getSp500Index() {
-        return Collections.emptyMap();
     }
 
     /**
