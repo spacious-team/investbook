@@ -22,21 +22,26 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ru.investbook.entity.EventCashFlowEntity;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public interface EventCashFlowRepository extends JpaRepository<EventCashFlowEntity, Integer> {
 
-    ArrayList<EventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdOrderByTimestamp(String portfolio,
-                                                                                      int cashFlowType);
+    List<EventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdOrderByTimestamp(String portfolio,
+                                                                                 int cashFlowType);
 
-    ArrayList<EventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
+    List<EventCashFlowEntity> findByCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
+            int cashFlowType,
+            Instant from,
+            Instant to);
+
+    List<EventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
             String portfolio,
             int cashFlowType,
             Instant from,
             Instant to);
 
-    ArrayList<EventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+    List<EventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
             String portfolio,
             Collection<Integer> cashFlowType,
             Instant from,

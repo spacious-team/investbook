@@ -1,5 +1,6 @@
 == Описание отчета о брокерском счете
 
+. <<portfolio-analysis.adoc#,Таблица "Обзор">>
 . <<portfolio-status.adoc#,Таблица "Портфель">>
 . <<portfolio-payment.adoc#,Таблица "Выплаты">>
 . <<foreign-portfolio-payment.adoc#,Таблица "Внешние выплаты">>

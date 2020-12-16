@@ -19,6 +19,7 @@
 package ru.investbook.view.excel;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.investbook.view.ForeignExchangeRateService;
 import ru.investbook.view.Table;
@@ -28,18 +29,35 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ForeignExchangeRateTableFactory {
-    private static final List<String> currencies = Arrays.asList("USD", "EUR", "GBP", "CHF");
+    private final List<String> currencies = Arrays.asList("USD", "EUR", "GBP", "CHF");
+    private final int FIRST_CURRENCY_ROW = 3; // 2 rows = header + total
     private final ForeignExchangeRateService foreignExchangeRateService;
+
+    public String cashConvertToUsdExcelFormula(String currency,
+                                               ExcelTableHeader cashColumn,
+                                               ExcelTableHeader exchangeRateColumn) {
+        if (currency.equalsIgnoreCase("USD")) {
+            return "=" + cashColumn.getCellAddr();
+        } else {
+            String toRub = cashConvertToRubExcelFormula(currency, cashColumn, exchangeRateColumn);
+            return toRub + "/" + exchangeRateColumn.getColumnIndex() + FIRST_CURRENCY_ROW; // USD is a first currency
+        }
+    }
 
     public String cashConvertToRubExcelFormula(String currency,
                                                ExcelTableHeader cashColumn,
                                                ExcelTableHeader exchangeRateColumn) {
-        int rowNum = currencies.indexOf(currency);
-        if (rowNum == -1) {
+        int currencyIndex = currencies.indexOf(currency);
+        if (currencyIndex == -1) {
+            if (!currency.equalsIgnoreCase("RUB")) {
+                log.warn("Не могу конвертировать курс валюты {} в RUB", currency);
+            }
             return "=" + cashColumn.getCellAddr();
         } else {
-            return "=" + cashColumn.getCellAddr() + "*" + exchangeRateColumn.getColumnIndex() + (rowNum + 3); // 2 rows = header + total
+            return "=" + cashColumn.getCellAddr() + "*" +
+                    exchangeRateColumn.getColumnIndex() + (FIRST_CURRENCY_ROW + currencyIndex);
         }
     }
 

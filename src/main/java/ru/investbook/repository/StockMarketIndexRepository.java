@@ -16,35 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.view;
+package ru.investbook.repository;
 
-import java.util.HashMap;
-import java.util.LinkedList;
+import org.springframework.data.jpa.repository.JpaRepository;
+import ru.investbook.entity.StockMarketIndexEntity;
 
-public class Table extends LinkedList<Table.Record> {
+import java.time.LocalDate;
+import java.util.List;
 
-    public void addEmptyRecord() {
-        add(Record.EMPTY);
-    }
+public interface StockMarketIndexRepository extends JpaRepository<StockMarketIndexEntity, LocalDate> {
 
-    public Record addNewRecord() {
-        Record record = new Record();
-        add(record);
-        return record;
-    }
+    List<StockMarketIndexEntity> getByDateBetweenOrderByDate(LocalDate startDate, LocalDate endDate);
 
-    public static Record newRecord() {
-        return new Record();
-    }
-
-    public static class Record extends HashMap<TableHeader, Object> {
-        public static Record EMPTY = new Record();
-
-        public Record() {
-        }
-
-        public Record(Record record) {
-            super(record);
-        }
-    }
 }

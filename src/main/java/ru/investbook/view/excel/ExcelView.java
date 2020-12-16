@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ExcelView {
+    private final PortfolioAnalysisExcelTableView portfolioAnalysisExcelTableView;
     private final PortfolioStatusExcelTableView portfolioStatusExcelTableView;
     private final PortfolioPaymentExcelTableView portfolioPaymentTableView;
     private final ForeignPortfolioPaymentExcelTableView foreignPortfolioPaymentTableView;
@@ -38,6 +39,7 @@ public class ExcelView {
 
     public void writeTo(XSSFWorkbook book) {
         CellStyles styles = new CellStyles(book);
+        portfolioAnalysisExcelTableView.writeTo(book, styles, portfolio -> "Обзор (" + portfolio + ")");
         portfolioStatusExcelTableView.writeTo(book, styles, portfolio -> "Портфель (" + portfolio + ")");
         portfolioPaymentTableView.writeTo(book, styles, portfolio -> portfolio + " (выплаты)");
         foreignPortfolioPaymentTableView.writeTo(book, styles, portfolio -> portfolio + " (внешние выплаты)");

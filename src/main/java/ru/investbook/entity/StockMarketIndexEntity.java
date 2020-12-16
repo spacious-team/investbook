@@ -16,35 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.view;
+package ru.investbook.entity;
 
-import java.util.HashMap;
-import java.util.LinkedList;
+import lombok.Data;
 
-public class Table extends LinkedList<Table.Record> {
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
-    public void addEmptyRecord() {
-        add(Record.EMPTY);
-    }
+@Entity
+@Table(name = "stock_market_index")
+@Data
+public class StockMarketIndexEntity {
 
-    public Record addNewRecord() {
-        Record record = new Record();
-        add(record);
-        return record;
-    }
+    @Id
+    private LocalDate date;
 
-    public static Record newRecord() {
-        return new Record();
-    }
-
-    public static class Record extends HashMap<TableHeader, Object> {
-        public static Record EMPTY = new Record();
-
-        public Record() {
-        }
-
-        public Record(Record record) {
-            super(record);
-        }
-    }
+    @Basic
+    @Column(name = "sp500")
+    private BigDecimal sp500;
 }
