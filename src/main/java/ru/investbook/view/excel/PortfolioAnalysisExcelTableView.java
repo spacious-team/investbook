@@ -21,8 +21,14 @@ package ru.investbook.view.excel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSource;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
+import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
+import org.apache.poi.xssf.usermodel.XSSFChart;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
@@ -33,6 +39,7 @@ import ru.investbook.view.TableHeader;
 
 import java.util.function.UnaryOperator;
 
+import static ru.investbook.view.excel.ExcelChartPlotHelper.*;
 import static ru.investbook.view.excel.ExcelTableHeader.getColumnsRange;
 import static ru.investbook.view.excel.PortfolioAnalysisExcelTableHeader.*;
 
@@ -105,7 +112,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     @Override
     protected void sheetPreCreate(Sheet sheet, Table table) {
         super.sheetPreCreate(sheet, table);
-        sheet.setZoom(102); // show all columns for 24 inch monitor for securities sheet
+        sheet.setZoom(85); // show all columns for 24 inch monitor for securities sheet
     }
 
     @Override
@@ -114,15 +121,72 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
         for (Cell cell : sheet.getRow(1)) {
                 cell.setCellStyle(styles.getTotalRowStyle());
         }
-        for (Row row : sheet) {
-            if (row.getRowNum() == 0) continue;
-            Cell cell;
-            if ((cell = row.getCell(ASSETS_GROWTH.ordinal())) != null) {
-                cell.setCellStyle(styles.getPercentStyle());
-            }
-            if ((cell = row.getCell(SP500_GROWTH.ordinal())) != null) {
-                cell.setCellStyle(styles.getPercentStyle());
-            }
-        }
+        plotChart("Активы и инвестиции, USD", sheet, PortfolioAnalysisExcelTableView::addInvestmentAndAssetsGraph);
+        plotChart("Роста активов, %", sheet, PortfolioAnalysisExcelTableView::addPortfolioGrowthGraph);
+        plotChart("Остаток денежных средств, USD", sheet, PortfolioAnalysisExcelTableView::addCashBalanceGraph);
+    }
+
+    private static void addInvestmentAndAssetsGraph(String name, Sheet sheet) {
+        int rowCount = sheet.getLastRowNum();
+        XSSFSheet _sheet = (XSSFSheet) sheet;
+
+        XSSFChart chart = createChart(_sheet, name, CURRENCY_NAME.ordinal(), 6, 8, 18);
+        XDDFChartData chartData = createScatterChartData(chart);
+
+        XDDFDataSource<String> date = XDDFDataSourcesFactory.fromStringCellRange(_sheet,
+                new CellRangeAddress(2, rowCount, DATE.ordinal(), DATE.ordinal()));
+        XDDFNumericalDataSource<Double> assetsUsd = XDDFDataSourcesFactory.fromNumericCellRange(_sheet,
+                new CellRangeAddress(2, rowCount, ASSETS_USD.ordinal(), ASSETS_USD.ordinal()));
+        XDDFNumericalDataSource<Double> investmentUsd = XDDFDataSourcesFactory.fromNumericCellRange(_sheet,
+                new CellRangeAddress(2, rowCount, TOTAL_INVESTMENT_USD.ordinal(), TOTAL_INVESTMENT_USD.ordinal()));
+
+        XDDFChartData.Series assetsGraph = chartData.addSeries(date, assetsUsd);
+        assetsGraph.setTitle("Активы", null);
+        XDDFChartData.Series investmentGraph = chartData.addSeries(date, investmentUsd);
+        investmentGraph.setTitle("Инвестиции", null);
+
+        disableScatterVaryColors(chart);
+        chart.plot(chartData);
+    }
+
+    private static void addPortfolioGrowthGraph(String name, Sheet sheet) {
+        int rowCount = sheet.getLastRowNum();
+        XSSFSheet _sheet = (XSSFSheet) sheet;
+
+        XSSFChart chart = createChart(_sheet, name, CURRENCY_NAME.ordinal(), 24, 8, 18);
+        XDDFChartData chartData = createScatterChartData(chart);
+
+        XDDFDataSource<String> date = XDDFDataSourcesFactory.fromStringCellRange(_sheet,
+                new CellRangeAddress(2, rowCount, DATE.ordinal(), DATE.ordinal()));
+        XDDFNumericalDataSource<Double> assetsGrowth = XDDFDataSourcesFactory.fromNumericCellRange(_sheet,
+                new CellRangeAddress(2, rowCount, ASSETS_GROWTH.ordinal(), ASSETS_GROWTH.ordinal()));
+        XDDFNumericalDataSource<Double> sp500Growth = XDDFDataSourcesFactory.fromNumericCellRange(_sheet,
+                new CellRangeAddress(2, rowCount, SP500_GROWTH.ordinal(), SP500_GROWTH.ordinal()));
+
+        XDDFChartData.Series assetsGrowthGraph = chartData.addSeries(date, assetsGrowth);
+        assetsGrowthGraph.setTitle("Активы", null);
+        XDDFChartData.Series sp500GrowthGraph = chartData.addSeries(date, sp500Growth);
+        sp500GrowthGraph.setTitle("S&P 500", null);
+
+        disableScatterVaryColors(chart);
+        chart.plot(chartData);
+    }
+
+    private static void addCashBalanceGraph(String name, Sheet sheet) {
+        int rowCount = sheet.getLastRowNum();
+        XSSFSheet _sheet = (XSSFSheet) sheet;
+
+        XSSFChart chart = createChart(_sheet, name, CURRENCY_NAME.ordinal(), 42, 8, 18);
+        XDDFChartData chartData = createScatterChartData(chart);
+
+        XDDFDataSource<String> date = XDDFDataSourcesFactory.fromStringCellRange(_sheet,
+                new CellRangeAddress(2, rowCount, DATE.ordinal(), DATE.ordinal()));
+        XDDFNumericalDataSource<Double> cashBalance = XDDFDataSourcesFactory.fromNumericCellRange(_sheet,
+                new CellRangeAddress(2, rowCount, TOTAL_CASH_USD.ordinal(), TOTAL_CASH_USD.ordinal()));
+
+        chartData.addSeries(date, cashBalance);
+        disableScatterVaryColors(chart);
+        chart.deleteLegend();
+        chart.plot(chartData);
     }
 }

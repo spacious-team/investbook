@@ -154,8 +154,11 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
 
         for (var record : table) {
             LocalDate date = (LocalDate) record.get(DATE);
-            record.put(SP500, sp500.get(date));
-            record.put(SP500_GROWTH, SP500_GROWTH_FORMULA);
+            BigDecimal value = sp500.get(date);
+            if (value != null) {
+                record.put(SP500, value);
+                record.put(SP500_GROWTH, SP500_GROWTH_FORMULA);
+            }
         }
 
         if (!table.isEmpty()) {
@@ -343,7 +346,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         String initialInvestment = getInitialAssetsUsdFormula();
         String investmentDelta = "(" + TOTAL_INVESTMENT_USD.getCellAddr() + "-" + getFirstKnownInvestmentUsdFormula() + ")";
         String currentInvestment = "(" + initialInvestment + "+" + investmentDelta + ")";
-        String assetsGrowth = ASSETS_USD.getCellAddr() + "/" + currentInvestment + "-1";
+        String assetsGrowth = ASSETS_USD.getCellAddr() + "*100/" + currentInvestment + "-100";
         return "=IF(" + TOTAL_INVESTMENT_USD.getCellAddr() + ">0," + assetsGrowth + ",\"\")";
     }
 
@@ -369,7 +372,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
 
     private static String getSp500GrowthFormula() {
         String nonEmptyValues = "AND(" + SP500.getCellAddr() + "<>\"\"," + SP500.getCellAddr(3) + "<>\"\")";
-        String growth = SP500.getCellAddr() + "/" + SP500.getCellAddr(3) + "-1";
+        String growth = SP500.getCellAddr() + "*100/" + SP500.getCellAddr(3) + "-100";
         return "=IF(" + nonEmptyValues + "," + growth + ",\"\")";
     }
 }
