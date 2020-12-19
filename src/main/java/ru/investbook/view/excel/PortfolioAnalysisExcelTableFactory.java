@@ -96,6 +96,20 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                               LinkedHashMap<Instant, BigDecimal> totalAssets,
                               Map<LocalDate, BigDecimal> sp500) {
         Table table = new Table();
+        addInvestmentColumns(cashFlows, table);
+        addCashBalanceColumns(cashBalances, table);
+        addAssetsColumns(totalAssets, table);
+
+        table.sort(comparing(record -> ((LocalDate) record.get(DATE))));
+
+        addAssetsGrowthColumn(table);
+        addSp500GrowthColumn(sp500, table);
+
+        addCurrencyExchangeRateColumns(table);
+        return table;
+    }
+
+    private void addInvestmentColumns(List<EventCashFlow> cashFlows, Table table) {
         for (EventCashFlow cashFlow : cashFlows) {
             Table.Record record = recordOf(table, cashFlow.getTimestamp(), cashFlow.getCurrency());
             record.merge(INVESTMENT_AMOUNT, cashFlow.getValue(), (v1, v2) -> ((BigDecimal) v1).add(((BigDecimal) v2)));
@@ -104,7 +118,9 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
             record.putIfAbsent(TOTAL_INVESTMENT_USD,
                     "=SUM(" + INVESTMENT_AMOUNT_USD.getColumnIndex() + "3:" + INVESTMENT_AMOUNT_USD.getCellAddr() + ")");
         }
+    }
 
+    private void addCashBalanceColumns(LinkedHashMap<Instant, Map<String, BigDecimal>> cashBalances, Table table) {
         for (var entry : cashBalances.entrySet()) {
             Instant instant = entry.getKey();
             Table.Record record = recordOf(table, instant);
@@ -121,7 +137,9 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                             foreignExchangeRateTableFactory.cashConvertToUsdExcelFormula("CHF", CASH_CHF, EXCHANGE_RATE).substring(1) + "+" +
                             foreignExchangeRateTableFactory.cashConvertToUsdExcelFormula("GBP", CASH_GBP, EXCHANGE_RATE).substring(1));
         }
+    }
 
+    private void addAssetsColumns(LinkedHashMap<Instant, BigDecimal> totalAssets, Table table) {
         for (var entry : totalAssets.entrySet()) {
             Instant instant = entry.getKey();
             BigDecimal assets = entry.getValue();
@@ -131,9 +149,9 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                     .cashConvertToUsdExcelFormula("RUB", ASSETS_RUB, EXCHANGE_RATE));
 
         }
+    }
 
-        table.sort(comparing(record -> ((LocalDate) record.get(DATE))));
-
+    private static void addAssetsGrowthColumn(Table table) {
         boolean isTotalInvestmentUsdKnown = false;
         for (var record : table) {
             if (!isTotalInvestmentUsdKnown && record.containsKey(TOTAL_INVESTMENT_USD)) {
@@ -147,7 +165,9 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                 }
             }
         }
+    }
 
+    private static void addSp500GrowthColumn(Map<LocalDate, BigDecimal> sp500, Table table) {
         boolean isSp500ValueKnown = false;
         for (var record : table) {
             LocalDate date = (LocalDate) record.get(DATE);
@@ -161,12 +181,12 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                 record.put(SP500_GROWTH, SP500_GROWTH_FORMULA);
             }
         }
+    }
 
+    private void addCurrencyExchangeRateColumns(Table table) {
         if (!table.isEmpty()) {
             foreignExchangeRateTableFactory.appendExchangeRates(table, CURRENCY_NAME, EXCHANGE_RATE);
         }
-
-        return table;
     }
 
     private static Table.Record recordOf(Table table, Instant instant, String investmentCurrency) {
