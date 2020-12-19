@@ -18,20 +18,31 @@
 
 package ru.investbook.view.excel;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableHeader;
 
+import java.util.Optional;
+import java.util.function.UnaryOperator;
+
 import static ru.investbook.view.excel.TaxExcelTableHeader.*;
 
 @Component
 public class TaxExcelTableView extends ExcelTableView {
+
+    @Getter
+    private final int sheetOrder = 9;
+    @Getter(AccessLevel.PROTECTED)
+    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Налог (" + portfolio + ")";
 
     public TaxExcelTableView(PortfolioRepository portfolioRepository,
                              TaxExcelTableFactory tableFactory,
@@ -48,7 +59,7 @@ public class TaxExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow(Table table) {
+    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
         Table.Record total = Table.newRecord();
         total.put(DATE, "Итого:");
         total.put(TAX_RUB, "=SUM(" + TAX_RUB.getRange(3, table.size() + 2) + ")");

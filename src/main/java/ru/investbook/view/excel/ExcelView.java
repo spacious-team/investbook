@@ -21,35 +21,29 @@ package ru.investbook.view.excel;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
+import ru.investbook.view.ViewFilter;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class ExcelView {
-    private final PortfolioAnalysisExcelTableView portfolioAnalysisExcelTableView;
-    private final PortfolioStatusExcelTableView portfolioStatusExcelTableView;
-    private final PortfolioPaymentExcelTableView portfolioPaymentTableView;
-    private final ForeignPortfolioPaymentExcelTableView foreignPortfolioPaymentTableView;
-    private final StockMarketProfitExcelTableView stockMarketProfitExcelTableView;
-    private final DerivativesMarketProfitExcelTableView derivativesMarketProfitExcelTableView;
-    private final ForeignMarketProfitExcelTableView foreignMarketProfitExcelTableView;
-    private final SecuritiesDepositAndWithdrawalExcelTableView securitiesDepositAndWithdrawalExcelTableView;
-    private final CashFlowExcelTableView cashFlowExcelTableView;
-    private final TaxExcelTableView taxExcelTableView;
-    private final CommissionExcelTableView commissionExcelTableView;
+    private final List<ExcelTableView> excelTableViews;
 
     public void writeTo(XSSFWorkbook book) {
+        ViewFilter filter = ViewFilter.get();
+        List<ExcelTable> tables = excelTableViews.parallelStream()
+                .map(excelTableView -> excelTableView.createExcelTables(filter))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
         CellStyles styles = new CellStyles(book);
-        portfolioAnalysisExcelTableView.writeTo(book, styles, portfolio -> "Обзор (" + portfolio + ")");
-        portfolioStatusExcelTableView.writeTo(book, styles, portfolio -> "Портфель (" + portfolio + ")");
-        portfolioPaymentTableView.writeTo(book, styles, portfolio -> portfolio + " (выплаты)");
-        foreignPortfolioPaymentTableView.writeTo(book, styles, portfolio -> portfolio + " (внешние выплаты)");
-        stockMarketProfitExcelTableView.writeTo(book, styles, portfolio -> portfolio + " (фондовый)");
-        derivativesMarketProfitExcelTableView.writeTo(book, styles, portfolio -> portfolio + " (срочный)");
-        foreignMarketProfitExcelTableView.writeTo(book, styles, portfolio -> portfolio + " (валюта)");
-        securitiesDepositAndWithdrawalExcelTableView.writeTo(book, styles, portfolio -> portfolio + " (ввод-вывод цб)");
-        cashFlowExcelTableView.writeTo(book, styles, portfolio -> "Доходность (" + portfolio + ")");
-        taxExcelTableView.writeTo(book, styles, portfolio -> "Налог (" + portfolio + ")");
-        commissionExcelTableView.writeTo(book, styles, portfolio -> "Комиссия (" + portfolio + ")");
+        tables.stream()
+                .sorted(Comparator.comparing(t -> t.getCreator().getSheetOrder()))
+                .forEach(table -> table.writeTo(book, styles));
+
         if (book.getNumberOfSheets() == 0) {
             book.createSheet("пустой отчет");
         }

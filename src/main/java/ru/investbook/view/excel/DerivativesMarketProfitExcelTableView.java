@@ -18,20 +18,31 @@
 
 package ru.investbook.view.excel;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableHeader;
 
+import java.util.Optional;
+import java.util.function.UnaryOperator;
+
 import static ru.investbook.view.excel.DerivativesMarketProfitExcelTableHeader.*;
 
 @Component
 public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
+
+    @Getter
+    private final int sheetOrder = 5;
+    @Getter(AccessLevel.PROTECTED)
+    private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (срочный)";
 
     public DerivativesMarketProfitExcelTableView(PortfolioRepository portfolioRepository,
                                                  DerivativesMarketProfitExcelTableFactory tableFactory,
@@ -52,7 +63,7 @@ public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow(Table table) {
+    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
         Table.Record totalRow = new Table.Record();
         totalRow.put(CONTRACT, "Итого:");
         totalRow.put(COUNT, getSumFormula(COUNT, table.size()));
