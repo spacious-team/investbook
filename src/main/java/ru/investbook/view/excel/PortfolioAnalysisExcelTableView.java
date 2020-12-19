@@ -18,6 +18,8 @@
 
 package ru.investbook.view.excel;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -29,7 +31,6 @@ import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
 import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
 import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
@@ -37,6 +38,9 @@ import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableHeader;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.function.UnaryOperator;
 
 import static ru.investbook.view.excel.ExcelChartPlotHelper.*;
@@ -47,6 +51,11 @@ import static ru.investbook.view.excel.PortfolioAnalysisExcelTableHeader.*;
 @Slf4j
 public class PortfolioAnalysisExcelTableView extends ExcelTableView {
 
+    @Getter
+    private final int sheetOrder = 0;
+    @Getter(AccessLevel.PROTECTED)
+    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Обзор (" + portfolio + ")";
+
     public PortfolioAnalysisExcelTableView(PortfolioRepository portfolioRepository,
                                            PortfolioAnalysisExcelTableFactory tableFactory,
                                            PortfolioConverter portfolioConverter) {
@@ -54,22 +63,12 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     }
 
     @Override
-    public void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator) {
-        Table table = ((PortfolioAnalysisExcelTableFactory) tableFactory).create();
-        if (!table.isEmpty()) {
-            Sheet sheet = book.createSheet(validateExcelSheetName("Обзор"));
-            writeTable(table, sheet, styles);
-        }
-        super.writeTo(book, styles, sheetNameCreator);
-    }
-
-    @Override
-    protected void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator, Portfolio portfolio) {
-        Table table = tableFactory.create(portfolio);
-        if (!table.isEmpty()) {
-            Sheet sheet = book.createSheet(validateExcelSheetName(sheetNameCreator.apply(portfolio.getId())));
-            writeTable(table, sheet, styles);
-        }
+    public Collection<ExcelTable> createExcelTables() {
+        Collection<ExcelTable> tables = new ArrayList<>();
+        Table table = tableFactory.create();
+        tables.add(ExcelTable.of("Обзор", table, this));
+        tables.addAll(super.createExcelTables());
+        return tables;
     }
 
     @Override
@@ -81,7 +80,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow(Table table) {
+    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
         Table.Record totalRow = Table.newRecord();
         totalRow.put(DATE, "Итого:");
         totalRow.put(TOTAL_INVESTMENT_USD,  getLastValue(table, TOTAL_INVESTMENT_USD));

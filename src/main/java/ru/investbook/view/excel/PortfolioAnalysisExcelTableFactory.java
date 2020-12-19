@@ -73,6 +73,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
     private final StockMarketIndexRepository stockMarketIndexRepository;
 
+    @Override
     public Table create() {
         return createTable(
                 getCashFlow(Optional.empty()),
@@ -88,11 +89,6 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                 getCashBalance(Optional.of(portfolio)),
                 getTotalAssets(Optional.of(portfolio)),
                 getSp500Index());
-    }
-
-    @Override
-    public Table create(Portfolio portfolio, String forCurrency) {
-        throw new UnsupportedOperationException("Формирование аналитики для конкретной валюты не поддерживается");
     }
 
     private Table createTable(List<EventCashFlow> cashFlows,

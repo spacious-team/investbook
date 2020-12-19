@@ -22,7 +22,15 @@ import org.spacious_team.broker.pojo.Portfolio;
 
 public interface TableFactory {
 
+    default Table create() {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
     Table create(Portfolio portfolio);
+
+    default Table create(String forCurrency) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
 
     default Table create(Portfolio portfolio, String forCurrency) {
         throw new UnsupportedOperationException("Not implemented");

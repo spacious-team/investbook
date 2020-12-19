@@ -18,11 +18,12 @@
 
 package ru.investbook.view.excel;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
@@ -32,7 +33,10 @@ import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableHeader;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.UnaryOperator;
 
 import static ru.investbook.view.excel.StockMarketProfitExcelTableHeader.*;
@@ -40,6 +44,10 @@ import static ru.investbook.view.excel.StockMarketProfitExcelTableHeader.*;
 @Component
 public class StockMarketProfitExcelTableView extends ExcelTableView {
 
+    @Getter
+    private final int sheetOrder = 4;
+    @Getter(AccessLevel.PROTECTED)
+    private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (фондовый)";
     private final TransactionCashFlowRepository transactionCashFlowRepository;
 
     public StockMarketProfitExcelTableView(PortfolioRepository portfolioRepository,
@@ -51,16 +59,20 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator, Portfolio portfolio) {
-        List<String> currencies = transactionCashFlowRepository
-                .findDistinctCurrencyByPkPortfolioAndPkType(portfolio.getId(), CashFlowType.PRICE);
+    protected Collection<ExcelTable> createExcelTables(Portfolio portfolio, String sheetName) {
+        List<String> currencies = getCurrencies(portfolio);
+        Collection<ExcelTable> tables = new ArrayList<>(currencies.size());
         for (String currency : currencies) {
             Table table = tableFactory.create(portfolio, currency);
-            if (!table.isEmpty()) {
-                Sheet sheet = book.createSheet(validateExcelSheetName(sheetNameCreator.apply(portfolio.getId()) + " " + currency));
-                writeTable(table, sheet, styles);
-            }
+            sheetName = sheetName + " " + currency;
+            tables.add(ExcelTable.of(portfolio, sheetName, table, this));
         }
+        return tables;
+    }
+
+    private List<String> getCurrencies(Portfolio portfolio) {
+        return transactionCashFlowRepository
+                .findDistinctCurrencyByPkPortfolioAndPkType(portfolio.getId(), CashFlowType.PRICE);
     }
 
     @Override
@@ -72,7 +84,7 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow(Table table) {
+    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
         Table.Record totalRow = new Table.Record();
         for (StockMarketProfitExcelTableHeader column : StockMarketProfitExcelTableHeader.values()) {
             totalRow.put(column, "=SUM(" + column.getRange(3, table.size() + 2) + ")");
