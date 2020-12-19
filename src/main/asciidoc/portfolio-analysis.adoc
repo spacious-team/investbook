@@ -80,7 +80,7 @@ NOTE: Отображается консолидированный отчет, о
 `(CurrentAssets / CurrentInvestment) * (InitialInvestment / InitialAssets) * 100 - 100`, где
 `CurrentInvestment = (InitialInvestment + InvestmentDelta)`, `InitialInvestment = InitialAssets`,
 `CurrentInvestment` - это размер инвестиций к рассматриваемой дате, `InitialInvestment` - размер инвестиций на дату
-оценки начальной стоимости активов, `InvestmentDelta` - размер инвестиций с даты оценки начальной стоимости активов
+оценки начальной стоимости активов, `InvestmentDelta` - объем инвестиций с даты оценки начальной стоимости активов
 до рассматриваемой даты, `InitialAssets` - начальная стоимости активов.
 
 [#sp500]

@@ -33,7 +33,7 @@
 
 Все что нужно - это подгружать свежие отчеты брокера. По каждому счету в отдельности и подводя единый итог по всем счетам,
 будет доступна следующая информация:
-- [обзор](src/main/asciidoc/portfolio-analysis.adoc) инвестиций, активов, динамики роста портфеля в сопоставлении с индексом S&P 500;  
+- [обзор](src/main/asciidoc/portfolio-analysis.adoc) роста активов в сравнении с S&P 500, истории инвестиций и остатка денежных средств;  
   ![portfolio-analysis](https://user-images.githubusercontent.com/11336712/102415874-fd17a280-4009-11eb-9bff-232975adf21b.png)
   <img src="https://user-images.githubusercontent.com/11336712/102416414-d4dc7380-400a-11eb-95b1-8ff8ae37bd17.png" width="32%"/>
   <img src="https://user-images.githubusercontent.com/11336712/102415878-fee16600-4009-11eb-87c5-ed4ac6629941.png" width="32%"/>
