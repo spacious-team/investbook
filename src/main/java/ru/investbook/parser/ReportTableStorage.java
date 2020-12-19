@@ -162,6 +162,9 @@ public class ReportTableStorage {
         }
     }
 
+    /**
+     * @return true if new row was added or it was already exists in DB, false - or error
+     */
     private boolean handlePost(Supplier<ResponseEntity<?>> postAction, String error) {
         try {
             HttpStatus status = postAction.get().getStatusCode();
@@ -174,11 +177,13 @@ public class ReportTableStorage {
             String message = cause.getMessage();
             if (message.toLowerCase().contains("duplicate") || // MariaDB
                     message.startsWith("Нарушение уникального индекса или первичного ключа")) { // H2
-                log.debug("Дублирование информации: {}", error, e);
+                log.debug("Дублирование информации: {}", error);
+                log.trace("Дублирование вызвано исключением", e);
+                return true; // same as above status == HttpStatus.CONFLICT
             } else {
                 log.warn(error, e);
             }
-            return false;
+            return false; // may return false negative for duplicate inserts into non H2 and MariaDB DBs
         }
         return true;
     }
