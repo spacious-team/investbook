@@ -134,12 +134,12 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
 
         table.sort(comparing(record -> ((LocalDate) record.get(DATE))));
 
-        boolean totalInvestmentUsdIsKnown = false;
+        boolean isTotalInvestmentUsdKnown = false;
         for (var record : table) {
-            if (!totalInvestmentUsdIsKnown && record.containsKey(TOTAL_INVESTMENT_USD)) {
-                totalInvestmentUsdIsKnown = true;
+            if (!isTotalInvestmentUsdKnown && record.containsKey(TOTAL_INVESTMENT_USD)) {
+                isTotalInvestmentUsdKnown = true;
             }
-            if (totalInvestmentUsdIsKnown) {
+            if (isTotalInvestmentUsdKnown) {
                 record.putIfAbsent(TOTAL_INVESTMENT_USD, "=INDIRECT(\"" + TOTAL_INVESTMENT_USD.getColumnIndex() + "\" & ROW() - 1)");
                 BigDecimal assetsRub = (BigDecimal) record.get(ASSETS_RUB);
                 if (assetsRub != null && assetsRub.compareTo(minCash) > 0) {
@@ -148,11 +148,16 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
             }
         }
 
+        boolean isSp500ValueKnown = false;
         for (var record : table) {
             LocalDate date = (LocalDate) record.get(DATE);
             BigDecimal value = sp500.get(date);
             if (value != null) {
+                isSp500ValueKnown = true;
                 record.put(SP500, value);
+                record.put(SP500_GROWTH, SP500_GROWTH_FORMULA);
+            } else if (isSp500ValueKnown) {
+                record.put(SP500, "=INDIRECT(\"" + SP500.getColumnIndex() + "\" & ROW() - 1)");
                 record.put(SP500_GROWTH, SP500_GROWTH_FORMULA);
             }
         }
@@ -360,15 +365,22 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                 firstNonEmptyRow + "," + (1 + Math.abs(ASSETS_USD.ordinal() - TOTAL_INVESTMENT_USD.ordinal())) + ")";
     }
 
+    private static String getSp500GrowthFormula() {
+        String initialSp500Value = getSp500InitialValue();
+        String nonEmptyValues = "AND(" + SP500.getCellAddr() + "<>\"\"," + initialSp500Value + "<>\"\")";
+        String growth = SP500.getCellAddr() + "*100/" + initialSp500Value + "-100";
+        return "=IF(" + nonEmptyValues + "," + growth + ",\"\")";
+    }
+    private static String getSp500InitialValue() {
+        String firstNonEmptyRow = getInitialInvestmentUsdAndInitialAssetsUsdRowFormula();
+        return "INDEX(" +
+                getColumnsRange(SP500, 3, SP500, 10000) + "," +
+                firstNonEmptyRow + ",1)";
+    }
+
     private static String getInitialInvestmentUsdAndInitialAssetsUsdRowFormula() {
         String firstNonEmptyTotalInvestmentUsdRow = "MATCH(true,INDEX((" + TOTAL_INVESTMENT_USD.getRange(3, 10000) + "<>0),0),0)";
         String firstNonEmptyAssetsUsdRow = "MATCH(true,INDEX((" + ASSETS_USD.getRange(3, 10000) + "<>0),0),0)";
         return "MAX(" + firstNonEmptyTotalInvestmentUsdRow + "," + firstNonEmptyAssetsUsdRow + ")";
-    }
-
-    private static String getSp500GrowthFormula() {
-        String nonEmptyValues = "AND(" + SP500.getCellAddr() + "<>\"\"," + SP500.getCellAddr(3) + "<>\"\")";
-        String growth = SP500.getCellAddr() + "*100/" + SP500.getCellAddr(3) + "-100";
-        return "=IF(" + nonEmptyValues + "," + growth + ",\"\")";
     }
 }
