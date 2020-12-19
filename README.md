@@ -1,5 +1,5 @@
 ![java-version](https://img.shields.io/badge/Java-15-brightgreen?style=flat-square)
-![spring-boot-version](https://img.shields.io/badge/SpringBoot-2.3.4-brightgreen?style=flat-square)
+![spring-boot-version](https://img.shields.io/badge/SpringBoot-2.4.1-brightgreen?style=flat-square)
 ![jpackage-version](https://img.shields.io/badge/Jpackage-latest-brightgreen?style=flat-square)
 
 <img src="https://user-images.githubusercontent.com/11336712/85948992-b1d6de00-b95c-11ea-8edc-4d5e7dfc8210.png" width="100%"/>
@@ -31,7 +31,13 @@
 счетов у разных брокеров, информация будет представлена в разном месте, объеме и форматах. Приложение объективно,
 отображает данные в едином формате для всех брокеров.
 
-Все что нужно - это подгружать свежие отчеты брокера. По каждому счету и валюте будет доступна следующая информация:
+Все что нужно - это подгружать свежие отчеты брокера. По каждому счету в отдельности и подводя единый итог по всем счетам,
+будет доступна следующая информация:
+- [обзор](src/main/asciidoc/portfolio-analysis.adoc) роста активов в сравнении с S&P 500, истории инвестиций и остатка денежных средств;  
+  ![portfolio-analysis](https://user-images.githubusercontent.com/11336712/102415874-fd17a280-4009-11eb-9bff-232975adf21b.png)
+  <img src="https://user-images.githubusercontent.com/11336712/102416414-d4dc7380-400a-11eb-95b1-8ff8ae37bd17.png" width="32%"/>
+  <img src="https://user-images.githubusercontent.com/11336712/102415878-fee16600-4009-11eb-87c5-ed4ac6629941.png" width="32%"/>
+  <img src="https://user-images.githubusercontent.com/11336712/102419341-9a75d500-4010-11eb-817a-a9b322237dd2.png" width="32%"/>
 - текущие позиции, усредненные цены покупок и доходности ценных бумаг в [портфеле](src/main/asciidoc/portfolio-status.adoc)
   (с учетом хеджирующих позиций на срочном рынке и усредненной цены покупки валюты);  
   ![portfolio](https://user-images.githubusercontent.com/11336712/93006504-c8590280-f565-11ea-947c-dc8fa5712844.png)

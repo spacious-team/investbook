@@ -22,21 +22,21 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityEventCashFlowEntity, Integer> {
 
-    ArrayList<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+    List<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
             String portfolio,
             String isin,
             int cashFlowType,
             Instant fromDate,
             Instant toDate);
 
-    ArrayList<SecurityEventCashFlowEntity> findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+    List<SecurityEventCashFlowEntity> findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
             String isin,
             int cashFlowType,
             Instant fromDate,
@@ -69,7 +69,7 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
             Instant fromDate,
             Instant toDate);
 
-    ArrayList<SecurityEventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+    List<SecurityEventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
             String portfolio,
             Collection<Integer> cashFlowType,
             Instant fromDate,

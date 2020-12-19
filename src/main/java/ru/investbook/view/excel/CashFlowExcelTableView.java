@@ -18,10 +18,13 @@
 
 package ru.investbook.view.excel;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
@@ -31,11 +34,18 @@ import ru.investbook.view.Table;
 import ru.investbook.view.TableHeader;
 
 import java.math.BigDecimal;
+import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 import static ru.investbook.view.excel.CashFlowExcelTableHeader.*;
 
 @Component
 public class CashFlowExcelTableView extends ExcelTableView {
+
+    @Getter
+    private final int sheetOrder = 8;
+    @Getter(AccessLevel.PROTECTED)
+    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Доходность (" + portfolio + ")";
     private final PortfolioPropertyRepository portfolioPropertyRepository;
 
     public CashFlowExcelTableView(PortfolioRepository portfolioRepository,
@@ -61,11 +71,13 @@ public class CashFlowExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow(Table table) {
+    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
         Table.Record total = Table.newRecord();
         BigDecimal liquidationValueRub = portfolioPropertyRepository
                 .findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(
-                        getPortfolio().getId(),
+                        portfolio
+                                .orElseThrow(() -> new IllegalArgumentException("Ожидается портфель"))
+                                .getId(),
                         PortfolioPropertyType.TOTAL_ASSETS.name())
                 .map(e -> BigDecimal.valueOf(Double.parseDouble(e.getValue())))
                 .orElse(BigDecimal.ZERO);

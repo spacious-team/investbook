@@ -46,11 +46,11 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -79,25 +79,10 @@ public class ReportRestController {
     @PostMapping
     public ResponseEntity<String> post(@RequestParam("reports") MultipartFile[] reports,
                                        @RequestParam(name = "broker", required = false) String broker) {
-        List<Exception> exceptions = new ArrayList<>();
-        for (MultipartFile report : reports) {
-            try {
-                if (report != null && !report.isEmpty()) {
-                    long t0 = System.nanoTime();
-                    String brokerName = parseReport(report, broker);
-                    if (investbookProperties.isReportBackup()) {
-                        Path path = saveToBackup(brokerName, report);
-                        log.info("Загрузка отчета {} завершена за {}, бекап отчета сохранен в {}",
-                                report.getOriginalFilename(), Duration.ofNanos(System.nanoTime() - t0), path.toAbsolutePath());
-                    } else {
-                        log.info("Загрузка отчета {} завершена за {}, бекап отключен конфигурацией",
-                                report.getOriginalFilename(), Duration.ofNanos(System.nanoTime() - t0));
-                    }
-                }
-            } catch (Exception e) {
-                exceptions.add(e);
-            }
-        }
+        Collection<Exception> exceptions = new ConcurrentLinkedQueue<>();
+        Arrays.stream(reports)
+                .parallel()
+                .forEach(report -> uploadReport(report, broker, exceptions));
         if (exceptions.isEmpty()) {
             return ResponseEntity.ok("""
                     Отчеты загружены <a href="/">[ok]</a>
@@ -111,6 +96,25 @@ public class ReportRestController {
                                 e.printStackTrace(pw);
                                 return sw.toString().replace("\n", "</br>");
                             }).collect(errorMessageBuilder(broker)));
+        }
+    }
+
+    private void uploadReport(MultipartFile report, String broker, Collection<Exception> exceptions) {
+        try {
+            if (report != null && !report.isEmpty()) {
+                long t0 = System.nanoTime();
+                String brokerName = parseReport(report, broker);
+                if (investbookProperties.isReportBackup()) {
+                    Path path = saveToBackup(brokerName, report);
+                    log.info("Загрузка отчета {} завершена за {}, бекап отчета сохранен в {}",
+                            report.getOriginalFilename(), Duration.ofNanos(System.nanoTime() - t0), path.toAbsolutePath());
+                } else {
+                    log.info("Загрузка отчета {} завершена за {}, бекап отключен конфигурацией",
+                            report.getOriginalFilename(), Duration.ofNanos(System.nanoTime() - t0));
+                }
+            }
+        } catch (Exception e) {
+            exceptions.add(e);
         }
     }
 

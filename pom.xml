@@ -23,12 +23,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.4.RELEASE</version>
+        <version>2.4.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2020.13</version>
+    <version>2020.14</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -47,8 +47,11 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>20.13</win.msi.version>
+        <win.msi.version>20.14</win.msi.version>
         <java.version>15</java.version>
+        <!-- version 3.2.0 provided by Spring Boot 2.4.1 has bug, using version from Spring Boot 2.3.4
+         TODO remove after fix -->
+        <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
     </properties>
 
     <repositories>
@@ -307,11 +310,6 @@
                                 </configuration>
                             </execution>
                         </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <version>2.4.3</version>
                     </plugin>
                 </plugins>
             </build>

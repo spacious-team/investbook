@@ -18,10 +18,13 @@
 
 package ru.investbook.view.excel;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.repository.PortfolioPropertyRepository;
@@ -29,11 +32,19 @@ import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableHeader;
 
+import java.util.Optional;
+import java.util.function.UnaryOperator;
+
 import static ru.investbook.view.excel.SecuritiesDepositAndWithdrawalExcelTableHeader.COUNT;
 import static ru.investbook.view.excel.SecuritiesDepositAndWithdrawalExcelTableHeader.SECURITY;
 
 @Component
 public class SecuritiesDepositAndWithdrawalExcelTableView extends ExcelTableView {
+
+    @Getter
+    private final int sheetOrder = 7;
+    @Getter(AccessLevel.PROTECTED)
+    private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (ввод-вывод цб)";
 
     public SecuritiesDepositAndWithdrawalExcelTableView(PortfolioRepository portfolioRepository,
                                                         SecuritiesDepositAndWithdrawalExcelTableFactory tableFactory,
@@ -50,7 +61,7 @@ public class SecuritiesDepositAndWithdrawalExcelTableView extends ExcelTableView
     }
 
     @Override
-    protected Table.Record getTotalRow(Table table) {
+    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
         Table.Record total = Table.newRecord();
         total.put(SECURITY, "Итого:");
         total.put(COUNT, "=SUM(" + COUNT.getRange(3, table.size() + 2) + ")");

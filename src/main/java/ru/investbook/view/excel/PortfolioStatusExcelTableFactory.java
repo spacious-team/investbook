@@ -100,6 +100,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Table create(String forCurrency) {
         return create(Optional.empty(), forCurrency);
     }

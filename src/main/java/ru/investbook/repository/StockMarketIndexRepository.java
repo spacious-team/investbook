@@ -16,24 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.view;
+package ru.investbook.repository;
 
-import org.spacious_team.broker.pojo.Portfolio;
+import org.springframework.data.jpa.repository.JpaRepository;
+import ru.investbook.entity.StockMarketIndexEntity;
 
-public interface TableFactory {
+import java.time.LocalDate;
+import java.util.List;
 
-    default Table create() {
-        throw new UnsupportedOperationException("Not implemented");
-    }
+public interface StockMarketIndexRepository extends JpaRepository<StockMarketIndexEntity, LocalDate> {
 
-    Table create(Portfolio portfolio);
-
-    default Table create(String forCurrency) {
-        throw new UnsupportedOperationException("Not implemented");
-    }
-
-    default Table create(Portfolio portfolio, String forCurrency) {
-        throw new UnsupportedOperationException("Not implemented");
-    }
+    List<StockMarketIndexEntity> getByDateBetweenOrderByDate(LocalDate startDate, LocalDate endDate);
 
 }

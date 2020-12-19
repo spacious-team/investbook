@@ -18,24 +18,20 @@
 
 package ru.investbook.view.excel;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xddf.usermodel.chart.ChartTypes;
-import org.apache.poi.xddf.usermodel.chart.LegendPosition;
 import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
-import org.apache.poi.xddf.usermodel.chart.XDDFChartLegend;
 import org.apache.poi.xddf.usermodel.chart.XDDFDataSource;
 import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
 import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
 import org.apache.poi.xssf.usermodel.XSSFChart;
-import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
@@ -45,15 +41,24 @@ import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableHeader;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
+import static ru.investbook.view.excel.ExcelChartPlotHelper.*;
 import static ru.investbook.view.excel.PortfolioStatusExcelTableHeader.*;
 
 @Component
 @Slf4j
 public class PortfolioStatusExcelTableView extends ExcelTableView {
+
+    @Getter
+    private final int sheetOrder = 1;
+    @Getter(AccessLevel.PROTECTED)
+    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Портфель (" + portfolio + ")";
 
     private final TransactionCashFlowRepository transactionCashFlowRepository;
 
@@ -66,31 +71,31 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     }
 
     @Override
-    public void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator) {
+    public Collection<ExcelTable> createExcelTables() {
         List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPkTypeIn(
                 Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId()));
+        Collection<ExcelTable> tables = new ArrayList<>(currencies.size());
         for (String currency : currencies) {
-            Table table = ((PortfolioStatusExcelTableFactory) tableFactory).create(currency);
-            if (!table.isEmpty()) {
-                Sheet sheet = book.createSheet(validateExcelSheetName("Портфель " + currency));
-                writeTable(table, sheet, styles);
-            }
+            Table table = tableFactory.create(currency);
+            String sheetName = "Портфель " + currency;
+            tables.add(ExcelTable.of(sheetName, table, this));
         }
-        super.writeTo(book, styles, sheetNameCreator);
+        tables.addAll(super.createExcelTables());
+        return tables;
     }
 
     @Override
-    protected void writeTo(XSSFWorkbook book, CellStyles styles, UnaryOperator<String> sheetNameCreator, Portfolio portfolio) {
+    protected Collection<ExcelTable> createExcelTables(Portfolio portfolio, String sheetName) {
         List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPkPortfolioAndPkTypeIn(
                 portfolio.getId(),
                 Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId()));
+        Collection<ExcelTable> tables = new ArrayList<>(currencies.size());
         for (String currency : currencies) {
             Table table = tableFactory.create(portfolio, currency);
-            if (!table.isEmpty()) {
-                Sheet sheet = book.createSheet(validateExcelSheetName(sheetNameCreator.apply(portfolio.getId()) + " " + currency));
-                writeTable(table, sheet, styles);
-            }
+            String sheetNameWithCurrency = sheetName + " " + currency;
+            tables.add(ExcelTable.of(portfolio, sheetNameWithCurrency, table, this));
         }
+        return tables;
     }
 
     @Override
@@ -121,8 +126,8 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow(Table table) {
-        Table.Record totalRow = new Table.Record();
+    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
+        Table.Record totalRow = Table.newRecord();
         for (PortfolioStatusExcelTableHeader column : PortfolioStatusExcelTableHeader.values()) {
             totalRow.put(column, "=SUM(" + column.getRange(3, table.size() + 2) + ")");
         }
@@ -167,9 +172,9 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
             if (cell == null) continue;
             if (cell.getColumnIndex() == SECURITY.ordinal()) {
                 cell.setCellStyle(styles.getTotalTextStyle());
-            } else if (cell.getColumnIndex() == BUY_COUNT.ordinal()){
+            } else if (cell.getColumnIndex() == BUY_COUNT.ordinal()) {
                 cell.setCellStyle(styles.getIntStyle());
-            } else if (cell.getColumnIndex() == CELL_COUNT.ordinal()){
+            } else if (cell.getColumnIndex() == CELL_COUNT.ordinal()) {
                 cell.setCellStyle(styles.getIntStyle());
             } else if (cell.getColumnIndex() == COUNT.ordinal()) {
                 cell.setCellStyle(styles.getIntStyle());
@@ -183,37 +188,20 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
                 cell.setCellStyle(styles.getTotalRowStyle());
             }
         }
-        addPieChart(sheet);
+        plotChart("Состав портфеля", sheet, PortfolioStatusExcelTableView::addPieChart);
     }
 
-    private void addPieChart(Sheet _sheet) {
-        try {
-            int chartHeight = 36;
-            XSSFSheet sheet = (XSSFSheet) _sheet;
-            int rowCount = sheet.getLastRowNum();
-            XSSFDrawing drawing = sheet.createDrawingPatriarch();
-            ClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0,
-                    0, rowCount + 2, PROPORTION.ordinal() + 1, rowCount + 2 + chartHeight);
+    private static void addPieChart(String name, XSSFSheet sheet) {
+        int rowCount = sheet.getLastRowNum();
+        XSSFChart chart = createChart(sheet, name, 0, rowCount + 2, PROPORTION.ordinal() + 1, 36);
+        XDDFChartData data = createPieChartData(chart);
 
-            XSSFChart chart = drawing.createChart(anchor);
-            chart.setTitleText("Состав портфеля");
-            chart.setTitleOverlay(false);
-            XDDFChartLegend legend = chart.getOrAddLegend();
-            legend.setPosition(LegendPosition.BOTTOM);
+        XDDFDataSource<String> securities = XDDFDataSourcesFactory.fromStringCellRange(sheet,
+                new CellRangeAddress(2, rowCount, SECURITY.ordinal(), SECURITY.ordinal()));
+        XDDFNumericalDataSource<Double> proportions = XDDFDataSourcesFactory.fromNumericCellRange(sheet,
+                new CellRangeAddress(2, rowCount, PROPORTION.ordinal(), PROPORTION.ordinal()));
 
-            XDDFDataSource<String> securities = XDDFDataSourcesFactory.fromStringCellRange(sheet,
-                    new CellRangeAddress(2, rowCount, SECURITY.ordinal(), SECURITY.ordinal()));
-            XDDFNumericalDataSource<Double> proportions = XDDFDataSourcesFactory.fromNumericCellRange(sheet,
-                    new CellRangeAddress(2, rowCount, PROPORTION.ordinal(), PROPORTION.ordinal()));
-
-            XDDFChartData data = chart.createData(ChartTypes.PIE, null, null);
-            data.setVaryColors(true);
-            data.addSeries(securities, proportions);
-            chart.plot(data);
-        } catch (Exception e) {
-            String message = "Не могу построить график на вкладке '{}', возможно закрыты все позиции";
-            log.info(message, _sheet.getSheetName());
-            log.debug(message, _sheet.getSheetName(), e);
-        }
+        data.addSeries(securities, proportions);
+        chart.plot(data);
     }
 }

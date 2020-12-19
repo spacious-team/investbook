@@ -183,6 +183,12 @@ CREATE TABLE IF NOT EXISTS `transaction_cash_flow` (
   CONSTRAINT `transaction_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Движение денежных средств';
 
+CREATE TABLE IF NOT EXISTS `stock_market_index` (
+    `date` DATE NOT NULL,
+    `sp500` DECIMAL(7,2) NULL DEFAULT NULL COMMENT 'Значение индекса S&P 500',
+    PRIMARY KEY (`date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Индексы фондовых рынков';
+
 -- Дамп данных таблицы portfolio.transaction_cash_flow: ~0 rows (приблизительно)
 /*!40000 ALTER TABLE `transaction_cash_flow` DISABLE KEYS */;
 /*!40000 ALTER TABLE `transaction_cash_flow` ENABLE KEYS */;

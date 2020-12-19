@@ -18,38 +18,74 @@
 
 package ru.investbook.view.excel;
 
-import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
+import ru.investbook.view.ViewFilter;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+
+import static java.lang.Math.min;
+import static java.util.Comparator.comparing;
 
 @Component
-@RequiredArgsConstructor
 public class ExcelView {
-    private final PortfolioStatusExcelTableView portfolioStatusExcelTableView;
-    private final PortfolioPaymentExcelTableView portfolioPaymentTableView;
-    private final ForeignPortfolioPaymentExcelTableView foreignPortfolioPaymentTableView;
-    private final StockMarketProfitExcelTableView stockMarketProfitExcelTableView;
-    private final DerivativesMarketProfitExcelTableView derivativesMarketProfitExcelTableView;
-    private final ForeignMarketProfitExcelTableView foreignMarketProfitExcelTableView;
-    private final SecuritiesDepositAndWithdrawalExcelTableView securitiesDepositAndWithdrawalExcelTableView;
-    private final CashFlowExcelTableView cashFlowExcelTableView;
-    private final TaxExcelTableView taxExcelTableView;
-    private final CommissionExcelTableView commissionExcelTableView;
+    private final List<ExcelTableView> excelTableViews;
 
-    public void writeTo(XSSFWorkbook book) {
+    public ExcelView(Collection<ExcelTableView> excelTableViews) {
+        this.excelTableViews = excelTableViews.stream()
+                .sorted(comparing(ExcelTableView::getSheetOrder))
+                .collect(Collectors.toList());
+    }
+
+    public void writeTo(XSSFWorkbook book, ViewFilter filter) throws InterruptedException, ExecutionException {
+
         CellStyles styles = new CellStyles(book);
-        portfolioStatusExcelTableView.writeTo(book, styles, portfolio -> "Портфель (" + portfolio + ")");
-        portfolioPaymentTableView.writeTo(book, styles, portfolio -> portfolio + " (выплаты)");
-        foreignPortfolioPaymentTableView.writeTo(book, styles, portfolio -> portfolio + " (внешние выплаты)");
-        stockMarketProfitExcelTableView.writeTo(book, styles, portfolio -> portfolio + " (фондовый)");
-        derivativesMarketProfitExcelTableView.writeTo(book, styles, portfolio -> portfolio + " (срочный)");
-        foreignMarketProfitExcelTableView.writeTo(book, styles, portfolio -> portfolio + " (валюта)");
-        securitiesDepositAndWithdrawalExcelTableView.writeTo(book, styles, portfolio -> portfolio + " (ввод-вывод цб)");
-        cashFlowExcelTableView.writeTo(book, styles, portfolio -> "Доходность (" + portfolio + ")");
-        taxExcelTableView.writeTo(book, styles, portfolio -> "Налог (" + portfolio + ")");
-        commissionExcelTableView.writeTo(book, styles, portfolio -> "Комиссия (" + portfolio + ")");
+        ExecutorService tableWriterExecutor = Executors.newSingleThreadExecutor();
+        Collection<Future<?>> sheetWriterFutures = new ArrayList<>();
+        int cpuCnt = Runtime.getRuntime().availableProcessors();
+        for (int idx = 0, delta = 1; idx < excelTableViews.size();) {
+            int fromIndex = idx;
+            idx += delta;
+            delta = cpuCnt;
+            int toIndex = min(idx, excelTableViews.size());
+            final var tables = excelTableViews.subList(fromIndex, toIndex)
+                            .parallelStream()
+                            .map(excelTableView -> getExcelTables(excelTableView, filter))
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.toList());
+            Future<?> future = tableWriterExecutor.submit(() -> writeExcelTables(tables, book, styles));
+            sheetWriterFutures.add(future);
+        }
+
+        for(Future<?> future : sheetWriterFutures) {
+            future.get();
+        }
+
         if (book.getNumberOfSheets() == 0) {
             book.createSheet("пустой отчет");
         }
+    }
+
+    private static Collection<ExcelTable> getExcelTables(ExcelTableView excelTableView, ViewFilter filter) {
+        try {
+            ViewFilter.set(filter);
+            return excelTableView.createExcelTables();
+        } finally {
+            ViewFilter.remove();
+        }
+    }
+
+    private static void writeExcelTables(List<ExcelTable> tables, Workbook book, CellStyles styles) {
+        tables.stream()
+                .sorted(comparing(t -> t.getCreator().getSheetOrder()))
+                .forEach(table -> table.writeTo(book, styles));
     }
 }

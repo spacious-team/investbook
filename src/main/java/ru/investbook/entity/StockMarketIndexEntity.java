@@ -16,24 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.view;
+package ru.investbook.entity;
 
-import org.spacious_team.broker.pojo.Portfolio;
+import lombok.Data;
 
-public interface TableFactory {
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
-    default Table create() {
-        throw new UnsupportedOperationException("Not implemented");
-    }
+@Entity
+@Table(name = "stock_market_index")
+@Data
+public class StockMarketIndexEntity {
 
-    Table create(Portfolio portfolio);
+    @Id
+    private LocalDate date;
 
-    default Table create(String forCurrency) {
-        throw new UnsupportedOperationException("Not implemented");
-    }
-
-    default Table create(Portfolio portfolio, String forCurrency) {
-        throw new UnsupportedOperationException("Not implemented");
-    }
-
+    @Basic
+    @Column(name = "sp500")
+    private BigDecimal sp500;
 }
