@@ -64,8 +64,8 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
         Collection<ExcelTable> tables = new ArrayList<>(currencies.size());
         for (String currency : currencies) {
             Table table = tableFactory.create(portfolio, currency);
-            sheetName = sheetName + " " + currency;
-            tables.add(ExcelTable.of(portfolio, sheetName, table, this));
+            String sheetNameWithCurrency = sheetName + " " + currency;
+            tables.add(ExcelTable.of(portfolio, sheetNameWithCurrency, table, this));
         }
         return tables;
     }
