@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioProperty;
@@ -36,7 +37,6 @@ import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.PortfolioCash;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
-import org.springframework.core.NestedExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -173,18 +173,24 @@ public class ReportTableStorage {
                 return false;
             }
         } catch (Exception e) {
-            Throwable cause = NestedExceptionUtils.getMostSpecificCause(e);
-            String message = cause.getMessage();
-            if (message.toLowerCase().contains("duplicate") || // MariaDB
-                    message.startsWith("Нарушение уникального индекса или первичного ключа")) { // H2
+            if (isUniqIndexViolationException(e)) {
                 log.debug("Дублирование информации: {}", error);
                 log.trace("Дублирование вызвано исключением", e);
                 return true; // same as above status == HttpStatus.CONFLICT
             } else {
                 log.warn(error, e);
+                return false;
             }
-            return false; // may return false negative for duplicate inserts into non H2 and MariaDB DBs
         }
         return true;
+    }
+
+    private static boolean isUniqIndexViolationException(Throwable t) {
+        do {
+            if (t instanceof ConstraintViolationException) {
+                return true;
+            }
+        } while ((t = t.getCause()) != null);
+        return false;
     }
 }
