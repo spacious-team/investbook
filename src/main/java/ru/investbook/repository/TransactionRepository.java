@@ -27,8 +27,8 @@ import ru.investbook.entity.TransactionEntity;
 import ru.investbook.entity.TransactionEntityPK;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -42,7 +42,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "AND length(security) = 12 " +
             "AND timestamp between :from AND :to " +
             "ORDER BY timestamp DESC")
-    Collection<String> findDistinctSecurityByPortfolioAndTimestampBetweenOrderByTimestampDesc(
+    List<String> findDistinctSecurityByPortfolioAndTimestampBetweenOrderByTimestampDesc(
             @Param("portfolio") Portfolio portfolio,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
@@ -59,7 +59,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "AND t2.currency = :currency " +
             "AND timestamp between :from AND :to " +
             "ORDER BY t1.timestamp DESC")
-    Collection<String> findDistinctSecurityByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+    List<String> findDistinctSecurityByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
             @Param("portfolio") Portfolio portfolio,
             @Param("currency") String currency,
             @Param("from") Instant fromDate,
@@ -76,7 +76,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "AND t2.currency = :currency " +
             "AND timestamp between :from AND :to " +
             "ORDER BY t1.timestamp DESC")
-    Collection<String> findDistinctSecurityByCurrencyAndTimestampBetweenOrderByTimestampDesc(
+    List<String> findDistinctSecurityByCurrencyAndTimestampBetweenOrderByTimestampDesc(
             @Param("currency") String currency,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
@@ -90,7 +90,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "AND security NOT LIKE '______\\_%' " +
             "AND timestamp between :from AND :to " +
             "ORDER BY timestamp DESC")
-    Collection<String> findDistinctDerivativeByPortfolioAndTimestampBetweenOrderByTimestampDesc(
+    List<String> findDistinctDerivativeByPortfolioAndTimestampBetweenOrderByTimestampDesc(
             @Param("portfolio") Portfolio portfolio,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
@@ -103,7 +103,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "AND security NOT LIKE '______\\_%' " +
             "AND timestamp between :from AND :to " +
             "ORDER BY timestamp DESC")
-    Collection<String> findDistinctDerivativeByTimestampBetweenOrderByTimestampDesc(
+    List<String> findDistinctDerivativeByTimestampBetweenOrderByTimestampDesc(
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
@@ -116,7 +116,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "AND security LIKE '______\\_%' " +
             "AND timestamp between :from AND :to " +
             "ORDER BY timestamp DESC")
-    Collection<String> findDistinctFxContractByPortfolioAndTimestampBetweenOrderByTimestampDesc(
+    List<String> findDistinctFxContractByPortfolioAndTimestampBetweenOrderByTimestampDesc(
             @Param("portfolio") Portfolio portfolio,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
@@ -129,14 +129,14 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "AND security LIKE '______\\_%' " +
             "AND timestamp between :from AND :to " +
             "ORDER BY timestamp DESC")
-    Collection<String> findDistinctFxContractByTimestampBetweenOrderByTimestampDesc(
+    List<String> findDistinctFxContractByTimestampBetweenOrderByTimestampDesc(
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
     /**
      * Returns foreign exchange market currency pairs (in USDRUB format)
      */
-    default Collection<String> findDistinctFxCurrencyPairByPortfolioAndTimestampBetween(
+    default List<String> findDistinctFxCurrencyPairByPortfolioAndTimestampBetween(
             Portfolio portfolio,
             Instant fromDate,
             Instant toDate) {
@@ -147,7 +147,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
                 .collect(Collectors.toList());
     }
 
-    default Collection<String> findDistinctFxContractByPortfolioAndCurrencyPairAndTimestampBetween(
+    default List<String> findDistinctFxContractByPortfolioAndCurrencyPairAndTimestampBetween(
             Portfolio portfolio,
             String currencyPair,
             Instant fromDate,
@@ -158,7 +158,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
                 .collect(Collectors.toList());
     }
 
-    default Collection<String> findDistinctFxContractByCurrencyPairAndTimestampBetween(
+    default List<String> findDistinctFxContractByCurrencyPairAndTimestampBetween(
             String currencyPair,
             Instant fromDate,
             Instant toDate) {
@@ -181,7 +181,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "AND t2.currency = :currency " +
             "AND timestamp between :from AND :to " +
             "ORDER BY t1.timestamp DESC")
-    Collection<String> findDistinctFxContractByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+    List<String> findDistinctFxContractByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
             @Param("portfolio") Portfolio portfolio,
             @Param("currency") String currency,
             @Param("from") Instant fromDate,
@@ -199,7 +199,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             "AND t2.currency = :currency " +
             "AND timestamp between :from AND :to " +
             "ORDER BY t1.timestamp DESC")
-    Collection<String> findDistinctFxContractByCurrencyAndTimestampBetweenOrderByTimestampDesc(
+    List<String> findDistinctFxContractByCurrencyAndTimestampBetweenOrderByTimestampDesc(
             @Param("currency") String currency,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
@@ -207,7 +207,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Returns foreign exchange market currency pairs (in USDRUB format)
      */
-    default Collection<String> findDistinctFxCurrencyPairByPortfolioAndCurrencyAndTimestampBetween(
+    default List<String> findDistinctFxCurrencyPairByPortfolioAndCurrencyAndTimestampBetween(
             Portfolio portfolio,
             String currency,
             Instant fromDate,
@@ -222,7 +222,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Returns foreign exchange market currency pairs (in USDRUB format)
      */
-    default Collection<String> findDistinctFxCurrencyPairByCurrencyAndTimestampBetween(
+    default List<String> findDistinctFxCurrencyPairByCurrencyAndTimestampBetween(
             String currency,
             Instant fromDate,
             Instant toDate) {
@@ -233,13 +233,13 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
                 .collect(Collectors.toList());
     }
 
-    ArrayList<TransactionEntity> findBySecurityIdAndPkPortfolioAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+    List<TransactionEntity> findBySecurityIdAndPkPortfolioAndTimestampBetweenOrderByTimestampAscPkIdAsc(
             String isin,
             String portfolio,
             Instant fromDate,
             Instant toDate);
 
-    ArrayList<TransactionEntity> findBySecurityIdAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+    List<TransactionEntity> findBySecurityIdAndTimestampBetweenOrderByTimestampAscPkIdAsc(
             String isin,
             Instant fromDate,
             Instant toDate);
