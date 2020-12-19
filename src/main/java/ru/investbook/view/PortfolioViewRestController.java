@@ -65,10 +65,10 @@ public class PortfolioViewRestController {
     public void getExcelView(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             long t0 = System.nanoTime();
-            ViewFilter.set(getViewFilter(request));
-            Path path = jimfs.getPath(getReportName(ViewFilter.get()));
+            ViewFilter viewFilter = getViewFilter(request);
+            Path path = jimfs.getPath(getReportName(viewFilter));
             try (XSSFWorkbook book = new XSSFWorkbook()) {
-                excelView.writeTo(book);
+                excelView.writeTo(book, viewFilter);
                 book.write(Files.newOutputStream(path));
             }
             ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
@@ -91,8 +91,6 @@ public class PortfolioViewRestController {
             response.setContentType("text/html; charset=utf-8");
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(httpBody);
-        } finally {
-            ViewFilter.remove();
         }
         response.flushBuffer();
     }

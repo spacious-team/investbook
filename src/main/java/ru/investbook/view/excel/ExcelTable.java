@@ -21,12 +21,14 @@ package ru.investbook.view.excel;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.spacious_team.broker.pojo.Portfolio;
 import ru.investbook.view.Table;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@Slf4j
 public class ExcelTable {
     private final Portfolio portfolio;
     private final String sheetName;
@@ -34,10 +36,12 @@ public class ExcelTable {
     private final ExcelTableView creator;
 
     static ExcelTable of(String sheetName, Table table, ExcelTableView creator) {
+        log.debug("Обработка данных для таблицы '{}' завершена", sheetName);
         return new ExcelTable(null, sheetName, table, creator);
     }
 
     static ExcelTable of(Portfolio portfolio, String sheetName, Table table, ExcelTableView creator) {
+        log.debug("Обработка данных для таблицы '{}' завершена", sheetName);
         return new ExcelTable(portfolio, sheetName, table, creator);
     }
 

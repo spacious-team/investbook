@@ -37,7 +37,6 @@ import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableHeader;
-import ru.investbook.view.ViewFilter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,12 +63,11 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     }
 
     @Override
-    public Collection<ExcelTable> createExcelTables(ViewFilter filter) {
-        ViewFilter.set(filter);
+    public Collection<ExcelTable> createExcelTables() {
         Collection<ExcelTable> tables = new ArrayList<>();
         Table table = tableFactory.create();
         tables.add(ExcelTable.of("Обзор", table, this));
-        tables.addAll(super.createExcelTables(filter));
+        tables.addAll(super.createExcelTables());
         return tables;
     }
 

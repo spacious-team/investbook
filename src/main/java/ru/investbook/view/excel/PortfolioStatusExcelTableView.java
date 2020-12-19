@@ -40,7 +40,6 @@ import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableHeader;
-import ru.investbook.view.ViewFilter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,8 +71,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     }
 
     @Override
-    public Collection<ExcelTable> createExcelTables(ViewFilter filter) {
-        ViewFilter.set(filter);
+    public Collection<ExcelTable> createExcelTables() {
         List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPkTypeIn(
                 Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId()));
         Collection<ExcelTable> tables = new ArrayList<>(currencies.size());
@@ -82,7 +80,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
             String sheetName = "Портфель " + currency;
             tables.add(ExcelTable.of(sheetName, table, this));
         }
-        tables.addAll(super.createExcelTables(filter));
+        tables.addAll(super.createExcelTables());
         return tables;
     }
 

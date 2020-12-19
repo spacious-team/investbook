@@ -19,6 +19,7 @@
 package ru.investbook.view.excel;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -36,8 +37,8 @@ import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;
 import ru.investbook.view.TableHeader;
-import ru.investbook.view.ViewFilter;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -52,6 +53,7 @@ import java.util.regex.Pattern;
 
 import static ru.investbook.view.excel.StockMarketProfitExcelTableHeader.ROW_NUM_PLACE_HOLDER;
 
+@Slf4j
 @RequiredArgsConstructor
 public abstract class ExcelTableView {
     protected final PortfolioRepository portfolioRepository;
@@ -62,8 +64,7 @@ public abstract class ExcelTableView {
     @Value("${server.port}")
     private int serverPort;
 
-    public Collection<ExcelTable> createExcelTables(ViewFilter filter) {
-        ViewFilter.set(filter);
+    public Collection<ExcelTable> createExcelTables() {
         Collection<ExcelTable> tables = new ArrayList<>();
         for (PortfolioEntity entity : getPortfolios()) {
             Portfolio portfolio = portfolioConverter.fromEntity(entity);
@@ -100,6 +101,7 @@ public abstract class ExcelTableView {
         Class<? extends TableHeader> headerType = getHeaderType(table);
         if (headerType == null) return;
         synchronized (book) {
+            long t0 = System.nanoTime();
             Sheet sheet = book.createSheet(validateExcelSheetName(sheetName));
             writeHeader(sheet, headerType, styles.getHeaderStyle());
             sheetPreCreate(sheet, table);
@@ -155,6 +157,7 @@ public abstract class ExcelTableView {
                 }
             }
             sheetPostCreate(sheet, headerType, styles);
+            log.debug("Вкладка '{}' сохранена за {}", sheetName, Duration.ofNanos(System.nanoTime() - t0));
         }
     }
 
