@@ -54,7 +54,7 @@
   ![derivatives-market](https://user-images.githubusercontent.com/11336712/78156504-8f115800-7447-11ea-87e5-3cd4c34aab47.png)
 - доходность сделок на [валютном](src/main/asciidoc/foreign-market-profit.adoc) рынке;  
   ![foreighn-market](https://user-images.githubusercontent.com/11336712/84881751-fa59e600-b096-11ea-8b83-19d1c1229d73.png)
-- [ввод и вывод](src/main/asciidoc/securities-deposit-and-withdrawal.adoc) ценных бумаг с/на другие счета;  
+- [ввод и вывод](src/main/asciidoc/securities-deposit-and-withdrawal.adoc) ценных бумаг с/на другие счета, конвертация, сплит акций (AAPL, TSLA и др.);  
   <img src="https://user-images.githubusercontent.com/11336712/87883425-f3185600-ca0f-11ea-9677-4689aa6a4ee5.png" width="40%"/>
 - [доходность](src/main/asciidoc/cash-flow.adoc) портфеля, пополнения, списания, переводы с/на другие счета;  
   ![cash-in](https://user-images.githubusercontent.com/11336712/100395491-3172f100-3052-11eb-9652-cd5730ac2e6f.png)
