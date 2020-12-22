@@ -33,7 +33,7 @@
 
 Все что нужно - это подгружать свежие отчеты брокера. По каждому счету в отдельности и подводя единый итог по всем счетам,
 будет доступна следующая информация:
-- [обзор](src/main/asciidoc/portfolio-analysis.adoc) роста активов в сравнении с S&P 500, истории инвестиций и остатка денежных средств;  
+- [обзор](src/main/asciidoc/portfolio-analysis.adoc) роста активов в сравнении с S&P 500, история инвестиций и остатка денежных средств;  
   ![portfolio-analysis](https://user-images.githubusercontent.com/11336712/102415874-fd17a280-4009-11eb-9bff-232975adf21b.png)
   <img src="https://user-images.githubusercontent.com/11336712/102416414-d4dc7380-400a-11eb-95b1-8ff8ae37bd17.png" width="32%"/>
   <img src="https://user-images.githubusercontent.com/11336712/102415878-fee16600-4009-11eb-87c5-ed4ac6629941.png" width="32%"/>
@@ -54,9 +54,9 @@
   ![derivatives-market](https://user-images.githubusercontent.com/11336712/78156504-8f115800-7447-11ea-87e5-3cd4c34aab47.png)
 - доходность сделок на [валютном](src/main/asciidoc/foreign-market-profit.adoc) рынке;  
   ![foreighn-market](https://user-images.githubusercontent.com/11336712/84881751-fa59e600-b096-11ea-8b83-19d1c1229d73.png)
-- [ввод и вывод](src/main/asciidoc/securities-deposit-and-withdrawal.adoc) ценных бумаг с/на другие счета;  
+- [ввод и вывод](src/main/asciidoc/securities-deposit-and-withdrawal.adoc) ценных бумаг с/на другие счета, конвертация, сплит акций (AAPL, TSLA и др.);  
   <img src="https://user-images.githubusercontent.com/11336712/87883425-f3185600-ca0f-11ea-9677-4689aa6a4ee5.png" width="40%"/>
-- [доходность](src/main/asciidoc/cash-flow.adoc) портфеля, пополнения, списания, переводы с/на другие счета;  
+- [доходность](src/main/asciidoc/cash-flow.adoc) портфеля, пополнения, списания, переводы с/на другие счета, текущий остаток денежных средств;  
   ![cash-in](https://user-images.githubusercontent.com/11336712/100395491-3172f100-3052-11eb-9652-cd5730ac2e6f.png)
 - [налоговая](src/main/asciidoc/tax.adoc) нагрузка, в том числе
   [обязательства](src/main/asciidoc/stock-market-profit.adoc#tax-liability) самостоятельной уплаты налога для иностранных бумаг;  
@@ -69,7 +69,7 @@
 и запустить его.
 
 Можете обратиться к более подробной инструкции по установке и работе с приложением для операционных систем
-[windows](docs/install-on-windows.md) и [linux](docs/install-on-linux.md).
+[windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md) и [linux](docs/install-on-linux.md).
 
 ### Работа с приложением
 Запустите приложение через ярлык на рабочем столе Windows, в браузере перейдите по адресу http://localhost
@@ -86,7 +86,8 @@
 
 ### Обновление приложения
 Процесс обновления на Windows не отличается от процесса первоначальной установки.
-Воспользуйтесь инструкцией для операционных систем [windows](docs/install-on-windows.md) и [linux](docs/install-on-linux.md).
+Воспользуйтесь инструкцией для операционных систем [windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md)
+и [linux](docs/install-on-linux.md).
 
 ### Брокеры
 Приложение анализирует отчеты брокеров Промсвязьбанк, Уралсиб и ВТБ. В ближайшее время будет поддерживать Финам и Тинькофф.

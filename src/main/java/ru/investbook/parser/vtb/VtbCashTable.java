@@ -20,10 +20,12 @@ package ru.investbook.parser.vtb;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.PortfolioCash;
 import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
+import org.spacious_team.table_wrapper.api.OptionalTableColumn;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
@@ -32,7 +34,9 @@ import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
+@Slf4j
 public class VtbCashTable extends AbstractReportTable<PortfolioCash> {
 
     private static final String TABLE_NAME = "Отчет об остатках денежных средств";
@@ -46,27 +50,35 @@ public class VtbCashTable extends AbstractReportTable<PortfolioCash> {
     @Override
     protected Collection<PortfolioCash> getRow(Table table, TableRow row) {
         Collection<PortfolioCash> cashes = new ArrayList<>();
-        cashes.add(getPortfolioCash(table, row, VtbCashTableHeader.STOCK_MARKET, "основной рынок"));
-        cashes.add(getPortfolioCash(table, row, VtbCashTableHeader.FORTS_MARKET, "срочный рынок"));
-        cashes.add(getPortfolioCash(table, row, VtbCashTableHeader.NON_MARKET, "внебирж. рынок"));
+        cashes.addAll(getPortfolioCash(table, row, VtbCashTableHeader.STOCK_MARKET, "основной рынок"));
+        cashes.addAll(getPortfolioCash(table, row, VtbCashTableHeader.FORTS_MARKET, "срочный рынок"));
+        cashes.addAll(getPortfolioCash(table, row, VtbCashTableHeader.NON_MARKET, "внебирж. рынок"));
         return cashes;
     }
 
-    private PortfolioCash getPortfolioCash(Table table, TableRow row, VtbCashTableHeader column, String section) {
-        return PortfolioCash.builder()
-                .currency(VtbBrokerReport.convertToCurrency(table.getStringCellValue(row, VtbCashTableHeader.CURRENCY)))
-                .section(section)
-                .value(table.getCurrencyCellValue(row, column))
-                .build();
+    private Collection<PortfolioCash> getPortfolioCash(Table table, TableRow row, VtbCashTableHeader column, String section) {
+        try {
+            return Collections.singleton(PortfolioCash.builder()
+                    .currency(VtbBrokerReport.convertToCurrency(table.getStringCellValue(row, VtbCashTableHeader.CURRENCY)))
+                    .section(section)
+                    .value(table.getCurrencyCellValue(row, column))
+                    .build());
+        } catch (Exception e) {
+            log.debug("Отсутствует значение колонки '{}' в таблице {}", column, table);
+            return Collections.emptyList();
+        }
     }
 
     @Getter
     @RequiredArgsConstructor
     private enum VtbCashTableHeader implements TableColumnDescription {
         CURRENCY(TableColumnImpl.of("Валюта")),
-        STOCK_MARKET(MultiLineTableColumn.of("Исходящий остаток", "площадка", "основной рынок")),
-        FORTS_MARKET(MultiLineTableColumn.of("Исходящий остаток", "площадка", "срочный рынок")),
-        NON_MARKET(MultiLineTableColumn.of("Исходящий остаток", "площадка", "внебирж. рынок"));
+        STOCK_MARKET(OptionalTableColumn.of(
+                MultiLineTableColumn.of("Исходящий остаток", "площадка", "основной рынок"))),
+        FORTS_MARKET(OptionalTableColumn.of(
+                MultiLineTableColumn.of("Исходящий остаток", "площадка", "срочный рынок"))),
+        NON_MARKET(OptionalTableColumn.of(
+                MultiLineTableColumn.of("Исходящий остаток", "площадка", "внебирж. рынок")));
 
         private final TableColumn column;
     }
