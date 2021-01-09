@@ -18,7 +18,6 @@
 
 package ru.investbook.parser.uralsib;
 
-import com.google.common.collect.Lists;
 import lombok.EqualsAndHashCode;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.spacious_team.table_wrapper.api.ReportPage;
@@ -33,7 +32,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -106,13 +104,10 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
         try {
             TableCellAddress address = reportPage.find(REPORT_DATE_MARKER, 0, Integer.MAX_VALUE,
                     (cell, value) -> cell.toLowerCase().contains(value.toString()));
-            return convertToInstant(
-                    Lists.reverse(
-                            Arrays.asList(
-                                    reportPage.getCell(address)
-                                            .getStringCellValue()
-                                            .split(" ")))
-                            .get(0))
+            String[] words = reportPage.getCell(address)
+                    .getStringCellValue()
+                    .split(" ");
+            return convertToInstant(words[words.length - 1])
                     .plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);
         } catch (Exception e) {
             throw new RuntimeException("Ошибка поиска даты отчета");
