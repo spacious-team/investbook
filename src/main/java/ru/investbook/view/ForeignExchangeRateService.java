@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -49,7 +49,7 @@ public class ForeignExchangeRateService {
      *
      * @param baseCurrency  базовая валюта
      * @param quoteCurrency котируемая валюта
-     * @return обменный курс валюты в российских рублях
+     * @return обменный курс в цене котируемой валюты
      */
     public BigDecimal getExchangeRate(String baseCurrency, String quoteCurrency) {
         if (baseCurrency.equalsIgnoreCase(quoteCurrency)) {
@@ -101,7 +101,7 @@ public class ForeignExchangeRateService {
      * @param quoteCurrency котируемая валюта
      * @param instant       на момент времени
      * @param timezone      в точке Земного шара с заданной таймзоной
-     * @return обменный курс валюты в российских рублях
+     * @return обменный курс в цене котируемой валюты
      */
     public BigDecimal getExchangeRate(String baseCurrency, String quoteCurrency, Instant instant, ZoneId timezone) {
         if (baseCurrency.equalsIgnoreCase(quoteCurrency)) {

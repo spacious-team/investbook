@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -43,6 +43,7 @@ public enum PortfolioStatusExcelTableHeader implements ExcelTableHeader {
     LAST_ACCRUED_INTEREST("НКД"),
     GROSS_PROFIT("Курсовой доход"),
     PROFIT("Прибыль"),
+    INTERNAL_RATE_OF_RETURN("Доходность, %"),
     PROFIT_PROPORTION("Доля прибыли, %"),
     INVESTMENT_PROPORTION("Доля вложений, %"),
     PROPORTION("Доля в портфеле, %");

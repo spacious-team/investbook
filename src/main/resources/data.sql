@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -31,6 +31,6 @@ INSERT IGNORE INTO `cash_flow_type` (`id`, `name`) VALUES
 (9, 'Гарантийное обеспечение'),
 (10, 'Налог уплаченный (с купона, с дивидендов)'),
 (11, 'Прогнозируемый налог'),
-(12, 'Стоимость сделки с деривативом, рубли'),
+(12, 'Стоимость сделки с деривативом, валюта (RUB, USD или др.)'),
 (13, 'Стоимость сделки с деривативом, пункты');
 /*!40000 ALTER TABLE `cash_flow_type` ENABLE KEYS */;
