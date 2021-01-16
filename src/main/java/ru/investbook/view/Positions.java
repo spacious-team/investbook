@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -26,6 +26,7 @@ import org.spacious_team.broker.pojo.Transaction;
 
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,7 @@ public class Positions {
     private final Deque<PositionHistory> positionHistories = new LinkedList<>();
     private final Deque<OpenedPosition> openedPositions = new LinkedList<>();
     private final Deque<ClosedPosition> closedPositions = new LinkedList<>();
+    private final int currentOpenedPositionsCount;
 
     public Positions(Deque<Transaction> transactions, Deque<SecurityEventCashFlow> redemptions) {
         this.transactions = transactions;
@@ -52,6 +54,9 @@ public class Positions {
         updateSecuritiesPastPositions(transactions);
         processTransactions(transactions);
         processRedemptions(redemptions);
+        this.currentOpenedPositionsCount = Optional.ofNullable(positionHistories.peekLast())
+                .map(PositionHistory::getOpenedPositions)
+                .orElse(0);
     }
 
     private void processTransactions(Deque<Transaction> transactions) {

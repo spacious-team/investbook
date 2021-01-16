@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -120,6 +120,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         sheet.setColumnWidth(LAST_PRICE.ordinal(), 13 * 256);
         sheet.setColumnWidth(LAST_ACCRUED_INTEREST.ordinal(), 13 * 256);
         sheet.setColumnWidth(TAX.ordinal(), 19 * 256);
+        sheet.setColumnWidth(INTERNAL_RATE_OF_RETURN.ordinal(), (int) (12.5 * 256));
         sheet.setColumnWidth(PROFIT_PROPORTION.ordinal(), 11 * 256);
         sheet.setColumnWidth(INVESTMENT_PROPORTION.ordinal(), 11 * 256);
         sheet.setColumnWidth(PROPORTION.ordinal(), 11 * 256);
@@ -140,13 +141,14 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         totalRow.remove(AVERAGE_ACCRUED_INTEREST);
         totalRow.remove(LAST_PRICE);
         totalRow.remove(LAST_ACCRUED_INTEREST);
+        totalRow.remove(INTERNAL_RATE_OF_RETURN);
         return totalRow;
     }
 
     @Override
     protected void sheetPreCreate(Sheet sheet, Table table) {
         super.sheetPreCreate(sheet, table);
-        sheet.setZoom(85); // show all columns for 24 inch monitor for securities sheet
+        sheet.setZoom(82); // show all columns for 24 inch monitor for securities sheet
     }
 
     @Override
@@ -157,6 +159,9 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
             Cell cell;
             if ((cell = row.getCell(SECURITY.ordinal())) != null) {
                 cell.setCellStyle(styles.getLeftAlignedTextStyle());
+            }
+            if ((cell = row.getCell(INTERNAL_RATE_OF_RETURN.ordinal())) != null) {
+                cell.setCellStyle(styles.getPercentStyle());
             }
             if ((cell = row.getCell(PROFIT_PROPORTION.ordinal())) != null) {
                 cell.setCellStyle(styles.getPercentStyle());

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -22,7 +22,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -42,13 +41,27 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
             Instant fromDate,
             Instant toDate);
 
-    /**
-     * Return last security payment
-     */
-    Optional<SecurityEventCashFlowEntity> findFirstByPortfolioIdAndSecurityIdAndCashFlowTypeIdInOrderByTimestampDesc(
+    List<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
             String portfolio,
             String isin,
-            Set<Integer> cashFlowType);
+            Set<Integer> cashFlowType,
+            Instant fromDate,
+            Instant toDate);
+
+    List<SecurityEventCashFlowEntity> findBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
+            String isin,
+            Set<Integer> cashFlowType,
+            Instant fromDate,
+            Instant toDate);
+
+    /**
+     * Return all portfolio payments, between date-time interval
+     */
+    List<SecurityEventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+            String portfolio,
+            Set<Integer> cashFlowType,
+            Instant fromDate,
+            Instant toDate);
 
     /**
      * Return last security payment, between date-time interval
@@ -66,12 +79,6 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
     Optional<SecurityEventCashFlowEntity> findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
             String isin,
             Set<Integer> cashFlowType,
-            Instant fromDate,
-            Instant toDate);
-
-    List<SecurityEventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-            String portfolio,
-            Collection<Integer> cashFlowType,
             Instant fromDate,
             Instant toDate);
 }

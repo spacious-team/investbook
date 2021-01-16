@@ -18,10 +18,8 @@
 
 package ru.investbook.view;
 
-import com.google.common.jimfs.Jimfs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.ContentDisposition;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,19 +28,18 @@ import ru.investbook.view.excel.ExcelView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystem;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -59,40 +56,34 @@ public class PortfolioViewRestController {
     private static final String REPORT_NAME = "investbook";
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault());
     private final ExcelView excelView;
-    private final FileSystem jimfs = Jimfs.newFileSystem();
+    private volatile int expectedFileSize = 0xFFFF;
 
     @PostMapping("/portfolio")
     public void getExcelView(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             long t0 = System.nanoTime();
-            ViewFilter viewFilter = getViewFilter(request);
-            Path path = jimfs.getPath(getReportName(viewFilter));
-            try (XSSFWorkbook book = new XSSFWorkbook()) {
-                excelView.writeTo(book, viewFilter);
-                book.write(Files.newOutputStream(path));
-            }
-            ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
-                    .filename(String.valueOf(path.getFileName()), StandardCharsets.UTF_8)
-                    .build();
-            response.setHeader("Content-disposition", contentDisposition.toString());
-            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            IOUtils.copy(Files.newInputStream(path), response.getOutputStream());
-            log.info("Отчет '{}' сформирован за {}", path.getFileName(), Duration.ofNanos(System.nanoTime() - t0));
+            String fileName = sendExcelFile(request, response);
+            log.info("Отчет '{}' сформирован за {}", fileName, Duration.ofNanos(System.nanoTime() - t0));
         } catch (Exception e) {
             log.error("Ошибка сборки отчета", e);
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            String httpBody = Stream.of(sw.toString().split("\n"))
-                    .collect(joining("</br>", "<b>Ошибка сборки отчета</b></br></br> <a href=\"/\">[назад]</a><br/>" +
-                            "<span style=\"font-size: smaller; color: gray;\">Вы можете " +
-                            "<a href=\"https://github.com/spacious-team/investbook/issues\">сообщить</a> об ошибке " +
-                            "разработчикам</span></br></br> - ", ""));
-            response.setContentType("text/html; charset=utf-8");
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(httpBody);
+            sendErrorPage(response, e);
         }
         response.flushBuffer();
+    }
+
+    private String sendExcelFile(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, InterruptedException, ExecutionException {
+        ViewFilter viewFilter = getViewFilter(request);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(expectedFileSize);
+        try (XSSFWorkbook book = new XSSFWorkbook()) {
+            excelView.writeTo(book, viewFilter);
+            book.write(outputStream);
+            expectedFileSize = outputStream.size();
+        }
+        String fileName = getReportName(viewFilter);
+        sendSuccessHeader(response, fileName);
+        outputStream.writeTo(response.getOutputStream());
+        return fileName;
     }
 
     private ViewFilter getViewFilter(HttpServletRequest request) {
@@ -121,5 +112,40 @@ public class PortfolioViewRestController {
             toDate = Instant.now();
         }
         return REPORT_NAME + " с " + dateFormatter.format(filter.getFromDate()) + " по " + dateFormatter.format(toDate) + ".xlsx";
+    }
+
+    private void sendSuccessHeader(HttpServletResponse response, String fileName) {
+        ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
+                .filename(fileName, StandardCharsets.UTF_8)
+                .build();
+        response.setHeader("Content-disposition", contentDisposition.toString());
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    }
+
+    private void sendErrorPage(HttpServletResponse response, Exception e) throws IOException {
+        sendErrorHttpHeader(response);
+        String httpBody = getErrorHttpBody(e);
+        response.getWriter().write(httpBody);
+    }
+
+    private String getErrorHttpBody(Exception exception) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        exception.printStackTrace(pw);
+        return Stream.of(sw.toString().split("\n"))
+                .collect(joining("</br>", """
+                        <b>Ошибка сборки отчета</b></br></br> <a href="/">[назад]</a>
+                        <br/>
+                        <span style="font-size: smaller; color: gray;">
+                            Вы можете <a href="https://github.com/spacious-team/investbook/issues">сообщить</a>
+                            об ошибке разработчикам
+                        </span>
+                        </br></br> - 
+                        """, ""));
+    }
+
+    private void sendErrorHttpHeader(HttpServletResponse response) {
+        response.setContentType("text/html; charset=utf-8");
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 }

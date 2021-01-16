@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ InvestBook
-  ~ Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU Affero General Public License as
@@ -23,12 +23,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.4.1</version>
+        <version>2.4.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2020.14.1</version>
+    <version>2021.1</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -47,7 +47,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>20.14.1</win.msi.version>
+        <win.msi.version>21.1</win.msi.version>
         <java.version>15</java.version>
         <!-- version 3.2.0 provided by Spring Boot 2.4.1 has bug, using version from Spring Boot 2.3.4
          TODO remove after fix -->
@@ -81,6 +81,21 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.github.spacious-team</groupId>
+            <artifactId>broker-report-parser-api</artifactId>
+            <version>2021.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.spacious-team</groupId>
+            <artifactId>table-wrapper-excel-impl</artifactId>
+            <version>2020.12</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.spacious-team</groupId>
+            <artifactId>table-wrapper-xml-impl</artifactId>
+            <version>2020.12</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
@@ -101,21 +116,6 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -133,9 +133,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.google.jimfs</groupId>
-            <artifactId>jimfs</artifactId>
-            <version>1.1</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -149,23 +149,23 @@
             <version>1.4.200</version>
         </dependency>
         <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.spacious-team</groupId>
-            <artifactId>table-wrapper-excel-impl</artifactId>
-            <version>2020.12</version>
+            <groupId>org.decampo</groupId>
+            <artifactId>xirr</artifactId>
+            <version>1.1</version>
         </dependency>
         <dependency>
-            <groupId>com.github.spacious-team</groupId>
-            <artifactId>table-wrapper-xml-impl</artifactId>
-            <version>2020.12</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.spacious-team</groupId>
-            <artifactId>broker-report-parser-api</artifactId>
-            <version>2020.13</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 
