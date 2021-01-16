@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
+import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
 import static ru.investbook.parser.vtb.VtbSecuritiesTable.VtbSecuritiesTableHeader.*;
 
 public class VtbSecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
@@ -48,7 +49,12 @@ public class VtbSecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
         BigDecimal price = Optional.ofNullable(table.getCurrencyCellValueOrDefault(row, FACE_VALUE, null))
                 .map(faceValue -> faceValue.multiply(quote).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP))
                 .orElse(null);
-        BigDecimal accruedInterest = table.getCurrencyCellValueOrDefault(row, ACCRUED_INTEREST, null);
+        BigDecimal accruedInterest = Optional.ofNullable(table.getCurrencyCellValueOrDefault(row, ACCRUED_INTEREST, null))
+                .filter(interest -> interest.compareTo(minValue) > 0) // otherwise outgoing count may be = 0
+                .map(interest -> {
+                    int count = table.getIntCellValueOrDefault(row, OUTGOING, -1);
+                    return (count <= 0) ? null : interest.divide(BigDecimal.valueOf(count), 2, RoundingMode.HALF_UP);
+                }).orElse(null);
         return Collections.singletonList(SecurityQuote.builder()
                 .security(table.getStringCellValue(row, NAME_REGNUMBER_ISIN).split(",")[2].trim())
                 .timestamp(getReport().getReportEndDateTime())
