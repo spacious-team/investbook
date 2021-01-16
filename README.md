@@ -1,5 +1,5 @@
 ![java-version](https://img.shields.io/badge/Java-15-brightgreen?style=flat-square)
-![spring-boot-version](https://img.shields.io/badge/SpringBoot-2.4.1-brightgreen?style=flat-square)
+![spring-boot-version](https://img.shields.io/badge/SpringBoot-2.4.2-brightgreen?style=flat-square)
 ![jpackage-version](https://img.shields.io/badge/Jpackage-latest-brightgreen?style=flat-square)
 
 <img src="https://user-images.githubusercontent.com/11336712/85948992-b1d6de00-b95c-11ea-8edc-4d5e7dfc8210.png" width="100%"/>
@@ -40,7 +40,7 @@
   <img src="https://user-images.githubusercontent.com/11336712/102419341-9a75d500-4010-11eb-817a-a9b322237dd2.png" width="32%"/>
 - текущие позиции, усредненные цены покупок и доходности ценных бумаг в [портфеле](src/main/asciidoc/portfolio-status.adoc)
   (с учетом хеджирующих позиций на срочном рынке и усредненной цены покупки валюты);  
-  ![portfolio](https://user-images.githubusercontent.com/11336712/93006504-c8590280-f565-11ea-947c-dc8fa5712844.png)
+  ![portfolio](https://user-images.githubusercontent.com/11336712/104820094-af2dce80-5843-11eb-8083-6521ea537334.png)
 - доля ценной бумаги в [портфеле](src/main/asciidoc/portfolio-status.adoc);  
   ![current-proportion](https://user-images.githubusercontent.com/11336712/88717010-8cd6b600-d128-11ea-901f-2b3fcee96f07.png)  
 - детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/portfolio-payment.adoc);  
