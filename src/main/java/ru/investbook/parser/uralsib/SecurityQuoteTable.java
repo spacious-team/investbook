@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -51,13 +51,10 @@ public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
         }
         BigDecimal price = amount.divide(BigDecimal.valueOf(count), 4, RoundingMode.HALF_UP);
         BigDecimal quote = table.getCurrencyCellValue(row, QUOTE);
-        if (price.subtract(quote).abs().compareTo(minValue) < 0) {
-            // котировка = цене (не облигация)
-            price = null;
-        }
         BigDecimal accruedInterest = table.getCurrencyCellValue(row, ACCRUED_INTEREST);
-        if (accruedInterest.compareTo(minValue) < 0) {
-            // не облигация
+        if (accruedInterest.compareTo(minValue) < 0 && price.subtract(quote).abs().compareTo(minValue) < 0) {
+            // акция
+            price = null;
             accruedInterest = null;
         }
         return Collections.singletonList(SecurityQuote.builder()
