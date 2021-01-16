@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,6 @@ package ru.investbook.view.excel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.stereotype.Component;
@@ -41,8 +40,8 @@ import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static ru.investbook.view.excel.PortfolioPaymentExcelTableHeader.*;
@@ -51,11 +50,16 @@ import static ru.investbook.view.excel.PortfolioPaymentExcelTableHeader.*;
 @RequiredArgsConstructor
 @Slf4j
 public class PortfolioPaymentExcelTableFactory implements TableFactory {
-    private static final CashFlowType[] PAY_TYPES = new CashFlowType[]{AMORTIZATION, REDEMPTION, COUPON, DIVIDEND, TAX};
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
     private final SecurityRepository securityRepository;
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
+    private final Set<Integer> paymentTypes = Set.of(
+            AMORTIZATION.getId(),
+            REDEMPTION.getId(),
+            COUPON.getId(),
+            DIVIDEND.getId(),
+            TAX.getId());
 
     @Override
     public Table create(Portfolio portfolio) {
@@ -67,9 +71,7 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
         return securityEventCashFlowRepository
                 .findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
                         portfolio.getId(),
-                        Stream.of(PAY_TYPES)
-                                .map(CashFlowType::getId)
-                                .collect(Collectors.toList()),
+                        paymentTypes,
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate())
                 .stream()
