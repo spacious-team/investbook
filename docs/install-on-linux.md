@@ -1,12 +1,12 @@
 ### Установка и работа на Mac и Linux
 
-Поддерживаетя любая версия mac и linux.
+Поддерживаетя любая версия Mac и Linux.
 1. Проверить версию java
    ```shell script
    $ java -version
    ```
    Если версия 15 или выше, пропустите следующий пункт.
-1. Скачать [Java 15](https://download.java.net/java/GA/jdk15/779bf45e88a44cbd9ea6621d33e33db1/36/GPL/openjdk-15_linux-x64_bin.tar.gz)
+1. Скачать [Java 15](https://jdk.java.net/15/)
    и распаковать папку `jdk-15` в директорию `/opt`.
 1. Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest)
    архив `.zip` и распаковать в директорию `/opt`.
