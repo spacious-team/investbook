@@ -6,10 +6,10 @@
    $ java -version
    ```
    Если версия 15 или выше, пропустите следующий пункт.
-1. Скачать [Java 15](https://jdk.java.net/15/)
-   и распаковать папку `jdk-15` в директорию `/opt`.
-1. Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest)
-   архив `.zip` и распаковать в директорию `/opt`.
+1. Скачать [Java 15](https://jdk.java.net/15/ (или  ) и  распаковать папку `jdk-15` в директорию `/opt`.
+   Для для 32 разрядных ОС можно скачать [Java 15 x86 JRE](https://bell-sw.com/).
+1. Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest) архив `.zip` и
+   распаковать в директорию `/opt`.
 1. В директории приложения найти файл `start.sh`, раскомментировать и актуализировать `JAVA_HOME`
    ```shell script
    $ export JAVA_HOME=/opt/jdk-15
