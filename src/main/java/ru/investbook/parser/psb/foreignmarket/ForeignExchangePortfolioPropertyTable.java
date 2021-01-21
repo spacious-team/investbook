@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -22,11 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.broker.report_parser.api.TableFactoryRegistry;
-import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.api.Table;
-import org.spacious_team.table_wrapper.api.TableFactory;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.psb.ForeignExchangeRateTable;
 import ru.investbook.parser.psb.PortfolioPropertyTable;
 
 import java.math.BigDecimal;
@@ -46,20 +44,14 @@ public class ForeignExchangePortfolioPropertyTable extends PortfolioPropertyTabl
     }
 
     protected Table getSummaryTable() {
-        ReportPage reportPage = getReport().getReportPage();
-        TableFactory tableFactory = TableFactoryRegistry.get(reportPage);
-        Table table = tableFactory.create(reportPage, SUMMARY_TABLE, ASSETS, SummaryTableHeader.class);
-        if (table.isEmpty()) {
-            throw new IllegalArgumentException("Таблица '" + SUMMARY_TABLE + "' не найдена");
-        }
-        return table;
+        return getSummaryTable(getReport(), ASSETS);
     }
 
     @Override
     protected Collection<PortfolioProperty> getTotalAssets(Table table) {
         try {
             TableRow assetsRow = table.findRow(ASSETS);
-            TableRow exchangeRateRow = table.findRow(EXCHANGE_RATE_ROW);
+            TableRow exchangeRateRow = table.findRow(ForeignExchangeRateTable.EXCHANGE_RATE_ROW);
             if (assetsRow == null || exchangeRateRow == null) {
                 return emptyList();
             }
@@ -74,7 +66,7 @@ public class ForeignExchangePortfolioPropertyTable extends PortfolioPropertyTabl
                             .multiply(table.getCurrencyCellValueOrDefault(exchangeRateRow, CHF, BigDecimal.ZERO)));
             return Collections.singletonList(PortfolioProperty.builder()
                     .portfolio(getReport().getPortfolio())
-                    .property(PortfolioPropertyType.TOTAL_ASSETS)
+                    .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
                     .value(totalAssets.toString())
                     .timestamp(getReport().getReportEndDateTime())
                     .build());

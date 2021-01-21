@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -245,8 +245,9 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         return getAllPortfolioCashBalance(portfolioCashes);
     }
 
+    // TODO add second method with PortfolioPropertyType.TOTAL_ASSETS_USD and combine both results late
     private LinkedHashMap<Instant, BigDecimal> getTotalAssets(Optional<Portfolio> portfolio) {
-        List<PortfolioProperty> assets = getPortfolioProperty(portfolio, PortfolioPropertyType.TOTAL_ASSETS);
+        List<PortfolioProperty> assets = getPortfolioProperty(portfolio, PortfolioPropertyType.TOTAL_ASSETS_RUB);
         return getAllPortfolioTotalAssets(assets);
     }
 

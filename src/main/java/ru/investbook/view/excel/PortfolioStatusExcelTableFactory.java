@@ -413,6 +413,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    // TODO convert transaction currency to this excel table currency
     private Optional<BigDecimal> getTransactionValue(Transaction t, CashFlowType type) {
         if (t.getId() == null) { // redemption
             return Optional.empty();

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -43,12 +43,12 @@ import static ru.investbook.parser.uralsib.SecurityTransactionTable.TransactionT
 public class SecurityTransactionTable extends AbstractReportTable<SecurityTransaction> {
     private static final String TABLE_NAME = "Биржевые сделки с ценными бумагами в отчетном периоде";
     private final BigDecimal minValue = BigDecimal.valueOf(0.01);
-    private final PortfolioPropertyTable portfolioPropertyTable;
+    private final ForeignExchangeRateTable foreignExchangeRateTable;
 
     public SecurityTransactionTable(UralsibBrokerReport report,
-                                    PortfolioPropertyTable portfolioPropertyTable) {
+                                    ForeignExchangeRateTable foreignExchangeRateTable) {
         super(report, TABLE_NAME, "", TransactionTableHeader.class, 2);
-        this.portfolioPropertyTable = portfolioPropertyTable;
+        this.foreignExchangeRateTable = foreignExchangeRateTable;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
         BigDecimal brokerCommission = table.getCurrencyCellValue(row, BROKER_COMMISSION);
         String brokerCommissionCurrency = getCurrency(table, row, BROKER_COMMISSION_CURRENCY, brokerCommission, valueCurrency);
         Instant timestamp = getReport().convertToInstant(table.getStringCellValue(row, DATE_TIME));
-        BigDecimal commission = getConvertedCommission(marketCommission, marketCommissionCurrency, valueCurrency, timestamp)
+        BigDecimal commission = getConvertedCommission(marketCommission, marketCommissionCurrency, valueCurrency, timestamp) // TODO ?do not convert if market and broker commission currency equals
                 .add(getConvertedCommission(brokerCommission, brokerCommissionCurrency, valueCurrency, timestamp))
                 .negate();
 
@@ -119,7 +119,7 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
             log.warn("Не указана валюта комиссии для комиссии {} в файле {}", commission, getReport().getPath().getFileName());
             return commission;
         }
-        BigDecimal exchangeRate = portfolioPropertyTable.getExchangeRate(commissionCurrency,
+        BigDecimal exchangeRate = foreignExchangeRateTable.getExchangeRate(commissionCurrency,
                 targetCurrency, timestamp);
         return commission.multiply(exchangeRate);
     }

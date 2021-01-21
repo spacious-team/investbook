@@ -84,20 +84,12 @@ CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   CONSTRAINT `event_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств, не связанное с ЦБ';
 
--- Дамп данных таблицы portfolio.event_cash_flow: ~0 rows (приблизительно)
-/*!40000 ALTER TABLE `event_cash_flow` DISABLE KEYS */;
-/*!40000 ALTER TABLE `event_cash_flow` ENABLE KEYS */;
-
 -- Дамп структуры для таблица portfolio.issuer
 CREATE TABLE IF NOT EXISTS `issuer` (
   `inn` bigint(10) unsigned NOT NULL COMMENT 'ИНН',
   `name` varchar(100) NOT NULL COMMENT 'Наименование',
   PRIMARY KEY (`inn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Эмитенты';
-
--- Дамп данных таблицы portfolio.issuer: ~0 rows (приблизительно)
-/*!40000 ALTER TABLE `issuer` DISABLE KEYS */;
-/*!40000 ALTER TABLE `issuer` ENABLE KEYS */;
 
 -- Дамп структуры для таблица portfolio.portfolio_property
 CREATE TABLE IF NOT EXISTS `portfolio_property` (
@@ -112,6 +104,24 @@ CREATE TABLE IF NOT EXISTS `portfolio_property` (
   CONSTRAINT `portfolio_property_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Свойства портфеля';
 
+/*
+ * InvestBook
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 -- Экспортируемые данные не выделены.
 
 -- Дамп структуры для таблица portfolio.security
@@ -124,10 +134,6 @@ CREATE TABLE IF NOT EXISTS `security` (
   KEY `security_issuer_inn_ix` (`issuer_inn`),
   CONSTRAINT `security_issuer_inn_fkey` FOREIGN KEY (`issuer_inn`) REFERENCES `issuer` (`inn`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Общая информация по ценным бумагам';
-
--- Дамп данных таблицы portfolio.security: ~0 rows (приблизительно)
-/*!40000 ALTER TABLE `security` DISABLE KEYS */;
-/*!40000 ALTER TABLE `security` ENABLE KEYS */;
 
 -- Дамп структуры для таблица portfolio.security_event_cash_flow
 CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
@@ -148,10 +154,6 @@ CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
   CONSTRAINT `security_event_cash_flow_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `security_event_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств, связанное с ЦБ';
-
--- Дамп данных таблицы portfolio.security_event_cash_flow: ~0 rows (приблизительно)
-/*!40000 ALTER TABLE `security_event_cash_flow` DISABLE KEYS */;
-/*!40000 ALTER TABLE `security_event_cash_flow` ENABLE KEYS */;
 
 -- Дамп структуры для таблица portfolio.security_quote
 CREATE TABLE IF NOT EXISTS `security_quote` (
@@ -181,10 +183,6 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   CONSTRAINT `transaction_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Сделки';
 
--- Дамп данных таблицы portfolio.transaction: ~0 rows (приблизительно)
-/*!40000 ALTER TABLE `transaction` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transaction` ENABLE KEYS */;
-
 -- Дамп структуры для таблица portfolio.transaction_cash_flow
 CREATE TABLE IF NOT EXISTS `transaction_cash_flow` (
   `transaction_id` varchar(32) NOT NULL COMMENT 'ID транзакции',
@@ -201,15 +199,20 @@ CREATE TABLE IF NOT EXISTS `transaction_cash_flow` (
   CONSTRAINT `transaction_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Движение денежных средств';
 
+-- Дамп структуры для таблица portfolio.stock_market_index
 CREATE TABLE IF NOT EXISTS `stock_market_index` (
-    `date` DATE NOT NULL,
-    `sp500` DECIMAL(7,2) NULL DEFAULT NULL COMMENT 'Значение индекса S&P 500',
-    PRIMARY KEY (`date`)
+  `date` DATE NOT NULL,
+  `sp500` DECIMAL(7,2) NULL DEFAULT NULL COMMENT 'Значение индекса S&P 500',
+  PRIMARY KEY (`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Индексы фондовых рынков';
 
--- Дамп данных таблицы portfolio.transaction_cash_flow: ~0 rows (приблизительно)
-/*!40000 ALTER TABLE `transaction_cash_flow` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transaction_cash_flow` ENABLE KEYS */;
+-- Дамп структуры для таблица portfolio.foreign_exchange_rate
+CREATE TABLE IF NOT EXISTS `foreign_exchange_rate` (
+  `date` DATE NOT NULL,
+  `currency_pair` CHAR(6) NOT NULL COMMENT 'Валютная пара (например USDRUB, базовая USD и котировальная валюты RUB)',
+  `rate` DECIMAL(7,4) NOT NULL COMMENT 'Официальный обменный курс ЦБ',
+  PRIMARY KEY (`currency_pair`, `date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Официальные обменные курсы валют';
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;

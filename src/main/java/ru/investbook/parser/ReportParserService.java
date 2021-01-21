@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
+import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
@@ -58,6 +59,7 @@ public class ReportParserService {
                 ReportTable<SecurityEventCashFlow> derivativeCashFlowTable = reportTables.getDerivativeCashFlowTable();
                 ReportTable<ForeignExchangeTransaction> fxTransactionTable = reportTables.getForeignExchangeTransactionTable();
                 ReportTable<SecurityQuote> securityQuoteTable = reportTables.getSecurityQuoteTable();
+                ReportTable<ForeignExchangeRate> foreignExchangeRateReportTable = reportTables.getForeignExchangeRateTable();
 
                 portfolioPropertyTable.getData().forEach(storage::addPortfolioProperty);
                 storage.addCashInfo(portfolioCashTable);
@@ -82,6 +84,7 @@ public class ReportParserService {
                 });
                 fxTransactionTable.getData().forEach(storage::addTransaction);
                 securityQuoteTable.getData().forEach(storage::addSecurityQuote);
+                foreignExchangeRateReportTable.getData().forEach(storage::addForeignExchangeRate);
             }
         } catch (Exception e) {
             log.warn("Не могу распарсить отчет {}", reportTables.getReport().getPath(), e);

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -78,7 +78,7 @@ public class CashFlowExcelTableView extends ExcelTableView {
                         portfolio
                                 .orElseThrow(() -> new IllegalArgumentException("Ожидается портфель"))
                                 .getId(),
-                        PortfolioPropertyType.TOTAL_ASSETS.name())
+                        PortfolioPropertyType.TOTAL_ASSETS_RUB.name()) // TODO sum with TOTAL_ASSETS_USD div by USDRUB exchange rate
                 .map(e -> BigDecimal.valueOf(Double.parseDouble(e.getValue())))
                 .orElse(BigDecimal.ZERO);
         total.put(DATE, "Итого:");
