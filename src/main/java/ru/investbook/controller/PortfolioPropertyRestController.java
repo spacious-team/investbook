@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -66,7 +66,7 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @PutMapping("{id}")
     @Override
     public ResponseEntity<PortfolioPropertyEntity> put(@PathVariable("id") Integer id,
-                                                        @Valid @RequestBody PortfolioProperty property) {
+                                                       @Valid @RequestBody PortfolioProperty property) {
         return super.put(id, property);
     }
 

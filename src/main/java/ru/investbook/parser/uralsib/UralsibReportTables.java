@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -46,16 +46,19 @@ public class UralsibReportTables implements ReportTables {
     @Getter
     private final PortfolioPropertyTable portfolioPropertyTable;
     @Getter
+    private final ForeignExchangeRateTable foreignExchangeRateTable;
+    @Getter
     private final CouponAmortizationRedemptionTable couponAmortizationRedemptionTable;
     @Getter
     private final DividendTable dividendTable;
 
     public UralsibReportTables(UralsibBrokerReport report, ForeignExchangeRateService foreignExchangeRateService) {
         this.report = report;
-        this.portfolioPropertyTable = new PortfolioPropertyTable(report, foreignExchangeRateService);
+        this.portfolioPropertyTable = new PortfolioPropertyTable(report);
+        this.foreignExchangeRateTable = new ForeignExchangeRateTable(report, foreignExchangeRateService);
         this.portfolioSecuritiesTable = new SecuritiesTable(report);
         this.securityTransactionTable = WrappingReportTable.of(
-                new SecurityTransactionTable(report, portfolioPropertyTable),
+                new SecurityTransactionTable(report, foreignExchangeRateTable),
                 new SecurityDepositAndWithdrawalTable(report, portfolioSecuritiesTable));
         this.couponAmortizationRedemptionTable =
                 new CouponAmortizationRedemptionTable(report, portfolioSecuritiesTable, securityTransactionTable);

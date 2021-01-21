@@ -20,16 +20,15 @@ package ru.investbook.view;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.springframework.stereotype.Service;
-import ru.investbook.repository.PortfolioPropertyRepository;
+import ru.investbook.entity.ForeignExchangeRateEntity;
+import ru.investbook.repository.ForeignExchangeRateRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,15 +36,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 @Slf4j
 public class ForeignExchangeRateService {
-    private static final ZoneId moexTimezone = ZoneId.of("Europe/Moscow");
-    private final PortfolioPropertyRepository portfolioPropertyRepository;
+    private final ForeignExchangeRateRepository foreignExchangeRateRepository;
     // base-currency -> quote-currency -> exchange-rate
     private final Map<String, Map<String, BigDecimal>> cache = new ConcurrentHashMap<>();
     // base-currency -> quote-currency -> local date -> exchange-rate
     private final Map<String, Map<String, Map<LocalDate, BigDecimal>>> cacheByDate = new ConcurrentHashMap<>();
 
     /**
-     * Возвращает котировку базовой валюты в цене котируемой валюты. Например, для USD/RUB базовая валюта - USD.
+     * Возвращает последнюю известную котировку базовой валюты в цене котируемой валюты. Например, для USD/RUB базовая валюта - USD.
      *
      * @param baseCurrency  базовая валюта
      * @param quoteCurrency котируемая валюта
@@ -72,7 +70,7 @@ public class ForeignExchangeRateService {
     }
 
     /**
-     * Возвращает котировку базовой валюты в цене котируемой валюты. Например, для USD/RUB базовая валюта - USD.
+     * Возвращает последнюю известную котировку базовой валюты в цене котируемой валюты. Например, для USD/RUB базовая валюта - USD.
      *
      * @param currency базовая валюта
      * @return обменный курс валюты в российских рублях
@@ -81,10 +79,9 @@ public class ForeignExchangeRateService {
         if (currency.equalsIgnoreCase("rub")) {
             return BigDecimal.ONE;
         }
-        PortfolioPropertyType property = getExchangePropertyFor(currency);
-        BigDecimal exchangeRate = portfolioPropertyRepository
-                .findFirstByPropertyOrderByTimestampDesc(property.name())
-                .map(v -> BigDecimal.valueOf(Double.parseDouble(v.getValue())))
+        BigDecimal exchangeRate = foreignExchangeRateRepository
+                .findFirstByPkCurrencyPairOrderByPkDateDesc(currency.toUpperCase() + "RUB")
+                .map(ForeignExchangeRateEntity::getRate)
                 .orElse(BigDecimal.ZERO);
 
         if (exchangeRate.equals(BigDecimal.ZERO)) {
@@ -137,17 +134,10 @@ public class ForeignExchangeRateService {
         if (currency.equalsIgnoreCase("rub")) {
             return BigDecimal.ONE;
         }
-        PortfolioPropertyType property = getExchangePropertyFor(currency);
         LocalDate localDate = LocalDate.ofInstant(instant, timezone);
-        ZonedDateTime dayStart = localDate.atStartOfDay(timezone);
-        BigDecimal exchangeRate = portfolioPropertyRepository
-                .findByPropertyAndTimestampBetweenOrderByTimestampDesc(
-                        property.name(),
-                        dayStart.toInstant(),
-                        dayStart.plusDays(1).minusNanos(1).toInstant())
-                .stream()
-                .findFirst()
-                .map(v -> BigDecimal.valueOf(Double.parseDouble(v.getValue())))
+        BigDecimal exchangeRate = foreignExchangeRateRepository
+                .findByPkCurrencyPairAndPkDate(currency.toUpperCase() + "RUB", localDate)
+                .map(ForeignExchangeRateEntity::getRate)
                 .orElse(BigDecimal.ZERO);
 
         if (exchangeRate.equals(BigDecimal.ZERO)) {
@@ -155,10 +145,6 @@ public class ForeignExchangeRateService {
         }
         cache(currency, "RUB", localDate, exchangeRate);
         return exchangeRate;
-    }
-
-    public static PortfolioPropertyType getExchangePropertyFor(String currency) {
-        return PortfolioPropertyType.valueOf(currency.toUpperCase() + "RUB_EXCHANGE_RATE");
     }
 
     private void cache(String baseCurrency, String quoteCurrency, BigDecimal exchangeRate) {

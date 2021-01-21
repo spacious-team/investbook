@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,7 @@ package ru.investbook.parser.psb;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.EventCashFlow;
+import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
@@ -96,5 +97,10 @@ public class PsbReportTables implements ReportTables {
         return WrappingReportTable.of(
                 new SecurityQuoteTable(report),
                 new DerivativeQuoteTable(report));
+    }
+
+    @Override
+    public ReportTable<ForeignExchangeRate> getForeignExchangeRateTable() {
+        return new ForeignExchangeRateTable(report);
     }
 }
