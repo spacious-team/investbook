@@ -275,10 +275,9 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     if (toDate.compareTo(LocalDate.now()) >= 0) {
                         lastPrice = foreignExchangeRateService.getExchangeRateToRub(currency);
                     } else {
-                        lastPrice = foreignExchangeRateService.getExchangeRateToRub(
+                        lastPrice = foreignExchangeRateService.getExchangeRateToRubOrDefault(
                                 currency,
-                                filter.getToDate(),
-                                ZoneId.systemDefault());
+                                LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault()));
                     }
                     row.put(LAST_PRICE, lastPrice);
                     securityQuote = SecurityQuote.builder()

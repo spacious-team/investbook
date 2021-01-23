@@ -90,22 +90,21 @@ public class ForeignExchangeRateTable extends InitializableReportTable<ForeignEx
             return BigDecimal.ONE;
         }
         BigDecimal exchangeRate = BigDecimal.ZERO;
-        LocalDate date = LocalDate.ofInstant(transactionInstant, getReport().getReportZoneId());
+        LocalDate atDate = LocalDate.ofInstant(transactionInstant, getReport().getReportZoneId());
         if (quoteCurrency.equalsIgnoreCase("rub")) {
-            exchangeRate = getReportExchangeRate(baseCurrency, date);
+            exchangeRate = getReportExchangeRate(baseCurrency, atDate);
         } else if (baseCurrency.equalsIgnoreCase("rub")) {
-            BigDecimal v = getReportExchangeRate(quoteCurrency, date);
+            BigDecimal v = getReportExchangeRate(quoteCurrency, atDate);
             exchangeRate = v.equals(BigDecimal.ZERO) ? v : BigDecimal.ONE.divide(v, 6, RoundingMode.HALF_UP);
         } else {
-            BigDecimal baseToRubRate = getReportExchangeRate(baseCurrency, date);
-            BigDecimal quoteToRubRate = getReportExchangeRate(quoteCurrency, date);
+            BigDecimal baseToRubRate = getReportExchangeRate(baseCurrency, atDate);
+            BigDecimal quoteToRubRate = getReportExchangeRate(quoteCurrency, atDate);
             if (!baseToRubRate.equals(BigDecimal.ZERO) && !quoteToRubRate.equals(BigDecimal.ZERO)) {
                 exchangeRate = baseToRubRate.divide(quoteToRubRate, 6, RoundingMode.HALF_UP);
             }
         }
         if (exchangeRate.equals(BigDecimal.ZERO)) {
-            exchangeRate = foreignExchangeRateService.getExchangeRate(baseCurrency, quoteCurrency,
-                    transactionInstant, getReport().getReportZoneId());
+            exchangeRate = foreignExchangeRateService.getExchangeRate(baseCurrency, quoteCurrency, atDate);
         }
         return exchangeRate;
     }

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -171,7 +171,7 @@ public class ReportRestController {
     private BrokerNameAndReport getReportOfUnknownBroker(MultipartFile report) throws IOException {
         BrokerReport brokerReport = null;
         // convert to mark supporting input stream
-        ByteArrayInputStream is = castToBayteArrayInputStream(report.getInputStream());
+        ByteArrayInputStream is = castToByteArrayInputStream(report.getInputStream());
         for (BrokerReportFactory brokerReportFactory : brokerReportFactories) {
             brokerReport = brokerReportFactory.create(report.getOriginalFilename(), is);
             if (brokerReport != null) {
@@ -182,7 +182,7 @@ public class ReportRestController {
     }
 
     private BrokerNameAndReport getReportOfKnownBroker(MultipartFile report, String providedByBroker) throws IOException {
-        ByteArrayInputStream is = castToBayteArrayInputStream(report.getInputStream());
+        ByteArrayInputStream is = castToByteArrayInputStream(report.getInputStream());
         return findBrokerReportFactory(providedByBroker).stream()
                 .map(f -> {
                     BrokerReport brokerReport = f.create(report.getOriginalFilename(), is);
@@ -204,7 +204,7 @@ public class ReportRestController {
                 .collect(Collectors.toList());
     }
 
-    private static ByteArrayInputStream castToBayteArrayInputStream(InputStream inputStream) throws IOException {
+    private static ByteArrayInputStream castToByteArrayInputStream(InputStream inputStream) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         inputStream.transferTo(out);
         return new ByteArrayInputStream(out.toByteArray());

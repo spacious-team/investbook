@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -56,7 +56,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
         return super.get();
     }
 
-    @GetMapping("/portfolio/{portfolio}/id/{transaction-id}")
+    @GetMapping("/portfolios/{portfolio}/ids/{transaction-id}")
     protected List<TransactionCashFlowEntity> get(@PathVariable("portfolio") String portfolio,
                                                   @PathVariable("transaction-id") String transactionId) {
         return transactionCashFlowRepository.findByPkPortfolioAndPkTransactionId(portfolio, transactionId);
@@ -65,7 +65,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
     /**
      * see {@link AbstractRestController#get(Object)}
      */
-    @GetMapping("/portfolio/{portfolio}/id/{transaction-id}/events/{event-type}")
+    @GetMapping("/portfolios/{portfolio}/ids/{transaction-id}/events/{event-type}")
     public ResponseEntity<TransactionCashFlowEntity> get(@PathVariable("portfolio") String portfolio,
                                                          @PathVariable("transaction-id") String transactionId,
                                                          @PathVariable("event-type") int eventType) {
@@ -81,7 +81,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
     /**
      * see {@link AbstractRestController#put(Object, Object)}
      */
-    @PutMapping("/portfolio/{portfolio}/id/{transaction-id}/events/{event-type}")
+    @PutMapping("/portfolios/{portfolio}/ids/{transaction-id}/events/{event-type}")
     public ResponseEntity<TransactionCashFlowEntity> put(@PathVariable("portfolio") String portfolio,
                                                          @PathVariable("transaction-id") String transactionId,
                                                          @PathVariable("event-type") int eventType,
@@ -92,7 +92,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
     /**
      * see {@link AbstractRestController#delete(Object)}
      */
-    @DeleteMapping("/portfolio/{portfolio}/id/{transaction-id}/events/{event-type}")
+    @DeleteMapping("/portfolios/{portfolio}/ids/{transaction-id}/events/{event-type}")
     public void delete(@PathVariable("portfolio") String portfolio,
                        @PathVariable("transaction-id") String transactionId,
                        @PathVariable("event-type") int eventType) {
@@ -128,8 +128,8 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
 
     @Override
     protected URI getLocationURI(TransactionCashFlow object) throws URISyntaxException {
-        return new URI(getLocation() + "/portfolio/" + object.getPortfolio()
-                + "/id/"+ object.getTransactionId()
+        return new URI(getLocation() + "/portfolios/" + object.getPortfolio()
+                + "/ids/"+ object.getTransactionId()
                 + "/events/" + object.getEventType().getId());
     }
 

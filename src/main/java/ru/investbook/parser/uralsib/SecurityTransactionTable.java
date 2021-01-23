@@ -64,14 +64,51 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
             accruedInterest = accruedInterest.negate();
         }
         String valueCurrency = getCurrency(table, row, VALUE_CURRENCY, value, "RUB");
-        BigDecimal marketCommission = table.getCurrencyCellValue(row, MARKET_COMMISSION);
+        BigDecimal marketCommission = table.getCurrencyCellValue(row, MARKET_COMMISSION).abs();
         String marketCommissionCurrency = getCurrency(table, row, MARKET_COMMISSION_CURRENCY, marketCommission, valueCurrency);
-        BigDecimal brokerCommission = table.getCurrencyCellValue(row, BROKER_COMMISSION);
+        BigDecimal brokerCommission = table.getCurrencyCellValue(row, BROKER_COMMISSION).abs();
         String brokerCommissionCurrency = getCurrency(table, row, BROKER_COMMISSION_CURRENCY, brokerCommission, valueCurrency);
         Instant timestamp = getReport().convertToInstant(table.getStringCellValue(row, DATE_TIME));
-        BigDecimal commission = getConvertedCommission(marketCommission, marketCommissionCurrency, valueCurrency, timestamp) // TODO ?do not convert if market and broker commission currency equals
-                .add(getConvertedCommission(brokerCommission, brokerCommissionCurrency, valueCurrency, timestamp))
-                .negate();
+
+        BigDecimal commission;
+        String commissionCurrency;
+        if (marketCommissionCurrency.equals(brokerCommissionCurrency)) {
+            commission = brokerCommission.add(marketCommission);
+            commissionCurrency = brokerCommissionCurrency;
+        } else if (marketCommission.compareTo(minValue) < 0 && brokerCommission.compareTo(minValue) < 0) {
+            commission = BigDecimal.ZERO;
+            commissionCurrency = brokerCommissionCurrency;
+        } else if (marketCommission.compareTo(minValue) < 0) {
+            commission = brokerCommission;
+            commissionCurrency = brokerCommissionCurrency;
+        } else if (brokerCommission.compareTo(minValue) < 0) {
+            commission = marketCommission;
+            commissionCurrency = marketCommissionCurrency;
+        } else {
+            try {
+                commission = marketCommission
+                        .add(getConvertedCommission(brokerCommission, brokerCommissionCurrency, marketCommissionCurrency, timestamp))
+                        .negate();
+                commissionCurrency = marketCommissionCurrency;
+            } catch (Exception e) {
+                String msg = "Не возможно просуммировать между собой комиссии ТС и брокера, валюты разные, обменный курс не известен";
+                if (marketCommissionCurrency.equals(valueCurrency)) {
+                    value = value.subtract(marketCommission);
+                    commission = brokerCommission;
+                    commissionCurrency = brokerCommissionCurrency;
+                    log.warn("{}. Комиссия ТС включена в сумму сделки {}, т.к. они оба в одной валюте: {}",
+                            msg, transactionId, valueCurrency);
+                } else if(brokerCommissionCurrency.equals(valueCurrency)) {
+                    value = value.subtract(brokerCommission);
+                    commission = marketCommission;
+                    commissionCurrency = marketCommissionCurrency;
+                    log.warn("{}. Комиссия брокера включена в сумму сделки {}, т.к. они оба в одной валюте: {}",
+                            msg, transactionId, valueCurrency);
+                } else {
+                    throw new RuntimeException(msg, e);
+                }
+            }
+        }
 
         return Collections.singletonList(SecurityTransaction.builder()
                 .timestamp(timestamp)
@@ -81,9 +118,9 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
                 .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
                 .value(value)
                 .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)
-                .commission(commission)
+                .commission(commission.negate())
                 .valueCurrency(valueCurrency)
-                .commissionCurrency(valueCurrency)
+                .commissionCurrency(commissionCurrency)
                 .build());
     }
 
@@ -112,15 +149,7 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
      */
     private BigDecimal getConvertedCommission(BigDecimal commission, String commissionCurrency,
                                               String targetCurrency, Instant timestamp) {
-        if (commission.compareTo(minValue) < 0) {
-            // is commission == 0 report contains commissionCurrency = ""
-            return commission;
-        } else if (commissionCurrency.isEmpty() || targetCurrency.isEmpty()) {
-            log.warn("Не указана валюта комиссии для комиссии {} в файле {}", commission, getReport().getPath().getFileName());
-            return commission;
-        }
-        BigDecimal exchangeRate = foreignExchangeRateTable.getExchangeRate(commissionCurrency,
-                targetCurrency, timestamp);
+        BigDecimal exchangeRate = foreignExchangeRateTable.getExchangeRate(commissionCurrency, targetCurrency, timestamp);
         return commission.multiply(exchangeRate);
     }
 
