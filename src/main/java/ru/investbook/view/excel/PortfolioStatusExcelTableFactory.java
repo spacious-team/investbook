@@ -36,7 +36,6 @@ import ru.investbook.converter.SecurityConverter;
 import ru.investbook.converter.SecurityQuoteConverter;
 import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
-import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityQuoteRepository;
@@ -117,16 +116,16 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
 
     private Table create(Optional<Portfolio> portfolio, String forCurrency) {
         Collection<String> securitiesId = getSecuritiesId(portfolio, forCurrency);
-        Table table = create(portfolio, securitiesId);
+        Table table = create(portfolio, securitiesId, forCurrency);
         table.add(getCashRow(portfolio, forCurrency));
         return table;
     }
 
-    protected Table create(Optional<Portfolio> portfolio, Collection<String> securitiesIsin) {
+    private Table create(Optional<Portfolio> portfolio, Collection<String> securitiesIsin, String forCurrency) {
         Table table = new Table();
         for (String isin : securitiesIsin) {
             getSecurity(isin)
-                    .map(security -> getSecurityStatus(portfolio, security))
+                    .map(security -> getSecurityStatus(portfolio, security, forCurrency))
                     .ifPresent(table::add);
         }
         return table;
@@ -216,7 +215,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         }
     }
 
-    private Table.Record getSecurityStatus(Optional<Portfolio> portfolio, Security security) {
+    private Table.Record getSecurityStatus(Optional<Portfolio> portfolio, Security security, String toCurrency) {
         Table.Record row = new Table.Record();
         SecurityType securityType = getSecurityType(security);
         row.put(SECURITY,
@@ -255,31 +254,35 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                             .sum());
 
             SecurityQuote securityQuote = null;
+            String quoteCurrency = null;
             int count = positions.getCurrentOpenedPositionsCount();
             row.put(COUNT, count);
             if (count == 0) {
-                row.put(GROSS_PROFIT, "=" + getGrossProfit(portfolio, security, positions) +
+                row.put(GROSS_PROFIT, "=" + getGrossProfit(portfolio, security, positions, toCurrency) +
                         ((securityType == STOCK_OR_BOND) ? ("+" + AMORTIZATION.getCellAddr()) : ""));
             } else {
-                row.put(AVERAGE_PRICE, getPurchaseCost(security, positions)
+                row.put(AVERAGE_PRICE, getPurchaseCost(security, positions, toCurrency)
                         .abs()
                         .divide(BigDecimal.valueOf(Math.max(1, Math.abs(count))), 6, RoundingMode.CEILING));
-                row.put(AVERAGE_ACCRUED_INTEREST, getPurchaseAccruedInterest(security, positions)
+                row.put(AVERAGE_ACCRUED_INTEREST, getPurchaseAccruedInterest(security, positions, toCurrency)
                         .abs()
                         .divide(BigDecimal.valueOf(Math.max(1, Math.abs(count))), 6, RoundingMode.CEILING));
 
                 if (securityType == CURRENCY_PAIR) {
                     BigDecimal lastPrice;
-                    String currency = getCurrencyPair(security.getId()).substring(0, 3);
+                    String currencyPair = getCurrencyPair(security.getId());
+                    String currency = currencyPair.substring(0, 3);
+                    quoteCurrency = currencyPair.substring(3, 6);
                     LocalDate toDate = LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault());
                     if (toDate.compareTo(LocalDate.now()) >= 0) {
-                        lastPrice = foreignExchangeRateService.getExchangeRateToRub(currency);
+                        lastPrice = foreignExchangeRateService.getExchangeRate(currency, quoteCurrency);
                     } else {
-                        lastPrice = foreignExchangeRateService.getExchangeRateToRubOrDefault(
+                        lastPrice = foreignExchangeRateService.getExchangeRateOrDefault(
                                 currency,
+                                quoteCurrency,
                                 LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault()));
                     }
-                    row.put(LAST_PRICE, lastPrice);
+                    row.put(LAST_PRICE, convertToCurrency(lastPrice, quoteCurrency, toCurrency));
                     securityQuote = SecurityQuote.builder()
                             .security(security.getId())
                             .timestamp(filter.getToDate())
@@ -294,27 +297,28 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         row.put(LAST_ACCRUED_INTEREST, quote.getAccruedInterest());
                     });
                     securityQuote = optionalQuote.orElse(null);
+                    quoteCurrency = toCurrency; // TODO не известно точно в какой валюте котируется инструмент, делаем предположение, что в валюте сделки
                 }
 
                 if (securityType == STOCK_OR_BOND || securityType == CURRENCY_PAIR) {
                     row.put(GROSS_PROFIT, STOCK_GROSS_PROFIT_FORMULA);
                 } else if (securityType == DERIVATIVE) {
-                    row.put(GROSS_PROFIT, getGrossProfit(portfolio, security, positions));
+                    row.put(GROSS_PROFIT, getGrossProfit(portfolio, security, positions, toCurrency));
                 }
                 if (securityType == STOCK_OR_BOND || securityType == CURRENCY_PAIR) {
                     row.put(INVESTMENT_PROPORTION, INVESTMENT_PROPORTION_FORMULA);
                     row.put(PROPORTION, PROPORTION_FORMULA);
                 }
             }
-            row.put(COMMISSION, getTotal(positions.getTransactions(), CashFlowType.COMMISSION).abs());
+            row.put(COMMISSION, getTotal(positions.getTransactions(), CashFlowType.COMMISSION, toCurrency).abs());
             if (securityType == STOCK_OR_BOND) {
-                row.put(COUPON, sumPaymentsForType(portfolio, security, CashFlowType.COUPON));
-                row.put(AMORTIZATION, sumPaymentsForType(portfolio, security, CashFlowType.AMORTIZATION));
-                row.put(DIVIDEND, sumPaymentsForType(portfolio, security, CashFlowType.DIVIDEND));
-                row.put(TAX, sumPaymentsForType(portfolio, security, CashFlowType.TAX).abs());
+                row.put(COUPON, sumPaymentsForType(portfolio, security, CashFlowType.COUPON, toCurrency));
+                row.put(AMORTIZATION, sumPaymentsForType(portfolio, security, CashFlowType.AMORTIZATION, toCurrency));
+                row.put(DIVIDEND, sumPaymentsForType(portfolio, security, CashFlowType.DIVIDEND, toCurrency));
+                row.put(TAX, sumPaymentsForType(portfolio, security, CashFlowType.TAX, toCurrency).abs());
             }
             row.put(PROFIT, PROFIT_FORMULA);
-            row.put(INTERNAL_RATE_OF_RETURN, internalRateOfReturn.calc(portfolio, security, securityQuote, filter));
+            row.put(INTERNAL_RATE_OF_RETURN, internalRateOfReturn.calc(portfolio, security, securityQuote, quoteCurrency, filter));
             row.put(PROFIT_PROPORTION, PROFIT_PROPORTION_FORMULA);
         } catch (Exception e) {
             log.error("Ошибка при формировании агрегированных данных по бумаге {}", security, e);
@@ -338,25 +342,25 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     /**
      * Курсовой доход с купли-продажи (для деривативов - суммарная вариационная маржа)
      */
-    private BigDecimal getGrossProfit(Optional<Portfolio> portfolio, Security security, Positions positions) {
+    private BigDecimal getGrossProfit(Optional<Portfolio> portfolio, Security security, Positions positions, String toCurrency) {
         SecurityType securityType = getSecurityType(security);
         return switch (securityType) {
-            case STOCK_OR_BOND -> getPurchaseCost(security, positions)
-                    .add(getPurchaseAccruedInterest(security, positions));
-            case DERIVATIVE -> sumPaymentsForType(portfolio, security, CashFlowType.DERIVATIVE_PROFIT);
-            case CURRENCY_PAIR -> getPurchaseCost(security, positions);
+            case STOCK_OR_BOND -> getPurchaseCost(security, positions, toCurrency)
+                    .add(getPurchaseAccruedInterest(security, positions, toCurrency));
+            case DERIVATIVE -> sumPaymentsForType(portfolio, security, CashFlowType.DERIVATIVE_PROFIT, toCurrency);
+            case CURRENCY_PAIR -> getPurchaseCost(security, positions, toCurrency);
         };
     }
 
     /**
      * Разница доходов с продажи и расходов на покупку
      */
-    private BigDecimal getPurchaseCost(Security security, Positions positions) {
+    private BigDecimal getPurchaseCost(Security security, Positions positions, String toCurrency) {
         SecurityType securityType = getSecurityType(security);
         return switch (securityType) {
-            case STOCK_OR_BOND -> getStockOrBondPurchaseCost(positions);
-            case DERIVATIVE -> getTotal(positions.getTransactions(), CashFlowType.DERIVATIVE_PRICE);
-            case CURRENCY_PAIR -> getTotal(positions.getTransactions(), CashFlowType.PRICE);
+            case STOCK_OR_BOND -> getStockOrBondPurchaseCost(positions, toCurrency);
+            case DERIVATIVE -> getTotal(positions.getTransactions(), CashFlowType.DERIVATIVE_PRICE, toCurrency);
+            case CURRENCY_PAIR -> getTotal(positions.getTransactions(), CashFlowType.PRICE, toCurrency);
         };
     }
 
@@ -364,19 +368,19 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
      * Разница цен продаж и покупок. Не учитывается цена покупки, если ЦБ выведена со счета, не учитывается цена
      * продажи, если ЦБ введена на счет
      */
-    private BigDecimal getStockOrBondPurchaseCost(Positions positions) {
+    private BigDecimal getStockOrBondPurchaseCost(Positions positions, String toCurrency) {
         BigDecimal purchaseCost = positions.getOpenedPositions()
                 .stream()
-                .map(openPosition -> getTransactionValue(openPosition.getOpenTransaction(), CashFlowType.PRICE)
+                .map(openPosition -> getTransactionValue(openPosition.getOpenTransaction(), CashFlowType.PRICE, toCurrency)
                         .map(value -> value.multiply(getOpenAmountMultiplier(openPosition))))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .reduce(BigDecimal.ZERO, BigDecimal::add); // если ценная бумага не вводилась на счет, а была куплена (есть цена покупки)
         for (ClosedPosition closedPosition : positions.getClosedPositions()) {
-            BigDecimal openPrice = getTransactionValue(closedPosition.getOpenTransaction(), CashFlowType.PRICE)
+            BigDecimal openPrice = getTransactionValue(closedPosition.getOpenTransaction(), CashFlowType.PRICE, toCurrency)
                     .map(value -> value.multiply(getOpenAmountMultiplier(closedPosition)))
                     .orElse(null);
-            BigDecimal closePrice = getTransactionValue(closedPosition.getCloseTransaction(), CashFlowType.PRICE)
+            BigDecimal closePrice = getTransactionValue(closedPosition.getCloseTransaction(), CashFlowType.PRICE, toCurrency)
                     .map(value -> value.multiply(getClosedAmountMultiplier(closedPosition)))
                     // redemption closing price will be taken into account later
                     .orElseGet(() -> (closedPosition.getClosingEvent() == CashFlowType.REDEMPTION) ? BigDecimal.ZERO : null);
@@ -388,7 +392,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         }
         return positions.getRedemptions()
                 .stream()
-                .map(SecurityEventCashFlow::getValue)
+                .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency))
                 .map(BigDecimal::abs)
                 .reduce(purchaseCost, BigDecimal::add);
     }
@@ -396,30 +400,29 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     /**
      * Разница проданного и купленного НКД
      */
-    private BigDecimal getPurchaseAccruedInterest(Security security, Positions positions) {
+    private BigDecimal getPurchaseAccruedInterest(Security security, Positions positions, String toCurrency) {
         if (getSecurityType(security) == STOCK_OR_BOND) {
-            return getTotal(positions.getTransactions(), CashFlowType.ACCRUED_INTEREST);
+            return getTotal(positions.getTransactions(), CashFlowType.ACCRUED_INTEREST, toCurrency);
         }
         return BigDecimal.ZERO;
     }
 
-    private BigDecimal getTotal(Deque<Transaction> transactions, CashFlowType type) {
+    private BigDecimal getTotal(Deque<Transaction> transactions, CashFlowType type, String toCurrency) {
         return transactions.stream()
                 .filter(t -> t.getId() != null && t.getCount() != 0)
-                .map(t -> getTransactionValue(t, type))
+                .map(t -> getTransactionValue(t, type, toCurrency))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    // TODO convert transaction currency to this excel table currency
-    private Optional<BigDecimal> getTransactionValue(Transaction t, CashFlowType type) {
+    private Optional<BigDecimal> getTransactionValue(Transaction t, CashFlowType type, String toCurrency) {
         if (t.getId() == null) { // redemption
             return Optional.empty();
         }
         return transactionCashFlowRepository
                 .findByPkPortfolioAndPkTransactionIdAndPkType(t.getPortfolio(), t.getId(), type.getId())
-                .map(TransactionCashFlowEntity::getValue);
+                .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency));
     }
 
     private BigDecimal getOpenAmountMultiplier(OpenedPosition openedPosition) {
@@ -444,10 +447,10 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         }
     }
 
-    private BigDecimal sumPaymentsForType(Optional<Portfolio> portfolio, Security security, CashFlowType cashFlowType) {
+    private BigDecimal sumPaymentsForType(Optional<Portfolio> portfolio, Security security, CashFlowType cashFlowType, String toCurrency) {
         return getSecurityEventCashFlowEntities(portfolio, security, cashFlowType)
                 .stream()
-                .map(SecurityEventCashFlowEntity::getValue)
+                .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -496,6 +499,10 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 .stream()
                 .map(portfolioPropertyConverter::fromEntity)
                     .collect(Collectors.toList());
+    }
+
+    private BigDecimal convertToCurrency(BigDecimal value, String fromCurrency, String toCurrency) {
+        return foreignExchangeRateService.convertValueToCurrency(value, fromCurrency, toCurrency);
     }
 
     private static String getStockOrBondGrossProfitFormula() {
