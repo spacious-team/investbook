@@ -45,6 +45,19 @@ public class ForeignExchangeRateService {
     private int serverPort;
 
     /**
+     * Конвертирует сумму денежных средств из заданной валюты в целевую валюту по последнему известному курсу или
+     * курсу по-умолчанию, если официальный курс не известен.
+     */
+    public BigDecimal convertValueToCurrency(BigDecimal value, String fromCurrency, String toCurrency) {
+        if (fromCurrency.equalsIgnoreCase(toCurrency)) {
+            return value;
+        } else {
+            BigDecimal exchangeRate = getExchangeRate(fromCurrency, toCurrency);
+            return value.multiply(exchangeRate);
+        }
+    }
+
+    /**
      * Возвращает последнюю известную котировку базовой валюты в цене котируемой валюты. Например, для USD/RUB базовая валюта - USD.
      *
      * @param baseCurrency  базовая валюта
