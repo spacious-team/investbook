@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/foreign-exchange-rate")
+@RequestMapping("/foreign-exchange-rates")
 public class ForeignExchangeRateRestController extends AbstractRestController<ForeignExchangeRateEntityPk, ForeignExchangeRate, ForeignExchangeRateEntity> {
     private final ForeignExchangeRateRepository foreignExchangeRateRepository;
 
@@ -57,7 +57,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
         return super.get();
     }
 
-    @GetMapping("/currency-pair/{currency-pair}")
+    @GetMapping("/currency-pairs/{currency-pair}")
     protected List<ForeignExchangeRateEntity> get(@PathVariable("currency-pair") String currencyPair) {
         return foreignExchangeRateRepository.findByPkCurrencyPairOrderByPkDateDesc(currencyPair);
     }
@@ -65,7 +65,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
     /**
      * see {@link AbstractRestController#get(Object)}
      */
-    @GetMapping("/currency-pair/{currency-pair}/date/{date}")
+    @GetMapping("/currency-pairs/{currency-pair}/dates/{date}")
     protected ResponseEntity<ForeignExchangeRateEntity> get(@PathVariable("currency-pair") String currencyPair,
                                                             @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
         return super.get(getId(currencyPair, date));
@@ -80,7 +80,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
     /**
      * see {@link AbstractRestController#put(Object, Object)}
      */
-    @PutMapping("/currency-pair/{currency-pair}/date/{date}")
+    @PutMapping("/currency-pairs/{currency-pair}/dates/{date}")
     public ResponseEntity<ForeignExchangeRateEntity> put(@PathVariable("currency-pair") String currencyPair,
                                                          @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
                                                          @RequestBody ForeignExchangeRate object) {
@@ -90,7 +90,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
     /**
      * see {@link AbstractRestController#delete(Object)}
      */
-    @DeleteMapping("/currency-pair/{currency-pair}/date/{date}")
+    @DeleteMapping("/currency-pairs/{currency-pair}/dates/{date}")
     public void delete(@PathVariable("currency-pair") String currencyPair,
                        @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
         super.delete(getId(currencyPair, date));
@@ -123,12 +123,11 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
 
     @Override
     protected URI getLocationURI(ForeignExchangeRate object) throws URISyntaxException {
-        return new URI(getLocation() + "/currency-pair/" + object.getCurrencyPair()
-                + "/date/"+ object.getDate());
+        return new URI(getLocation() + "/currency-pairs/" + object.getCurrencyPair() + "/dates/"+ object.getDate());
     }
 
     @Override
     protected String getLocation() {
-        return "/foreign-exchange-rate";
+        return "/foreign-exchange-rates";
     }
 }

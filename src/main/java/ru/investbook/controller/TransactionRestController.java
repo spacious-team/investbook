@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -61,7 +61,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
     /**
      * see {@link AbstractRestController#get(Object)}
      */
-    @GetMapping("/portfolio/{portfolio}/id/{id}")
+    @GetMapping("/portfolios/{portfolio}/ids/{id}")
     public ResponseEntity<TransactionEntity> get(@PathVariable("portfolio") String portfolio,
                                                  @PathVariable("id") String id) {
         return super.get(getId(portfolio, id));
@@ -77,7 +77,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
     /**
      * see {@link AbstractRestController#put(Object, Object)}
      */
-    @PutMapping("/portfolio/{portfolio}/id/{id}")
+    @PutMapping("/portfolios/{portfolio}/ids/{id}")
     public ResponseEntity<TransactionEntity> put(@PathVariable("portfolio") String portfolio,
                                                  @PathVariable("id") String id,
                                                  @Valid @RequestBody Transaction object) {
@@ -88,7 +88,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
     /**
      * see {@link AbstractRestController#delete(Object)}
      */
-    @DeleteMapping("/portfolio/{portfolio}/id/{id}")
+    @DeleteMapping("/portfolios/{portfolio}/ids/{id}")
     public void delete(@PathVariable("portfolio") String portfolio,
                        @PathVariable("id") String id) {
         positionsFactory.invalidateCache();
@@ -122,7 +122,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
 
     @Override
     protected URI getLocationURI(Transaction object) throws URISyntaxException {
-        return new URI(getLocation() + "/portfolio/" + object.getPortfolio() + "/id/" + object.getId());
+        return new URI(getLocation() + "/portfolios/" + object.getPortfolio() + "/ids/" + object.getId());
     }
 
     @Override
