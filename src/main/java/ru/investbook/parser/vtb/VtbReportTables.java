@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,7 @@ package ru.investbook.parser.vtb;
 
 import lombok.Getter;
 import org.spacious_team.broker.pojo.EventCashFlow;
+import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
@@ -105,5 +106,10 @@ public class VtbReportTables implements ReportTables {
     @Override
     public ReportTable<SecurityQuote> getSecurityQuoteTable() {
         return new VtbSecurityQuoteTable(report);
+    }
+
+    @Override
+    public ReportTable<ForeignExchangeRate> getForeignExchangeRateTable() {
+        return new VtbForeignExchangeRateTable(report);
     }
 }

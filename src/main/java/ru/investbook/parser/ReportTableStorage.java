@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.spacious_team.broker.pojo.EventCashFlow;
+import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
@@ -41,6 +42,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import ru.investbook.controller.EventCashFlowRestController;
+import ru.investbook.controller.ForeignExchangeRateRestController;
 import ru.investbook.controller.PortfolioPropertyRestController;
 import ru.investbook.controller.PortfolioRestController;
 import ru.investbook.controller.SecurityEventCashFlowRestController;
@@ -63,6 +65,7 @@ public class ReportTableStorage {
     private final TransactionCashFlowRestController transactionCashFlowRestController;
     private final PortfolioPropertyRestController portfolioPropertyRestController;
     private final SecurityQuoteRestController securityQuoteRestController;
+    private final ForeignExchangeRateRestController foreignExchangeRateRestController;
     private final ObjectMapper objectMapper;
 
     public boolean addPortfolio(Portfolio portfolio) {
@@ -145,6 +148,12 @@ public class ReportTableStorage {
         handlePost(
                 () -> securityQuoteRestController.post(securityQuote),
                 "Не могу добавить информацию о котировке финансового инструмента " + securityQuote);
+    }
+
+    public void addForeignExchangeRate(ForeignExchangeRate exchangeRate) {
+        handlePost(
+                () -> foreignExchangeRateRestController.post(exchangeRate),
+                "Не могу добавить информацию о курсе валюты " + exchangeRate);
     }
 
     public void addCashInfo(ReportTable<PortfolioCash> cashTable) {

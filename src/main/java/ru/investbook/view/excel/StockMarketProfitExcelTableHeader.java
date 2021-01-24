@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -39,7 +39,7 @@ public enum StockMarketProfitExcelTableHeader implements ExcelTableHeader {
     DIVIDEND("Дивиденды"),
     CLOSE_COMMISSION("Комиссия закрытия/погашения"),
     TAX("Налог с купонов и дивидендов (уплаченный)"),
-    TAX_LIABILITY("Обязательства по уплате налога"),
+    TAX_LIABILITY("Налог к уплате с дивидендов и купонов"),
     FORECAST_TAX("Налог с разницы курсов (ожидаемый)"),
     PROFIT("Прибыль (закрытых позиций)"),
     YIELD("Доходность годовых, %");
