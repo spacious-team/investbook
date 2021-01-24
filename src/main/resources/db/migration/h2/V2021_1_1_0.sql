@@ -277,5 +277,10 @@ INSERT IGNORE INTO `foreign_exchange_rate` (`date`, `currency_pair`, `rate`) VAL
 ('2021-01-13', 'USDRUB', 74.2663),
 ('2021-01-14', 'USDRUB', 73.5264),
 ('2021-01-15', 'USDRUB', 73.7961),
-('2021-01-16', 'USDRUB', 73.5453);
+('2021-01-16', 'USDRUB', 73.5453),
+('2021-01-19', 'USDRUB', 73.9735),
+('2021-01-20', 'USDRUB', 73.7243),
+('2021-01-21', 'USDRUB', 73.3550),
+('2021-01-22', 'USDRUB', 73.3694),
+('2021-01-23', 'USDRUB', 74.3615);
 /*!40000 ALTER TABLE `foreign_exchange_rate` ENABLE KEYS */;
