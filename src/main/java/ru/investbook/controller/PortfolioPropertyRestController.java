@@ -18,6 +18,9 @@
 
 package ru.investbook.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +40,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/portfolio-properties")
+@Tag(name = "Свойства счета", description = "Информация о брокерском счете")
+@RequestMapping("/api/v1/portfolio-properties")
 public class PortfolioPropertyRestController extends AbstractRestController<Integer, PortfolioProperty, PortfolioPropertyEntity> {
 
     public PortfolioPropertyRestController(JpaRepository<PortfolioPropertyEntity, Integer> repository,
@@ -45,33 +49,42 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
         super(repository, converter);
     }
 
-    @GetMapping
     @Override
+    @GetMapping
+    @Operation(summary = "Отобразить все", description = "Отображает всю имеющуюся информацию обо всех счетах")
     public List<PortfolioPropertyEntity> get() {
         return super.get();
     }
 
-    @GetMapping("{id}")
     @Override
-    public ResponseEntity<PortfolioPropertyEntity> get(@PathVariable("id") Integer id) {
+    @GetMapping("{id}")
+    @Operation(summary = "Отобразить по счету", description = "Отображает всю имеющуюся информацию по одному счету")
+    public ResponseEntity<PortfolioPropertyEntity> get(@PathVariable("id")
+                                                       @Parameter(description = "Номер счета")
+                                                               Integer id) {
         return super.get(id);
     }
 
-    @PostMapping
     @Override
+    @PostMapping
+    @Operation(summary = "Добавить", description = "Добавить информацию о конкретном счете")
     public ResponseEntity<PortfolioPropertyEntity> post(@Valid @RequestBody PortfolioProperty property) {
         return super.post(property);
     }
 
-    @PutMapping("{id}")
     @Override
-    public ResponseEntity<PortfolioPropertyEntity> put(@PathVariable("id") Integer id,
+    @PutMapping("{id}")
+    @Operation(summary = "Обновить", description = "Обновить информацию о счете")
+    public ResponseEntity<PortfolioPropertyEntity> put(@PathVariable("id")
+                                                       @Parameter(description = "Номер счета")
+                                                               Integer id,
                                                        @Valid @RequestBody PortfolioProperty property) {
         return super.put(id, property);
     }
 
-    @DeleteMapping("{id}")
     @Override
+    @DeleteMapping("{id}")
+    @Operation(summary = "Удалить")
     public void delete(@PathVariable("id") Integer id) {
         super.delete(id);
     }

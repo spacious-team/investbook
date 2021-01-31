@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,6 +18,9 @@
 
 package ru.investbook.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,18 +34,23 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/cash-flow-types")
+@Tag(name = "Типы событий")
+@RequestMapping("/api/v1/cash-flow-types")
 public class CashFlowTypeRestController {
 
     private final CashFlowTypeRepository cashFlowTypeRepository;
 
     @GetMapping
+    @Operation(summary = "Отобразить все")
     public Iterable<CashFlowTypeEntity> getCashFlowType() {
         return cashFlowTypeRepository.findAll();
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<CashFlowTypeEntity> getCashFlowType(@PathVariable("id") Integer id) {
+    @Operation(summary = "Отобразить по идентификатору")
+    public ResponseEntity<CashFlowTypeEntity> getCashFlowType(@PathVariable("id")
+                                                              @Parameter(description = "Идентификатор типа")
+                                                                      Integer id) {
         Optional<CashFlowTypeEntity> result = cashFlowTypeRepository.findById(id);
         return result
                 .map(ResponseEntity::ok)

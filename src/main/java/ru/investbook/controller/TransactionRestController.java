@@ -18,6 +18,9 @@
 
 package ru.investbook.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +44,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/transactions")
+@Tag(name = "Сделки", description = "Операции купли/продажи биржевых инструментов")
+@RequestMapping("/api/v1/transactions")
 public class TransactionRestController extends AbstractRestController<TransactionEntityPK, Transaction, TransactionEntity> {
     private final PositionsFactory positionsFactory;
 
@@ -54,6 +58,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
 
     @Override
     @GetMapping
+    @Operation(summary = "Отобразить все", description = "Отображает все сделки по всем счетам")
     protected List<TransactionEntity> get() {
         return super.get();
     }
@@ -62,13 +67,19 @@ public class TransactionRestController extends AbstractRestController<Transactio
      * see {@link AbstractRestController#get(Object)}
      */
     @GetMapping("/portfolios/{portfolio}/ids/{id}")
-    public ResponseEntity<TransactionEntity> get(@PathVariable("portfolio") String portfolio,
-                                                 @PathVariable("id") String id) {
+    @Operation(summary = "Отобразить одну", description = "Отображает сделку с указанными параметрами")
+    public ResponseEntity<TransactionEntity> get(@PathVariable("portfolio")
+                                                 @Parameter(description = "Идентификатор счета брокера")
+                                                         String portfolio,
+                                                 @PathVariable("id")
+                                                 @Parameter(description = "Идентификатор сделки")
+                                                         String id) {
         return super.get(getId(portfolio, id));
     }
 
     @Override
     @PostMapping
+    @Operation(summary = "Добавить", description = "Сохраняет новую сделку в БД")
     public ResponseEntity<TransactionEntity> post(@Valid @RequestBody Transaction object) {
         positionsFactory.invalidateCache();
         return super.post(object);
@@ -78,8 +89,13 @@ public class TransactionRestController extends AbstractRestController<Transactio
      * see {@link AbstractRestController#put(Object, Object)}
      */
     @PutMapping("/portfolios/{portfolio}/ids/{id}")
-    public ResponseEntity<TransactionEntity> put(@PathVariable("portfolio") String portfolio,
-                                                 @PathVariable("id") String id,
+    @Operation(summary = "Обновить параметры", description = "Обновляет праметры указанной сделки")
+    public ResponseEntity<TransactionEntity> put(@PathVariable("portfolio")
+                                                 @Parameter(description = "Идентификатор счета брокера")
+                                                         String portfolio,
+                                                 @PathVariable("id")
+                                                 @Parameter(description = "Идентификатор сделки")
+                                                         String id,
                                                  @Valid @RequestBody Transaction object) {
         positionsFactory.invalidateCache();
         return super.put(getId(portfolio, id), object);
@@ -89,8 +105,13 @@ public class TransactionRestController extends AbstractRestController<Transactio
      * see {@link AbstractRestController#delete(Object)}
      */
     @DeleteMapping("/portfolios/{portfolio}/ids/{id}")
-    public void delete(@PathVariable("portfolio") String portfolio,
-                       @PathVariable("id") String id) {
+    @Operation(summary = "Удалить", description = "Удаляет указанную сделку")
+    public void delete(@PathVariable("portfolio")
+                       @Parameter(description = "Идентификатор счета брокера")
+                               String portfolio,
+                       @PathVariable("id")
+                       @Parameter(description = "Идентификатор сделки")
+                               String id) {
         positionsFactory.invalidateCache();
         super.delete(getId(portfolio, id));
     }

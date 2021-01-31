@@ -18,6 +18,9 @@
 
 package ru.investbook.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.spacious_team.broker.pojo.Issuer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
@@ -37,41 +40,54 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/issuers")
+@Tag(name = "Эмитенты", description = "Информация об эмитентах")
+@RequestMapping("/api/v1/issuers")
 public class IssuerRestController extends AbstractRestController<Long, Issuer, IssuerEntity> {
 
     public IssuerRestController(JpaRepository<IssuerEntity, Long> repository, EntityConverter<IssuerEntity, Issuer> converter) {
         super(repository, converter);
     }
 
-    @GetMapping
     @Override
+    @GetMapping
+    @Operation(summary = "Отобразить всех")
     public List<IssuerEntity> get() {
         return super.get();
     }
 
-    @GetMapping("{inn}")
     @Override
-    public ResponseEntity<IssuerEntity> get(@PathVariable("inn") Long inn) {
+    @GetMapping("{inn}")
+    @Operation(summary = "Отобразить одного", description = "Отобразить информацию по организации по идентификатору налогоплательщика")
+    public ResponseEntity<IssuerEntity> get(@PathVariable("inn")
+                                            @Parameter(description = "Идентификатор налогоплательщика, например ИНН в России")
+                                                    Long inn) {
         return super.get(inn);
     }
 
-    @PostMapping
     @Override
+    @PostMapping
+    @Operation(summary = "Добавить")
     public ResponseEntity<IssuerEntity> post(@Valid @RequestBody Issuer issuer) {
         return super.post(issuer);
     }
 
-    @PutMapping("{inn}")
     @Override
-    public ResponseEntity<IssuerEntity> put(@PathVariable("inn") Long inn,
-                                            @Valid @RequestBody Issuer issuer) {
+    @PutMapping("{inn}")
+    @Operation(summary = "Обновить сведения")
+    public ResponseEntity<IssuerEntity> put(@PathVariable("inn")
+                                            @Parameter(description = "Идентификатор налогоплательщика, например ИНН в России")
+                                                    Long inn,
+                                            @Valid @RequestBody
+                                                    Issuer issuer) {
         return super.put(inn, issuer);
     }
 
-    @DeleteMapping("{inn}")
     @Override
-    public void delete(@PathVariable("inn") Long inn) {
+    @DeleteMapping("{inn}")
+    @Operation(summary = "Удалить", description = "Удаляет сведения об организации из БД")
+    public void delete(@PathVariable("inn")
+                       @Parameter(description = "Идентификатор налогоплательщика, например ИНН в России")
+                               Long inn) {
         super.delete(inn);
     }
 

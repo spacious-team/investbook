@@ -18,6 +18,9 @@
 
 package ru.investbook.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +43,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@Tag(name = "Движение ДС по сделке", description = "Сколько уплачено (выружено) в сделке купли (продажи)")
 @RequestMapping("/transaction-cash-flows")
 public class TransactionCashFlowRestController extends AbstractRestController<TransactionCashFlowEntityPK, TransactionCashFlow, TransactionCashFlowEntity> {
     private final TransactionCashFlowRepository transactionCashFlowRepository;
@@ -50,15 +54,21 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
         this.transactionCashFlowRepository = repository;
     }
 
-    @GetMapping
     @Override
+    @GetMapping
+    @Operation(summary = "Отобразить все", description = "Отобразить информацию обо всех сделках")
     protected List<TransactionCashFlowEntity> get() {
         return super.get();
     }
 
     @GetMapping("/portfolios/{portfolio}/ids/{transaction-id}")
-    protected List<TransactionCashFlowEntity> get(@PathVariable("portfolio") String portfolio,
-                                                  @PathVariable("transaction-id") String transactionId) {
+    @Operation(summary = "Отобразить одну", description = "Отобразить информацию о конкретной сделке")
+    protected List<TransactionCashFlowEntity> get(@PathVariable("portfolio")
+                                                  @Parameter(description = "Номер счета")
+                                                          String portfolio,
+                                                  @PathVariable("transaction-id")
+                                                  @Parameter(description = "Идентификатор сделки")
+                                                          String transactionId) {
         return transactionCashFlowRepository.findByPkPortfolioAndPkTransactionId(portfolio, transactionId);
     }
 
@@ -66,14 +76,23 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
      * see {@link AbstractRestController#get(Object)}
      */
     @GetMapping("/portfolios/{portfolio}/ids/{transaction-id}/events/{event-type}")
-    public ResponseEntity<TransactionCashFlowEntity> get(@PathVariable("portfolio") String portfolio,
-                                                         @PathVariable("transaction-id") String transactionId,
-                                                         @PathVariable("event-type") int eventType) {
+    @Operation(summary = "Отобразить детализацию одной", description = "Отобразить конкретную информацию о конкретной сделке")
+    public ResponseEntity<TransactionCashFlowEntity> get(@PathVariable("portfolio")
+                                                         @Parameter(description = "Номер счета")
+                                                                 String portfolio,
+                                                         @PathVariable("transaction-id")
+                                                         @Parameter(description = "Идентификатор сделки")
+                                                                 String transactionId,
+                                                         @PathVariable("event-type")
+                                                         @Parameter(description = "Тип (стоимость/комиссия/НКД)",
+                                                                 example = "Смотреть API \"Типы событий\"")
+                                                                 int eventType) {
         return super.get(getId(portfolio, transactionId, eventType));
     }
 
-    @PostMapping
     @Override
+    @PostMapping
+    @Operation(summary = "Добавить", description = "Добавить информацию об об объемах движения ДС по сделке")
     public ResponseEntity<TransactionCashFlowEntity> post(@RequestBody TransactionCashFlow object) {
         return super.post(object);
     }
@@ -82,9 +101,17 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
      * see {@link AbstractRestController#put(Object, Object)}
      */
     @PutMapping("/portfolios/{portfolio}/ids/{transaction-id}/events/{event-type}")
-    public ResponseEntity<TransactionCashFlowEntity> put(@PathVariable("portfolio") String portfolio,
-                                                         @PathVariable("transaction-id") String transactionId,
-                                                         @PathVariable("event-type") int eventType,
+    @Operation(summary = "Обновить", description = "Обновить информацию об об объемах движения ДС по сделке")
+    public ResponseEntity<TransactionCashFlowEntity> put(@PathVariable("portfolio")
+                                                         @Parameter(description = "Номер счета")
+                                                                 String portfolio,
+                                                         @PathVariable("transaction-id")
+                                                         @Parameter(description = "Идентификатор сделки")
+                                                                 String transactionId,
+                                                         @PathVariable("event-type")
+                                                         @Parameter(description = "Тип (стоимость/комиссия/НКД)",
+                                                                 example = "Смотреть API \"Типы событий\"")
+                                                                 int eventType,
                                                          @RequestBody TransactionCashFlow object) {
         return super.put(getId(portfolio, transactionId, eventType), object);
     }
@@ -93,9 +120,19 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
      * see {@link AbstractRestController#delete(Object)}
      */
     @DeleteMapping("/portfolios/{portfolio}/ids/{transaction-id}/events/{event-type}")
-    public void delete(@PathVariable("portfolio") String portfolio,
-                       @PathVariable("transaction-id") String transactionId,
-                       @PathVariable("event-type") int eventType) {
+    @Operation(summary = "Удалить", description = """
+            Удалить информацию об об объемах движения ДС по сделке. Сама сделка не удаляется, ее нужно удалить своим API
+            """)
+    public void delete(@PathVariable("portfolio")
+                       @Parameter(description = "Номер счета")
+                               String portfolio,
+                       @PathVariable("transaction-id")
+                       @Parameter(description = "Идентификатор сделки")
+                               String transactionId,
+                       @PathVariable("event-type")
+                       @Parameter(description = "Тип (стоимость/комиссия/НКД)",
+                               example = "Смотреть API \"Типы событий\"")
+                               int eventType) {
         super.delete(getId(portfolio, transactionId, eventType));
     }
 
@@ -129,7 +166,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
     @Override
     protected URI getLocationURI(TransactionCashFlow object) throws URISyntaxException {
         return new URI(getLocation() + "/portfolios/" + object.getPortfolio()
-                + "/ids/"+ object.getTransactionId()
+                + "/ids/" + object.getTransactionId()
                 + "/events/" + object.getEventType().getId());
     }
 

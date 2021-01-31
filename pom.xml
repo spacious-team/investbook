@@ -83,7 +83,7 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>2021.1.1</version>
+            <version>c2221f8507</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
@@ -156,6 +156,11 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.5.2</version>
         </dependency>
         <dependency>
             <groupId>org.decampo</groupId>
