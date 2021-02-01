@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,32 +18,47 @@
 
 package ru.investbook.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.investbook.entity.CashFlowTypeEntity;
+import ru.investbook.converter.CashFlowTypeConverter;
 import ru.investbook.repository.CashFlowTypeRepository;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/cash-flow-types")
+@Tag(name = "Типы событий")
+@RequestMapping("/api/v1/cash-flow-types")
 public class CashFlowTypeRestController {
 
     private final CashFlowTypeRepository cashFlowTypeRepository;
+    private final CashFlowTypeConverter cashFlowTypeConverter;
 
     @GetMapping
-    public Iterable<CashFlowTypeEntity> getCashFlowType() {
-        return cashFlowTypeRepository.findAll();
+    @Operation(summary = "Отобразить все")
+    public Iterable<CashFlowType> getCashFlowType() {
+        return cashFlowTypeRepository.findAll()
+                .stream()
+                .map(cashFlowTypeConverter::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<CashFlowTypeEntity> getCashFlowType(@PathVariable("id") Integer id) {
-        Optional<CashFlowTypeEntity> result = cashFlowTypeRepository.findById(id);
+    @Operation(summary = "Отобразить по идентификатору")
+    public ResponseEntity<CashFlowType> getCashFlowType(@PathVariable("id")
+                                                        @Parameter(description = "Идентификатор типа")
+                                                                Integer id) {
+        Optional<CashFlowType> result = cashFlowTypeRepository.findById(id)
+                .map(cashFlowTypeConverter::fromEntity);
         return result
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());

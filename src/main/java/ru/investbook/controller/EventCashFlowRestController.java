@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,6 +18,9 @@
 
 package ru.investbook.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +40,10 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/event-cash-flows")
+@Tag(name = "Движения ДС по счету", description = """
+        Ввод, вывод ДС, налоги, комиссии, а также дивиденды, купоны, амортизации по бумагам другого счета
+        """)
+@RequestMapping("/api/v1/event-cash-flows")
 public class EventCashFlowRestController extends AbstractRestController<Integer, EventCashFlow, EventCashFlowEntity> {
 
     public EventCashFlowRestController(JpaRepository<EventCashFlowEntity, Integer> repository,
@@ -45,34 +51,45 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
         super(repository, converter);
     }
 
-    @GetMapping
     @Override
-    public List<EventCashFlowEntity> get() {
+    @GetMapping
+    @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам")
+    public List<EventCashFlow> get() {
         return super.get();
     }
 
-    @GetMapping("{id}")
     @Override
-    public ResponseEntity<EventCashFlowEntity> get(@PathVariable("id") Integer id) {
+    @GetMapping("{id}")
+    @Operation(summary = "Отобразить одну", description = "Отобразить выплату по идентификатору")
+    public ResponseEntity<EventCashFlow> get(@PathVariable("id")
+                                             @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                                                     Integer id) {
         return super.get(id);
     }
 
-    @PostMapping
     @Override
-    public ResponseEntity<EventCashFlowEntity> post(@Valid @RequestBody EventCashFlow event) {
+    @PostMapping
+    @Operation(summary = "Добавить", description = "Сохранить информацию о выплате в БД")
+    public ResponseEntity<Void> post(@Valid @RequestBody EventCashFlow event) {
         return super.post(event);
     }
 
-    @PutMapping("{id}")
     @Override
-    public ResponseEntity<EventCashFlowEntity> put(@PathVariable("id") Integer id,
-                                                   @Valid @RequestBody EventCashFlow event) {
+    @PutMapping("{id}")
+    @Operation(summary = "Изменить", description = "Модифицировать информацию о выплате в БД")
+    public ResponseEntity<Void> put(@PathVariable("id")
+                                    @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                                            Integer id,
+                                    @Valid @RequestBody EventCashFlow event) {
         return super.put(id, event);
     }
 
-    @DeleteMapping("{id}")
     @Override
-    public void delete(@PathVariable("id") Integer id) {
+    @DeleteMapping("{id}")
+    @Operation(summary = "Удалить", description = "Удалить информацию о выплате из БД")
+    public void delete(@PathVariable("id")
+                       @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                               Integer id) {
         super.delete(id);
     }
 

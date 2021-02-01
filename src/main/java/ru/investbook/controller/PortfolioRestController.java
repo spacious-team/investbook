@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,6 +18,9 @@
 
 package ru.investbook.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.entity.PortfolioEntity;
@@ -36,6 +40,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@Tag(name = "Счета", description = "Список счетов")
+@RequestMapping("/api/v1/portfolios")
 public class PortfolioRestController extends AbstractRestController<String, Portfolio, PortfolioEntity> {
     private final PortfolioRepository repository;
 
@@ -44,34 +50,45 @@ public class PortfolioRestController extends AbstractRestController<String, Port
         this.repository = repository;
     }
 
-    @GetMapping("/portfolios")
     @Override
-    public List<PortfolioEntity> get() {
+    @GetMapping
+    @Operation(summary = "Отобразить все")
+    public List<Portfolio> get() {
         return super.get();
     }
 
-    @GetMapping("/portfolios/{id}")
     @Override
-    public ResponseEntity<PortfolioEntity> get(@PathVariable("id") String id) {
+    @GetMapping("{id}")
+    @Operation(summary = "Отобразить один")
+    public ResponseEntity<Portfolio> get(@PathVariable("id")
+                                         @Parameter(description = "Номер счета")
+                                                 String id) {
         return super.get(id);
     }
 
-    @PostMapping("/portfolios")
     @Override
-    public ResponseEntity<PortfolioEntity> post(@Valid @RequestBody Portfolio object) {
+    @PostMapping
+    @Operation(summary = "Добавить")
+    public ResponseEntity<Void> post(@Valid @RequestBody Portfolio object) {
         return super.post(object);
     }
 
-    @PutMapping("/portfolios/{id}")
     @Override
-    public ResponseEntity<PortfolioEntity> put(@PathVariable("id") String id,
-                                                  @Valid @RequestBody Portfolio object) {
+    @PutMapping("{id}")
+    @Operation(summary = "Добавить")
+    public ResponseEntity<Void> put(@PathVariable("id")
+                                    @Parameter(description = "Номер счета")
+                                            String id,
+                                    @Valid @RequestBody Portfolio object) {
         return super.put(id, object);
     }
 
-    @DeleteMapping("/portfolios/{id}")
     @Override
-    public void delete(@PathVariable("id") String id) {
+    @DeleteMapping("{id}")
+    @Operation(summary = "Удалить", description = "Удалить счет и все связанные с ним данные")
+    public void delete(@PathVariable("id")
+                       @Parameter(description = "Номер счета")
+                               String id) {
         super.delete(id);
     }
 

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,6 +18,9 @@
 
 package ru.investbook.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +40,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/security-quotes")
+@Tag(name = "Котировки", description = "Котировки биржевых инструментов")
+@RequestMapping("/api/v1/security-quotes")
 public class SecurityQuoteRestController extends AbstractRestController<Integer, SecurityQuote, SecurityQuoteEntity> {
 
     public SecurityQuoteRestController(JpaRepository<SecurityQuoteEntity, Integer> repository,
@@ -45,34 +49,46 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
         super(repository, converter);
     }
 
-    @GetMapping
     @Override
-    public List<SecurityQuoteEntity> get() {
+    @GetMapping
+    @Operation(summary = "Отобразить все", description = "Отобразить всю историю котировок по всем инструментам")
+    public List<SecurityQuote> get() {
         return super.get();
     }
 
-    @GetMapping("{id}")
+
     @Override
-    public ResponseEntity<SecurityQuoteEntity> get(@PathVariable("id") Integer id) {
+    @GetMapping("{id}")
+    @Operation(summary = "Отобразить одну", description = "Отобразить котировку по номеру записи в БД")
+    public ResponseEntity<SecurityQuote> get(@PathVariable("id")
+                                             @Parameter(description = "Номер записи о котировке")
+                                                     Integer id) {
         return super.get(id);
     }
 
-    @PostMapping
     @Override
-    public ResponseEntity<SecurityQuoteEntity> post(@Valid @RequestBody SecurityQuote quote) {
+    @PostMapping
+    @Operation(summary = "Добавить")
+    public ResponseEntity<Void> post(@Valid @RequestBody SecurityQuote quote) {
         return super.post(quote);
     }
 
-    @PutMapping("{id}")
     @Override
-    public ResponseEntity<SecurityQuoteEntity> put(@PathVariable("id") Integer id,
-                                                   @Valid @RequestBody SecurityQuote quote) {
+    @PutMapping("{id}")
+    @Operation(summary = "Изменить")
+    public ResponseEntity<Void> put(@PathVariable("id")
+                                    @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                                            Integer id,
+                                    @Valid @RequestBody SecurityQuote quote) {
         return super.put(id, quote);
     }
 
-    @DeleteMapping("{id}")
     @Override
-    public void delete(@PathVariable("id") Integer id) {
+    @DeleteMapping("{id}")
+    @Operation(summary = "Удалить")
+    public void delete(@PathVariable("id")
+                       @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                               Integer id) {
         super.delete(id);
     }
 

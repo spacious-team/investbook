@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,6 +18,9 @@
 
 package ru.investbook.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.spacious_team.broker.pojo.Security;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,7 +40,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/securities")
+@Tag(name = "Инструменты", description = "Акции, облигации, деривативы и валютные пары")
+@RequestMapping("/api/v1/securities")
 public class SecurityRestController extends AbstractRestController<String, Security, SecurityEntity> {
     private final SecurityRepository repository;
 
@@ -46,33 +50,48 @@ public class SecurityRestController extends AbstractRestController<String, Secur
         this.repository = repository;
     }
 
-    @GetMapping
     @Override
-    public List<SecurityEntity> get() {
+    @GetMapping
+    @Operation(summary = "Отобразить все", description = "Отобразить все биржевые инструменты")
+    public List<Security> get() {
         return super.get();
     }
 
-    @GetMapping("{id}")
+
     @Override
-    public ResponseEntity<SecurityEntity> get(@PathVariable("id") String id) {
+    @GetMapping("{id}")
+    @Operation(summary = "Отобразить один",
+            description = "Отобразить биржевой инструмент по идентификатору (ISIN,  коду дериватива, вылютной пары)")
+    public ResponseEntity<Security> get(@PathVariable("id")
+                                        @Parameter(description = "Идентификатор", example = "ISIN, BR-2.21, USDRUB_TOM")
+                                                String id) {
         return super.get(id);
     }
 
-    @PostMapping
+
     @Override
-    public ResponseEntity<SecurityEntity> post(@Valid @RequestBody Security security) {
+    @PostMapping
+    @Operation(summary = "Добавить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре")
+    public ResponseEntity<Void> post(@Valid @RequestBody Security security) {
         return super.post(security);
     }
 
-    @PutMapping("{id}")
     @Override
-    public ResponseEntity<SecurityEntity> put(@PathVariable("id") String id, @Valid @RequestBody Security security) {
+    @PutMapping("{id}")
+    @Operation(summary = "Обновить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре")
+    public ResponseEntity<Void> put(@PathVariable("id")
+                                    @Parameter(description = "Идентификатор", example = "ISIN, BR-2.21, USDRUB_TOM")
+                                            String id,
+                                    @Valid @RequestBody Security security) {
         return super.put(id, security);
     }
 
-    @DeleteMapping("{id}")
     @Override
-    public void delete(@PathVariable("id") String id) {
+    @DeleteMapping("{id}")
+    @Operation(summary = "Удалить", description = "Сведения о биржевом инструменте и всех его сделках по всем счетам")
+    public void delete(@PathVariable("id")
+                       @Parameter(description = "Идентификатор", example = "ISIN, BR-2.21, USDRUB_TOM")
+                               String id) {
         super.delete(id);
     }
 
