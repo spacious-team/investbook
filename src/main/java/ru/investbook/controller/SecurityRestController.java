@@ -40,8 +40,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@Tag(name = "Биржевые инструменты", description = "Информация об акциях, облигациях, деривативах и валютных парах")
-@RequestMapping("/securities")
+@Tag(name = "Инструменты", description = "Акции, облигации, деривативы и валютные пары")
+@RequestMapping("/api/v1/securities")
 public class SecurityRestController extends AbstractRestController<String, Security, SecurityEntity> {
     private final SecurityRepository repository;
 
@@ -53,7 +53,7 @@ public class SecurityRestController extends AbstractRestController<String, Secur
     @Override
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отобразить все биржевые инструменты")
-    public List<SecurityEntity> get() {
+    public List<Security> get() {
         return super.get();
     }
 
@@ -62,9 +62,9 @@ public class SecurityRestController extends AbstractRestController<String, Secur
     @GetMapping("{id}")
     @Operation(summary = "Отобразить один",
             description = "Отобразить биржевой инструмент по идентификатору (ISIN,  коду дериватива, вылютной пары)")
-    public ResponseEntity<SecurityEntity> get(@PathVariable("id")
-                                              @Parameter(description = "Идентификатор", example = "ISIN, BR-2.21, USDRUB_TOM")
-                                                      String id) {
+    public ResponseEntity<Security> get(@PathVariable("id")
+                                        @Parameter(description = "Идентификатор", example = "ISIN, BR-2.21, USDRUB_TOM")
+                                                String id) {
         return super.get(id);
     }
 
@@ -72,17 +72,17 @@ public class SecurityRestController extends AbstractRestController<String, Secur
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре")
-    public ResponseEntity<SecurityEntity> post(@Valid @RequestBody Security security) {
+    public ResponseEntity<Void> post(@Valid @RequestBody Security security) {
         return super.post(security);
     }
 
     @Override
     @PutMapping("{id}")
     @Operation(summary = "Обновить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре")
-    public ResponseEntity<SecurityEntity> put(@PathVariable("id")
-                                              @Parameter(description = "Идентификатор", example = "ISIN, BR-2.21, USDRUB_TOM")
-                                                      String id,
-                                              @Valid @RequestBody Security security) {
+    public ResponseEntity<Void> put(@PathVariable("id")
+                                    @Parameter(description = "Идентификатор", example = "ISIN, BR-2.21, USDRUB_TOM")
+                                            String id,
+                                    @Valid @RequestBody Security security) {
         return super.put(id, security);
     }
 

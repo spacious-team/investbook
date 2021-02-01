@@ -59,7 +59,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
     @Override
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отображает все сделки по всем счетам")
-    protected List<TransactionEntity> get() {
+    protected List<Transaction> get() {
         return super.get();
     }
 
@@ -68,19 +68,19 @@ public class TransactionRestController extends AbstractRestController<Transactio
      */
     @GetMapping("/portfolios/{portfolio}/ids/{id}")
     @Operation(summary = "Отобразить одну", description = "Отображает сделку с указанными параметрами")
-    public ResponseEntity<TransactionEntity> get(@PathVariable("portfolio")
-                                                 @Parameter(description = "Идентификатор счета брокера")
-                                                         String portfolio,
-                                                 @PathVariable("id")
-                                                 @Parameter(description = "Идентификатор сделки")
-                                                         String id) {
+    public ResponseEntity<Transaction> get(@PathVariable("portfolio")
+                                           @Parameter(description = "Идентификатор счета брокера")
+                                                   String portfolio,
+                                           @PathVariable("id")
+                                           @Parameter(description = "Идентификатор сделки")
+                                                   String id) {
         return super.get(getId(portfolio, id));
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Сохраняет новую сделку в БД")
-    public ResponseEntity<TransactionEntity> post(@Valid @RequestBody Transaction object) {
+    public ResponseEntity<Void> post(@Valid @RequestBody Transaction object) {
         positionsFactory.invalidateCache();
         return super.post(object);
     }
@@ -90,13 +90,13 @@ public class TransactionRestController extends AbstractRestController<Transactio
      */
     @PutMapping("/portfolios/{portfolio}/ids/{id}")
     @Operation(summary = "Обновить параметры", description = "Обновляет праметры указанной сделки")
-    public ResponseEntity<TransactionEntity> put(@PathVariable("portfolio")
-                                                 @Parameter(description = "Идентификатор счета брокера")
-                                                         String portfolio,
-                                                 @PathVariable("id")
-                                                 @Parameter(description = "Идентификатор сделки")
-                                                         String id,
-                                                 @Valid @RequestBody Transaction object) {
+    public ResponseEntity<Void> put(@PathVariable("portfolio")
+                                    @Parameter(description = "Идентификатор счета брокера")
+                                            String portfolio,
+                                    @PathVariable("id")
+                                    @Parameter(description = "Идентификатор сделки")
+                                            String id,
+                                    @Valid @RequestBody Transaction object) {
         positionsFactory.invalidateCache();
         return super.put(getId(portfolio, id), object);
     }

@@ -53,33 +53,33 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @Override
     @GetMapping
     @Operation(summary = "Отобразить все")
-    public List<PortfolioEntity> get() {
+    public List<Portfolio> get() {
         return super.get();
     }
 
     @Override
     @GetMapping("{id}")
     @Operation(summary = "Отобразить один")
-    public ResponseEntity<PortfolioEntity> get(@PathVariable("id")
-                                               @Parameter(description = "Номер счета")
-                                                       String id) {
+    public ResponseEntity<Portfolio> get(@PathVariable("id")
+                                         @Parameter(description = "Номер счета")
+                                                 String id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить")
-    public ResponseEntity<PortfolioEntity> post(@Valid @RequestBody Portfolio object) {
+    public ResponseEntity<Void> post(@Valid @RequestBody Portfolio object) {
         return super.post(object);
     }
 
     @Override
     @PutMapping("{id}")
     @Operation(summary = "Добавить")
-    public ResponseEntity<PortfolioEntity> put(@PathVariable("id")
-                                               @Parameter(description = "Номер счета")
-                                                       String id,
-                                               @Valid @RequestBody Portfolio object) {
+    public ResponseEntity<Void> put(@PathVariable("id")
+                                    @Parameter(description = "Номер счета")
+                                            String id,
+                                    @Valid @RequestBody Portfolio object) {
         return super.put(id, object);
     }
 

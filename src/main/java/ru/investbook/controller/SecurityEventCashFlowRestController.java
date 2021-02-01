@@ -43,10 +43,8 @@ import java.util.Optional;
 import static org.spacious_team.broker.pojo.CashFlowType.REDEMPTION;
 
 @RestController
-@Tag(name = "Выплаты по биржевым инструментам", description = """
-        Дивиденды, купоны, амортизации, вариационная маржа, комиссии, налоги и другие выплаты
-        с привязкой к инструменту с известным идентицикаторов (например ISIN).
-        Если идентификатор инструмента не известен, используйте другой раздел API.
+@Tag(name = "События по бумаге", description = """
+        Дивиденды, купоны, амортизации, вариационная маржа, комиссии, налоги
         """)
 @RequestMapping("/api/v1/security-event-cash-flows")
 public class SecurityEventCashFlowRestController extends AbstractRestController<Integer, SecurityEventCashFlow, SecurityEventCashFlowEntity> {
@@ -62,23 +60,23 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @Override
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам")
-    public List<SecurityEventCashFlowEntity> get() {
+    public List<SecurityEventCashFlow> get() {
         return super.get();
     }
 
     @Override
     @GetMapping("{id}")
     @Operation(summary = "Отобразить одну", description = "Отобразить выплату по идентификатору")
-    public ResponseEntity<SecurityEventCashFlowEntity> get(@PathVariable("id")
-                                                           @Parameter(description = "Внутренний идентификатор выплаты в БД")
-                                                                   Integer id) {
+    public ResponseEntity<SecurityEventCashFlow> get(@PathVariable("id")
+                                                     @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                                                             Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Сохранить информацию о выплате в БД")
-    public ResponseEntity<SecurityEventCashFlowEntity> post(@Valid @RequestBody SecurityEventCashFlow event) {
+    public ResponseEntity<Void> post(@Valid @RequestBody SecurityEventCashFlow event) {
         if (event.getEventType() == REDEMPTION) positionsFactory.invalidateCache();
         return super.post(event);
     }
@@ -86,10 +84,10 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @Override
     @PutMapping("{id}")
     @Operation(summary = "Изменить", description = "Модифицировать информацию о выплате в БД")
-    public ResponseEntity<SecurityEventCashFlowEntity> put(@PathVariable("id")
-                                                           @Parameter(description = "Внутренний идентификатор выплаты в БД")
-                                                                   Integer id,
-                                                           @Valid @RequestBody SecurityEventCashFlow event) {
+    public ResponseEntity<Void> put(@PathVariable("id")
+                                    @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                                            Integer id,
+                                    @Valid @RequestBody SecurityEventCashFlow event) {
         if (event.getEventType() == REDEMPTION) positionsFactory.invalidateCache();
         return super.put(id, event);
     }

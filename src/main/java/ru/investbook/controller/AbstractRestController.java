@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -28,22 +28,27 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public abstract class AbstractRestController<ID, Pojo, Entity> {
     protected final JpaRepository<Entity, ID> repository;
-    private final EntityConverter<Entity, Pojo> converter;
+    protected final EntityConverter<Entity, Pojo> converter;
 
-    protected List<Entity> get() {
-        return repository.findAll();
+    protected List<Pojo> get() {
+        return repository.findAll()
+                .stream()
+                .map(converter::fromEntity)
+                .collect(Collectors.toList());
     }
 
     /**
      * Get the entity.
      * If entity not exists NOT_FOUND http status will be returned.
      */
-    public ResponseEntity<Entity> get(ID id) {
+    public ResponseEntity<Pojo> get(ID id) {
         return getById(id)
+                .map(converter::fromEntity)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -56,7 +61,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
      * If entity already exists CONFLICT http status and Location header was returned.
      * @param object new entity (ID may not be provided if it AUTOINCREMENT)
      */
-    protected ResponseEntity<Entity> post(Pojo object) {
+    protected ResponseEntity<Void> post(Pojo object) {
         try {
             ID id = getId(object);
             if (id == null) {
@@ -86,7 +91,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
      * @param object new version of entity
      * @throws URISyntaxException
      */
-    public ResponseEntity<Entity> put(ID id, Pojo object) {
+    public ResponseEntity<Void> put(ID id, Pojo object) {
         try {
             object = (getId(object) != null) ? object : updateId(id, object);
             if (!getId(object).equals(id)) {
@@ -95,7 +100,8 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
             }
             Optional<Entity> result = getById(id);
             if (result.isPresent()) {
-                return ResponseEntity.ok(saveAndFlush(object));
+                saveAndFlush(object);
+                return ResponseEntity.ok().build();
             } else {
                 return createEntity(object);
             }
@@ -113,11 +119,11 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
     /**
      * @return response entity with http CREATE status, Location http header and body
      */
-    private ResponseEntity<Entity> createEntity(Pojo object) throws URISyntaxException {
+    private ResponseEntity<Void> createEntity(Pojo object) throws URISyntaxException {
         Entity entity = saveAndFlush(object);
         return ResponseEntity
                 .created(getLocationURI(converter.fromEntity(entity)))
-                .body(entity);
+                .build();
     }
 
     protected URI getLocationURI(Pojo object) throws URISyntaxException {

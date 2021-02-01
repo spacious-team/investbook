@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@Tag(name = "Свойства счета", description = "Информация о брокерском счете")
+@Tag(name = "Свойства счетов", description = "Информация о брокерских счетах")
 @RequestMapping("/api/v1/portfolio-properties")
 public class PortfolioPropertyRestController extends AbstractRestController<Integer, PortfolioProperty, PortfolioPropertyEntity> {
 
@@ -52,40 +52,42 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @Override
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отображает всю имеющуюся информацию обо всех счетах")
-    public List<PortfolioPropertyEntity> get() {
+    public List<PortfolioProperty> get() {
         return super.get();
     }
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить по счету", description = "Отображает всю имеющуюся информацию по одному счету")
-    public ResponseEntity<PortfolioPropertyEntity> get(@PathVariable("id")
-                                                       @Parameter(description = "Номер счета")
-                                                               Integer id) {
+    @Operation(summary = "Отобразить один", description = "Отображает информацию по идентификатору")
+    public ResponseEntity<PortfolioProperty> get(@PathVariable("id")
+                                                 @Parameter(description = "Внутренний идентификатор записи")
+                                                         Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Добавить информацию о конкретном счете")
-    public ResponseEntity<PortfolioPropertyEntity> post(@Valid @RequestBody PortfolioProperty property) {
+    public ResponseEntity<Void> post(@Valid @RequestBody PortfolioProperty property) {
         return super.post(property);
     }
 
     @Override
     @PutMapping("{id}")
     @Operation(summary = "Обновить", description = "Обновить информацию о счете")
-    public ResponseEntity<PortfolioPropertyEntity> put(@PathVariable("id")
-                                                       @Parameter(description = "Номер счета")
-                                                               Integer id,
-                                                       @Valid @RequestBody PortfolioProperty property) {
+    public ResponseEntity<Void> put(@PathVariable("id")
+                                    @Parameter(description = "Внутренний идентификатор записи")
+                                            Integer id,
+                                    @Valid @RequestBody PortfolioProperty property) {
         return super.put(id, property);
     }
 
     @Override
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить")
-    public void delete(@PathVariable("id") Integer id) {
+    public void delete(@PathVariable("id")
+                       @Parameter(description = "Внутренний идентификатор записи")
+                               Integer id) {
         super.delete(id);
     }
 

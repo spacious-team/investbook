@@ -40,11 +40,9 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@Tag(name = "Движение ДС", description = """
-            Налоги, комиссии, а также дивиденды, купоны, амортизации по бумагам, 
-            идентификатор инструмента (например ISIN) которых не известен.
-            Если идентификатор инструмента известен, используйте другой раздел API.
-            """)
+@Tag(name = "Движения ДС по счету", description = """
+        Ввод, вывод ДС, налоги, комиссии, а также дивиденды, купоны, амортизации по бумагам другого счета
+        """)
 @RequestMapping("/api/v1/event-cash-flows")
 public class EventCashFlowRestController extends AbstractRestController<Integer, EventCashFlow, EventCashFlowEntity> {
 
@@ -56,38 +54,42 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     @Override
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам")
-    public List<EventCashFlowEntity> get() {
+    public List<EventCashFlow> get() {
         return super.get();
     }
 
     @Override
     @GetMapping("{id}")
     @Operation(summary = "Отобразить одну", description = "Отобразить выплату по идентификатору")
-    public ResponseEntity<EventCashFlowEntity> get(@PathVariable("id")
-                                                   @Parameter(description = "Внутренний идентификатор выплаты в БД")
-                                                           Integer id) {
+    public ResponseEntity<EventCashFlow> get(@PathVariable("id")
+                                             @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                                                     Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Сохранить информацию о выплате в БД")
-    public ResponseEntity<EventCashFlowEntity> post(@Valid @RequestBody EventCashFlow event) {
+    public ResponseEntity<Void> post(@Valid @RequestBody EventCashFlow event) {
         return super.post(event);
     }
 
     @Override
     @PutMapping("{id}")
     @Operation(summary = "Изменить", description = "Модифицировать информацию о выплате в БД")
-    public ResponseEntity<EventCashFlowEntity> put(@PathVariable("id") Integer id,
-                                                   @Valid @RequestBody EventCashFlow event) {
+    public ResponseEntity<Void> put(@PathVariable("id")
+                                    @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                                            Integer id,
+                                    @Valid @RequestBody EventCashFlow event) {
         return super.put(id, event);
     }
 
     @Override
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = "Удалить информацию о выплате из БД")
-    public void delete(@PathVariable("id") Integer id) {
+    public void delete(@PathVariable("id")
+                       @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                               Integer id) {
         super.delete(id);
     }
 

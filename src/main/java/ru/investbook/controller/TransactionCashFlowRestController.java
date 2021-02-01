@@ -41,10 +41,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
-@Tag(name = "Движение ДС по сделке", description = "Сколько уплачено (выружено) в сделке купли (продажи)")
-@RequestMapping("/transaction-cash-flows")
+@Tag(name = "Движения ДС по сделкам", description = "Уплаченные и вырученные суммы в сделках")
+@RequestMapping("/api/v1/transaction-cash-flows")
 public class TransactionCashFlowRestController extends AbstractRestController<TransactionCashFlowEntityPK, TransactionCashFlow, TransactionCashFlowEntity> {
     private final TransactionCashFlowRepository transactionCashFlowRepository;
 
@@ -57,19 +58,22 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
     @Override
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отобразить информацию обо всех сделках")
-    protected List<TransactionCashFlowEntity> get() {
+    protected List<TransactionCashFlow> get() {
         return super.get();
     }
 
     @GetMapping("/portfolios/{portfolio}/ids/{transaction-id}")
     @Operation(summary = "Отобразить одну", description = "Отобразить информацию о конкретной сделке")
-    protected List<TransactionCashFlowEntity> get(@PathVariable("portfolio")
-                                                  @Parameter(description = "Номер счета")
-                                                          String portfolio,
-                                                  @PathVariable("transaction-id")
-                                                  @Parameter(description = "Идентификатор сделки")
-                                                          String transactionId) {
-        return transactionCashFlowRepository.findByPkPortfolioAndPkTransactionId(portfolio, transactionId);
+    protected List<TransactionCashFlow> get(@PathVariable("portfolio")
+                                            @Parameter(description = "Номер счета")
+                                                    String portfolio,
+                                            @PathVariable("transaction-id")
+                                            @Parameter(description = "Идентификатор сделки")
+                                                    String transactionId) {
+        return transactionCashFlowRepository.findByPkPortfolioAndPkTransactionId(portfolio, transactionId)
+                .stream()
+                .map(converter::fromEntity)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -77,23 +81,22 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
      */
     @GetMapping("/portfolios/{portfolio}/ids/{transaction-id}/events/{event-type}")
     @Operation(summary = "Отобразить детализацию одной", description = "Отобразить конкретную информацию о конкретной сделке")
-    public ResponseEntity<TransactionCashFlowEntity> get(@PathVariable("portfolio")
-                                                         @Parameter(description = "Номер счета")
-                                                                 String portfolio,
-                                                         @PathVariable("transaction-id")
-                                                         @Parameter(description = "Идентификатор сделки")
-                                                                 String transactionId,
-                                                         @PathVariable("event-type")
-                                                         @Parameter(description = "Тип (стоимость/комиссия/НКД)",
-                                                                 example = "Смотреть API \"Типы событий\"")
-                                                                 int eventType) {
+    public ResponseEntity<TransactionCashFlow> get(@PathVariable("portfolio")
+                                                   @Parameter(description = "Номер счета")
+                                                           String portfolio,
+                                                   @PathVariable("transaction-id")
+                                                   @Parameter(description = "Идентификатор сделки")
+                                                           String transactionId,
+                                                   @PathVariable("event-type")
+                                                   @Parameter(description = "Тип (стоимость/комиссия/НКД)", example = "Смотреть API \"Типы событий\"")
+                                                           int eventType) {
         return super.get(getId(portfolio, transactionId, eventType));
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Добавить информацию об об объемах движения ДС по сделке")
-    public ResponseEntity<TransactionCashFlowEntity> post(@RequestBody TransactionCashFlow object) {
+    public ResponseEntity<Void> post(@RequestBody TransactionCashFlow object) {
         return super.post(object);
     }
 
@@ -102,17 +105,16 @@ public class TransactionCashFlowRestController extends AbstractRestController<Tr
      */
     @PutMapping("/portfolios/{portfolio}/ids/{transaction-id}/events/{event-type}")
     @Operation(summary = "Обновить", description = "Обновить информацию об об объемах движения ДС по сделке")
-    public ResponseEntity<TransactionCashFlowEntity> put(@PathVariable("portfolio")
-                                                         @Parameter(description = "Номер счета")
-                                                                 String portfolio,
-                                                         @PathVariable("transaction-id")
-                                                         @Parameter(description = "Идентификатор сделки")
-                                                                 String transactionId,
-                                                         @PathVariable("event-type")
-                                                         @Parameter(description = "Тип (стоимость/комиссия/НКД)",
-                                                                 example = "Смотреть API \"Типы событий\"")
-                                                                 int eventType,
-                                                         @RequestBody TransactionCashFlow object) {
+    public ResponseEntity<Void> put(@PathVariable("portfolio")
+                                    @Parameter(description = "Номер счета")
+                                            String portfolio,
+                                    @PathVariable("transaction-id")
+                                    @Parameter(description = "Идентификатор сделки")
+                                            String transactionId,
+                                    @PathVariable("event-type")
+                                    @Parameter(description = "Тип (стоимость/комиссия/НКД)", example = "Смотреть API \"Типы событий\"")
+                                            int eventType,
+                                    @RequestBody TransactionCashFlow object) {
         return super.put(getId(portfolio, transactionId, eventType), object);
     }
 

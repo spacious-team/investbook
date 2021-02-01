@@ -51,34 +51,34 @@ public class IssuerRestController extends AbstractRestController<Long, Issuer, I
     @Override
     @GetMapping
     @Operation(summary = "Отобразить всех")
-    public List<IssuerEntity> get() {
+    public List<Issuer> get() {
         return super.get();
     }
 
     @Override
     @GetMapping("{inn}")
     @Operation(summary = "Отобразить одного", description = "Отобразить информацию по организации по идентификатору налогоплательщика")
-    public ResponseEntity<IssuerEntity> get(@PathVariable("inn")
-                                            @Parameter(description = "Идентификатор налогоплательщика, например ИНН в России")
-                                                    Long inn) {
+    public ResponseEntity<Issuer> get(@PathVariable("inn")
+                                      @Parameter(description = "Идентификатор налогоплательщика, например ИНН в России")
+                                              Long inn) {
         return super.get(inn);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить")
-    public ResponseEntity<IssuerEntity> post(@Valid @RequestBody Issuer issuer) {
+    public ResponseEntity<Void> post(@Valid @RequestBody Issuer issuer) {
         return super.post(issuer);
     }
 
     @Override
     @PutMapping("{inn}")
     @Operation(summary = "Обновить сведения")
-    public ResponseEntity<IssuerEntity> put(@PathVariable("inn")
-                                            @Parameter(description = "Идентификатор налогоплательщика, например ИНН в России")
-                                                    Long inn,
-                                            @Valid @RequestBody
-                                                    Issuer issuer) {
+    public ResponseEntity<Void> put(@PathVariable("inn")
+                                    @Parameter(description = "Идентификатор налогоплательщика, например ИНН в России")
+                                            Long inn,
+                                    @Valid @RequestBody
+                                            Issuer issuer) {
         return super.put(inn, issuer);
     }
 

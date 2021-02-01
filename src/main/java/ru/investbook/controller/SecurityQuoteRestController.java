@@ -41,7 +41,7 @@ import java.util.Optional;
 
 @RestController
 @Tag(name = "Котировки", description = "Котировки биржевых инструментов")
-@RequestMapping("/security-quotes")
+@RequestMapping("/api/v1/security-quotes")
 public class SecurityQuoteRestController extends AbstractRestController<Integer, SecurityQuote, SecurityQuoteEntity> {
 
     public SecurityQuoteRestController(JpaRepository<SecurityQuoteEntity, Integer> repository,
@@ -52,7 +52,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @Override
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отобразить всю историю котировок по всем инструментам")
-    public List<SecurityQuoteEntity> get() {
+    public List<SecurityQuote> get() {
         return super.get();
     }
 
@@ -60,26 +60,26 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @Override
     @GetMapping("{id}")
     @Operation(summary = "Отобразить одну", description = "Отобразить котировку по номеру записи в БД")
-    public ResponseEntity<SecurityQuoteEntity> get(@PathVariable("id")
-                                                   @Parameter(description = "Номер записи о котировке")
-                                                           Integer id) {
+    public ResponseEntity<SecurityQuote> get(@PathVariable("id")
+                                             @Parameter(description = "Номер записи о котировке")
+                                                     Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить")
-    public ResponseEntity<SecurityQuoteEntity> post(@Valid @RequestBody SecurityQuote quote) {
+    public ResponseEntity<Void> post(@Valid @RequestBody SecurityQuote quote) {
         return super.post(quote);
     }
 
     @Override
     @PutMapping("{id}")
     @Operation(summary = "Изменить")
-    public ResponseEntity<SecurityQuoteEntity> put(@PathVariable("id")
-                                                   @Parameter(description = "Внутренний идентификатор выплаты в БД")
-                                                           Integer id,
-                                                   @Valid @RequestBody SecurityQuote quote) {
+    public ResponseEntity<Void> put(@PathVariable("id")
+                                    @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                                            Integer id,
+                                    @Valid @RequestBody SecurityQuote quote) {
         return super.put(id, quote);
     }
 
