@@ -41,15 +41,15 @@ import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import ru.investbook.controller.EventCashFlowRestController;
-import ru.investbook.controller.ForeignExchangeRateRestController;
-import ru.investbook.controller.PortfolioPropertyRestController;
-import ru.investbook.controller.PortfolioRestController;
-import ru.investbook.controller.SecurityEventCashFlowRestController;
-import ru.investbook.controller.SecurityQuoteRestController;
-import ru.investbook.controller.SecurityRestController;
-import ru.investbook.controller.TransactionCashFlowRestController;
-import ru.investbook.controller.TransactionRestController;
+import ru.investbook.api.EventCashFlowRestController;
+import ru.investbook.api.ForeignExchangeRateRestController;
+import ru.investbook.api.PortfolioPropertyRestController;
+import ru.investbook.api.PortfolioRestController;
+import ru.investbook.api.SecurityEventCashFlowRestController;
+import ru.investbook.api.SecurityQuoteRestController;
+import ru.investbook.api.SecurityRestController;
+import ru.investbook.api.TransactionCashFlowRestController;
+import ru.investbook.api.TransactionRestController;
 
 import java.util.function.Supplier;
 

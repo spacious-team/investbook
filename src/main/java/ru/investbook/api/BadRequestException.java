@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.controller;
+package ru.investbook.api;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-public class InternalServerErrorException extends IllegalArgumentException {
-    public InternalServerErrorException(String s, Throwable t) {
-        super(s, t);
+@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+public class BadRequestException extends IllegalArgumentException {
+    public BadRequestException(String s) {
+        super(s);
     }
 }

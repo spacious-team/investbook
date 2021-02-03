@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.controller;
+package ru.investbook.api;
 
 import org.springdoc.core.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
