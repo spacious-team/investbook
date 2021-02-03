@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser;
+package ru.investbook.controller;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import ru.investbook.InvestbookProperties;
+import ru.investbook.parser.ReportParserService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
