@@ -40,11 +40,11 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 public class ReportParserService {
-    private final ReportTableStorage storage;
+    private final InvestbookApiClient api;
 
     public void parse(ReportTables reportTables) {
         try {
-            boolean isAdded = storage.addPortfolio(Portfolio.builder()
+            boolean isAdded = api.addPortfolio(Portfolio.builder()
                     .id(reportTables.getReport().getPortfolio())
                     .build());
             if (isAdded) {
@@ -61,30 +61,30 @@ public class ReportParserService {
                 ReportTable<SecurityQuote> securityQuoteTable = reportTables.getSecurityQuoteTable();
                 ReportTable<ForeignExchangeRate> foreignExchangeRateReportTable = reportTables.getForeignExchangeRateTable();
 
-                portfolioPropertyTable.getData().forEach(storage::addPortfolioProperty);
-                storage.addCashInfo(portfolioCashTable);
-                portfolioSecuritiesTable.getData().forEach(storage::addSecurity);
-                cashFlowTable.getData().forEach(storage::addEventCashFlow);
-                securityTransactionTable.getData().forEach(storage::addTransaction);
+                portfolioPropertyTable.getData().forEach(api::addPortfolioProperty);
+                api.addCashInfo(portfolioCashTable);
+                portfolioSecuritiesTable.getData().forEach(api::addSecurity);
+                cashFlowTable.getData().forEach(api::addEventCashFlow);
+                securityTransactionTable.getData().forEach(api::addTransaction);
                 couponAndAmortizationTable.getData().forEach(c -> {
-                    if (storage.addSecurity(c.getSecurity())) { // required for amortization
-                        storage.addSecurityEventCashFlow(c);
+                    if (api.addSecurity(c.getSecurity())) { // required for amortization
+                        api.addSecurityEventCashFlow(c);
                     }
                 });
-                dividendTable.getData().forEach(storage::addSecurityEventCashFlow);
-                derivativeTransactionTable.getData().forEach(storage::addTransaction);
+                dividendTable.getData().forEach(api::addSecurityEventCashFlow);
+                derivativeTransactionTable.getData().forEach(api::addTransaction);
                 derivativeCashFlowTable.getData().forEach(c -> {
-                    if (storage.addSecurity(c.getSecurity())) {
+                    if (api.addSecurity(c.getSecurity())) {
                         if (c.getCount() == null &&
                                 c.getEventType() == CashFlowType.DERIVATIVE_PROFIT) { // count is optional for derivatives
                             c = c.toBuilder().count(0).build();
                         }
-                        storage.addSecurityEventCashFlow(c);
+                        api.addSecurityEventCashFlow(c);
                     }
                 });
-                fxTransactionTable.getData().forEach(storage::addTransaction);
-                securityQuoteTable.getData().forEach(storage::addSecurityQuote);
-                foreignExchangeRateReportTable.getData().forEach(storage::addForeignExchangeRate);
+                fxTransactionTable.getData().forEach(api::addTransaction);
+                securityQuoteTable.getData().forEach(api::addSecurityQuote);
+                foreignExchangeRateReportTable.getData().forEach(api::addForeignExchangeRate);
             }
         } catch (Exception e) {
             log.warn("Не могу распарсить отчет {}", reportTables.getReport().getPath(), e);

@@ -56,7 +56,7 @@ import java.util.function.Supplier;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class ReportTableStorage {
+public class InvestbookApiClient {
     private final PortfolioRestController portfolioRestController;
     private final SecurityRestController securityRestController;
     private final SecurityEventCashFlowRestController securityEventCashFlowRestController;
