@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -84,7 +84,7 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
                 .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
                 .value(table.getCurrencyCellValue(row, VALUE))
                 .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
-                .description(StringUtils.isEmpty(description) ? null : description)
+                .description(StringUtils.hasLength(description) ? description : null)
                 .build());
     }
 

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -57,7 +57,7 @@ public class VtbForeignExchangeTransactionTable extends AbstractReportTable<Fore
                 .timestamp(((ExcelTable) table).getDateCellValue(row, DATE_TIME).toInstant())
                 .transactionId(table.getStringCellValue(row, TRANSACTION))
                 .portfolio(getReport().getPortfolio())
-                .contract(table.getStringCellValue(row, INSTRUMENT))
+                .security(table.getStringCellValue(row, INSTRUMENT))
                 .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
                 .value(value)
                 .commission(commission)
