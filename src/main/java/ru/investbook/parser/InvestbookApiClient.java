@@ -56,7 +56,7 @@ import java.util.function.Supplier;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class ReportTableStorage {
+public class InvestbookApiClient {
     private final PortfolioRestController portfolioRestController;
     private final SecurityRestController securityRestController;
     private final SecurityEventCashFlowRestController securityEventCashFlowRestController;
@@ -99,7 +99,7 @@ public class ReportTableStorage {
     }
 
     public void addTransaction(DerivativeTransaction derivativeTransaction) {
-        addSecurity(derivativeTransaction.getContract());
+        addSecurity(derivativeTransaction.getSecurity());
         boolean isAdded = addTransaction(derivativeTransaction.getTransaction());
         if (isAdded) {
             derivativeTransaction.getTransactionCashFlows().forEach(this::addTransactionCashFlow);
@@ -107,7 +107,7 @@ public class ReportTableStorage {
     }
 
     public void addTransaction(ForeignExchangeTransaction fxTransaction) {
-        addSecurity(fxTransaction.getContract());
+        addSecurity(fxTransaction.getSecurity());
         boolean isAdded = addTransaction(fxTransaction.getTransaction());
         if (isAdded) {
             fxTransaction.getTransactionCashFlows().forEach(this::addTransactionCashFlow);

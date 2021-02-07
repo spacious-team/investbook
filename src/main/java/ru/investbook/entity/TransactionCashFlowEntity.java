@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,6 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.math.BigDecimal;
@@ -43,13 +42,6 @@ public class TransactionCashFlowEntity {
     private TransactionCashFlowEntityPK pk;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "transaction_id", referencedColumnName = "id", insertable = false, updatable = false),
-            @JoinColumn(name = "portfolio", referencedColumnName = "portfolio", insertable = false, updatable = false)
-    })
-    private TransactionEntity transaction;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type", referencedColumnName = "id", insertable = false, updatable = false)
     private CashFlowTypeEntity cashFlowType;
 
@@ -60,4 +52,16 @@ public class TransactionCashFlowEntity {
     @Basic
     @Column(name = "currency")
     private String currency = "RUR";
+
+
+    /*
+    Nowadays not used, commented due to perf issue
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "transaction_id", referencedColumnName = "id", insertable = false, updatable = false),
+            @JoinColumn(name = "portfolio", referencedColumnName = "portfolio", insertable = false, updatable = false)
+    })
+    private TransactionEntity transaction;
+    */
 }

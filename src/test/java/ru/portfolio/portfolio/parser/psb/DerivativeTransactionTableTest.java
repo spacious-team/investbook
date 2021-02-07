@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -39,7 +39,7 @@ public class DerivativeTransactionTableTest {
     @Test(dataProvider = "isin")
     void testIsin(String report, String firstIsin, String lastIsin) throws IOException {
         List<DerivativeTransaction> data = new DerivativeTransactionTable(new PsbBrokerReport(report)).getData();
-        assertEquals(data.get(0).getContract(), firstIsin);
-        assertEquals(data.get(data.size() - 1).getContract(), lastIsin);
+        assertEquals(data.get(0).getSecurity(), firstIsin);
+        assertEquals(data.get(data.size() - 1).getSecurity(), lastIsin);
     }
 }

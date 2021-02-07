@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -102,9 +102,9 @@ public class CashFlowEventTable extends AbstractReportTable<CashFlowEventTable.C
                     (duplicateOperation.equals(operation) || duplicateOperation.equals(pairedEvent.operation)) &&
                     value.equals(pairedEvent.value.negate()) &&
                     currency.equals(pairedEvent.currency) &&
-                    ((StringUtils.isEmpty(description)) ?
-                            StringUtils.isEmpty(pairedEvent.description) :
-                            description.equals(pairedEvent.description));
+                    (StringUtils.hasLength(description) ?
+                            description.equals(pairedEvent.description) :
+                            !StringUtils.hasLength(pairedEvent.description));
         }
 
         String getLowercaseDescription() {

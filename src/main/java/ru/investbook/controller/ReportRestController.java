@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser;
+package ru.investbook.controller;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import ru.investbook.InvestbookProperties;
+import ru.investbook.parser.ReportParserService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -161,10 +162,10 @@ public class ReportRestController {
     }
 
     private BrokerNameAndReport getBrokerReport(MultipartFile report, String providedByBroker) throws IOException {
-        if (StringUtils.isEmpty(providedByBroker)) {
-            return getReportOfUnknownBroker(report);
-        } else {
+        if (StringUtils.hasLength(providedByBroker)) {
             return getReportOfKnownBroker(report, providedByBroker);
+        } else {
+            return getReportOfUnknownBroker(report);
         }
     }
 
@@ -223,7 +224,7 @@ public class ReportRestController {
     private static Collector<CharSequence, ?, String> errorMessageBuilder(String broker) {
         return Collectors.joining("</br></br> - ", """
                 <b>Ошибка загрузки отчетов</b> <a href="/">[назад]</a><br/>
-                """ + (StringUtils.isEmpty(broker) ? "Попробуйте повторить загрузку, указав Брокера<br/>" : "") + """
+                """ + (!StringUtils.hasLength(broker) ? "Попробуйте повторить загрузку, указав Брокера<br/>" : "") + """
                 <span style="font-size: smaller; color: gray;">Вы можете
                 <a href="https://github.com/spacious-team/investbook/issues/new?labels=bug&template=bug_report.md">сообщить</a>
                 об ошибке разработчикам

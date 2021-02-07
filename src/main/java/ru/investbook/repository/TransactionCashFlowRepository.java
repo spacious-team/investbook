@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,7 @@ package ru.investbook.repository;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntityPK;
 
@@ -37,6 +38,10 @@ public interface TransactionCashFlowRepository extends JpaRepository<Transaction
                                                                                      String transactionId,
                                                                                      int cashFlowType);
 
+    List<TransactionCashFlowEntity> findByPkPortfolioAndPkTransactionIdAndPkTypeIn(String portfolio,
+                                                                                   String transactionId,
+                                                                                   Set<Integer> cashFlowTypes);
+
     @Query(value = "SELECT distinct t.currency FROM TransactionCashFlowEntity t " +
             "WHERE t.pk.portfolio = :portfolio AND t.pk.type = :#{#cashFlowType.id}")
     List<String> findDistinctCurrencyByPkPortfolioAndPkType(String portfolio, CashFlowType cashFlowType);
@@ -48,4 +53,7 @@ public interface TransactionCashFlowRepository extends JpaRepository<Transaction
     @Query(value = "SELECT distinct t.currency FROM TransactionCashFlowEntity t " +
             "WHERE t.pk.type in (:#{#cashFlowTypes})")
     List<String> findDistinctCurrencyByPkTypeIn(Set<Integer> cashFlowTypes);
+
+    @Transactional
+    void deleteByPkPortfolioAndPkTransactionId(String portfolio, String transactionId);
 }

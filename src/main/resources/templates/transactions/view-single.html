@@ -1,0 +1,49 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Сохранена сделка</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+
+<h1>Схоранена сделка</h1>
+<h2 th:switch="${transaction.action.name}">
+    <span th:case="BUY">Покупка</span>
+    <span th:case="CELL">Продажа</span>
+</h2>
+<p th:text="'Счет: ' +  ${transaction.portfolio}" th:if="${transaction.portfolio != null && transaction.portfolio != ''}"/>
+<p th:text="'Дата: ' + ${transaction.date}"/>
+<p th:text="'Номер сделки: ' +  ${transaction.transactionId}" th:if="${transaction.transactionId != null && transaction.transactionId != ''}"/>
+<p th:text="'Инструмент: ' +  ${transaction.security}" />
+<p th:text="'Количество: ' + ${transaction.count}" />
+<p th:text="'Цена: ' + ${transaction.price} + ' ' + ${transaction.priceCurrency}" />
+<p th:text="'НКД: ' + ${transaction.accruedInterest} + ' ' + ${transaction.getPriceCurrency}" th:if="${transaction.accruedInterest != null}"/>
+<p th:text="'Шаг цены: ' + ${transaction.priceTick}" th:if="${transaction.priceTick != null}"/>
+<p th:text="'Стоимость шага: ' + ${transaction.priceTickValue} + ' ' + ${transaction.priceTickValueCurrency}" th:if="${transaction.priceTickValue != null}"/>
+<p th:text="'Комиссия: ' + ${transaction.commission} + ' ' + ${transaction.commissionCurrency}" th:if="${transaction.commission != null}" />
+<a href="/transactions/edit-form">Добавить еще</a><br>
+<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/%D0%A1%D0%B4%D0%B5%D0%BB%D0%BA%D0%B8/delete">Удалить сделку</a><br>
+<a href="/transactions">Посмотреть все сделки</a><br>
+<a href="/">На главную</a><br>
+
+</body>
+</html>

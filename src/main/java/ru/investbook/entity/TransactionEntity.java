@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -24,25 +24,20 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Entity
 @Table(name = "transaction")
 @Data
 @EqualsAndHashCode(of = "pk")
-@ToString(exclude = {"transactionCashFlows"})
+@ToString //(exclude = {"transactionCashFlows"})
 public class TransactionEntity {
 
     @EmbeddedId
@@ -66,7 +61,10 @@ public class TransactionEntity {
     @Column(name = "count")
     private int count;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
+    /*
+    Nowadays not used, commented due to perf issue (LAZY doesn't work with orphanRemoval = true)
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "transaction", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private Set<TransactionCashFlowEntity> transactionCashFlows = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
@@ -79,4 +77,5 @@ public class TransactionEntity {
         this.transactionCashFlows.remove(cash);
         cash.setTransaction(null);
     }
+    */
 }
