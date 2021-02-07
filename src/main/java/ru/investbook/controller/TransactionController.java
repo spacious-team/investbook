@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.model.dto.TransactionModel;
 import ru.investbook.model.repository.TransactionModelRepository;
@@ -71,11 +72,18 @@ public class TransactionController {
         return "transactions/table";
     }
 
-    // TODO edit existing
     @GetMapping("/edit-form")
-    public String getEditForm(Model model) {
-        TransactionModel transaction = new TransactionModel();
-        transaction.setPortfolio(selectedPortfolio);
+    public String getEditForm(Model model,
+                              @RequestParam(name = "portfolio", required = false) String portfolio,
+                              @RequestParam(name = "transaction-id", required = false) String transactionId) {
+        TransactionModel transaction;
+        if (portfolio != null && transactionId != null) {
+            transaction = transactionModelRepository.findById(portfolio, transactionId)
+                    .orElseGet(TransactionModel::new);
+        } else {
+            transaction = new TransactionModel();
+            transaction.setPortfolio(selectedPortfolio);
+        }
         model.addAttribute("transaction", transaction);
         model.addAttribute("securities", securities);
         model.addAttribute("portfolios", portfolios);

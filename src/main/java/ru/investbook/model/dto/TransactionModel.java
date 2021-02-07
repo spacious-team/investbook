@@ -32,9 +32,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.util.Objects;
 
-import static ru.investbook.model.dto.TransactionModel.SecurityType.BOND;
-import static ru.investbook.model.dto.TransactionModel.SecurityType.SHARE;
+import static ru.investbook.model.dto.TransactionModel.SecurityType.*;
 
 @Data
 public class TransactionModel {
@@ -129,11 +129,24 @@ public class TransactionModel {
         this.commissionCurrency = commissionCurrency.toUpperCase();
     }
 
+    public void setSecurity(String securityId, String securityName) {
+        Objects.requireNonNull(securityId, "Необходимо предоставить ISIN акции, облигации или наименование контракта");
+        if (StringUtils.hasText(securityName)) {
+            this.security = securityName + " (" + securityId + ")";
+        } else {
+            this.security = securityId;
+        }
+    }
+
+    public String getSecurityDisplayName() {
+        return (securityType == SHARE || securityType == BOND) ? getSecurityName() : security;
+    }
+
     /**
      * Returns ISIN (stock market) or contract name (derivatives and forex market)
      */
     public String getSecurityId() {
-        if (securityType == BOND || securityType == SHARE) {
+        if (securityType == SHARE || securityType == BOND) {
             if (!isSecurityHasIsin()) {
                 throw new RuntimeException("В скобках должен быть указан ISIN инструмента: " + security);
             }
@@ -147,7 +160,7 @@ public class TransactionModel {
      * Returns security name (stock market) or null (derivatives and forex market)
      */
     public String getSecurityName() {
-        if (securityType == BOND || securityType == SHARE) {
+        if (securityType == SHARE || securityType == BOND) {
             if (isSecurityHasIsin()) {
                 return security.substring(0, security.length() - 14).trim();
             }
@@ -159,6 +172,18 @@ public class TransactionModel {
     private boolean isSecurityHasIsin() {
         int len = security.length();
         return (len >= 15) && security.charAt(len - 14) == '(' && security.charAt(len - 1) == ')';
+    }
+
+    public void setSecurityType(SecurityType type) {
+        this.securityType = type;
+    }
+
+    public void setSecurityType(org.spacious_team.broker.pojo.SecurityType type) {
+        this.securityType = switch (type) {
+            case STOCK_OR_BOND -> SHARE;
+            case DERIVATIVE -> DERIVATIVE;
+            case CURRENCY_PAIR -> CURRENCY;
+        };
     }
 
     public String getTransactionId() {

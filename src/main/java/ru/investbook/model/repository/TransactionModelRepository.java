@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
@@ -34,7 +35,9 @@ import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.converter.TransactionCashFlowConverter;
 import ru.investbook.converter.TransactionConverter;
+import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
+import ru.investbook.entity.TransactionEntityPK;
 import ru.investbook.model.dto.TransactionModel;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
@@ -46,6 +49,7 @@ import java.math.RoundingMode;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -67,7 +71,16 @@ public class TransactionModelRepository implements ModelRepository<TransactionMo
     private final Set<Integer> cashFlowTypes = Set.of(CashFlowType.PRICE.getId(),
             CashFlowType.ACCRUED_INTEREST.getId(),
             CashFlowType.DERIVATIVE_QUOTE.getId(),
+            CashFlowType.DERIVATIVE_PRICE.getId(),
             CashFlowType.COMMISSION.getId());
+
+    public Optional<TransactionModel> findById(String portfolio, String transactionId) {
+        TransactionEntityPK pk = new TransactionEntityPK();
+        pk.setId(transactionId);
+        pk.setPortfolio(portfolio);
+        return transactionRepository.findById(pk)
+                .map(this::toTransactionModel);
+    }
 
     @Override
     public List<TransactionModel> findAll() {
@@ -150,28 +163,46 @@ public class TransactionModelRepository implements ModelRepository<TransactionMo
         BigDecimal cnt = BigDecimal.valueOf(count);
         m.setAction(count >= 0 ? TransactionModel.Action.BUY : TransactionModel.Action.CELL);
         m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
-        m.setSecurity(ofNullable(e.getSecurity().getName())
-                .or(() -> ofNullable(e.getSecurity().getTicker()))
-                .orElseGet(() -> e.getSecurity().getId()));
+        m.setSecurity(e.getSecurity().getId(), e.getSecurity().getName());
+        m.setSecurityType(SecurityType.getSecurityType(e.getSecurity().getId()));
         m.setCount(abs(count));
-        transactionCashFlowRepository.findByPkPortfolioAndPkTransactionIdAndPkTypeIn(
+        List<TransactionCashFlowEntity> cashFlows = transactionCashFlowRepository.findByPkPortfolioAndPkTransactionIdAndPkTypeIn(
                 e.getPk().getPortfolio(),
                 e.getPk().getId(),
-                cashFlowTypes)
-                .forEach(value -> {
+                cashFlowTypes);
+        cashFlows.forEach(value -> {
                     CashFlowType type = CashFlowType.valueOf(value.getCashFlowType().getId());
                     switch (type) {
                         case PRICE, DERIVATIVE_QUOTE -> {
                             m.setPrice(value.getValue().divide(cnt, 6, RoundingMode.HALF_UP).abs());
                             m.setPriceCurrency(value.getCurrency());
+                            if (type == CashFlowType.DERIVATIVE_QUOTE) {
+                                m.setSecurityType(TransactionModel.SecurityType.DERIVATIVE);
+                            }
                         }
-                        case ACCRUED_INTEREST -> m.setAccruedInterest(value.getValue().divide(cnt, 6, RoundingMode.HALF_UP).abs());
+                        case ACCRUED_INTEREST -> {
+                            m.setAccruedInterest(value.getValue().divide(cnt, 6, RoundingMode.HALF_UP).abs());
+                            m.setSecurityType(TransactionModel.SecurityType.BOND);
+                        }
                         case COMMISSION -> {
                             m.setCommission(value.getValue().abs());
                             m.setCommissionCurrency(value.getCurrency());
                         }
                     }
                 });
+        if (m.getSecurityType() == TransactionModel.SecurityType.DERIVATIVE &&
+                m.getPrice() != null && m.getPrice().floatValue() > 0.000001) {
+            cashFlows.stream()
+                    .filter(value -> CashFlowType.valueOf(value.getCashFlowType().getId()) == CashFlowType.DERIVATIVE_PRICE)
+                    .forEach(value -> {
+                        m.setPriceTick(BigDecimal.ONE); // information not stored in db, normalizing
+                        m.setPriceTickValue(value.getValue()
+                                .divide(BigDecimal.valueOf(m.getCount()), 6, RoundingMode.HALF_UP)
+                                .divide(m.getPrice(), 6, RoundingMode.HALF_UP)
+                                .abs());
+                        m.setPriceTickValueCurrency(value.getCurrency());
+                    });
+        }
         return m;
     }
 }
