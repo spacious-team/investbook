@@ -1,0 +1,146 @@
+/*
+ * InvestBook
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package ru.investbook.model.repository;
+
+import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow.SecurityEventCashFlowBuilder;
+import org.springframework.stereotype.Component;
+import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.converter.SecurityConverter;
+import ru.investbook.converter.SecurityEventCashFlowConverter;
+import ru.investbook.entity.SecurityEventCashFlowEntity;
+import ru.investbook.model.dto.SecurityEventModel;
+import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.SecurityEventCashFlowRepository;
+import ru.investbook.repository.SecurityRepository;
+
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Component
+@RequiredArgsConstructor
+public class SecurityEventModelRepository implements ModelRepository<SecurityEventModel> {
+    private static final ZoneId zoneId = ZoneId.systemDefault();
+    private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
+    private final SecurityRepository securityRepository;
+    private final PortfolioRepository portfolioRepository;
+    private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
+    private final SecurityConverter securityConverter;
+    private final PortfolioConverter portfolioConverter;
+    private final Set<Integer> cashFlowTypes = Set.of(CashFlowType.PRICE.getId(),
+            CashFlowType.ACCRUED_INTEREST.getId(),
+            CashFlowType.DERIVATIVE_QUOTE.getId(),
+            CashFlowType.DERIVATIVE_PRICE.getId(),
+            CashFlowType.COMMISSION.getId());
+
+    public Optional<SecurityEventModel> findById(Integer id) {
+        return securityEventCashFlowRepository.findById(id)
+                .map(this::toSecurityEventModel);
+    }
+
+    @Override
+    public List<SecurityEventModel> findAll() {
+        return securityEventCashFlowRepository.findByOrderByPortfolioIdAscTimestampDescSecurityIdAsc()
+                .stream()
+                .filter(e -> e.getCashFlowType().getId() != CashFlowType.TAX.getId())
+                .map(this::toSecurityEventModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void saveAndFlush(SecurityEventModel e) {
+        saveAndFlush(e.getPortfolio(), e.getSecurityId(), e.getSecurityName());
+        SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
+                .portfolio(e.getPortfolio())
+                .timestamp(e.getDate().atStartOfDay(zoneId).toInstant())
+                .security(e.getSecurityId())
+                .count(e.getCount());
+        SecurityEventCashFlowEntity entity = securityEventCashFlowRepository.save(
+                securityEventCashFlowConverter.toEntity(builder
+                        .id(e.getId())
+                        .eventType(e.getType())
+                        .value(e.getValue())
+                        .currency(e.getValueCurrency())
+                        .build()));
+        e.setId(entity.getId());
+        if (e.getTax() != null && e.getTax().floatValue() > 0.001) {
+            entity = securityEventCashFlowRepository.save(securityEventCashFlowConverter.toEntity(
+                    builder
+                            .id(e.getTaxId())
+                            .eventType(CashFlowType.TAX)
+                            .value(e.getTax().negate())
+                            .currency(e.getTaxCurrency())
+                            .build()));
+            e.setTaxId(entity.getId());
+        } else if (e.getTaxId() != null) { // taxId exists in db, but no tax value in edited version
+            securityEventCashFlowRepository.deleteById(e.getTaxId());
+        }
+        securityEventCashFlowRepository.flush();
+    }
+
+    private void saveAndFlush(String portfolio, String securityId, String securityName) {
+        if (!portfolioRepository.existsById(portfolio)) {
+            portfolioRepository.saveAndFlush(
+                    portfolioConverter.toEntity(Portfolio.builder()
+                            .id(portfolio)
+                            .build()));
+        }
+        if (!securityRepository.existsById(securityId)) {
+            securityRepository.saveAndFlush(
+                    securityConverter.toEntity(Security.builder()
+                            .id(securityId)
+                            .name(securityName)
+                            .build()));
+        }
+    }
+
+    private SecurityEventModel toSecurityEventModel(SecurityEventCashFlowEntity e) {
+        SecurityEventModel m = new SecurityEventModel();
+        m.setId(e.getId());
+        m.setPortfolio(e.getPortfolio().getId());
+        m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
+        m.setSecurity(e.getSecurity().getId(), e.getSecurity().getName());
+        m.setCount(e.getCount());
+        m.setType(CashFlowType.valueOf(e.getCashFlowType().getId()));
+        m.setValue(e.getValue().abs());
+        m.setValueCurrency(e.getCurrency());
+
+        if (m.getType() != CashFlowType.TAX) {
+            securityEventCashFlowRepository.findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampAndCount(
+                    m.getPortfolio(),
+                    m.getSecurityId(),
+                    CashFlowType.TAX.getId(),
+                    e.getTimestamp(),
+                    m.getCount())
+                    .ifPresent(tax -> {
+                        m.setTaxId(tax.getId());
+                        m.setTax(tax.getValue().abs());
+                        m.setTaxCurrency(tax.getCurrency());
+                    });
+        }
+        return m;
+    }
+}

@@ -28,6 +28,15 @@ import java.util.Set;
 
 public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityEventCashFlowEntity, Integer> {
 
+    List<SecurityEventCashFlowEntity> findByOrderByPortfolioIdAscTimestampDescSecurityIdAsc();
+
+    Optional<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampAndCount(
+            String portfolio,
+            String isin,
+            int cashFlowType,
+            Instant timestamp,
+            int count);
+
     List<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
             String portfolio,
             String isin,
