@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.model.dto.TransactionModel;
 import ru.investbook.model.repository.TransactionModelRepository;
 import ru.investbook.repository.PortfolioRepository;
@@ -35,9 +34,6 @@ import ru.investbook.repository.SecurityRepository;
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static java.util.Optional.ofNullable;
 
 @Controller
 @RequestMapping("/transactions")
@@ -52,17 +48,8 @@ public class TransactionController {
 
     @PostConstruct
     public void start() {
-        portfolios = portfolioRepository.findAll()
-                .stream()
-                .map(PortfolioEntity::getId)
-                .collect(Collectors.toList());
-        securities = securityRepository.findAll()
-                .stream()
-                .map(e -> ofNullable(e.getName())
-                            .map(v -> v + " (" + e.getId() + ")")
-                            .orElse(e.getId()))
-                .sorted()
-                .collect(Collectors.toList());
+        portfolios = ControllerHelper.getPortfolios(portfolioRepository);
+        securities = ControllerHelper.getSecuritiesDescriptions(securityRepository);
     }
 
     @GetMapping

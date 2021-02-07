@@ -25,7 +25,7 @@
 </head>
 <body>
 
-<h1>Схоранена сделка</h1>
+<h1>Сохранена сделка</h1>
 <h2 th:switch="${transaction.action.name}">
     <span th:case="BUY">Покупка</span>
     <span th:case="CELL">Продажа</span>
@@ -41,7 +41,7 @@
 <p th:text="'Стоимость шага: ' + ${transaction.priceTickValue} + ' ' + ${transaction.priceTickValueCurrency}" th:if="${transaction.priceTickValue != null}"/>
 <p th:text="'Комиссия: ' + ${transaction.commission} + ' ' + ${transaction.commissionCurrency}" th:if="${transaction.commission != null}" />
 <a href="/transactions/edit-form">Добавить еще</a><br>
-<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/%D0%A1%D0%B4%D0%B5%D0%BB%D0%BA%D0%B8/delete">Удалить сделку</a><br>
+<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Сделки/delete">Удалить сделку</a><br>
 <a href="/transactions">Посмотреть все сделки</a><br>
 <a href="/">На главную</a><br>
 
