@@ -1,0 +1,74 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Сделки</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <style>
+        body { max-width: 95%; }
+        table{table-layout: auto;}
+        td {
+            width: 1px;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Сделки</h1>
+<a href="/transactions/edit-form">Добавить сделку</a><br>
+<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/%D0%A1%D0%B4%D0%B5%D0%BB%D0%BA%D0%B8/delete">Удалить сделку</a><br>
+<a href="/">На главную</a><br>
+
+<table>
+    <tr>
+        <th>Счет</th>
+        <th>Номер сделки</th>
+        <th>Дата</th>
+        <th>Инструмент</th>
+        <th>Сделка</th>
+        <th>Количество, шт</th>
+        <th>Цена</th>
+        <th>НКД</th>
+        <th>Валюта цены</th>
+        <th>Комиссия</th>
+        <th>Валюта комиссии</th>
+    </tr>
+    <tr th:each="tr : ${transactions}">
+        <td th:text="${tr.portfolio}"/>
+        <td th:text="${tr.transactionId}"/>
+        <td th:text="${tr.date}"/>
+        <td th:text="${tr.security}"/>
+        <td th:switch="${tr.action.name}">
+            <span th:case="BUY">Покупка</span>
+            <span th:case="CELL">Продажа</span>
+        </td>
+        <td th:text="${tr.count}"/>
+        <td th:text="${tr.price}"/>
+        <td th:text="${tr.accruedInterest}"/>
+        <td th:text="${tr.priceCurrency}"/>
+        <td th:text="${tr.commission}"/>
+        <td th:text="${tr.commissionCurrency}"/>
+    </tr>
+</table>
+
+</body>
+</html>

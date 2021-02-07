@@ -1,0 +1,195 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить транзакцию</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+
+<h1>Редактировать сделку</h1>
+<form action="#" th:action="@{/transactions}" th:object="${transaction}" method="post">
+    <label>
+        Дата сделки
+        <input type="date" th:field="*{date}" style="width:110px" required/>
+    </label>
+    <label>
+        Счет
+        <input type="text" th:field="*{portfolio}" list="portfolios" size="14" required/>
+    </label>
+    <label>
+        Операция
+        <select th:field="*{action}" style="width:125px" required>
+            <option value="BUY" selected>Купля</option>
+            <option value="CELL">Продажа</option>
+        </select>
+    </label>
+    <label>
+        Тип инструмента
+        <select id="market-type" onchange="selectMarket()" th:field="*{securityType}" style="width:214px" required>
+            <option value="SHARE" selected>Акция, ETF</option>
+            <option value="BOND">Облигация</option>
+            <option value="DERIVATIVE">Фьючерс, опцион</option>
+            <option value="CURRENCY">Валюта</option>
+        </select>
+    </label>
+    <br/>
+    <label>
+        Инструмент
+        <input type="text" th:field="*{security}" list="securities" size="46" required/>
+    </label>
+    <label>
+        Количество, шт
+        <input type="number" min="1" th:field="*{count}" required/>
+    </label>
+    <br/>
+    <label>
+        Цена
+        <input type="number" step="0.01" min="0.01" th:field="*{price}" required/>
+    </label>
+    <label id="accrued-interest">
+        НКД
+        <input type="number" step="0.01" min="0" th:field="*{accruedInterest}"/>
+    </label>
+    <label>
+        Валюта цены
+        <input type="text" th:field="*{priceCurrency}" value="RUB" list="currencies" id="price-currency" required/>
+    </label>
+    <br/>
+    <label id="price-tick">
+        Шаг цены (опционально)
+        <input type="number" step="0.0001" min="0" th:field="*{priceTick}" value="1"/>
+    </label>
+    <label id="price-tick-value">
+        Стоимость шага (опц-но)
+        <input type="number" step="0.0001" min="0" th:field="*{priceTickValue}" value="1"/>
+    </label>
+    <label id="price-tick-value-currency">
+        Валюта шага (опционально)
+        <input type="text" th:field="*{priceTickValueCurrency}" value="RUB" list="currencies"/>
+    </label>
+    <label>
+        Комиссия
+        <input type="number" step="0.01" min="0" th:field="*{commission}" required/>
+    </label>
+    <label>
+        Валюта комиссии
+        <input type="text" th:field="*{commissionCurrency}" value="RUB" list="currencies" required>
+    </label>
+    <label>
+        Номер сделки
+        <input type="text" th:field="*{transactionId}" placeholder="<не знаю>"/>
+    </label>
+    <br/>
+    <input type="submit" value="Сохранить"/>
+
+    <datalist id="portfolios">
+        <option th:each="portfolio : ${portfolios}" th:text="${portfolio}"></option>
+    </datalist>
+    <datalist id="securities">
+        <option th:each="security : ${securities}" th:text="${security}"></option>
+    </datalist>
+    <datalist id="currencies">
+        <option>RUB</option>
+        <option>USD</option>
+        <option>EUR</option>
+        <option>GBP</option>
+        <option>CHF</option>
+    </datalist>
+</form>
+
+<p style="font-size: medium; color: dimgray; text-align: justify;">
+    Номер сделки: если планиуется в будущем загрузить отчет брокера, то использование
+    номера сделки в системе учета брокера исключит дублирование данных. Если отчет брокера загружать не планируется
+    можно не заполнять.
+</p>
+
+<p style="font-size: medium; color: dimgray; text-align: justify;">
+    Инструмент: для акций, облигаций, ETF и других инструментов, имеющих ISIN, после наименования инструмента небходимо
+    в скобках указать ISIN, например "Яндекс (NL0009805522)". Для фьючерсов, опционов и валютных контрактов
+    указывается наименование контракта, например "Si-3.22" (или в кратком коде "SiH2"), "Si-3.22M170322CA80000"
+    (или в кратком коде "Si80000BC2"), "USDRUB_TOM", придерживаясь полного наименовая или краткого кода контракта для
+    всех сделок.
+</p>
+
+<script type="text/javascript">
+
+    selectMarket()
+
+    function selectMarket() {
+        let e = document.getElementById('market-type');
+        let type = e.options[e.selectedIndex].value
+
+        // for type = SHARE and CURRENCY
+        hide('accrued-interest')
+        hide('price-tick')
+        hide('price-tick-value')
+        hide('price-tick-value-currency')
+        setPriceCurrency('RUB', false)
+
+        switch (type) {
+            case "BOND":
+                displayRequired('accrued-interest')
+                break
+            case "DERIVATIVE":
+                display('price-tick')
+                display('price-tick-value')
+                displayWithValue('price-tick-value-currency', 'RUB')
+                setPriceCurrency('PNT', true)
+                break
+        }
+    }
+
+    function hide(id) {
+        let e = document.getElementById(id);
+        e.style.display = 'none'
+        let input = e.getElementsByTagName("input")[0]
+        input.required = false
+        input.value = ''
+    }
+
+    function display(id) {
+        let e = document.getElementById(id);
+        e.style.display = ''
+        return e
+    }
+
+    function displayWithValue(id, value) {
+        let e = display(id)
+        let input = e.getElementsByTagName("input")[0]
+        input.value = value
+    }
+
+    function displayRequired(id) {
+        let e = display(id)
+        let input = e.getElementsByTagName("input")[0]
+        input.required = true
+    }
+
+    function setPriceCurrency(value, isReadOnly) {
+        let e = document.getElementById('price-currency')
+        e.value = value
+        e.readOnly = isReadOnly
+    }
+</script>
+
+</body>
+</html>

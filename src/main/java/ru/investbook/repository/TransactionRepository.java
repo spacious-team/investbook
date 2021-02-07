@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -33,6 +33,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public interface TransactionRepository extends JpaRepository<TransactionEntity, TransactionEntityPK> {
+
+    List<TransactionEntity> findByOrderByPkPortfolioAscTimestampDescSecurityIdAsc();
 
     /**
      * Returns stock market share and bonds ISINs
