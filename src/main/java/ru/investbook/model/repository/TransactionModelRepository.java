@@ -135,24 +135,27 @@ public class TransactionModelRepository implements ModelRepository<TransactionMo
     private void saveAndFlush(TransactionModel transactionModel,
                               Transaction transaction,
                               Collection<TransactionCashFlow> cashFlows) {
-        if (!portfolioRepository.existsById(transaction.getPortfolio())) {
-            portfolioRepository.saveAndFlush(
-                    portfolioConverter.toEntity(Portfolio.builder()
-                            .id(transaction.getPortfolio())
-                            .build()));
-        }
-        String securityId = transactionModel.getSecurityId();
-        if (!securityRepository.existsById(securityId)) {
-            securityRepository.saveAndFlush(
-                    securityConverter.toEntity(Security.builder()
-                            .id(securityId)
-                            .name(transactionModel.getSecurityName())
-                            .build()));
-        }
+        saveAndFlush(transactionModel.getPortfolio(), transactionModel.getSecurityId(), transactionModel.getSecurityName());
         transactionRepository.saveAndFlush(transactionConverter.toEntity(transaction));
         transactionCashFlowRepository.deleteByPkPortfolioAndPkTransactionId(transaction.getPortfolio(), transaction.getId());
         cashFlows.forEach(cash -> transactionCashFlowRepository.save(transactionCashFlowConverter.toEntity(cash)));
         transactionCashFlowRepository.flush();
+    }
+
+    private void saveAndFlush(String portfolio, String securityId, String securityName) {
+        if (!portfolioRepository.existsById(portfolio)) {
+            portfolioRepository.saveAndFlush(
+                    portfolioConverter.toEntity(Portfolio.builder()
+                            .id(portfolio)
+                            .build()));
+        }
+        if (!securityRepository.existsById(securityId)) {
+            securityRepository.saveAndFlush(
+                    securityConverter.toEntity(Security.builder()
+                            .id(securityId)
+                            .name(securityName)
+                            .build()));
+        }
     }
 
     private TransactionModel toTransactionModel(TransactionEntity e) {

@@ -139,7 +139,7 @@ public class TransactionModel {
     }
 
     public String getSecurityDisplayName() {
-        return (securityType == SHARE || securityType == BOND) ? getSecurityName() : security;
+        return (securityType == SHARE || securityType == BOND) ? SecurityHelper.getSecurityName(security) : security;
     }
 
     /**
@@ -147,11 +147,11 @@ public class TransactionModel {
      */
     public String getSecurityId() {
         if (securityType == SHARE || securityType == BOND) {
-            if (!isSecurityHasIsin()) {
+            String id = SecurityHelper.getSecurityId(security);
+            if (id == null || id.equals(security)) {
                 throw new RuntimeException("В скобках должен быть указан ISIN инструмента: " + security);
             }
-            int len = security.length();
-            return security.substring(len - 13, len - 1);
+            return id;
         }
         return security;
     }
@@ -161,17 +161,13 @@ public class TransactionModel {
      */
     public String getSecurityName() {
         if (securityType == SHARE || securityType == BOND) {
-            if (isSecurityHasIsin()) {
-                return security.substring(0, security.length() - 14).trim();
+            String name = SecurityHelper.getSecurityName(security);
+            if (name == null) {
+                throw new RuntimeException("В скобках должен быть указан ISIN инструмента: " + security);
             }
-            throw new RuntimeException("В скобках должен быть указан ISIN инструмента: " + security);
+            return name;
         }
         return null;
-    }
-
-    private boolean isSecurityHasIsin() {
-        int len = security.length();
-        return (len >= 15) && security.charAt(len - 14) == '(' && security.charAt(len - 1) == ')';
     }
 
     public void setSecurityType(SecurityType type) {

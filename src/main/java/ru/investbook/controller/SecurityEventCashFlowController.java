@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.investbook.model.dto.TransactionModel;
-import ru.investbook.model.repository.TransactionModelRepository;
+import ru.investbook.model.dto.SecurityEventModel;
+import ru.investbook.model.repository.SecurityEventModelRepository;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 
@@ -36,10 +36,10 @@ import javax.validation.Valid;
 import java.util.List;
 
 @Controller
-@RequestMapping("/transactions")
+@RequestMapping("/security-events")
 @RequiredArgsConstructor
-public class TransactionController {
-    private final TransactionModelRepository transactionModelRepository;
+public class SecurityEventCashFlowController {
+    private final SecurityEventModelRepository securityEventModelRepository;
     private final PortfolioRepository portfolioRepository;
     private final SecurityRepository securityRepository;
     private volatile List<String> securities;
@@ -54,40 +54,39 @@ public class TransactionController {
 
     @GetMapping
     public String get(Model model) {
-        List<TransactionModel> transactions = transactionModelRepository.findAll();
-        model.addAttribute("transactions", transactions);
-        return "transactions/table";
+        List<SecurityEventModel> events = securityEventModelRepository.findAll();
+        model.addAttribute("events", events);
+        return "security-events/table";
     }
 
     @GetMapping("/edit-form")
     public String getEditForm(Model model,
-                              @RequestParam(name = "portfolio", required = false) String portfolio,
-                              @RequestParam(name = "transaction-id", required = false) String transactionId) {
-        TransactionModel transaction;
-        if (portfolio != null && transactionId != null) {
-            transaction = transactionModelRepository.findById(portfolio, transactionId)
-                    .orElseGet(TransactionModel::new);
+                              @RequestParam(name = "id", required = false) Integer id) {
+        SecurityEventModel event;
+        if (id != null) {
+            event = securityEventModelRepository.findById(id)
+                    .orElseGet(SecurityEventModel::new);
         } else {
-            transaction = new TransactionModel();
-            transaction.setPortfolio(selectedPortfolio);
+            event = new SecurityEventModel();
+            event.setPortfolio(selectedPortfolio);
         }
-        model.addAttribute("transaction", transaction);
+        model.addAttribute("event", event);
         model.addAttribute("securities", securities);
         model.addAttribute("portfolios", portfolios);
-        return "transactions/edit-form";
+        return "security-events/edit-form";
     }
 
     /**
-     * Saves transaction to storage
+     * Saves event to storage
      *
-     * @param transaction transaction for save
+     * @param event event for save
      * @param model       model with result for exposing to view
      */
     @PostMapping
-    public String postTransaction(@ModelAttribute @Valid TransactionModel transaction, Model model) {
-        selectedPortfolio = transaction.getPortfolio();
-        transactionModelRepository.saveAndFlush(transaction);
-        model.addAttribute("transaction", transaction);
-        return "transactions/view-single";
+    public String postTransaction(@ModelAttribute @Valid SecurityEventModel event, Model model) {
+        selectedPortfolio = event.getPortfolio();
+        securityEventModelRepository.saveAndFlush(event);
+        model.addAttribute("event", event);
+        return "security-events/view-single";
     }
 }
