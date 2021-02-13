@@ -29,7 +29,7 @@ import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
-import ru.investbook.model.dto.SecurityEventModel;
+import ru.investbook.model.dto.SecurityEventCashFlowModel;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityRepository;
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class SecurityEventModelRepository implements ModelRepository<SecurityEventModel> {
+public class SecurityEventCashFlowModelRepository implements ModelRepository<SecurityEventCashFlowModel> {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityRepository securityRepository;
@@ -56,13 +56,13 @@ public class SecurityEventModelRepository implements ModelRepository<SecurityEve
             CashFlowType.DERIVATIVE_PRICE.getId(),
             CashFlowType.COMMISSION.getId());
 
-    public Optional<SecurityEventModel> findById(Integer id) {
+    public Optional<SecurityEventCashFlowModel> findById(Integer id) {
         return securityEventCashFlowRepository.findById(id)
                 .map(this::toSecurityEventModel);
     }
 
     @Override
-    public List<SecurityEventModel> findAll() {
+    public List<SecurityEventCashFlowModel> findAll() {
         return securityEventCashFlowRepository.findByOrderByPortfolioIdAscTimestampDescSecurityIdAsc()
                 .stream()
                 .filter(e -> e.getCashFlowType().getId() != CashFlowType.TAX.getId())
@@ -71,7 +71,7 @@ public class SecurityEventModelRepository implements ModelRepository<SecurityEve
     }
 
     @Override
-    public void saveAndFlush(SecurityEventModel e) {
+    public void saveAndFlush(SecurityEventCashFlowModel e) {
         saveAndFlush(e.getPortfolio(), e.getSecurityId(), e.getSecurityName());
         SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .portfolio(e.getPortfolio())
@@ -117,8 +117,8 @@ public class SecurityEventModelRepository implements ModelRepository<SecurityEve
         }
     }
 
-    private SecurityEventModel toSecurityEventModel(SecurityEventCashFlowEntity e) {
-        SecurityEventModel m = new SecurityEventModel();
+    private SecurityEventCashFlowModel toSecurityEventModel(SecurityEventCashFlowEntity e) {
+        SecurityEventCashFlowModel m = new SecurityEventCashFlowModel();
         m.setId(e.getId());
         m.setPortfolio(e.getPortfolio().getId());
         m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());

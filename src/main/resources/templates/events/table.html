@@ -20,7 +20,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>События по бумагам</title>
+    <title>События по счетам</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
     <style>
         body {
@@ -40,57 +40,49 @@
 </head>
 <body>
 
-<h1>События по бумагам</h1>
+<h1>События по счетам</h1>
 <p class="hint">
-    Отображены движения денежных средств, привязанные к конкретному инструменту.
-    События без привязки к конкретной бумаге нужно смотреть на странице "<a href="/events">События по счетам</a>".
+    Отображены движения денежных средств, не привязанные к бумаге.
+    События по конкретной бумаге нужно смотреть на странице "<a href="/security-events">События по бумагам</a>".
 </p>
 
-<a href="/security-events/edit-form">Добавить событие</a><br>
-<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/События по бумаге/delete_3">Удалить событие</a><br>
+<a href="/events/edit-form">Добавить событие</a><br>
+<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Движения ДС по счету/delete_9">Удалить событие</a><br>
 <a href="/">На главную</a><br>
 
 <p class="hint">
     Для редактирования события кликните по ее номеру.
 </p>
 
-<p class="hint">
-    При удалении события, не забудьте также удалить налоговое событие по номеру, если оно указано в скобках.
-</p>
-
 <table>
     <tr>
         <th>Счет</th>
-        <th>Номер события (налога)</th>
+        <th>Номер события</th>
         <th>Дата</th>
-        <th>Инструмент</th>
         <th>Событие</th>
-        <th>Количество, шт</th>
-        <th>Выплата</th>
+        <th>Сумма</th>
         <th>Валюта</th>
-        <th>Налог</th>
-        <th>Валюта налога</th>
+        <th>Описание</th>
     </tr>
     <tr th:each="e : ${events}">
         <td th:text="${e.portfolio}"/>
         <td>
-            <a th:href="@{/security-events/edit-form(id=${e.id})}" th:text="${e.id}"/>
-            <span th:text="' (' + ${e.taxId} + ')'" th:if="${e.taxId != null}"/>
+            <a th:href="@{/events/edit-form(id=${e.id})}" th:text="${e.id}"/>
         </td>
         <td th:text="${e.date}"/>
-        <td th:text="${e.getSecurityDisplayName}"/>
         <td th:switch="${e.type.name}">
             <span th:case="DIVIDEND">Дивиденд</span>
             <span th:case="COUPON">Купон</span>
             <span th:case="AMORTIZATION">Амортизация облигации</span>
             <span th:case="REDEMPTION">Погашение облигации</span>
-            <span th:case="DERIVATIVE_PROFIT">Вариационная маржа</span>
+            <span th:case="COMMISSION">Комиссия</span>
+            <span th:case="TAX">Налог</span>
+            <span th:text="Пополнение" th:if="${e.type.name == 'CASH' && e.value >= 0}"/>
+            <span th:text="Снятие" th:if="${e.type.name == 'CASH' && e.value < 0}"/>
         </td>
-        <td th:text="${(e.count == 0) ? '' : e.count}"/>
-        <td th:text="${e.value}"/>
+        <td th:text="${e.value.abs()}"/>
         <td th:text="${e.valueCurrency}"/>
-        <td th:text="${e.tax}"/>
-        <td th:text="${(e.tax == null) ? '' : e.taxCurrency}"/>
+        <td th:text="${e.description}"/>
     </tr>
 </table>
 

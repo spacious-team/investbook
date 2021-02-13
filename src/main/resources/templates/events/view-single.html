@@ -30,21 +30,23 @@
 <p th:text="'Счет: ' +  ${event.portfolio}" th:if="${event.portfolio != null}"/>
 <p th:text="'Номер записи: ' +  ${event.id}"/>
 <p th:text="'Дата: ' + ${event.date}"/>
-<p th:text="'Инструмент: ' +  ${event.security}"/>
-<p th:text="'Количество: ' + ${event.count}" th:if="${event.count != 0}"/>
 <p th:switch="${event.type.name}">
     <span th:case="DIVIDEND">Дивиденд</span>
     <span th:case="COUPON">Купон</span>
     <span th:case="AMORTIZATION">Амортизация облигации</span>
     <span th:case="REDEMPTION">Погашение облигации</span>
-    <span th:case="DERIVATIVE_PROFIT">Вариационная маржа</span>
-    <span th:text="': ' + ${event.value} + ' ' + ${event.valueCurrency}"/>
+    <span th:case="COMMISSION">Комиссия</span>
+    <span th:case="TAX">Налог</span>
+    <span th:text="Пополнение" th:if="${event.type.name == 'CASH' && event.value >= 0}"/>
+    <span th:text="Снятие" th:if="${event.type.name == 'CASH' && event.value < 0}"/>
+    <span th:text="': ' + ${event.value.abs()} + ' ' + ${event.valueCurrency}"/>
 </p>
-<p th:text="'Налог: ' + ${event.tax} + ' ' + ${event.taxCurrency}" th:if="${event.tax != null}"/>
+<br th:if="${event.description != null}">
+<p th:text="${event.description}" th:if="${event.description != null}"/>
 <a href="/security-events/edit-form">Добавить еще</a><br>
-<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/События по бумаге/delete_3">Удалить
+<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Движения ДС по счету/delete_9">Удалить
     событие</a><br>
-<a href="/security-events">Посмотреть все события</a><br>
+<a href="/events">Посмотреть все события</a><br>
 <a href="/">На главную</a><br>
 
 </body>

@@ -26,53 +26,48 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.investbook.model.dto.SecurityEventCashFlowModel;
-import ru.investbook.model.repository.SecurityEventCashFlowModelRepository;
+import ru.investbook.model.dto.EventCashFlowModel;
+import ru.investbook.model.repository.EventCashFlowModelRepository;
 import ru.investbook.repository.PortfolioRepository;
-import ru.investbook.repository.SecurityRepository;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import java.util.List;
 
 @Controller
-@RequestMapping("/security-events")
+@RequestMapping("/events")
 @RequiredArgsConstructor
-public class SecurityEventCashFlowController {
-    private final SecurityEventCashFlowModelRepository securityEventCashFlowModelRepository;
+public class EventCashFlowController {
+    private final EventCashFlowModelRepository eventCashFlowModelRepository;
     private final PortfolioRepository portfolioRepository;
-    private final SecurityRepository securityRepository;
-    private volatile List<String> securities;
     private volatile List<String> portfolios;
     private volatile String selectedPortfolio;
 
     @PostConstruct
     public void start() {
         portfolios = ControllerHelper.getPortfolios(portfolioRepository);
-        securities = ControllerHelper.getSecuritiesDescriptions(securityRepository);
     }
 
     @GetMapping
     public String get(Model model) {
-        List<SecurityEventCashFlowModel> events = securityEventCashFlowModelRepository.findAll();
+        List<EventCashFlowModel> events = eventCashFlowModelRepository.findAll();
         model.addAttribute("events", events);
-        return "security-events/table";
+        return "events/table";
     }
 
     @GetMapping("/edit-form")
     public String getEditForm(Model model, @RequestParam(name = "id", required = false) Integer id) {
-        SecurityEventCashFlowModel event;
+        EventCashFlowModel event;
         if (id != null) {
-            event = securityEventCashFlowModelRepository.findById(id)
-                    .orElseGet(SecurityEventCashFlowModel::new);
+            event = eventCashFlowModelRepository.findById(id)
+                    .orElseGet(EventCashFlowModel::new);
         } else {
-            event = new SecurityEventCashFlowModel();
+            event = new EventCashFlowModel();
             event.setPortfolio(selectedPortfolio);
         }
         model.addAttribute("event", event);
-        model.addAttribute("securities", securities);
         model.addAttribute("portfolios", portfolios);
-        return "security-events/edit-form";
+        return "events/edit-form";
     }
 
     /**
@@ -82,10 +77,10 @@ public class SecurityEventCashFlowController {
      * @param model       model with result for exposing to view
      */
     @PostMapping
-    public String postTransaction(@ModelAttribute @Valid SecurityEventCashFlowModel event, Model model) {
+    public String postTransaction(@ModelAttribute @Valid EventCashFlowModel event, Model model) {
         selectedPortfolio = event.getPortfolio();
-        securityEventCashFlowModelRepository.saveAndFlush(event);
+        eventCashFlowModelRepository.saveAndFlush(event);
         model.addAttribute("event", event);
-        return "security-events/view-single";
+        return "events/view-single";
     }
 }

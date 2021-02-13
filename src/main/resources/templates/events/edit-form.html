@@ -1,0 +1,114 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить событие</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <style>
+        .hint {
+            font-size: medium;
+            color: dimgray;
+            text-align: justify;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Редактировать событие</h1>
+<form action="#" th:action="@{/events}" th:object="${event}" method="post">
+    <label>
+        <input type="hidden" th:field="*{id}"/>
+    </label>
+    <label>
+        Дата
+        <input type="date" th:field="*{date}" style="width:110px" required/>
+    </label>
+    <label>
+        Счет
+        <input type="text" th:field="*{portfolio}" list="portfolios" style="width: 270px;" required/>
+    </label>
+    <label>
+        Операция
+        <select th:field="*{type}" id="operation-type" required>
+            <option value="CASH">Пополнение</option>
+            <option value="CASH">Снятие</option> <!-- view value only -->
+            <option value="DIVIDEND">Дивиденд</option>
+            <option value="COUPON">Купон</option>
+            <option value="AMORTIZATION">Амортизация облигации</option>
+            <option value="REDEMPTION">Погашение облигации</option>
+            <option value="COMMISSION">Комиссия</option>
+            <option value="TAX">Налог</option>
+        </select>
+    </label>
+    <br/>
+    <label>
+        Сумма
+        <input type="number" step="0.01" th:field="*{value}" id="value" required/>
+    </label>
+    <label>
+        Валюта
+        <input type="text" th:field="*{valueCurrency}" value="RUB" list="currencies" required/>
+    </label>
+    <br>
+    <label>
+        <input type="text" th:field="*{description}" placeholder="Описание" style="width: 660px;"/>
+    </label>
+    <br/>
+    <input type="submit" onclick="checkValues()" value="Сохранить"/>
+
+    <datalist id="portfolios">
+        <option th:each="portfolio : ${portfolios}" th:text="${portfolio}"></option>
+    </datalist>
+    <datalist id="currencies">
+        <option>RUB</option>
+        <option>USD</option>
+        <option>EUR</option>
+        <option>GBP</option>
+        <option>CHF</option>
+    </datalist>
+</form>
+
+<script type="text/javascript">
+
+    selectType()
+
+    function selectType() {
+        let e = document.getElementById('operation-type');
+        let type = e.options[e.selectedIndex].value
+        if (type == "CASH") {
+            let valueElement = document.getElementById('value')
+            e.options.selectedIndex = (valueElement.value >= 0) ? 0 : 1
+            valueElement.value = Math.abs(valueElement.value)
+        }
+
+    }
+
+    function checkValues() {
+        let e = document.getElementById('operation-type');
+        let text = e.options[e.selectedIndex].text
+        let valueElement = document.getElementById('value')
+        valueElement.value = (text == "Снятие") ? -Math.abs(valueElement.value) : Math.abs(valueElement.value)
+    }
+
+</script>
+
+</body>
+</html>

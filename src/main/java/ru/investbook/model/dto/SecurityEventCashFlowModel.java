@@ -33,7 +33,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Data
-public class SecurityEventModel {
+public class SecurityEventCashFlowModel {
 
     @Nullable
     private Integer id;
