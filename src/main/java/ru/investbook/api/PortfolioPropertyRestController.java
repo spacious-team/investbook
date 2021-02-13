@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@Tag(name = "Свойства счетов", description = "Информация о брокерских счетах")
+@Tag(name = "Информация по счетам")
 @RequestMapping("/api/v1/portfolio-properties")
 public class PortfolioPropertyRestController extends AbstractRestController<Integer, PortfolioProperty, PortfolioPropertyEntity> {
 

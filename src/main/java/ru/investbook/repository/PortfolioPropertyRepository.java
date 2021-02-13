@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -24,10 +24,13 @@ import org.springframework.data.repository.query.Param;
 import ru.investbook.entity.PortfolioPropertyEntity;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 public interface PortfolioPropertyRepository extends JpaRepository<PortfolioPropertyEntity, Integer> {
+
+    List<PortfolioPropertyEntity> findByPropertyInOrderByTimestampDesc(Collection<String> property);
 
     Optional<PortfolioPropertyEntity> findFirstByPropertyOrderByTimestampDesc(String property);
 

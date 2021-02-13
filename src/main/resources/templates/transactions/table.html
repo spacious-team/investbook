@@ -31,9 +31,8 @@
             table-layout: auto;
         }
 
-        td {
-            width: 1px;
-            white-space: nowrap;
+        td.value {
+            text-align: right;
         }
 
         .hint {
@@ -81,10 +80,13 @@
             <span th:case="CELL">Продажа</span>
         </td>
         <td th:text="${tr.count}"/>
-        <td th:text="${tr.price}"/>
-        <td th:text="${tr.accruedInterest}"/>
+        <td th:text="${(tr.price != null) ? tr.price.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}"
+            class="value"/>
+        <td th:text="${(tr.accruedInterest != null) ? tr.accruedInterest.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}"
+            class="value"/>
         <td th:text="${tr.priceCurrency}"/>
-        <td th:text="${tr.commission}"/>
+        <td th:text="${(tr.commission != null) ? tr.commission.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}"
+            class="value"/>
         <td th:text="${tr.commissionCurrency}"/>
     </tr>
 </table>
