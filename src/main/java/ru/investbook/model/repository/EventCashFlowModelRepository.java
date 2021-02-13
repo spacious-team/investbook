@@ -26,18 +26,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.converter.PortfolioConverter;
-import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.EventCashFlowEntity;
 import ru.investbook.model.dto.EventCashFlowModel;
 import ru.investbook.repository.EventCashFlowRepository;
 import ru.investbook.repository.PortfolioRepository;
-import ru.investbook.repository.SecurityRepository;
 
 import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.spacious_team.broker.pojo.CashFlowType.CASH;
@@ -47,27 +44,20 @@ import static org.spacious_team.broker.pojo.CashFlowType.CASH;
 public class EventCashFlowModelRepository implements ModelRepository<EventCashFlowModel> {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final EventCashFlowRepository eventCashFlowRepository;
-    private final SecurityRepository securityRepository;
     private final PortfolioRepository portfolioRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
-    private final SecurityConverter securityConverter;
     private final PortfolioConverter portfolioConverter;
-    private final Set<Integer> cashFlowTypes = Set.of(CashFlowType.PRICE.getId(),
-            CashFlowType.ACCRUED_INTEREST.getId(),
-            CashFlowType.DERIVATIVE_QUOTE.getId(),
-            CashFlowType.DERIVATIVE_PRICE.getId(),
-            CashFlowType.COMMISSION.getId());
 
     public Optional<EventCashFlowModel> findById(Integer id) {
         return eventCashFlowRepository.findById(id)
-                .map(this::toSecurityEventModel);
+                .map(this::toModel);
     }
 
     @Override
     public List<EventCashFlowModel> findAll() {
         return eventCashFlowRepository.findByOrderByPortfolioIdAscTimestampDesc()
                 .stream()
-                .map(this::toSecurityEventModel)
+                .map(this::toModel)
                 .collect(Collectors.toList());
     }
 
@@ -105,7 +95,7 @@ public class EventCashFlowModelRepository implements ModelRepository<EventCashFl
         };
     }
 
-    private EventCashFlowModel toSecurityEventModel(EventCashFlowEntity e) {
+    private EventCashFlowModel toModel(EventCashFlowEntity e) {
         CashFlowType type = CashFlowType.valueOf(e.getCashFlowType().getId());
         EventCashFlowModel m = new EventCashFlowModel();
         m.setId(e.getId());

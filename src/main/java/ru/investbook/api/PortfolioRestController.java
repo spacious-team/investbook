@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@Tag(name = "Счета", description = "Список счетов")
+@Tag(name = "Счета")
 @RequestMapping("/api/v1/portfolios")
 public class PortfolioRestController extends AbstractRestController<String, Portfolio, PortfolioEntity> {
     private final PortfolioRepository repository;
