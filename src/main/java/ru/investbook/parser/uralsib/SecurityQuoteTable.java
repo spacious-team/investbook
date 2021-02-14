@@ -24,44 +24,66 @@ import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
+import static java.math.RoundingMode.HALF_UP;
 import static ru.investbook.parser.uralsib.SecuritiesTable.SecuritiesTableHeader.*;
 
 public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
 
     private final BigDecimal minValue = BigDecimal.valueOf(0.01);
+    private final ForeignExchangeRateTable foreignExchangeRateTable;
+    private final Collection<String> currencies = List.of("USD", "EUR", "GBP");
 
-    protected SecurityQuoteTable(UralsibBrokerReport report) {
+    protected SecurityQuoteTable(UralsibBrokerReport report, ForeignExchangeRateTable foreignExchangeRateTable) {
         super(report, SecuritiesTable.TABLE_NAME, SecuritiesTable.TABLE_END_TEXT,
                 SecuritiesTable.SecuritiesTableHeader.class);
+        this.foreignExchangeRateTable = foreignExchangeRateTable;
     }
 
     @Override
     protected Collection<SecurityQuote> getRow(Table table, TableRow row) {
-        BigDecimal amount = table.getCurrencyCellValueOrDefault(row, AMOUNT, null);
-        if (amount == null) {
+        BigDecimal amountInRub = table.getCurrencyCellValueOrDefault(row, AMOUNT, null);
+        if (amountInRub == null || amountInRub.compareTo(minValue) < 0) {
             return Collections.emptyList();
         }
         int count = table.getIntCellValue(row, OUTGOING_COUNT);
         if (count == 0) {
             return Collections.emptyList();
         }
-        BigDecimal price = amount.divide(BigDecimal.valueOf(count), 4, RoundingMode.HALF_UP);
+        BigDecimal priceInRub = amountInRub.divide(BigDecimal.valueOf(count), 4, HALF_UP);
         BigDecimal quote = table.getCurrencyCellValue(row, QUOTE);
         BigDecimal accruedInterest = table.getCurrencyCellValue(row, ACCRUED_INTEREST);
-        if (accruedInterest.compareTo(minValue) < 0 && price.subtract(quote).abs().compareTo(minValue) < 0) {
-            // акция
-            price = null;
-            accruedInterest = null;
+        String isin = table.getStringCellValue(row, ISIN);
+        Instant reportEndDateTime = getReport().getReportEndDateTime();
+        if (accruedInterest.compareTo(minValue) < 0) { // акция или облигация с НКД == 0 ?
+            if (priceInRub.subtract(quote).abs().compareTo(minValue) < 0) {
+                // акция, котировка в руб
+                priceInRub = null;
+                accruedInterest = null;
+            } else {
+                for (String currency : currencies) {
+                    try {
+                        BigDecimal usdRub = foreignExchangeRateTable.getExchangeRate(currency, "RUB", reportEndDateTime);
+                        if (priceInRub.divide(usdRub, 2, HALF_UP).subtract(quote).abs().compareTo(minValue) < 0) {
+                            // акция (Tesla, Apple), котировка в иностранной валюте
+                            priceInRub = null;
+                            accruedInterest = null;
+                            break;
+                        }
+                    } catch (Exception ignore) {
+                    }
+                }
+            }
         }
         return Collections.singletonList(SecurityQuote.builder()
-                .security(table.getStringCellValue(row, ISIN))
-                .timestamp(getReport().getReportEndDateTime())
+                .security(isin)
+                .timestamp(reportEndDateTime)
                 .quote(quote)
-                .price(price)
+                .price(priceInRub)
                 .accruedInterest(accruedInterest)
                 .build());
     }
