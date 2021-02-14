@@ -1,0 +1,48 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Сохранена котировка</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+</head>
+<body>
+
+<h1>Сохранена котировка</h1>
+<p th:text="${quote.timestamp}" id="date-time"/>
+<p th:text="'Номер записи: ' +  ${quote.id}" th:if="${quote.id != null}"/>
+<p th:text="'Инструмент: ' +  ${quote.getSecurityDisplayName()}"/>
+<p th:text="'Котировка: ' + ${quote.quote}" th:if="${quote.quote != null}">
+    <span th:text="%" th:if="${quote.accruedInterest != null}"/>
+</p>
+<p th:text="'Цена: ' + ${quote.price}" th:if="${quote.price != null}"/>
+<p th:text="'НКД: ' + ${quote.accruedInterest}" th:if="${quote.accruedInterest != null}"/>
+<a href="/security-quotes/edit-form">Добавить еще</a><br>
+<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Котировки/delete_2">Удалить котировку</a><br>
+<a href="/security-quotes">Посмотреть все котировки</a><br>
+<a href="/">На главную</a><br>
+
+<script type="text/javascript">
+    let e = document.getElementById("date-time")
+    e.textContent = new Date(e.textContent).toLocaleString()
+</script>
+
+</body>
+</html>

@@ -16,21 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.repository;
+package ru.investbook.model.dto;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import ru.investbook.entity.SecurityQuoteEntity;
+public enum SecurityType {
+    SHARE, BOND, DERIVATIVE, CURRENCY;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-
-public interface SecurityQuoteRepository extends JpaRepository<SecurityQuoteEntity, Integer> {
-
-    List<SecurityQuoteEntity> findByOrderByTimestampDescSecurityAsc();
-
-    Optional<SecurityQuoteEntity> findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(
-            String isin,
-            Instant date);
-
+    public static SecurityType valueOf(org.spacious_team.broker.pojo.SecurityType type) {
+        return switch (type) {
+            case STOCK_OR_BOND -> SHARE;
+            case DERIVATIVE -> DERIVATIVE;
+            case CURRENCY_PAIR -> CURRENCY;
+        };
+    }
 }

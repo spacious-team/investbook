@@ -19,32 +19,23 @@
 package ru.investbook.model.dto;
 
 import lombok.Data;
-import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 
+import static java.time.ZoneId.systemDefault;
+
 @Data
-public class SecurityEventCashFlowModel {
+public class SecurityQuoteModel {
 
     @Nullable
     private Integer id;
-
-    @Nullable
-    private Integer taxId;
-
-    @NotEmpty
-    private String portfolio;
-
-    @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date = LocalDate.now();
 
     /**
      * In "name (isin)" or "contract-name" format
@@ -53,32 +44,21 @@ public class SecurityEventCashFlowModel {
     private String security;
 
     @NotNull
-    private int count;
+    private SecurityType securityType;
 
     @NotNull
-    private CashFlowType type;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private Instant timestamp = LocalDate.now().atTime(12, 0).atZone(systemDefault()).toInstant();
 
     @NotNull
     @Positive
-    private BigDecimal value;
+    private BigDecimal quote;
 
-    @NotEmpty
-    private String valueCurrency = "RUB";
+    @Positive
+    private BigDecimal price;
 
-    @Nullable
-    @PositiveOrZero
-    private BigDecimal tax;
-
-    @Nullable
-    private String taxCurrency = "RUB";
-
-    public void setValueCurrency(String currency) {
-        this.valueCurrency = currency.toUpperCase();
-    }
-
-    public void setTaxCurrency(String currency) {
-        this.taxCurrency = currency.toUpperCase();
-    }
+    @Positive
+    private BigDecimal accruedInterest;
 
     public void setSecurity(String securityId, String securityName) {
         this.security = SecurityHelper.getSecurityDescription(securityId, securityName);

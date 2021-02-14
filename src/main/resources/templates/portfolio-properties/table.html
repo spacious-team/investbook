@@ -23,7 +23,7 @@
     <title>Информация по счету</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
     <style>
-        td.value {
+        .value {
             text-align: right;
         }
 
@@ -52,7 +52,7 @@
         <th>Номер записи</th>
         <th>Дата</th>
         <th>Свойство</th>
-        <th>Значение</th>
+        <th class="value">Значение</th>
     </tr>
     <tr th:each="property : ${properties}">
         <td th:text="${property.portfolio}"/>

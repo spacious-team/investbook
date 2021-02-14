@@ -77,7 +77,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @PutMapping("{id}")
     @Operation(summary = "Изменить")
     public ResponseEntity<Void> put(@PathVariable("id")
-                                    @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                                    @Parameter(description = "Номер записи о котировке")
                                             Integer id,
                                     @Valid @RequestBody SecurityQuote quote) {
         return super.put(id, quote);
@@ -87,7 +87,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить")
     public void delete(@PathVariable("id")
-                       @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                       @Parameter(description = "Номер записи о котировке")
                                Integer id) {
         super.delete(id);
     }

@@ -32,9 +32,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.util.Objects;
 
-import static ru.investbook.model.dto.TransactionModel.SecurityType.*;
+import static ru.investbook.model.dto.SecurityType.BOND;
+import static ru.investbook.model.dto.SecurityType.SHARE;
 
 @Data
 public class TransactionModel {
@@ -111,10 +111,6 @@ public class TransactionModel {
         BUY, CELL
     }
 
-    public enum SecurityType {
-        SHARE, BOND, DERIVATIVE, CURRENCY
-    }
-
     public void setPriceTickValueCurrency(String priceTickValueCurrency) {
         if (priceTickValueCurrency != null) {
             this.priceTickValueCurrency = priceTickValueCurrency.toUpperCase();
@@ -130,16 +126,11 @@ public class TransactionModel {
     }
 
     public void setSecurity(String securityId, String securityName) {
-        Objects.requireNonNull(securityId, "Необходимо предоставить ISIN акции, облигации или наименование контракта");
-        if (StringUtils.hasText(securityName)) {
-            this.security = securityName + " (" + securityId + ")";
-        } else {
-            this.security = securityId;
-        }
+        this.security = SecurityHelper.getSecurityDescription(securityId, securityName);
     }
 
     public String getSecurityDisplayName() {
-        return (securityType == SHARE || securityType == BOND) ? SecurityHelper.getSecurityName(security) : security;
+        return SecurityHelper.getSecurityDisplayName(security);
     }
 
     /**
@@ -168,18 +159,6 @@ public class TransactionModel {
             return name;
         }
         return null;
-    }
-
-    public void setSecurityType(SecurityType type) {
-        this.securityType = type;
-    }
-
-    public void setSecurityType(org.spacious_team.broker.pojo.SecurityType type) {
-        this.securityType = switch (type) {
-            case STOCK_OR_BOND -> SHARE;
-            case DERIVATIVE -> DERIVATIVE;
-            case CURRENCY_PAIR -> CURRENCY;
-        };
     }
 
     public String getTransactionId() {

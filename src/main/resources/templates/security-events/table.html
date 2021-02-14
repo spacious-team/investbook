@@ -31,7 +31,7 @@
             table-layout: auto;
         }
 
-        td.value {
+        .value {
             text-align: right;
         }
 
@@ -70,9 +70,9 @@
         <th>Инструмент</th>
         <th>Событие</th>
         <th>Количество, шт</th>
-        <th>Выплата</th>
+        <th class="value">Выплата</th>
         <th>Валюта</th>
-        <th>Налог</th>
+        <th class="value">Налог</th>
         <th>Валюта налога</th>
     </tr>
     <tr th:each="e : ${events}">

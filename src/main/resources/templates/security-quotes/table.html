@@ -1,0 +1,83 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Котировки</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <style>
+        table {
+            table-layout: auto;
+        }
+
+        .value {
+            text-align: right;
+        }
+
+        .hint {
+            font-size: medium;
+            color: dimgray;
+            text-align: justify;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Котировки</h1>
+<a href="/security-quotes/edit-form">Добавить котировку</a><br>
+<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Котировки/delete_2">Удалить котировку</a><br>
+<a href="/">На главную</a><br>
+
+<p class="hint">
+    Для редактирования котировки кликните по ее номеру.
+</p>
+
+<table>
+    <tr>
+        <th>Номер записи</th>
+        <th>Дата, время</th>
+        <th>Инструмент</th>
+        <th class="value">Котировка</th>
+        <th class="value">Цена</th>
+        <th class="value">НКД</th>
+    </tr>
+    <tr th:each="quote : ${quotes}">
+        <td><a th:href="@{/security-quotes/edit-form(id=${quote.id})}" th:text="${quote.id}"/></td>
+        <td th:text="${quote.timestamp}" class="date-time"/>
+        <td th:text="${quote.getSecurityDisplayName}"/>
+        <td th:text="${(quote.quote != null) ? quote.quote.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}"
+            class="value"/>
+        <td th:text="${(quote.price != null) ? quote.price.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}"
+            class="value"/>
+        <td th:text="${(quote.accruedInterest != null) ? quote.accruedInterest.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}"
+            class="value"/>
+    </tr>
+</table>
+
+<script type="text/javascript">
+    let elements = document.getElementsByClassName("date-time")
+    for (var i = 0; i < elements.length; i++) {
+        let e = elements[i];
+        e.innerText = new Date(e.innerText).toLocaleString()
+    }
+</script>
+
+</body>
+</html>

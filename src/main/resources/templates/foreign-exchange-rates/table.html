@@ -23,7 +23,7 @@
     <title>Официальные обменные курсы</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
     <style>
-        td.value {
+        .value {
             text-align: right;
         }
 
@@ -50,7 +50,7 @@
     <tr>
         <th>Дата</th>
         <th>Базовая валюта</th>
-        <th>Курс базовой валюты</th>
+        <th class="value">Курс базовой валюты</th>
         <th>Котируемая валюта</th>
     </tr>
     <tr th:each="rate : ${rates}">

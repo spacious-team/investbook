@@ -31,7 +31,7 @@
     <span th:case="CELL">Продажа</span>
 </h2>
 <p th:text="'Счет: ' +  ${transaction.portfolio}"/>
-<p th:text="'Дата: ' + ${transaction.date}"/>
+<p th:text="'Дата исполнения: ' + ${transaction.date}"/>
 <p th:text="'Номер сделки: ' +  ${transaction.transactionId}" th:if="${transaction.transactionId != null && transaction.transactionId != ''}"/>
 <p th:text="'Инструмент: ' +  ${transaction.security}" />
 <p th:text="'Количество: ' + ${transaction.count}" />

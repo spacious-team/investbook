@@ -35,7 +35,7 @@
 <h1>Редактировать сделку</h1>
 <form action="#" th:action="@{/transactions}" th:object="${transaction}" method="post">
     <label>
-        Дата сделки
+        Дата исполнения
         <input type="date" th:field="*{date}" style="width:110px" required/>
     </label>
     <label>
@@ -51,7 +51,7 @@
     </label>
     <label>
         Тип инструмента
-        <select id="market-type" onchange="selectMarket()" th:field="*{securityType}" style="width:214px" required>
+        <select id="security-type" onchange="selectType()" th:field="*{securityType}" style="width:214px" required>
             <option value="SHARE" selected>Акция, ETF</option>
             <option value="BOND">Облигация</option>
             <option value="DERIVATIVE">Фьючерс, опцион</option>
@@ -124,17 +124,26 @@
 </form>
 
 <p class="hint">
-    Номер сделки: если планиуется в будущем загрузить отчет брокера, то использование
-    номера сделки в системе учета брокера исключит дублирование данных. Если отчет брокера загружать не планируется
-    можно не заполнять.
+    Дата исполнения - это дата торгового дня фактического исполнения сделки и поставки бумаги. Если акция куплена
+    в режиме T+2, значит нужно указывать +2 дня от даты сделки в торговом терминале с учетом рабочих дней биржи.
+    Например, если в терминале сделка совершена в пятницу и во вторник на бирже нерабочий день, а среда - рабочий,
+    то нужно указывать среду. Например, если фьючерс куплен в пятницу после 19-00 на МосБирже и в понедельник рабочий
+    день, то нужно указывать понедельник. Например, если куплена валюта по инструменту USDRUB_TOM, то нужно указывать
+    следующий рабочий день биржи.
 </p>
 
 <p class="hint">
-    Инструмент: для акций, облигаций, ETF и других инструментов, имеющих ISIN, после наименования инструмента небходимо
+    Инструмент: для акций, облигаций, ETF и других инструментов, имеющих ISIN, после наименования инструмента необходимо
     в скобках указать ISIN, например "Яндекс (NL0009805522)". Для фьючерсов, опционов и валютных контрактов
     указывается наименование контракта, например "Si-3.22" (или в кратком коде "SiH2"), "Si-3.22M170322CA80000"
     (или в кратком коде "Si80000BC2"), "USDRUB_TOM", придерживаясь полного наименовая или краткого кода контракта для
     всех сделок.
+</p>
+
+<p class="hint">
+    Номер сделки: если планиуется в будущем загрузить отчет брокера, то использование
+    номера сделки в системе учета брокера исключит дублирование данных. Если отчет брокера загружать не планируется
+    можно не заполнять.
 </p>
 
 <p class="hint">
@@ -143,10 +152,10 @@
 
 <script type="text/javascript">
 
-    selectMarket()
+    selectType()
 
-    function selectMarket() {
-        let e = document.getElementById('market-type');
+    function selectType() {
+        let e = document.getElementById('security-type');
         let type = e.options[e.selectedIndex].value
 
         // for type = SHARE and CURRENCY
@@ -201,13 +210,13 @@
     }
 
     function checkValues() {
-        let e = document.getElementById('market-type');
+        let e = document.getElementById('security-type');
         let type = e.options[e.selectedIndex].value
         switch (type) {
             case "SHARE":
             case "CURRENCY":
                 erase('accrued-interest')
-                // no break
+            // no break
             case "BOND":
                 erase('price-tick')
                 erase('price-tick-value')
