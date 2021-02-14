@@ -22,6 +22,13 @@
     <meta charset="UTF-8">
     <title>Добавить событие</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <style>
+        .hint {
+            font-size: medium;
+            color: dimgray;
+            text-align: justify;
+        }
+    </style>
 </head>
 <body>
 
@@ -93,6 +100,14 @@
         <option>CHF</option>
     </datalist>
 </form>
+
+<p class="hint">
+    Инструмент: для акций, облигаций, ETF и других инструментов, имеющих ISIN, после наименования инструмента необходимо
+    в скобках указать ISIN, например "Яндекс (NL0009805522)". Для фьючерсов, опционов и валютных контрактов
+    указывается наименование контракта, например "Si-3.22" (или в кратком коде "SiH2"), "Si-3.22M170322CA80000"
+    (или в кратком коде "Si80000BC2"), "USDRUB_TOM", придерживаясь полного наименовая или краткого кода контракта для
+    всех сделок.
+</p>
 
 <script type="text/javascript">
 

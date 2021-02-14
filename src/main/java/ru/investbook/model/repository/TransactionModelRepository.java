@@ -22,7 +22,6 @@ import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
-import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
@@ -38,6 +37,7 @@ import ru.investbook.converter.TransactionConverter;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.entity.TransactionEntityPK;
+import ru.investbook.model.dto.SecurityType;
 import ru.investbook.model.dto.TransactionModel;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
@@ -55,6 +55,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
 import static java.util.Optional.ofNullable;
+import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 
 @Component
 @RequiredArgsConstructor
@@ -167,7 +168,7 @@ public class TransactionModelRepository implements ModelRepository<TransactionMo
         m.setAction(count >= 0 ? TransactionModel.Action.BUY : TransactionModel.Action.CELL);
         m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
         m.setSecurity(e.getSecurity().getId(), e.getSecurity().getName());
-        m.setSecurityType(SecurityType.getSecurityType(e.getSecurity().getId()));
+        m.setSecurityType(SecurityType.valueOf(getSecurityType(e.getSecurity().getId())));
         m.setCount(abs(count));
         List<TransactionCashFlowEntity> cashFlows = transactionCashFlowRepository.findByPkPortfolioAndPkTransactionIdAndPkTypeIn(
                 e.getPk().getPortfolio(),
@@ -180,12 +181,12 @@ public class TransactionModelRepository implements ModelRepository<TransactionMo
                             m.setPrice(value.getValue().divide(cnt, 6, RoundingMode.HALF_UP).abs());
                             m.setPriceCurrency(value.getCurrency());
                             if (type == CashFlowType.DERIVATIVE_QUOTE) {
-                                m.setSecurityType(TransactionModel.SecurityType.DERIVATIVE);
+                                m.setSecurityType(SecurityType.DERIVATIVE);
                             }
                         }
                         case ACCRUED_INTEREST -> {
                             m.setAccruedInterest(value.getValue().divide(cnt, 6, RoundingMode.HALF_UP).abs());
-                            m.setSecurityType(TransactionModel.SecurityType.BOND);
+                            m.setSecurityType(SecurityType.BOND);
                         }
                         case COMMISSION -> {
                             m.setCommission(value.getValue().abs());
@@ -193,7 +194,7 @@ public class TransactionModelRepository implements ModelRepository<TransactionMo
                         }
                     }
                 });
-        if (m.getSecurityType() == TransactionModel.SecurityType.DERIVATIVE &&
+        if (m.getSecurityType() == SecurityType.DERIVATIVE &&
                 m.getPrice() != null && m.getPrice().floatValue() > 0.000001) {
             cashFlows.stream()
                     .filter(value -> CashFlowType.valueOf(value.getCashFlowType().getId()) == CashFlowType.DERIVATIVE_PRICE)

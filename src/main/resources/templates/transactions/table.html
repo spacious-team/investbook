@@ -31,7 +31,7 @@
             table-layout: auto;
         }
 
-        td.value {
+        .value {
             text-align: right;
         }
 
@@ -57,14 +57,14 @@
     <tr>
         <th>Счет</th>
         <th>Номер сделки</th>
-        <th>Дата</th>
+        <th>Дата исполнения</th>
         <th>Инструмент</th>
         <th>Сделка</th>
         <th>Количество, шт</th>
-        <th>Цена</th>
-        <th>НКД</th>
+        <th class="value">Цена</th>
+        <th class="value">НКД</th>
         <th>Валюта цены</th>
-        <th>Комиссия</th>
+        <th class="value">Комиссия</th>
         <th>Валюта комиссии</th>
     </tr>
     <tr th:each="tr : ${transactions}">

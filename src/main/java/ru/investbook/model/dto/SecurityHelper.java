@@ -18,7 +18,20 @@
 
 package ru.investbook.model.dto;
 
+import org.springframework.util.StringUtils;
+
+import java.util.Objects;
+
 class SecurityHelper {
+
+    static String getSecurityDescription(String securityId, String securityName) {
+        Objects.requireNonNull(securityId, "Необходимо предоставить ISIN акции, облигации или наименование контракта");
+        if (StringUtils.hasText(securityName)) {
+            return securityName + " (" + securityId + ")";
+        } else {
+            return securityId;
+        }
+    }
 
     /**
      * Returns ISIN from template "Name (ISIN)"
@@ -39,6 +52,11 @@ class SecurityHelper {
             return securityDescription.substring(0, securityDescription.length() - 14).trim();
         }
         return null;
+    }
+
+    static String getSecurityDisplayName(String securityDescription) {
+        String name = SecurityHelper.getSecurityName(securityDescription);
+        return (name == null) ? securityDescription : name;
     }
 
     static boolean isSecurityDescriptionHasIsin(String securityDescription) {

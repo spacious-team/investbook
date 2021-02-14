@@ -60,25 +60,25 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить одну", description = "Отобразить выплату по идентификатору")
+    @Operation(summary = "Отобразить одну", description = "Отобразить выплату по ее номеру")
     public ResponseEntity<EventCashFlow> get(@PathVariable("id")
-                                             @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                                             @Parameter(description = "Номер события")
                                                      Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Сохранить информацию о выплате в БД")
+    @Operation(summary = "Добавить", description = "Сохранить информацию в БД")
     public ResponseEntity<Void> post(@Valid @RequestBody EventCashFlow event) {
         return super.post(event);
     }
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Изменить", description = "Модифицировать информацию о выплате в БД")
+    @Operation(summary = "Изменить", description = "Модифицировать информацию в БД")
     public ResponseEntity<Void> put(@PathVariable("id")
-                                    @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                                    @Parameter(description = "Номер события")
                                             Integer id,
                                     @Valid @RequestBody EventCashFlow event) {
         return super.put(id, event);
@@ -86,9 +86,9 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удалить информацию о выплате из БД")
+    @Operation(summary = "Удалить", description = "Удалить информацию из БД")
     public void delete(@PathVariable("id")
-                       @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                       @Parameter(description = "Номер события")
                                Integer id) {
         super.delete(id);
     }
