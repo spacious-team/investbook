@@ -1,0 +1,69 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Официальные обменные курсы</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <style>
+        td.value {
+            text-align: right;
+        }
+
+        .hint {
+            font-size: medium;
+            color: dimgray;
+            text-align: justify;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Официальные обменные курсы</h1>
+<a href="/foreign-exchange-rates/edit-form">Добавить событие</a><br>
+<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Официальные обменные курсы/delete_8">Удалить
+    событие</a><br>
+<a href="/">На главную</a><br>
+
+<p class="hint">
+    Для редактирования курса кликните по его дате.
+</p>
+
+<table>
+    <tr>
+        <th>Дата</th>
+        <th>Базовая валюта</th>
+        <th>Курс базовой валюты</th>
+        <th>Котируемая валюта</th>
+    </tr>
+    <tr th:each="rate : ${rates}">
+        <td>
+            <a th:href="@{/foreign-exchange-rates/edit-form(date=${rate.date}, baseCurrency=${rate.baseCurrency}, quoteCurrency=${rate.quoteCurrency})}"
+               th:text="${rate.date}"/>
+        </td>
+        <td th:text="${rate.baseCurrency}"/>
+        <td th:text="${(rate.rate != null) ? rate.rate.abs().setScale(4, T(java.math.RoundingMode).HALF_UP) : ''}"
+            class="value"/>
+        <td th:text="${rate.quoteCurrency}"/>
+    </tr>
+</table>
+
+</body>
+</html>

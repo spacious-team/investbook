@@ -1,0 +1,62 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить обменный курс</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <style>
+        input[type=submit] {
+            display: inline  !important;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Редактировать обменный курс</h1>
+<form action="#" th:action="@{/foreign-exchange-rates}" th:object="${rate}" method="post">
+    <label>
+        <input type="date" th:field="*{date}" required/>
+    </label>
+    <span>&emsp;</span>
+    <label>
+        <input type="text" th:field="*{baseCurrency}" list="currencies" size="3" required/>
+    </label>
+    <span>&#10562;</span>
+    <label>
+        <input type="number" step="0.0001" th:field="*{rate}" size="9" required/>
+    </label>
+    <label>
+        <input type="text" th:field="*{quoteCurrency}" list="currencies" size="3" required/>
+    </label>
+    <span>&emsp;</span>
+    <input type="submit" value="Сохранить"/>
+
+    <datalist id="currencies">
+        <option>RUB</option>
+        <option>USD</option>
+        <option>EUR</option>
+        <option>GBP</option>
+        <option>CHF</option>
+    </datalist>
+</form>
+
+</body>
+</html>
