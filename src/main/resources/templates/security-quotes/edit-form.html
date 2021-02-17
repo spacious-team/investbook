@@ -20,7 +20,8 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Добавить транзакцию</title>
+    <title th:if="${quote.id == null}">Добавить котировку</title>
+    <title th:unless="${quote.id == null}">Редактировать котировку</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
     <style>
         .hint {
@@ -32,7 +33,8 @@
 </head>
 <body>
 
-<h1>Редактировать сделку</h1>
+<h1 th:if="${quote.id == null}">Добавить котировку</h1>
+<h1 th:unless="${quote.id == null}">Редактировать котировку</h1>
 <form action="#" th:action="@{/security-quotes}" th:object="${quote}" method="post">
     <label>
         <input type="hidden" th:field="*{id}"/>
