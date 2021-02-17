@@ -20,7 +20,7 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Добавить обменный курс</title>
+    <title>Обменный курс</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
     <style>
         input[type=submit] {
@@ -30,12 +30,12 @@
 </head>
 <body>
 
-<h1>Редактировать обменный курс</h1>
+<h1>Обменный курс</h1>
 <form action="#" th:action="@{/foreign-exchange-rates}" th:object="${rate}" method="post">
     <label>
         <input type="date" th:field="*{date}" required/>
     </label>
-    <span>&emsp;</span>
+    <span>&nbsp;</span>
     <label>
         <input type="text" th:field="*{baseCurrency}" list="currencies" size="3" required/>
     </label>

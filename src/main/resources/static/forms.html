@@ -1,0 +1,95 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Формы</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <style>
+        .main {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-content: center;
+        }
+
+        .main div {
+            margin: auto;
+            width: 50%;
+            min-width: 20em;
+        }
+    </style>
+</head>
+<body>
+<h1>Формы</h1>
+<p>
+    <a href="/user-guide/investbook-forms.html">Формы</a> (Investbook Forms) предоставляют интерфейс для ввода
+    информации об инвестициях и спекуляциях, который используется при дальнейшей сборке аналитических отчетов.
+</p>
+
+<div class="main">
+    <div>
+        <h2>Сделки</h2>
+        <a href="/transactions/edit-form">Добавить</a><br>
+        <a href="/transactions">Посмотреть все сделки</a><br>
+        <a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Сделки/delete">Удалить</a><br>
+    </div>
+
+    <div>
+        <h2>События по бумагам</h2>
+        <a href="/security-events/edit-form">Добавить</a><br>
+        <a href="/security-events">Посмотреть все события</a><br>
+        <a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/События по бумаге/delete_3">Удалить
+            событие</a><br>
+    </div>
+
+    <div>
+        <h2>Информация по счетам</h2>
+        <a href="/portfolio-properties/edit-form">Добавить</a><br>
+        <a href="/portfolio-properties">Посмотреть</a><br>
+        <a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Информация по счетам/delete_6">Удалить</a><br>
+
+    </div>
+
+    <div>
+        <h2>События по счетам</h2>
+        <a href="/events/edit-form">Добавить</a><br>
+        <a href="/events">Посмотреть все события</a><br>
+        <a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Движения ДС по счету/delete_9">Удалить
+            событие</a><br>
+    </div>
+
+    <div>
+        <h2>Обменные курсы</h2>
+        <a href="/foreign-exchange-rates/edit-form">Добавить</a><br>
+        <a href="/foreign-exchange-rates">Посмотреть все</a><br>
+        <a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Официальные обменные курсы/delete_8">Удалить</a><br>
+    </div>
+
+    <div>
+        <h2>Котировки</h2>
+        <a href="/security-quotes/edit-form">Добавить</a><br>
+        <a href="/security-quotes">Посмотреть все котировки</a><br>
+        <a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Котировки/delete_2">Удалить котировку</a><br>
+    </div>
+</div>
+
+</body>
+</html>

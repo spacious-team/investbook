@@ -20,12 +20,14 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Добавить событие</title>
+    <title th:if="${property.id == null}">Добавить свойство</title>
+    <title th:unless="${property.id == null}">Редактировать свойство</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
 </head>
 <body>
 
-<h1>Редактировать событие</h1>
+<h1 th:if="${property.id == null}">Добавить свойство</h1>
+<h1 th:unless="${property.id == null}">Редактировать свойство</h1>
 <form action="#" th:action="@{/portfolio-properties}" th:object="${property}" method="post">
     <label>
         <input type="hidden" th:field="*{id}"/>

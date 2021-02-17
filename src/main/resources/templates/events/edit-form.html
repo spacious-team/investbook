@@ -20,7 +20,8 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Добавить событие</title>
+    <title th:if="${event.id == null}">Добавить событие</title>
+    <title th:unless="${event.id == null}">Редактировать событие</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
     <style>
         .hint {
@@ -32,7 +33,8 @@
 </head>
 <body>
 
-<h1>Редактировать событие</h1>
+<h1 th:if="${event.id == null}">Добавить событие</h1>
+<h1 th:unless="${event.id == null}">Редактировать событие</h1>
 <form action="#" th:action="@{/events}" th:object="${event}" method="post">
     <label>
         <input type="hidden" th:field="*{id}"/>
@@ -61,7 +63,7 @@
     <br/>
     <label>
         Сумма
-        <input type="number" step="0.01" th:field="*{value}" id="value" required/>
+        <input type="number" step="0.01" min="0.01" th:field="*{value}" id="value" required/>
     </label>
     <label>
         Валюта
