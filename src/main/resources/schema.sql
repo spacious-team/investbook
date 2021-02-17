@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS `event_cash_flow` (
   UNIQUE KEY `event_cash_flow_timestamp_type_value_currency_portfolio_uniq_ix` (`timestamp`,`type`,`value`,`currency`,`portfolio`),
   KEY `event_cash_flow_type_ix` (`type`),
   KEY `event_cash_flow_portfolio_ix` (`portfolio`),
-  CONSTRAINT `event_cash_flow_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `event_cash_flow_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT `event_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств, не связанное с ЦБ';
 
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `portfolio_property` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `portfolio_property_portfolio_timestamp_property_uniq_ix` (`portfolio`,`timestamp`,`property`),
   KEY `portfolio_property_portfolio_ix` (`portfolio`),
-  CONSTRAINT `portfolio_property_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE
+  CONSTRAINT `portfolio_property_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Свойства портфеля';
 
 /*
@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
   KEY `security_event_cash_flow_ticker_ix` (`security`),
   KEY `security_event_cash_flow_portfolio_ix` (`portfolio`),
   CONSTRAINT `security_event_cash_flow_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE,
-  CONSTRAINT `security_event_cash_flow_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `security_event_cash_flow_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT `security_event_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств, связанное с ЦБ';
 
@@ -166,7 +166,7 @@ CREATE TABLE IF NOT EXISTS `security_quote` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `security_quote_security_timestamp_uniq_ix` (`security`, `timestamp`),
   KEY `security_quote_security_fkey` (`security`),
-  CONSTRAINT `security_quote_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE
+  CONSTRAINT `security_quote_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Котировка (цена) финансовых инструментов';
 
 -- Дамп структуры для таблица portfolio.transaction
@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   KEY `transaction_security_ix` (`security`),
   KEY `transaction_portfolio_ix` (`portfolio`),
   CONSTRAINT `transaction_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE,
-  CONSTRAINT `transaction_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE
+  CONSTRAINT `transaction_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Сделки';
 
 -- Дамп структуры для таблица portfolio.transaction_cash_flow
