@@ -285,7 +285,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     }
 
     /**
-     * Sums cash with same currency for all portfolios and markets, group result by date.
+     * Sums cash with same currency for all portfolios and markets, groups result by date.
      *
      * @return map of date -> currency -> value
      */
@@ -334,7 +334,6 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         private final String portfolio;
         private final Instant instant;
         private final Map<String, BigDecimal> currencyValue;
-
     }
 
     private LinkedHashMap<Instant, BigDecimal> getAllPortfolioTotalAssets(List<PortfolioProperty> assets) {

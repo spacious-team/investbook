@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -50,21 +50,21 @@ import static org.spacious_team.broker.pojo.CashFlowType.*;
 @Slf4j
 public class PaidInterestFactory {
     private static final CashFlowType[] PAY_TYPES = new CashFlowType[]{COUPON, AMORTIZATION, DIVIDEND, TAX};
-    private final PositionsFactory positionsFactory;
+    private final FifoPositionsFactory positionsFactory;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
-    private final Map<Positions, Map<ViewFilter, PaidInterest>> paidInterestCache = new ConcurrentHashMap<>();
+    private final Map<FifoPositions, Map<ViewFilter, PaidInterest>> paidInterestCache = new ConcurrentHashMap<>();
 
     public PaidInterest get(Portfolio portfolio, Security security, ViewFilter filter) {
         ViewFilter filterTillToDate = filter.toBuilder()
                 .fromDate(ViewFilter.defaultFromDate) // need all history o positions from first security transaction
                 .build();
-        Positions positions = positionsFactory.get(portfolio, security, filterTillToDate);
+        FifoPositions positions = positionsFactory.get(portfolio, security, filterTillToDate);
         return paidInterestCache.computeIfAbsent(positions, k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(filter, k -> create(portfolio.getId(), security, positions, filter));
     }
 
-    private PaidInterest create(String portfolio, Security security, Positions positions, ViewFilter filter) {
+    private PaidInterest create(String portfolio, Security security, FifoPositions positions, ViewFilter filter) {
         PaidInterest paidInterest = new PaidInterest();
         for (CashFlowType type : PAY_TYPES) {
             paidInterest.get(type).putAll(getPositionWithPayments(portfolio, security.getId(), positions, type, filter));
@@ -74,7 +74,7 @@ public class PaidInterestFactory {
 
     private Map<Position, List<SecurityEventCashFlow>> getPositionWithPayments(String portfolio,
                                                                                String isin,
-                                                                               Positions positions,
+                                                                               FifoPositions positions,
                                                                                CashFlowType event,
                                                                                ViewFilter filter) {
         List<SecurityEventCashFlowEntity> accruedInterests = securityEventCashFlowRepository

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -26,10 +26,10 @@ import org.springframework.stereotype.Component;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.view.ClosedPosition;
+import ru.investbook.view.FifoPositions;
+import ru.investbook.view.FifoPositionsFactory;
 import ru.investbook.view.OpenedPosition;
 import ru.investbook.view.Position;
-import ru.investbook.view.Positions;
-import ru.investbook.view.PositionsFactory;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;
 import ru.investbook.view.ViewFilter;
@@ -48,7 +48,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
     // isin -> security price currency
     private final TransactionRepository transactionRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
-    private final PositionsFactory positionsFactory;
+    private final FifoPositionsFactory positionsFactory;
 
     public Table create(Portfolio portfolio) {
         return create(portfolio, getCurrencyPairs(portfolio));
@@ -58,7 +58,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
         Table openPositionsProfit = new Table();
         Table closedPositionsProfit = new Table();
         for (String currencyPair : currencyPairs) {
-            Positions positions = positionsFactory.get(portfolio, currencyPair, ViewFilter.get());
+            FifoPositions positions = positionsFactory.get(portfolio, currencyPair, ViewFilter.get());
             openPositionsProfit.addAll(getPositionProfit(currencyPair, positions.getOpenedPositions(),
                     this::getOpenedPositionProfit));
             closedPositionsProfit.addAll(getPositionProfit(currencyPair, positions.getClosedPositions(),

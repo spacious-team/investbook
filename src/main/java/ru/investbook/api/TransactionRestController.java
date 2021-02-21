@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.entity.TransactionEntityPK;
-import ru.investbook.view.PositionsFactory;
+import ru.investbook.view.FifoPositionsFactory;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -47,11 +47,11 @@ import java.util.Optional;
 @Tag(name = "Сделки", description = "Операции купли/продажи биржевых инструментов")
 @RequestMapping("/api/v1/transactions")
 public class TransactionRestController extends AbstractRestController<TransactionEntityPK, Transaction, TransactionEntity> {
-    private final PositionsFactory positionsFactory;
+    private final FifoPositionsFactory positionsFactory;
 
     public TransactionRestController(JpaRepository<TransactionEntity, TransactionEntityPK> repository,
                                      EntityConverter<TransactionEntity, Transaction> converter,
-                                     PositionsFactory positionsFactory) {
+                                     FifoPositionsFactory positionsFactory) {
         super(repository, converter);
         this.positionsFactory = positionsFactory;
     }

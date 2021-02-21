@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -45,28 +45,28 @@ import static org.spacious_team.broker.pojo.SecurityType.getCurrencyPair;
 
 @Component
 @RequiredArgsConstructor
-public class PositionsFactory {
+public class FifoPositionsFactory {
 
     private static final String ALL_PORTFOLIO_KEY = "all";
     private final TransactionRepository transactionRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final TransactionConverter transactionConverter;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
-    private final Map<String, Map<String, Positions>> positionsCache = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, FifoPositions>> positionsCache = new ConcurrentHashMap<>();
 
-    public Positions get(Portfolio portfolio, Security security, ViewFilter filter) {
+    public FifoPositions get(Portfolio portfolio, Security security, ViewFilter filter) {
         return get(Optional.of(portfolio), security.getId(), filter);
     }
 
-    public Positions get(Portfolio portfolio, String isinOrContract, ViewFilter filter) {
+    public FifoPositions get(Portfolio portfolio, String isinOrContract, ViewFilter filter) {
         return get(Optional.of(portfolio), isinOrContract, filter);
     }
 
-    public Positions get(Optional<Portfolio> portfolio, Security security, ViewFilter filter) {
+    public FifoPositions get(Optional<Portfolio> portfolio, Security security, ViewFilter filter) {
         return get(portfolio, security.getId(), filter);
     }
 
-    public Positions get(Optional<Portfolio> portfolio, String isinOrContract, ViewFilter filter) {
+    public FifoPositions get(Optional<Portfolio> portfolio, String isinOrContract, ViewFilter filter) {
         return positionsCache
                 .computeIfAbsent(
                         portfolio.map(Portfolio::getId)
@@ -88,7 +88,7 @@ public class PositionsFactory {
         return key + filter.getFromDate().toString() + filter.getToDate().toString();
     }
 
-    private Positions create(Optional<Portfolio> portfolio, String isinOrContract, ViewFilter filter) {
+    private FifoPositions create(Optional<Portfolio> portfolio, String isinOrContract, ViewFilter filter) {
         SecurityType type = SecurityType.getSecurityType(isinOrContract);
         LinkedList<Transaction> transactions;
         if (type == SecurityType.CURRENCY_PAIR) {
@@ -106,7 +106,7 @@ public class PositionsFactory {
         Deque<SecurityEventCashFlow> redemption = (type == SecurityType.STOCK_OR_BOND) ?
                 getRedemption(portfolio, isinOrContract, filter) :
                 new ArrayDeque<>(0);
-        return new Positions(transactions, redemption);
+        return new FifoPositions(transactions, redemption);
     }
 
     private Collection<String> getFxContracts(Optional<Portfolio> portfolio, String currencyPair, ViewFilter filter) {

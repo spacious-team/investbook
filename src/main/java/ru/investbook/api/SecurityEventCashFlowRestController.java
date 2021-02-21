@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
-import ru.investbook.view.PositionsFactory;
+import ru.investbook.view.FifoPositionsFactory;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -48,11 +48,11 @@ import static org.spacious_team.broker.pojo.CashFlowType.REDEMPTION;
         """)
 @RequestMapping("/api/v1/security-event-cash-flows")
 public class SecurityEventCashFlowRestController extends AbstractRestController<Integer, SecurityEventCashFlow, SecurityEventCashFlowEntity> {
-    private final PositionsFactory positionsFactory;
+    private final FifoPositionsFactory positionsFactory;
 
     public SecurityEventCashFlowRestController(JpaRepository<SecurityEventCashFlowEntity, Integer> repository,
                                                EntityConverter<SecurityEventCashFlowEntity, SecurityEventCashFlow> converter,
-                                               PositionsFactory positionsFactory) {
+                                               FifoPositionsFactory positionsFactory) {
         super(repository, converter);
         this.positionsFactory = positionsFactory;
     }

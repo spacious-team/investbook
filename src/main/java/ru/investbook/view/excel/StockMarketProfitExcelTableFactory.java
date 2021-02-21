@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -34,13 +34,13 @@ import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.view.ClosedPosition;
+import ru.investbook.view.FifoPositions;
+import ru.investbook.view.FifoPositionsFactory;
 import ru.investbook.view.ForeignExchangeRateService;
 import ru.investbook.view.OpenedPosition;
 import ru.investbook.view.PaidInterest;
 import ru.investbook.view.PaidInterestFactory;
 import ru.investbook.view.Position;
-import ru.investbook.view.Positions;
-import ru.investbook.view.PositionsFactory;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;
 import ru.investbook.view.ViewFilter;
@@ -71,7 +71,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     private final PaidInterestFactory paidInterestFactory;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final ForeignExchangeRateService foreignExchangeRateService;
-    private final PositionsFactory positionsFactory;
+    private final FifoPositionsFactory positionsFactory;
 
     public Table create(Portfolio portfolio) {
         return create(portfolio, getSecuritiesIsin(portfolio));
@@ -88,7 +88,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             Optional<SecurityEntity> securityEntity = securityRepository.findById(isin);
             if (securityEntity.isPresent()) {
                 Security security = securityConverter.fromEntity(securityEntity.get());
-                Positions positions = positionsFactory.get(portfolio, security, ViewFilter.get());
+                FifoPositions positions = positionsFactory.get(portfolio, security, ViewFilter.get());
                 PaidInterest paidInterest = paidInterestFactory.get(portfolio, security, ViewFilter.get());
                 openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(),
                         paidInterest, this::getOpenedPositionProfit));

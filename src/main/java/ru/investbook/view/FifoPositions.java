@@ -34,12 +34,9 @@ import static java.lang.Integer.min;
 import static java.lang.Integer.signum;
 import static java.lang.Math.abs;
 
-/**
- * Calculate {@link ClosedPosition}
- */
 @Getter
 @Slf4j
-public class Positions {
+public class FifoPositions {
 
     private final Deque<Transaction> transactions;
     private final Deque<SecurityEventCashFlow> redemptions;
@@ -48,7 +45,7 @@ public class Positions {
     private final Deque<ClosedPosition> closedPositions = new LinkedList<>();
     private final int currentOpenedPositionsCount;
 
-    public Positions(Deque<Transaction> transactions, Deque<SecurityEventCashFlow> redemptions) {
+    public FifoPositions(Deque<Transaction> transactions, Deque<SecurityEventCashFlow> redemptions) {
         this.transactions = transactions;
         this.redemptions = redemptions;
         updateSecuritiesPastPositions(transactions);
@@ -73,7 +70,7 @@ public class Positions {
         if (!redemptions.isEmpty() && (redemptions.peek() != null)) {
             String security = redemptions.peek().getSecurity();
             updateSecuritiesPastPositions(redemptions.stream()
-                    .map(Positions::convertToTransaction)
+                    .map(FifoPositions::convertToTransaction)
                     .collect(Collectors.toCollection(LinkedList::new)));
             for (SecurityEventCashFlow  redemption : redemptions) {
                 closePositions(convertToTransaction(redemption), CashFlowType.REDEMPTION);
