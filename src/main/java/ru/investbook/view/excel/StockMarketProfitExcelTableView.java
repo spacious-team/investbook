@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 
+import static ru.investbook.view.excel.ExcelConditionalFormatHelper.highlightNegativeByRed;
 import static ru.investbook.view.excel.StockMarketProfitExcelTableHeader.*;
 
 @Component
@@ -129,5 +130,6 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
                 cell.setCellStyle(styles.getTotalRowStyle());
             }
         }
+        highlightNegativeByRed(sheet, YIELD);
     }
 }
