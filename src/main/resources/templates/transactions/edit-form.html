@@ -23,11 +23,14 @@
     <title th:if="${transaction.transactionId == null}">Добавить сделку</title>
     <title th:unless="${transaction.transactionId == null}">Редактировать сделку</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <link rel="stylesheet" href="/water-wrapper.css">
     <style>
-        .hint {
-            font-size: medium;
-            color: dimgray;
-            text-align: justify;
+        form {
+            width: 750px
+        }
+
+        .action {
+            width: 125px;
         }
     </style>
 </head>
@@ -38,22 +41,22 @@
 <form action="#" th:action="@{/transactions}" th:object="${transaction}" method="post">
     <label>
         Дата исполнения
-        <input type="date" th:field="*{date}" style="width:110px" required/>
+        <input type="date" th:field="*{date}" required/>
     </label>
     <label>
         Счет
-        <input type="text" th:field="*{portfolio}" list="portfolios" size="14" required/>
+        <input type="text" th:field="*{portfolio}" list="portfolios" class="portfolio" required/>
     </label>
     <label>
         Операция
-        <select th:field="*{action}" style="width:125px" required>
+        <select th:field="*{action}" class="action" required>
             <option value="BUY" selected>Купля</option>
             <option value="CELL">Продажа</option>
         </select>
     </label>
     <label>
         Тип инструмента
-        <select id="security-type" onchange="selectType()" th:field="*{securityType}" style="width:214px" required>
+        <select id="security-type" onchange="selectType()" th:field="*{securityType}" class="input-width" required>
             <option value="SHARE" selected>Акция, ETF</option>
             <option value="BOND">Облигация</option>
             <option value="DERIVATIVE">Фьючерс, опцион</option>
@@ -63,7 +66,7 @@
     <br/>
     <label>
         Инструмент
-        <input type="text" th:field="*{security}" list="securities" size="46" required/>
+        <input type="text" th:field="*{security}" list="securities" class="security" required/>
     </label>
     <label>
         Количество, шт
@@ -92,7 +95,7 @@
         <input type="number" step="0.000001" min="0" th:field="*{priceTickValue}" value="1"/>
     </label>
     <label id="price-tick-value-currency">
-        Валюта шага (опционально)
+        Валюта шага (опц-но)
         <input type="text" th:field="*{priceTickValueCurrency}" value="RUB" list="currencies"/>
     </label>
     <label>

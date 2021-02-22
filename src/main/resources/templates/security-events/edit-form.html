@@ -23,11 +23,10 @@
     <title th:if="${event.id == null}">Добавить событие</title>
     <title th:unless="${event.id == null}">Редактировать событие</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <link rel="stylesheet" href="/water-wrapper.css">
     <style>
-        .hint {
-            font-size: medium;
-            color: dimgray;
-            text-align: justify;
+        input.portfolio {
+            width: 248px;
         }
     </style>
 </head>
@@ -42,15 +41,15 @@
     </label>
     <label>
         Дата
-        <input type="date" th:field="*{date}" style="width:110px" required/>
+        <input type="date" th:field="*{date}" required/>
     </label>
     <label>
         Счет
-        <input type="text" th:field="*{portfolio}" list="portfolios" style="width: 270px;" required/>
+        <input type="text" th:field="*{portfolio}" list="portfolios" class="portfolio" required/>
     </label>
     <label>
         Операция
-        <select th:field="*{type}" onclick="selectType()" id="operation-type" required>
+        <select th:field="*{type}" onclick="selectType()" id="operation-type" class="input-width" required>
             <option value="DIVIDEND" selected>Дивиденд</option>
             <option value="COUPON">Купон</option>
             <option value="AMORTIZATION">Амортизация облигации</option>
@@ -61,11 +60,11 @@
     <br/>
     <label>
         Инструмент
-        <input type="text" th:field="*{security}" list="securities" size="46" required/>
+        <input type="text" th:field="*{security}" list="securities" class="security" required/>
     </label>
     <label id="count">
         Количество, шт
-        <input type="number" min="1" th:field="*{count}" style="width: 214px;" required/>
+        <input type="number" min="1" th:field="*{count}" class="input-width" required/>
     </label>
     <br/>
     <label>

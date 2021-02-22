@@ -23,6 +23,12 @@
     <title th:if="${property.id == null}">Добавить свойство</title>
     <title th:unless="${property.id == null}">Редактировать свойство</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <link rel="stylesheet" href="/water-wrapper.css">
+    <style>
+        #totalAssets {
+            width: 135px;
+        }
+    </style>
 </head>
 <body>
 

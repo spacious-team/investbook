@@ -343,7 +343,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                 .count();
         // portfolio -> value
         Map<String, BigDecimal> lastTotalAssets = new HashMap<>();
-        // portfolio -> summed values
+        // date-time -> summed values
         LinkedHashMap<Instant, BigDecimal> allPortfolioSummedValues = new LinkedHashMap<>();
         for (PortfolioProperty property : assets) {
             lastTotalAssets.put(property.getPortfolio(), BigDecimal.valueOf(parseDouble(property.getValue())));

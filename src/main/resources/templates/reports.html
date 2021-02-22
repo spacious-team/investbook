@@ -1,6 +1,6 @@
 <!--
   ~ InvestBook
-  ~ Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU Affero General Public License as
@@ -18,13 +18,25 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
-    <title>Загрузка отчета брокера</title>
+    <title>Загрузить отчеты брокера</title>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <link rel="stylesheet" href="/water-wrapper.css">
+    <style>
+        input[type=file] {
+            width: 300px;
+        }
+
+        input, select {
+            margin-right: 25px;
+        }
+    </style>
 </head>
 <body>
+<h1>Загрузить отчеты брокера</h1>
 <form action="#" th:action="@{/reports}" enctype="multipart/form-data" method="POST">
     <label>
-        Отчет
+        Отчеты
         <input multiple name="reports" type="file"/>
     </label>
     <label>
@@ -36,7 +48,16 @@
                     th:text="${brokerName}"></option>
         </select>
     </label>
-    <input type="submit" value="загрузить"/>
+    <label>
+        &nbsp;
+        <input type="submit" value="загрузить"/>
+    </label>
 </form>
+<p class="hint">
+    Вы также можете ввести сделки вручную с помощью <a href="/forms.html">Форм</a>, если в списке нет вашего брокера.
+</p>
+<p>
+    <a href="/">Вернуться на главную страницу</a>
+</p>
 </body>
 </html>
