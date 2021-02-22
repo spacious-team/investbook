@@ -1,0 +1,196 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title th:if="${event.id == null}">Добавить событие</title>
+    <title th:unless="${event.id == null}">Редактировать событие</title>
+    <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
+    <link rel="stylesheet" href="/water-wrapper.css">
+    <style>
+        input.portfolio {
+            width: 248px;
+        }
+    </style>
+</head>
+<body>
+
+<h1 th:if="${event.id == null}">Добавить событие</h1>
+<h1 th:unless="${event.id == null}">Редактировать событие</h1>
+<form action="#" th:action="@{/security-events}" th:object="${event}" method="post">
+    <label>
+        <input type="hidden" th:field="*{id}"/>
+        <input type="hidden" th:field="*{taxId}"/>
+    </label>
+    <label>
+        Дата
+        <input type="date" th:field="*{date}" required/>
+    </label>
+    <label>
+        Счет
+        <input type="text" th:field="*{portfolio}" list="portfolios" class="portfolio" required/>
+    </label>
+    <label>
+        Операция
+        <select th:field="*{type}" onclick="selectType()" id="operation-type" class="input-width" required>
+            <option value="DIVIDEND" selected>Дивиденд</option>
+            <option value="COUPON">Купон</option>
+            <option value="AMORTIZATION">Амортизация облигации</option>
+            <option value="REDEMPTION">Погашение облигации</option>
+            <option value="DERIVATIVE_PROFIT">Вариационная маржа</option>
+        </select>
+    </label>
+    <br/>
+    <label>
+        Инструмент
+        <input type="text" th:field="*{security}" list="securities" class="security" required/>
+    </label>
+    <label id="count">
+        Количество, шт
+        <input type="number" min="1" th:field="*{count}" class="input-width" required/>
+    </label>
+    <br/>
+    <label>
+        Получено всего (до налога)
+        <input type="number" step="0.01" min="0.01" th:field="*{value}" required/>
+    </label>
+    <label>
+        Валюта выплаты
+        <input type="text" th:field="*{valueCurrency}" value="RUB" list="currencies" required/>
+    </label>
+    <br id="tax-br">
+    <label id="tax">
+        Налог
+        <input type="number" step="0.01" min="0" th:field="*{tax}" required/>
+    </label>
+    <label id="tax-currency">
+        Валюта налога
+        <input type="text" th:field="*{taxCurrency}" value="RUB" list="currencies" required/>
+    </label>
+    <br/>
+    <input type="submit" onclick="checkValues()" value="Сохранить"/>
+
+    <datalist id="portfolios">
+        <option th:each="portfolio : ${portfolios}" th:text="${portfolio}"></option>
+    </datalist>
+    <datalist id="securities">
+        <option th:each="security : ${securities}" th:text="${security}"></option>
+    </datalist>
+    <datalist id="currencies">
+        <option>RUB</option>
+        <option>USD</option>
+        <option>EUR</option>
+        <option>GBP</option>
+        <option>CHF</option>
+    </datalist>
+</form>
+
+<p class="hint">
+    Инструмент: для акций, облигаций, ETF и других инструментов, имеющих ISIN, после наименования инструмента необходимо
+    в скобках указать ISIN, например "Яндекс (NL0009805522)". Для фьючерсов, опционов и валютных контрактов
+    указывается наименование контракта, например "Si-3.22" (или в кратком коде "SiH2"), "Si-3.22M170322CA80000"
+    (или в кратком коде "Si80000BC2"), "USDRUB_TOM", придерживаясь полного наименовая или краткого кода контракта для
+    всех сделок.
+</p>
+
+<script type="text/javascript">
+
+    selectType()
+
+    function selectType() {
+        let e = document.getElementById('operation-type');
+        let type = e.options[e.selectedIndex].value
+
+        switch (type) {
+            case "DIVIDEND":
+            case "COUPON":
+                display('tax')
+                display('tax-currency')
+                display('count')
+                setMin('count', 1)
+                document.getElementById('tax-br').display = ''
+                break
+            case "DERIVATIVE_PROFIT":
+                hide('count')
+                setMin('count', 0)
+                hide('tax')
+                hide('tax-currency')
+                document.getElementById('tax-br').display = 'none'
+                break
+            default:
+                display('count')
+                setMin('count', 1)
+                hide('tax')
+                hide('tax-currency')
+                document.getElementById('tax-br').display = 'none'
+                break
+        }
+    }
+
+    function hide(id) {
+        let e = document.getElementById(id);
+        e.style.display = 'none'
+        let input = e.getElementsByTagName("input")[0]
+        input.required = false
+    }
+
+    function display(id) {
+        let e = document.getElementById(id);
+        e.style.display = ''
+        let input = e.getElementsByTagName("input")[0]
+        input.required = true
+    }
+
+    function setMin(id, min) {
+        let e = document.getElementById(id);
+        let input = e.getElementsByTagName("input")[0]
+        input.min = min
+    }
+
+    function checkValues() {
+        let e = document.getElementById('operation-type');
+        let type = e.options[e.selectedIndex].value
+        switch (type) {
+            case "DERIVATIVE_PROFIT":
+                setZeroCount('count')
+                // no break
+            case "AMORTIZATION":
+            case "REDEMPTION":
+                erase('tax')
+                erase('tax-currency')
+                break
+        }
+    }
+
+    function setZeroCount(id) {
+        let e = document.getElementById(id);
+        let input = e.getElementsByTagName("input")[0]
+        input.value = '0'
+    }
+
+    function erase(id) {
+        let e = document.getElementById(id);
+        let input = e.getElementsByTagName("input")[0]
+        input.value = ''
+    }
+</script>
+
+</body>
+</html>

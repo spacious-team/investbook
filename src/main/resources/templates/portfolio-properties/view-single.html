@@ -1,0 +1,41 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Сохранено свойство</title>
+    <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
+    <link rel="stylesheet" href="/water-wrapper.css">
+</head>
+<body>
+
+<h1>Сохранено свойство</h1>
+
+<p th:text="'Счет: ' +  ${property.portfolio}"/>
+<p th:text="'Номер записи: ' +  ${property.id}"/>
+<p th:text="'Дата: ' + ${property.date}"/>
+<p th:text="'Активы: ' + ${property.totalAssets} + ' ' + ${property.totalAssetsCurrency}"/>
+<a href="/portfolio-properties/edit-form">Добавить еще</a><br>
+<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Информация по счетам/delete_6">Удалить свойство</a><br>
+<a href="/portfolio-properties">Посмотреть все</a><br>
+<a href="/forms.html">На главную</a><br>
+
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title th:if="${quote.id == null}">Добавить котировку</title>
+    <title th:unless="${quote.id == null}">Редактировать котировку</title>
+    <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
+    <link rel="stylesheet" href="/water-wrapper.css">
+    <style>
+        #security-type {
+            width: 184px;
+        }
+
+        #time {
+            margin-right: 30px;
+            width: 80px;
+        }
+
+        input {
+            width: 86px;
+        }
+
+        input[type="submit"] {
+            width: 150px;
+        }
+    </style>
+</head>
+<body>
+
+<h1 th:if="${quote.id == null}">Добавить котировку</h1>
+<h1 th:unless="${quote.id == null}">Редактировать котировку</h1>
+<form action="#" th:action="@{/security-quotes}" th:object="${quote}" method="post">
+    <label>
+        <input type="hidden" th:field="*{id}"/>
+        <input type="hidden" th:field="*{timestamp}" id="timestamp"/>
+    </label>
+    <label>
+        Инструмент
+        <input type="text" th:field="*{security}" list="securities" class="security" required/>
+    </label>
+    <label>
+        Тип инструмента
+        <select id="security-type" onchange="selectType()" th:field="*{securityType}" required>
+            <option value="SHARE" selected>Акция, ETF</option>
+            <option value="BOND">Облигация</option>
+            <option value="DERIVATIVE">Фьючерс, опцион</option>
+            <option value="CURRENCY">Валюта</option>
+        </select>
+    </label>
+    <br>
+    <label>
+        Дата
+        <input type="date" th:value="${#temporals.format(quote.timestamp, 'yyyy-MM-dd')}" id="date" required/>
+    </label>
+    <label>
+        Время
+        <input type="time" th:value="${#temporals.format(quote.timestamp, 'HH:mm')}" id="time" required/>
+    </label>
+    <label>
+        Котировка
+        <input type="number" step="any" min="0.01" th:field="*{quote}" size="10" required/>
+    </label>
+    <label id="price">
+        Цена
+        <input type="number" step="any" min="0.01" th:field="*{price}" size="10"/>
+    </label>
+    <label id="accrued-interest">
+        НКД
+        <input type="number" step="0.01" min="0" th:field="*{accruedInterest}" size="10"/>
+    </label>
+    <br/>
+    <input type="submit" onclick="checkValues()" value="Сохранить"/>
+
+    <datalist id="securities">
+        <option th:each="security : ${securities}" th:text="${security}"></option>
+    </datalist>
+</form>
+
+<p class="hint">
+    Дата и время указывать в вашей временной таймзоне.
+</p>
+
+<p class="hint">
+    Инструмент: для акций, облигаций, ETF и других инструментов, имеющих ISIN, после наименования инструмента необходимо
+    в скобках указать ISIN, например "Яндекс (NL0009805522)". Для фьючерсов, опционов и валютных контрактов
+    указывается наименование контракта, например "Si-3.22" (или в кратком коде "SiH2"), "Si-3.22M170322CA80000"
+    (или в кратком коде "Si80000BC2"), "USDRUB_TOM", придерживаясь полного наименовая или краткого кода контракта для
+    всех сделок.
+</p>
+
+<p class="hint">
+    Котировка: для облигации в процентах (%), для срочных контрактов - в пунктах.
+</p>
+
+<p class="hint">
+    Цена: для облигации - чистая цена в валюте, для срочных контрактов опционально - в валюте.
+</p>
+
+<script type="text/javascript">
+
+    selectType()
+
+    function selectType() {
+        let e = document.getElementById('security-type');
+        let type = e.options[e.selectedIndex].value
+
+        // for type = SHARE and CURRENCY
+        hide('price')
+        hide('accrued-interest')
+
+        switch (type) {
+            case "BOND":
+                displayRequired('price')
+                displayRequired('accrued-interest')
+                break
+            case "DERIVATIVE":
+                display('price')
+                break
+        }
+    }
+
+    function hide(id) {
+        let e = document.getElementById(id);
+        e.style.display = 'none'
+        let input = e.getElementsByTagName("input")[0]
+        input.required = false
+    }
+
+    function display(id) {
+        let e = document.getElementById(id);
+        e.style.display = ''
+        return e
+    }
+
+    function displayRequired(id) {
+        let e = display(id)
+        let input = e.getElementsByTagName("input")[0]
+        input.required = true
+    }
+
+    function checkValues() {
+        let e = document.getElementById('security-type');
+        let type = e.options[e.selectedIndex].value
+        switch (type) {
+            case "SHARE":
+            case "CURRENCY":
+                erase('price')
+                erase('accrued-interest')
+                break
+            case "DERIVATIVE":
+                erase('accrued-interest')
+                break
+        }
+        document.getElementById('timestamp').value =
+            new Date(document.getElementById('date').value + ' ' + document.getElementById('time').value)
+                .toISOString()
+    }
+
+    function erase(id) {
+        let e = document.getElementById(id);
+        let input = e.getElementsByTagName("input")[0]
+        input.value = ''
+    }
+</script>
+
+</body>
+</html>

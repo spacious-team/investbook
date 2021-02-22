@@ -285,7 +285,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     }
 
     /**
-     * Sums cash with same currency for all portfolios and markets, group result by date.
+     * Sums cash with same currency for all portfolios and markets, groups result by date.
      *
      * @return map of date -> currency -> value
      */
@@ -334,7 +334,6 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         private final String portfolio;
         private final Instant instant;
         private final Map<String, BigDecimal> currencyValue;
-
     }
 
     private LinkedHashMap<Instant, BigDecimal> getAllPortfolioTotalAssets(List<PortfolioProperty> assets) {
@@ -344,7 +343,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                 .count();
         // portfolio -> value
         Map<String, BigDecimal> lastTotalAssets = new HashMap<>();
-        // portfolio -> summed values
+        // date-time -> summed values
         LinkedHashMap<Instant, BigDecimal> allPortfolioSummedValues = new LinkedHashMap<>();
         for (PortfolioProperty property : assets) {
             lastTotalAssets.put(property.getPortfolio(), BigDecimal.valueOf(parseDouble(property.getValue())));

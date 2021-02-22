@@ -1,0 +1,81 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>События по счетам</title>
+    <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
+    <link rel="stylesheet" href="/water-wrapper.css">
+    <style>
+        body {
+            max-width: 95%;
+        }
+    </style>
+</head>
+<body>
+
+<h1>События по счетам</h1>
+<p class="hint">
+    Отображены движения денежных средств, не привязанные к бумаге.
+    События по конкретной бумаге нужно смотреть на странице "<a href="/security-events">События по бумагам</a>".
+</p>
+
+<a href="/events/edit-form">Добавить событие</a><br>
+<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Движения ДС по счету/delete_9">Удалить событие</a><br>
+<a href="/forms.html">На главную</a><br>
+
+<p class="hint">
+    Для редактирования события кликните по ее номеру.
+</p>
+
+<table>
+    <tr>
+        <th>Счет</th>
+        <th>Номер события</th>
+        <th>Дата</th>
+        <th>Событие</th>
+        <th class="value">Сумма</th>
+        <th>Валюта</th>
+        <th>Описание</th>
+    </tr>
+    <tr th:each="e : ${events}">
+        <td th:text="${e.portfolio}"/>
+        <td>
+            <a th:href="@{/events/edit-form(id=${e.id})}" th:text="${e.id}"/>
+        </td>
+        <td th:text="${e.date}"/>
+        <td th:switch="${e.type.name}">
+            <span th:case="DIVIDEND">Дивиденд</span>
+            <span th:case="COUPON">Купон</span>
+            <span th:case="AMORTIZATION">Амортизация облигации</span>
+            <span th:case="REDEMPTION">Погашение облигации</span>
+            <span th:case="COMMISSION">Комиссия</span>
+            <span th:case="TAX">Налог</span>
+            <span th:text="Пополнение" th:if="${e.type.name == 'CASH' && e.value >= 0}"/>
+            <span th:text="Снятие" th:if="${e.type.name == 'CASH' && e.value < 0}"/>
+        </td>
+        <td th:text="${(e.value != null) ? e.value.abs().setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}" class="value"/>
+        <td th:text="${e.valueCurrency}"/>
+        <td th:text="${e.description}"/>
+    </tr>
+</table>
+
+</body>
+</html>

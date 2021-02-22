@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -48,7 +48,7 @@ public class VtbCashFlowTable extends AbstractVtbCashFlowTable<EventCashFlow> {
                 .timestamp(event.getDate())
                 .value(event.getValue())
                 .currency(event.getCurrency())
-                .description(StringUtils.isEmpty(description) ? null : description)
+                .description(StringUtils.hasLength(description) ? description : null)
                 .build());
     }
 }

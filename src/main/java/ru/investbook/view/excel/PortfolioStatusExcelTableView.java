@@ -49,6 +49,7 @@ import java.util.Set;
 import java.util.function.UnaryOperator;
 
 import static ru.investbook.view.excel.ExcelChartPlotHelper.*;
+import static ru.investbook.view.excel.ExcelConditionalFormatHelper.highlightNegativeByRed;
 import static ru.investbook.view.excel.PortfolioStatusExcelTableHeader.*;
 
 @Component
@@ -193,6 +194,8 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
                 cell.setCellStyle(styles.getTotalRowStyle());
             }
         }
+        highlightNegativeByRed(sheet, PROFIT);
+        highlightNegativeByRed(sheet, INTERNAL_RATE_OF_RETURN);
         plotChart("Состав портфеля", sheet, PortfolioStatusExcelTableView::addPieChart);
     }
 

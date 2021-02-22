@@ -48,7 +48,7 @@ import static org.spacious_team.broker.pojo.SecurityType.DERIVATIVE;
 @RequiredArgsConstructor
 @Slf4j
 public class InternalRateOfReturn {
-    private final PositionsFactory positionsFactory;
+    private final FifoPositionsFactory positionsFactory;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final ForeignExchangeRateService foreignExchangeRateService;
@@ -76,7 +76,7 @@ public class InternalRateOfReturn {
             if (SecurityType.getSecurityType(security.getId()) == DERIVATIVE) {
                 return null;
             }
-            Positions positions = positionsFactory.get(portfolio, security, filter);
+            FifoPositions positions = positionsFactory.get(portfolio, security, filter);
             int count = positions.getCurrentOpenedPositionsCount();
             if (count != 0 && (currentQuote == null || currentQuote.getDirtyPriceInCurrency() == null)) {
                 return null;
@@ -107,7 +107,7 @@ public class InternalRateOfReturn {
         }
     }
 
-    private String getTransactionCurrency(Positions positions) {
+    private String getTransactionCurrency(FifoPositions positions) {
         return positions.getTransactions()
                 .stream()
                 .map(t -> transactionCashFlowRepository

@@ -1,0 +1,70 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title th:if="${property.id == null}">Добавить свойство</title>
+    <title th:unless="${property.id == null}">Редактировать свойство</title>
+    <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
+    <link rel="stylesheet" href="/water-wrapper.css">
+    <style>
+        #totalAssets {
+            width: 135px;
+        }
+    </style>
+</head>
+<body>
+
+<h1 th:if="${property.id == null}">Добавить свойство</h1>
+<h1 th:unless="${property.id == null}">Редактировать свойство</h1>
+<form action="#" th:action="@{/portfolio-properties}" th:object="${property}" method="post">
+    <label>
+        <input type="hidden" th:field="*{id}"/>
+    </label>
+    <label>
+        Дата
+        <input type="date" th:field="*{date}" required/>
+    </label>
+    <label>
+        Счет
+        <input type="text" th:field="*{portfolio}" list="portfolios" required/>
+    </label>
+    <br/>
+    <label>
+        Активы
+        <input type="number" step="0.01" min="0" th:field="*{totalAssets}" required/>
+    </label>
+    <label>
+        Валюта
+        <select th:field="*{totalAssetsCurrency}" required>
+            <option value="RUB">RUB</option>
+            <option value="USD">USD</option>
+        </select>
+    </label>
+    <br/>
+    <input type="submit" onclick="checkValues()" value="Сохранить"/>
+
+    <datalist id="portfolios">
+        <option th:each="portfolio : ${portfolios}" th:text="${portfolio}"></option>
+    </datalist>
+</form>
+
+</body>
+</html>

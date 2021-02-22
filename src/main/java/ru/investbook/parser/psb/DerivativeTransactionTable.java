@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -31,7 +31,7 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 
 import static ru.investbook.parser.psb.DerivativeTransactionTable.FortsTableHeader.*;
 
@@ -77,26 +77,18 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
         BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
                 .add(table.getCurrencyCellValue(row, BROKER_COMMISSION))
                 .negate();
-        List<DerivativeTransaction> transactionInfo = new ArrayList<>(2);
-        DerivativeTransaction.DerivativeTransactionBuilder builder = DerivativeTransaction.builder()
+        return Collections.singleton(DerivativeTransaction.builder()
                 .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
                 .transactionId(String.valueOf(table.getLongCellValue(row, TRANSACTION))) // double numbers
                 .portfolio(getReport().getPortfolio())
-                .contract(table.getStringCellValue(row, CONTRACT))
-                .count((isBuy ? 1 : -1) * count);
-        transactionInfo.add(builder
+                .security(table.getStringCellValue(row, CONTRACT))
+                .count((isBuy ? 1 : -1) * count)
+                .valueInPoints(valueInPoints)
                 .value(value)
                 .commission(commission)
                 .valueCurrency("RUB") // FORTS, only RUB
                 .commissionCurrency("RUB") // FORTS, only RUB
                 .build());
-        transactionInfo.add(builder
-                .value(valueInPoints)
-                .commission(BigDecimal.ZERO)
-                .valueCurrency(DerivativeTransaction.QUOTE_CURRENCY)
-                .commissionCurrency("RUB") // FORTS, only RUB
-                .build());
-        return transactionInfo;
     }
 
     enum FortsTableHeader implements TableColumnDescription {

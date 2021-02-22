@@ -51,6 +51,8 @@ public class UralsibReportTables implements ReportTables {
     private final CouponAmortizationRedemptionTable couponAmortizationRedemptionTable;
     @Getter
     private final DividendTable dividendTable;
+    @Getter
+    private final ReportTable<SecurityQuote> securityQuoteTable;
 
     public UralsibReportTables(UralsibBrokerReport report, ForeignExchangeRateService foreignExchangeRateService) {
         this.report = report;
@@ -63,6 +65,9 @@ public class UralsibReportTables implements ReportTables {
         this.couponAmortizationRedemptionTable =
                 new CouponAmortizationRedemptionTable(report, portfolioSecuritiesTable, securityTransactionTable);
         this.dividendTable = new DividendTable(report, portfolioSecuritiesTable, securityTransactionTable);
+        this.securityQuoteTable = WrappingReportTable.of(
+                new SecurityQuoteTable(report, foreignExchangeRateTable),
+                new DerivativeQuoteTable(report));
     }
 
     @Override
@@ -102,12 +107,5 @@ public class UralsibReportTables implements ReportTables {
     @Override
     public ReportTable<SecurityEventCashFlow> getDerivativeCashFlowTable() {
         return new DerivativeCashFlowTable(report);
-    }
-
-    @Override
-    public ReportTable<SecurityQuote> getSecurityQuoteTable() {
-        return WrappingReportTable.of(
-                new SecurityQuoteTable(report),
-                new DerivativeQuoteTable(report));
     }
 }

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.ContentDisposition;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.view.excel.ExcelView;
@@ -58,8 +59,13 @@ public class PortfolioViewRestController {
     private final ExcelView excelView;
     private volatile int expectedFileSize = 0xFFFF;
 
-    @PostMapping("/portfolio")
+    @GetMapping("/portfolio")
     public void getExcelView(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        postExcelView(request, response);
+    }
+
+    @PostMapping("/portfolio")
+    public void postExcelView(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             long t0 = System.nanoTime();
             String fileName = sendExcelFile(request, response);

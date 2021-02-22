@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -29,11 +29,9 @@ import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 
-import static org.spacious_team.broker.report_parser.api.DerivativeTransaction.QUOTE_CURRENCY;
 import static ru.investbook.parser.psb.DerivativeExpirationTable.ExpirationTableHeader.*;
 
 @Slf4j
@@ -67,27 +65,18 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
         BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
                 .add(table.getCurrencyCellValue(row, BROKER_COMMISSION))
                 .negate();
-        List<DerivativeTransaction> transactionInfo = new ArrayList<>(2);
-        DerivativeTransaction.DerivativeTransactionBuilder builder =
-                DerivativeTransaction.builder()
-                        .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
-                        .portfolio(getReport().getPortfolio())
-                        .transactionId(String.valueOf(table.getLongCellValue(row, TRANSACTION)))
-                        .contract(table.getStringCellValue(row, CONTRACT))
-                        .count((isBuy ? 1 : -1) * count);
-        transactionInfo.add(builder
+        return Collections.singleton(DerivativeTransaction.builder()
+                .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
+                .portfolio(getReport().getPortfolio())
+                .transactionId(String.valueOf(table.getLongCellValue(row, TRANSACTION)))
+                .security(table.getStringCellValue(row, CONTRACT))
+                .count((isBuy ? 1 : -1) * count)
+                .valueInPoints(valueInPoints)
                 .value(value)
                 .commission(commission)
                 .valueCurrency("RUB") // FORTS, only RUB
                 .commissionCurrency("RUB") // FORTS, only RUB
                 .build());
-        transactionInfo.add(builder
-                .value(valueInPoints)
-                .commission(BigDecimal.ZERO)
-                .valueCurrency(QUOTE_CURRENCY)
-                .commissionCurrency("RUB") // FORTS, only RUB
-                .build());
-        return transactionInfo;
     }
 
     enum ExpirationTableHeader implements TableColumnDescription {
@@ -104,7 +93,8 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
 
         @Getter
         private final TableColumn column;
-        ExpirationTableHeader(String ... words) {
+
+        ExpirationTableHeader(String... words) {
             this.column = TableColumnImpl.of(words);
         }
     }

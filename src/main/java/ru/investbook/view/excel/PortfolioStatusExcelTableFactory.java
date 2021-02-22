@@ -43,12 +43,12 @@ import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.view.ClosedPosition;
+import ru.investbook.view.FifoPositions;
+import ru.investbook.view.FifoPositionsFactory;
 import ru.investbook.view.ForeignExchangeRateService;
 import ru.investbook.view.InternalRateOfReturn;
 import ru.investbook.view.OpenedPosition;
 import ru.investbook.view.PositionHistory;
-import ru.investbook.view.Positions;
-import ru.investbook.view.PositionsFactory;
 import ru.investbook.view.Table;
 import ru.investbook.view.TableFactory;
 import ru.investbook.view.ViewFilter;
@@ -89,7 +89,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     private final SecurityQuoteConverter securityQuoteConverter;
     private final SecurityConverter securityConverter;
     protected final PortfolioPropertyConverter portfolioPropertyConverter;
-    private final PositionsFactory positionsFactory;
+    private final FifoPositionsFactory positionsFactory;
     private final ForeignExchangeRateService foreignExchangeRateService;
     protected final PortfolioPropertyRepository portfolioPropertyRepository;
     private final InternalRateOfReturn internalRateOfReturn;
@@ -226,7 +226,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         row.put(TYPE, securityType.getDescription());
         try {
             ViewFilter filter = ViewFilter.get();
-            Positions positions = positionsFactory.get(portfolio, security, filter);
+            FifoPositions positions = positionsFactory.get(portfolio, security, filter);
             row.put(FIRST_TRANSACTION_DATE, Optional.ofNullable(positions.getPositionHistories().peekFirst())
                     .map(PositionHistory::getInstant)
                     .orElse(null));
@@ -342,7 +342,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     /**
      * Курсовой доход с купли-продажи (для деривативов - суммарная вариационная маржа)
      */
-    private BigDecimal getGrossProfit(Optional<Portfolio> portfolio, Security security, Positions positions, String toCurrency) {
+    private BigDecimal getGrossProfit(Optional<Portfolio> portfolio, Security security, FifoPositions positions, String toCurrency) {
         SecurityType securityType = getSecurityType(security);
         return switch (securityType) {
             case STOCK_OR_BOND -> getPurchaseCost(security, positions, toCurrency)
@@ -355,7 +355,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     /**
      * Разница доходов с продажи и расходов на покупку
      */
-    private BigDecimal getPurchaseCost(Security security, Positions positions, String toCurrency) {
+    private BigDecimal getPurchaseCost(Security security, FifoPositions positions, String toCurrency) {
         SecurityType securityType = getSecurityType(security);
         return switch (securityType) {
             case STOCK_OR_BOND -> getStockOrBondPurchaseCost(positions, toCurrency);
@@ -368,7 +368,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
      * Разница цен продаж и покупок. Не учитывается цена покупки, если ЦБ выведена со счета, не учитывается цена
      * продажи, если ЦБ введена на счет
      */
-    private BigDecimal getStockOrBondPurchaseCost(Positions positions, String toCurrency) {
+    private BigDecimal getStockOrBondPurchaseCost(FifoPositions positions, String toCurrency) {
         BigDecimal purchaseCost = positions.getOpenedPositions()
                 .stream()
                 .map(openPosition -> getTransactionValue(openPosition.getOpenTransaction(), CashFlowType.PRICE, toCurrency)
@@ -400,7 +400,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     /**
      * Разница проданного и купленного НКД
      */
-    private BigDecimal getPurchaseAccruedInterest(Security security, Positions positions, String toCurrency) {
+    private BigDecimal getPurchaseAccruedInterest(Security security, FifoPositions positions, String toCurrency) {
         if (getSecurityType(security) == STOCK_OR_BOND) {
             return getTotal(positions.getTransactions(), CashFlowType.ACCRUED_INTEREST, toCurrency);
         }
