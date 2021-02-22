@@ -1,0 +1,216 @@
+/*
+ * InvestBook
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+html {
+    height: 100%;
+}
+
+body {
+    background: url(background.jpg) no-repeat;
+    background-color: #193783;
+    background-size: cover;
+    color: #EEE;
+    font-size: 16px;
+    font-family: Arial, serif;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    min-height: 100%;
+}
+
+a {
+    color: #EEE;
+    text-decoration: none;
+    transition-duration: 0.2s;
+}
+
+a:hover {
+    transition-duration: 0.2s;
+}
+
+:not(a) > span, :not(a) > p {
+    cursor: default;
+}
+
+.row {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    max-width: 1200px;
+    min-width: 320px;
+    margin: auto;
+    padding: 0 25px;
+}
+
+.row .cell {
+    margin: auto;
+}
+
+.row .cell span {
+    display: inline-block;
+}
+
+.row .cell p {
+    display: block;
+    margin: 0;
+}
+
+.header {
+    margin-top: 50px;
+}
+
+.site-name {
+    font-size: 20px;
+    line-height: 20px;
+}
+
+.transaction-count {
+    font-size: 46px;
+    line-height: 46px;
+    margin-right: 4px;
+}
+
+.portfolios {
+    display: inline-block;
+    font-size: smaller;
+    margin-top: 12px;
+}
+
+.header svg {
+    width: 32px;
+    height: 32px;
+}
+
+.header svg path {
+    fill: #eee;
+}
+
+.wallet {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.wallet span {
+    margin-left: 4px;
+}
+
+.header .exit {
+    margin: auto 0 auto 0;
+}
+
+.assets {
+    justify-content: flex-start;
+}
+
+.assets .cell {
+    margin: 100px;
+}
+
+.assets a {
+    color: rgba(238, 238, 238, 0.5);
+    text-decoration: none;
+    transition-duration: 0.2s;
+}
+
+.assets a:hover {
+    color: #EEE;
+    transition-duration: 0.2s;
+}
+
+.assets .label {
+    font-size: 40px;
+    margin-bottom: 50px;
+}
+
+.assets .value {
+    font-size: 90px;
+    font-weight: bolder;
+}
+
+.links {
+    margin-bottom: 100px;
+}
+
+.links a {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    height: 180px;
+    width: 180px;
+}
+
+.links a:hover {
+    color: #0e67becc;
+    background-color: white;
+}
+
+.links svg {
+    width: 75%;
+    margin-left: 20%;
+}
+
+.links a svg path {
+    fill: #eee;
+    transition-duration: 0.2s;
+}
+
+.links a:hover svg path {
+    fill: #0e67becc;
+    transition-duration: 0.2s;
+}
+
+.links span {
+    width: 100%;
+    text-align: center;
+    font-size: 24px;
+}
+
+.footer {
+    margin-bottom: 20px;
+}
+
+.footer a {
+    display: flex;
+    align-items: center;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+.footer a path {
+    fill: #eee;
+    transition-duration: 0.1s;
+}
+
+.footer a:hover path {
+    stroke: #eee2;
+    stroke-width: 4px;
+    transition-duration: 0.1s;
+}
+
+.footer svg {
+    width: 20px;
+    height: 20px;
+}
+
+.footer a span {
+    margin-left: 6px;
+}

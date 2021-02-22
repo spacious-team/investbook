@@ -1,0 +1,99 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <title>Аналитика за период</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <link rel="stylesheet" href="/water-wrapper.css">
+    <style>
+        form {
+            display: flex;
+            align-items: center;
+            margin-top: 2em;
+            min-width: 800px;
+        }
+
+        #from-date, #from-date-label, #to-date-label {
+            display: none;
+        }
+
+        #to-date {
+            display: inline;
+        }
+
+        .active-text {
+            text-decoration: none;
+            color: gray;
+        }
+
+        .inactive-text {
+            text-decoration: line-through;
+            color: #D0D0D0;
+        }
+    </style>
+</head>
+<body>
+<h1>Аналитика за период</h1>
+
+<a href="/">На главную</a>
+
+<form action="/portfolio" method="POST" id="get-portfolio" class="grey-smaller">
+    <a onclick="selectPeriodView()" id="perion-link" class="inactive-text" href="#" title="выбрать период">за период</a>
+    <span class="inactive-text" style="text-decoration: none">/</span>
+    <a onclick="selectTillDateView()" id="till-link" class="active-text" href="#" title="выбрать дату">на дату</a>&emsp;
+    <label id="from-date-label" for="from-date">&emsp; с &emsp;</label>
+    <input id="from-date" name="from-date" type="date"/>
+    <label id="to-date-label" for="to-date">&emsp; по &emsp;</label>
+    <input id="to-date" name="to-date" type="date"/>
+    &emsp;
+    <input type="submit" value="Получить"/>
+</form>
+</body>
+
+<script type="text/javascript">
+    document.getElementById('from-date').value = '1997-09-22';
+    document.getElementById('to-date').value = new Date().toISOString().substr(0, 10);
+
+    function selectPeriodView() {
+        document.getElementById('from-date').style.display = 'inline'
+        document.getElementById('from-date-label').style.display = 'inline'
+        document.getElementById('to-date-label').style.display = 'inline'
+        let periodLink = document.getElementById('perion-link');
+        let tillLink = document.getElementById('till-link');
+        periodLink.classList.add('active-text')
+        periodLink.classList.remove('inactive-text')
+        tillLink.classList.add('inactive-text')
+        tillLink.classList.remove('active-text')
+    }
+
+    function selectTillDateView() {
+        document.getElementById('from-date').value = '1997-09-22';
+        document.getElementById('from-date').style.display = 'none'
+        document.getElementById('from-date-label').style.display = 'none'
+        document.getElementById('to-date-label').style.display = 'none'
+        let periodLink = document.getElementById('perion-link');
+        let tillLink = document.getElementById('till-link');
+        periodLink.classList.add('inactive-text')
+        periodLink.classList.remove('active-text')
+        tillLink.classList.add('active-text')
+        tillLink.classList.remove('inactive-text')
+    }
+</script>
+</html>

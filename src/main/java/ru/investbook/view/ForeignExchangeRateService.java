@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 @Slf4j
 public class ForeignExchangeRateService {
+    public static final String RUB = "RUB";
     private final ForeignExchangeRateRepository foreignExchangeRateRepository;
     // base-currency -> quote-currency -> exchange-rate
     private final Map<String, Map<String, BigDecimal>> cache = new ConcurrentHashMap<>();
