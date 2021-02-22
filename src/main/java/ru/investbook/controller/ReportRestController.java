@@ -87,6 +87,7 @@ public class ReportRestController {
         if (exceptions.isEmpty()) {
             return ResponseEntity.ok("""
                     Отчеты загружены <a href="/">[ok]</a>
+                    <script type="text/javascript">document.location.href="/"</script>
                     """);
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

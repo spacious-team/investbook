@@ -22,12 +22,19 @@
     <meta charset="UTF-8">
     <title th:if="${event.id == null}">Добавить событие</title>
     <title th:unless="${event.id == null}">Редактировать событие</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
+    <link rel="stylesheet" href="/water-wrapper.css">
     <style>
-        .hint {
-            font-size: medium;
-            color: dimgray;
-            text-align: justify;
+        #portfolio {
+            width: 250px;
+        }
+
+        #operation-type {
+            width: 235px;
+        }
+
+        #description {
+            width: 660px;
         }
     </style>
 </head>
@@ -41,11 +48,11 @@
     </label>
     <label>
         Дата
-        <input type="date" th:field="*{date}" style="width:110px" required/>
+        <input type="date" th:field="*{date}" required/>
     </label>
     <label>
         Счет
-        <input type="text" th:field="*{portfolio}" list="portfolios" style="width: 270px;" required/>
+        <input type="text" th:field="*{portfolio}" list="portfolios" id="portfolio" required/>
     </label>
     <label>
         Операция
@@ -71,7 +78,7 @@
     </label>
     <br>
     <label>
-        <input type="text" th:field="*{description}" placeholder="Описание" style="width: 660px;"/>
+        <input type="text" th:field="*{description}" placeholder="Описание" id="description"/>
     </label>
     <br/>
     <input type="submit" onclick="checkValues()" value="Сохранить"/>

@@ -22,12 +22,24 @@
     <meta charset="UTF-8">
     <title th:if="${quote.id == null}">Добавить котировку</title>
     <title th:unless="${quote.id == null}">Редактировать котировку</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
+    <link rel="stylesheet" href="/water-wrapper.css">
     <style>
-        .hint {
-            font-size: medium;
-            color: dimgray;
-            text-align: justify;
+        #security-type {
+            width: 184px;
+        }
+
+        #time {
+            margin-right: 30px;
+            width: 80px;
+        }
+
+        input {
+            width: 86px;
+        }
+
+        input[type="submit"] {
+            width: 150px;
         }
     </style>
 </head>
@@ -42,11 +54,11 @@
     </label>
     <label>
         Инструмент
-        <input type="text" th:field="*{security}" list="securities" size="46" required/>
+        <input type="text" th:field="*{security}" list="securities" class="security" required/>
     </label>
     <label>
         Тип инструмента
-        <select id="security-type" onchange="selectType()" th:field="*{securityType}" style="width:218px" required>
+        <select id="security-type" onchange="selectType()" th:field="*{securityType}" required>
             <option value="SHARE" selected>Акция, ETF</option>
             <option value="BOND">Облигация</option>
             <option value="DERIVATIVE">Фьючерс, опцион</option>
@@ -56,13 +68,11 @@
     <br>
     <label>
         Дата
-        <input type="date" th:value="${#temporals.format(quote.timestamp, 'yyyy-MM-dd')}" id="date" style="width:117px"
-               required/>
+        <input type="date" th:value="${#temporals.format(quote.timestamp, 'yyyy-MM-dd')}" id="date" required/>
     </label>
     <label>
         Время
-        <input type="time" th:value="${#temporals.format(quote.timestamp, 'HH:mm')}" id="time"
-               style="margin-right: 30px" required/>
+        <input type="time" th:value="${#temporals.format(quote.timestamp, 'HH:mm')}" id="time" required/>
     </label>
     <label>
         Котировка

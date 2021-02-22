@@ -21,10 +21,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Обменный курс</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
+    <link rel="stylesheet" href="/water-wrapper.css">
     <style>
         input[type=submit] {
             display: inline  !important;
+        }
+
+        #baseCurrency, #quoteCurrency {
+            width: 65px;
+        }
+
+        #rate {
+            width: 120px;
         }
     </style>
 </head>
@@ -37,11 +46,11 @@
     </label>
     <span>&nbsp;</span>
     <label>
-        <input type="text" th:field="*{baseCurrency}" list="currencies" size="3" required/>
+        <input type="text" th:field="*{baseCurrency}" list="currencies" required/>
     </label>
     <span>&#10562;</span>
     <label>
-        <input type="number" step="0.0001" th:field="*{rate}" size="9" required/>
+        <input type="number" step="0.0001" th:field="*{rate}" required/>
     </label>
     <label>
         <input type="text" th:field="*{quoteCurrency}" list="currencies" size="3" required/>
