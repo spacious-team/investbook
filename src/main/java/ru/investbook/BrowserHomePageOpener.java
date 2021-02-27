@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -29,7 +29,7 @@ public class BrowserHomePageOpener {
 
     static void open(String url) {
         Logger log = LoggerFactory.getLogger(BrowserHomePageOpener.class);
-        log.info("Opening browser with home page \"{}\" ...", url);
+        log.debug("Opening browser with home page \"{}\" ...", url);
         String os = System.getProperty("os.name").toLowerCase();
         Runtime rt = Runtime.getRuntime();
         try {
@@ -53,7 +53,7 @@ public class BrowserHomePageOpener {
                 }
                 rt.exec(new String[]{"sh", "-c", cmd.toString()});
             }
-            log.info("Home page \"{}\" opening try finished successfully", url);
+            log.debug("Home page \"{}\" was opened", url);
         } catch (Exception e) {
             log.info("Can't open home page \"{}\" with browser", url, e);
         }
