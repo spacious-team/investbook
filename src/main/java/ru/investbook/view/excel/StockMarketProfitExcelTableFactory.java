@@ -26,7 +26,6 @@ import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.SecurityConverter;
-import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
@@ -51,11 +50,11 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
 import static ru.investbook.view.excel.StockMarketProfitExcelTableHeader.*;
 
 @Component
@@ -74,41 +73,27 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     private final FifoPositionsFactory positionsFactory;
 
     public Table create(Portfolio portfolio) {
-        return create(portfolio, getSecuritiesIsin(portfolio));
+        throw new UnsupportedOperationException();
     }
 
     public Table create(Portfolio portfolio, String forCurrency) {
-        return create(portfolio, getSecuritiesIsin(portfolio, forCurrency));
+        Collection<String> securitiesIsin = getSecuritiesIsin(portfolio, forCurrency);
+        return create(portfolio, securitiesIsin);
     }
 
     public Table create(Portfolio portfolio, Collection<String> securitiesIsin) {
         Table openPositionsProfit = new Table();
         Table closedPositionsProfit = new Table();
         for (String isin : securitiesIsin) {
-            Optional<SecurityEntity> securityEntity = securityRepository.findById(isin);
-            if (securityEntity.isPresent()) {
-                Security security = securityConverter.fromEntity(securityEntity.get());
-                FifoPositions positions = positionsFactory.get(portfolio, security, ViewFilter.get());
-                PaidInterest paidInterest = paidInterestFactory.get(portfolio, security, ViewFilter.get());
-                openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(),
-                        paidInterest, this::getOpenedPositionProfit));
-                closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(),
-                        paidInterest, this::getClosedPositionProfit));
-                openPositionsProfit.addAll(getPositionProfit(security, paidInterest.getFictitiousPositions(),
-                        paidInterest, this::getOpenedPositionProfit));
-            }
+            securityRepository.findById(isin)
+                    .map(securityConverter::fromEntity)
+                    .ifPresent(security ->
+                            getRowsForSecurity(security, portfolio, openPositionsProfit, closedPositionsProfit));
         }
         Table profit = new Table();
         profit.addAll(openPositionsProfit);
         profit.addAll(closedPositionsProfit);
         return profit;
-    }
-
-    private Collection<String> getSecuritiesIsin(Portfolio portfolio) {
-        return transactionRepository.findDistinctSecurityByPortfolioAndTimestampBetweenOrderByTimestampDesc(
-                portfolio,
-                ViewFilter.get().getFromDate(),
-                ViewFilter.get().getToDate());
     }
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio, String currency) {
@@ -117,6 +102,17 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                 currency,
                 ViewFilter.get().getFromDate(),
                 ViewFilter.get().getToDate());
+    }
+
+    private void getRowsForSecurity(Security security, Portfolio portfolio, Table openPositionsProfit, Table closedPositionsProfit) {
+        FifoPositions positions = positionsFactory.get(portfolio, security, ViewFilter.get());
+        PaidInterest paidInterest = paidInterestFactory.get(portfolio, security, ViewFilter.get());
+        openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(),
+                paidInterest, this::getOpenedPositionProfit));
+        closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(),
+                paidInterest, this::getClosedPositionProfit));
+        openPositionsProfit.addAll(getPositionProfit(security, paidInterest.getFictitiousPositions(),
+                paidInterest, this::getOpenedPositionProfit));
     }
 
     private <T extends Position> Table getPositionProfit(Security security,
@@ -128,7 +124,8 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             Table.Record record = profitBuilder.apply(position);
             record.putAll(getPaidInterestProfit(position, paidInterest));
             record.put(SECURITY,
-                    Optional.ofNullable(security.getName())
+                    ofNullable(security.getName())
+                            .or(() -> ofNullable(security.getTicker()))
                             .orElse(security.getId()));
             rows.add(record);
         }
@@ -163,18 +160,12 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         Transaction transaction = position.getCloseTransaction();
         double multiplier = Math.abs(1d * position.getCount() / transaction.getCount());
         row.put(CLOSE_DATE, transaction.getTimestamp());
-        BigDecimal closeAmount;
-        switch (position.getClosingEvent()) {
-            case PRICE:
-                closeAmount = getTransactionCashFlow(transaction, CashFlowType.PRICE, multiplier);
-                break;
-            case REDEMPTION:
-                closeAmount = getRedemptionCashFlow(transaction.getPortfolio(), transaction.getSecurity(), multiplier);
-                break;
-            default:
-                throw new IllegalArgumentException("ЦБ " + transaction.getSecurity() +
-                        " не может быть закрыта событием типа " + position.getClosingEvent());
-        }
+        BigDecimal closeAmount = switch (position.getClosingEvent()) {
+            case PRICE -> getTransactionCashFlow(transaction, CashFlowType.PRICE, multiplier);
+            case REDEMPTION -> getRedemptionCashFlow(transaction.getPortfolio(), transaction.getSecurity(), multiplier);
+            default -> throw new IllegalArgumentException("ЦБ " + transaction.getSecurity() +
+                    " не может быть закрыта событием типа " + position.getClosingEvent());
+        };
         if (closeAmount == null) {
             // ЦБ выведены со счета, а не прданы, принимаем цену продажи = цене покупки, чтобы не было фин. результата
             closeAmount = getTransactionCashFlow(position.getOpenTransaction(), CashFlowType.PRICE, multiplier);
@@ -260,25 +251,23 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     }
 
     /**
-     * @return security price currency
+     * @return transaction price currency
      */
     private String getSecurityCurrency(Transaction transaction) {
-        String currency = securityCurrencies.get(transaction.getSecurity());
-        if (currency != null) {
-            return currency;
-        }
-        currency = transactionCashFlowRepository
+        return securityCurrencies.computeIfAbsent(transaction.getSecurity(), $ -> getTransactionCurrency(transaction));
+    }
+
+    private String getTransactionCurrency(Transaction transaction) {
+        return transactionCashFlowRepository
                 .findByPkPortfolioAndPkTransactionIdAndPkType(
                         transaction.getPortfolio(),
                         transaction.getId(),
                         CashFlowType.PRICE.getId())
                 .map(TransactionCashFlowEntity::getCurrency)
                 .orElseThrow();
-        securityCurrencies.put(transaction.getSecurity(), currency);
-        return currency;
     }
 
-    public static <T extends Position> String convertPaidInterestToExcelFormula(List<SecurityEventCashFlow> pays) {
+    public static String convertPaidInterestToExcelFormula(List<SecurityEventCashFlow> pays) {
         if (pays == null || pays.isEmpty()) {
             return null;
         }

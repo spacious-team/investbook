@@ -95,7 +95,9 @@ public class FifoPositions {
 
     private boolean isIncreasePosition(Transaction transaction) {
         OpenedPosition position = openedPositions.peek();
-        return position == null || position.getUnclosedPositions() == 0 || (signum(transaction.getCount()) == signum(position.getUnclosedPositions()));
+        return position == null ||
+                position.getUnclosedPositions() == 0 ||
+                (signum(transaction.getCount()) == signum(position.getUnclosedPositions()));
     }
 
     /**
