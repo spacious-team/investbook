@@ -25,7 +25,6 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
@@ -152,7 +151,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         }
         row.put(OPEN_PRICE, openPrice);
         if (openPrice != null) {
-            row.put(OPEN_AMOUNT, "=" + OPEN_PRICE.getCellAddr() + "*" + position.getCount());
+            row.put(OPEN_AMOUNT, "=" + OPEN_PRICE.getCellAddr() + "*" + COUNT.getCellAddr());
         }
         double multiplier = Math.abs(1d * position.getCount() / transaction.getCount());
         row.put(OPEN_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier, toCurrency));
@@ -219,7 +218,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                             .multiply(BigDecimal.valueOf(multiplier))
                             .abs()
                             .setScale(6, RoundingMode.HALF_UP);
-                    return convertValueToCurrencyFormula(value, cash.getCurrency(), toCurrency);
+                    return "=" + convertValueToCurrencyFormula(value, cash.getCurrency(), toCurrency);
                 })
                 .orElse(null);
     }
@@ -234,16 +233,16 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                         ViewFilter.get().getToDate());
         if (cashFlows.isEmpty()) {
             return null;
+        } else if (cashFlows.size() > 1) {
+            throw new IllegalArgumentException("По ЦБ может быть не более одного события погашения, по бумаге " + isin +
+                    " найдено " + cashFlows.size() + " событий погашения");
         }
-        Assert.isTrue(cashFlows.size() == 1,
-                "По ЦБ может быть не более одного события погашения, по бумаге " + isin +
-                        " найдено " + cashFlows.size() + " событий погашения: " + cashFlows);
         SecurityEventCashFlowEntity redemptionEntity = cashFlows.get(0);
         BigDecimal redemption = redemptionEntity.getValue()
                 .multiply(BigDecimal.valueOf(multiplier))
                 .abs()
                 .setScale(6, RoundingMode.HALF_UP);
-        return convertValueToCurrencyFormula(redemption, redemptionEntity.getCurrency(), toCurrency);
+        return "=" + convertValueToCurrencyFormula(redemption, redemptionEntity.getCurrency(), toCurrency);
     }
 
     /**
