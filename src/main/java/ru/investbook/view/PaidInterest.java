@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -54,10 +53,10 @@ public class PaidInterest {
     }
 
     /**
-     * Returns payments currency or null (if no payments or currency is unknown)
+     * Returns payments currencies
      */
-    public Optional<String> getCurrency() {
-        List<String> currencies = paidInterest.values()
+    public Collection<String> getCurrencies() {
+        return paidInterest.values()
                 .stream()
                 .flatMap(m -> m.values().stream())
                 .flatMap(Collection::stream)
@@ -65,16 +64,6 @@ public class PaidInterest {
                 .distinct()
                 .sorted()
                 .collect(Collectors.toList());
-        if (currencies.size() > 1) {
-            String isin = paidInterest.values()
-                    .stream()
-                    .map(Map::keySet)
-                    .map(p -> ((OpenedPosition) p).getOpenTransaction().getSecurity())
-                    .findAny()
-                    .orElse("<неизвестный isin>");
-            log.warn("Выплаты по {} поступали в разных валютах {}", isin, currencies);
-        }
-        return currencies.isEmpty() ? Optional.empty() : Optional.ofNullable(currencies.get(0));
     }
 
     static Position getFictitiousPositionPayment(SecurityEventCashFlow cash) {

@@ -26,7 +26,6 @@ import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.SecurityConverter;
-import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
@@ -51,11 +50,12 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
+import static ru.investbook.view.ForeignExchangeRateService.RUB;
 import static ru.investbook.view.excel.StockMarketProfitExcelTableHeader.*;
 
 @Component
@@ -74,41 +74,12 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     private final FifoPositionsFactory positionsFactory;
 
     public Table create(Portfolio portfolio) {
-        return create(portfolio, getSecuritiesIsin(portfolio));
+        throw new UnsupportedOperationException();
     }
 
     public Table create(Portfolio portfolio, String forCurrency) {
-        return create(portfolio, getSecuritiesIsin(portfolio, forCurrency));
-    }
-
-    public Table create(Portfolio portfolio, Collection<String> securitiesIsin) {
-        Table openPositionsProfit = new Table();
-        Table closedPositionsProfit = new Table();
-        for (String isin : securitiesIsin) {
-            Optional<SecurityEntity> securityEntity = securityRepository.findById(isin);
-            if (securityEntity.isPresent()) {
-                Security security = securityConverter.fromEntity(securityEntity.get());
-                FifoPositions positions = positionsFactory.get(portfolio, security, ViewFilter.get());
-                PaidInterest paidInterest = paidInterestFactory.get(portfolio, security, ViewFilter.get());
-                openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(),
-                        paidInterest, this::getOpenedPositionProfit));
-                closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(),
-                        paidInterest, this::getClosedPositionProfit));
-                openPositionsProfit.addAll(getPositionProfit(security, paidInterest.getFictitiousPositions(),
-                        paidInterest, this::getOpenedPositionProfit));
-            }
-        }
-        Table profit = new Table();
-        profit.addAll(openPositionsProfit);
-        profit.addAll(closedPositionsProfit);
-        return profit;
-    }
-
-    private Collection<String> getSecuritiesIsin(Portfolio portfolio) {
-        return transactionRepository.findDistinctSecurityByPortfolioAndTimestampBetweenOrderByTimestampDesc(
-                portfolio,
-                ViewFilter.get().getFromDate(),
-                ViewFilter.get().getToDate());
+        Collection<String> securitiesIsin = getSecuritiesIsin(portfolio, forCurrency);
+        return create(portfolio, securitiesIsin, forCurrency);
     }
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio, String currency) {
@@ -119,69 +90,95 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                 ViewFilter.get().getToDate());
     }
 
-    private <T extends Position> Table getPositionProfit(Security security,
-                                                         Deque<T> positions,
-                                                         PaidInterest paidInterest,
-                                                         Function<T, Table.Record> profitBuilder) {
+    public Table create(Portfolio portfolio, Collection<String> securitiesIsin, String toCurrency) {
+        Table openPositionsProfit = new Table();
+        Table closedPositionsProfit = new Table();
+        for (String isin : securitiesIsin) {
+            securityRepository.findById(isin)
+                    .map(securityConverter::fromEntity)
+                    .ifPresent(security ->
+                            getRowsForSecurity(security, portfolio, openPositionsProfit, closedPositionsProfit, toCurrency));
+        }
+        Table profit = new Table();
+        profit.addAll(openPositionsProfit);
+        profit.addAll(closedPositionsProfit);
+        return profit;
+    }
+
+    private void getRowsForSecurity(Security security, Portfolio portfolio, Table openPositionsProfit,
+                                    Table closedPositionsProfit, String toCurrency) {
+        FifoPositions positions = positionsFactory.get(portfolio, security, ViewFilter.get());
+        PaidInterest paidInterest = paidInterestFactory.get(portfolio, security, ViewFilter.get());
+        openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(),
+                paidInterest, this::getOpenedPositionProfit, toCurrency));
+        closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(),
+                paidInterest, this::getClosedPositionProfit, toCurrency));
+        openPositionsProfit.addAll(getPositionProfit(security, paidInterest.getFictitiousPositions(),
+                paidInterest, this::getOpenedPositionProfit, toCurrency));
+    }
+
+    private <T extends OpenedPosition> Table getPositionProfit(Security security,
+                                                               Deque<T> positions,
+                                                               PaidInterest paidInterest,
+                                                               BiFunction<T, String, Table.Record> profitBuilder,
+                                                               String toCurrency) {
         Table rows = new Table();
         for (T position : positions) {
-            Table.Record record = profitBuilder.apply(position);
-            record.putAll(getPaidInterestProfit(position, paidInterest));
-            record.put(SECURITY,
-                    Optional.ofNullable(security.getName())
-                            .orElse(security.getId()));
-            rows.add(record);
+            String openTransactionCurrency = getTransactionCurrency(position.getOpenTransaction());
+            if (openTransactionCurrency.equalsIgnoreCase(toCurrency)) {
+                Table.Record record = profitBuilder.apply(position, toCurrency);
+                record.putAll(getPaidInterestProfit(position, paidInterest, toCurrency));
+                record.put(SECURITY,
+                        ofNullable(security.getName())
+                                .or(() -> ofNullable(security.getTicker()))
+                                .orElse(security.getId()));
+                rows.add(record);
+            }
         }
         return rows;
     }
 
-    private Table.Record getOpenedPositionProfit(OpenedPosition position) {
+    private <T extends OpenedPosition> Table.Record getOpenedPositionProfit(T position, String toCurrency) {
         Table.Record row = new Table.Record();
         Transaction transaction = position.getOpenTransaction();
         row.put(OPEN_DATE, transaction.getTimestamp());
         row.put(COUNT, Math.abs(position.getCount()) * Integer.signum(transaction.getCount()));
-        BigDecimal openPrice = getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount());
+        String openPrice = getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount(), toCurrency);
         if (openPrice == null && (position instanceof ClosedPosition)) {
             // ЦБ введены, а не куплены, принимаем цену покупки = цене продажи, чтобы не было финфнсового результата
             Transaction closeTransaction = ((ClosedPosition) position).getCloseTransaction();
-            openPrice = getTransactionCashFlow(closeTransaction, CashFlowType.PRICE, 1d / closeTransaction.getCount());
+            openPrice = getTransactionCashFlow(closeTransaction, CashFlowType.PRICE, 1d / closeTransaction.getCount(), toCurrency);
         }
         row.put(OPEN_PRICE, openPrice);
         if (openPrice != null) {
-            row.put(OPEN_AMOUNT, openPrice.multiply(BigDecimal.valueOf(position.getCount())));
+            row.put(OPEN_AMOUNT, "=" + OPEN_PRICE.getCellAddr() + "*" + COUNT.getCellAddr());
         }
         double multiplier = Math.abs(1d * position.getCount() / transaction.getCount());
-        row.put(OPEN_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier));
-        row.put(OPEN_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multiplier));
+        row.put(OPEN_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier, toCurrency));
+        row.put(OPEN_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multiplier, toCurrency));
         return row;
     }
 
-    private Table.Record getClosedPositionProfit(ClosedPosition position) {
+    private Table.Record getClosedPositionProfit(ClosedPosition position, String toCurrency) {
         // open transaction info
-        Table.Record row = new Table.Record(getOpenedPositionProfit(position));
+        Table.Record row = new Table.Record(getOpenedPositionProfit(position, toCurrency));
         // close transaction info
         Transaction transaction = position.getCloseTransaction();
         double multiplier = Math.abs(1d * position.getCount() / transaction.getCount());
         row.put(CLOSE_DATE, transaction.getTimestamp());
-        BigDecimal closeAmount;
-        switch (position.getClosingEvent()) {
-            case PRICE:
-                closeAmount = getTransactionCashFlow(transaction, CashFlowType.PRICE, multiplier);
-                break;
-            case REDEMPTION:
-                closeAmount = getRedemptionCashFlow(transaction.getPortfolio(), transaction.getSecurity(), multiplier);
-                break;
-            default:
-                throw new IllegalArgumentException("ЦБ " + transaction.getSecurity() +
-                        " не может быть закрыта событием типа " + position.getClosingEvent());
-        }
+        String closeAmount = switch (position.getClosingEvent()) {
+            case PRICE -> getTransactionCashFlow(transaction, CashFlowType.PRICE, multiplier, toCurrency);
+            case REDEMPTION -> getRedemptionCashFlow(transaction.getPortfolio(), transaction.getSecurity(), multiplier, toCurrency);
+            default -> throw new IllegalArgumentException("ЦБ " + transaction.getSecurity() +
+                    " не может быть закрыта событием типа " + position.getClosingEvent());
+        };
         if (closeAmount == null) {
             // ЦБ выведены со счета, а не прданы, принимаем цену продажи = цене покупки, чтобы не было фин. результата
-            closeAmount = getTransactionCashFlow(position.getOpenTransaction(), CashFlowType.PRICE, multiplier);
+            closeAmount = getTransactionCashFlow(position.getOpenTransaction(), CashFlowType.PRICE, multiplier, toCurrency);
         }
         row.put(CLOSE_AMOUNT, closeAmount);
-        row.put(CLOSE_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier));
-        row.put(CLOSE_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multiplier));
+        row.put(CLOSE_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier, toCurrency));
+        row.put(CLOSE_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multiplier, toCurrency));
         boolean isLongPosition = isLongPosition(position);
         row.put(FORECAST_TAX, getForecastTax(isLongPosition));
         row.put(PROFIT, getClosedPositionProfit(isLongPosition));
@@ -193,28 +190,21 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         return position.getOpenTransaction().getCount() > 0;
     }
 
-    private Table.Record getPaidInterestProfit(Position position, PaidInterest paidInterest) {
+    private Table.Record getPaidInterestProfit(Position position, PaidInterest paidInterest, String toCurrency) {
         Table.Record info = new Table.Record();
-        String coupon = convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.COUPON, position));
-        String amortization = convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.AMORTIZATION, position));
-        String dividend = convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.DIVIDEND, position));
-        String tax = convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.TAX, position));
-        info.put(COUPON, coupon);
-        info.put(AMORTIZATION, amortization);
-        info.put(DIVIDEND, dividend);
-        info.put(TAX, tax);
-        if (coupon != null || dividend != null) {
-            if (paidInterest.getCurrency()
-                    .filter("RUB"::equals)
-                    .isEmpty()) {
-                // считаем, что подписан W-8BEN, 10% налога удержаны иностранным эмитентом, нужно доплатить 3%
-                info.put(TAX_LIABILITY, TAX_LIABILITY_FORMULA);
-            }
+        info.put(COUPON, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.COUPON, position), toCurrency));
+        info.put(AMORTIZATION, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.AMORTIZATION, position), toCurrency));
+        info.put(DIVIDEND, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.DIVIDEND, position), toCurrency));
+        info.put(TAX, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.TAX, position), toCurrency));
+        if (!toCurrency.equals(RUB) || !paidInterest.getCurrencies().stream().allMatch(RUB::equals)) {
+            // Если речь о сделках в иностранной валюте или хотя бы одна выплата была в иностранной валюте,
+            // скорее всего нужно доплачивать в налоговую
+            info.put(TAX_LIABILITY, TAX_LIABILITY_FORMULA);
         }
         return info;
     }
 
-    private BigDecimal getTransactionCashFlow(Transaction transaction, CashFlowType type, double multiplier) {
+    private String getTransactionCashFlow(Transaction transaction, CashFlowType type, double multiplier, String toCurrency) {
         if (transaction.getId() == null) {
             return null;
         }
@@ -223,15 +213,17 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                         transaction.getPortfolio(),
                         transaction.getId(),
                         type.getId())
-                .map(cash -> cash.getValue()
-                        .multiply(exchangeRateToSecurityCurrency(cash.getCurrency(), transaction))
-                        .multiply(BigDecimal.valueOf(multiplier))
-                        .abs()
-                        .setScale(6, RoundingMode.HALF_UP))
+                .map(cash -> {
+                    BigDecimal value = cash.getValue()
+                            .multiply(BigDecimal.valueOf(multiplier))
+                            .abs()
+                            .setScale(6, RoundingMode.HALF_UP);
+                    return "=" + convertValueToCurrencyFormula(value, cash.getCurrency(), toCurrency);
+                })
                 .orElse(null);
     }
 
-    private BigDecimal getRedemptionCashFlow(String portfolio, String isin, double multiplier) {
+    private String getRedemptionCashFlow(String portfolio, String isin, double multiplier, String toCurrency) {
         List<SecurityEventCashFlowEntity> cashFlows = securityEventCashFlowRepository
                 .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         portfolio,
@@ -241,52 +233,46 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                         ViewFilter.get().getToDate());
         if (cashFlows.isEmpty()) {
             return null;
-        } else if (cashFlows.size() != 1) {
+        } else if (cashFlows.size() > 1) {
             throw new IllegalArgumentException("По ЦБ может быть не более одного события погашения, по бумаге " + isin +
-                    " найдено " + cashFlows.size() + " событий погашения: " + cashFlows);
+                    " найдено " + cashFlows.size() + " событий погашения");
         }
-        return cashFlows.get(0)
-                .getValue()
+        SecurityEventCashFlowEntity redemptionEntity = cashFlows.get(0);
+        BigDecimal redemption = redemptionEntity.getValue()
                 .multiply(BigDecimal.valueOf(multiplier))
                 .abs()
                 .setScale(6, RoundingMode.HALF_UP);
-    }
-
-    private BigDecimal exchangeRateToSecurityCurrency(String currency, Transaction transaction) {
-        String securityCurrency = getSecurityCurrency(transaction);
-        return currency.equalsIgnoreCase(securityCurrency) ?
-                BigDecimal.ONE :
-                foreignExchangeRateService.getExchangeRate(currency, securityCurrency);
+        return "=" + convertValueToCurrencyFormula(redemption, redemptionEntity.getCurrency(), toCurrency);
     }
 
     /**
-     * @return security price currency
+     * @return transaction {@link CashFlowType#PRICE} currency
      */
-    private String getSecurityCurrency(Transaction transaction) {
-        String currency = securityCurrencies.get(transaction.getSecurity());
-        if (currency != null) {
-            return currency;
-        }
-        currency = transactionCashFlowRepository
+    private String getTransactionCurrency(Transaction transaction) {
+        return transactionCashFlowRepository
                 .findByPkPortfolioAndPkTransactionIdAndPkType(
                         transaction.getPortfolio(),
                         transaction.getId(),
                         CashFlowType.PRICE.getId())
                 .map(TransactionCashFlowEntity::getCurrency)
                 .orElseThrow();
-        securityCurrencies.put(transaction.getSecurity(), currency);
-        return currency;
     }
 
-    public static <T extends Position> String convertPaidInterestToExcelFormula(List<SecurityEventCashFlow> pays) {
+    public String convertPaidInterestToExcelFormula(List<SecurityEventCashFlow> pays, String toCurrency) {
         if (pays == null || pays.isEmpty()) {
             return null;
         }
         return pays.stream()
-                .map(SecurityEventCashFlow::getValue)
-                .map(BigDecimal::abs)
-                .map(String::valueOf)
+                .map(cash -> convertValueToCurrencyFormula(cash.getValue().abs(), cash.getCurrency(), toCurrency))
                 .collect(Collectors.joining("+", "=", ""));
+    }
+
+    private String convertValueToCurrencyFormula(BigDecimal value, String valueCurrency, String toCurrency) {
+        if (valueCurrency.equals(toCurrency)) {
+            return String.valueOf(value);
+        } else {
+            return value + "*" + foreignExchangeRateService.getExchangeRate(valueCurrency, toCurrency);
+        }
     }
 
     private String getForecastTax(boolean isLongPosition) {
