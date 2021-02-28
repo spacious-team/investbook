@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -60,8 +60,8 @@ public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTra
             value = value.negate();
             accruedInterest = accruedInterest.negate();
         }
-        BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
-                .add(table.getCurrencyCellValue(row, BROKER_COMMISSION))
+        BigDecimal commission = table.getCurrencyCellValueOrDefault(row, MARKET_COMMISSION, BigDecimal.ZERO)
+                .add(table.getCurrencyCellValueOrDefault(row, BROKER_COMMISSION, BigDecimal.ZERO))
                 .negate();
         String currency = VtbBrokerReport.convertToCurrency(table.getStringCellValue(row, VALUE_CURRENCY));
         return Collections.singleton(SecurityTransaction.builder()
