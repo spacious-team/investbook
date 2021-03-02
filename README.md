@@ -18,7 +18,7 @@
 Если вы ведете учет сделок в excel или слышали, что его надо вести
 ([рекомендация 1](https://zen.yandex.ru/media/openjournal/kak-vesti-uchet-sdelok-v-excel-5d52616ea98a2a00ad258284),
 [2](https://vse-dengy.ru/pro-investitsii/dohodnost-investitsiy-xirr.html),
-[3](https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=325769)), то приложение поможет вам это делать.
+[3](https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=325769)), то это бесплатное приложение поможет вам это делать.
 
 Учет сделок в excel таблице, в отличие от отчетов брокера, показывает историю портфеля: усредненную цену покупки,
 финансовый результат по сделкам, историю полученных дивидендов и купонов, удержания налогов как с выплат, так и c выводимых
