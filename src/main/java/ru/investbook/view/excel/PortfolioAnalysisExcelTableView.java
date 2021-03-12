@@ -24,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFDataSource;
 import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
@@ -129,15 +128,15 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
         int rowCount = sheet.getLastRowNum();
         XSSFSheet _sheet = (XSSFSheet) sheet;
 
+        XDDFDataSource<String> date = XDDFDataSourcesFactory.fromStringCellRange(_sheet,
+                nonEmptyCellRangeAddress(sheet,2, rowCount, DATE.ordinal(), DATE.ordinal()));
+        XDDFNumericalDataSource<Double> assetsUsd = XDDFDataSourcesFactory.fromNumericCellRange(_sheet,
+                nonEmptyCellRangeAddress(sheet,2, rowCount, ASSETS_USD.ordinal(), ASSETS_USD.ordinal()));
+        XDDFNumericalDataSource<Double> investmentUsd = XDDFDataSourcesFactory.fromNumericCellRange(_sheet,
+                nonEmptyCellRangeAddress(sheet,2, rowCount, TOTAL_INVESTMENT_USD.ordinal(), TOTAL_INVESTMENT_USD.ordinal()));
+
         XSSFChart chart = createChart(_sheet, name, CURRENCY_NAME.ordinal(), 6, 8, 18);
         XDDFChartData chartData = createScatterChartData(chart);
-
-        XDDFDataSource<String> date = XDDFDataSourcesFactory.fromStringCellRange(_sheet,
-                new CellRangeAddress(2, rowCount, DATE.ordinal(), DATE.ordinal()));
-        XDDFNumericalDataSource<Double> assetsUsd = XDDFDataSourcesFactory.fromNumericCellRange(_sheet,
-                new CellRangeAddress(2, rowCount, ASSETS_USD.ordinal(), ASSETS_USD.ordinal()));
-        XDDFNumericalDataSource<Double> investmentUsd = XDDFDataSourcesFactory.fromNumericCellRange(_sheet,
-                new CellRangeAddress(2, rowCount, TOTAL_INVESTMENT_USD.ordinal(), TOTAL_INVESTMENT_USD.ordinal()));
 
         XDDFChartData.Series assetsGraph = chartData.addSeries(date, assetsUsd);
         assetsGraph.setTitle("Активы", null);
@@ -152,15 +151,15 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
         int rowCount = sheet.getLastRowNum();
         XSSFSheet _sheet = (XSSFSheet) sheet;
 
+        XDDFDataSource<String> date = XDDFDataSourcesFactory.fromStringCellRange(_sheet,
+                nonEmptyCellRangeAddress(sheet,2, rowCount, DATE.ordinal(), DATE.ordinal()));
+        XDDFNumericalDataSource<Double> assetsGrowth = XDDFDataSourcesFactory.fromNumericCellRange(_sheet,
+                nonEmptyCellRangeAddress(sheet,2, rowCount, ASSETS_GROWTH.ordinal(), ASSETS_GROWTH.ordinal()));
+        XDDFNumericalDataSource<Double> sp500Growth = XDDFDataSourcesFactory.fromNumericCellRange(_sheet,
+                nonEmptyCellRangeAddress(sheet,2, rowCount, SP500_GROWTH.ordinal(), SP500_GROWTH.ordinal()));
+
         XSSFChart chart = createChart(_sheet, name, CURRENCY_NAME.ordinal(), 24, 8, 18);
         XDDFChartData chartData = createScatterChartData(chart);
-
-        XDDFDataSource<String> date = XDDFDataSourcesFactory.fromStringCellRange(_sheet,
-                new CellRangeAddress(2, rowCount, DATE.ordinal(), DATE.ordinal()));
-        XDDFNumericalDataSource<Double> assetsGrowth = XDDFDataSourcesFactory.fromNumericCellRange(_sheet,
-                new CellRangeAddress(2, rowCount, ASSETS_GROWTH.ordinal(), ASSETS_GROWTH.ordinal()));
-        XDDFNumericalDataSource<Double> sp500Growth = XDDFDataSourcesFactory.fromNumericCellRange(_sheet,
-                new CellRangeAddress(2, rowCount, SP500_GROWTH.ordinal(), SP500_GROWTH.ordinal()));
 
         XDDFChartData.Series assetsGrowthGraph = chartData.addSeries(date, assetsGrowth);
         assetsGrowthGraph.setTitle("Активы", null);
@@ -175,13 +174,13 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
         int rowCount = sheet.getLastRowNum();
         XSSFSheet _sheet = (XSSFSheet) sheet;
 
+        XDDFDataSource<String> date = XDDFDataSourcesFactory.fromStringCellRange(_sheet,
+                nonEmptyCellRangeAddress(sheet,2, rowCount, DATE.ordinal(), DATE.ordinal()));
+        XDDFNumericalDataSource<Double> cashBalance = XDDFDataSourcesFactory.fromNumericCellRange(_sheet,
+                nonEmptyCellRangeAddress(sheet,2, rowCount, TOTAL_CASH_USD.ordinal(), TOTAL_CASH_USD.ordinal()));
+
         XSSFChart chart = createChart(_sheet, name, CURRENCY_NAME.ordinal(), 42, 8, 18);
         XDDFChartData chartData = createScatterChartData(chart);
-
-        XDDFDataSource<String> date = XDDFDataSourcesFactory.fromStringCellRange(_sheet,
-                new CellRangeAddress(2, rowCount, DATE.ordinal(), DATE.ordinal()));
-        XDDFNumericalDataSource<Double> cashBalance = XDDFDataSourcesFactory.fromNumericCellRange(_sheet,
-                new CellRangeAddress(2, rowCount, TOTAL_CASH_USD.ordinal(), TOTAL_CASH_USD.ordinal()));
 
         chartData.addSeries(date, cashBalance);
         disableScatterVaryColors(chart);
