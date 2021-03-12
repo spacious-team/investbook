@@ -60,7 +60,7 @@
     <br/>
     <label>
         Инструмент
-        <input type="text" th:field="*{security}" list="securities" class="security" required/>
+        <input type="text" th:field="*{security}" list="securities" class="security" id="security" required/>
     </label>
     <label id="count">
         Количество, шт
@@ -118,6 +118,8 @@
         let e = document.getElementById('operation-type');
         let type = e.options[e.selectedIndex].value
 
+        setPattern('security', '^.*\\s+\\([A-Z0-9]+\\)\\s*$')
+
         switch (type) {
             case "DIVIDEND":
             case "COUPON":
@@ -132,6 +134,7 @@
                 setMin('count', 0)
                 hide('tax')
                 hide('tax-currency')
+                removePattern('security')
                 document.getElementById('tax-br').display = 'none'
                 break
             default:
@@ -162,6 +165,14 @@
         let e = document.getElementById(id);
         let input = e.getElementsByTagName("input")[0]
         input.min = min
+    }
+
+    function setPattern(id, pattern) {
+        document.getElementById(id).setAttribute("pattern", pattern)
+    }
+
+    function removePattern(id) {
+        document.getElementById(id).removeAttribute("pattern")
     }
 
     function checkValues() {
