@@ -54,7 +54,7 @@
     </label>
     <label>
         Инструмент
-        <input type="text" th:field="*{security}" list="securities" class="security" required/>
+        <input type="text" th:field="*{security}" list="securities" class="security" id="security" required/>
     </label>
     <label>
         Тип инструмента
@@ -125,6 +125,7 @@
         // for type = SHARE and CURRENCY
         hide('price')
         hide('accrued-interest')
+        setPattern('security', '^.*\\s+\\([A-Z0-9]+\\)\\s*$')
 
         switch (type) {
             case "BOND":
@@ -133,6 +134,9 @@
                 break
             case "DERIVATIVE":
                 display('price')
+                // no break
+            case "CURRENCY":
+                removePattern('security')
                 break
         }
     }
@@ -154,6 +158,14 @@
         let e = display(id)
         let input = e.getElementsByTagName("input")[0]
         input.required = true
+    }
+
+    function setPattern(id, pattern) {
+        document.getElementById(id).setAttribute("pattern", pattern)
+    }
+
+    function removePattern(id) {
+        document.getElementById(id).removeAttribute("pattern")
     }
 
     function checkValues() {
