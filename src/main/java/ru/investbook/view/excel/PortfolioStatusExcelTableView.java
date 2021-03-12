@@ -25,7 +25,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFDataSource;
 import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
@@ -201,13 +200,14 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
 
     private static void addPieChart(String name, XSSFSheet sheet) {
         int rowCount = sheet.getLastRowNum();
-        XSSFChart chart = createChart(sheet, name, 0, rowCount + 2, PROPORTION.ordinal() + 1, 36);
-        XDDFChartData data = createPieChartData(chart);
 
         XDDFDataSource<String> securities = XDDFDataSourcesFactory.fromStringCellRange(sheet,
-                new CellRangeAddress(2, rowCount, SECURITY.ordinal(), SECURITY.ordinal()));
+                nonEmptyCellRangeAddress(sheet,2, rowCount, SECURITY.ordinal(), SECURITY.ordinal()));
         XDDFNumericalDataSource<Double> proportions = XDDFDataSourcesFactory.fromNumericCellRange(sheet,
-                new CellRangeAddress(2, rowCount, PROPORTION.ordinal(), PROPORTION.ordinal()));
+                nonEmptyCellRangeAddress(sheet,2, rowCount, PROPORTION.ordinal(), PROPORTION.ordinal()));
+
+        XSSFChart chart = createChart(sheet, name, 0, rowCount + 2, PROPORTION.ordinal() + 1, 36);
+        XDDFChartData data = createPieChartData(chart);
 
         data.addSeries(securities, proportions);
         chart.plot(data);

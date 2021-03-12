@@ -20,7 +20,9 @@ package ru.investbook.view.excel;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xddf.usermodel.PresetColor;
 import org.apache.poi.xddf.usermodel.XDDFColor;
 import org.apache.poi.xddf.usermodel.XDDFLineProperties;
@@ -134,5 +136,17 @@ public class ExcelChartPlotHelper {
                 .getScatterChartArray(0)
                 .addNewVaryColors()
                 .setVal(false);
+    }
+
+    static CellRangeAddress nonEmptyCellRangeAddress(Sheet sheet, int firstRow, int lastRow, int firstCol, int lastCol) {
+        for (int i = firstRow; i <= lastRow; i++) {
+            Row row = sheet.getRow(i);
+            for (int j = firstCol; j <= lastCol; j++) {
+                if (row.getCell(j) != null) {
+                    return new CellRangeAddress(firstRow, lastRow, firstCol, lastCol);
+                }
+            }
+        }
+        throw new IllegalArgumentException("No value in cell range");
     }
 }
