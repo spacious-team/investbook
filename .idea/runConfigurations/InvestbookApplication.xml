@@ -2,7 +2,8 @@
   <configuration default="false" name="InvestbookApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <module name="investbook" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="ru.investbook.InvestbookApplication" />
-    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=core,dev -Xms16m -XX:MinHeapFreeRatio=1 -XX:MaxHeapFreeRatio=5 -XX:G1PeriodicGCInterval=5000 -XX:GCTimeRatio=1 -XX:MaxGCPauseMillis=2000" />
+    <option name="ENABLE_JMX_AGENT" value="false" />
+    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=core,dev -Xms16m -XX:MinHeapFreeRatio=1 -XX:MaxHeapFreeRatio=5 -XX:G1PeriodicGCInterval=5000 -XX:GCTimeRatio=1 -XX:MaxGCPauseMillis=2000 -XX:NativeMemoryTracking=summary -XX:-TieredCompilation -Xverify:none" />
     <option name="ALTERNATIVE_JRE_PATH" />
     <method v="2">
       <option name="Make" enabled="true" />
