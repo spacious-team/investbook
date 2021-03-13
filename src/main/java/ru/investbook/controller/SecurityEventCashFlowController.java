@@ -54,38 +54,33 @@ public class SecurityEventCashFlowController {
 
     @GetMapping
     public String get(Model model) {
-        List<SecurityEventCashFlowModel> events = securityEventCashFlowModelRepository.findAll();
-        model.addAttribute("events", events);
+        model.addAttribute("events", securityEventCashFlowModelRepository.findAll());
         return "security-events/table";
     }
 
     @GetMapping("/edit-form")
-    public String getEditForm(Model model, @RequestParam(name = "id", required = false) Integer id) {
-        SecurityEventCashFlowModel event;
-        if (id != null) {
-            event = securityEventCashFlowModelRepository.findById(id)
-                    .orElseGet(SecurityEventCashFlowModel::new);
-        } else {
-            event = new SecurityEventCashFlowModel();
-            event.setPortfolio(selectedPortfolio);
-        }
-        model.addAttribute("event", event);
+    public String getEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
+        model.addAttribute("event", getSecurityEventCashFlow(id));
         model.addAttribute("securities", securities);
         model.addAttribute("portfolios", portfolios);
         return "security-events/edit-form";
     }
 
-    /**
-     * Saves event to storage
-     *
-     * @param event event for save
-     * @param model       model with result for exposing to view
-     */
+    private SecurityEventCashFlowModel getSecurityEventCashFlow(Integer id) {
+        if (id != null) {
+            return securityEventCashFlowModelRepository.findById(id)
+                    .orElseGet(SecurityEventCashFlowModel::new);
+        } else {
+            SecurityEventCashFlowModel event = new SecurityEventCashFlowModel();
+            event.setPortfolio(selectedPortfolio);
+            return event;
+        }
+    }
+
     @PostMapping
-    public String postTransaction(@ModelAttribute @Valid SecurityEventCashFlowModel event, Model model) {
+    public String postTransaction(@Valid @ModelAttribute("event") SecurityEventCashFlowModel event) {
         selectedPortfolio = event.getPortfolio();
         securityEventCashFlowModelRepository.saveAndFlush(event);
-        model.addAttribute("event", event);
         return "security-events/view-single";
     }
 }

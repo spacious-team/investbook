@@ -49,6 +49,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -59,7 +60,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/reports")
 @Slf4j
-public class ReportRestController {
+public class InvestbookReportController {
     private final ReportParserService reportParserService;
     private final InvestbookProperties investbookProperties;
     private final Collection<BrokerReportFactory> brokerReportFactories;
@@ -67,19 +68,14 @@ public class ReportRestController {
 
 
     @GetMapping
-    public String getReports(Model model) {
-        Collection<String> brokerNames = brokerReportFactories.stream()
-                .map(BrokerReportFactory::getBrokerName)
-                .map(String::toLowerCase)
-                .distinct()
-                .collect(Collectors.toList());
-        model.addAttribute("brokerNames", brokerNames);
+    public String getPage(Model model) {
+        model.addAttribute("brokerNames", getBrokerNames());
         return "reports";
     }
 
     @PostMapping
-    public ResponseEntity<String> post(@RequestParam("reports") MultipartFile[] reports,
-                                       @RequestParam(name = "broker", required = false) String broker) {
+    public ResponseEntity<String> buildInvestbookReport(@RequestParam("reports") MultipartFile[] reports,
+                                                        @RequestParam(name = "broker", required = false) String broker) {
         Collection<Exception> exceptions = new ConcurrentLinkedQueue<>();
         Arrays.stream(reports)
                 .parallel()
@@ -99,6 +95,14 @@ public class ReportRestController {
                                 return sw.toString().replace("\n", "</br>");
                             }).collect(errorMessageBuilder(broker)));
         }
+    }
+
+    private List<String> getBrokerNames() {
+        return brokerReportFactories.stream()
+                .map(BrokerReportFactory::getBrokerName)
+                .map(String::toLowerCase)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     private void uploadReport(MultipartFile report, String broker, Collection<Exception> exceptions) {

@@ -32,7 +32,6 @@ import ru.investbook.model.repository.ForeignExchangeRateModelRepository;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
-import java.util.List;
 
 @Controller
 @RequestMapping("/foreign-exchange-rates")
@@ -42,35 +41,35 @@ public class ForeignExchangeRateController {
 
     @GetMapping
     public String get(Model model) {
-        List<ForeignExchangeRateModel> rates = foreignExchangeRateModelRepository.findAll();
-        model.addAttribute("rates", rates);
+        model.addAttribute("rates", foreignExchangeRateModelRepository.findAll());
         return "foreign-exchange-rates/table";
     }
 
     @GetMapping("/edit-form")
-    public String getEditForm(Model model,
-                              @RequestParam(name = "date", required = false)
+    public String getEditForm(@RequestParam(name = "date", required = false)
                               @DateTimeFormat(pattern = "yyyy-MM-dd")
                                       LocalDate date,
                               @RequestParam(name = "baseCurrency", required = false)
                                       String baseCurrency,
                               @RequestParam(name = "quoteCurrency", required = false)
-                                      String quoteCurrency) {
-        ForeignExchangeRateModel rate;
-        if (date != null && baseCurrency != null && quoteCurrency != null) {
-            rate = foreignExchangeRateModelRepository.findById(date, baseCurrency, quoteCurrency)
-                    .orElseGet(ForeignExchangeRateModel::new);
-        } else {
-            rate = new ForeignExchangeRateModel();
-        }
-        model.addAttribute("rate", rate);
+                                      String quoteCurrency,
+                              Model model) {
+        model.addAttribute("rate", getForeignExchangeRate(date, baseCurrency, quoteCurrency));
         return "foreign-exchange-rates/edit-form";
     }
 
+    private ForeignExchangeRateModel getForeignExchangeRate(LocalDate date, String baseCurrency, String quoteCurrency) {
+        if (date != null && baseCurrency != null && quoteCurrency != null) {
+            return foreignExchangeRateModelRepository.findById(date, baseCurrency, quoteCurrency)
+                    .orElseGet(ForeignExchangeRateModel::new);
+        } else {
+            return new ForeignExchangeRateModel();
+        }
+    }
+
     @PostMapping
-    public String postTransaction(@ModelAttribute @Valid ForeignExchangeRateModel rate, Model model) {
+    public String postTransaction(@Valid @ModelAttribute("rate") ForeignExchangeRateModel rate) {
         foreignExchangeRateModelRepository.saveAndFlush(rate);
-        model.addAttribute("rate", rate);
         return "foreign-exchange-rates/view-single";
     }
 }

@@ -50,7 +50,7 @@ import static ru.investbook.view.ForeignExchangeRateService.RUB;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/")
-public class ApplicationRestController {
+public class HomePageController {
 
     private final BuildProperties buildProperties;
     private final TransactionRepository transactionRepository;
@@ -60,10 +60,7 @@ public class ApplicationRestController {
 
     @GetMapping
     public String index(Model model) {
-        List<String> portfolios = portfolioRepository.findAll()
-                .stream()
-                .map(PortfolioEntity::getId)
-                .collect(Collectors.toList());
+        List<String> portfolios = getPortfolios();
         model.addAttribute("transactionsCount", transactionRepository.count());
         model.addAttribute("portfolios", portfolios);
         model.addAttribute("assets", getAssets(portfolios));
@@ -77,6 +74,13 @@ public class ApplicationRestController {
     public String shutdown() {
         Executors.newSingleThreadScheduledExecutor().schedule(() -> System.exit(0), 3, TimeUnit.SECONDS);
         return "Приложение остановлено";
+    }
+
+    private List<String> getPortfolios() {
+        return portfolioRepository.findAll()
+                .stream()
+                .map(PortfolioEntity::getId)
+                .collect(Collectors.toList());
     }
 
     private BigDecimal getAssets(Collection<String> portfolios) {
@@ -98,7 +102,7 @@ public class ApplicationRestController {
                         portfolio, PortfolioPropertyType.CASH.name()))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(ApplicationRestController::groupByCurrency)
+                .map(HomePageController::groupByCurrency)
                 .map(this::convertToRubAndSum)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 

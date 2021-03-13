@@ -50,31 +50,32 @@ public class PortfolioPropertyController {
 
     @GetMapping
     public String get(Model model) {
-        List<PortfolioPropertyModel> properties = portfolioPropertyModelRepository.findAll();
-        model.addAttribute("properties", properties);
+        model.addAttribute("properties", portfolioPropertyModelRepository.findAll());
         return "portfolio-properties/table";
     }
 
     @GetMapping("/edit-form")
-    public String getEditForm(Model model, @RequestParam(name = "id", required = false) Integer id) {
-        PortfolioPropertyModel property;
-        if (id != null) {
-            property = portfolioPropertyModelRepository.findById(id)
-                    .orElseGet(PortfolioPropertyModel::new);
-        } else {
-            property = new PortfolioPropertyModel();
-            property.setPortfolio(selectedPortfolio);
-        }
-        model.addAttribute("property", property);
+    public String getEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
+        model.addAttribute("property", getPortfolioProperty(id));
         model.addAttribute("portfolios", portfolios);
         return "portfolio-properties/edit-form";
     }
 
+    private PortfolioPropertyModel getPortfolioProperty(Integer id) {
+        if (id != null) {
+            return portfolioPropertyModelRepository.findById(id)
+                    .orElseGet(PortfolioPropertyModel::new);
+        } else {
+            PortfolioPropertyModel property = new PortfolioPropertyModel();
+            property.setPortfolio(selectedPortfolio);
+            return property;
+        }
+    }
+
     @PostMapping
-    public String postTransaction(@ModelAttribute @Valid PortfolioPropertyModel property, Model model) {
+    public String postTransaction(@Valid @ModelAttribute("property") PortfolioPropertyModel property) {
         selectedPortfolio = property.getPortfolio();
         portfolioPropertyModelRepository.saveAndFlush(property);
-        model.addAttribute("property", property);
         return "portfolio-properties/view-single";
     }
 }

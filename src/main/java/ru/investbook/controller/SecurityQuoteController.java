@@ -49,29 +49,29 @@ public class SecurityQuoteController {
 
     @GetMapping
     public String get(Model model) {
-        List<SecurityQuoteModel> quotes = securityQuoteModelRepository.findAll();
-        model.addAttribute("quotes", quotes);
+        model.addAttribute("quotes", securityQuoteModelRepository.findAll());
         return "security-quotes/table";
     }
 
     @GetMapping("/edit-form")
-    public String getEditForm(Model model, @RequestParam(name = "id", required = false) Integer id) {
-        SecurityQuoteModel quote;
-        if (id != null) {
-            quote = securityQuoteModelRepository.findById(id)
-                    .orElseGet(SecurityQuoteModel::new);
-        } else {
-            quote = new SecurityQuoteModel();
-        }
-        model.addAttribute("quote", quote);
+    public String getEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
+        model.addAttribute("quote", getSecurityQuote(id));
         model.addAttribute("securities", securities);
         return "security-quotes/edit-form";
     }
 
+    private SecurityQuoteModel getSecurityQuote(Integer id) {
+        if (id != null) {
+            return securityQuoteModelRepository.findById(id)
+                    .orElseGet(SecurityQuoteModel::new);
+        } else {
+            return new SecurityQuoteModel();
+        }
+    }
+
     @PostMapping
-    public String postTransaction(@ModelAttribute @Valid SecurityQuoteModel quote, Model model) {
+    public String postTransaction(@Valid  @ModelAttribute("quote") SecurityQuoteModel quote) {
         securityQuoteModelRepository.saveAndFlush(quote);
-        model.addAttribute("quote", quote);
         return "security-quotes/view-single";
     }
 }

@@ -54,40 +54,40 @@ public class TransactionController {
 
     @GetMapping
     public String get(Model model) {
-        List<TransactionModel> transactions = transactionModelRepository.findAll();
-        model.addAttribute("transactions", transactions);
+        model.addAttribute("transactions", transactionModelRepository.findAll());
         return "transactions/table";
     }
 
     @GetMapping("/edit-form")
-    public String getEditForm(Model model,
-                              @RequestParam(name = "portfolio", required = false) String portfolio,
-                              @RequestParam(name = "transaction-id", required = false) String transactionId) {
-        TransactionModel transaction;
-        if (portfolio != null && transactionId != null) {
-            transaction = transactionModelRepository.findById(portfolio, transactionId)
-                    .orElseGet(TransactionModel::new);
-        } else {
-            transaction = new TransactionModel();
-            transaction.setPortfolio(selectedPortfolio);
-        }
-        model.addAttribute("transaction", transaction);
+    public String getEditForm(@RequestParam(name = "portfolio", required = false) String portfolio,
+                              @RequestParam(name = "transaction-id", required = false) String transactionId,
+                              Model model) {
+        model.addAttribute("transaction", getTransaction(portfolio, transactionId));
         model.addAttribute("securities", securities);
         model.addAttribute("portfolios", portfolios);
         return "transactions/edit-form";
     }
 
+    private TransactionModel getTransaction(String portfolio, String transactionId) {
+        if (portfolio != null && transactionId != null) {
+            return transactionModelRepository.findById(portfolio, transactionId)
+                    .orElseGet(TransactionModel::new);
+        } else {
+            TransactionModel transaction = new TransactionModel();
+            transaction.setPortfolio(selectedPortfolio);
+            return transaction;
+        }
+    }
+
     /**
      * Saves transaction to storage
      *
-     * @param transaction transaction for save
-     * @param model       model with result for exposing to view
+     * @param transaction transaction attribute for save, same model attribute user for display in view
      */
     @PostMapping
-    public String postTransaction(@ModelAttribute @Valid TransactionModel transaction, Model model) {
+    public String postTransaction(@Valid @ModelAttribute("transaction") TransactionModel transaction) {
         selectedPortfolio = transaction.getPortfolio();
         transactionModelRepository.saveAndFlush(transaction);
-        model.addAttribute("transaction", transaction);
         return "transactions/view-single";
     }
 }

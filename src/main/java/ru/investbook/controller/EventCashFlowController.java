@@ -50,37 +50,32 @@ public class EventCashFlowController {
 
     @GetMapping
     public String get(Model model) {
-        List<EventCashFlowModel> events = eventCashFlowModelRepository.findAll();
-        model.addAttribute("events", events);
+        model.addAttribute("events", eventCashFlowModelRepository.findAll());
         return "events/table";
     }
 
     @GetMapping("/edit-form")
-    public String getEditForm(Model model, @RequestParam(name = "id", required = false) Integer id) {
-        EventCashFlowModel event;
-        if (id != null) {
-            event = eventCashFlowModelRepository.findById(id)
-                    .orElseGet(EventCashFlowModel::new);
-        } else {
-            event = new EventCashFlowModel();
-            event.setPortfolio(selectedPortfolio);
-        }
-        model.addAttribute("event", event);
+    public String getEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
+        model.addAttribute("event", getEventCashFlow(id));
         model.addAttribute("portfolios", portfolios);
         return "events/edit-form";
     }
 
-    /**
-     * Saves event to storage
-     *
-     * @param event event for save
-     * @param model       model with result for exposing to view
-     */
+    private EventCashFlowModel getEventCashFlow(Integer id) {
+        if (id != null) {
+            return eventCashFlowModelRepository.findById(id)
+                    .orElseGet(EventCashFlowModel::new);
+        } else {
+            EventCashFlowModel event = new EventCashFlowModel();
+            event.setPortfolio(selectedPortfolio);
+            return event;
+        }
+    }
+
     @PostMapping
-    public String postTransaction(@ModelAttribute @Valid EventCashFlowModel event, Model model) {
+    public String postTransaction(@Valid @ModelAttribute("event") EventCashFlowModel event) {
         selectedPortfolio = event.getPortfolio();
         eventCashFlowModelRepository.saveAndFlush(event);
-        model.addAttribute("event", event);
         return "events/view-single";
     }
 }
