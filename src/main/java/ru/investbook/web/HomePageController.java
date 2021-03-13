@@ -29,10 +29,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.PortfolioPropertyEntity;
+import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.TransactionRepository;
-import ru.investbook.view.ForeignExchangeRateService;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.reducing;
-import static ru.investbook.view.ForeignExchangeRateService.RUB;
+import static ru.investbook.report.ForeignExchangeRateService.RUB;
 
 @Controller
 @RequiredArgsConstructor

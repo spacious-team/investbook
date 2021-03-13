@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
-import ru.investbook.view.FifoPositionsFactory;
+import ru.investbook.report.FifoPositionsFactory;
 
 import javax.validation.Valid;
 import java.util.List;

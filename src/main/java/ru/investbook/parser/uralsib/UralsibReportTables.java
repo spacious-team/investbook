@@ -31,7 +31,7 @@ import org.spacious_team.broker.report_parser.api.ReportTables;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.broker.report_parser.api.WrappingReportTable;
 import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
-import ru.investbook.view.ForeignExchangeRateService;
+import ru.investbook.report.ForeignExchangeRateService;
 
 import java.util.ArrayList;
 import java.util.List;
