@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.model.repository;
+package ru.investbook.web.forms.service;
 
 import java.util.List;
 
-public interface ModelRepository<T> {
+public interface FormsService<Model> {
 
-    List<T> findAll();
+    List<Model> getAll();
 
-    <S extends T> void saveAndFlush(S model);
+    <T extends Model> void save(T model);
 }

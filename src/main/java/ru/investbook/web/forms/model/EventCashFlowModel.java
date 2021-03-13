@@ -16,39 +16,47 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.model.dto;
+package ru.investbook.web.forms.model;
 
 import lombok.Data;
+import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
-public class ForeignExchangeRateModel {
+public class EventCashFlowModel {
+
+    @Nullable
+    private Integer id;
+
+    @NotEmpty
+    private String portfolio;
 
     @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date = LocalDate.now();
 
-    @NotEmpty
-    private String baseCurrency;
-
-    @NotEmpty
-    String quoteCurrency;
-
     @NotNull
-    @Positive
-    private BigDecimal rate;
+    private CashFlowType type;
 
-    public void setBaseCurrency(String currency) {
-        this.baseCurrency = currency.toUpperCase();
-    }
+    /**
+     * Negative value for cash out, otherwise - positive
+     */
+    @NotNull
+    private BigDecimal value;
 
-    public void setQuoteCurrency(String currency) {
-        this.quoteCurrency = currency.toUpperCase();
+    @NotEmpty
+    private String valueCurrency = "RUB";
+
+    @Nullable
+    private String description;
+
+    public void setValueCurrency(String currency) {
+        this.valueCurrency = currency.toUpperCase();
     }
 }

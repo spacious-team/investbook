@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.model.dto;
+package ru.investbook.web.forms.model;
 
 import lombok.Data;
-import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.lang.Nullable;
 
@@ -28,8 +28,11 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_RUB;
+import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_USD;
+
 @Data
-public class EventCashFlowModel {
+public class PortfolioPropertyModel {
 
     @Nullable
     private Integer id;
@@ -42,21 +45,27 @@ public class EventCashFlowModel {
     private LocalDate date = LocalDate.now();
 
     @NotNull
-    private CashFlowType type;
+    private BigDecimal totalAssets;
 
-    /**
-     * Negative value for cash out, otherwise - positive
-     */
     @NotNull
-    private BigDecimal value;
+    private Currency totalAssetsCurrency;
 
-    @NotEmpty
-    private String valueCurrency = "RUB";
+    public enum Currency {
+        RUB, USD;
 
-    @Nullable
-    private String description;
+        public PortfolioPropertyType toPortfolioProperty() {
+            return switch (this) {
+                case RUB -> TOTAL_ASSETS_RUB;
+                case USD -> TOTAL_ASSETS_USD;
+            };
+        }
 
-    public void setValueCurrency(String currency) {
-        this.valueCurrency = currency.toUpperCase();
+        public static Currency valueOf(PortfolioPropertyType property) {
+            return switch (property) {
+                case TOTAL_ASSETS_RUB -> RUB;
+                case TOTAL_ASSETS_USD -> USD;
+                default -> throw new IllegalArgumentException();
+            };
+        }
     }
 }

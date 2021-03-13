@@ -16,20 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.model.repository;
+package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Portfolio;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.entity.EventCashFlowEntity;
-import ru.investbook.model.dto.EventCashFlowModel;
 import ru.investbook.repository.EventCashFlowRepository;
 import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.web.forms.model.EventCashFlowModel;
 
 import java.math.BigDecimal;
 import java.time.ZoneId;
@@ -39,22 +39,22 @@ import java.util.stream.Collectors;
 
 import static org.spacious_team.broker.pojo.CashFlowType.CASH;
 
-@Component
+@Service
 @RequiredArgsConstructor
-public class EventCashFlowModelRepository implements ModelRepository<EventCashFlowModel> {
+public class EventCashFlowFormsService implements FormsService<EventCashFlowModel> {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final EventCashFlowRepository eventCashFlowRepository;
     private final PortfolioRepository portfolioRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
     private final PortfolioConverter portfolioConverter;
 
-    public Optional<EventCashFlowModel> findById(Integer id) {
+    public Optional<EventCashFlowModel> getById(Integer id) {
         return eventCashFlowRepository.findById(id)
                 .map(this::toModel);
     }
 
     @Override
-    public List<EventCashFlowModel> findAll() {
+    public List<EventCashFlowModel> getAll() {
         return eventCashFlowRepository.findByOrderByPortfolioIdAscTimestampDesc()
                 .stream()
                 .map(this::toModel)
@@ -62,7 +62,7 @@ public class EventCashFlowModelRepository implements ModelRepository<EventCashFl
     }
 
     @Override
-    public void saveAndFlush(EventCashFlowModel e) {
+    public void save(EventCashFlowModel e) {
         saveAndFlush(e.getPortfolio());
         EventCashFlowEntity entity = eventCashFlowRepository.save(
                 eventCashFlowConverter.toEntity(EventCashFlow.builder()

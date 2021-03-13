@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.controller;
+package ru.investbook.web.forms.controller;
 
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.repository.PortfolioRepository;

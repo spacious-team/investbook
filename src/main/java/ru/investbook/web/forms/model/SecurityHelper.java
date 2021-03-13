@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.model.dto;
+package ru.investbook.web.forms.model;
 
 import org.springframework.util.StringUtils;
 

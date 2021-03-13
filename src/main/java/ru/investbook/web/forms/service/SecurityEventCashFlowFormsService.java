@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.model.repository;
+package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
@@ -24,15 +24,15 @@ import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow.SecurityEventCashFlowBuilder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
-import ru.investbook.model.dto.SecurityEventCashFlowModel;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityRepository;
+import ru.investbook.web.forms.model.SecurityEventCashFlowModel;
 
 import java.time.ZoneId;
 import java.util.List;
@@ -40,9 +40,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 @RequiredArgsConstructor
-public class SecurityEventCashFlowModelRepository implements ModelRepository<SecurityEventCashFlowModel> {
+public class SecurityEventCashFlowFormsService implements FormsService<SecurityEventCashFlowModel> {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityRepository securityRepository;
@@ -56,13 +56,13 @@ public class SecurityEventCashFlowModelRepository implements ModelRepository<Sec
             CashFlowType.DERIVATIVE_PRICE.getId(),
             CashFlowType.COMMISSION.getId());
 
-    public Optional<SecurityEventCashFlowModel> findById(Integer id) {
+    public Optional<SecurityEventCashFlowModel> getById(Integer id) {
         return securityEventCashFlowRepository.findById(id)
                 .map(this::toSecurityEventModel);
     }
 
     @Override
-    public List<SecurityEventCashFlowModel> findAll() {
+    public List<SecurityEventCashFlowModel> getAll() {
         return securityEventCashFlowRepository.findByOrderByPortfolioIdAscTimestampDescSecurityIdAsc()
                 .stream()
                 .filter(e -> e.getCashFlowType().getId() != CashFlowType.TAX.getId())
@@ -71,7 +71,7 @@ public class SecurityEventCashFlowModelRepository implements ModelRepository<Sec
     }
 
     @Override
-    public void saveAndFlush(SecurityEventCashFlowModel e) {
+    public void save(SecurityEventCashFlowModel e) {
         saveAndFlush(e.getPortfolio(), e.getSecurityId(), e.getSecurityName());
         SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .portfolio(e.getPortfolio())

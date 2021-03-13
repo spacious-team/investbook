@@ -16,19 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.model.repository;
+package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.PortfolioPropertyConverter;
 import ru.investbook.entity.PortfolioPropertyEntity;
-import ru.investbook.model.dto.PortfolioPropertyModel;
 import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.web.forms.model.PortfolioPropertyModel;
 
 import java.math.BigDecimal;
 import java.time.ZoneId;
@@ -41,9 +41,9 @@ import java.util.stream.Collectors;
 import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_RUB;
 import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_USD;
 
-@Component
+@Service
 @RequiredArgsConstructor
-public class PortfolioPropertyModelRepository implements ModelRepository<PortfolioPropertyModel> {
+public class PortfolioPropertyFormsService implements FormsService<PortfolioPropertyModel> {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final PortfolioPropertyRepository portfolioPropertyRepository;
     private final PortfolioRepository portfolioRepository;
@@ -51,13 +51,13 @@ public class PortfolioPropertyModelRepository implements ModelRepository<Portfol
     private final PortfolioConverter portfolioConverter;
     private final Collection<String> properties = Set.of(TOTAL_ASSETS_RUB.name(), TOTAL_ASSETS_USD.name());
 
-    public Optional<PortfolioPropertyModel> findById(Integer id) {
+    public Optional<PortfolioPropertyModel> getById(Integer id) {
         return portfolioPropertyRepository.findById(id)
                 .map(this::toModel);
     }
 
     @Override
-    public List<PortfolioPropertyModel> findAll() {
+    public List<PortfolioPropertyModel> getAll() {
         return portfolioPropertyRepository.findByPropertyInOrderByTimestampDesc(properties)
                 .stream()
                 .map(this::toModel)
@@ -65,7 +65,7 @@ public class PortfolioPropertyModelRepository implements ModelRepository<Portfol
     }
 
     @Override
-    public void saveAndFlush(PortfolioPropertyModel m) {
+    public void save(PortfolioPropertyModel m) {
         saveAndFlush(m.getPortfolio());
         PortfolioPropertyEntity entity = portfolioPropertyRepository.save(
                 portfolioPropertyConverter.toEntity(PortfolioProperty.builder()

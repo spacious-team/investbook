@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.controller;
+package ru.investbook.web;
 
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;

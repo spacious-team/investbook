@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.controller;
+package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -26,19 +26,19 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.investbook.model.dto.PortfolioPropertyModel;
-import ru.investbook.model.repository.PortfolioPropertyModelRepository;
 import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.web.forms.model.EventCashFlowModel;
+import ru.investbook.web.forms.service.EventCashFlowFormsService;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import java.util.List;
 
 @Controller
-@RequestMapping("/portfolio-properties")
+@RequestMapping("/events")
 @RequiredArgsConstructor
-public class PortfolioPropertyController {
-    private final PortfolioPropertyModelRepository portfolioPropertyModelRepository;
+public class EventCashFlowController {
+    private final EventCashFlowFormsService eventCashFlowFormsService;
     private final PortfolioRepository portfolioRepository;
     private volatile List<String> portfolios;
     private volatile String selectedPortfolio;
@@ -50,32 +50,32 @@ public class PortfolioPropertyController {
 
     @GetMapping
     public String get(Model model) {
-        model.addAttribute("properties", portfolioPropertyModelRepository.findAll());
-        return "portfolio-properties/table";
+        model.addAttribute("events", eventCashFlowFormsService.getAll());
+        return "events/table";
     }
 
     @GetMapping("/edit-form")
     public String getEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
-        model.addAttribute("property", getPortfolioProperty(id));
+        model.addAttribute("event", getEventCashFlow(id));
         model.addAttribute("portfolios", portfolios);
-        return "portfolio-properties/edit-form";
+        return "events/edit-form";
     }
 
-    private PortfolioPropertyModel getPortfolioProperty(Integer id) {
+    private EventCashFlowModel getEventCashFlow(Integer id) {
         if (id != null) {
-            return portfolioPropertyModelRepository.findById(id)
-                    .orElseGet(PortfolioPropertyModel::new);
+            return eventCashFlowFormsService.getById(id)
+                    .orElseGet(EventCashFlowModel::new);
         } else {
-            PortfolioPropertyModel property = new PortfolioPropertyModel();
-            property.setPortfolio(selectedPortfolio);
-            return property;
+            EventCashFlowModel event = new EventCashFlowModel();
+            event.setPortfolio(selectedPortfolio);
+            return event;
         }
     }
 
     @PostMapping
-    public String postTransaction(@Valid @ModelAttribute("property") PortfolioPropertyModel property) {
-        selectedPortfolio = property.getPortfolio();
-        portfolioPropertyModelRepository.saveAndFlush(property);
-        return "portfolio-properties/view-single";
+    public String postTransaction(@Valid @ModelAttribute("event") EventCashFlowModel event) {
+        selectedPortfolio = event.getPortfolio();
+        eventCashFlowFormsService.save(event);
+        return "events/view-single";
     }
 }

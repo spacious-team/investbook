@@ -16,16 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.model.repository;
+package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.investbook.converter.ForeignExchangeRateConverter;
 import ru.investbook.entity.ForeignExchangeRateEntity;
 import ru.investbook.entity.ForeignExchangeRateEntityPk;
-import ru.investbook.model.dto.ForeignExchangeRateModel;
 import ru.investbook.repository.ForeignExchangeRateRepository;
+import ru.investbook.web.forms.model.ForeignExchangeRateModel;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -34,13 +34,13 @@ import java.util.stream.Collectors;
 
 import static java.lang.Math.min;
 
-@Component
+@Service
 @RequiredArgsConstructor
-public class ForeignExchangeRateModelRepository implements ModelRepository<ForeignExchangeRateModel> {
+public class ForeignExchangeRateFormsService implements FormsService<ForeignExchangeRateModel> {
     private final ForeignExchangeRateRepository foreignExchangeRateRepository;
     private final ForeignExchangeRateConverter foreignExchangeRateConverter;
 
-    public Optional<ForeignExchangeRateModel> findById(LocalDate date, String baseCurrency, String quoteCurrency) {
+    public Optional<ForeignExchangeRateModel> getById(LocalDate date, String baseCurrency, String quoteCurrency) {
         ForeignExchangeRateEntityPk pk = new ForeignExchangeRateEntityPk();
         pk.setDate(date);
         pk.setCurrencyPair(baseCurrency + quoteCurrency);
@@ -49,7 +49,7 @@ public class ForeignExchangeRateModelRepository implements ModelRepository<Forei
     }
 
     @Override
-    public List<ForeignExchangeRateModel> findAll() {
+    public List<ForeignExchangeRateModel> getAll() {
         return foreignExchangeRateRepository.findByOrderByPkDateDescPkCurrencyPairAsc()
                 .stream()
                 .map(this::toModel)
@@ -57,7 +57,7 @@ public class ForeignExchangeRateModelRepository implements ModelRepository<Forei
     }
 
     @Override
-    public void saveAndFlush(ForeignExchangeRateModel m) {
+    public void save(ForeignExchangeRateModel m) {
         foreignExchangeRateRepository.saveAndFlush(
                 foreignExchangeRateConverter.toEntity(ForeignExchangeRate.builder()
                         .date(m.getDate())

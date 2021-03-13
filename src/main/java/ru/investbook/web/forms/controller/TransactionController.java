@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.controller;
+package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -26,10 +26,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.investbook.model.dto.TransactionModel;
-import ru.investbook.model.repository.TransactionModelRepository;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
+import ru.investbook.web.forms.model.TransactionModel;
+import ru.investbook.web.forms.service.TransactionFormsService;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
@@ -39,7 +39,7 @@ import java.util.List;
 @RequestMapping("/transactions")
 @RequiredArgsConstructor
 public class TransactionController {
-    private final TransactionModelRepository transactionModelRepository;
+    private final TransactionFormsService transactionFormsService;
     private final PortfolioRepository portfolioRepository;
     private final SecurityRepository securityRepository;
     private volatile List<String> securities;
@@ -54,7 +54,7 @@ public class TransactionController {
 
     @GetMapping
     public String get(Model model) {
-        model.addAttribute("transactions", transactionModelRepository.findAll());
+        model.addAttribute("transactions", transactionFormsService.getAll());
         return "transactions/table";
     }
 
@@ -70,7 +70,7 @@ public class TransactionController {
 
     private TransactionModel getTransaction(String portfolio, String transactionId) {
         if (portfolio != null && transactionId != null) {
-            return transactionModelRepository.findById(portfolio, transactionId)
+            return transactionFormsService.getById(portfolio, transactionId)
                     .orElseGet(TransactionModel::new);
         } else {
             TransactionModel transaction = new TransactionModel();
@@ -87,7 +87,7 @@ public class TransactionController {
     @PostMapping
     public String postTransaction(@Valid @ModelAttribute("transaction") TransactionModel transaction) {
         selectedPortfolio = transaction.getPortfolio();
-        transactionModelRepository.saveAndFlush(transaction);
+        transactionFormsService.save(transaction);
         return "transactions/view-single";
     }
 }

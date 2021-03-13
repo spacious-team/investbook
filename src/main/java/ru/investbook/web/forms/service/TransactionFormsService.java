@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.model.repository;
+package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
@@ -37,12 +37,12 @@ import ru.investbook.converter.TransactionConverter;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.entity.TransactionEntityPK;
-import ru.investbook.model.dto.SecurityType;
-import ru.investbook.model.dto.TransactionModel;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
+import ru.investbook.web.forms.model.SecurityType;
+import ru.investbook.web.forms.model.TransactionModel;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -59,7 +59,7 @@ import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 
 @Component
 @RequiredArgsConstructor
-public class TransactionModelRepository implements ModelRepository<TransactionModel> {
+public class TransactionFormsService implements FormsService<TransactionModel> {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final TransactionRepository transactionRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
@@ -75,7 +75,7 @@ public class TransactionModelRepository implements ModelRepository<TransactionMo
             CashFlowType.DERIVATIVE_PRICE.getId(),
             CashFlowType.COMMISSION.getId());
 
-    public Optional<TransactionModel> findById(String portfolio, String transactionId) {
+    public Optional<TransactionModel> getById(String portfolio, String transactionId) {
         TransactionEntityPK pk = new TransactionEntityPK();
         pk.setId(transactionId);
         pk.setPortfolio(portfolio);
@@ -84,7 +84,7 @@ public class TransactionModelRepository implements ModelRepository<TransactionMo
     }
 
     @Override
-    public List<TransactionModel> findAll() {
+    public List<TransactionModel> getAll() {
         return transactionRepository.findByOrderByPkPortfolioAscTimestampDescSecurityIdAsc()
                 .stream()
                 .map(this::toTransactionModel)
@@ -92,7 +92,7 @@ public class TransactionModelRepository implements ModelRepository<TransactionMo
     }
 
     @Override
-    public void saveAndFlush(TransactionModel tr) {
+    public void save(TransactionModel tr) {
         int direction = ((tr.getAction() == TransactionModel.Action.BUY) ? 1 : -1);
         BigDecimal multiplier = BigDecimal.valueOf(-direction * tr.getCount());
 

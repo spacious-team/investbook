@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.model.dto;
+package ru.investbook.web.forms.model;
 
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -33,8 +33,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 
-import static ru.investbook.model.dto.SecurityType.BOND;
-import static ru.investbook.model.dto.SecurityType.SHARE;
+import static ru.investbook.web.forms.model.SecurityType.BOND;
+import static ru.investbook.web.forms.model.SecurityType.SHARE;
 
 @Data
 public class TransactionModel {

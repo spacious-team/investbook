@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.controller;
+package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -26,52 +26,61 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.investbook.model.dto.SecurityQuoteModel;
-import ru.investbook.model.repository.SecurityQuoteModelRepository;
+import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
+import ru.investbook.web.forms.model.SecurityEventCashFlowModel;
+import ru.investbook.web.forms.service.SecurityEventCashFlowFormsService;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import java.util.List;
 
 @Controller
-@RequestMapping("/security-quotes")
+@RequestMapping("/security-events")
 @RequiredArgsConstructor
-public class SecurityQuoteController {
-    private final SecurityQuoteModelRepository securityQuoteModelRepository;
+public class SecurityEventCashFlowController {
+    private final SecurityEventCashFlowFormsService securityEventCashFlowFormsService;
+    private final PortfolioRepository portfolioRepository;
     private final SecurityRepository securityRepository;
     private volatile List<String> securities;
+    private volatile List<String> portfolios;
+    private volatile String selectedPortfolio;
 
     @PostConstruct
     public void start() {
+        portfolios = ControllerHelper.getPortfolios(portfolioRepository);
         securities = ControllerHelper.getSecuritiesDescriptions(securityRepository);
     }
 
     @GetMapping
     public String get(Model model) {
-        model.addAttribute("quotes", securityQuoteModelRepository.findAll());
-        return "security-quotes/table";
+        model.addAttribute("events", securityEventCashFlowFormsService.getAll());
+        return "security-events/table";
     }
 
     @GetMapping("/edit-form")
     public String getEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
-        model.addAttribute("quote", getSecurityQuote(id));
+        model.addAttribute("event", getSecurityEventCashFlow(id));
         model.addAttribute("securities", securities);
-        return "security-quotes/edit-form";
+        model.addAttribute("portfolios", portfolios);
+        return "security-events/edit-form";
     }
 
-    private SecurityQuoteModel getSecurityQuote(Integer id) {
+    private SecurityEventCashFlowModel getSecurityEventCashFlow(Integer id) {
         if (id != null) {
-            return securityQuoteModelRepository.findById(id)
-                    .orElseGet(SecurityQuoteModel::new);
+            return securityEventCashFlowFormsService.getById(id)
+                    .orElseGet(SecurityEventCashFlowModel::new);
         } else {
-            return new SecurityQuoteModel();
+            SecurityEventCashFlowModel event = new SecurityEventCashFlowModel();
+            event.setPortfolio(selectedPortfolio);
+            return event;
         }
     }
 
     @PostMapping
-    public String postTransaction(@Valid  @ModelAttribute("quote") SecurityQuoteModel quote) {
-        securityQuoteModelRepository.saveAndFlush(quote);
-        return "security-quotes/view-single";
+    public String postTransaction(@Valid @ModelAttribute("event") SecurityEventCashFlowModel event) {
+        selectedPortfolio = event.getPortfolio();
+        securityEventCashFlowFormsService.save(event);
+        return "security-events/view-single";
     }
 }

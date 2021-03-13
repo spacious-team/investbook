@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.controller;
+package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -27,8 +27,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.investbook.model.dto.ForeignExchangeRateModel;
-import ru.investbook.model.repository.ForeignExchangeRateModelRepository;
+import ru.investbook.web.forms.model.ForeignExchangeRateModel;
+import ru.investbook.web.forms.service.ForeignExchangeRateFormsService;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
@@ -37,11 +37,11 @@ import java.time.LocalDate;
 @RequestMapping("/foreign-exchange-rates")
 @RequiredArgsConstructor
 public class ForeignExchangeRateController {
-    private final ForeignExchangeRateModelRepository foreignExchangeRateModelRepository;
+    private final ForeignExchangeRateFormsService foreignExchangeRateFormsService;
 
     @GetMapping
     public String get(Model model) {
-        model.addAttribute("rates", foreignExchangeRateModelRepository.findAll());
+        model.addAttribute("rates", foreignExchangeRateFormsService.getAll());
         return "foreign-exchange-rates/table";
     }
 
@@ -60,7 +60,7 @@ public class ForeignExchangeRateController {
 
     private ForeignExchangeRateModel getForeignExchangeRate(LocalDate date, String baseCurrency, String quoteCurrency) {
         if (date != null && baseCurrency != null && quoteCurrency != null) {
-            return foreignExchangeRateModelRepository.findById(date, baseCurrency, quoteCurrency)
+            return foreignExchangeRateFormsService.getById(date, baseCurrency, quoteCurrency)
                     .orElseGet(ForeignExchangeRateModel::new);
         } else {
             return new ForeignExchangeRateModel();
@@ -69,7 +69,7 @@ public class ForeignExchangeRateController {
 
     @PostMapping
     public String postTransaction(@Valid @ModelAttribute("rate") ForeignExchangeRateModel rate) {
-        foreignExchangeRateModelRepository.saveAndFlush(rate);
+        foreignExchangeRateFormsService.save(rate);
         return "foreign-exchange-rates/view-single";
     }
 }

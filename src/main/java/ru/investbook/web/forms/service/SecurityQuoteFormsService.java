@@ -16,19 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.model.repository;
+package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.converter.SecurityQuoteConverter;
 import ru.investbook.entity.SecurityQuoteEntity;
-import ru.investbook.model.dto.SecurityQuoteModel;
-import ru.investbook.model.dto.SecurityType;
 import ru.investbook.repository.SecurityQuoteRepository;
 import ru.investbook.repository.SecurityRepository;
+import ru.investbook.web.forms.model.SecurityQuoteModel;
+import ru.investbook.web.forms.model.SecurityType;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,22 +36,22 @@ import java.util.stream.Collectors;
 
 import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 
-@Component
+@Service
 @RequiredArgsConstructor
-public class SecurityQuoteModelRepository implements ModelRepository<SecurityQuoteModel> {
+public class SecurityQuoteFormsService implements FormsService<SecurityQuoteModel> {
     private final SecurityQuoteRepository securityQuoteRepository;
     private final SecurityRepository securityRepository;
     private final SecurityQuoteConverter securityQuoteConverter;
     private final SecurityConverter securityConverter;
 
 
-    public Optional<SecurityQuoteModel> findById(Integer id) {
+    public Optional<SecurityQuoteModel> getById(Integer id) {
         return securityQuoteRepository.findById(id)
                 .map(this::toSecurityQuoteModel);
     }
 
     @Override
-    public List<SecurityQuoteModel> findAll() {
+    public List<SecurityQuoteModel> getAll() {
         return securityQuoteRepository.findByOrderByTimestampDescSecurityAsc()
                 .stream()
                 .map(this::toSecurityQuoteModel)
@@ -59,7 +59,7 @@ public class SecurityQuoteModelRepository implements ModelRepository<SecurityQuo
     }
 
     @Override
-    public void saveAndFlush(SecurityQuoteModel e) {
+    public void save(SecurityQuoteModel e) {
         saveAndFlush(e.getSecurityId(), e.getSecurityName());
         SecurityQuoteEntity entity = securityQuoteRepository.saveAndFlush(
                 securityQuoteConverter.toEntity(SecurityQuote.builder()
