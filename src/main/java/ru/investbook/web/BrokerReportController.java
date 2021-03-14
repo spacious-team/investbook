@@ -58,7 +58,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/reports")
+@RequestMapping("/broker-reports")
 @Slf4j
 public class BrokerReportController {
     private final ReportParserService reportParserService;
@@ -70,7 +70,7 @@ public class BrokerReportController {
     @GetMapping
     public String getPage(Model model) {
         model.addAttribute("brokerNames", getBrokerNames());
-        return "reports";
+        return "broker-reports";
     }
 
     @PostMapping

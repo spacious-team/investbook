@@ -16,14 +16,14 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <!DOCTYPE html>
-<html lang="ru">
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <title>Аналитика за период</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
     <style>
-        form {
+        .flex {
             display: flex;
             align-items: center;
             margin-top: 2em;
@@ -47,6 +47,10 @@
             text-decoration: line-through;
             color: #D0D0D0;
         }
+
+        input[type=checkbox] {
+            margin-left: 16px;
+        }
     </style>
 </head>
 <body>
@@ -54,22 +58,30 @@
 
 <a href="/">На главную</a>
 
-<form action="/portfolio" method="POST" id="get-portfolio" class="grey-smaller">
-    <a onclick="selectPeriodView()" id="perion-link" class="inactive-text" href="#" title="выбрать период">за период</a>
-    <span class="inactive-text" style="text-decoration: none">/</span>
-    <a onclick="selectTillDateView()" id="till-link" class="active-text" href="#" title="выбрать дату">на дату</a>&emsp;
-    <label id="from-date-label" for="from-date">&emsp; с &emsp;</label>
-    <input id="from-date" name="from-date" type="date"/>
-    <label id="to-date-label" for="to-date">&emsp; по &emsp;</label>
-    <input id="to-date" name="to-date" type="date"/>
-    &emsp;
-    <input type="submit" value="Получить"/>
+<form action="/portfolio" method="POST" id="get-portfolio" class="grey-smaller" th:object="${viewFilter}">
+    <div class="flex">
+        <a onclick="selectPeriodView()" id="perion-link" class="inactive-text" href="#" title="выбрать период">за период</a>
+        <span class="inactive-text" style="text-decoration: none">/</span>
+        <a onclick="selectTillDateView()" id="till-link" class="active-text" href="#" title="выбрать дату">на дату</a>&emsp;
+        <label id="from-date-label" for="from-date">&emsp; с &emsp;</label>
+        <input id="from-date" name="from-date" type="date" th:field="*{fromDate}"/>
+        <label id="to-date-label" for="to-date">&emsp; по &emsp;</label>
+        <input id="to-date" name="to-date" type="date" th:field="*{toDate}"/>
+        &emsp;
+        <input type="submit" value="Получить"/>
+    </div>
+    <p>Счета:
+        <input type="checkbox" name="roles"
+               th:each="portfolio : ${viewFilter.portfolios}"
+               th:text="${portfolio}"
+               th:value="${portfolio}"
+               th:field="*{portfolios}"
+               checked/>
+    </p>
 </form>
 </body>
 
 <script type="text/javascript">
-    document.getElementById('from-date').value = '1997-09-22';
-    document.getElementById('to-date').value = new Date().toISOString().substr(0, 10);
 
     function selectPeriodView() {
         document.getElementById('from-date').style.display = 'inline'

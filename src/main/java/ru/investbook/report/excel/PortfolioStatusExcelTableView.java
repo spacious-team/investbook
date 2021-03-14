@@ -72,15 +72,21 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
 
     @Override
     public Collection<ExcelTable> createExcelTables() {
+        Collection<ExcelTable> tables = new ArrayList<>();
+        tables.addAll(createExcelTablesByCurrencies());
+        tables.addAll(super.createExcelTables());
+        return tables;
+    }
+
+    private Collection<ExcelTable> createExcelTablesByCurrencies() {
+        Collection<ExcelTable> tables = new ArrayList<>();
         List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPkTypeIn(
                 Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId()));
-        Collection<ExcelTable> tables = new ArrayList<>(currencies.size());
         for (String currency : currencies) {
             Table table = tableFactory.create(currency);
             String sheetName = "Портфель " + currency;
             tables.add(ExcelTable.of(sheetName, table, this));
         }
-        tables.addAll(super.createExcelTables());
         return tables;
     }
 
