@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/reports")
 @Slf4j
-public class InvestbookReportController {
+public class BrokerReportController {
     private final ReportParserService reportParserService;
     private final InvestbookProperties investbookProperties;
     private final Collection<BrokerReportFactory> brokerReportFactories;
