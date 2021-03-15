@@ -22,7 +22,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.decampo.xirr.NewtonRaphson;
 import org.decampo.xirr.Xirr;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityType;
@@ -70,13 +69,13 @@ public class InternalRateOfReturn {
      * @return internal rate of return if can be calculated or null otherwise
      */
     // TODO convert all values to same currency
-    public Double calc(Optional<Portfolio> portfolio, Security security,
+    public Double calc(Collection<String> portfolios, Security security,
                        SecurityQuote currentQuote, String quoteCurrency, ViewFilter filter) {
         try {
             if (SecurityType.getSecurityType(security.getId()) == DERIVATIVE) {
                 return null;
             }
-            FifoPositions positions = positionsFactory.get(portfolio, security, filter);
+            FifoPositions positions = positionsFactory.get(portfolios, security, filter);
             int count = positions.getCurrentOpenedPositionsCount();
             if (count != 0 && (currentQuote == null || currentQuote.getDirtyPriceInCurrency() == null)) {
                 return null;
@@ -90,7 +89,7 @@ public class InternalRateOfReturn {
                     .map(Optional::get)
                     .collect(Collectors.toList());
 
-            getSecurityEventCashFlowEntities(portfolio, security, paymentTypes)
+            getSecurityEventCashFlowEntities(portfolios, security, paymentTypes)
                     .stream()
                     .map(cash -> castToXirrTransaction(cash, toCurrency))
                     .collect(Collectors.toCollection(() -> transactions));
@@ -160,25 +159,23 @@ public class InternalRateOfReturn {
         return (BigDecimal.ZERO.equals(value)) ? Optional.empty() : Optional.ofNullable(value);
     }
 
-    public List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Optional<Portfolio> portfolio,
+    public List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
                                                                               Security security,
                                                                               Set<Integer> cashFlowTypes) {
-        return portfolio
-                .map(value ->
-                        securityEventCashFlowRepository
-                                .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
-                                        value.getId(),
-                                        security.getId(),
-                                        cashFlowTypes,
-                                        ViewFilter.get().getFromDate(),
-                                        ViewFilter.get().getToDate()))
-                .orElseGet(() ->
-                        securityEventCashFlowRepository
-                                .findBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
-                                        security.getId(),
-                                        cashFlowTypes,
-                                        ViewFilter.get().getFromDate(),
-                                        ViewFilter.get().getToDate()));
+        return !portfolios.isEmpty() ?
+                securityEventCashFlowRepository
+                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
+                                portfolios,
+                                security.getId(),
+                                cashFlowTypes,
+                                ViewFilter.get().getFromDate(),
+                                ViewFilter.get().getToDate()) :
+                securityEventCashFlowRepository
+                        .findBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
+                                security.getId(),
+                                cashFlowTypes,
+                                ViewFilter.get().getFromDate(),
+                                ViewFilter.get().getToDate());
     }
 
     private BigDecimal convertToCurrency(BigDecimal value, String fromCurrency, String toCurrency) {

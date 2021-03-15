@@ -55,7 +55,27 @@ public interface PortfolioPropertyRepository extends JpaRepository<PortfolioProp
             )
             ORDER BY portfolio, timestamp DESC
             """)
-    List<PortfolioPropertyEntity> findDistinctOnPortfolioByPropertyAndTimestampBetweenOrderByTimestampDesc(
+    List<PortfolioPropertyEntity> findDistinctOnPortfolioIdByPropertyAndTimestampBetweenOrderByTimestampDesc(
+            @Param("property") String property,
+            @Param("from") Instant startDate,
+            @Param("to") Instant endDate);
+
+    @Query(nativeQuery = true, value = """
+            SELECT *
+            FROM portfolio_property AS t1
+            WHERE portfolio IN (:portfolios) 
+            AND property = :property 
+            AND timestamp = (
+                SELECT MAX(timestamp)
+                FROM portfolio_property AS t2
+                WHERE t1.portfolio = t2.portfolio
+                AND t2.property = :property 
+                AND t2.timestamp between :from AND :to
+            )
+            ORDER BY portfolio, timestamp DESC
+            """)
+    List<PortfolioPropertyEntity> findDistinctOnPortfolioIdByPortfolioIdInAndPropertyAndTimestampBetweenOrderByTimestampDesc(
+            @Param("portfolios") Collection<String> portfolios,
             @Param("property") String property,
             @Param("from") Instant startDate,
             @Param("to") Instant endDate);
@@ -64,8 +84,9 @@ public interface PortfolioPropertyRepository extends JpaRepository<PortfolioProp
                                                                                         Instant startDate,
                                                                                         Instant endDate);
 
-    List<PortfolioPropertyEntity> findByPortfolioIdAndPropertyAndTimestampBetweenOrderByTimestampDesc(String portfolio,
-                                                                                                    String property,
-                                                                                                    Instant startDate,
-                                                                                                    Instant endDate);
+    List<PortfolioPropertyEntity> findByPortfolioIdInAndPropertyAndTimestampBetweenOrderByTimestampDesc(
+            Collection<String> portfolios,
+            String property,
+            Instant startDate,
+            Instant endDate);
 }

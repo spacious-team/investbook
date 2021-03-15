@@ -50,6 +50,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singleton;
+
 @Component
 @RequiredArgsConstructor
 public class DerivativeEventsFactory {
@@ -101,9 +103,9 @@ public class DerivativeEventsFactory {
 
     private LinkedList<Transaction> getTransactions(Portfolio portfolio, Security contract, ViewFilter filter) {
         return transactionRepository
-                .findBySecurityIdAndPkPortfolioAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+                .findBySecurityIdAndPkPortfolioInAndTimestampBetweenOrderByTimestampAscPkIdAsc(
                         contract.getId(),
-                        portfolio.getId(),
+                        singleton(portfolio.getId()),
                         filter.getFromDate(),
                         filter.getToDate())
                 .stream()
@@ -113,8 +115,8 @@ public class DerivativeEventsFactory {
 
     private Map<LocalDate, SecurityEventCashFlow> getSecurityEventCashFlows(Portfolio portfolio, Security contract, ViewFilter filter) {
         return securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                        portfolio.getId(),
+                .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                        singleton(portfolio.getId()),
                         contract.getId(),
                         CashFlowType.DERIVATIVE_PROFIT.getId(),
                         filter.getFromDate(),

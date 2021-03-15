@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singleton;
 import static ru.investbook.report.excel.TaxExcelTableHeader.*;
 
 @Component
@@ -48,8 +49,8 @@ public class TaxExcelTableFactory implements TableFactory {
     public Table create(Portfolio portfolio) {
         Table table = new Table();
         List<EventCashFlow> cashFlows = eventCashFlowRepository
-                .findByPortfolioIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
-                        portfolio.getId(),
+                .findByPortfolioIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
+                        singleton(portfolio.getId()),
                         CashFlowType.TAX.getId(),
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate())
