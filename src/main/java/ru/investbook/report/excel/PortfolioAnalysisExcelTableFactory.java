@@ -219,15 +219,15 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
 
     private List<EventCashFlow> getCashFlow(Collection<String> portfolios) {
         ViewFilter viewFilter = ViewFilter.get();
-        List<EventCashFlowEntity> entities = !portfolios.isEmpty() ?
+        List<EventCashFlowEntity> entities = portfolios.isEmpty() ?
                 eventCashFlowRepository
-                        .findByPortfolioIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
-                                portfolios,
+                        .findByCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
                                 CASH.getId(),
                                 viewFilter.getFromDate(),
                                 viewFilter.getToDate()) :
                 eventCashFlowRepository
-                        .findByCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
+                        .findByPortfolioIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
+                                portfolios,
                                 CASH.getId(),
                                 viewFilter.getFromDate(),
                                 viewFilter.getToDate());
@@ -254,15 +254,15 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
 
     private List<PortfolioProperty> getPortfolioProperty(Collection<String> portfolios, PortfolioPropertyType property) {
         ViewFilter viewFilter = ViewFilter.get();
-        List<PortfolioPropertyEntity> entities = !portfolios.isEmpty() ?
+        List<PortfolioPropertyEntity> entities = portfolios.isEmpty() ?
                 portfolioPropertyRepository
-                        .findByPortfolioIdInAndPropertyAndTimestampBetweenOrderByTimestampDesc(
-                                portfolios,
+                        .findByPropertyAndTimestampBetweenOrderByTimestampDesc(
                                 property.name(),
                                 viewFilter.getFromDate(),
                                 viewFilter.getToDate()) :
                 portfolioPropertyRepository
-                        .findByPropertyAndTimestampBetweenOrderByTimestampDesc(
+                        .findByPortfolioIdInAndPropertyAndTimestampBetweenOrderByTimestampDesc(
+                                portfolios,
                                 property.name(),
                                 viewFilter.getFromDate(),
                                 viewFilter.getToDate());

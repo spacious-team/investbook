@@ -132,7 +132,24 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
 
     private Collection<String> getSecuritiesId(Collection<String> portfolios, String currency) {
         Collection<String> contracts = new ArrayList<>();
-        if (!portfolios.isEmpty()) {
+        if (portfolios.isEmpty()) {
+            contracts.addAll(
+                    transactionRepository.findDistinctSecurityByCurrencyAndTimestampBetweenOrderByTimestampDesc(
+                            currency,
+                            ViewFilter.get().getFromDate(),
+                            ViewFilter.get().getToDate()));
+            contracts.addAll(
+                    transactionRepository.findDistinctFxCurrencyPairByCurrencyAndTimestampBetween(
+                            currency,
+                            ViewFilter.get().getFromDate(),
+                            ViewFilter.get().getToDate()));
+            if (currency.equalsIgnoreCase("RUB")) {
+                contracts.addAll(
+                        transactionRepository.findDistinctDerivativeByTimestampBetweenOrderByTimestampDesc(
+                                ViewFilter.get().getFromDate(),
+                                ViewFilter.get().getToDate()));
+            }
+        } else {
             contracts.addAll(
                     transactionRepository.findDistinctSecurityByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
                             portfolios,
@@ -149,23 +166,6 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 contracts.addAll(
                         transactionRepository.findDistinctDerivativeByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
                                 portfolios,
-                                ViewFilter.get().getFromDate(),
-                                ViewFilter.get().getToDate()));
-            }
-        } else {
-            contracts.addAll(
-                    transactionRepository.findDistinctSecurityByCurrencyAndTimestampBetweenOrderByTimestampDesc(
-                            currency,
-                            ViewFilter.get().getFromDate(),
-                            ViewFilter.get().getToDate()));
-            contracts.addAll(
-                    transactionRepository.findDistinctFxCurrencyPairByCurrencyAndTimestampBetween(
-                            currency,
-                            ViewFilter.get().getFromDate(),
-                            ViewFilter.get().getToDate()));
-            if (currency.equalsIgnoreCase("RUB")) {
-                contracts.addAll(
-                        transactionRepository.findDistinctDerivativeByTimestampBetweenOrderByTimestampDesc(
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate()));
             }
@@ -326,13 +326,13 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     }
 
     private Optional<SecurityEventCashFlowEntity> getLastEventDate(Collection<String> portfolios, Security security, ViewFilter filter) {
-        return !portfolios.isEmpty() ?
-                securityEventCashFlowRepository
-                        .findFirstByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                portfolios, security.getId(), paymentEvents, filter.getFromDate(), filter.getToDate()) :
+        return portfolios.isEmpty() ?
                 securityEventCashFlowRepository
                         .findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                security.getId(), paymentEvents, filter.getFromDate(), filter.getToDate());
+                                security.getId(), paymentEvents, filter.getFromDate(), filter.getToDate()) :
+                securityEventCashFlowRepository
+                        .findFirstByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+                                portfolios, security.getId(), paymentEvents, filter.getFromDate(), filter.getToDate());
 
     }
 
@@ -454,16 +454,16 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     public List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
                                                                               Security security,
                                                                               CashFlowType cashFlowType) {
-        return !portfolios.isEmpty() ?
+        return portfolios.isEmpty() ?
                 securityEventCashFlowRepository
-                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                portfolios,
+                        .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                                 security.getId(),
                                 cashFlowType.getId(),
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate()) :
                 securityEventCashFlowRepository
-                        .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                                portfolios,
                                 security.getId(),
                                 cashFlowType.getId(),
                                 ViewFilter.get().getFromDate(),
@@ -476,15 +476,15 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
      * соответствующих дате, не позже указанной.
      */
     protected Collection<PortfolioProperty> getPortfolioCash(Collection<String> portfolios, Instant atInstant) {
-        List<PortfolioPropertyEntity> entities = !portfolios.isEmpty() ?
+        List<PortfolioPropertyEntity> entities = portfolios.isEmpty() ?
                 portfolioPropertyRepository
-                        .findDistinctOnPortfolioIdByPortfolioIdInAndPropertyAndTimestampBetweenOrderByTimestampDesc(
-                                portfolios,
+                        .findDistinctOnPortfolioIdByPropertyAndTimestampBetweenOrderByTimestampDesc(
                                 PortfolioPropertyType.CASH.name(),
                                 Instant.ofEpochSecond(0),
                                 atInstant) :
                 portfolioPropertyRepository
-                        .findDistinctOnPortfolioIdByPropertyAndTimestampBetweenOrderByTimestampDesc(
+                        .findDistinctOnPortfolioIdByPortfolioIdInAndPropertyAndTimestampBetweenOrderByTimestampDesc(
+                                portfolios,
                                 PortfolioPropertyType.CASH.name(),
                                 Instant.ofEpochSecond(0),
                                 atInstant);

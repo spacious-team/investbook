@@ -113,31 +113,31 @@ public class FifoPositionsFactory {
     }
 
     private Collection<String> getFxContracts(Collection<String> portfolios, String currencyPair, ViewFilter filter) {
-        return !portfolios.isEmpty() ?
+        return portfolios.isEmpty() ?
                 transactionRepository
-                        .findDistinctFxContractByPortfolioInAndCurrencyPairAndTimestampBetween(
-                                portfolios,
+                        .findDistinctFxContractByCurrencyPairAndTimestampBetween(
                                 currencyPair,
                                 filter.getFromDate(),
                                 filter.getToDate()) :
                 transactionRepository
-                        .findDistinctFxContractByCurrencyPairAndTimestampBetween(
+                        .findDistinctFxContractByPortfolioInAndCurrencyPairAndTimestampBetween(
+                                portfolios,
                                 currencyPair,
                                 filter.getFromDate(),
                                 filter.getToDate());
     }
 
     private LinkedList<Transaction> getTransactions(Collection<String> portfolios, String isin, ViewFilter filter) {
-        List<TransactionEntity> entities = !portfolios.isEmpty() ?
+        List<TransactionEntity> entities = portfolios.isEmpty() ?
+                transactionRepository
+                        .findBySecurityIdAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+                                isin,
+                                filter.getFromDate(),
+                                filter.getToDate()) :
                 transactionRepository
                         .findBySecurityIdAndPkPortfolioInAndTimestampBetweenOrderByTimestampAscPkIdAsc(
                                 isin,
                                 portfolios,
-                                filter.getFromDate(),
-                                filter.getToDate()) :
-                transactionRepository
-                        .findBySecurityIdAndTimestampBetweenOrderByTimestampAscPkIdAsc(
-                                isin,
                                 filter.getFromDate(),
                                 filter.getToDate());
         return entities.stream()
@@ -146,16 +146,16 @@ public class FifoPositionsFactory {
     }
 
     private Deque<SecurityEventCashFlow> getRedemption(Collection<String> portfolios, String isin, ViewFilter filter) {
-        List<SecurityEventCashFlowEntity> entities = !portfolios.isEmpty() ?
+        List<SecurityEventCashFlowEntity> entities = portfolios.isEmpty() ?
                 securityEventCashFlowRepository
-                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                portfolios,
+                        .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                                 isin,
                                 CashFlowType.REDEMPTION.getId(),
                                 filter.getFromDate(),
                                 filter.getToDate()) :
                 securityEventCashFlowRepository
-                        .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                                portfolios,
                                 isin,
                                 CashFlowType.REDEMPTION.getId(),
                                 filter.getFromDate(),

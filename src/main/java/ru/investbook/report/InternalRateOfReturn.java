@@ -162,16 +162,16 @@ public class InternalRateOfReturn {
     public List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
                                                                               Security security,
                                                                               Set<Integer> cashFlowTypes) {
-        return !portfolios.isEmpty() ?
+        return portfolios.isEmpty() ?
                 securityEventCashFlowRepository
-                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
-                                portfolios,
+                        .findBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
                                 security.getId(),
                                 cashFlowTypes,
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate()) :
                 securityEventCashFlowRepository
-                        .findBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
+                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
+                                portfolios,
                                 security.getId(),
                                 cashFlowTypes,
                                 ViewFilter.get().getFromDate(),
