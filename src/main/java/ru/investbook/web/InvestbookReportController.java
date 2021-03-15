@@ -88,7 +88,7 @@ public class InvestbookReportController {
 
     private String sendExcelFile(ViewFilterModel viewFilterModel, HttpServletResponse response)
             throws IOException, InterruptedException, ExecutionException {
-        ViewFilter viewFilter = ViewFilter.of(viewFilterModel);
+        ViewFilter viewFilter = ViewFilter.of(viewFilterModel, () -> getPortfolios(portfolioRepository));
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream(expectedFileSize);
         try (XSSFWorkbook book = new XSSFWorkbook()) {
             excelView.writeTo(book, viewFilter);

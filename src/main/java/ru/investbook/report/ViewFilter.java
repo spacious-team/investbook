@@ -29,6 +29,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static java.time.ZoneId.systemDefault;
 
@@ -40,12 +41,19 @@ public class ViewFilter {
     public static final Instant defaultFromDate = Instant.ofEpochSecond(0);
     private static final Function<LocalDate, Instant> toInstant = date -> date.atStartOfDay(systemDefault()).toInstant();
 
-    public static ViewFilter of(ViewFilterModel viewFilterModel) {
-
+    public static ViewFilter of(ViewFilterModel viewFilterModel, Supplier<? extends Collection<String>> allPortfoliosSupplier) {
+        Collection<String> portfolios = viewFilterModel.getPortfolios();
+        if (!portfolios.isEmpty()) {
+            Collection<String> allPortfolios = allPortfoliosSupplier.get();
+            if (portfolios.size() == allPortfolios.size() && portfolios.containsAll(allPortfolios)) {
+                // portfolio filter not required
+                portfolios = Collections.emptySet();
+            }
+        }
         return ViewFilter.builder()
                 .fromDate(toInstant.apply(viewFilterModel.getFromDate()))
                 .toDate(toInstant.apply(viewFilterModel.getToDate()).plus(1, ChronoUnit.DAYS).minusSeconds(1))
-                .portfolios(viewFilterModel.getPortfolios())
+                .portfolios(portfolios)
                 .build();
     }
 

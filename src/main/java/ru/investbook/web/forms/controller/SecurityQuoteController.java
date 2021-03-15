@@ -33,7 +33,7 @@ import ru.investbook.web.forms.service.SecurityQuoteFormsService;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
-import java.util.List;
+import java.util.Collection;
 
 @Controller
 @RequestMapping("/security-quotes")
@@ -41,7 +41,7 @@ import java.util.List;
 public class SecurityQuoteController {
     private final SecurityQuoteFormsService securityQuoteFormsService;
     private final SecurityRepository securityRepository;
-    private volatile List<String> securities;
+    private volatile Collection<String> securities;
 
     @PostConstruct
     public void start() {

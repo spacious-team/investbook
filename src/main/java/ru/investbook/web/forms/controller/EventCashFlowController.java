@@ -33,7 +33,7 @@ import ru.investbook.web.forms.service.EventCashFlowFormsService;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
-import java.util.List;
+import java.util.Collection;
 
 @Controller
 @RequestMapping("/events")
@@ -41,7 +41,7 @@ import java.util.List;
 public class EventCashFlowController {
     private final EventCashFlowFormsService eventCashFlowFormsService;
     private final PortfolioRepository portfolioRepository;
-    private volatile List<String> portfolios;
+    private volatile Collection<String> portfolios;
     private volatile String selectedPortfolio;
 
     @PostConstruct

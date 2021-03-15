@@ -33,7 +33,7 @@ import ru.investbook.web.forms.service.PortfolioPropertyFormsService;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
-import java.util.List;
+import java.util.Collection;
 
 @Controller
 @RequestMapping("/portfolio-properties")
@@ -41,7 +41,7 @@ import java.util.List;
 public class PortfolioPropertyController {
     private final PortfolioPropertyFormsService portfolioPropertyFormsService;
     private final PortfolioRepository portfolioRepository;
-    private volatile List<String> portfolios;
+    private volatile Collection<String> portfolios;
     private volatile String selectedPortfolio;
 
     @PostConstruct
