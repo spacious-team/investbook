@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singleton;
 import static ru.investbook.report.excel.CommissionExcelTableHeader.*;
 
 @Component
@@ -47,8 +48,8 @@ public class CommissionExcelTableFactory implements TableFactory {
     public Table create(Portfolio portfolio) {
         Table table = new Table();
         List<EventCashFlow> cashFlows = eventCashFlowRepository
-                .findByPortfolioIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
-                        portfolio.getId(),
+                .findByPortfolioIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
+                        singleton(portfolio.getId()),
                         CashFlowType.COMMISSION.getId(),
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate())

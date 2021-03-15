@@ -37,6 +37,7 @@ import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
+import ru.investbook.report.ViewFilter;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 
@@ -47,6 +48,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
+import static java.util.Collections.singleton;
 import static ru.investbook.report.excel.ExcelChartPlotHelper.*;
 import static ru.investbook.report.excel.ExcelConditionalFormatHelper.highlightNegativeByRed;
 import static ru.investbook.report.excel.PortfolioStatusExcelTableHeader.*;
@@ -72,22 +74,33 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
 
     @Override
     public Collection<ExcelTable> createExcelTables() {
-        List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPkTypeIn(
-                Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId()));
-        Collection<ExcelTable> tables = new ArrayList<>(currencies.size());
+        Collection<ExcelTable> tables = new ArrayList<>();
+        tables.addAll(createExcelTablesByCurrencies());
+        tables.addAll(super.createExcelTables());
+        return tables;
+    }
+
+    private Collection<ExcelTable> createExcelTablesByCurrencies() {
+        Collection<ExcelTable> tables = new ArrayList<>();
+        Collection<String> portfolios = ViewFilter.get().getPortfolios();
+        List<String> currencies = portfolios.isEmpty() ?
+                transactionCashFlowRepository.findDistinctCurrencyByPkTypeIn(
+                        Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId())) :
+                transactionCashFlowRepository.findDistinctCurrencyByPkPortfolioAndPkTypeIn(
+                        portfolios,
+                        Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId()));
         for (String currency : currencies) {
-            Table table = tableFactory.create(currency);
+            Table table = tableFactory.create(portfolios, currency);
             String sheetName = "Портфель " + currency;
             tables.add(ExcelTable.of(sheetName, table, this));
         }
-        tables.addAll(super.createExcelTables());
         return tables;
     }
 
     @Override
     protected Collection<ExcelTable> createExcelTables(Portfolio portfolio, String sheetName) {
         List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPkPortfolioAndPkTypeIn(
-                portfolio.getId(),
+                singleton(portfolio.getId()),
                 Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId()));
         Collection<ExcelTable> tables = new ArrayList<>(currencies.size());
         for (String currency : currencies) {

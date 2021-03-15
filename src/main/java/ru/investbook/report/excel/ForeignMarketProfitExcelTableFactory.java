@@ -40,6 +40,7 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.function.Function;
 
+import static java.util.Collections.singleton;
 import static ru.investbook.report.excel.ForeignMarketProfitExcelTableHeader.*;
 
 @Component
@@ -74,8 +75,8 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
      * Returns currency pairs, for example USDRUB, EURRUB
      */
     private Collection<String> getCurrencyPairs(Portfolio portfolio) {
-        return transactionRepository.findDistinctFxCurrencyPairByPortfolioAndTimestampBetween(
-                portfolio,
+        return transactionRepository.findDistinctFxCurrencyPairByPortfolioInAndTimestampBetween(
+                singleton(portfolio.getId()),
                 ViewFilter.get().getFromDate(),
                 ViewFilter.get().getToDate());
     }

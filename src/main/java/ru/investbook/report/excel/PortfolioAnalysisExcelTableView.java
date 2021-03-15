@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
+import ru.investbook.report.ViewFilter;
 import ru.investbook.repository.PortfolioRepository;
 
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     @Override
     public Collection<ExcelTable> createExcelTables() {
         Collection<ExcelTable> tables = new ArrayList<>();
-        Table table = tableFactory.create();
+        Table table = tableFactory.create(ViewFilter.get().getPortfolios());
         tables.add(ExcelTable.of("Обзор", table, this));
         tables.addAll(super.createExcelTables());
         return tables;

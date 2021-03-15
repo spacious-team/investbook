@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singleton;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
 
 @Component
@@ -78,8 +79,8 @@ public class PaidInterestFactory {
                                                                                CashFlowType event,
                                                                                ViewFilter filter) {
         List<SecurityEventCashFlowEntity> accruedInterests = securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                        portfolio,
+                .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                        singleton(portfolio),
                         isin,
                         event.getId(),
                         filter.getFromDate(),

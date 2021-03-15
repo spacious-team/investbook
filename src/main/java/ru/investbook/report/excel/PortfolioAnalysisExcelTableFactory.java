@@ -30,6 +30,8 @@ import org.spacious_team.broker.report_parser.api.PortfolioCash;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.converter.PortfolioPropertyConverter;
+import ru.investbook.entity.EventCashFlowEntity;
+import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.entity.StockMarketIndexEntity;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
@@ -43,15 +45,16 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.lang.Double.parseDouble;
+import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.reducing;
@@ -74,20 +77,20 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     private final StockMarketIndexRepository stockMarketIndexRepository;
 
     @Override
-    public Table create() {
+    public Table create(Collection<String> portfolios) {
         return createTable(
-                getCashFlow(Optional.empty()),
-                getCashBalance(Optional.empty()),
-                getTotalAssets(Optional.empty()),
+                getCashFlow(portfolios),
+                getCashBalance(portfolios),
+                getTotalAssets(portfolios),
                 getSp500Index());
     }
 
     @Override
     public Table create(Portfolio portfolio) {
         return createTable(
-                getCashFlow(Optional.of(portfolio)),
-                getCashBalance(Optional.of(portfolio)),
-                getTotalAssets(Optional.of(portfolio)),
+                getCashFlow(singleton(portfolio.getId())),
+                getCashBalance(singleton(portfolio.getId())),
+                getTotalAssets(singleton(portfolio.getId())),
                 getSp500Index());
     }
 
@@ -214,60 +217,56 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                 });
     }
 
-    private List<EventCashFlow> getCashFlow(Optional<Portfolio> portfolio) {
+    private List<EventCashFlow> getCashFlow(Collection<String> portfolios) {
         ViewFilter viewFilter = ViewFilter.get();
-        return portfolio
-                .map(value ->
-                        eventCashFlowRepository
-                                .findByPortfolioIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
-                                        value.getId(),
-                                        CASH.getId(),
-                                        viewFilter.getFromDate(),
-                                        viewFilter.getToDate()))
-                .orElseGet(() ->
-                        eventCashFlowRepository
-                                .findByCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
-                                        CASH.getId(),
-                                        viewFilter.getFromDate(),
-                                        viewFilter.getToDate()))
-                .stream()
+        List<EventCashFlowEntity> entities = portfolios.isEmpty() ?
+                eventCashFlowRepository
+                        .findByCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
+                                CASH.getId(),
+                                viewFilter.getFromDate(),
+                                viewFilter.getToDate()) :
+                eventCashFlowRepository
+                        .findByPortfolioIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
+                                portfolios,
+                                CASH.getId(),
+                                viewFilter.getFromDate(),
+                                viewFilter.getToDate());
+        return entities.stream()
                 .map(eventCashFlowConverter::fromEntity)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
-     * Returns cash balance information for all portfolios.
+     * Returns cash balance information for all portfolios
      *
      * @return map of date -> currency -> value
      */
-    private LinkedHashMap<Instant, Map<String, BigDecimal>> getCashBalance(Optional<Portfolio> portfolio) {
-        List<PortfolioProperty> portfolioCashes = getPortfolioProperty(portfolio, PortfolioPropertyType.CASH);
+    private LinkedHashMap<Instant, Map<String, BigDecimal>> getCashBalance(Collection<String> portfolios) {
+        List<PortfolioProperty> portfolioCashes = getPortfolioProperty(portfolios, PortfolioPropertyType.CASH);
         return getAllPortfolioCashBalance(portfolioCashes);
     }
 
     // TODO add second method with PortfolioPropertyType.TOTAL_ASSETS_USD and combine both results late
-    private LinkedHashMap<Instant, BigDecimal> getTotalAssets(Optional<Portfolio> portfolio) {
-        List<PortfolioProperty> assets = getPortfolioProperty(portfolio, PortfolioPropertyType.TOTAL_ASSETS_RUB);
+    private LinkedHashMap<Instant, BigDecimal> getTotalAssets(Collection<String> portfolios) {
+        List<PortfolioProperty> assets = getPortfolioProperty(portfolios, PortfolioPropertyType.TOTAL_ASSETS_RUB);
         return getAllPortfolioTotalAssets(assets);
     }
 
-    private List<PortfolioProperty> getPortfolioProperty(Optional<Portfolio> portfolio, PortfolioPropertyType property) {
+    private List<PortfolioProperty> getPortfolioProperty(Collection<String> portfolios, PortfolioPropertyType property) {
         ViewFilter viewFilter = ViewFilter.get();
-        List<PortfolioProperty> properties = portfolio
-                .map(value ->
-                        portfolioPropertyRepository
-                                .findByPortfolioIdAndPropertyAndTimestampBetweenOrderByTimestampDesc(
-                                        value.getId(),
-                                        property.name(),
-                                        viewFilter.getFromDate(),
-                                        viewFilter.getToDate()))
-                .orElseGet(() ->
-                        portfolioPropertyRepository
-                                .findByPropertyAndTimestampBetweenOrderByTimestampDesc(
-                                        property.name(),
-                                        viewFilter.getFromDate(),
-                                        viewFilter.getToDate()))
-                .stream()
+        List<PortfolioPropertyEntity> entities = portfolios.isEmpty() ?
+                portfolioPropertyRepository
+                        .findByPropertyAndTimestampBetweenOrderByTimestampDesc(
+                                property.name(),
+                                viewFilter.getFromDate(),
+                                viewFilter.getToDate()) :
+                portfolioPropertyRepository
+                        .findByPortfolioIdInAndPropertyAndTimestampBetweenOrderByTimestampDesc(
+                                portfolios,
+                                property.name(),
+                                viewFilter.getFromDate(),
+                                viewFilter.getToDate());
+        List<PortfolioProperty> properties = entities.stream()
                 .map(portfolioPropertyConverter::fromEntity)
                 .collect(Collectors.toCollection(ArrayList::new));
         Collections.reverse(properties);

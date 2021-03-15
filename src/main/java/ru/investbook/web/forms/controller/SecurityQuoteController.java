@@ -27,12 +27,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.repository.SecurityRepository;
+import ru.investbook.web.ControllerHelper;
 import ru.investbook.web.forms.model.SecurityQuoteModel;
 import ru.investbook.web.forms.service.SecurityQuoteFormsService;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
-import java.util.List;
+import java.util.Collection;
 
 @Controller
 @RequestMapping("/security-quotes")
@@ -40,7 +41,7 @@ import java.util.List;
 public class SecurityQuoteController {
     private final SecurityQuoteFormsService securityQuoteFormsService;
     private final SecurityRepository securityRepository;
-    private volatile List<String> securities;
+    private volatile Collection<String> securities;
 
     @PostConstruct
     public void start() {

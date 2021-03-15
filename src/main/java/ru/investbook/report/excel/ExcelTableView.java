@@ -20,6 +20,7 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -36,6 +37,7 @@ import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
 import ru.investbook.report.TableHeader;
+import ru.investbook.report.ViewFilter;
 import ru.investbook.repository.PortfolioRepository;
 
 import java.time.Duration;
@@ -45,11 +47,11 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static ru.investbook.report.excel.StockMarketProfitExcelTableHeader.ROW_NUM_PLACE_HOLDER;
 
@@ -66,7 +68,7 @@ public abstract class ExcelTableView {
 
     public Collection<ExcelTable> createExcelTables() {
         Collection<ExcelTable> tables = new ArrayList<>();
-        for (PortfolioEntity entity : getPortfolios()) {
+        for (PortfolioEntity entity : getPortfolios(ViewFilter.get().getPortfolios())) {
             Portfolio portfolio = portfolioConverter.fromEntity(entity);
             String sheetName = getSheetNameCreator().apply(portfolio.getId());
             tables.addAll(createExcelTables(portfolio, sheetName));
@@ -79,9 +81,15 @@ public abstract class ExcelTableView {
         return Collections.singleton(ExcelTable.of(portfolio, sheetName, table, this));
     }
 
-    protected List<PortfolioEntity> getPortfolios() {
+    protected Collection<PortfolioEntity> getPortfolios(Collection<String> allowedPortfolios) {
         // TODO select by user
-        return portfolioRepository.findAll();
+        Collection<PortfolioEntity> portfolios = portfolioRepository.findAll();
+        if (CollectionUtils.isNotEmpty(allowedPortfolios)) {
+            return portfolios.stream()
+                    .filter(e -> allowedPortfolios.contains(e.getId()))
+                    .collect(Collectors.toSet());
+        }
+        return portfolios;
     }
 
     protected abstract UnaryOperator<String> getSheetNameCreator();

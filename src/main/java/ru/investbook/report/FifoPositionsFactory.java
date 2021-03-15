@@ -28,6 +28,8 @@ import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
 import ru.investbook.converter.TransactionConverter;
+import ru.investbook.entity.SecurityEventCashFlowEntity;
+import ru.investbook.entity.TransactionEntity;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
 
@@ -36,11 +38,12 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singleton;
 import static org.spacious_team.broker.pojo.SecurityType.getCurrencyPair;
 
 @Component
@@ -55,26 +58,26 @@ public class FifoPositionsFactory {
     private final Map<String, Map<String, FifoPositions>> positionsCache = new ConcurrentHashMap<>();
 
     public FifoPositions get(Portfolio portfolio, Security security, ViewFilter filter) {
-        return get(Optional.of(portfolio), security.getId(), filter);
+        return get(singleton(portfolio.getId()), security.getId(), filter);
     }
 
     public FifoPositions get(Portfolio portfolio, String isinOrContract, ViewFilter filter) {
-        return get(Optional.of(portfolio), isinOrContract, filter);
+        return get(singleton(portfolio.getId()), isinOrContract, filter);
     }
 
-    public FifoPositions get(Optional<Portfolio> portfolio, Security security, ViewFilter filter) {
-        return get(portfolio, security.getId(), filter);
+    public FifoPositions get(Collection<String> portfolios, Security security, ViewFilter filter) {
+        return get(portfolios, security.getId(), filter);
     }
 
-    public FifoPositions get(Optional<Portfolio> portfolio, String isinOrContract, ViewFilter filter) {
+    public FifoPositions get(Collection<String> portfolios, String isinOrContract, ViewFilter filter) {
+        String key = portfolios.stream().sorted().collect(Collectors.joining(","));
         return positionsCache
                 .computeIfAbsent(
-                        portfolio.map(Portfolio::getId)
-                                .orElse(ALL_PORTFOLIO_KEY),
+                        key.isEmpty() ? ALL_PORTFOLIO_KEY : key,
                         k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(
                         getCacheKey(isinOrContract, filter),
-                        k -> create(portfolio, isinOrContract, filter));
+                        k -> create(portfolios, isinOrContract, filter));
     }
 
     public void invalidateCache() {
@@ -88,82 +91,76 @@ public class FifoPositionsFactory {
         return key + filter.getFromDate().toString() + filter.getToDate().toString();
     }
 
-    private FifoPositions create(Optional<Portfolio> portfolio, String isinOrContract, ViewFilter filter) {
+    private FifoPositions create(Collection<String> portfolios, String isinOrContract, ViewFilter filter) {
         SecurityType type = SecurityType.getSecurityType(isinOrContract);
         LinkedList<Transaction> transactions;
         if (type == SecurityType.CURRENCY_PAIR) {
             String currencyPair = getCurrencyPair(isinOrContract);
-            transactions = getFxContracts(portfolio, currencyPair, filter)
+            transactions = getFxContracts(portfolios, currencyPair, filter)
                     .stream()
-                    .flatMap(contract -> getTransactions(portfolio, contract, filter).stream())
+                    .flatMap(contract -> getTransactions(portfolios, contract, filter).stream())
                     .collect(Collectors.toCollection(LinkedList::new));
             transactions.sort(
                     Comparator.comparing(Transaction::getTimestamp)
                             .thenComparing(Transaction::getId));
         } else {
-            transactions = getTransactions(portfolio, isinOrContract, filter);
+            transactions = getTransactions(portfolios, isinOrContract, filter);
         }
         Deque<SecurityEventCashFlow> redemption = (type == SecurityType.STOCK_OR_BOND) ?
-                getRedemption(portfolio, isinOrContract, filter) :
+                getRedemption(portfolios, isinOrContract, filter) :
                 new ArrayDeque<>(0);
         return new FifoPositions(transactions, redemption);
     }
 
-    private Collection<String> getFxContracts(Optional<Portfolio> portfolio, String currencyPair, ViewFilter filter) {
-        return portfolio
-                .map(value ->
-                        transactionRepository
-                                .findDistinctFxContractByPortfolioAndCurrencyPairAndTimestampBetween(
-                                        value,
-                                        currencyPair,
-                                        filter.getFromDate(),
-                                        filter.getToDate()))
-                .orElseGet(() ->
-                        transactionRepository
-                                .findDistinctFxContractByCurrencyPairAndTimestampBetween(
-                                        currencyPair,
-                                        filter.getFromDate(),
-                                        filter.getToDate()));
+    private Collection<String> getFxContracts(Collection<String> portfolios, String currencyPair, ViewFilter filter) {
+        return portfolios.isEmpty() ?
+                transactionRepository
+                        .findDistinctFxContractByCurrencyPairAndTimestampBetween(
+                                currencyPair,
+                                filter.getFromDate(),
+                                filter.getToDate()) :
+                transactionRepository
+                        .findDistinctFxContractByPortfolioInAndCurrencyPairAndTimestampBetween(
+                                portfolios,
+                                currencyPair,
+                                filter.getFromDate(),
+                                filter.getToDate());
     }
 
-    private LinkedList<Transaction> getTransactions(Optional<Portfolio> portfolio, String isin, ViewFilter filter) {
-        return portfolio
-                .map(value ->
-                        transactionRepository
-                                .findBySecurityIdAndPkPortfolioAndTimestampBetweenOrderByTimestampAscPkIdAsc(
-                                        isin,
-                                        value.getId(),
-                                        filter.getFromDate(),
-                                        filter.getToDate()))
-                .orElseGet(() ->
-                        transactionRepository
-                                .findBySecurityIdAndTimestampBetweenOrderByTimestampAscPkIdAsc(
-                                        isin,
-                                        filter.getFromDate(),
-                                        filter.getToDate()))
-                .stream()
+    private LinkedList<Transaction> getTransactions(Collection<String> portfolios, String isin, ViewFilter filter) {
+        List<TransactionEntity> entities = portfolios.isEmpty() ?
+                transactionRepository
+                        .findBySecurityIdAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+                                isin,
+                                filter.getFromDate(),
+                                filter.getToDate()) :
+                transactionRepository
+                        .findBySecurityIdAndPkPortfolioInAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+                                isin,
+                                portfolios,
+                                filter.getFromDate(),
+                                filter.getToDate());
+        return entities.stream()
                 .map(transactionConverter::fromEntity)
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    private Deque<SecurityEventCashFlow> getRedemption(Optional<Portfolio> portfolio, String isin, ViewFilter filter) {
-        return portfolio
-                .map(value ->
-                        securityEventCashFlowRepository
-                                .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                        value.getId(),
-                                        isin,
-                                        CashFlowType.REDEMPTION.getId(),
-                                        filter.getFromDate(),
-                                        filter.getToDate()))
-                .orElseGet(() ->
-                        securityEventCashFlowRepository
-                                .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                        isin,
-                                        CashFlowType.REDEMPTION.getId(),
-                                        filter.getFromDate(),
-                                        filter.getToDate()))
-                .stream()
+    private Deque<SecurityEventCashFlow> getRedemption(Collection<String> portfolios, String isin, ViewFilter filter) {
+        List<SecurityEventCashFlowEntity> entities = portfolios.isEmpty() ?
+                securityEventCashFlowRepository
+                        .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                                isin,
+                                CashFlowType.REDEMPTION.getId(),
+                                filter.getFromDate(),
+                                filter.getToDate()) :
+                securityEventCashFlowRepository
+                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                                portfolios,
+                                isin,
+                                CashFlowType.REDEMPTION.getId(),
+                                filter.getFromDate(),
+                                filter.getToDate());
+        return entities.stream()
                 .map(securityEventCashFlowConverter::fromEntity)
                 .collect(Collectors.toCollection(LinkedList::new));
     }

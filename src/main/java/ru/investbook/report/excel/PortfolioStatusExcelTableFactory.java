@@ -61,13 +61,13 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singleton;
 import static org.spacious_team.broker.pojo.SecurityType.*;
 import static ru.investbook.report.excel.PortfolioStatusExcelTableHeader.*;
 
@@ -105,55 +105,34 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public Table create(String forCurrency) {
-        return create(Optional.empty(), forCurrency);
-    }
-
     public Table create(Portfolio portfolio, String forCurrency) {
-        return create(Optional.of(portfolio), forCurrency);
+        return create(singleton(portfolio.getId()), forCurrency);
     }
 
-    private Table create(Optional<Portfolio> portfolio, String forCurrency) {
-        Collection<String> securitiesId = getSecuritiesId(portfolio, forCurrency);
-        Table table = create(portfolio, securitiesId, forCurrency);
-        table.add(getCashRow(portfolio, forCurrency));
+    /**
+     * @param portfolios should be empty for display for all
+     */
+    @Override
+    public Table create(Collection<String> portfolios, String forCurrency) {
+        Collection<String> securitiesId = getSecuritiesId(portfolios, forCurrency);
+        Table table = create(portfolios, securitiesId, forCurrency);
+        table.add(getCashRow(portfolios, forCurrency));
         return table;
     }
 
-    private Table create(Optional<Portfolio> portfolio, Collection<String> securitiesIsin, String forCurrency) {
+    private Table create(Collection<String> portfolios, Collection<String> securitiesIsin, String forCurrency) {
         Table table = new Table();
         for (String isin : securitiesIsin) {
             getSecurity(isin)
-                    .map(security -> getSecurityStatus(portfolio, security, forCurrency))
+                    .map(security -> getSecurityStatus(portfolios, security, forCurrency))
                     .ifPresent(table::add);
         }
         return table;
     }
 
-    private Collection<String> getSecuritiesId(Optional<Portfolio> portfolio, String currency) {
+    private Collection<String> getSecuritiesId(Collection<String> portfolios, String currency) {
         Collection<String> contracts = new ArrayList<>();
-        if (portfolio.isPresent()) {
-            contracts.addAll(
-                    transactionRepository.findDistinctSecurityByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
-                            portfolio.get(),
-                            currency,
-                            ViewFilter.get().getFromDate(),
-                            ViewFilter.get().getToDate()));
-            contracts.addAll(
-                    transactionRepository.findDistinctFxCurrencyPairByPortfolioAndCurrencyAndTimestampBetween(
-                            portfolio.get(),
-                            currency,
-                            ViewFilter.get().getFromDate(),
-                            ViewFilter.get().getToDate()));
-            if (currency.equalsIgnoreCase("RUB")) {
-                contracts.addAll(
-                        transactionRepository.findDistinctDerivativeByPortfolioAndTimestampBetweenOrderByTimestampDesc(
-                                portfolio.get(),
-                                ViewFilter.get().getFromDate(),
-                                ViewFilter.get().getToDate()));
-            }
-        } else {
+        if (portfolios.isEmpty()) {
             contracts.addAll(
                     transactionRepository.findDistinctSecurityByCurrencyAndTimestampBetweenOrderByTimestampDesc(
                             currency,
@@ -170,17 +149,37 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate()));
             }
+        } else {
+            contracts.addAll(
+                    transactionRepository.findDistinctSecurityByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+                            portfolios,
+                            currency,
+                            ViewFilter.get().getFromDate(),
+                            ViewFilter.get().getToDate()));
+            contracts.addAll(
+                    transactionRepository.findDistinctFxCurrencyPairByPortfolioInAndCurrencyAndTimestampBetween(
+                            portfolios,
+                            currency,
+                            ViewFilter.get().getFromDate(),
+                            ViewFilter.get().getToDate()));
+            if (currency.equalsIgnoreCase("RUB")) {
+                contracts.addAll(
+                        transactionRepository.findDistinctDerivativeByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
+                                portfolios,
+                                ViewFilter.get().getFromDate(),
+                                ViewFilter.get().getToDate()));
+            }
         }
         return contracts;
     }
 
-    protected Table.Record getCashRow(Optional<Portfolio> portfolio, String forCurrency) {
+    protected Table.Record getCashRow(Collection<String> portfolios, String forCurrency) {
         Table.Record row = new Table.Record();
         Instant atTime = Instant.ofEpochSecond(Math.min(
                 ViewFilter.get().getToDate().getEpochSecond(),
                 Instant.now().getEpochSecond()));
         row.put(SECURITY, "Остаток денежных средств, " + forCurrency.toLowerCase());
-        Collection<PortfolioProperty> portfolioCashes = getPortfolioCash(portfolio, atTime);
+        Collection<PortfolioProperty> portfolioCashes = getPortfolioCash(portfolios, atTime);
         row.put(LAST_EVENT_DATE, portfolioCashes.stream()
                 .map(PortfolioProperty::getTimestamp)
                 .reduce((t1, t2) -> t1.isAfter(t2) ? t1 : t2)
@@ -215,7 +214,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         }
     }
 
-    private Table.Record getSecurityStatus(Optional<Portfolio> portfolio, Security security, String toCurrency) {
+    private Table.Record getSecurityStatus(Collection<String> portfolios, Security security, String toCurrency) {
         Table.Record row = new Table.Record();
         SecurityType securityType = getSecurityType(security);
         row.put(SECURITY,
@@ -226,7 +225,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         row.put(TYPE, securityType.getDescription());
         try {
             ViewFilter filter = ViewFilter.get();
-            FifoPositions positions = positionsFactory.get(portfolio, security, filter);
+            FifoPositions positions = positionsFactory.get(portfolios, security, filter);
             row.put(FIRST_TRANSACTION_DATE, Optional.ofNullable(positions.getPositionHistories().peekFirst())
                     .map(PositionHistory::getInstant)
                     .orElse(null));
@@ -234,7 +233,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     .map(PositionHistory::getInstant)
                     .orElse(null));
             if (securityType != CURRENCY_PAIR) {
-                row.put(LAST_EVENT_DATE, getLastEventDate(portfolio, security, filter)
+                row.put(LAST_EVENT_DATE, getLastEventDate(portfolios, security, filter)
                                 .map(SecurityEventCashFlowEntity::getTimestamp)
                                 .orElse(null));
             }
@@ -258,7 +257,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             int count = positions.getCurrentOpenedPositionsCount();
             row.put(COUNT, count);
             if (count == 0) {
-                row.put(GROSS_PROFIT, "=" + getGrossProfit(portfolio, security, positions, toCurrency) +
+                row.put(GROSS_PROFIT, "=" + getGrossProfit(portfolios, security, positions, toCurrency) +
                         ((securityType == STOCK_OR_BOND) ? ("+" + AMORTIZATION.getCellAddr()) : ""));
             } else {
                 row.put(AVERAGE_PRICE, getPurchaseCost(security, positions, toCurrency)
@@ -303,7 +302,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 if (securityType == STOCK_OR_BOND || securityType == CURRENCY_PAIR) {
                     row.put(GROSS_PROFIT, STOCK_GROSS_PROFIT_FORMULA);
                 } else if (securityType == DERIVATIVE) {
-                    row.put(GROSS_PROFIT, getGrossProfit(portfolio, security, positions, toCurrency));
+                    row.put(GROSS_PROFIT, getGrossProfit(portfolios, security, positions, toCurrency));
                 }
                 if (securityType == STOCK_OR_BOND || securityType == CURRENCY_PAIR) {
                     row.put(INVESTMENT_PROPORTION, INVESTMENT_PROPORTION_FORMULA);
@@ -312,13 +311,13 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             }
             row.put(COMMISSION, getTotal(positions.getTransactions(), CashFlowType.COMMISSION, toCurrency).abs());
             if (securityType == STOCK_OR_BOND) {
-                row.put(COUPON, sumPaymentsForType(portfolio, security, CashFlowType.COUPON, toCurrency));
-                row.put(AMORTIZATION, sumPaymentsForType(portfolio, security, CashFlowType.AMORTIZATION, toCurrency));
-                row.put(DIVIDEND, sumPaymentsForType(portfolio, security, CashFlowType.DIVIDEND, toCurrency));
-                row.put(TAX, sumPaymentsForType(portfolio, security, CashFlowType.TAX, toCurrency).abs());
+                row.put(COUPON, sumPaymentsForType(portfolios, security, CashFlowType.COUPON, toCurrency));
+                row.put(AMORTIZATION, sumPaymentsForType(portfolios, security, CashFlowType.AMORTIZATION, toCurrency));
+                row.put(DIVIDEND, sumPaymentsForType(portfolios, security, CashFlowType.DIVIDEND, toCurrency));
+                row.put(TAX, sumPaymentsForType(portfolios, security, CashFlowType.TAX, toCurrency).abs());
             }
             row.put(PROFIT, PROFIT_FORMULA);
-            row.put(INTERNAL_RATE_OF_RETURN, internalRateOfReturn.calc(portfolio, security, securityQuote, quoteCurrency, filter));
+            row.put(INTERNAL_RATE_OF_RETURN, internalRateOfReturn.calc(portfolios, security, securityQuote, quoteCurrency, filter));
             row.put(PROFIT_PROPORTION, PROFIT_PROPORTION_FORMULA);
         } catch (Exception e) {
             log.error("Ошибка при формировании агрегированных данных по бумаге {}", security, e);
@@ -326,28 +325,26 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         return row;
     }
 
-    private Optional<SecurityEventCashFlowEntity> getLastEventDate(Optional<Portfolio> portfolio, Security security, ViewFilter filter) {
-        return portfolio
-                .map(value ->
-                        securityEventCashFlowRepository
-                                .findFirstByPortfolioIdAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                        value.getId(), security.getId(), paymentEvents, filter.getFromDate(), filter.getToDate()))
-                .orElseGet(() ->
-                        securityEventCashFlowRepository
-                                .findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                        security.getId(), paymentEvents, filter.getFromDate(), filter.getToDate()));
+    private Optional<SecurityEventCashFlowEntity> getLastEventDate(Collection<String> portfolios, Security security, ViewFilter filter) {
+        return portfolios.isEmpty() ?
+                securityEventCashFlowRepository
+                        .findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+                                security.getId(), paymentEvents, filter.getFromDate(), filter.getToDate()) :
+                securityEventCashFlowRepository
+                        .findFirstByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+                                portfolios, security.getId(), paymentEvents, filter.getFromDate(), filter.getToDate());
 
     }
 
     /**
      * Курсовой доход с купли-продажи (для деривативов - суммарная вариационная маржа)
      */
-    private BigDecimal getGrossProfit(Optional<Portfolio> portfolio, Security security, FifoPositions positions, String toCurrency) {
+    private BigDecimal getGrossProfit(Collection<String> portfolios, Security security, FifoPositions positions, String toCurrency) {
         SecurityType securityType = getSecurityType(security);
         return switch (securityType) {
             case STOCK_OR_BOND -> getPurchaseCost(security, positions, toCurrency)
                     .add(getPurchaseAccruedInterest(security, positions, toCurrency));
-            case DERIVATIVE -> sumPaymentsForType(portfolio, security, CashFlowType.DERIVATIVE_PROFIT, toCurrency);
+            case DERIVATIVE -> sumPaymentsForType(portfolios, security, CashFlowType.DERIVATIVE_PROFIT, toCurrency);
             case CURRENCY_PAIR -> getPurchaseCost(security, positions, toCurrency);
         };
     }
@@ -447,32 +444,30 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         }
     }
 
-    private BigDecimal sumPaymentsForType(Optional<Portfolio> portfolio, Security security, CashFlowType cashFlowType, String toCurrency) {
-        return getSecurityEventCashFlowEntities(portfolio, security, cashFlowType)
+    private BigDecimal sumPaymentsForType(Collection<String> portfolios, Security security, CashFlowType cashFlowType, String toCurrency) {
+        return getSecurityEventCashFlowEntities(portfolios, security, cashFlowType)
                 .stream()
                 .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Optional<Portfolio> portfolio,
-                                                                                     Security security,
-                                                                                     CashFlowType cashFlowType) {
-        return portfolio
-                .map(value ->
-                        securityEventCashFlowRepository
-                                .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                        value.getId(),
-                                        security.getId(),
-                                        cashFlowType.getId(),
-                                        ViewFilter.get().getFromDate(),
-                                        ViewFilter.get().getToDate()))
-                .orElseGet(() ->
-                        securityEventCashFlowRepository
-                                .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                        security.getId(),
-                                        cashFlowType.getId(),
-                                        ViewFilter.get().getFromDate(),
-                                        ViewFilter.get().getToDate()));
+    public List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
+                                                                              Security security,
+                                                                              CashFlowType cashFlowType) {
+        return portfolios.isEmpty() ?
+                securityEventCashFlowRepository
+                        .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                                security.getId(),
+                                cashFlowType.getId(),
+                                ViewFilter.get().getFromDate(),
+                                ViewFilter.get().getToDate()) :
+                securityEventCashFlowRepository
+                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                                portfolios,
+                                security.getId(),
+                                cashFlowType.getId(),
+                                ViewFilter.get().getFromDate(),
+                                ViewFilter.get().getToDate());
     }
 
     /**
@@ -480,25 +475,22 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
      * Если портфель не указан, возвращает для всех портфелей сумму последних известных остатков денежных средств
      * соответствующих дате, не позже указанной.
      */
-    protected Collection<PortfolioProperty> getPortfolioCash(Optional<Portfolio> portfolio, Instant atInstant) {
-        return portfolio
-                .flatMap(value ->
-                        portfolioPropertyRepository
-                                .findFirstByPortfolioIdAndPropertyAndTimestampBetweenOrderByTimestampDesc(
-                                        value.getId(),
-                                        PortfolioPropertyType.CASH.name(),
-                                        Instant.ofEpochSecond(0),
-                                        atInstant))
-                .map(value -> (Collection<PortfolioPropertyEntity>) Collections.singleton(value))
-                .orElseGet(() ->
-                        portfolioPropertyRepository
-                                .findDistinctOnPortfolioByPropertyAndTimestampBetweenOrderByTimestampDesc(
-                                        PortfolioPropertyType.CASH.name(),
-                                        Instant.ofEpochSecond(0),
-                                        atInstant))
-                .stream()
+    protected Collection<PortfolioProperty> getPortfolioCash(Collection<String> portfolios, Instant atInstant) {
+        List<PortfolioPropertyEntity> entities = portfolios.isEmpty() ?
+                portfolioPropertyRepository
+                        .findDistinctOnPortfolioIdByPropertyAndTimestampBetweenOrderByTimestampDesc(
+                                PortfolioPropertyType.CASH.name(),
+                                Instant.ofEpochSecond(0),
+                                atInstant) :
+                portfolioPropertyRepository
+                        .findDistinctOnPortfolioIdByPortfolioIdInAndPropertyAndTimestampBetweenOrderByTimestampDesc(
+                                portfolios,
+                                PortfolioPropertyType.CASH.name(),
+                                Instant.ofEpochSecond(0),
+                                atInstant);
+        return entities.stream()
                 .map(portfolioPropertyConverter::fromEntity)
-                    .collect(Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     private BigDecimal convertToCurrency(BigDecimal value, String fromCurrency, String toCurrency) {

@@ -16,34 +16,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.web.forms.controller;
+package ru.investbook.web;
 
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
-class ControllerHelper {
+public class ControllerHelper {
 
-    static List<String> getPortfolios(PortfolioRepository portfolioRepository) {
+    public static Set<String> getPortfolios(PortfolioRepository portfolioRepository) {
         return portfolioRepository.findAll()
                 .stream()
                 .map(PortfolioEntity::getId)
-                .collect(Collectors.toList());
+                .sorted()
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    static List<String> getSecuritiesDescriptions(SecurityRepository securityRepository) {
+    public static Set<String> getSecuritiesDescriptions(SecurityRepository securityRepository) {
         return securityRepository.findAll()
                 .stream()
                 .map(e -> ofNullable(e.getName())
                         .map(v -> v + " (" + e.getId() + ")")
                         .orElse(e.getId()))
                 .sorted()
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
 }

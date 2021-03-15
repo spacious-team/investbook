@@ -28,12 +28,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
+import ru.investbook.web.ControllerHelper;
 import ru.investbook.web.forms.model.TransactionModel;
 import ru.investbook.web.forms.service.TransactionFormsService;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
-import java.util.List;
+import java.util.Collection;
 
 @Controller
 @RequestMapping("/transactions")
@@ -42,8 +43,8 @@ public class TransactionController {
     private final TransactionFormsService transactionFormsService;
     private final PortfolioRepository portfolioRepository;
     private final SecurityRepository securityRepository;
-    private volatile List<String> securities;
-    private volatile List<String> portfolios;
+    private volatile Collection<String> securities;
+    private volatile Collection<String> portfolios;
     private volatile String selectedPortfolio;
 
     @PostConstruct

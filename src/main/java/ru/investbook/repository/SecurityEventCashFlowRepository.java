@@ -22,6 +22,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,8 +38,8 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
             Instant timestamp,
             int count);
 
-    List<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-            String portfolio,
+    List<SecurityEventCashFlowEntity> findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+            Collection<String> portfolios,
             String isin,
             int cashFlowType,
             Instant fromDate,
@@ -50,8 +51,8 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
             Instant fromDate,
             Instant toDate);
 
-    List<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
-            String portfolio,
+    List<SecurityEventCashFlowEntity> findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
+            Collection<String> portfolios,
             String isin,
             Set<Integer> cashFlowType,
             Instant fromDate,
@@ -75,8 +76,8 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
     /**
      * Return last security payment, between date-time interval
      */
-    Optional<SecurityEventCashFlowEntity> findFirstByPortfolioIdAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-            String portfolio,
+    Optional<SecurityEventCashFlowEntity> findFirstByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+            Collection<String> portfolio,
             String isin,
             Set<Integer> cashFlowType,
             Instant fromDate,

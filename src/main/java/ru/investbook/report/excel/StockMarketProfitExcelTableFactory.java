@@ -54,6 +54,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singleton;
 import static java.util.Optional.ofNullable;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 import static ru.investbook.report.excel.StockMarketProfitExcelTableHeader.*;
@@ -83,8 +84,8 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     }
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio, String currency) {
-        return transactionRepository.findDistinctSecurityByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
-                portfolio,
+        return transactionRepository.findDistinctSecurityByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+                singleton(portfolio.getId()),
                 currency,
                 ViewFilter.get().getFromDate(),
                 ViewFilter.get().getToDate());
@@ -225,8 +226,8 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
 
     private String getRedemptionCashFlow(String portfolio, String isin, double multiplier, String toCurrency) {
         List<SecurityEventCashFlowEntity> cashFlows = securityEventCashFlowRepository
-                .findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                        portfolio,
+                .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                        singleton(portfolio),
                         isin,
                         CashFlowType.REDEMPTION.getId(),
                         ViewFilter.get().getFromDate(),

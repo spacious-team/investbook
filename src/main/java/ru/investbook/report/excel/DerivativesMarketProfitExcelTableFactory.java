@@ -42,6 +42,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Collections.singleton;
 import static ru.investbook.report.excel.DerivativesMarketProfitExcelTableHeader.*;
 
 @Component
@@ -76,8 +77,8 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
     }
 
     private Collection<String> getSecuritiesIsin(Portfolio portfolio) {
-        return transactionRepository.findDistinctDerivativeByPortfolioAndTimestampBetweenOrderByTimestampDesc(
-                portfolio,
+        return transactionRepository.findDistinctDerivativeByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
+                singleton(portfolio.getId()),
                 ViewFilter.get().getFromDate(),
                 ViewFilter.get().getToDate());
     }

@@ -27,12 +27,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.web.ControllerHelper;
 import ru.investbook.web.forms.model.EventCashFlowModel;
 import ru.investbook.web.forms.service.EventCashFlowFormsService;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
-import java.util.List;
+import java.util.Collection;
 
 @Controller
 @RequestMapping("/events")
@@ -40,7 +41,7 @@ import java.util.List;
 public class EventCashFlowController {
     private final EventCashFlowFormsService eventCashFlowFormsService;
     private final PortfolioRepository portfolioRepository;
-    private volatile List<String> portfolios;
+    private volatile Collection<String> portfolios;
     private volatile String selectedPortfolio;
 
     @PostConstruct
