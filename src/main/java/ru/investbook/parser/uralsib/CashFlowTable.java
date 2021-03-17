@@ -37,8 +37,8 @@ import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 @Slf4j
 public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
 
-    private final Pattern moneyTransferToDescriptionPattern = Pattern.compile(".*\\s+на\\s+[^\\s]+\\s+([^\\s.]+)");
     private final Pattern moneyTransferFromDescriptionPattern = Pattern.compile(".*\\s+с\\s+[^\\s]+\\s+([^\\s.]+)");
+    private final Pattern moneyTransferToDescriptionPattern = Pattern.compile(".*\\s+на\\s+[^\\s]+\\s+([^\\s.]+)");
     private final Pattern clientCodePattern = Pattern.compile("(^[0-9]+)");
 
     public CashFlowTable(UralsibBrokerReport report) {
@@ -57,9 +57,9 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
                 type = CashFlowType.CASH;
                 break;
             case "перевод дс":
-                Matcher matcherTo = moneyTransferToDescriptionPattern.matcher(description);
                 Matcher matcherFrom = moneyTransferFromDescriptionPattern.matcher(description);
-                if (matcherTo.find() && matcherFrom.find()) {
+                Matcher matcherTo = moneyTransferToDescriptionPattern.matcher(description);
+                if (matcherFrom.find() && matcherTo.find()) {
                     String to = matcherTo.group(1);
                     String from = matcherFrom.group(1);
                     if (isCurrentPortfolioAccount(to) != isCurrentPortfolioAccount(from)) {
