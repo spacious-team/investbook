@@ -63,8 +63,10 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
                     String to = matcherTo.group(1);
                     String from = matcherFrom.group(1);
                     if (isCurrentPortfolioAccount(to) != isCurrentPortfolioAccount(from)) {
-                        type = CashFlowType.CASH;
-                        break;
+                        if (getClientCode(from) != 0 && getClientCode(to) != 0) {
+                            type = CashFlowType.CASH;
+                            break;
+                        }
                     }
                 }
                 return emptyList();
