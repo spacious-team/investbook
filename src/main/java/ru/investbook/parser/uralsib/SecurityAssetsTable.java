@@ -40,16 +40,16 @@ import java.util.Collection;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static ru.investbook.parser.uralsib.PortfolioPropertyTable.SummaryTableHeader.RUB;
+import static ru.investbook.parser.uralsib.SecurityAssetsTable.SummaryTableHeader.RUB;
 
 @Slf4j
-public class PortfolioPropertyTable extends InitializableReportTable<PortfolioProperty> {
+public class SecurityAssetsTable extends InitializableReportTable<PortfolioProperty> {
     private static final String ASSETS_TABLE = "ОЦЕНКА АКТИВОВ";
     private static final String TABLE_FIRST_HEADER_LINE = "На конец отчетного периода";
     private static final String TABLE_SECOND_HEADER_LINE = "по цене закрытия";
     private static final String ASSETS = "Общая стоимость активов:";
 
-    protected PortfolioPropertyTable(UralsibBrokerReport report) {
+    protected SecurityAssetsTable(UralsibBrokerReport report) {
         super(report);
     }
 
