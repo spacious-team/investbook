@@ -40,16 +40,20 @@ import java.util.Collection;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static ru.investbook.parser.uralsib.SecurityAssetsTable.SummaryTableHeader.RUB;
+import static ru.investbook.parser.uralsib.AssetsTable.SummaryTableHeader.RUB;
 
+/**
+ * Shows total assets value (sum of cash and security), but Assets table is empty if no security in portfolio.
+ * In that case assets should be calculated by {@link CashTable}.
+ */
 @Slf4j
-public class SecurityAssetsTable extends InitializableReportTable<PortfolioProperty> {
+public class AssetsTable extends InitializableReportTable<PortfolioProperty> {
     private static final String ASSETS_TABLE = "ОЦЕНКА АКТИВОВ";
     private static final String TABLE_FIRST_HEADER_LINE = "На конец отчетного периода";
     private static final String TABLE_SECOND_HEADER_LINE = "по цене закрытия";
     private static final String ASSETS = "Общая стоимость активов:";
 
-    protected SecurityAssetsTable(UralsibBrokerReport report) {
+    protected AssetsTable(UralsibBrokerReport report) {
         super(report);
     }
 
@@ -65,23 +69,20 @@ public class SecurityAssetsTable extends InitializableReportTable<PortfolioPrope
                 table = tableFactory.createOfNoName(reportPage, ASSETS_TABLE, TABLE_SECOND_HEADER_LINE,
                         SummaryTableHeader.class, 2);
             }
-
-            PortfolioProperty.PortfolioPropertyBuilder propertyBuilder = PortfolioProperty.builder()
-                    .portfolio(report.getPortfolio())
-                    .timestamp(report.getReportEndDateTime())
-                    .property(PortfolioPropertyType.TOTAL_ASSETS_RUB);
-
             if (table.isEmpty()) {
-                log.info("Таблица '{}' не найдена, считаю, что активы равны 0", ASSETS_TABLE);
-                return singletonList(propertyBuilder
-                        .value("0")
-                        .build());
+                log.debug("Таблица '{}' не найдена", ASSETS_TABLE);
+                return emptyList();
             }
+
             TableRow row = table.findRow(ASSETS);
             if (row == null) {
                 return emptyList();
             }
-            return singletonList(propertyBuilder
+
+            return singletonList(PortfolioProperty.builder()
+                    .portfolio(report.getPortfolio())
+                    .timestamp(report.getReportEndDateTime())
+                    .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
                     .value(table.getCurrencyCellValue(row, RUB).toString())
                     .build());
         } catch (Exception e) {
