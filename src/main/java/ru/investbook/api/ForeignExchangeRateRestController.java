@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.ForeignExchangeRateConverter;
 import ru.investbook.entity.ForeignExchangeRateEntity;
 import ru.investbook.entity.ForeignExchangeRateEntityPk;
+import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.repository.ForeignExchangeRateRepository;
 
 import java.net.URI;
@@ -49,11 +50,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/foreign-exchange-rates")
 public class ForeignExchangeRateRestController extends AbstractRestController<ForeignExchangeRateEntityPk, ForeignExchangeRate, ForeignExchangeRateEntity> {
     private final ForeignExchangeRateRepository foreignExchangeRateRepository;
+    private final ForeignExchangeRateService foreignExchangeRateService;
 
     public ForeignExchangeRateRestController(ForeignExchangeRateRepository repository,
-                                             ForeignExchangeRateConverter converter) {
+                                             ForeignExchangeRateConverter converter,
+                                             ForeignExchangeRateService foreignExchangeRateService) {
         super(repository, converter);
         this.foreignExchangeRateRepository = repository;
+        this.foreignExchangeRateService = foreignExchangeRateService;
     }
 
     @Override
@@ -94,6 +98,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
     @PostMapping
     @Operation(summary = "Добавить")
     public ResponseEntity<Void> post(@RequestBody ForeignExchangeRate object) {
+        foreignExchangeRateService.invalidateCache();
         return super.post(object);
     }
 
@@ -110,6 +115,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
                                     @DateTimeFormat(pattern = "yyyy-MM-dd")
                                             LocalDate date,
                                     @RequestBody ForeignExchangeRate object) {
+        foreignExchangeRateService.invalidateCache();
         return super.put(getId(currencyPair, date), object);
     }
 
@@ -125,6 +131,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
                        @Parameter(description = "Дата", example = "2021-01-23")
                        @DateTimeFormat(pattern = "yyyy-MM-dd")
                                LocalDate date) {
+        foreignExchangeRateService.invalidateCache();
         super.delete(getId(currencyPair, date));
     }
 

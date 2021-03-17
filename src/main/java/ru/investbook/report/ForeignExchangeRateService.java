@@ -201,6 +201,10 @@ public class ForeignExchangeRateService {
         return exchangeRate;
     }
 
+    public void invalidateCache() {
+        this.cache.clear();
+    }
+
     private void cache(String baseCurrency, String quoteCurrency, BigDecimal exchangeRate) {
         this.cache.computeIfAbsent(baseCurrency, k -> new ConcurrentHashMap<>())
                 .putIfAbsent(quoteCurrency, exchangeRate);
