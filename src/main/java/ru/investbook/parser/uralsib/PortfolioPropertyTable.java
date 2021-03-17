@@ -18,90 +18,62 @@
 
 package ru.investbook.parser.uralsib;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.InitializableReportTable;
-import org.spacious_team.broker.report_parser.api.TableFactoryRegistry;
-import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
-import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
-import org.spacious_team.table_wrapper.api.ReportPage;
-import org.spacious_team.table_wrapper.api.Table;
-import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
-import org.spacious_team.table_wrapper.api.TableFactory;
-import org.spacious_team.table_wrapper.api.TableRow;
+import org.spacious_team.broker.report_parser.api.PortfolioCash;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Collection;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static ru.investbook.parser.uralsib.PortfolioPropertyTable.SummaryTableHeader.RUB;
+import static ru.investbook.report.ForeignExchangeRateService.RUB;
 
 @Slf4j
 public class PortfolioPropertyTable extends InitializableReportTable<PortfolioProperty> {
-    private static final String ASSETS_TABLE = "ОЦЕНКА АКТИВОВ";
-    private static final String TABLE_FIRST_HEADER_LINE = "На конец отчетного периода";
-    private static final String TABLE_SECOND_HEADER_LINE = "по цене закрытия";
-    private static final String ASSETS = "Общая стоимость активов:";
+    private final AssetsTable securityAssetsTable;
+    private final CashTable cashTable;
+    private final ForeignExchangeRateTable foreignExchangeRateTable;
 
-    protected PortfolioPropertyTable(UralsibBrokerReport report) {
-        super(report);
+    public PortfolioPropertyTable(AssetsTable securityAssetsTable, CashTable cashTable,
+                                  ForeignExchangeRateTable foreignExchangeRateTable) {
+        super(securityAssetsTable.getReport());
+        this.securityAssetsTable = securityAssetsTable;
+        this.cashTable = cashTable;
+        this.foreignExchangeRateTable = foreignExchangeRateTable;
     }
 
     @Override
     protected Collection<PortfolioProperty> parseTable() {
         try {
-            BrokerReport report = getReport();
-            ReportPage reportPage = report.getReportPage();
-            TableFactory tableFactory = TableFactoryRegistry.get(reportPage);
-            Table table = tableFactory.createOfNoName(reportPage, ASSETS_TABLE, TABLE_FIRST_HEADER_LINE,
-                    SummaryTableHeader.class, 3);
-            if (table.isEmpty()) {
-                table = tableFactory.createOfNoName(reportPage, ASSETS_TABLE, TABLE_SECOND_HEADER_LINE,
-                        SummaryTableHeader.class, 2);
+            Collection<PortfolioProperty> securityAssets = securityAssetsTable.getData();
+            if (!securityAssets.isEmpty()) {
+                return securityAssets;
             }
 
-            PortfolioProperty.PortfolioPropertyBuilder propertyBuilder = PortfolioProperty.builder()
-                    .portfolio(report.getPortfolio())
-                    .timestamp(report.getReportEndDateTime())
-                    .property(PortfolioPropertyType.TOTAL_ASSETS_RUB);
+            BigDecimal assets = BigDecimal.ZERO;
+            Instant reportEndDateTime = getReport().getReportEndDateTime();
+            for (PortfolioCash cash : cashTable.getData()) {
+                BigDecimal value = cash.getValue();
+                if (value.floatValue() > 0.001f) {
+                    String currency = cash.getCurrency();
+                    BigDecimal exchangeRate = foreignExchangeRateTable.getExchangeRate(currency, RUB, reportEndDateTime);
+                    assets = assets.add(value.multiply(exchangeRate));
+                }
+            }
 
-            if (table.isEmpty()) {
-                log.info("Таблица '{}' не найдена, считаю, что активы равны 0", ASSETS_TABLE);
-                return singletonList(propertyBuilder
-                        .value("0")
-                        .build());
-            }
-            TableRow row = table.findRow(ASSETS);
-            if (row == null) {
-                return emptyList();
-            }
-            return singletonList(propertyBuilder
-                    .value(table.getCurrencyCellValue(row, RUB).toString())
+            return singletonList(PortfolioProperty.builder()
+                    .portfolio(getReport().getPortfolio())
+                    .timestamp(reportEndDateTime)
+                    .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
+                    .value(assets.toString())
                     .build());
         } catch (Exception e) {
-            log.info("Не могу распарсить таблицу '{}' в файле {}", ASSETS_TABLE, getReport().getPath().getFileName(), e);
+            log.warn("Не могу получить активы из файла {}", getReport().getPath().getFileName(), e);
             return emptyList();
         }
-    }
-
-    @RequiredArgsConstructor
-    enum SummaryTableHeader implements TableColumnDescription {
-        RUB(AnyOfTableColumn.of(
-                MultiLineTableColumn.of(
-                        TableColumnImpl.of(TABLE_FIRST_HEADER_LINE),
-                        TableColumnImpl.of(TABLE_SECOND_HEADER_LINE),
-                        TableColumnImpl.of("RUR")),
-                MultiLineTableColumn.of(
-                        TableColumnImpl.of(TABLE_SECOND_HEADER_LINE),
-                        TableColumnImpl.of("RUR"))));
-
-        @Getter
-        private final TableColumn column;
     }
 }
