@@ -79,7 +79,7 @@ public class SecurityEventCashFlowController {
     }
 
     @PostMapping
-    public String postTransaction(@Valid @ModelAttribute("event") SecurityEventCashFlowModel event) {
+    public String postSecurityEventCashFlow(@Valid @ModelAttribute("event") SecurityEventCashFlowModel event) {
         selectedPortfolio = event.getPortfolio();
         securityEventCashFlowFormsService.save(event);
         return "security-events/view-single";
