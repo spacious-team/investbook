@@ -68,7 +68,7 @@ public class ForeignExchangeRateController {
     }
 
     @PostMapping
-    public String postTransaction(@Valid @ModelAttribute("rate") ForeignExchangeRateModel rate) {
+    public String postForeignExchangeRate(@Valid @ModelAttribute("rate") ForeignExchangeRateModel rate) {
         foreignExchangeRateFormsService.save(rate);
         return "foreign-exchange-rates/view-single";
     }

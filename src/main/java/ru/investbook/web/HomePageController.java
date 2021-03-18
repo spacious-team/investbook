@@ -19,6 +19,7 @@
 package ru.investbook.web;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.report_parser.api.PortfolioCash;
 import org.springframework.boot.info.BuildProperties;
@@ -36,6 +37,7 @@ import ru.investbook.repository.TransactionRepository;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -50,6 +52,7 @@ import static ru.investbook.report.ForeignExchangeRateService.RUB;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/")
+@Slf4j
 public class HomePageController {
 
     private final BuildProperties buildProperties;
@@ -113,10 +116,15 @@ public class HomePageController {
      */
     // currency -> value
     private static Map<String, BigDecimal> groupByCurrency(PortfolioPropertyEntity e) {
-        return PortfolioCash.valueOf(e.getValue())
-                .stream()
-                .collect(groupingBy(PortfolioCash::getCurrency,
-                        reducing(BigDecimal.ZERO, PortfolioCash::getValue, BigDecimal::add)));
+        try {
+            return PortfolioCash.deserialize(e.getValue())
+                    .stream()
+                    .collect(groupingBy(PortfolioCash::getCurrency,
+                            reducing(BigDecimal.ZERO, PortfolioCash::getValue, BigDecimal::add)));
+        } catch (Exception ex) {
+            log.warn("Ошибка при десериализации свойства: {}", e.getValue(), ex);
+            return Collections.emptyMap();
+        }
     }
 
     private BigDecimal convertToRubAndSum(Map<String, BigDecimal> values) {

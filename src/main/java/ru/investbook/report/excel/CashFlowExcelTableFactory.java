@@ -128,14 +128,19 @@ public class CashFlowExcelTableFactory implements TableFactory {
     }
 
     private Map<String, BigDecimal> getCashBalances(Portfolio portfolio) {
-        Instant atTime = Instant.ofEpochSecond(Math.min(
-                ViewFilter.get().getToDate().getEpochSecond(),
-                Instant.now().getEpochSecond()));
-        return getPortfolioCash(portfolio, atTime)
-                .map(PortfolioCash::valueOf)
-                .orElse(Collections.emptyList())
-                .stream()
-                .collect(Collectors.toMap(c -> c.getCurrency().toUpperCase(), PortfolioCash::getValue, BigDecimal::add));
+        try {
+            Instant atTime = Instant.ofEpochSecond(Math.min(
+                    ViewFilter.get().getToDate().getEpochSecond(),
+                    Instant.now().getEpochSecond()));
+            return getPortfolioCash(portfolio, atTime)
+                    .map(PortfolioCash::deserialize)
+                    .orElse(Collections.emptyList())
+                    .stream()
+                    .collect(Collectors.toMap(c -> c.getCurrency().toUpperCase(), PortfolioCash::getValue, BigDecimal::add));
+        } catch (Exception e) {
+            log.warn("Ошибка при десериализации свойства CASH", e);
+            return Collections.emptyMap();
+        }
     }
 
     /**

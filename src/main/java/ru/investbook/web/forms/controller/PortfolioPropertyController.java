@@ -28,12 +28,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.web.ControllerHelper;
+import ru.investbook.web.forms.model.PortfolioPropertyCashModel;
 import ru.investbook.web.forms.model.PortfolioPropertyModel;
+import ru.investbook.web.forms.model.PortfolioPropertyTotalAssetsModel;
 import ru.investbook.web.forms.service.PortfolioPropertyFormsService;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.function.Supplier;
 
 @Controller
 @RequestMapping("/portfolio-properties")
@@ -55,28 +58,57 @@ public class PortfolioPropertyController {
         return "portfolio-properties/table";
     }
 
-    @GetMapping("/edit-form")
-    public String getEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
-        model.addAttribute("property", getPortfolioProperty(id));
-        model.addAttribute("portfolios", portfolios);
-        return "portfolio-properties/edit-form";
+    @GetMapping("/edit-form/cash")
+    public String getCashEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
+        PortfolioPropertyModel property = getPortfolioProperty(id, PortfolioPropertyCashModel::new);
+        return getEditForm(model, property);
     }
 
-    private PortfolioPropertyModel getPortfolioProperty(Integer id) {
-        if (id != null) {
-            return portfolioPropertyFormsService.getById(id)
-                    .orElseGet(PortfolioPropertyModel::new);
+    @GetMapping("/edit-form/total-assets")
+    public String getTotalAssetsEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
+        PortfolioPropertyModel property = getPortfolioProperty(id, PortfolioPropertyTotalAssetsModel::new);
+        return getEditForm(model, property);
+    }
+
+    private String getEditForm(Model model, PortfolioPropertyModel property) {
+        model.addAttribute("property", property);
+        model.addAttribute("portfolios", portfolios);
+        if (property instanceof PortfolioPropertyCashModel) {
+            return "portfolio-properties/cash-edit-form";
+        } else if (property instanceof PortfolioPropertyTotalAssetsModel) {
+            return "portfolio-properties/total-assets-edit-form";
         } else {
-            PortfolioPropertyModel property = new PortfolioPropertyModel();
-            property.setPortfolio(selectedPortfolio);
-            return property;
+            throw new IllegalArgumentException("Unexpected type " + property.getClass());
         }
     }
 
-    @PostMapping
-    public String postTransaction(@Valid @ModelAttribute("property") PortfolioPropertyModel property) {
+    private PortfolioPropertyModel getPortfolioProperty(Integer id,
+                                                        Supplier<? extends PortfolioPropertyModel> newSupplier) {
+        if (id != null) {
+            return portfolioPropertyFormsService.getById(id)
+                    .orElseGet(newSupplier);
+        } else {
+            PortfolioPropertyModel model = newSupplier.get();
+            model.setPortfolio(selectedPortfolio);
+            return model;
+        }
+    }
+
+    @PostMapping("/cash")
+    public String postCash(@Valid @ModelAttribute("property") PortfolioPropertyCashModel property) {
+        return postPortfolioProperty(property);
+    }
+
+    @PostMapping("/total-assets")
+    public String postCash(@Valid @ModelAttribute("property") PortfolioPropertyTotalAssetsModel property) {
+        return postPortfolioProperty(property);
+    }
+
+    private String postPortfolioProperty(PortfolioPropertyModel property) {
         selectedPortfolio = property.getPortfolio();
         portfolioPropertyFormsService.save(property);
-        return "portfolio-properties/view-single";
+        return (property.getClass() == PortfolioPropertyCashModel.class) ?
+            "portfolio-properties/cash-view-single" :
+            "portfolio-properties/total-assets-view-single";
     }
 }

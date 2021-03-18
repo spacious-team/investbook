@@ -19,24 +19,25 @@
 package ru.investbook.web.forms.model;
 
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.lang.Nullable;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
+import java.math.BigDecimal;
 
 @Data
-public abstract class PortfolioPropertyModel {
-
-    @Nullable
-    private Integer id;
-
-    @NotEmpty
-    private String portfolio;
+public class PortfolioPropertyCashModel extends PortfolioPropertyModel {
 
     @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date = LocalDate.now();
+    private BigDecimal cashRub = BigDecimal.ZERO;
 
+    @NotNull
+    private BigDecimal cashUsd = BigDecimal.ZERO;
+
+    @NotNull
+    private BigDecimal cashEur = BigDecimal.ZERO;
+
+    @NotNull
+    private BigDecimal cashGbp = BigDecimal.ZERO;
+
+    @NotNull
+    private BigDecimal cashChf = BigDecimal.ZERO;
 }

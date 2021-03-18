@@ -185,12 +185,18 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 .reduce((t1, t2) -> t1.isAfter(t2) ? t1 : t2)
                 .orElse(null));
         BigDecimal portfolioCash = portfolioCashes.stream()
-                .map(portfolioProperty ->
-                        PortfolioCash.valueOf(portfolioProperty.getValue())
+                .map(portfolioProperty -> {
+                    try {
+                        return PortfolioCash.deserialize(portfolioProperty.getValue())
                                 .stream()
                                 .filter(cash -> forCurrency.equals(cash.getCurrency()))
                                 .map(PortfolioCash::getValue)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add))
+                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    } catch (Exception e) {
+                        log.warn("Ошибка при десериализации свойства: {}", portfolioProperty.getValue(), e);
+                        return BigDecimal.ZERO;
+                    }
+                })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         row.put(LAST_PRICE, portfolioCash);
         if (ViewFilter.get().getFromDate().isBefore(instantOf2000_01_01) &&

@@ -71,7 +71,7 @@ public class SecurityQuoteController {
     }
 
     @PostMapping
-    public String postTransaction(@Valid  @ModelAttribute("quote") SecurityQuoteModel quote) {
+    public String postSecurityQuote(@Valid  @ModelAttribute("quote") SecurityQuoteModel quote) {
         securityQuoteFormsService.save(quote);
         return "security-quotes/view-single";
     }
