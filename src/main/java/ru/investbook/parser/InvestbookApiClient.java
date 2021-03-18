@@ -18,8 +18,6 @@
 
 package ru.investbook.parser;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
@@ -66,7 +64,6 @@ public class InvestbookApiClient {
     private final PortfolioPropertyRestController portfolioPropertyRestController;
     private final SecurityQuoteRestController securityQuoteRestController;
     private final ForeignExchangeRateRestController foreignExchangeRateRestController;
-    private final ObjectMapper objectMapper;
 
     public boolean addPortfolio(Portfolio portfolio) {
         return handlePost(
@@ -162,11 +159,11 @@ public class InvestbookApiClient {
                 addPortfolioProperty(PortfolioProperty.builder()
                         .portfolio(cashTable.getReport().getPortfolio())
                         .property(PortfolioPropertyType.CASH)
-                        .value(objectMapper.writeValueAsString(cashTable.getData()))
+                        .value(PortfolioCash.serialize(cashTable.getData()))
                         .timestamp(cashTable.getReport().getReportEndDateTime())
                         .build());
             }
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             log.warn("Не могу добавить информацию о наличных средствах {}", cashTable.getData(), e);
         }
     }

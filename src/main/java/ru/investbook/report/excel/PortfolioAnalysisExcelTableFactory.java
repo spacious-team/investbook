@@ -296,10 +296,16 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         // summing cash values with same currency
         List<PortfolioInstantCurrencyValue> balances = portfolioCashes.stream()
                 .map(portfolioProperty -> {
-                    Map<String, BigDecimal> currencyValue = PortfolioCash.valueOf(portfolioProperty.getValue())
-                            .stream()
-                            .collect(groupingBy(PortfolioCash::getCurrency,
-                                    reducing(BigDecimal.ZERO, PortfolioCash::getValue, BigDecimal::add)));
+                    Map<String, BigDecimal> currencyValue;
+                    try {
+                        currencyValue = PortfolioCash.deserialize(portfolioProperty.getValue())
+                                .stream()
+                                .collect(groupingBy(PortfolioCash::getCurrency,
+                                        reducing(BigDecimal.ZERO, PortfolioCash::getValue, BigDecimal::add)));
+                    } catch (Exception e) {
+                        log.warn("Ошибка при десериализации свойства: {}", portfolioProperty.getValue(), e);
+                        currencyValue = Collections.emptyMap();
+                    }
                     return PortfolioInstantCurrencyValue.builder()
                             .portfolio(portfolioProperty.getPortfolio())
                             .instant(portfolioProperty.getTimestamp())

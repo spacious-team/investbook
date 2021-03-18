@@ -19,29 +19,37 @@
 package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.report_parser.api.PortfolioCash;
 import org.springframework.stereotype.Service;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.PortfolioPropertyConverter;
 import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.web.forms.model.PortfolioPropertyCashModel;
 import ru.investbook.web.forms.model.PortfolioPropertyModel;
+import ru.investbook.web.forms.model.PortfolioPropertyTotalAssetsModel;
 
 import java.math.BigDecimal;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_RUB;
-import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_USD;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.reducing;
+import static org.spacious_team.broker.pojo.PortfolioPropertyType.*;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PortfolioPropertyFormsService implements FormsService<PortfolioPropertyModel> {
     private static final ZoneId zoneId = ZoneId.systemDefault();
@@ -49,7 +57,7 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
     private final PortfolioRepository portfolioRepository;
     private final PortfolioPropertyConverter portfolioPropertyConverter;
     private final PortfolioConverter portfolioConverter;
-    private final Collection<String> properties = Set.of(TOTAL_ASSETS_RUB.name(), TOTAL_ASSETS_USD.name());
+    private final Collection<String> properties = Set.of(TOTAL_ASSETS_RUB.name(), TOTAL_ASSETS_USD.name(), CASH.name());
 
     public Optional<PortfolioPropertyModel> getById(Integer id) {
         return portfolioPropertyRepository.findById(id)
@@ -67,14 +75,35 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
     @Override
     public void save(PortfolioPropertyModel m) {
         saveAndFlush(m.getPortfolio());
-        PortfolioPropertyEntity entity = portfolioPropertyRepository.save(
-                portfolioPropertyConverter.toEntity(PortfolioProperty.builder()
-                        .id(m.getId())
-                        .portfolio(m.getPortfolio())
-                        .timestamp(m.getDate().atStartOfDay(zoneId).toInstant())
-                        .property(m.getTotalAssetsCurrency().toPortfolioProperty())
-                        .value(m.getTotalAssets().toString())
-                        .build()));
+        PortfolioProperty.PortfolioPropertyBuilder builder = PortfolioProperty.builder()
+                .id(m.getId())
+                .portfolio(m.getPortfolio())
+                .timestamp(m.getDate().atStartOfDay(zoneId).toInstant());
+
+        if (m instanceof PortfolioPropertyCashModel) {
+            PortfolioPropertyCashModel c = (PortfolioPropertyCashModel) m;
+            PortfolioCash.PortfolioCashBuilder b = PortfolioCash.builder().section("all");
+            Collection<PortfolioCash> cash = new ArrayList<>();
+            cash.add(b.value(c.getCashRub()).currency("RUB").build());
+            cash.add(b.value(c.getCashUsd()).currency("USD").build());
+            cash.add(b.value(c.getCashEur()).currency("EUR").build());
+            cash.add(b.value(c.getCashGbp()).currency("GBP").build());
+            cash.add(b.value(c.getCashChf()).currency("CHF").build());
+            cash = cash.stream()
+                    .filter(e -> e.getValue() != null && e.getValue().doubleValue() > 0.001)
+                    .collect(Collectors.toList());
+            builder.property(CASH)
+                    .value(PortfolioCash.serialize(cash));
+        } else if (m instanceof PortfolioPropertyTotalAssetsModel) {
+            PortfolioPropertyTotalAssetsModel a = (PortfolioPropertyTotalAssetsModel) m;
+            builder.property(a.getTotalAssetsCurrency().toPortfolioProperty())
+                    .value(a.getTotalAssets().toString());
+        } else {
+            throw new IllegalArgumentException("Unexpected type " + m.getClass());
+        }
+
+        PortfolioPropertyEntity entity = portfolioPropertyConverter.toEntity(builder.build());
+        entity = portfolioPropertyRepository.save(entity);
         m.setId(entity.getId());
         portfolioPropertyRepository.flush();
     }
@@ -89,12 +118,39 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
     }
 
     private PortfolioPropertyModel toModel(PortfolioPropertyEntity e) {
-        PortfolioPropertyModel m = new PortfolioPropertyModel();
+        PortfolioPropertyModel m;
+        PortfolioPropertyType type = valueOf(e.getProperty().toUpperCase());
+        m = switch (type) {
+            case CASH -> new PortfolioPropertyCashModel();
+            case TOTAL_ASSETS_RUB, TOTAL_ASSETS_USD -> new PortfolioPropertyTotalAssetsModel();
+        };
         m.setId(e.getId());
         m.setPortfolio(e.getPortfolio().getId());
         m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
-        m.setTotalAssets(BigDecimal.valueOf(Double.parseDouble(e.getValue())));
-        m.setTotalAssetsCurrency(PortfolioPropertyModel.Currency.valueOf(PortfolioPropertyType.valueOf(e.getProperty())));
-        return m;
+        return switch (type) {
+            case CASH -> {
+                PortfolioPropertyCashModel c = (PortfolioPropertyCashModel) m;
+                try {
+                    Map<String, BigDecimal> cashes = PortfolioCash.deserialize(e.getValue())
+                            .stream()
+                            .collect(groupingBy(p -> p.getCurrency().toUpperCase(),
+                                    reducing(BigDecimal.ZERO, PortfolioCash::getValue, BigDecimal::add)));
+                    c.setCashRub(cashes.getOrDefault("RUB", BigDecimal.ZERO));
+                    c.setCashUsd(cashes.getOrDefault("USD", BigDecimal.ZERO));
+                    c.setCashEur(cashes.getOrDefault("EUR", BigDecimal.ZERO));
+                    c.setCashGbp(cashes.getOrDefault("GBP", BigDecimal.ZERO));
+                    c.setCashChf(cashes.getOrDefault("CHF", BigDecimal.ZERO));
+                } catch (Exception ex) {
+                    log.warn("Ошибка при десериализации свойства: {}", e.getValue(), ex);
+                }
+                yield c;
+            }
+            case TOTAL_ASSETS_RUB, TOTAL_ASSETS_USD -> {
+                PortfolioPropertyTotalAssetsModel a = (PortfolioPropertyTotalAssetsModel) m;
+                a.setTotalAssets(BigDecimal.valueOf(Double.parseDouble(e.getValue())));
+                a.setTotalAssetsCurrency(PortfolioPropertyTotalAssetsModel.Currency.valueOf(type));
+                yield a;
+            }
+        };
     }
 }

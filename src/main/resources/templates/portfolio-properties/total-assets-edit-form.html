@@ -34,7 +34,7 @@
 
 <h1 th:if="${property.id == null}">Добавить свойство</h1>
 <h1 th:unless="${property.id == null}">Редактировать свойство</h1>
-<form action="#" th:action="@{/portfolio-properties}" th:object="${property}" method="post">
+<form action="#" th:action="@{/portfolio-properties/total-assets}" th:object="${property}" method="post">
     <label>
         <input type="hidden" th:field="*{id}"/>
     </label>
@@ -46,7 +46,7 @@
         Счет
         <input type="text" th:field="*{portfolio}" list="portfolios" required/>
     </label>
-    <br/>
+    <br>
     <label>
         Активы
         <input type="number" step="0.01" min="0" th:field="*{totalAssets}" required/>
