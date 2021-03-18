@@ -214,3 +214,17 @@ a:hover {
 .footer a span {
     margin-left: 6px;
 }
+
+.blink {
+    animation-name: blinker;
+    animation-duration: 3.3s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+    color: #FFF;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0.3;
+    }
+}
