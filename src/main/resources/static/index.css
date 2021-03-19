@@ -216,19 +216,5 @@ a:hover {
 }
 
 .blink {
-    animation-name: blinker;
-    animation-duration: 3.3s;
-    animation-iteration-count: infinite;
-    animation-timing-function: ease-in-out;
     color: #FFF;
-}
-
-.blink:hover {
-    animation: none;
-}
-
-@keyframes blinker {
-    50% {
-        opacity: 0.3;
-    }
 }

@@ -21,6 +21,7 @@
     <title>Investbook</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" href="/index.css">
+    <link rel="stylesheet" href="/main.css">
 </head>
 <body>
 <div class="content">
@@ -168,7 +169,7 @@
         .then((response) => response.json())
         .then((json) => json[0].name)
         .then((latestVersion) => {
-            if (latestVersion != [[${buildProperties.version}]]) {
+            if (latestVersion !== [[${buildProperties.version}]]) {
                 console.log("Current version ", [[${buildProperties.version}]], ", latest version ", latestVersion, ", notifying")
                 document.getElementById('check-version').classList.add("blink")
             }
