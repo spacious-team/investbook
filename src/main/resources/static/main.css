@@ -16,56 +16,39 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-html {
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
+.blink {
+    animation-name: blinker;
+    animation-duration: 3.3s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
 }
 
-body {
-    margin: auto;
-    padding-bottom: 100px;
+.blink:hover {
+    animation: none;
 }
 
-h1 {
-    margin-bottom: 1em;
+@keyframes blinker {
+    50% {
+        opacity: 0.3;
+    }
 }
 
-table {
-    table-layout: auto;
+#find-securities {
+    position: absolute;
+    margin-top: 30px;
+    margin-left: -45px;
+    cursor: pointer;
 }
 
-input {
-    width: 192px;
+#find-securities svg {
+    width: 26px;
+    height: 26px;
+}
+#find-securities svg path {
+    fill: dimgray;
 }
 
-input[type=date] {
-    width:130px;
-}
-
-input[type=submit] {
-    width: auto;
-}
-
-input.portfolio {
-    width: 117px;
-}
-
-input.security {
-    width: 390px;
-    padding-right: 34px;
-}
-
-.input-width {
-    min-width: 214px;
-}
-
-.hint {
-    font-size: medium;
-    color: dimgray;
-    text-align: justify;
-}
-
-.value {
-    text-align: right;
+#find-securities svg:hover path {
+    stroke: #90b6ff2b;
+    stroke-width: 4px;
 }
