@@ -223,6 +223,10 @@ a:hover {
     color: #FFF;
 }
 
+.blink:hover {
+    animation: none;
+}
+
 @keyframes blinker {
     50% {
         opacity: 0.3;
