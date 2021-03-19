@@ -19,7 +19,6 @@
 async function uploadSecurities(inputIdWithQueryString, securitiesDatalistElementId, callingElement) {
     let queryString = document.getElementById(inputIdWithQueryString).value
     console.log("Поиск бумаги по: ", queryString)
-    console.log(callingElement)
     callingElement.classList.add("blink")
     await findAndUploadSecurities(queryString, securitiesDatalistElementId)
     callingElement.classList.remove("blink")
