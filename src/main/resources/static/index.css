@@ -100,6 +100,7 @@ a:hover {
 
 .header svg path {
     fill: #eee;
+    vector-effect: non-scaling-stroke;
 }
 
 .wallet {
@@ -168,6 +169,7 @@ a:hover {
 
 .links a svg path {
     fill: #eee;
+    vector-effect: non-scaling-stroke;
     transition-duration: 0.2s;
 }
 
@@ -198,6 +200,7 @@ a:hover {
 .footer a path {
     fill: #eee;
     transition-duration: 0.1s;
+    vector-effect: non-scaling-stroke;
 }
 
 .footer a:hover path {
@@ -213,4 +216,8 @@ a:hover {
 
 .footer a span {
     margin-left: 6px;
+}
+
+.blink {
+    color: #FFF;
 }

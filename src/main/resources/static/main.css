@@ -1,0 +1,54 @@
+/*
+ * InvestBook
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.blink {
+    animation-name: blinker;
+    animation-duration: 3.3s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+}
+
+.blink:hover {
+    animation: none;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0.3;
+    }
+}
+
+#find-securities {
+    position: absolute;
+    margin-top: 30px;
+    margin-left: -45px;
+    cursor: pointer;
+}
+
+#find-securities svg {
+    width: 26px;
+    height: 26px;
+}
+#find-securities svg path {
+    fill: dimgray;
+}
+
+#find-securities svg:hover path {
+    stroke: #00000008;
+    stroke-width: 4px;
+}

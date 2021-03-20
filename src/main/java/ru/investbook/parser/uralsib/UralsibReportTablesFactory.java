@@ -23,7 +23,7 @@ import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.ReportTables;
 import org.spacious_team.broker.report_parser.api.ReportTablesFactory;
 import org.springframework.stereotype.Component;
-import ru.investbook.view.ForeignExchangeRateService;
+import ru.investbook.report.ForeignExchangeRateService;
 
 @Component
 @RequiredArgsConstructor

@@ -37,8 +37,8 @@ public interface EventCashFlowRepository extends JpaRepository<EventCashFlowEnti
             Instant from,
             Instant to);
 
-    List<EventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
-            String portfolio,
+    List<EventCashFlowEntity> findByPortfolioIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
+            Collection<String> portfolio,
             int cashFlowType,
             Instant from,
             Instant to);

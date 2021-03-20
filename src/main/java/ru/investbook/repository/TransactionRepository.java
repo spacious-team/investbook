@@ -55,14 +55,14 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     @Query(nativeQuery = true, value = "SELECT DISTINCT security FROM transaction as t1 " +
             "JOIN transaction_cash_flow as t2 " +
             "ON t1.id = t2.transaction_id " +
-            "AND t1.portfolio = :#{#portfolio.id} " +
+            "AND t1.portfolio IN (:portfolios) " +
             "AND length(security) = 12 " +
             "AND t2.type = 1 " +
             "AND t2.currency = :currency " +
             "AND timestamp between :from AND :to " +
             "ORDER BY t1.timestamp DESC")
-    List<String> findDistinctSecurityByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
-            @Param("portfolio") Portfolio portfolio,
+    List<String> findDistinctSecurityByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+            @Param("portfolios") Collection<String> portfolios,
             @Param("currency") String currency,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
@@ -87,13 +87,13 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
      * Returns derivatives market contracts
      */
     @Query(nativeQuery = true, value = "SELECT distinct security FROM transaction " +
-            "WHERE portfolio = :#{#portfolio.id} " +
+            "WHERE portfolio IN (:portfolios) " +
             "AND length(security) <> 12 " +
             "AND security NOT LIKE '______\\_%' " +
             "AND timestamp between :from AND :to " +
             "ORDER BY timestamp DESC")
-    List<String> findDistinctDerivativeByPortfolioAndTimestampBetweenOrderByTimestampDesc(
-            @Param("portfolio") Portfolio portfolio,
+    List<String> findDistinctDerivativeByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
+            @Param("portfolios") Collection<String> portfolios,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
@@ -113,13 +113,13 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
      * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM, USDRUB_CNGD format)
      */
     @Query(nativeQuery = true, value = "SELECT distinct security FROM transaction " +
-            "WHERE portfolio = :#{#portfolio.id} " +
+            "WHERE portfolio IN (:portfolios) " +
             "AND length(security) <> 12 " +
             "AND security LIKE '______\\_%' " +
             "AND timestamp between :from AND :to " +
             "ORDER BY timestamp DESC")
-    List<String> findDistinctFxContractByPortfolioAndTimestampBetweenOrderByTimestampDesc(
-            @Param("portfolio") Portfolio portfolio,
+    List<String> findDistinctFxContractByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
+            @Param("portfolios") Collection<String> portfolios,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
@@ -138,23 +138,23 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Returns foreign exchange market currency pairs (in USDRUB format)
      */
-    default List<String> findDistinctFxCurrencyPairByPortfolioAndTimestampBetween(
-            Portfolio portfolio,
+    default List<String> findDistinctFxCurrencyPairByPortfolioInAndTimestampBetween(
+            Collection<String> portfolios,
             Instant fromDate,
             Instant toDate) {
-        return findDistinctFxContractByPortfolioAndTimestampBetweenOrderByTimestampDesc(portfolio, fromDate, toDate)
+        return findDistinctFxContractByPortfolioInAndTimestampBetweenOrderByTimestampDesc(portfolios, fromDate, toDate)
                 .stream()
                 .map(e -> e.substring(0, Math.min(6, e.length())))
                 .distinct()
                 .collect(Collectors.toList());
     }
 
-    default List<String> findDistinctFxContractByPortfolioAndCurrencyPairAndTimestampBetween(
-            Portfolio portfolio,
+    default List<String> findDistinctFxContractByPortfolioInAndCurrencyPairAndTimestampBetween(
+            Collection<String> portfolios,
             String currencyPair,
             Instant fromDate,
             Instant toDate) {
-        return findDistinctFxContractByPortfolioAndTimestampBetweenOrderByTimestampDesc(portfolio, fromDate, toDate)
+        return findDistinctFxContractByPortfolioInAndTimestampBetweenOrderByTimestampDesc(portfolios, fromDate, toDate)
                 .stream()
                 .filter(contract -> contract.startsWith(currencyPair))
                 .collect(Collectors.toList());
@@ -176,15 +176,15 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     @Query(nativeQuery = true, value = "SELECT DISTINCT security FROM transaction as t1 " +
             "JOIN transaction_cash_flow as t2 " +
             "ON t1.id = t2.transaction_id " +
-            "AND t1.portfolio = :#{#portfolio.id} " +
+            "AND t1.portfolio IN (:portfolios) " +
             "AND length(security) <> 12 " +
             "AND security LIKE '______\\_%' " +
             "AND t2.type = 1 " +
             "AND t2.currency = :currency " +
             "AND timestamp between :from AND :to " +
             "ORDER BY t1.timestamp DESC")
-    List<String> findDistinctFxContractByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
-            @Param("portfolio") Portfolio portfolio,
+    List<String> findDistinctFxContractByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+            @Param("portfolios") Collection<String> portfolios,
             @Param("currency") String currency,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
@@ -209,12 +209,12 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Returns foreign exchange market currency pairs (in USDRUB format)
      */
-    default List<String> findDistinctFxCurrencyPairByPortfolioAndCurrencyAndTimestampBetween(
-            Portfolio portfolio,
+    default List<String> findDistinctFxCurrencyPairByPortfolioInAndCurrencyAndTimestampBetween(
+            Collection<String> portfolios,
             String currency,
             Instant fromDate,
             Instant toDate) {
-        return findDistinctFxContractByPortfolioAndCurrencyAndTimestampBetweenOrderByTimestampDesc(portfolio, currency, fromDate, toDate)
+        return findDistinctFxContractByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(portfolios, currency, fromDate, toDate)
                 .stream()
                 .map(e -> e.substring(0, Math.min(6, e.length())))
                 .distinct()
@@ -235,9 +235,9 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
                 .collect(Collectors.toList());
     }
 
-    List<TransactionEntity> findBySecurityIdAndPkPortfolioAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+    List<TransactionEntity> findBySecurityIdAndPkPortfolioInAndTimestampBetweenOrderByTimestampAscPkIdAsc(
             String isin,
-            String portfolio,
+            Collection<String> portfolio,
             Instant fromDate,
             Instant toDate);
 

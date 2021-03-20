@@ -24,7 +24,7 @@ import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.InitializableReportTable;
 import org.spacious_team.table_wrapper.api.TableCell;
 import org.spacious_team.table_wrapper.api.TableCellAddress;
-import ru.investbook.view.ForeignExchangeRateService;
+import ru.investbook.report.ForeignExchangeRateService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

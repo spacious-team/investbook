@@ -52,7 +52,8 @@ input.portfolio {
 }
 
 input.security {
-    width: 414px;
+    width: 390px;
+    padding-right: 34px;
 }
 
 .input-width {
