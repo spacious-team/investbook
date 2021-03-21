@@ -55,7 +55,7 @@ public class PaidInterestFactory {
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public PaidInterest get(Portfolio portfolio, Security security, ViewFilter filter) {
         ViewFilter filterTillToDate = filter.toBuilder()
                 .fromDate(ViewFilter.defaultFromDate) // the entire history of positions from the first transaction is required
