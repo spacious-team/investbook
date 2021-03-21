@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PaidInterest {
     static final Instant fictitiousPositionInstant = Instant.ofEpochSecond(0);
+    private static final Instant fictitiousPositionInstantPlus1Nanosec = fictitiousPositionInstant.plusNanos(1);
     private final Map<CashFlowType, Map<Position, List<SecurityEventCashFlow>>> paidInterest = new HashMap<>();
 
     Map<Position, List<SecurityEventCashFlow>> get(CashFlowType type) {
@@ -79,14 +80,16 @@ public class PaidInterest {
      * Positions with unknown transaction date
      * (for example dividend payment record exists but security transaction does not uploaded by broker report)
      */
-    @SuppressWarnings("unchecked")
     public Deque<OpenedPosition> getFictitiousPositions() {
-        Instant instant = fictitiousPositionInstant.plusNanos(1);
-        return (Deque<OpenedPosition>)(Deque<?>) paidInterest.values()
+        return paidInterest.values()
                 .stream()
                 .flatMap(map -> map.keySet().stream())
                 .filter(position -> position instanceof OpenedPosition)
-                .filter(position -> position.wasOpenedAtTheInstant(instant))
+                .filter(PaidInterest::isFictitiousPosition)
+                .map(position -> (OpenedPosition) position)
+                //  get(CashFlowType, Position) returns both DIVIDEND and TAX events for each of equals positions,
+                //  so do not return 2 positions (for DIVIDEND and TAX) for preventing duplicate during report building
+                .distinct()
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
@@ -96,7 +99,7 @@ public class PaidInterest {
      * @return true is if checking transaction is fictitious
      */
     public static boolean isFictitiousPosition(Position position) {
-        return position.wasOpenedAtTheInstant(fictitiousPositionInstantPlus1NonoSec);
+        return position.wasOpenedAtTheInstant(fictitiousPositionInstantPlus1Nanosec);
     }
 
     /**
