@@ -89,4 +89,22 @@ public class PaidInterest {
                 .filter(position -> position.wasOpenedAtTheInstant(instant))
                 .collect(Collectors.toCollection(LinkedList::new));
     }
+
+    /**
+     * If dividend, coupon or amortization record is exists, but no open transaction,
+     * {@link PaidInterestFactory} creates fictitious open transaction.
+     * @return true is if checking transaction is fictitious
+     */
+    public static boolean isFictitiousPosition(Position position) {
+        return position.wasOpenedAtTheInstant(fictitiousPositionInstantPlus1NonoSec);
+    }
+
+    /**
+     * If dividend, coupon or amortization record is exists, but not open transaction,
+     * {@link PaidInterestFactory} creates fictitious open transaction.
+     * @return true is if checking transaction is fictitious
+     */
+    public static boolean isFictitiousPositionTransaction(Transaction transaction) {
+        return transaction.getId() == null;
+    }
 }
