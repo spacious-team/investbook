@@ -25,6 +25,7 @@ import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
@@ -40,7 +41,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singleton;
@@ -54,15 +54,14 @@ public class PaidInterestFactory {
     private final FifoPositionsFactory positionsFactory;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
-    private final Map<FifoPositions, Map<ViewFilter, PaidInterest>> paidInterestCache = new ConcurrentHashMap<>();
 
+    @Transactional(readOnly = true)
     public PaidInterest get(Portfolio portfolio, Security security, ViewFilter filter) {
         ViewFilter filterTillToDate = filter.toBuilder()
-                .fromDate(ViewFilter.defaultFromDate) // need all history o positions from first security transaction
+                .fromDate(ViewFilter.defaultFromDate) // the entire history of positions from the first transaction is required
                 .build();
         FifoPositions positions = positionsFactory.get(portfolio, security, filterTillToDate);
-        return paidInterestCache.computeIfAbsent(positions, k -> new ConcurrentHashMap<>())
-                .computeIfAbsent(filter, k -> create(portfolio.getId(), security, positions, filter));
+        return create(portfolio.getId(), security, positions, filter);
     }
 
     private PaidInterest create(String portfolio, Security security, FifoPositions positions, ViewFilter filter) {
@@ -78,7 +77,7 @@ public class PaidInterestFactory {
                                                                                FifoPositions positions,
                                                                                CashFlowType event,
                                                                                ViewFilter filter) {
-        List<SecurityEventCashFlowEntity> accruedInterests = securityEventCashFlowRepository
+        List<SecurityEventCashFlowEntity> eventCashFlowEntities = securityEventCashFlowRepository
                 .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         singleton(portfolio),
                         isin,
@@ -87,7 +86,7 @@ public class PaidInterestFactory {
                         filter.getToDate());
 
         Map<Position, List<SecurityEventCashFlow>> payments = new HashMap<>();
-        for (SecurityEventCashFlowEntity entity : accruedInterests) {
+        for (SecurityEventCashFlowEntity entity : eventCashFlowEntities) {
             SecurityEventCashFlow cash = securityEventCashFlowConverter.fromEntity(entity);
             try {
                 Instant bookClosureDate = getBookClosureDate(positions.getPositionHistories(), entity);

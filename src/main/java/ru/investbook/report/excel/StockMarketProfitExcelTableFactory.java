@@ -49,8 +49,6 @@ import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -63,8 +61,6 @@ import static ru.investbook.report.excel.StockMarketProfitExcelTableHeader.*;
 @RequiredArgsConstructor
 public class StockMarketProfitExcelTableFactory implements TableFactory {
     private static final String TAX_LIABILITY_FORMULA = getTaxLiabilityFormula();
-    // isin -> security price currency
-    private final Map<String, String> securityCurrencies = new ConcurrentHashMap<>();
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
@@ -125,7 +121,9 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                                                                String toCurrency) {
         Table rows = new Table();
         for (T position : positions) {
-            String openTransactionCurrency = getTransactionCurrency(position.getOpenTransaction());
+            String openTransactionCurrency = PaidInterest.isFictitiousPosition(position) ?
+                    toCurrency :
+                    getTransactionCurrency(position.getOpenTransaction());
             if (openTransactionCurrency.equalsIgnoreCase(toCurrency)) {
                 Table.Record record = profitBuilder.apply(position, toCurrency);
                 record.putAll(getPaidInterestProfit(position, paidInterest, toCurrency));
@@ -206,7 +204,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     }
 
     private String getTransactionCashFlow(Transaction transaction, CashFlowType type, double multiplier, String toCurrency) {
-        if (transaction.getId() == null) {
+        if (PaidInterest.isFictitiousPositionTransaction(transaction)) {
             return null;
         }
         return transactionCashFlowRepository
