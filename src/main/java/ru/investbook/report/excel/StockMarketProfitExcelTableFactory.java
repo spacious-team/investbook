@@ -125,7 +125,9 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                                                                String toCurrency) {
         Table rows = new Table();
         for (T position : positions) {
-            String openTransactionCurrency = getTransactionCurrency(position.getOpenTransaction());
+            String openTransactionCurrency = PaidInterest.isFictitiousPosition(position) ?
+                    toCurrency :
+                    getTransactionCurrency(position.getOpenTransaction());
             if (openTransactionCurrency.equalsIgnoreCase(toCurrency)) {
                 Table.Record record = profitBuilder.apply(position, toCurrency);
                 record.putAll(getPaidInterestProfit(position, paidInterest, toCurrency));
@@ -206,7 +208,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     }
 
     private String getTransactionCashFlow(Transaction transaction, CashFlowType type, double multiplier, String toCurrency) {
-        if (transaction.getId() == null) {
+        if (PaidInterest.isFictitiousPositionTransaction(transaction)) {
             return null;
         }
         return transactionCashFlowRepository
