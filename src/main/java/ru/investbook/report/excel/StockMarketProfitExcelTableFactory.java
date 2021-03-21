@@ -49,8 +49,6 @@ import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -63,8 +61,6 @@ import static ru.investbook.report.excel.StockMarketProfitExcelTableHeader.*;
 @RequiredArgsConstructor
 public class StockMarketProfitExcelTableFactory implements TableFactory {
     private static final String TAX_LIABILITY_FORMULA = getTaxLiabilityFormula();
-    // isin -> security price currency
-    private final Map<String, String> securityCurrencies = new ConcurrentHashMap<>();
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
