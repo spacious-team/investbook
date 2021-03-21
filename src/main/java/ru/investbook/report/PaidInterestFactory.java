@@ -25,6 +25,7 @@ import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
@@ -54,6 +55,7 @@ public class PaidInterestFactory {
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
 
+    @Transactional
     public PaidInterest get(Portfolio portfolio, Security security, ViewFilter filter) {
         ViewFilter filterTillToDate = filter.toBuilder()
                 .fromDate(ViewFilter.defaultFromDate) // the entire history of positions from the first transaction is required
