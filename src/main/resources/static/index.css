@@ -109,8 +109,12 @@ a:hover {
     margin-right: 10px;
 }
 
+.wallet svg {
+    margin-top: -5px;
+}
+
 .wallet span {
-    margin-left: 4px;
+    margin-left: 10px;
 }
 
 .header .exit {
