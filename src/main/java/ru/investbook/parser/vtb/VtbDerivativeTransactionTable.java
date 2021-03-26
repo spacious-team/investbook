@@ -22,12 +22,10 @@ import lombok.Getter;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
-import org.spacious_team.table_wrapper.excel.ExcelTable;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -44,22 +42,22 @@ public class VtbDerivativeTransactionTable extends AbstractReportTable<Derivativ
     }
 
     @Override
-    protected Collection<DerivativeTransaction> getRow(Table table, TableRow row) {
+    protected Collection<DerivativeTransaction> getRow(TableRow row) {
 
-        boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
-        int count = table.getIntCellValue(row, COUNT);
-        BigDecimal valueInPoints = table.getCurrencyCellValue(row, QUOTE).multiply(BigDecimal.valueOf(count));
+        boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
+        int count = row.getIntCellValue(COUNT);
+        BigDecimal valueInPoints = row.getBigDecimalCellValue(QUOTE).multiply(BigDecimal.valueOf(count));
         if (isBuy) {
             valueInPoints = valueInPoints.negate();
         }
-        BigDecimal commission = table.getCurrencyCellValue(row, BROKER_CLEARING_COMMISSION)
-                .add(table.getCurrencyCellValue(row, BROKER_TRANSACTION_COMMISSION))
+        BigDecimal commission = row.getBigDecimalCellValue(BROKER_CLEARING_COMMISSION)
+                .add(row.getBigDecimalCellValue(BROKER_TRANSACTION_COMMISSION))
                 .negate();
         return Collections.singleton(DerivativeTransaction.builder()
-                .timestamp(((ExcelTable) table).getDateCellValue(row, DATE_TIME).toInstant())
-                .transactionId(table.getStringCellValue(row, TRANSACTION))
+                .timestamp(row.getInstantCellValue(DATE_TIME))
+                .transactionId(row.getStringCellValue(TRANSACTION))
                 .portfolio(getReport().getPortfolio())
-                .security(table.getStringCellValue(row, CONTRACT))
+                .security(row.getStringCellValue(CONTRACT))
                 .count((isBuy ? 1 : -1) * count)
                 .valueInPoints(valueInPoints)
                 .commission(commission)

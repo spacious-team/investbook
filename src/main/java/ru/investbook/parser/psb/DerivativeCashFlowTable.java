@@ -24,13 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.TableFactoryRegistry;
-import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
-import org.spacious_team.table_wrapper.api.TableFactory;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
@@ -64,9 +61,8 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
     }
 
     private boolean hasOpenContract() {
-        ReportPage reportPage = getReport().getReportPage();
-        TableFactory tableFactory = TableFactoryRegistry.get(reportPage);
-        Table countTable = tableFactory.create(reportPage, TABLE2_NAME, TABLE_END_TEXT, ContractCountTableHeader.class);
+        Table countTable = getReport().getReportPage()
+                .create(TABLE2_NAME, TABLE_END_TEXT, ContractCountTableHeader.class);
         List<AbstractMap.SimpleEntry<String, Integer>> counts = countTable.getData(getReport().getPath(), DerivativeCashFlowTable::getCount);
         this.contractCount = counts.stream()
                 .filter(e -> e.getValue() != 0)
@@ -74,30 +70,30 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
         return !this.contractCount.isEmpty();
     }
 
-    private static AbstractMap.SimpleEntry<String, Integer> getCount(Table table, TableRow row) {
-        String contract = table.getStringCellValue(row, CONTRACT);
-        int incomingCount = Math.abs(table.getIntCellValue(row, INCOMING));
-        int outgoingCount = Math.abs(table.getIntCellValue(row, OUTGOING));
+    private static AbstractMap.SimpleEntry<String, Integer> getCount(TableRow row) {
+        String contract = row.getStringCellValue(CONTRACT);
+        int incomingCount = Math.abs(row.getIntCellValue(INCOMING));
+        int outgoingCount = Math.abs(row.getIntCellValue(OUTGOING));
         int count = Math.max(incomingCount, outgoingCount);
         if (count == 0) {
-            count = Math.abs(table.getIntCellValue(row, BUY)); // buyCount == cellCount
+            count = Math.abs(row.getIntCellValue(BUY)); // buyCount == cellCount
         }
         return new AbstractMap.SimpleEntry<>(contract, count);
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> getRow(Table table, TableRow row) {
-        BigDecimal value = table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.INCOMING)
-                .subtract(table.getCurrencyCellValue(row, DerivativeCashFlowTableHeader.OUTGOING));
+    protected Collection<SecurityEventCashFlow> getRow(TableRow row) {
+        BigDecimal value = row.getBigDecimalCellValue(DerivativeCashFlowTableHeader.INCOMING)
+                .subtract(row.getBigDecimalCellValue(DerivativeCashFlowTableHeader.OUTGOING));
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
-                .timestamp(convertToInstant(table.getStringCellValue(row, DerivativeCashFlowTableHeader.DATE)))
+                .timestamp(convertToInstant(row.getStringCellValue(DerivativeCashFlowTableHeader.DATE)))
                 .portfolio(getReport().getPortfolio())
                 .value(value)
                 .currency("RUB"); // FORTS, only RUB
-        String action = table.getStringCellValue(row, DerivativeCashFlowTableHeader.OPERATION).toLowerCase();
+        String action = row.getStringCellValue(DerivativeCashFlowTableHeader.OPERATION).toLowerCase();
         switch (action) {
             case "вариационная маржа":
-                String contract = table.getStringCellValue(row, DerivativeCashFlowTableHeader.CONTRACT)
+                String contract = row.getStringCellValue(DerivativeCashFlowTableHeader.CONTRACT)
                         .split("/")[1].trim();
                 Integer count = getContractCount().get(contract);
                 if (count == null) {

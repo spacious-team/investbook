@@ -57,10 +57,10 @@ public class ForeignExchangeRateTable extends InitializableReportTable<ForeignEx
                 return emptyList();
             }
             Collection<ForeignExchangeRate> rates = new ArrayList<>();
-            rates.addAll(createExchangeRateProperty(table, row, USD, CurrencyPair.USDRUB));
-            rates.addAll(createExchangeRateProperty(table, row, EUR, CurrencyPair.EURRUB));
-            rates.addAll(createExchangeRateProperty(table, row, GBP, CurrencyPair.GBPRUB));
-            rates.addAll(createExchangeRateProperty(table, row, CHF, CurrencyPair.CHFRUB));
+            rates.addAll(createExchangeRateProperty(row, USD, CurrencyPair.USDRUB));
+            rates.addAll(createExchangeRateProperty(row, EUR, CurrencyPair.EURRUB));
+            rates.addAll(createExchangeRateProperty(row, GBP, CurrencyPair.GBPRUB));
+            rates.addAll(createExchangeRateProperty(row, CHF, CurrencyPair.CHFRUB));
             return rates;
         } catch (Exception e) {
             log.info("Ошибка поиска стоимости активов или обменного курса в файле {}", getReport().getPath().getFileName(), e);
@@ -68,10 +68,10 @@ public class ForeignExchangeRateTable extends InitializableReportTable<ForeignEx
         }
     }
 
-    private Collection<ForeignExchangeRate> createExchangeRateProperty(Table table,
-                                                                     TableRow row, PortfolioPropertyTable.SummaryTableHeader currency,
-                                                                     CurrencyPair currencyPair) {
-        BigDecimal exchangeRate = table.getCurrencyCellValueOrDefault(row, currency, BigDecimal.ZERO);
+    private Collection<ForeignExchangeRate> createExchangeRateProperty(TableRow row,
+                                                                       PortfolioPropertyTable.SummaryTableHeader currency,
+                                                                       CurrencyPair currencyPair) {
+        BigDecimal exchangeRate = row.getBigDecimalCellValueOrDefault(currency, BigDecimal.ZERO);
         if (exchangeRate.compareTo(min) > 0) {
             return singletonList(ForeignExchangeRate.builder()
                     .date(LocalDate.ofInstant(getReport().getReportEndDateTime(), getReport().getReportZoneId()))

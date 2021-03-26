@@ -55,8 +55,8 @@ public class ForeignExchangeCashFlowTable extends AbstractReportTable<EventCashF
     }
 
     @Override
-    protected Collection<EventCashFlow> getRow(Table table, TableRow row) {
-        String action = table.getStringCellValue(row, OPERATION);
+    protected Collection<EventCashFlow> getRow(TableRow row) {
+        String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         boolean isPositive;
         switch (action) {
@@ -67,19 +67,19 @@ public class ForeignExchangeCashFlowTable extends AbstractReportTable<EventCashF
                 isPositive = false;
                 break;
             default:
-                log.debug("Не известный тип операции '{}' в таблице '{}'", action, table);
+                log.debug("Не известный тип операции '{}' в таблице '{}'", action, row.getTable());
                 return emptyList();
         }
         String currency;
-        BigDecimal value = table.getCurrencyCellValue(row, RUB);
+        BigDecimal value = row.getBigDecimalCellValue(RUB);
         if (value.compareTo(min) > 0) {
             currency = "RUB";
         } else {
-            value = table.getCurrencyCellValue(row, USD);
+            value = row.getBigDecimalCellValue(USD);
             if (value.compareTo(min) > 0) {
                 currency = "USD";
             } else {
-                value = table.getCurrencyCellValue(row, EUR);
+                value = row.getBigDecimalCellValue(EUR);
                 if (value.compareTo(min) > 0) {
                     currency = "EUR";
                 } else {
@@ -90,7 +90,7 @@ public class ForeignExchangeCashFlowTable extends AbstractReportTable<EventCashF
         return singletonList(EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(CashFlowType.CASH)
-                .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
+                .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                 .value(value.multiply(BigDecimal.valueOf(isPositive ? 1 : -1)))
                 .currency(currency)
                 .description("Операция по валютному счету")

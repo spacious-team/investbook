@@ -22,7 +22,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
@@ -44,26 +43,26 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
     }
 
     @Override
-    protected Collection<ForeignExchangeTransaction> getRow(Table table, TableRow row) {
-        String dateTime = table.getStringCellValue(row, DATE_TIME); // 08.02.2019 23:37
+    protected Collection<ForeignExchangeTransaction> getRow(TableRow row) {
+        String dateTime = row.getStringCellValue(DATE_TIME); // 08.02.2019 23:37
         Instant transactionInstant = convertToInstant(dateTime);
-        String notUniqTransactionId = table.getStringCellValue(row, TRANSACTION);
+        String notUniqTransactionId = row.getStringCellValue(TRANSACTION);
         String transactionId = notUniqTransactionId + dateTime.replaceAll("[.\\s:]", "");
-        boolean isBuy = table.getStringCellValue(row, DIRECTION).trim().equalsIgnoreCase("К");
-        BigDecimal value = table.getCurrencyCellValue(row, VALUE);
+        boolean isBuy = row.getStringCellValue(DIRECTION).trim().equalsIgnoreCase("К");
+        BigDecimal value = row.getBigDecimalCellValue(VALUE);
         if (isBuy) {
             value = value.negate();
         }
-        String contract = table.getStringCellValue(row, CONTRACT);
+        String contract = row.getStringCellValue(CONTRACT);
         String quoteCurrency = contract.substring(3, 6).toUpperCase(); // extracts RUB from USDRUB_TOM
         return Collections.singletonList(ForeignExchangeTransaction.builder()
                 .timestamp(transactionInstant)
                 .transactionId(transactionId)
                 .portfolio(getReport().getPortfolio())
                 .security(contract)
-                .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
+                .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)
-                .commission(table.getCurrencyCellValue(row, MARKET_COMMISSION).negate())
+                .commission(row.getBigDecimalCellValue(MARKET_COMMISSION).negate())
                 .valueCurrency(quoteCurrency)
                 .commissionCurrency("RUB")
                 .build());

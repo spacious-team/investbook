@@ -22,7 +22,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
@@ -44,16 +43,16 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
     }
 
     @Override
-    protected Collection<DerivativeTransaction> getRow(Table table, TableRow row) {
-        boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
-        int count = table.getIntCellValue(row, COUNT);
-        String type = table.getStringCellValue(row, TYPE).toLowerCase();
+    protected Collection<DerivativeTransaction> getRow(TableRow row) {
+        boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
+        int count = row.getIntCellValue(COUNT);
+        String type = row.getStringCellValue(TYPE).toLowerCase();
         BigDecimal value;
         BigDecimal valueInPoints;
         switch (type) {
             case "фьючерс" -> {
-                value = table.getCurrencyCellValue(row, VALUE);
-                valueInPoints = table.getCurrencyCellValue(row, QUOTE).multiply(BigDecimal.valueOf(count));
+                value = row.getBigDecimalCellValue(VALUE);
+                valueInPoints = row.getBigDecimalCellValue(QUOTE).multiply(BigDecimal.valueOf(count));
             }
             case "опцион" -> value = valueInPoints = BigDecimal.ZERO;
             default -> throw new IllegalArgumentException("Не известный контракт '" + type + "'"); // unexpected contract
@@ -62,14 +61,14 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
             value = value.negate();
             valueInPoints = valueInPoints.negate();
         }
-        BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
-                .add(table.getCurrencyCellValue(row, BROKER_COMMISSION))
+        BigDecimal commission = row.getBigDecimalCellValue(MARKET_COMMISSION)
+                .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .negate();
         return Collections.singleton(DerivativeTransaction.builder()
-                .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
+                .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .portfolio(getReport().getPortfolio())
-                .transactionId(String.valueOf(table.getLongCellValue(row, TRANSACTION)))
-                .security(table.getStringCellValue(row, CONTRACT))
+                .transactionId(String.valueOf(row.getLongCellValue(TRANSACTION)))
+                .security(row.getStringCellValue(CONTRACT))
                 .count((isBuy ? 1 : -1) * count)
                 .valueInPoints(valueInPoints)
                 .value(value)

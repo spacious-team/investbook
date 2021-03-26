@@ -20,7 +20,6 @@ package ru.investbook.parser.psb;
 
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
@@ -41,18 +40,18 @@ public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
     }
 
     @Override
-    protected Collection<SecurityQuote> getRow(Table table, TableRow row) {
+    protected Collection<SecurityQuote> getRow(TableRow row) {
         if (row.rowContains(SecuritiesTable.INVALID_TEXT)) {
             return emptyList();
         }
-        int count = table.getIntCellValue(row, OUTGOING);
+        int count = row.getIntCellValue(OUTGOING);
         if (count == 0) {
             return emptyList();
         }
-        BigDecimal amount = table.getCurrencyCellValue(row, AMOUNT);
+        BigDecimal amount = row.getBigDecimalCellValue(AMOUNT);
         BigDecimal price = amount.divide(BigDecimal.valueOf(count), 4, RoundingMode.HALF_UP);
-        BigDecimal quote = table.getCurrencyCellValue(row, QUOTE);
-        BigDecimal accruedInterest = table.getCurrencyCellValue(row, ACCRUED_INTEREST)
+        BigDecimal quote = row.getBigDecimalCellValue(QUOTE);
+        BigDecimal accruedInterest = row.getBigDecimalCellValue(ACCRUED_INTEREST)
                 .divide(BigDecimal.valueOf(count), 2, RoundingMode.HALF_UP);
         if (accruedInterest.compareTo(minValue) < 0 && price.subtract(quote).abs().compareTo(minValue) < 0) {
             // акция
@@ -60,7 +59,7 @@ public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
             accruedInterest = null;
         }
         return Collections.singletonList(SecurityQuote.builder()
-                .security(table.getStringCellValue(row, ISIN))
+                .security(row.getStringCellValue(ISIN))
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .price(price)

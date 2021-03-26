@@ -22,10 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.InitializableReportTable;
 import org.spacious_team.broker.report_parser.api.PortfolioCash;
-import org.spacious_team.broker.report_parser.api.TableFactoryRegistry;
-import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.api.Table;
-import org.spacious_team.table_wrapper.api.TableFactory;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.psb.PortfolioPropertyTable;
 
@@ -56,7 +53,7 @@ public class ForeignExchangeCashTable extends InitializableReportTable<Portfolio
         }
         Collection<PortfolioCash> cashes = new ArrayList<>();
         for (PortfolioPropertyTable.SummaryTableHeader currency : CURRENCIES) {
-            BigDecimal cash = table.getCurrencyCellValueOrDefault(row, currency, null);
+            BigDecimal cash = row.getBigDecimalCellValueOrDefault(currency, null);
             if (cash != null) {
                 cashes.add(PortfolioCash.builder()
                         .section("валютный рынок")
@@ -69,9 +66,8 @@ public class ForeignExchangeCashTable extends InitializableReportTable<Portfolio
     }
 
     private Table getSummaryTable() {
-        ReportPage reportPage = getReport().getReportPage();
-        TableFactory tableFactory = TableFactoryRegistry.get(reportPage);
-        Table table = tableFactory.create(reportPage, SUMMARY_TABLE, ASSETS, PortfolioPropertyTable.SummaryTableHeader.class);
+        Table table = getReport().getReportPage()
+                .create(SUMMARY_TABLE, ASSETS, PortfolioPropertyTable.SummaryTableHeader.class);
         if (table.isEmpty()) {
             throw new IllegalArgumentException("Таблица '" + SUMMARY_TABLE + "' не найдена");
         }

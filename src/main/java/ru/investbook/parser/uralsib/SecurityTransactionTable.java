@@ -24,7 +24,6 @@ import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
 import org.spacious_team.table_wrapper.api.RelativePositionTableColumn;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
@@ -52,23 +51,23 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
     }
 
     @Override
-    protected Collection<SecurityTransaction> getRow(Table table, TableRow row) {
-        String transactionId = getTransactionId(table, row, TRANSACTION);
+    protected Collection<SecurityTransaction> getRow(TableRow row) {
+        String transactionId = getTransactionId(row, TRANSACTION);
         if (transactionId == null) return emptyList();
 
-        boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
-        BigDecimal value = table.getCurrencyCellValue(row, VALUE);
-        BigDecimal accruedInterest = table.getCurrencyCellValue(row, ACCRUED_INTEREST);
+        boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
+        BigDecimal value = row.getBigDecimalCellValue(VALUE);
+        BigDecimal accruedInterest = row.getBigDecimalCellValue(ACCRUED_INTEREST);
         if (isBuy) {
             value = value.negate();
             accruedInterest = accruedInterest.negate();
         }
-        String valueCurrency = getCurrency(table, row, VALUE_CURRENCY, value, "RUB");
-        BigDecimal marketCommission = table.getCurrencyCellValue(row, MARKET_COMMISSION).abs();
-        String marketCommissionCurrency = getCurrency(table, row, MARKET_COMMISSION_CURRENCY, marketCommission, valueCurrency);
-        BigDecimal brokerCommission = table.getCurrencyCellValue(row, BROKER_COMMISSION).abs();
-        String brokerCommissionCurrency = getCurrency(table, row, BROKER_COMMISSION_CURRENCY, brokerCommission, valueCurrency);
-        Instant timestamp = getReport().convertToInstant(table.getStringCellValue(row, DATE_TIME));
+        String valueCurrency = getCurrency(row, VALUE_CURRENCY, value, "RUB");
+        BigDecimal marketCommission = row.getBigDecimalCellValue(MARKET_COMMISSION).abs();
+        String marketCommissionCurrency = getCurrency(row, MARKET_COMMISSION_CURRENCY, marketCommission, valueCurrency);
+        BigDecimal brokerCommission = row.getBigDecimalCellValue(BROKER_COMMISSION).abs();
+        String brokerCommissionCurrency = getCurrency(row, BROKER_COMMISSION_CURRENCY, brokerCommission, valueCurrency);
+        Instant timestamp = getReport().convertToInstant(row.getStringCellValue(DATE_TIME));
 
         BigDecimal commission;
         String commissionCurrency;
@@ -109,13 +108,12 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
                 }
             }
         }
-
         return Collections.singletonList(SecurityTransaction.builder()
                 .timestamp(timestamp)
                 .transactionId(transactionId)
                 .portfolio(getReport().getPortfolio())
-                .security(table.getStringCellValue(row, ISIN))
-                .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
+                .security(row.getStringCellValue(ISIN))
+                .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)
                 .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)
                 .commission(commission.negate())
@@ -124,19 +122,19 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
                 .build());
     }
 
-    static String getTransactionId(Table table, TableRow row, TableColumnDescription column) {
+    static String getTransactionId(TableRow row, TableColumnDescription column) {
         try {
             // some numbers (doubles) represented by string type cells
-            return String.valueOf(table.getLongCellValue(row, column));
+            return String.valueOf(row.getLongCellValue(column));
         } catch (Exception e) {
             return null;
         }
     }
 
-    private String getCurrency(Table table, TableRow row, TableColumnDescription currencyColumn,
+    private String getCurrency(TableRow row, TableColumnDescription currencyColumn,
                                BigDecimal commission, String defaultCurrency) {
         return Optional.ofNullable(
-                table.getStringCellValueOrDefault(row, currencyColumn, null))
+                row.getStringCellValueOrDefault(currencyColumn, null))
                 .or(() -> (commission.abs().compareTo(minValue) < 0) ?
                         Optional.ofNullable(defaultCurrency) :
                         Optional.empty())

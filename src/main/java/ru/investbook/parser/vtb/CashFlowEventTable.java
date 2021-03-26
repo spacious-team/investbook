@@ -25,12 +25,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
-import org.spacious_team.table_wrapper.excel.ExcelTable;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
@@ -51,17 +49,17 @@ public class CashFlowEventTable extends AbstractReportTable<CashFlowEventTable.C
     }
 
     @Override
-    protected Collection<CashFlowEvent> getRow(Table table, TableRow row) {
-        String operation = table.getStringCellValueOrDefault(row, OPERATION, null);
+    protected Collection<CashFlowEvent> getRow(TableRow row) {
+        String operation = row.getStringCellValueOrDefault(OPERATION, null);
         if (operation == null) {
             return Collections.emptyList();
         }
         return Collections.singleton(CashFlowEvent.builder()
-                .date(((ExcelTable) table).getDateCellValue(row, DATE).toInstant())
+                .date(row.getInstantCellValue(DATE))
                 .operation(operation.toLowerCase().trim())
-                .value(table.getCurrencyCellValue(row, VALUE))
-                .currency(VtbBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
-                .description(table.getStringCellValueOrDefault(row, DESCRIPTION, ""))
+                .value(row.getBigDecimalCellValue(VALUE))
+                .currency(VtbBrokerReport.convertToCurrency(row.getStringCellValue(CURRENCY)))
+                .description(row.getStringCellValueOrDefault(DESCRIPTION, ""))
                 .build());
     }
 

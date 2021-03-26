@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
@@ -47,9 +46,9 @@ public class CouponAmortizationRedemptionTable extends AbstractReportTable<Secur
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> getRow(Table table, TableRow row) {
+    protected Collection<SecurityEventCashFlow> getRow(TableRow row) {
         CashFlowType event;
-        String action = table.getStringCellValue(row, TYPE);
+        String action = row.getStringCellValue(TYPE);
         if (action.equalsIgnoreCase("Погашение купона")) {
             event = CashFlowType.COUPON;
         } else if (action.equalsIgnoreCase("Амортизация")) {
@@ -61,18 +60,18 @@ public class CouponAmortizationRedemptionTable extends AbstractReportTable<Secur
         }
 
         BigDecimal value = ((event == CashFlowType.COUPON) ?
-                table.getCurrencyCellValue(row, COUPON) :
-                table.getCurrencyCellValue(row, VALUE));
-        BigDecimal tax = table.getCurrencyCellValue(row, TAX).negate();
+                row.getBigDecimalCellValue(COUPON) :
+                row.getBigDecimalCellValue(VALUE));
+        BigDecimal tax = row.getBigDecimalCellValue(TAX).negate();
 
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
-                .security(table.getStringCellValue(row, ISIN))
+                .security(row.getStringCellValue(ISIN))
                 .portfolio(getReport().getPortfolio())
-                .count(table.getIntCellValue(row, COUNT))
+                .count(row.getIntCellValue(COUNT))
                 .eventType(event)
-                .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
+                .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                 .value(value)
-                .currency(table.getStringCellValue(row, CURRENCY));
+                .currency(row.getStringCellValue(CURRENCY));
         Collection<SecurityEventCashFlow> data = new ArrayList<>();
         data.add(builder.build());
         if (tax.abs().compareTo(minValue) >= 0) {

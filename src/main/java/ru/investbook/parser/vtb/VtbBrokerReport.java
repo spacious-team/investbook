@@ -80,7 +80,7 @@ public class VtbBrokerReport extends AbstractExcelBrokerReport {
         try {
             TableCellAddress address = reportPage.find(REPORT_DATE_MARKER, 1, 2);
             String value = reportPage.getCell(address)
-                    .getStringCellValue()
+                    .getStringValue()
                     .split(" ")[9];
             return convertToInstant(value)
                     .plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);

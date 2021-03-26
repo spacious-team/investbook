@@ -23,12 +23,10 @@ import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
-import org.spacious_team.table_wrapper.excel.ExcelTable;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -46,11 +44,11 @@ public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTra
     }
 
     @Override
-    protected Collection<SecurityTransaction> getRow(Table table, TableRow row) {
-        String isin = table.getStringCellValue(row, NAME_AND_ISIN).split(",")[2].trim();
-        boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
-        BigDecimal value = table.getCurrencyCellValue(row, VALUE_WITH_ACCRUED_INTEREST);
-        BigDecimal accruedInterest = table.getCurrencyCellValue(row, ACCRUED_INTEREST);
+    protected Collection<SecurityTransaction> getRow(TableRow row) {
+        String isin = row.getStringCellValue(NAME_AND_ISIN).split(",")[2].trim();
+        boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
+        BigDecimal value = row.getBigDecimalCellValue(VALUE_WITH_ACCRUED_INTEREST);
+        BigDecimal accruedInterest = row.getBigDecimalCellValue(ACCRUED_INTEREST);
         if (accruedInterest.abs().compareTo(minValue) >= 0) {
             value = value.subtract(accruedInterest);
         } else {
@@ -60,16 +58,16 @@ public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTra
             value = value.negate();
             accruedInterest = accruedInterest.negate();
         }
-        BigDecimal commission = table.getCurrencyCellValueOrDefault(row, MARKET_COMMISSION, BigDecimal.ZERO)
-                .add(table.getCurrencyCellValueOrDefault(row, BROKER_COMMISSION, BigDecimal.ZERO))
+        BigDecimal commission = row.getBigDecimalCellValueOrDefault(MARKET_COMMISSION, BigDecimal.ZERO)
+                .add(row.getBigDecimalCellValueOrDefault(BROKER_COMMISSION, BigDecimal.ZERO))
                 .negate();
-        String currency = VtbBrokerReport.convertToCurrency(table.getStringCellValue(row, VALUE_CURRENCY));
+        String currency = VtbBrokerReport.convertToCurrency(row.getStringCellValue(VALUE_CURRENCY));
         return Collections.singleton(SecurityTransaction.builder()
-                .timestamp(((ExcelTable) table).getDateCellValue(row, DATE).toInstant())
-                .transactionId(table.getStringCellValue(row, TRANSACTION))
+                .timestamp(row.getInstantCellValue(DATE))
+                .transactionId(row.getStringCellValue(TRANSACTION))
                 .portfolio(getReport().getPortfolio())
                 .security(isin)
-                .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
+                .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)
                 .accruedInterest(accruedInterest)
                 .commission(commission)

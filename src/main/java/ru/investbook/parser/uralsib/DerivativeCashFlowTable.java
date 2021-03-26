@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.util.Collection;
@@ -42,24 +41,24 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
         super(report, PaymentsTable.TABLE_NAME, "", PaymentsTable.PaymentsTableHeader.class);
     }
 
-    protected Collection<SecurityEventCashFlow> getRow(Table table, TableRow row) {
-        String action = table.getStringCellValue(row, OPERATION);
+    protected Collection<SecurityEventCashFlow> getRow(TableRow row) {
+        String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         if (!action.equalsIgnoreCase("вариационная маржа")) {
             return emptyList();
         }
         return singletonList(SecurityEventCashFlow.builder()
-                .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
+                .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                 .portfolio(getReport().getPortfolio())
-                .value(table.getCurrencyCellValue(row, VALUE))
-                .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
+                .value(row.getBigDecimalCellValue(VALUE))
+                .currency(UralsibBrokerReport.convertToCurrency(row.getStringCellValue(CURRENCY)))
                 .eventType(CashFlowType.DERIVATIVE_PROFIT)
-                .security(getContract(table, row))
+                .security(getContract(row))
                 .build());
     }
 
-    private String getContract(Table table, TableRow row) {
-        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
+    private String getContract(TableRow row) {
+        String description = row.getStringCellValueOrDefault(DESCRIPTION, "");
         Matcher matcher = contractPattern.matcher(description);
         if (matcher.find()) {
             return matcher.group(1);

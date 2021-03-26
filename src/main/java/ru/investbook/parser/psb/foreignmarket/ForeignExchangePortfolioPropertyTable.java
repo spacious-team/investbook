@@ -55,15 +55,15 @@ public class ForeignExchangePortfolioPropertyTable extends PortfolioPropertyTabl
             if (assetsRow == null || exchangeRateRow == null) {
                 return emptyList();
             }
-            BigDecimal totalAssets = table.getCurrencyCellValueOrDefault(assetsRow, RUB, BigDecimal.ZERO)
-                    .add(table.getCurrencyCellValueOrDefault(assetsRow, USD, BigDecimal.ZERO)
-                            .multiply(table.getCurrencyCellValueOrDefault(exchangeRateRow, USD, BigDecimal.ZERO)))
-                    .add(table.getCurrencyCellValueOrDefault(assetsRow, EUR, BigDecimal.ZERO)
-                            .multiply(table.getCurrencyCellValueOrDefault(exchangeRateRow, EUR, BigDecimal.ZERO)))
-                    .add(table.getCurrencyCellValueOrDefault(assetsRow, GBP, BigDecimal.ZERO)
-                            .multiply(table.getCurrencyCellValueOrDefault(exchangeRateRow, GBP, BigDecimal.ZERO)))
-                    .add(table.getCurrencyCellValueOrDefault(assetsRow, CHF, BigDecimal.ZERO)
-                            .multiply(table.getCurrencyCellValueOrDefault(exchangeRateRow, CHF, BigDecimal.ZERO)));
+            BigDecimal totalAssets = assetsRow.getBigDecimalCellValueOrDefault(RUB, BigDecimal.ZERO)
+                    .add(assetsRow.getBigDecimalCellValueOrDefault(USD, BigDecimal.ZERO)
+                            .multiply(exchangeRateRow.getBigDecimalCellValueOrDefault(USD, BigDecimal.ZERO)))
+                    .add(assetsRow.getBigDecimalCellValueOrDefault(EUR, BigDecimal.ZERO)
+                            .multiply(exchangeRateRow.getBigDecimalCellValueOrDefault(EUR, BigDecimal.ZERO)))
+                    .add(assetsRow.getBigDecimalCellValueOrDefault(GBP, BigDecimal.ZERO)
+                            .multiply(exchangeRateRow.getBigDecimalCellValueOrDefault(GBP, BigDecimal.ZERO)))
+                    .add(assetsRow.getBigDecimalCellValueOrDefault(CHF, BigDecimal.ZERO)
+                            .multiply(exchangeRateRow.getBigDecimalCellValueOrDefault(CHF, BigDecimal.ZERO)));
             return Collections.singletonList(PortfolioProperty.builder()
                     .portfolio(getReport().getPortfolio())
                     .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
