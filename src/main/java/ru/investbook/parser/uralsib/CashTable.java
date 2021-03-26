@@ -22,7 +22,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.PortfolioCash;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
@@ -44,11 +43,11 @@ public class CashTable extends AbstractReportTable<PortfolioCash> {
     }
 
     @Override
-    protected Collection<PortfolioCash> getRow(Table table, TableRow row) {
+    protected Collection<PortfolioCash> getRow(TableRow row) {
         return singletonList(PortfolioCash.builder()
                 .section("all")
-                .value(table.getCurrencyCellValue(row, VALUE))
-                .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
+                .value(row.getBigDecimalCellValue(VALUE))
+                .currency(UralsibBrokerReport.convertToCurrency(row.getStringCellValue(CURRENCY)))
                 .build());
     }
 

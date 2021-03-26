@@ -51,9 +51,9 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
         this.redemptionDates = new SecurityRedemptionTable(report).getData();
     }
 
-    protected Collection<SecurityEventCashFlow> getRow(Table table, TableRow row) {
+    protected Collection<SecurityEventCashFlow> getRow(TableRow row) {
         CashFlowType event;
-        String action = table.getStringCellValue(row, OPERATION);
+        String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         if (action.equalsIgnoreCase("погашение купона")) {
             event = CashFlowType.COUPON;
@@ -63,9 +63,9 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
             return emptyList();
         }
 
-        Security security = getSecurity(table, row, CashFlowType.AMORTIZATION);
+        Security security = getSecurity(row, CashFlowType.AMORTIZATION);
         if (security == null) return emptyList();
-        Instant timestamp = getReport().convertToInstant(table.getStringCellValue(row, DATE));
+        Instant timestamp = getReport().convertToInstant(row.getStringCellValue(DATE));
 
         if (event == null) {
             if (isRedemption(security.getName(), timestamp)) {
@@ -75,8 +75,8 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
             }
         }
 
-        BigDecimal tax = getTax(table, row);
-        BigDecimal value = table.getCurrencyCellValue(row, VALUE)
+        BigDecimal tax = getTax(row);
+        BigDecimal value = row.getBigDecimalCellValue(VALUE)
                 .add(tax.abs());
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .security(security.getId())
@@ -85,7 +85,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
                 .eventType(event)
                 .timestamp(timestamp)
                 .value(value)
-                .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)));
+                .currency(UralsibBrokerReport.convertToCurrency(row.getStringCellValue(CURRENCY)));
         Collection<SecurityEventCashFlow> data = new ArrayList<>();
         data.add(builder.build());
 

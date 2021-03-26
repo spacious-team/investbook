@@ -76,26 +76,26 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
                 this::checkEquality, this::mergeDuplicates);
     }
 
-    private Collection<SecurityEventCashFlow> getRowAndSaveDescription(Table table, TableRow row) {
+    private Collection<SecurityEventCashFlow> getRowAndSaveDescription(TableRow row) {
         // Тип операции = "Разблокировано средств ГО" имеет пустое описание, не падаем, возвращаем default
-        currentRowDescription = table.getStringCellValueOrDefault(row, DESCRIPTION, null);
-        return getRow(table, row);
+        currentRowDescription = row.getStringCellValueOrDefault(DESCRIPTION, null);
+        return getRow(row);
     }
 
     /**
      * @return security if found, null otherwise
      */
-    protected Security getSecurity(Table table, TableRow row, CashFlowType cashEventIfSecurityNotFound) {
+    protected Security getSecurity(TableRow row, CashFlowType cashEventIfSecurityNotFound) {
         try {
-            return getSecurityIfCan(table, row);
+            return getSecurityIfCan(row);
         } catch (Exception e) {
             EventCashFlow.EventCashFlowBuilder builder = EventCashFlow.builder()
                     .portfolio(getReport().getPortfolio())
-                    .timestamp(getReport().convertToInstant(table.getStringCellValue(row, DATE)))
-                    .currency(convertToCurrency(table.getStringCellValue(row, CURRENCY)))
-                    .description(table.getStringCellValueOrDefault(row, DESCRIPTION, null));
-            BigDecimal tax = getTax(table, row);
-            BigDecimal value = table.getCurrencyCellValue(row, VALUE)
+                    .timestamp(getReport().convertToInstant(row.getStringCellValue(DATE)))
+                    .currency(convertToCurrency(row.getStringCellValue(CURRENCY)))
+                    .description(row.getStringCellValueOrDefault(DESCRIPTION, null));
+            BigDecimal tax = getTax(row);
+            BigDecimal value = row.getBigDecimalCellValue(VALUE)
                     .add(tax.abs());
             EventCashFlow cash = builder
                     .eventType(cashEventIfSecurityNotFound)
@@ -116,8 +116,8 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
         }
     }
 
-    protected Security getSecurityIfCan(Table table, TableRow row) {
-        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
+    protected Security getSecurityIfCan(TableRow row) {
+        String description = row.getStringCellValueOrDefault(DESCRIPTION, "");
         String descriptionLowercase = description.toLowerCase();
         for (ReportSecurityInformation info : securitiesIncomingCount) {
             if (info == null) continue;
@@ -135,8 +135,8 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
         return securityParameter != null && description.contains(securityParameter.toLowerCase());
     }
 
-    protected BigDecimal getTax(Table table, TableRow row) {
-        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
+    protected BigDecimal getTax(TableRow row) {
+        String description = row.getStringCellValueOrDefault(DESCRIPTION, "");
         Matcher matcher = taxInformationPattern.matcher(description.toLowerCase());
         if (matcher.find()) {
             try {

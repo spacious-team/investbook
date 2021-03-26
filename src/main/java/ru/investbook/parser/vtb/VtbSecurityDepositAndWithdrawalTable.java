@@ -21,9 +21,7 @@ package ru.investbook.parser.vtb;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
-import org.spacious_team.table_wrapper.excel.ExcelTable;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -46,8 +44,8 @@ public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<S
     }
 
     @Override
-    protected Collection<SecurityTransaction> getRow(Table table, TableRow row) {
-        String operation = table.getStringCellValueOrDefault(row, OPERATION, "").toLowerCase().trim();
+    protected Collection<SecurityTransaction> getRow(TableRow row) {
+        String operation = row.getStringCellValueOrDefault(OPERATION, "").toLowerCase().trim();
         switch (operation) {
             case "перевод цб": // перевод между субсчетами
             case "конвертация цб":
@@ -55,8 +53,8 @@ public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<S
             case "ввод цб": // догадка, нет примера отчета
                 break;
             case "погашение цб":
-                String isin = table.getStringCellValue(row, NAME_REGNUMBER_ISIN).split(",")[2].trim();
-                Integer count = Math.abs(table.getIntCellValue(row, COUNT));
+                String isin = row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",")[2].trim();
+                Integer count = Math.abs(row.getIntCellValue(COUNT));
                 bondRedemptions.put(isin, count);
                 // no break;
             default:
@@ -64,8 +62,8 @@ public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<S
         }
 
         String portfolio = getReport().getPortfolio();
-        String isin = table.getStringCellValue(row, NAME_REGNUMBER_ISIN).split(",")[2].trim();
-        Instant timestamp = ((ExcelTable) table).getDateCellValue(row, DATE).toInstant();
+        String isin = row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",")[2].trim();
+        Instant timestamp = row.getInstantCellValue(DATE);
         String transactionId = generateTransactionId(portfolio, timestamp, isin);
         return Collections.singleton(
                 SecurityTransaction.builder()
@@ -73,7 +71,7 @@ public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<S
                         .timestamp(timestamp)
                         .portfolio(portfolio)
                         .security(isin)
-                        .count(table.getIntCellValue(row, COUNT))
+                        .count(row.getIntCellValue(COUNT))
                         .value(BigDecimal.ZERO)
                         .accruedInterest(BigDecimal.ZERO)
                         .commission(BigDecimal.ZERO)

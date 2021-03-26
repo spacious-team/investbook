@@ -26,7 +26,6 @@ import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.PortfolioCash;
 import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
@@ -48,23 +47,23 @@ public class VtbCashTable extends AbstractReportTable<PortfolioCash> {
     }
 
     @Override
-    protected Collection<PortfolioCash> getRow(Table table, TableRow row) {
+    protected Collection<PortfolioCash> getRow(TableRow row) {
         Collection<PortfolioCash> cashes = new ArrayList<>();
-        cashes.addAll(getPortfolioCash(table, row, VtbCashTableHeader.STOCK_MARKET, "основной рынок"));
-        cashes.addAll(getPortfolioCash(table, row, VtbCashTableHeader.FORTS_MARKET, "срочный рынок"));
-        cashes.addAll(getPortfolioCash(table, row, VtbCashTableHeader.NON_MARKET, "внебирж. рынок"));
+        cashes.addAll(getPortfolioCash(row, VtbCashTableHeader.STOCK_MARKET, "основной рынок"));
+        cashes.addAll(getPortfolioCash(row, VtbCashTableHeader.FORTS_MARKET, "срочный рынок"));
+        cashes.addAll(getPortfolioCash(row, VtbCashTableHeader.NON_MARKET, "внебирж. рынок"));
         return cashes;
     }
 
-    private Collection<PortfolioCash> getPortfolioCash(Table table, TableRow row, VtbCashTableHeader column, String section) {
+    private Collection<PortfolioCash> getPortfolioCash(TableRow row, VtbCashTableHeader column, String section) {
         try {
             return Collections.singleton(PortfolioCash.builder()
-                    .currency(VtbBrokerReport.convertToCurrency(table.getStringCellValue(row, VtbCashTableHeader.CURRENCY)))
+                    .currency(VtbBrokerReport.convertToCurrency(row.getStringCellValue(VtbCashTableHeader.CURRENCY)))
                     .section(section)
-                    .value(table.getCurrencyCellValue(row, column))
+                    .value(row.getBigDecimalCellValue(column))
                     .build());
         } catch (Exception e) {
-            log.debug("Отсутствует значение колонки '{}' в таблице {}", column, table);
+            log.debug("Отсутствует значение колонки '{}' в таблице {}", column, row.getTable());
             return Collections.emptyList();
         }
     }

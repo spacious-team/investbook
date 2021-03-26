@@ -19,8 +19,8 @@
 package ru.investbook.parser;
 
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.report_parser.api.TableFactoryRegistry;
 import org.spacious_team.table_wrapper.api.TableFactory;
+import org.spacious_team.table_wrapper.api.TableFactoryRegistry;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AssignableTypeFilter;

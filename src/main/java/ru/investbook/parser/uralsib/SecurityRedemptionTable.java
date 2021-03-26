@@ -20,7 +20,6 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
@@ -47,11 +46,11 @@ public class SecurityRedemptionTable extends AbstractReportTable<Map.Entry<Strin
     }
 
     @Override
-    protected Collection<Map.Entry<String, Instant>> getRow(Table table, TableRow row) {
-        return table.getStringCellValue(row, OPERATION).equalsIgnoreCase(REDEMPTION_DESCRIPTION) ?
+    protected Collection<Map.Entry<String, Instant>> getRow(TableRow row) {
+        return row.getStringCellValue(OPERATION).equalsIgnoreCase(REDEMPTION_DESCRIPTION) ?
                 singletonList(new AbstractMap.SimpleEntry<>(
-                        table.getStringCellValue(row, NAME),
-                        convertToInstant(table.getStringCellValue(row, DATE)))) :
+                        row.getStringCellValue(NAME),
+                        convertToInstant(row.getStringCellValue(DATE)))) :
                 emptyList();
     }
 

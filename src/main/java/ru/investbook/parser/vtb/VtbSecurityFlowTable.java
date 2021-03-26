@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
@@ -46,8 +45,8 @@ public class VtbSecurityFlowTable extends AbstractReportTable<Security> {
     }
 
     @Override
-    protected Collection<Security> getRow(Table table, TableRow row) {
-        String[] description = table.getStringCellValue(row, NAME_REGNUMBER_ISIN).split(",");
+    protected Collection<Security> getRow(TableRow row) {
+        String[] description = row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",");
         String name = description[0].trim();
         String registrationNumber = description[1].toUpperCase().trim();
         String isin = description[2].toUpperCase().trim();

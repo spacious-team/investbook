@@ -25,15 +25,12 @@ import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.InitializableReportTable;
-import org.spacious_team.broker.report_parser.api.TableFactoryRegistry;
 import org.spacious_team.table_wrapper.api.ConstantPositionTableColumn;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
-import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
-import org.spacious_team.table_wrapper.api.TableFactory;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.util.Collection;
@@ -62,9 +59,8 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
     }
 
     public static Table getSummaryTable(BrokerReport report, String tableFooterString) {
-        ReportPage reportPage = report.getReportPage();
-        TableFactory tableFactory = TableFactoryRegistry.get(reportPage);
-        Table table = tableFactory.create(reportPage, SUMMARY_TABLE, tableFooterString, SummaryTableHeader.class);
+        Table table = report.getReportPage()
+                .create(SUMMARY_TABLE, tableFooterString, SummaryTableHeader.class);
         if (table.isEmpty()) {
             throw new IllegalArgumentException("Таблица '" + SUMMARY_TABLE + "' не найдена");
         }
@@ -80,7 +76,7 @@ public class PortfolioPropertyTable extends InitializableReportTable<PortfolioPr
             return Collections.singletonList(PortfolioProperty.builder()
                     .portfolio(getReport().getPortfolio())
                     .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
-                    .value(table.getCurrencyCellValue(row, RUB).toString())
+                    .value(row.getBigDecimalCellValue(RUB).toString())
                     .timestamp(getReport().getReportEndDateTime())
                     .build());
         } catch (Exception e) {

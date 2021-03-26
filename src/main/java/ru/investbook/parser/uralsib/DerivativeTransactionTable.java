@@ -25,7 +25,6 @@ import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
@@ -53,36 +52,36 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
     }
 
     @Override
-    protected Collection<DerivativeTransaction> getRow(Table table, TableRow row) {
+    protected Collection<DerivativeTransaction> getRow(TableRow row) {
         if (expirationTableReached) return emptyList();
-        String transactionId = SecurityTransactionTable.getTransactionId(table, row, TRANSACTION);
+        String transactionId = SecurityTransactionTable.getTransactionId(row, TRANSACTION);
         if (transactionId == null) {
-            if (DerivativeExpirationTable.TABLE_NAME.equals(table.getStringCellValueOrDefault(row, TRANSACTION, null))) {
+            if (DerivativeExpirationTable.TABLE_NAME.equals(row.getStringCellValueOrDefault(TRANSACTION, null))) {
                 expirationTableReached = true;
             }
             return emptyList();
         }
 
-        String direction = table.getStringCellValue(row, DIRECTION);
+        String direction = row.getStringCellValue(DIRECTION);
         boolean isBuy = direction.equalsIgnoreCase("покупка") || direction.equalsIgnoreCase("зачисление");
-        int count = table.getIntCellValue(row, COUNT);
-        BigDecimal valueInPoints = table.getCurrencyCellValue(row, QUOTE).multiply(BigDecimal.valueOf(count));
-        BigDecimal value = table.getCurrencyCellValue(row, VALUE);
+        int count = row.getIntCellValue(COUNT);
+        BigDecimal valueInPoints = row.getBigDecimalCellValue(QUOTE).multiply(BigDecimal.valueOf(count));
+        BigDecimal value = row.getBigDecimalCellValue(VALUE);
         String valueCurrency = UralsibBrokerReport.convertToCurrency(
-                table.getStringCellValueOrDefault(row, VALUE_CURRENCY, "RUB"));
+                row.getStringCellValueOrDefault(VALUE_CURRENCY, "RUB"));
         if (isBuy) {
             value = value.negate();
             valueInPoints = valueInPoints.negate();
         }
-        BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
-                .add(table.getCurrencyCellValue(row, BROKER_COMMISSION))
-                .add(table.getCurrencyCellValueOrDefault(row, CLEARING_COMMISSION, BigDecimal.ZERO))
+        BigDecimal commission = row.getBigDecimalCellValue(MARKET_COMMISSION)
+                .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
+                .add(row.getBigDecimalCellValueOrDefault(CLEARING_COMMISSION, BigDecimal.ZERO))
                 .negate();
         return Collections.singleton(DerivativeTransaction.builder()
-                .timestamp(convertToInstant(table.getStringCellValue(row, DATE_TIME)))
+                .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .transactionId(transactionId)
                 .portfolio(getReport().getPortfolio())
-                .security(table.getStringCellValue(row, CONTRACT))
+                .security(row.getStringCellValue(CONTRACT))
                 .count((isBuy ? 1 : -1) * count)
                 .valueInPoints(valueInPoints)
                 .value(value)
