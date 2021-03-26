@@ -213,6 +213,7 @@ public class BrokerReportController {
     private static ByteArrayInputStream castToByteArrayInputStream(InputStream inputStream) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         inputStream.transferTo(out);
+        inputStream.close();
         return new ByteArrayInputStream(out.toByteArray());
     }
 
