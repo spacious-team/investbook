@@ -276,7 +276,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     private Map<LocalDate, BigDecimal> getSp500Index() {
         ViewFilter viewFilter = ViewFilter.get();
         return stockMarketIndexRepository
-                .getByDateBetweenOrderByDate(
+                .findByDateBetweenOrderByDate(
                         LocalDate.ofInstant(viewFilter.getFromDate(), ZoneId.systemDefault()),
                         LocalDate.ofInstant(viewFilter.getToDate(), ZoneId.systemDefault()))
                 .stream()

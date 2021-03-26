@@ -18,7 +18,11 @@
 
 package ru.investbook.entity;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -31,6 +35,9 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "stock_market_index")
 @Data
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
 public class StockMarketIndexEntity {
 
     @Id
