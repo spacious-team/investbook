@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,19 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.repository;
+package ru.investbook.service;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import ru.investbook.entity.StockMarketIndexEntity;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+@Configuration
+public class ServiceConfiguration {
 
-public interface StockMarketIndexRepository extends JpaRepository<StockMarketIndexEntity, LocalDate> {
-
-    Optional<StockMarketIndexEntity> findFirstBySp500NotNullOrderByDateDesc();
-
-    List<StockMarketIndexEntity> findByDateBetweenOrderByDate(LocalDate startDate, LocalDate endDate);
+    @Bean
+    public RestTemplate getRestTemplate(RestTemplateBuilder builder) {
+        return builder.build();
+    }
 
 }
