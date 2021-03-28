@@ -62,7 +62,8 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
 
     private boolean hasOpenContract() {
         Table countTable = getReport().getReportPage()
-                .create(TABLE2_NAME, TABLE_END_TEXT, ContractCountTableHeader.class);
+                .create(TABLE2_NAME, TABLE_END_TEXT, ContractCountTableHeader.class)
+                .excludeTotalRow();
         List<AbstractMap.SimpleEntry<String, Integer>> counts = countTable.getData(getReport().getPath(), DerivativeCashFlowTable::getCount);
         this.contractCount = counts.stream()
                 .filter(e -> e.getValue() != 0)

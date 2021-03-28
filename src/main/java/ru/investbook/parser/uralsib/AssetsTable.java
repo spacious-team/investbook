@@ -59,10 +59,10 @@ public class AssetsTable extends InitializableReportTable<PortfolioProperty> {
         try {
             BrokerReport report = getReport();
             Table table = report.getReportPage()
-                    .createOfNoName(ASSETS_TABLE, TABLE_FIRST_HEADER_LINE, SummaryTableHeader.class, 3);
+                    .createNameless(ASSETS_TABLE, TABLE_FIRST_HEADER_LINE, SummaryTableHeader.class, 3);
             if (table.isEmpty()) {
                 table = report.getReportPage()
-                        .createOfNoName(ASSETS_TABLE, TABLE_SECOND_HEADER_LINE, SummaryTableHeader.class, 2);
+                        .createNameless(ASSETS_TABLE, TABLE_SECOND_HEADER_LINE, SummaryTableHeader.class, 2);
             }
             if (table.isEmpty()) {
                 log.debug("Таблица '{}' не найдена", ASSETS_TABLE);

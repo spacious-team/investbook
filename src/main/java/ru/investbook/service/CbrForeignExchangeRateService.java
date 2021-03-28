@@ -92,7 +92,7 @@ public class CbrForeignExchangeRateService {
         Objects.requireNonNull(resource, () -> "Не удалось скачать курсы валют с адреса " + uri);
         Workbook book = new XSSFWorkbook(resource.getInputStream());
         new ExcelSheet(book.getSheetAt(0))
-                .createOfNoName("data", TableHeader.class)
+                .createNameless("data", TableHeader.class)
                 .stream()
                 .map(row -> getRate(row, currencyPair))
                 .forEach(this::save);

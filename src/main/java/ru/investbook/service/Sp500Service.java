@@ -72,7 +72,7 @@ public class Sp500Service {
         Objects.requireNonNull(resource, () -> "Не удалось скачать S&P 500 с адреса " + uri);
         Workbook book = new HSSFWorkbook(resource.getInputStream());
         new ExcelSheet(book.getSheetAt(0))
-                .createOfNoName("Effective date", TableHeader.class)
+                .createNameless("Effective date", TableHeader.class)
                 .stream()
                 .map(Sp500Service::getIndexValue)
                 .forEach(this::save);

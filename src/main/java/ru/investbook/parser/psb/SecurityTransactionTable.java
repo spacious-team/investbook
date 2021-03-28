@@ -58,6 +58,7 @@ public class SecurityTransactionTable extends InitializableReportTable<SecurityT
     private List<SecurityTransaction> parseTable(PsbBrokerReport report, String tableName) {
         return getReport().getReportPage()
                 .create(tableName, TABLE_END_TEXT, TransactionTableHeader.class)
+                .excludeTotalRow()
                 .getDataCollection(report.getPath(), this::getTransaction);
     }
 
