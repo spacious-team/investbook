@@ -31,7 +31,6 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static ru.investbook.parser.psb.SecurityTransactionTable.TransactionTableHeader.*;
@@ -50,19 +49,19 @@ public class SecurityTransactionTable extends InitializableReportTable<SecurityT
     @Override
     protected Collection<SecurityTransaction> parseTable() {
         List<SecurityTransaction> data = new ArrayList<>();
-        data.addAll(parseTable((PsbBrokerReport) getReport(), TABLE1_NAME));
-        data.addAll(parseTable((PsbBrokerReport) getReport(), TABLE2_NAME));
+        data.addAll(parseTable(TABLE1_NAME));
+        data.addAll(parseTable(TABLE2_NAME));
         return data;
     }
 
-    private List<SecurityTransaction> parseTable(PsbBrokerReport report, String tableName) {
+    private List<SecurityTransaction> parseTable(String tableName) {
         return getReport().getReportPage()
                 .create(tableName, TABLE_END_TEXT, TransactionTableHeader.class)
                 .excludeTotalRow()
-                .getDataCollection(report.getPath(), this::getTransaction);
+                .getData(getReport().getPath(), this::getTransaction);
     }
 
-    private Collection<SecurityTransaction> getTransaction(TableRow row) {
+    private SecurityTransaction getTransaction(TableRow row) {
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         BigDecimal value = row.getBigDecimalCellValue(VALUE);
         BigDecimal accruedInterest = row.getBigDecimalCellValue(ACCRUED_INTEREST);
@@ -75,7 +74,7 @@ public class SecurityTransactionTable extends InitializableReportTable<SecurityT
                 .add(row.getBigDecimalCellValue(CLEARING_COMMISSION))
                 .add(row.getBigDecimalCellValue(ITS_COMMISSION))
                 .negate();
-        return Collections.singletonList(SecurityTransaction.builder()
+        return SecurityTransaction.builder()
                 .timestamp(getReport().convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .transactionId(String.valueOf(row.getLongCellValue(TRANSACTION))) // may be double numbers in future
                 .portfolio(getReport().getPortfolio())
@@ -86,7 +85,7 @@ public class SecurityTransactionTable extends InitializableReportTable<SecurityT
                 .commission(commission)
                 .valueCurrency(row.getStringCellValue(VALUE_CURRENCY).replace(" ", "").split("/")[1])
                 .commissionCurrency(row.getStringCellValue(COMMISSION_CURRENCY))
-                .build());
+                .build();
     }
 
     enum TransactionTableHeader implements TableColumnDescription {

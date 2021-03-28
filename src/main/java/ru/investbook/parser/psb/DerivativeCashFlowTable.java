@@ -34,7 +34,6 @@ import java.math.BigDecimal;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -61,14 +60,14 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
     }
 
     private boolean hasOpenContract() {
-        Table countTable = getReport().getReportPage()
+        contractCount = getReport().getReportPage()
                 .create(TABLE2_NAME, TABLE_END_TEXT, ContractCountTableHeader.class)
-                .excludeTotalRow();
-        List<AbstractMap.SimpleEntry<String, Integer>> counts = countTable.getData(getReport().getPath(), DerivativeCashFlowTable::getCount);
-        this.contractCount = counts.stream()
+                .excludeTotalRow()
+                .getData(getReport().getPath(), DerivativeCashFlowTable::getCount)
+                .stream()
                 .filter(e -> e.getValue() != 0)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        return !this.contractCount.isEmpty();
+        return !contractCount.isEmpty();
     }
 
     private static AbstractMap.SimpleEntry<String, Integer> getCount(TableRow row) {
