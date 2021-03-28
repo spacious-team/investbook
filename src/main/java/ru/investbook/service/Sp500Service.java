@@ -61,14 +61,14 @@ public class Sp500Service {
         try {
             long t0 = System.nanoTime();
             Resource resource = restTemplate.getForObject(uri, Resource.class);
-            update(resource);
+            updateBy(resource);
             log.info("Индекс S&P 500 обновлен за {}", Duration.ofNanos(System.nanoTime() - t0));
         } catch (Exception e) {
-            throw new RuntimeException("Не смог обновить значения индекса S&P 500");
+            throw new RuntimeException("Не смог обновить значения индекса S&P 500", e);
         }
     }
 
-    private void update(Resource resource) throws IOException {
+    private void updateBy(Resource resource) throws IOException {
         Objects.requireNonNull(resource, () -> "Не удалось скачать S&P 500 с адреса " + uri);
         Workbook book = new HSSFWorkbook(resource.getInputStream());
         new ExcelSheet(book.getSheetAt(0))

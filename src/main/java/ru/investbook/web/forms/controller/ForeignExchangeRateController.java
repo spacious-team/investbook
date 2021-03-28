@@ -27,17 +27,24 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import ru.investbook.repository.ForeignExchangeRateRepository;
+import ru.investbook.repository.TransactionRepository;
+import ru.investbook.service.CbrForeignExchangeRateService;
 import ru.investbook.web.forms.model.ForeignExchangeRateModel;
 import ru.investbook.web.forms.service.ForeignExchangeRateFormsService;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 @Controller
 @RequestMapping("/foreign-exchange-rates")
 @RequiredArgsConstructor
 public class ForeignExchangeRateController {
     private final ForeignExchangeRateFormsService foreignExchangeRateFormsService;
+    private final CbrForeignExchangeRateService cbrForeignExchangeRateService;
+    private final ForeignExchangeRateRepository foreignExchangeRateRepository;
+    private final TransactionRepository transactionRepository;
 
     @GetMapping
     public String get(Model model) {
@@ -71,5 +78,26 @@ public class ForeignExchangeRateController {
     public String postForeignExchangeRate(@Valid @ModelAttribute("rate") ForeignExchangeRateModel rate) {
         foreignExchangeRateFormsService.save(rate);
         return "foreign-exchange-rates/view-single";
+    }
+
+    @GetMapping("update")
+    public String updateForeignExchangeRate(Model model) {
+        cbrForeignExchangeRateService.updateFrom(getFirstTransactionDate());
+        model.addAttribute("message",
+                "Официальные курсы обновлены по " + getLatestDateOfAllFxRateKnown() + " включительно.");
+        return "success";
+    }
+
+    private LocalDate getFirstTransactionDate() {
+        return transactionRepository.findFirstByOrderByTimestampAsc()
+                .map(e -> LocalDate.ofInstant(e.getTimestamp(), ZoneId.systemDefault()))
+                .orElseGet(() -> LocalDate.of(2010, 1, 1));
+    }
+
+    private LocalDate getLatestDateOfAllFxRateKnown() {
+        return foreignExchangeRateRepository.findByMaxPkDateGroupByPkCurrencyPair()
+                .stream()
+                .min(LocalDate::compareTo)
+                .orElseGet(() -> LocalDate.of(2010, 1, 1));
     }
 }

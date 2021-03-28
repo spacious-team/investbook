@@ -74,7 +74,7 @@
             <dependency>
                 <groupId>com.github.spacious-team</groupId>
                 <artifactId>table-wrapper-api</artifactId>
-                <version>17acbac7a8</version>
+                <version>e1afb51d5a</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -88,12 +88,12 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-excel-impl</artifactId>
-            <version>ade92e6639</version>
+            <version>84840f5050</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-xml-impl</artifactId>
-            <version>c68997f61a</version>
+            <version>d711582374</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

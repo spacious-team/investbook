@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
 
 public interface TransactionRepository extends JpaRepository<TransactionEntity, TransactionEntityPK> {
 
+    Optional<TransactionEntity> findFirstByOrderByTimestampAsc();
+
     List<TransactionEntity> findByOrderByPkPortfolioAscTimestampDescSecurityIdAsc();
 
     /**
