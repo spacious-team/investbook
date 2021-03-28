@@ -75,7 +75,7 @@ public class CbrForeignExchangeRateService {
                 String currencyPair = currency.toUpperCase() + ForeignExchangeRateService.RUB;
                 URI uri = this.uri
                         .cloneBuilder()
-                        .queryParam("VAL_NM_RQ", currency)
+                        .queryParam("VAL_NM_RQ", e.getValue())
                         .queryParam("FromDate", formattedFromDate)
                         .build()
                         .toUri();
