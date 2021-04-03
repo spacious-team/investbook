@@ -20,10 +20,10 @@ package ru.investbook.service.moex;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.springframework.stereotype.Service;
 import ru.investbook.converter.SecurityQuoteConverter;
+import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityQuoteRepository;
 
 import java.util.Optional;
@@ -41,7 +41,7 @@ public class MoexIssSecurityQuoteService {
     private final SecurityQuoteConverter securityQuoteConverter;
     private final SecurityQuoteRepository securityQuoteRepository;
 
-    public void updateQuote(Security security) {
+    public void updateQuote(SecurityEntity security) {
         updateQuote(security.getId());
     }
 

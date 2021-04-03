@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +27,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.service.moex.MoexIssSecurityQuoteService;
 import ru.investbook.web.ControllerHelper;
@@ -35,10 +35,12 @@ import ru.investbook.web.forms.service.SecurityQuoteFormsService;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
+import java.time.Duration;
 import java.util.Collection;
 
 @Controller
 @RequestMapping("/security-quotes")
+@Slf4j
 @RequiredArgsConstructor
 public class SecurityQuoteController {
     private final SecurityQuoteFormsService securityQuoteFormsService;
@@ -81,10 +83,9 @@ public class SecurityQuoteController {
 
     @GetMapping("update")
     public String updateFromMoexIssApi(Model model) {
-        securityRepository.findAll()
-                .stream()
-                .map(SecurityEntity::getId)
-                .forEach(moexIssSecurityQuoteService::updateQuote);
+        long t0 = System.nanoTime();
+        securityRepository.findAll().forEach(moexIssSecurityQuoteService::updateQuote);
+        log.info("Котировки обновлены за {}", Duration.ofNanos(System.nanoTime() - t0));
         model.addAttribute("message", "Котировки обновлены.");
         return "success";
     }

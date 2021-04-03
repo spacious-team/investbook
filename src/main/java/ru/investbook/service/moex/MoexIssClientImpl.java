@@ -24,15 +24,12 @@ import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponents;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.spacious_team.broker.pojo.SecurityType.*;
-import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 
 /**
  * <b>Steps for getting security quote:</b>
@@ -64,21 +61,19 @@ import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 @Slf4j
 public class MoexIssClientImpl implements MoexIssClient {
 
-    private final UriComponents securitiesUri = fromHttpUrl("http://iss.moex.com/iss/securities.json?" +
+    private static final String securitiesUri = "http://iss.moex.com/iss/securities.json?" +
             "iss.meta=off&" +
             "securities.columns=secid,shortname,isin&" +
             "start=0&" +
             "limit=10&" +
-            "q={query}")
-            .build();
-    private final UriComponents securityUri = fromHttpUrl("http://iss.moex.com/iss/securities/{secId}.json?" +
+            "q={query}";
+    private static final String securityUri = "http://iss.moex.com/iss/securities/{secId}.json?" +
             "iss.only=boards&" +
-            "boards.columns=is_primary,engine,market,boardid").build();
-    private final UriComponents quoteUri = fromHttpUrl("http://iss.moex.com/iss/engines/{engine}/markets/{market}/boards/{board}/securities/{secId}.json?" +
+            "boards.columns=is_primary,engine,market,boardid";
+    private static final String quoteUri = "http://iss.moex.com/iss/engines/{engine}/markets/{market}/boards/{board}/securities/{secId}.json?" +
             "iss.meta=off&" +
             "iss.only=securities&" +
-            "securities.columns=SECID,PREVDATE,PREVADMITTEDQUOTE,PREVSETTLEPRICE,PREVPRICE,ACCRUEDINT,LOTSIZE,LOTVALUE,MINSTEP,STEPPRICE")
-            .build();
+            "securities.columns=SECID,PREVDATE,PREVADMITTEDQUOTE,PREVSETTLEPRICE,PREVPRICE,ACCRUEDINT,LOTSIZE,LOTVALUE,MINSTEP,STEPPRICE";
     private final MoexDerivativeShortnameConvertor moexDerivativeShortnameConvertor;
     private final RestTemplate restTemplate;
 
@@ -94,8 +89,7 @@ public class MoexIssClientImpl implements MoexIssClient {
         }
         // Moex couldn't find contract  (shortname=USDRUB_TOM) by USDRUB_TOM, but finds it by USDRUB
         String query = (securityType == CURRENCY_PAIR) ? getCurrencyPair(isinOrContractName) : isinOrContractName;
-        URI uri = securitiesUri.expand(query).toUri();
-        return Optional.ofNullable(restTemplate.getForObject(uri, Map.class))
+        return Optional.ofNullable(restTemplate.getForObject(securitiesUri, Map.class, query))
                 .map(MoexJsonResponseParser::buildFromIntObjectMap)
                 .flatMap(securities -> securities.stream()
                         .filter(security -> isinOrContractName.equals(security.get("isin")) ||
@@ -108,8 +102,7 @@ public class MoexIssClientImpl implements MoexIssClient {
 
     @Override
     public Optional<MoexMarketDescription> getMarket(String moexSecId) {
-        URI uri = securityUri.expand(moexSecId).toUri();
-        return Optional.ofNullable(restTemplate.getForObject(uri, Map.class))
+        return Optional.ofNullable(restTemplate.getForObject(securityUri, Map.class, moexSecId))
                 .map(MoexJsonResponseParser::buildFromIntObjectMap)
                 .flatMap(response -> response.stream()
                         .filter(m -> Integer.valueOf(1).equals(m.get("is_primary")))
@@ -120,8 +113,7 @@ public class MoexIssClientImpl implements MoexIssClient {
     public Optional<SecurityQuote> getQuote(String moexSecId, MoexMarketDescription market) {
         Map<String, String> variables = new HashMap<>(market.toMap());
         variables.put("secId", moexSecId);
-        URI uri = quoteUri.expand(variables).toUri();
-        return Optional.ofNullable(restTemplate.getForObject(uri, Map.class))
+        return Optional.ofNullable(restTemplate.getForObject(quoteUri, Map.class, variables))
                 .map(MoexJsonResponseParser::buildFromIntObjectMap)
                 .flatMap(quote -> quote.stream()
                         .findAny()
