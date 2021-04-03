@@ -26,7 +26,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
+import ru.investbook.service.moex.MoexIssSecurityQuoteService;
 import ru.investbook.web.ControllerHelper;
 import ru.investbook.web.forms.model.SecurityQuoteModel;
 import ru.investbook.web.forms.service.SecurityQuoteFormsService;
@@ -40,6 +42,7 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class SecurityQuoteController {
     private final SecurityQuoteFormsService securityQuoteFormsService;
+    private final MoexIssSecurityQuoteService moexIssSecurityQuoteService;
     private final SecurityRepository securityRepository;
     private volatile Collection<String> securities;
 
@@ -74,5 +77,15 @@ public class SecurityQuoteController {
     public String postSecurityQuote(@Valid  @ModelAttribute("quote") SecurityQuoteModel quote) {
         securityQuoteFormsService.save(quote);
         return "security-quotes/view-single";
+    }
+
+    @GetMapping("update")
+    public String updateFromMoexIssApi(Model model) {
+        securityRepository.findAll()
+                .stream()
+                .map(SecurityEntity::getId)
+                .forEach(moexIssSecurityQuoteService::updateQuote);
+        model.addAttribute("message", "Котировки обновлены.");
+        return "success";
     }
 }

@@ -20,7 +20,6 @@ package ru.investbook.parser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.exception.ConstraintViolationException;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.spacious_team.broker.pojo.Portfolio;
@@ -50,6 +49,8 @@ import ru.investbook.api.TransactionCashFlowRestController;
 import ru.investbook.api.TransactionRestController;
 
 import java.util.function.Supplier;
+
+import static ru.investbook.repository.RepositoryHelper.isUniqIndexViolationException;
 
 @Component
 @Slf4j
@@ -189,14 +190,5 @@ public class InvestbookApiClient {
             }
         }
         return true;
-    }
-
-    private static boolean isUniqIndexViolationException(Throwable t) {
-        do {
-            if (t instanceof ConstraintViolationException) {
-                return true;
-            }
-        } while ((t = t.getCause()) != null);
-        return false;
     }
 }

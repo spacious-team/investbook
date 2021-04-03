@@ -33,7 +33,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriComponents;
 import ru.investbook.converter.ForeignExchangeRateConverter;
 import ru.investbook.entity.ForeignExchangeRateEntity;
 import ru.investbook.report.ForeignExchangeRateService;
@@ -47,14 +47,19 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
 
+import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class CbrForeignExchangeRateService {
-    private final UriComponentsBuilder uri = UriComponentsBuilder.fromHttpUrl("https://www.cbr.ru/Queries/UniDbQuery/DownloadExcel/98956")
-            .queryParam("Posted", true)
+    private final UriComponents uri = fromHttpUrl("https://www.cbr.ru/Queries/UniDbQuery/DownloadExcel/98956")
+            .queryParam("VAL_NM_RQ", "{currency}")
+            .queryParam("FromDate", "{from-date}")
+            .queryParam("ToDate", "01/01/2100")
             .queryParam("mode", 1)
-            .queryParam("ToDate", "01/01/2100");
+            .queryParam("Posted", true)
+            .build();
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
     private final Map<String, ?> currencyParamValues = Map.of(
             "USD", "R01235",
@@ -74,10 +79,7 @@ public class CbrForeignExchangeRateService {
                 String currency = e.getKey();
                 String currencyPair = currency.toUpperCase() + ForeignExchangeRateService.RUB;
                 URI uri = this.uri
-                        .cloneBuilder()
-                        .queryParam("VAL_NM_RQ", e.getValue())
-                        .queryParam("FromDate", formattedFromDate)
-                        .build()
+                        .expand(Map.of("currency", e.getValue(), "from-date", formattedFromDate))
                         .toUri();
                 Resource resource = restTemplate.getForObject(uri, Resource.class);
                 updateBy(resource, currencyPair, uri);
