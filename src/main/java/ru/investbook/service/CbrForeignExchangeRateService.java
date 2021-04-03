@@ -20,6 +20,7 @@ package ru.investbook.service;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -44,6 +45,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ForkJoinPool;
 
 @Service
 @Slf4j
@@ -66,22 +68,31 @@ public class CbrForeignExchangeRateService {
     private final RestTemplate restTemplate;
 
     @Transactional
+    @SneakyThrows
     public void updateFrom(LocalDate fromDate) {
+        long t0 = System.nanoTime();
+        String formattedFromDate = fromDate.format(dateTimeFormatter);
+        new ForkJoinPool(currencyParamValues.size())
+                .submit(() -> currencyParamValues.entrySet()
+                        .parallelStream()
+                        .forEach(e -> updateCurrencyRate(formattedFromDate, e)))
+                .get();
+        log.info("Курсы валют обновлены за {}", Duration.ofNanos(System.nanoTime() - t0));
+    }
+
+    private void updateCurrencyRate(String formattedFromDate, Map.Entry<String, ?> e) {
         try {
-            String formattedFromDate = fromDate.format(dateTimeFormatter);
-            for (var e : currencyParamValues.entrySet()) {
-                long t0 = System.nanoTime();
-                String currency = e.getKey();
-                String currencyPair = currency.toUpperCase() + ForeignExchangeRateService.RUB;
-                Resource resource = restTemplate.getForObject(
-                        uri,
-                        Resource.class,
-                        Map.of("currency", e.getValue(), "from-date", formattedFromDate));
-                updateBy(resource, currencyPair);
-                log.info("Курс {} обновлен за {}", currencyPair, Duration.ofNanos(System.nanoTime() - t0));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Не смог обновить курсы валют", e);
+            long t0 = System.nanoTime();
+            String currency = e.getKey();
+            String currencyPair = currency.toUpperCase() + ForeignExchangeRateService.RUB;
+            Resource resource = restTemplate.getForObject(
+                    uri,
+                    Resource.class,
+                    Map.of("currency", e.getValue(), "from-date", formattedFromDate));
+            updateBy(resource, currencyPair);
+            log.info("Курс {} обновлен за {}", currencyPair, Duration.ofNanos(System.nanoTime() - t0));
+        } catch (Exception ex) {
+            throw new RuntimeException("Не смог обновить курсы валют", ex);
         }
     }
 
