@@ -25,6 +25,7 @@ import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -116,11 +117,38 @@ public class MoexIssClientImpl implements MoexIssClient {
     public Optional<SecurityQuote> getQuote(String moexSecId, MoexMarketDescription market) {
         Map<String, String> variables = new HashMap<>(market.toMap());
         variables.put("secId", moexSecId);
-        return Optional.ofNullable(restTemplate.getForObject(quoteUri, Map.class, variables))
+        Optional<SecurityQuote> quote = Optional.ofNullable(restTemplate.getForObject(quoteUri, Map.class, variables))
                 .map(MoexJsonResponseParser::buildFromIntObjectMap)
-                .flatMap(quote -> quote.stream()
+                .flatMap(_quote -> _quote.stream()
                         .findAny()
                         .flatMap(MoexSecurityQuoteHelper::parse));
+        if (quote.isPresent() && isThisPossibleOption(moexSecId)) {
+            // Котировка опциона не содержит цену SecurityQuote.price,
+            // т.к. ИСС МосБиржи, определяя MINSTEP, не сообщает STEPPRICE.
+            // STEPPRICE нужно получить из базового актива (фьючерса)
+            return moexDerivativeShortnameConvertor.getOptionUnderlingFuturesContract(moexSecId)
+                    .filter(moexDerivativeShortnameConvertor::isFutures)
+                    .flatMap(underlyingSecid -> getMarket(underlyingSecid)
+                            .flatMap(underlyingMarket -> getQuote(underlyingSecid, underlyingMarket)))
+                    .map(futuresContract -> futuresContract.getPrice()
+                            .divide(futuresContract.getQuote(), 6, RoundingMode.HALF_UP))
+                    .map(oneUnitPrice -> quote.get().getQuote().multiply(oneUnitPrice))
+                    .map(optionalPrice -> quote.get().toBuilder()
+                                .price(optionalPrice)
+                                .build())
+                    .or(() -> quote); // не удалось вычислить, возвращаем без SecurityQuote.price
+        }
+        return quote;
+    }
+
+    /**
+     * May be false positive.
+     *
+     * @return true for option
+     */
+    private static boolean isThisPossibleOption(String moexSecid) {
+        int length = moexSecid.length();
+        return (length == 10) || (length == 11);
     }
 
     public boolean isDerivativeAndExpired(String shortnameOrSecid) {

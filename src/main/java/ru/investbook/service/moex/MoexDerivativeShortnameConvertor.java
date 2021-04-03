@@ -117,7 +117,12 @@ public class MoexDerivativeShortnameConvertor {
             {"WH", "WH4"}   // пшеница
     }).collect(Collectors.toMap(a -> a[1], a -> a[0]));
 
-    private final String[] monthCodes = new String[] {"F", "G", "H", "J", "K", "M", "N", "Q", "U", "V", "X", "Z"};
+    private final Character[] futuresContractMonthCodes =
+            new Character[] {'F', 'G', 'H', 'J', 'K', 'M', 'N', 'Q', 'U', 'V', 'X', 'Z'};
+    private final Character[] callOptionMonthCodes =
+            new Character[] {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'G', 'K', 'L'};
+    private final Character[] putOptionMonthCodes =
+            new Character[] {'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X'};
 
     public Optional<String> getFuturesContractSecidIfCan(String contractShortName) {
         try {
@@ -135,7 +140,7 @@ public class MoexDerivativeShortnameConvertor {
             int month = Integer.parseInt(contractShortName.substring(dashPosition + 1, dotPosition));
             int year = Integer.parseInt(contractShortName.substring(dotPosition + 1));
             return Optional.ofNullable(shortnamesToSecid.get(contractShortName.substring(0, dashPosition)))
-                    .map(prefix -> prefix + monthCodes[month - 1] + (year % 10));
+                    .map(prefix -> prefix + futuresContractMonthCodes[month - 1] + (year % 10));
         } catch (Exception e) {
             return Optional.empty();
         }
@@ -145,7 +150,7 @@ public class MoexDerivativeShortnameConvertor {
      * Only for derivative contracts.
      *
      * @return true for futures contract (in {@code Si-6.21} or {@code SiM1} format),
-     *         false for options (in {@code Si65000BC9D} or {@code Si-6.19M280319CA65000} format)
+     *         false for options (in {@code Si65000BC9}, {@code Si65000BC9D} or {@code Si-6.19M280319CA65000} format)
      */
     public boolean isFutures(String contract) {
         if (contract.length() == 4) {
@@ -155,5 +160,30 @@ public class MoexDerivativeShortnameConvertor {
         } else {
             return contract.charAt(contract.length() - 3) == '.';
         }
+    }
+
+    public Optional<String> getOptionUnderlingFuturesContract(String optionSecid) {
+        try {
+            String code = optionSecid.substring(0, 2);
+            if (shortnamesToSecid.containsKey(code)) {
+                Character optionMonth = optionSecid.charAt(8);
+                int month = optionMonth - callOptionMonthCodes[0];
+                if (month < 0 || month > 11) {
+                    month = optionMonth - putOptionMonthCodes[0];
+                }
+                if (month < 0 || month > 11) {
+                    return Optional.empty();
+                }
+                int year;
+                try {
+                    year = Integer.parseInt(optionSecid.substring(optionSecid.length() - 1));
+                } catch (Exception e) {
+                    year = Integer.parseInt(optionSecid.substring(optionSecid.length() - 2));
+                }
+                return Optional.of(code + futuresContractMonthCodes[month] + year);
+            }
+        } catch (Exception ignore) {
+        }
+        return Optional.empty();
     }
 }
