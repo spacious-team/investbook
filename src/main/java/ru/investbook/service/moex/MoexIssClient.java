@@ -29,4 +29,11 @@ public interface MoexIssClient {
     Optional<MoexMarketDescription> getMarket(String moexSecId);
 
     Optional<SecurityQuote> getQuote(String moexSecId, MoexMarketDescription market);
+
+    /**
+     * May be false negative (return false in case of no quotes on moex iss)
+     *
+     * @return true if Moex hasn't quotes
+     */
+    boolean isDerivativeAndExpired(String shortnameOrSecid);
 }

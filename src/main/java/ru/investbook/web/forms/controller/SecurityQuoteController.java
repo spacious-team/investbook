@@ -37,6 +37,8 @@ import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 
 @Controller
 @RequestMapping("/security-quotes")
@@ -82,9 +84,13 @@ public class SecurityQuoteController {
     }
 
     @GetMapping("update")
-    public String updateFromMoexIssApi(Model model) {
+    public String updateFromMoexIssApi(Model model) throws ExecutionException, InterruptedException {
         long t0 = System.nanoTime();
-        securityRepository.findAll().forEach(moexIssSecurityQuoteService::updateQuote);
+        new ForkJoinPool(4 * Runtime.getRuntime().availableProcessors())
+                .submit(() -> securityRepository.findAll()
+                        .parallelStream()
+                        .forEach(moexIssSecurityQuoteService::updateQuote))
+                .get();
         log.info("Котировки обновлены за {}", Duration.ofNanos(System.nanoTime() - t0));
         model.addAttribute("message", "Котировки обновлены.");
         return "success";

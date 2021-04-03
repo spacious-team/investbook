@@ -47,7 +47,8 @@ public class MoexIssSecurityQuoteService {
 
     public void updateQuote(String securityId) {
         if (getSecurityType(securityId) == CURRENCY_PAIR) {
-            // currency pair quote derived from foreign exchange rate, use CbrForeignExchangeRateService
+            return; // currency pair quote derived from foreign exchange rate, use CbrForeignExchangeRateService
+        } else if (moexClient.isDerivativeAndExpired(securityId)) {
             return;
         }
         moexClient.getSecId(securityId)

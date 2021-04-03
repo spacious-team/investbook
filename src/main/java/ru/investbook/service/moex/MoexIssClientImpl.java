@@ -25,6 +25,7 @@ import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -76,6 +77,8 @@ public class MoexIssClientImpl implements MoexIssClient {
             "securities.columns=SECID,PREVDATE,PREVADMITTEDQUOTE,PREVSETTLEPRICE,PREVPRICE,ACCRUEDINT,LOTSIZE,LOTVALUE,MINSTEP,STEPPRICE";
     private final MoexDerivativeShortnameConvertor moexDerivativeShortnameConvertor;
     private final RestTemplate restTemplate;
+    private int currentYear = getCurrentYear();
+    private long fastCoarseDayCounter = getFastCoarseDayCounter();
 
     @Override
     public Optional<String> getSecId(String isinOrContractName) {
@@ -118,5 +121,50 @@ public class MoexIssClientImpl implements MoexIssClient {
                 .flatMap(quote -> quote.stream()
                         .findAny()
                         .flatMap(MoexSecurityQuoteHelper::parse));
+    }
+
+    public boolean isDerivativeAndExpired(String shortnameOrSecid) {
+        try {
+            SecurityType securityType = getSecurityType(shortnameOrSecid);
+            if (securityType == DERIVATIVE) {
+                int currentYear = getCurrentYear();
+                int year;
+                // only current plus 2 years contracts may have quotes
+                int dashPos = shortnameOrSecid.indexOf('-');
+                if (dashPos == -1) {
+                    // last number (last o penultimate symbol) contains year
+                    // (SiM1, Si75000BD1, Si75000BD1A)
+                    try {
+                        year = Integer.parseInt(shortnameOrSecid.substring(shortnameOrSecid.length() - 1));
+                    } catch (Exception e) {
+                        year = Integer.parseInt(shortnameOrSecid.substring(shortnameOrSecid.length() - 2));
+                    }
+                    year = currentYear / 10 * 10 + year;
+                } else {
+                    // 2-digits year after '.' (Si-6.21, Si-6.21M170621CA75000)
+                    int dotPos = shortnameOrSecid.indexOf('.');
+                    if (dotPos == -1) {
+                        return false;
+                    }
+                    year = Integer.parseInt(shortnameOrSecid.substring(dotPos + 1, dotPos + 3));
+                    year = currentYear / 100 * 100 + year;
+                }
+                return (year < currentYear) || (year > (currentYear + 2));
+            }
+        } catch (Exception ignore) {
+        }
+        return false;
+    }
+
+    private int getCurrentYear() {
+        if (fastCoarseDayCounter != getFastCoarseDayCounter()) {
+            fastCoarseDayCounter = getFastCoarseDayCounter();
+            currentYear = LocalDate.now().getYear();
+        }
+        return currentYear;
+    }
+
+    private static long getFastCoarseDayCounter() {
+        return System.currentTimeMillis() >>> 26; // increments each 18,6 hours
     }
 }
