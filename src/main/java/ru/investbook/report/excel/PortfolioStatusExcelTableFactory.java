@@ -77,6 +77,7 @@ import static ru.investbook.report.excel.PortfolioStatusExcelTableHeader.*;
 public class PortfolioStatusExcelTableFactory implements TableFactory {
     static final BigDecimal minCash = BigDecimal.valueOf(0.01);
     private static final String STOCK_GROSS_PROFIT_FORMULA = getStockOrBondGrossProfitFormula();
+    private static final String DERIVATIVE_GROSS_PROFIT_FORMULA = getDerivativeGrossProfitFormula();
     private static final String PROFIT_FORMULA = getProfitFormula();
     private static final String PROFIT_PROPORTION_FORMULA = getProfitProportionFormula();
     private static final String INVESTMENT_PROPORTION_FORMULA = getInvestmentProportionFormula();
@@ -308,7 +309,14 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 if (securityType == STOCK_OR_BOND || securityType == CURRENCY_PAIR) {
                     row.put(GROSS_PROFIT, STOCK_GROSS_PROFIT_FORMULA);
                 } else if (securityType == DERIVATIVE) {
-                    row.put(GROSS_PROFIT, getGrossProfit(portfolios, security, positions, toCurrency));
+                    // Курсовой доход может устареть из-за обновления котировок с сайта МосБиржи.
+                    // поэтому если есть котировки, считаем их свежими, отображаем вариационную маржу по котировке.
+                    // Если котировок нет, то по записям CashFlowType.DERIVATIVE_PROFIT из БД
+                    if (row.containsKey(LAST_PRICE) && row.containsKey(AVERAGE_PRICE)) {
+                        row.put(GROSS_PROFIT, DERIVATIVE_GROSS_PROFIT_FORMULA);
+                    } else {
+                        row.put(GROSS_PROFIT, getGrossProfit(portfolios, security, positions, toCurrency));
+                    }
                 }
                 if (securityType == STOCK_OR_BOND || securityType == CURRENCY_PAIR) {
                     row.put(INVESTMENT_PROPORTION, INVESTMENT_PROPORTION_FORMULA);
@@ -508,6 +516,13 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 LAST_PRICE.getCellAddr() + "+" + LAST_ACCRUED_INTEREST.getCellAddr() + "-" +
                 AVERAGE_PRICE.getCellAddr() + "-" + AVERAGE_ACCRUED_INTEREST.getCellAddr() + ")*" +
                 COUNT.getCellAddr() + "+" + AMORTIZATION.getCellAddr() + ",0)";
+    }
+
+    private static String getDerivativeGrossProfitFormula() {
+        return "=IF(" + LAST_PRICE.getCellAddr() + "<>\"\",(" +
+                LAST_PRICE.getCellAddr() + "-" +
+                AVERAGE_PRICE.getCellAddr() + ")*" +
+                COUNT.getCellAddr() + ",0)";
     }
 
     private static String getProfitFormula() {
