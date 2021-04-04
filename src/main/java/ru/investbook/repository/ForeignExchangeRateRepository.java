@@ -39,7 +39,7 @@ public interface ForeignExchangeRateRepository extends JpaRepository<ForeignExch
     List<ForeignExchangeRateEntity> findByPkCurrencyPairOrderByPkDateDesc(String currencyPair);
 
     @Query(value = """
-        SELECT max(t.pk.date), t.pk.currencyPair, t.rate
+        SELECT max(t.pk.date)
             FROM ForeignExchangeRateEntity t
             GROUP BY t.pk.currencyPair
     """)
