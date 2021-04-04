@@ -32,7 +32,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 import ru.investbook.entity.StockMarketIndexEntity;
 import ru.investbook.repository.StockMarketIndexRepository;
 
@@ -41,11 +40,13 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.Objects;
 
+import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class Sp500Service {
-    private final URI uri = UriComponentsBuilder.fromHttpUrl("https://www.spglobal.com/spdji/en/idsexport/file.xls")
+    private final URI uri = fromHttpUrl("https://www.spglobal.com/spdji/en/idsexport/file.xls")
             .queryParam("redesignExport", true)
             .queryParam("selectedModule", "PerformanceGraphView")
             .queryParam("selectedSubModule", "Graph")

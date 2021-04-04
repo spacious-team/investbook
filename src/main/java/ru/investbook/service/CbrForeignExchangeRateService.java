@@ -20,6 +20,7 @@ package ru.investbook.service;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -33,28 +34,29 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 import ru.investbook.converter.ForeignExchangeRateConverter;
 import ru.investbook.entity.ForeignExchangeRateEntity;
 import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.repository.ForeignExchangeRateRepository;
 
 import java.io.IOException;
-import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ForkJoinPool;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class CbrForeignExchangeRateService {
-    private final UriComponentsBuilder uri = UriComponentsBuilder.fromHttpUrl("https://www.cbr.ru/Queries/UniDbQuery/DownloadExcel/98956")
-            .queryParam("Posted", true)
-            .queryParam("mode", 1)
-            .queryParam("ToDate", "01/01/2100");
+    private static final String uri = "https://www.cbr.ru/Queries/UniDbQuery/DownloadExcel/98956?" +
+            "VAL_NM_RQ={currency}&" +
+            "FromDate={from-date}&" +
+            "ToDate=01/01/2100&" +
+            "mode=1&" +
+            "Posted=true";
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
     private final Map<String, ?> currencyParamValues = Map.of(
             "USD", "R01235",
@@ -66,30 +68,36 @@ public class CbrForeignExchangeRateService {
     private final RestTemplate restTemplate;
 
     @Transactional
+    @SneakyThrows
     public void updateFrom(LocalDate fromDate) {
+        long t0 = System.nanoTime();
+        String formattedFromDate = fromDate.format(dateTimeFormatter);
+        new ForkJoinPool(currencyParamValues.size())
+                .submit(() -> currencyParamValues.entrySet()
+                        .parallelStream()
+                        .forEach(e -> updateCurrencyRate(formattedFromDate, e)))
+                .get();
+        log.info("Курсы валют обновлены за {}", Duration.ofNanos(System.nanoTime() - t0));
+    }
+
+    private void updateCurrencyRate(String formattedFromDate, Map.Entry<String, ?> e) {
         try {
-            String formattedFromDate = fromDate.format(dateTimeFormatter);
-            for (var e : currencyParamValues.entrySet()) {
-                long t0 = System.nanoTime();
-                String currency = e.getKey();
-                String currencyPair = currency.toUpperCase() + ForeignExchangeRateService.RUB;
-                URI uri = this.uri
-                        .cloneBuilder()
-                        .queryParam("VAL_NM_RQ", e.getValue())
-                        .queryParam("FromDate", formattedFromDate)
-                        .build()
-                        .toUri();
-                Resource resource = restTemplate.getForObject(uri, Resource.class);
-                updateBy(resource, currencyPair, uri);
-                log.info("Курс {} обновлен за {}", currencyPair, Duration.ofNanos(System.nanoTime() - t0));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Не смог обновить курсы валют", e);
+            long t0 = System.nanoTime();
+            String currency = e.getKey();
+            String currencyPair = currency.toUpperCase() + ForeignExchangeRateService.RUB;
+            Resource resource = restTemplate.getForObject(
+                    uri,
+                    Resource.class,
+                    Map.of("currency", e.getValue(), "from-date", formattedFromDate));
+            updateBy(resource, currencyPair);
+            log.info("Курс {} обновлен за {}", currencyPair, Duration.ofNanos(System.nanoTime() - t0));
+        } catch (Exception ex) {
+            throw new RuntimeException("Не смог обновить курсы валют", ex);
         }
     }
 
-    private void updateBy(Resource resource, String currencyPair, URI uri) throws IOException {
-        Objects.requireNonNull(resource, () -> "Не удалось скачать курсы валют с адреса " + uri);
+    private void updateBy(Resource resource, String currencyPair) throws IOException {
+        Objects.requireNonNull(resource, () -> "Не удалось скачать курсы валют");
         Workbook book = new XSSFWorkbook(resource.getInputStream());
         new ExcelSheet(book.getSheetAt(0))
                 .createNameless("data", TableHeader.class)
