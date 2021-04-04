@@ -20,7 +20,6 @@ package ru.investbook.parser.uralsib;
 
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
@@ -45,19 +44,19 @@ public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
     }
 
     @Override
-    protected Collection<SecurityQuote> getRow(Table table, TableRow row) {
-        BigDecimal amountInRub = table.getCurrencyCellValueOrDefault(row, AMOUNT, null);
+    protected Collection<SecurityQuote> getRow(TableRow row) {
+        BigDecimal amountInRub = row.getBigDecimalCellValueOrDefault(AMOUNT, null);
         if (amountInRub == null || amountInRub.compareTo(minValue) < 0) {
             return Collections.emptyList();
         }
-        int count = table.getIntCellValue(row, OUTGOING_COUNT);
+        int count = row.getIntCellValue(OUTGOING_COUNT);
         if (count == 0) {
             return Collections.emptyList();
         }
         BigDecimal priceInRub = amountInRub.divide(BigDecimal.valueOf(count), 4, HALF_UP);
-        BigDecimal quote = table.getCurrencyCellValue(row, QUOTE);
-        BigDecimal accruedInterest = table.getCurrencyCellValue(row, ACCRUED_INTEREST);
-        String isin = table.getStringCellValue(row, ISIN);
+        BigDecimal quote = row.getBigDecimalCellValue(QUOTE);
+        BigDecimal accruedInterest = row.getBigDecimalCellValue(ACCRUED_INTEREST);
+        String isin = row.getStringCellValue(ISIN);
         Instant reportEndDateTime = getReport().getReportEndDateTime();
         if (accruedInterest.compareTo(minValue) < 0) { // акция или облигация с НКД == 0 ?
             if (priceInRub.subtract(quote).abs().compareTo(minValue) < 0) {

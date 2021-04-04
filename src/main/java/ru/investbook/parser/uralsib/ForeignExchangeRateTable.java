@@ -57,7 +57,7 @@ public class ForeignExchangeRateTable extends InitializableReportTable<ForeignEx
             }
             List<ForeignExchangeRate> exchangeRates = new ArrayList<>();
             TableCell cell = report.getReportPage().getRow(address.getRow() + 1).getCell(0);
-            String text = cell.getStringCellValue();
+            String text = cell.getStringValue();
             String[] words = text.split(" ");
             for (int i = 0; i < words.length; i++) {
                 try {

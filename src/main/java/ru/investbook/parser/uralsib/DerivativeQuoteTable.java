@@ -21,7 +21,6 @@ package ru.investbook.parser.uralsib;
 import lombok.Getter;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
@@ -46,13 +45,13 @@ public class DerivativeQuoteTable extends AbstractReportTable<SecurityQuote> {
     }
 
     @Override
-    protected Collection<SecurityQuote> getRow(Table table, TableRow row) {
-        BigDecimal quote = table.getCurrencyCellValueOrDefault(row, QUOTE, null);
+    protected Collection<SecurityQuote> getRow(TableRow row) {
+        BigDecimal quote = row.getBigDecimalCellValueOrDefault(QUOTE, null);
         if (quote == null || quote.compareTo(minValue) < 0) {
             return emptyList();
         }
         return Collections.singletonList(SecurityQuote.builder()
-                .security(table.getStringCellValue(row, CONTRACT))
+                .security(row.getStringCellValue(CONTRACT))
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .build());

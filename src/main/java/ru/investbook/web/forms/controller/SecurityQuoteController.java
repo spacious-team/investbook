@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,19 +28,25 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.repository.SecurityRepository;
+import ru.investbook.service.moex.MoexIssSecurityQuoteService;
 import ru.investbook.web.ControllerHelper;
 import ru.investbook.web.forms.model.SecurityQuoteModel;
 import ru.investbook.web.forms.service.SecurityQuoteFormsService;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
+import java.time.Duration;
 import java.util.Collection;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 
 @Controller
 @RequestMapping("/security-quotes")
+@Slf4j
 @RequiredArgsConstructor
 public class SecurityQuoteController {
     private final SecurityQuoteFormsService securityQuoteFormsService;
+    private final MoexIssSecurityQuoteService moexIssSecurityQuoteService;
     private final SecurityRepository securityRepository;
     private volatile Collection<String> securities;
 
@@ -74,5 +81,18 @@ public class SecurityQuoteController {
     public String postSecurityQuote(@Valid  @ModelAttribute("quote") SecurityQuoteModel quote) {
         securityQuoteFormsService.save(quote);
         return "security-quotes/view-single";
+    }
+
+    @GetMapping("update")
+    public String updateFromMoexIssApi(Model model) throws ExecutionException, InterruptedException {
+        long t0 = System.nanoTime();
+        new ForkJoinPool(4 * Runtime.getRuntime().availableProcessors())
+                .submit(() -> securityRepository.findAll()
+                        .parallelStream()
+                        .forEach(moexIssSecurityQuoteService::updateQuote))
+                .get();
+        log.info("Котировки обновлены за {}", Duration.ofNanos(System.nanoTime() - t0));
+        model.addAttribute("message", "Котировки обновлены.");
+        return "success";
     }
 }

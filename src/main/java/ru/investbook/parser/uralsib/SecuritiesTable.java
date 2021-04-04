@@ -25,7 +25,6 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
@@ -47,15 +46,15 @@ public class SecuritiesTable extends AbstractReportTable<ReportSecurityInformati
     }
 
     @Override
-    protected Collection<ReportSecurityInformation> getRow(Table table, TableRow row) {
+    protected Collection<ReportSecurityInformation> getRow(TableRow row) {
         Security security = Security.builder()
-                .id(table.getStringCellValue(row, ISIN))
-                .name(table.getStringCellValue(row, NAME))
+                .id(row.getStringCellValue(ISIN))
+                .name(row.getStringCellValue(NAME))
                 .build();
         return singletonList(ReportSecurityInformation.builder()
                 .security(security)
-                .cfi(table.getStringCellValue(row, CFI))
-                .incomingCount(table.getIntCellValue(row, INCOMING_COUNT))
+                .cfi(row.getStringCellValue(CFI))
+                .incomingCount(row.getIntCellValue(INCOMING_COUNT))
                 .build());
     }
 

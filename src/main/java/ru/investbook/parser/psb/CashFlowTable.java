@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
@@ -47,8 +46,8 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
     }
 
     @Override
-    protected Collection<EventCashFlow> getRow(Table table, TableRow row) {
-        String action = table.getStringCellValue(row, OPERATION);
+    protected Collection<EventCashFlow> getRow(TableRow row) {
+        String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         CashFlowType type = CashFlowType.CASH;
         boolean isPositive;
@@ -66,17 +65,17 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
             default:
                 return emptyList();
         }
-        if (type == CashFlowType.CASH && !table.getStringCellValue(row, DESCRIPTION).isEmpty()) {
+        if (type == CashFlowType.CASH && !row.getStringCellValue(DESCRIPTION).isEmpty()) {
             return emptyList(); // cash in/out records has no description
         }
-        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, null);
+        String description = row.getStringCellValueOrDefault(DESCRIPTION, null);
         return singletonList(EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(type)
-                .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
-                .value(table.getCurrencyCellValue(row, VALUE)
+                .timestamp(convertToInstant(row.getStringCellValue(DATE)))
+                .value(row.getBigDecimalCellValue(VALUE)
                         .multiply(BigDecimal.valueOf(isPositive ? 1 : -1)))
-                .currency(table.getStringCellValue(row, CURRENCY))
+                .currency(row.getStringCellValue(CURRENCY))
                 .description(StringUtils.hasLength(description) ? description : null)
                 .build());
     }

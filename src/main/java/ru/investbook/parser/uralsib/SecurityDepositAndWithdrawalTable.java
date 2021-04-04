@@ -21,7 +21,6 @@ package ru.investbook.parser.uralsib;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
@@ -46,17 +45,17 @@ public class SecurityDepositAndWithdrawalTable extends AbstractReportTable<Secur
     }
 
     @Override
-    protected Collection<SecurityTransaction> getRow(Table table, TableRow row) {
-        String operation = table.getStringCellValue(row, OPERATION);
+    protected Collection<SecurityTransaction> getRow(TableRow row) {
+        String operation = row.getStringCellValue(OPERATION);
         if (!operation.equalsIgnoreCase(IN_DESCRIPTION) && !operation.equalsIgnoreCase(OUT_DESCRIPTION)) {
             return Collections.emptyList();
         }
         return Collections.singletonList(SecurityTransaction.builder()
-                .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
-                .transactionId(table.getStringCellValue(row, ID))
+                .timestamp(convertToInstant(row.getStringCellValue(DATE)))
+                .transactionId(row.getStringCellValue(ID))
                 .portfolio(getReport().getPortfolio())
-                .security(getSecurity(table, row).getId())
-                .count(table.getIntCellValue(row, COUNT))
+                .security(getSecurity(row).getId())
+                .count(row.getIntCellValue(COUNT))
                 .value(BigDecimal.ZERO)
                 .accruedInterest(BigDecimal.ZERO)
                 .commission(BigDecimal.ZERO)
@@ -65,8 +64,8 @@ public class SecurityDepositAndWithdrawalTable extends AbstractReportTable<Secur
                 .build());
     }
 
-    private Security getSecurity(Table table, TableRow row) {
-        String cfi = table.getStringCellValue(row, CFI);
+    private Security getSecurity(TableRow row) {
+        String cfi = row.getStringCellValue(CFI);
         return securitiesIncomingCount.stream()
                 .filter(security -> security.getCfi().equals(cfi))
                 .map(SecuritiesTable.ReportSecurityInformation::getSecurity)

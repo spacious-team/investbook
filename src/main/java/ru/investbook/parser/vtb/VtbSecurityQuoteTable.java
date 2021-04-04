@@ -21,7 +21,6 @@ package ru.investbook.parser.vtb;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
@@ -41,27 +40,27 @@ public class VtbSecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
     }
 
     @Override
-    protected Collection<SecurityQuote> getRow(Table table, TableRow row) {
-        BigDecimal quote = table.getCurrencyCellValueOrDefault(row, QUOTE, null);
+    protected Collection<SecurityQuote> getRow(TableRow row) {
+        BigDecimal quote = row.getBigDecimalCellValueOrDefault(QUOTE, null);
         if (quote == null) {
             return Collections.emptyList();
         }
-        BigDecimal price = Optional.ofNullable(table.getCurrencyCellValueOrDefault(row, FACE_VALUE, null))
+        BigDecimal price = Optional.ofNullable(row.getBigDecimalCellValueOrDefault(FACE_VALUE, null))
                 .filter(faceValue -> faceValue.compareTo(minValue) > 0)
                 .map(faceValue -> faceValue.multiply(quote).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP))
                 .orElse(null);
         BigDecimal accruedInterest = null;
         if (price != null) {
             // имеет смысл только для облигаций, для акций price = null
-            accruedInterest = Optional.ofNullable(table.getCurrencyCellValueOrDefault(row, ACCRUED_INTEREST, null))
+            accruedInterest = Optional.ofNullable(row.getBigDecimalCellValueOrDefault(ACCRUED_INTEREST, null))
                     .filter(interest -> interest.compareTo(minValue) > 0) // otherwise outgoing count may be = 0
                     .map(interest -> {
-                        int count = table.getIntCellValueOrDefault(row, OUTGOING, -1);
+                        int count = row.getIntCellValueOrDefault(OUTGOING, -1);
                         return (count <= 0) ? null : interest.divide(BigDecimal.valueOf(count), 2, RoundingMode.HALF_UP);
                     }).orElse(null);
         }
         return Collections.singletonList(SecurityQuote.builder()
-                .security(table.getStringCellValue(row, NAME_REGNUMBER_ISIN).split(",")[2].trim())
+                .security(row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",")[2].trim())
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .price(price)

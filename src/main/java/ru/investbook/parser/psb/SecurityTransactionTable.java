@@ -22,20 +22,15 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.InitializableReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
-import org.spacious_team.broker.report_parser.api.TableFactoryRegistry;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
-import org.spacious_team.table_wrapper.api.ReportPage;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
-import org.spacious_team.table_wrapper.api.TableFactory;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static ru.investbook.parser.psb.SecurityTransactionTable.TransactionTableHeader.*;
@@ -54,43 +49,43 @@ public class SecurityTransactionTable extends InitializableReportTable<SecurityT
     @Override
     protected Collection<SecurityTransaction> parseTable() {
         List<SecurityTransaction> data = new ArrayList<>();
-        data.addAll(parseTable((PsbBrokerReport) getReport(), TABLE1_NAME));
-        data.addAll(parseTable((PsbBrokerReport) getReport(), TABLE2_NAME));
+        data.addAll(parseTable(TABLE1_NAME));
+        data.addAll(parseTable(TABLE2_NAME));
         return data;
     }
 
-    private List<SecurityTransaction> parseTable(PsbBrokerReport report, String tableName) {
-        ReportPage reportPage = getReport().getReportPage();
-        TableFactory tableFactory = TableFactoryRegistry.get(reportPage);
-        Table table = tableFactory.create(report.getReportPage(), tableName, TABLE_END_TEXT, TransactionTableHeader.class);
-        return table.getDataCollection(report.getPath(), this::getTransaction);
+    private List<SecurityTransaction> parseTable(String tableName) {
+        return getReport().getReportPage()
+                .create(tableName, TABLE_END_TEXT, TransactionTableHeader.class)
+                .excludeTotalRow()
+                .getData(getReport().getPath(), this::getTransaction);
     }
 
-    private Collection<SecurityTransaction> getTransaction(Table table, TableRow row) {
-        boolean isBuy = table.getStringCellValue(row, DIRECTION).equalsIgnoreCase("покупка");
-        BigDecimal value = table.getCurrencyCellValue(row, VALUE);
-        BigDecimal accruedInterest = table.getCurrencyCellValue(row, ACCRUED_INTEREST);
+    private SecurityTransaction getTransaction(TableRow row) {
+        boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
+        BigDecimal value = row.getBigDecimalCellValue(VALUE);
+        BigDecimal accruedInterest = row.getBigDecimalCellValue(ACCRUED_INTEREST);
         if (isBuy) {
             value = value.negate();
             accruedInterest = accruedInterest.negate();
         }
-        BigDecimal commission = table.getCurrencyCellValue(row, MARKET_COMMISSION)
-                .add(table.getCurrencyCellValue(row, BROKER_COMMISSION))
-                .add(table.getCurrencyCellValue(row, CLEARING_COMMISSION))
-                .add(table.getCurrencyCellValue(row, ITS_COMMISSION))
+        BigDecimal commission = row.getBigDecimalCellValue(MARKET_COMMISSION)
+                .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
+                .add(row.getBigDecimalCellValue(CLEARING_COMMISSION))
+                .add(row.getBigDecimalCellValue(ITS_COMMISSION))
                 .negate();
-        return Collections.singletonList(SecurityTransaction.builder()
-                .timestamp(getReport().convertToInstant(table.getStringCellValue(row, DATE_TIME)))
-                .transactionId(String.valueOf(table.getLongCellValue(row, TRANSACTION))) // may be double numbers in future
+        return SecurityTransaction.builder()
+                .timestamp(getReport().convertToInstant(row.getStringCellValue(DATE_TIME)))
+                .transactionId(String.valueOf(row.getLongCellValue(TRANSACTION))) // may be double numbers in future
                 .portfolio(getReport().getPortfolio())
-                .security(table.getStringCellValue(row, ISIN))
-                .count((isBuy ? 1 : -1) * table.getIntCellValue(row, COUNT))
+                .security(row.getStringCellValue(ISIN))
+                .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)
                 .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)
                 .commission(commission)
-                .valueCurrency(table.getStringCellValue(row, VALUE_CURRENCY).replace(" ", "").split("/")[1])
-                .commissionCurrency(table.getStringCellValue(row, COMMISSION_CURRENCY))
-                .build());
+                .valueCurrency(row.getStringCellValue(VALUE_CURRENCY).replace(" ", "").split("/")[1])
+                .commissionCurrency(row.getStringCellValue(COMMISSION_CURRENCY))
+                .build();
     }
 
     enum TransactionTableHeader implements TableColumnDescription {

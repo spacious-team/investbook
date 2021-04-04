@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 
 import javax.validation.constraints.NotNull;
@@ -28,6 +29,7 @@ import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_R
 import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_USD;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class PortfolioPropertyTotalAssetsModel extends PortfolioPropertyModel {
 
     @NotNull

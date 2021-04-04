@@ -23,9 +23,12 @@ import ru.investbook.entity.StockMarketIndexEntity;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface StockMarketIndexRepository extends JpaRepository<StockMarketIndexEntity, LocalDate> {
 
-    List<StockMarketIndexEntity> getByDateBetweenOrderByDate(LocalDate startDate, LocalDate endDate);
+    Optional<StockMarketIndexEntity> findFirstBySp500NotNullOrderByDateDesc();
+
+    List<StockMarketIndexEntity> findByDateBetweenOrderByDate(LocalDate startDate, LocalDate endDate);
 
 }

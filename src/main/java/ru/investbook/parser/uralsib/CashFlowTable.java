@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.springframework.util.StringUtils;
 
@@ -46,10 +45,10 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
     }
 
     @Override
-    protected Collection<EventCashFlow> getRow(Table table, TableRow row) {
-        String action = table.getStringCellValue(row, OPERATION);
+    protected Collection<EventCashFlow> getRow(TableRow row) {
+        String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
-        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
+        String description = row.getStringCellValueOrDefault(DESCRIPTION, "");
         CashFlowType type;
         switch (action) {
             case"ввод дс":
@@ -83,9 +82,9 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
         return singletonList(EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(type)
-                .timestamp(convertToInstant(table.getStringCellValue(row, DATE)))
-                .value(table.getCurrencyCellValue(row, VALUE))
-                .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)))
+                .timestamp(convertToInstant(row.getStringCellValue(DATE)))
+                .value(row.getBigDecimalCellValue(VALUE))
+                .currency(UralsibBrokerReport.convertToCurrency(row.getStringCellValue(CURRENCY)))
                 .description(StringUtils.hasLength(description) ? description : null)
                 .build());
     }

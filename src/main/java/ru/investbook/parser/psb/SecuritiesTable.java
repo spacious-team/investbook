@@ -22,7 +22,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
@@ -46,12 +45,12 @@ public class SecuritiesTable extends AbstractReportTable<Security> {
     }
 
     @Override
-    protected Collection<Security> getRow(Table table, TableRow row) {
+    protected Collection<Security> getRow(TableRow row) {
         return row.rowContains(INVALID_TEXT) ?
                 emptyList() :
                 Collections.singletonList(Security.builder()
-                        .id(table.getStringCellValue(row, ISIN))
-                        .name(table.getStringCellValue(row, NAME))
+                        .id(row.getStringCellValue(ISIN))
+                        .name(row.getStringCellValue(NAME))
                         .build());
     }
 

@@ -19,10 +19,12 @@
 package ru.investbook.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import ru.investbook.entity.ForeignExchangeRateEntity;
 import ru.investbook.entity.ForeignExchangeRateEntityPk;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,5 +37,12 @@ public interface ForeignExchangeRateRepository extends JpaRepository<ForeignExch
     Optional<ForeignExchangeRateEntity> findFirstByPkCurrencyPairOrderByPkDateDesc(String currencyPair);
 
     List<ForeignExchangeRateEntity> findByPkCurrencyPairOrderByPkDateDesc(String currencyPair);
+
+    @Query(value = """
+        SELECT max(t.pk.date), t.pk.currencyPair, t.rate
+            FROM ForeignExchangeRateEntity t
+            GROUP BY t.pk.currencyPair
+    """)
+    Collection<LocalDate> findByMaxPkDateGroupByPkCurrencyPair();
 
 }

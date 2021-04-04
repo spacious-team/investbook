@@ -105,7 +105,7 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
             TableCellAddress address = reportPage.find(REPORT_DATE_MARKER, 0, Integer.MAX_VALUE,
                     (cell, value) -> cell.toLowerCase().contains(value.toString()));
             String[] words = reportPage.getCell(address)
-                    .getStringCellValue()
+                    .getStringValue()
                     .split(" ");
             return convertToInstant(words[words.length - 1])
                     .plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);

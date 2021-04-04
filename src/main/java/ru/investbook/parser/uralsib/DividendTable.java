@@ -24,7 +24,6 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
@@ -47,21 +46,21 @@ public class DividendTable extends PaymentsTable {
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> getRow(Table table, TableRow row) {
-        String action = table.getStringCellValue(row, OPERATION);
+    protected Collection<SecurityEventCashFlow> getRow(TableRow row) {
+        String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
-        String description = table.getStringCellValueOrDefault(row, DESCRIPTION, "");
+        String description = row.getStringCellValueOrDefault(DESCRIPTION, "");
         description = String.valueOf(description).toLowerCase();
         if (!action.equalsIgnoreCase(DIVIDEND_ACTION) || !description.contains("дивиденд")) {
             return emptyList();
         }
 
-        Security security = getSecurity(table, row, CashFlowType.DIVIDEND);
+        Security security = getSecurity(row, CashFlowType.DIVIDEND);
         if (security == null) return emptyList();
-        Instant timestamp = getReport().convertToInstant(table.getStringCellValue(row, DATE));
+        Instant timestamp = getReport().convertToInstant(row.getStringCellValue(DATE));
 
-        BigDecimal tax = getTax(table, row);
-        BigDecimal value = table.getCurrencyCellValue(row, VALUE)
+        BigDecimal tax = getTax(row);
+        BigDecimal value = row.getBigDecimalCellValue(VALUE)
                 .add(tax.abs());
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .security(security.getId())
@@ -70,7 +69,7 @@ public class DividendTable extends PaymentsTable {
                 .eventType(CashFlowType.DIVIDEND)
                 .timestamp(timestamp)
                 .value(value)
-                .currency(UralsibBrokerReport.convertToCurrency(table.getStringCellValue(row, CURRENCY)));
+                .currency(UralsibBrokerReport.convertToCurrency(row.getStringCellValue(CURRENCY)));
 
         Collection<SecurityEventCashFlow> data = new ArrayList<>();
         data.add(builder.build());

@@ -20,7 +20,6 @@ package ru.investbook.parser.psb;
 
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.util.Collection;
@@ -36,9 +35,9 @@ public class DerivativesTable extends AbstractReportTable<Security> {
     }
 
     @Override
-    protected Collection<Security> getRow(Table table, TableRow row) {
+    protected Collection<Security> getRow(TableRow row) {
         return Collections.singletonList(Security.builder()
-                .id(table.getStringCellValue(row, CONTRACT))
+                .id(row.getStringCellValue(CONTRACT))
                 .build());
     }
 }

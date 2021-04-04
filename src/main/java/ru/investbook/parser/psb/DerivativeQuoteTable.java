@@ -20,7 +20,6 @@ package ru.investbook.parser.psb;
 
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
@@ -41,17 +40,17 @@ public class DerivativeQuoteTable extends AbstractReportTable<SecurityQuote> {
     }
 
     @Override
-    protected Collection<SecurityQuote> getRow(Table table, TableRow row) {
-        BigDecimal price = table.getCurrencyCellValue(row, PRICE);
-        BigDecimal tickValue = table.getCurrencyCellValue(row, PRICE_TICK_VALUE);
+    protected Collection<SecurityQuote> getRow(TableRow row) {
+        BigDecimal price = row.getBigDecimalCellValue(PRICE);
+        BigDecimal tickValue = row.getBigDecimalCellValue(PRICE_TICK_VALUE);
         if (price.compareTo(minValue) < 0 || tickValue.compareTo(minValue) < 0) {
             return emptyList();
         }
-        BigDecimal tick = table.getCurrencyCellValue(row, PRICE_TICK);
+        BigDecimal tick = row.getBigDecimalCellValue(PRICE_TICK);
         BigDecimal quote = price.multiply(tick)
                 .divide(tickValue, 2, RoundingMode.HALF_UP);
         return Collections.singletonList(SecurityQuote.builder()
-                .security(table.getStringCellValue(row, CONTRACT))
+                .security(row.getStringCellValue(CONTRACT))
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .price(price)
