@@ -31,7 +31,7 @@ import java.util.stream.Stream;
  * @see <a href="https://www.moex.com/s205">Specifications ticker codes for Futures and Options</a>
  */
 @Component
-public class MoexDerivativeShortnameConvertor {
+public class MoexDerivativeSecidHelper {
 
     private final Map<String, String> shortnamesToSecid = Stream.of(new String[][]{
             {"MX", "MIX"},  // Индекс МосБиржи
@@ -162,6 +162,20 @@ public class MoexDerivativeShortnameConvertor {
         }
     }
 
+    /**
+     * May be false positive.
+     *
+     * @return true for option (and true in rare case for other assets), false for other securities
+     */
+    public boolean isSecidPossibleOption(String moexSecid) {
+        int length = moexSecid.length();
+        return (length == 10) || (length == 11);
+    }
+
+    /**
+     * @param optionSecid option's moex secid in {@code Si65000BC9} or {@code Si65000BC9D} format
+     * @return futures contract secid (for ex. {@code SiH9}) if it can be calculated, empty optional otherwise
+     */
     public Optional<String> getOptionUnderlingFuturesContract(String optionSecid) {
         try {
             String code = optionSecid.substring(0, 2);

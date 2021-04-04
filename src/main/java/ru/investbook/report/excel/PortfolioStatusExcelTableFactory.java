@@ -310,8 +310,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     row.put(GROSS_PROFIT, STOCK_GROSS_PROFIT_FORMULA);
                 } else if (securityType == DERIVATIVE) {
                     // Курсовой доход может устареть из-за обновления котировок с сайта МосБиржи.
-                    // поэтому если есть котировки, считаем их свежими, отображаем вариационную маржу по котировке.
-                    // Если котировок нет, то по записям CashFlowType.DERIVATIVE_PROFIT из БД
+                    // Поэтому если есть котировки, считаем их свежими, отображаем вариационную маржу по котировке.
+                    // Если котировок нет, то считаем доход по записям CashFlowType.DERIVATIVE_PROFIT из БД.
                     if (row.containsKey(LAST_PRICE) && row.containsKey(AVERAGE_PRICE)) {
                         row.put(GROSS_PROFIT, DERIVATIVE_GROSS_PROFIT_FORMULA);
                     } else {

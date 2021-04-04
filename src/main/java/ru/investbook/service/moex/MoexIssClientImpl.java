@@ -76,7 +76,7 @@ public class MoexIssClientImpl implements MoexIssClient {
             "iss.meta=off&" +
             "iss.only=securities&" +
             "securities.columns=SECID,PREVDATE,PREVADMITTEDQUOTE,PREVSETTLEPRICE,PREVPRICE,ACCRUEDINT,LOTSIZE,LOTVALUE,MINSTEP,STEPPRICE";
-    private final MoexDerivativeShortnameConvertor moexDerivativeShortnameConvertor;
+    private final MoexDerivativeSecidHelper moexDerivativeSecidHelper;
     private final RestTemplate restTemplate;
     private int currentYear = getCurrentYear();
     private long fastCoarseDayCounter = getFastCoarseDayCounter();
@@ -86,7 +86,7 @@ public class MoexIssClientImpl implements MoexIssClient {
         SecurityType securityType = getSecurityType(isinOrContractName);
         if (securityType == DERIVATIVE) {
             // Moex couldn't find futures contract (too many records). Try evaluate contract name
-            Optional<String> secid = moexDerivativeShortnameConvertor.getFuturesContractSecidIfCan(isinOrContractName);
+            Optional<String> secid = moexDerivativeSecidHelper.getFuturesContractSecidIfCan(isinOrContractName);
             if (secid.isPresent()) {
                 return secid;
             }
@@ -122,12 +122,12 @@ public class MoexIssClientImpl implements MoexIssClient {
                 .flatMap(_quote -> _quote.stream()
                         .findAny()
                         .flatMap(MoexSecurityQuoteHelper::parse));
-        if (quote.isPresent() && isThisPossibleOption(moexSecId)) {
+        if (quote.isPresent() && moexDerivativeSecidHelper.isSecidPossibleOption(moexSecId)) {
             // Котировка опциона не содержит цену SecurityQuote.price,
             // т.к. ИСС МосБиржи, определяя MINSTEP, не сообщает STEPPRICE.
             // STEPPRICE нужно получить из базового актива (фьючерса)
-            return moexDerivativeShortnameConvertor.getOptionUnderlingFuturesContract(moexSecId)
-                    .filter(moexDerivativeShortnameConvertor::isFutures)
+            return moexDerivativeSecidHelper.getOptionUnderlingFuturesContract(moexSecId)
+                    .filter(moexDerivativeSecidHelper::isFutures)
                     .flatMap(underlyingSecid -> getMarket(underlyingSecid)
                             .flatMap(underlyingMarket -> getQuote(underlyingSecid, underlyingMarket)))
                     .map(futuresContract -> futuresContract.getPrice()
@@ -139,16 +139,6 @@ public class MoexIssClientImpl implements MoexIssClient {
                     .or(() -> quote); // не удалось вычислить, возвращаем без SecurityQuote.price
         }
         return quote;
-    }
-
-    /**
-     * May be false positive.
-     *
-     * @return true for option
-     */
-    private static boolean isThisPossibleOption(String moexSecid) {
-        int length = moexSecid.length();
-        return (length == 10) || (length == 11);
     }
 
     public boolean isDerivativeAndExpired(String shortnameOrSecid) {
