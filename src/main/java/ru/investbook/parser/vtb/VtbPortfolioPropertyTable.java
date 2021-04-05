@@ -24,6 +24,7 @@ import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.InitializableReportTable;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 
 import static java.util.Collections.emptyList;
@@ -45,11 +46,17 @@ public class VtbPortfolioPropertyTable extends InitializableReportTable<Portfoli
                     .portfolio(getReport().getPortfolio())
                     .timestamp(getReport().getReportEndDateTime())
                     .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
-                    .value(getReport().getReportPage().getNextColumnValue(TOTAL_ASSETS).toString())
+                    .value(getBigDecimalValue().toString())
                     .build());
         } catch (Exception e) {
             log.debug("Не удалось распарсить свойство '{}' из {}", TOTAL_ASSETS, getReport().getPath());
             return emptyList();
         }
+    }
+
+    private BigDecimal getBigDecimalValue() {
+            Object value = getReport().getReportPage().getNextColumnValue(TOTAL_ASSETS);
+            return BigDecimal.valueOf(
+                    Double.parseDouble(value.toString()));
     }
 }

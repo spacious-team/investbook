@@ -92,11 +92,20 @@ public class HomePageController {
                         portfolio, PortfolioPropertyType.TOTAL_ASSETS_RUB.name())) // TODO sum with TOTAL_ASSETS_USD
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(PortfolioPropertyEntity::getValue)
-                .map(Double::parseDouble)
-                .map(BigDecimal::valueOf)
+                .map(HomePageController::parseTotalAssetsIfCan)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+    }
+
+    private static BigDecimal parseTotalAssetsIfCan(PortfolioPropertyEntity entity) {
+        try {
+            return BigDecimal.valueOf(
+                    Double.parseDouble(
+                            entity.getValue()));
+        } catch (Exception e) {
+            log.error("Значение должно содержать число, сохранено {}", entity);
+            return BigDecimal.ZERO;
+        }
     }
 
     private BigDecimal getTotalCash(Collection<String> portfolios) {
