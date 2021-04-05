@@ -29,7 +29,6 @@ import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
-import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.PortfolioRepository;
 
 import java.util.Optional;
@@ -48,8 +47,7 @@ public class SecuritiesDepositAndWithdrawalExcelTableView extends ExcelTableView
 
     public SecuritiesDepositAndWithdrawalExcelTableView(PortfolioRepository portfolioRepository,
                                                         SecuritiesDepositAndWithdrawalExcelTableFactory tableFactory,
-                                                        PortfolioConverter portfolioConverter,
-                                                        PortfolioPropertyRepository portfolioPropertyRepository) {
+                                                        PortfolioConverter portfolioConverter) {
         super(portfolioRepository, tableFactory, portfolioConverter);
     }
 
