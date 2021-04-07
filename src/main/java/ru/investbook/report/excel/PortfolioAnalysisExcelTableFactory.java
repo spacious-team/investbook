@@ -351,7 +351,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         // date-time -> summed values
         LinkedHashMap<Instant, BigDecimal> allPortfolioSummedValues = new LinkedHashMap<>();
         for (PortfolioProperty property : assets) {
-            lastTotalAssets.put(property.getPortfolio(), BigDecimal.valueOf(parseDouble(property.getValue())));
+            lastTotalAssets.put(property.getPortfolio(), getAssets(property));
             if (lastTotalAssets.size() >= portfolioCount) {
                 BigDecimal sum = lastTotalAssets.values()
                         .stream()
@@ -360,6 +360,15 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
             }
         }
         return allPortfolioSummedValues;
+    }
+
+    private BigDecimal getAssets(PortfolioProperty property) {
+        try {
+            return BigDecimal.valueOf(parseDouble(property.getValue()));
+        } catch (Exception e) {
+            log.error("В поле актив ожидается число: {}", property);
+            return BigDecimal.ZERO;
+        }
     }
 
     /**
