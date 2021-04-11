@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import ru.investbook.report.ViewFilter;
 import ru.investbook.report.excel.ExcelView;
 import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.web.model.ViewFilterModel;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;

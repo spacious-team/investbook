@@ -27,6 +27,9 @@
 <body>
     <h1 th:text="${title ?: 'Успешно'}"></h1>
     <p th:if="${message != null}" th:text="${message}"></p>
-    <p><a href="#" onclick="window.history.back()">[назад]</a></p>
+    <p>
+        <a href="#" onclick="window.history.back()">[назад]</a>
+        <a href="/">[на главную]</a>
+    </p>
 </body>
 </html>
