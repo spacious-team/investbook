@@ -16,24 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.web;
+package ru.investbook.parser;
 
-import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
+import java.io.InputStream;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
+public interface BrokerReportParserService {
 
-@Data
-public class ViewFilterModel {
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate fromDate = LocalDate.of(1997, 9, 22);
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate toDate = LocalDate.now();
-
-    private Collection<String> portfolios = Collections.emptySet();
-
+    /**
+     * Parse and backups report.
+     * Method does not close input stream.
+     *
+     * @param inputStream      file content
+     * @param fileName         file name
+     * @param providedByBroker broker what generates report, may be null if unknown
+     * @throws RuntimeException if report has broken format or parser not found
+     */
+    void parseReport(InputStream inputStream, String fileName, String providedByBroker);
 }
