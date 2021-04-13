@@ -186,14 +186,14 @@ public class MoexDerivativeSecidHelper {
                 int monthPos = Character.isDigit(optionSecid.charAt(optionSecid.length() - 1)) ?
                         optionSecid.length() - 2 :
                         optionSecid.length() - 3;
-                Character optionMonth = optionSecid.charAt(monthPos);
+                char optionMonth = optionSecid.charAt(monthPos);
                 int month = optionMonth - callOptionMonthCodes[0];
                 if (month < 0 || month > 11) {
                     month = optionMonth - putOptionMonthCodes[0];
                 }
                 if (month >= 0 && month <= 11) {
-                    return Optional.of(code + futuresContractMonthCodes[month] +
-                            parseInt(Character.toString(optionSecid.charAt(monthPos + 1))));
+                    char optionYear = optionSecid.charAt(monthPos + 1);
+                    return Optional.of(code + futuresContractMonthCodes[month] + parseInt(Character.toString(optionYear)));
                 }
             }
         } catch (Exception ignore) {
