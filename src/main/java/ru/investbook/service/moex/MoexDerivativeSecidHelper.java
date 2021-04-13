@@ -182,7 +182,7 @@ public class MoexDerivativeSecidHelper {
     public Optional<String> getOptionUnderlingFuturesContract(String optionSecid) {
         try {
             String code = optionSecid.substring(0, 2);
-            if (shortnamesToSecid.containsKey(code)) {
+            if (shortnamesToSecid.containsValue(code)) {
                 int monthPos = Character.isDigit(optionSecid.charAt(optionSecid.length() - 1)) ?
                         optionSecid.length() - 2 :
                         optionSecid.length() - 3;
