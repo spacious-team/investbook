@@ -25,6 +25,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.Integer.parseInt;
+
 /**
  * Converts derivative short names (for ex. Si-6.21) to secid (a.k.a ticker codes, for ex SiM1)
  *
@@ -137,8 +139,8 @@ public class MoexDerivativeSecidHelper {
             if (dotPosition == -1) {
                 return Optional.empty();
             }
-            int month = Integer.parseInt(contractShortName.substring(dashPosition + 1, dotPosition));
-            int year = Integer.parseInt(contractShortName.substring(dotPosition + 1));
+            int month = parseInt(contractShortName.substring(dashPosition + 1, dotPosition));
+            int year = parseInt(contractShortName.substring(dotPosition + 1));
             return Optional.ofNullable(shortnamesToSecid.get(contractShortName.substring(0, dashPosition)))
                     .map(prefix -> prefix + futuresContractMonthCodes[month - 1] + (year % 10));
         } catch (Exception e) {
@@ -189,11 +191,10 @@ public class MoexDerivativeSecidHelper {
                 if (month < 0 || month > 11) {
                     month = optionMonth - putOptionMonthCodes[0];
                 }
-                if (month < 0 || month > 11) {
-                    return Optional.empty();
+                if (month >= 0 && month <= 11) {
+                    return Optional.of(code + futuresContractMonthCodes[month] +
+                            parseInt(Character.toString(optionSecid.charAt(monthPos + 1))));
                 }
-                int year = Integer.parseInt(Character.toString(optionSecid.charAt(monthPos + 1)));
-                return Optional.of(code + futuresContractMonthCodes[month] + year);
             }
         } catch (Exception ignore) {
         }
