@@ -169,18 +169,22 @@ public class MoexDerivativeSecidHelper {
      */
     public boolean isSecidPossibleOption(String moexSecid) {
         int length = moexSecid.length();
-        return (length == 10) || (length == 11);
+        return (length >= 10) && (length <= 12);
     }
 
     /**
-     * @param optionSecid option's moex secid in {@code Si65000BC9} or {@code Si65000BC9D} format
+     * @param optionSecid option's moex secid in {@code Si65000BC9}, {@code Si65000BC9D}, {@code RI180000BD1} or
+     *                   {@code RI180000BD1A} format
      * @return futures contract secid (for ex. {@code SiH9}) if it can be calculated, empty optional otherwise
      */
     public Optional<String> getOptionUnderlingFuturesContract(String optionSecid) {
         try {
             String code = optionSecid.substring(0, 2);
             if (shortnamesToSecid.containsKey(code)) {
-                Character optionMonth = optionSecid.charAt(8);
+                int monthPos = Character.isDigit(optionSecid.charAt(optionSecid.length() - 1)) ?
+                        optionSecid.length() - 2 :
+                        optionSecid.length() - 3;
+                Character optionMonth = optionSecid.charAt(monthPos);
                 int month = optionMonth - callOptionMonthCodes[0];
                 if (month < 0 || month > 11) {
                     month = optionMonth - putOptionMonthCodes[0];
@@ -188,12 +192,7 @@ public class MoexDerivativeSecidHelper {
                 if (month < 0 || month > 11) {
                     return Optional.empty();
                 }
-                int year;
-                try {
-                    year = Integer.parseInt(optionSecid.substring(optionSecid.length() - 1));
-                } catch (Exception e) {
-                    year = Integer.parseInt(optionSecid.substring(optionSecid.length() - 2));
-                }
+                int year = Integer.parseInt(Character.toString(optionSecid.charAt(monthPos + 1)));
                 return Optional.of(code + futuresContractMonthCodes[month] + year);
             }
         } catch (Exception ignore) {
