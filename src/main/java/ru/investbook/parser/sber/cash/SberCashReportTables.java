@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.psb.foreignmarket;
+package ru.investbook.parser.sber.cash;
 
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
@@ -25,39 +25,39 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTables;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.PortfolioCash;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 
-public class PsbForeignMarketReportTables extends AbstractReportTables<PsbBrokerForeignMarketReport> {
+public class SberCashReportTables extends AbstractReportTables<BrokerReport> {
 
-
-    protected PsbForeignMarketReportTables(PsbBrokerForeignMarketReport report) {
+    protected SberCashReportTables(BrokerReport report) {
         super(report);
     }
 
     @Override
     public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
-        return new ForeignExchangePortfolioPropertyTable(report);
+        return emptyTable();
     }
 
     @Override
     public ReportTable<PortfolioCash> getCashTable() {
-        return new ForeignExchangeCashTable(report);
+        return emptyTable();
     }
 
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
-        return new ForeignExchangeCashFlowTable(report);
+        return emptyTable();
     }
-    
+
     @Override
     public ReportTable<Security> getSecuritiesTable() {
         return emptyTable();
     }
-    
+
     @Override
     public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
         return emptyTable();
@@ -70,19 +70,19 @@ public class PsbForeignMarketReportTables extends AbstractReportTables<PsbBroker
 
     @Override
     public ReportTable<ForeignExchangeTransaction> getForeignExchangeTransactionTable() {
-        return new ForeignExchangeTransactionTable(report);
+        return emptyTable();
     }
 
     @Override
     public ReportTable<SecurityEventCashFlow> getCouponAmortizationRedemptionTable() {
         return emptyTable();
     }
-    
+
     @Override
     public ReportTable<SecurityEventCashFlow> getDividendTable() {
         return emptyTable();
     }
-    
+
     @Override
     public ReportTable<SecurityEventCashFlow> getDerivativeCashFlowTable() {
         return emptyTable();
@@ -95,6 +95,6 @@ public class PsbForeignMarketReportTables extends AbstractReportTables<PsbBroker
 
     @Override
     public ReportTable<ForeignExchangeRate> getForeignExchangeRateTable() {
-        return new ForeignExchangeRateTable(report);
+        return emptyTable();
     }
 }

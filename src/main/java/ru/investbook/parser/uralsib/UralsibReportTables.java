@@ -23,10 +23,10 @@ import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.report_parser.api.AbstractReportTables;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
-import org.spacious_team.broker.report_parser.api.ReportTables;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.broker.report_parser.api.WrappingReportTable;
 import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
@@ -36,9 +36,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class UralsibReportTables implements ReportTables {
-    @Getter
-    private final UralsibBrokerReport report;
+public class UralsibReportTables extends AbstractReportTables<UralsibBrokerReport> {
+
     @Getter
     private final CashTable cashTable;
     private final SecuritiesTable portfolioSecuritiesTable;
@@ -56,7 +55,7 @@ public class UralsibReportTables implements ReportTables {
     private final ReportTable<SecurityQuote> securityQuoteTable;
 
     public UralsibReportTables(UralsibBrokerReport report, ForeignExchangeRateService foreignExchangeRateService) {
-        this.report = report;
+        super(report);
         AssetsTable securityAssetsTable = new AssetsTable(report);
         this.cashTable = new CashTable(report);
         this.foreignExchangeRateTable = new ForeignExchangeRateTable(report, foreignExchangeRateService);
@@ -81,7 +80,7 @@ public class UralsibReportTables implements ReportTables {
         data.addAll(dividendTable.getEventCashFlows());
         return new WrappingReportTable<>(report, data);
     }
-    
+
     @Override
     public ReportTable<Security> getSecuritiesTable() {
         return new WrappingReportTable<>(report, portfolioSecuritiesTable.getData()
@@ -101,7 +100,7 @@ public class UralsibReportTables implements ReportTables {
     public ReportTable<ForeignExchangeTransaction> getForeignExchangeTransactionTable() {
         return new ForeignExchangeTransactionTable(report);
     }
-    
+
     @Override
     public ReportTable<SecurityEventCashFlow> getDerivativeCashFlowTable() {
         return new DerivativeCashFlowTable(report);
