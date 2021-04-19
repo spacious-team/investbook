@@ -67,7 +67,7 @@ public class SecurityTransactionTable extends AbstractReportTable<SecurityTransa
         String marketCommissionCurrency = getCurrency(row, MARKET_COMMISSION_CURRENCY, marketCommission, valueCurrency);
         BigDecimal brokerCommission = row.getBigDecimalCellValue(BROKER_COMMISSION).abs();
         String brokerCommissionCurrency = getCurrency(row, BROKER_COMMISSION_CURRENCY, brokerCommission, valueCurrency);
-        Instant timestamp = getReport().convertToInstant(row.getStringCellValue(DATE_TIME));
+        Instant timestamp = convertToInstant(row.getStringCellValue(DATE_TIME));
 
         BigDecimal commission;
         String commissionCurrency;

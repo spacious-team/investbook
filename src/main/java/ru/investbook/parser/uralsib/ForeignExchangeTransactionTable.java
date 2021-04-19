@@ -79,7 +79,7 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
                 .negate();
 
         return Collections.singletonList(ForeignExchangeTransaction.builder()
-                .timestamp(getReport().convertToInstant(row.getStringCellValue(DATE_TIME)))
+                .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .transactionId(transactionId)
                 .portfolio(getReport().getPortfolio())
                 .security(instrument)

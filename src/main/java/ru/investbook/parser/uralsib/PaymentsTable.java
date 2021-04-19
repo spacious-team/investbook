@@ -91,7 +91,7 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
         } catch (Exception e) {
             EventCashFlow.EventCashFlowBuilder builder = EventCashFlow.builder()
                     .portfolio(getReport().getPortfolio())
-                    .timestamp(getReport().convertToInstant(row.getStringCellValue(DATE)))
+                    .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                     .currency(convertToCurrency(row.getStringCellValue(CURRENCY)))
                     .description(row.getStringCellValueOrDefault(DESCRIPTION, null));
             BigDecimal tax = getTax(row);

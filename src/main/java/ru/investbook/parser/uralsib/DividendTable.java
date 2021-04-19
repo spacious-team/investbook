@@ -57,7 +57,7 @@ public class DividendTable extends PaymentsTable {
 
         Security security = getSecurity(row, CashFlowType.DIVIDEND);
         if (security == null) return emptyList();
-        Instant timestamp = getReport().convertToInstant(row.getStringCellValue(DATE));
+        Instant timestamp = convertToInstant(row.getStringCellValue(DATE));
 
         BigDecimal tax = getTax(row);
         BigDecimal value = row.getBigDecimalCellValue(VALUE)
