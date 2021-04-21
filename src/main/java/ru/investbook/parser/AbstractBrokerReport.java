@@ -42,7 +42,6 @@ public abstract class AbstractBrokerReport implements SingleBrokerReport {
     @Setter(AccessLevel.PROTECTED)
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
-    @Getter
     @Setter(AccessLevel.PROTECTED)
     private Path path;
     @Getter

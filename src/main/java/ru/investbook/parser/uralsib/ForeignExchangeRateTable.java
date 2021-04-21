@@ -77,7 +77,7 @@ public class ForeignExchangeRateTable extends SingleInitializableReportTable<For
             }
             return exchangeRates;
         } catch (Exception e) {
-            log.debug("Не могу найти обменный курс в файле {}", getReport().getPath().getFileName(), e);
+            log.debug("Не могу найти обменный курс в отчете {}", getReport(), e);
             return emptyList();
         }
     }

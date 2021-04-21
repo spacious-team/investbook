@@ -49,7 +49,7 @@ public class VtbPortfolioPropertyTable extends SingleInitializableReportTable<Po
                     .value(getBigDecimalValue().toString())
                     .build());
         } catch (Exception e) {
-            log.debug("Не удалось распарсить свойство '{}' из {}", TOTAL_ASSETS, getReport().getPath());
+            log.debug("Не удалось распарсить свойство '{}' из отчета {}", TOTAL_ASSETS, getReport());
             return emptyList();
         }
     }

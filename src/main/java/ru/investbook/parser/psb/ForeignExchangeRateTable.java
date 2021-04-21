@@ -63,7 +63,7 @@ public class ForeignExchangeRateTable extends SingleInitializableReportTable<For
             rates.addAll(createExchangeRateProperty(row, CHF, CurrencyPair.CHFRUB));
             return rates;
         } catch (Exception e) {
-            log.info("Ошибка поиска стоимости активов или обменного курса в файле {}", getReport().getPath().getFileName(), e);
+            log.info("Ошибка поиска стоимости активов или обменного курса в отчете {}", getReport(), e);
             return emptyList();
         }
     }

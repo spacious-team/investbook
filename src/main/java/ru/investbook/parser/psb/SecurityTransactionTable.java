@@ -58,7 +58,7 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
         return getReport().getReportPage()
                 .create(tableName, TABLE_END_TEXT, TransactionTableHeader.class)
                 .excludeTotalRow()
-                .getData(getReport().getPath(), this::getTransaction);
+                .getData(getReport(), this::getTransaction);
     }
 
     private SecurityTransaction getTransaction(TableRow row) {

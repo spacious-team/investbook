@@ -81,7 +81,7 @@ public class AssetsTable extends SingleInitializableReportTable<PortfolioPropert
                     .value(row.getBigDecimalCellValue(RUB).toString())
                     .build());
         } catch (Exception e) {
-            log.info("Не могу распарсить таблицу '{}' в файле {}", ASSETS_TABLE, getReport().getPath().getFileName(), e);
+            log.info("Не могу распарсить таблицу '{}' из отчета {}", ASSETS_TABLE, getReport(), e);
             return emptyList();
         }
     }

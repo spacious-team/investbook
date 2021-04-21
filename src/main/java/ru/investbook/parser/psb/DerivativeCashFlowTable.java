@@ -63,7 +63,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
         contractCount = getReport().getReportPage()
                 .create(TABLE2_NAME, TABLE_END_TEXT, ContractCountTableHeader.class)
                 .excludeTotalRow()
-                .getData(getReport().getPath(), DerivativeCashFlowTable::getCount)
+                .getData(getReport(), DerivativeCashFlowTable::getCount)
                 .stream()
                 .filter(e -> e.getValue() != 0)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

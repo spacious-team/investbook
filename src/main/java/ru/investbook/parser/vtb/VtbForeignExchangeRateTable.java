@@ -76,7 +76,7 @@ public class VtbForeignExchangeRateTable extends SingleInitializableReportTable<
                     .rate(rate)
                     .build());
         } catch (Exception e) {
-            log.debug("Не удалось распарсить '{}' из {}", rowHeader, getReport().getPath());
+            log.debug("Не удалось распарсить '{}' из отчета {}", rowHeader, getReport());
             return emptyList();
         }
     }

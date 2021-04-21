@@ -72,7 +72,7 @@ public class PortfolioPropertyTable extends SingleInitializableReportTable<Portf
                     .value(assets.toString())
                     .build());
         } catch (Exception e) {
-            log.warn("Не могу получить активы из файла {}", getReport().getPath().getFileName(), e);
+            log.warn("Не могу получить активы из отчета {}", getReport(), e);
             return emptyList();
         }
     }

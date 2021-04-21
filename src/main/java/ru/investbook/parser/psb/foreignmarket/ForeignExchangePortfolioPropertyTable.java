@@ -71,7 +71,7 @@ public class ForeignExchangePortfolioPropertyTable extends PortfolioPropertyTabl
                     .timestamp(getReport().getReportEndDateTime())
                     .build());
         } catch (Exception e) {
-            log.info("Не могу получить стоимость активов из отчета {}", getReport().getPath().getFileName());
+            log.info("Не могу получить стоимость активов из отчета {}", getReport());
         }
         return emptyList();
     }

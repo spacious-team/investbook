@@ -20,7 +20,6 @@ package ru.investbook.parser;
 
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 
-import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
 
@@ -28,8 +27,6 @@ import java.time.ZoneId;
  * Broker report containing single portfolio information
  */
 public interface SingleBrokerReport extends BrokerReport {
-
-    Path getPath();
 
     String getPortfolio();
 
