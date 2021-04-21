@@ -33,4 +33,6 @@ public interface SingleBrokerReport extends BrokerReport {
     Instant getReportEndDateTime();
 
     ZoneId getReportZoneId();
+
+    Instant convertToInstant(String value);
 }

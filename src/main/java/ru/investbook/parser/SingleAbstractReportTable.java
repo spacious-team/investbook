@@ -22,6 +22,8 @@ import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 
+import java.time.Instant;
+
 /**
  * Report table reading information from {@link SingleBrokerReport}
  */
@@ -51,5 +53,9 @@ public abstract class SingleAbstractReportTable<T>  extends AbstractReportTable<
     @Override
     public SingleBrokerReport getReport() {
         return (SingleBrokerReport) super.getReport();
+    }
+
+    protected Instant convertToInstant(String dateTime) {
+        return getReport().convertToInstant(dateTime);
     }
 }
