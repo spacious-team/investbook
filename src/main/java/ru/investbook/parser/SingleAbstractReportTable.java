@@ -19,6 +19,7 @@
 package ru.investbook.parser;
 
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 
 /**
@@ -34,6 +35,17 @@ public abstract class SingleAbstractReportTable<T>  extends AbstractReportTable<
     protected SingleAbstractReportTable(SingleBrokerReport report, String tableName, String tableFooter,
                                         Class<? extends TableColumnDescription> headerDescription, int headersRowCount) {
         super(report, tableName, tableFooter, headerDescription, headersRowCount);
+    }
+
+    public SingleAbstractReportTable(BrokerReport report, String providedTableName, String namelessTableFirstLine,
+                                     String tableFooter, Class<? extends TableColumnDescription> headerDescription) {
+        super(report, providedTableName, namelessTableFirstLine, tableFooter, headerDescription);
+    }
+
+    public SingleAbstractReportTable(BrokerReport report, String providedTableName, String namelessTableFirstLine,
+                                     String tableFooter, Class<? extends TableColumnDescription> headerDescription,
+                                     int headersRowCount) {
+        super(report, providedTableName, namelessTableFirstLine, tableFooter, headerDescription, headersRowCount);
     }
 
     @Override
