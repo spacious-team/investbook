@@ -19,8 +19,8 @@
 package ru.investbook.parser.uralsib;
 
 import org.spacious_team.broker.pojo.SecurityQuote;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -31,7 +31,7 @@ import java.util.List;
 import static java.math.RoundingMode.HALF_UP;
 import static ru.investbook.parser.uralsib.SecuritiesTable.SecuritiesTableHeader.*;
 
-public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
+public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote> {
 
     private final BigDecimal minValue = BigDecimal.valueOf(0.01);
     private final ForeignExchangeRateTable foreignExchangeRateTable;

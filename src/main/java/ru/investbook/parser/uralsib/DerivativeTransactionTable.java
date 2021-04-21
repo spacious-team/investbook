@@ -21,7 +21,6 @@ package ru.investbook.parser.uralsib;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
@@ -29,6 +28,7 @@ import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -38,7 +38,7 @@ import static java.util.Collections.emptyList;
 import static ru.investbook.parser.uralsib.DerivativeTransactionTable.FortsTableHeader.*;
 
 @Slf4j
-public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTransaction> {
+public class DerivativeTransactionTable extends SingleAbstractReportTable<DerivativeTransaction> {
     private static final String TABLE_NAME = "СДЕЛКИ С ФЬЮЧЕРСАМИ И ОПЦИОНАМИ";
     private static final String TABLE_END_TEXT = PaymentsTable.TABLE_NAME;
     private boolean expirationTableReached = false;

@@ -20,7 +20,6 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
 import org.spacious_team.table_wrapper.api.RelativePositionTableColumn;
@@ -28,6 +27,7 @@ import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -39,7 +39,7 @@ import static java.util.Collections.emptyList;
 import static ru.investbook.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.*;
 
 @Slf4j
-public class SecurityTransactionTable extends AbstractReportTable<SecurityTransaction> {
+public class SecurityTransactionTable extends SingleAbstractReportTable<SecurityTransaction> {
     private static final String TABLE_NAME = "Биржевые сделки с ценными бумагами в отчетном периоде";
     private final BigDecimal minValue = BigDecimal.valueOf(0.01);
     private final ForeignExchangeRateTable foreignExchangeRateTable;

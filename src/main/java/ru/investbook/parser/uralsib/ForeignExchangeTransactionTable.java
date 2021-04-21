@@ -20,12 +20,12 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -35,7 +35,7 @@ import static java.util.Collections.emptyList;
 import static ru.investbook.parser.uralsib.ForeignExchangeTransactionTable.FxTransactionTableHeader.*;
 
 @Slf4j
-public class ForeignExchangeTransactionTable extends AbstractReportTable<ForeignExchangeTransaction> {
+public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<ForeignExchangeTransaction> {
     private static final String TABLE_NAME = "Биржевые валютные сделки, совершенные в отчетном периоде";
     private static final String CONTRACT_PREFIX = "Инструмент:";
     private String instrument = null;

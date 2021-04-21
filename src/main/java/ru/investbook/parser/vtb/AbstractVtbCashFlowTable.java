@@ -18,7 +18,7 @@
 
 package ru.investbook.parser.vtb;
 
-import org.spacious_team.broker.report_parser.api.InitializableReportTable;
+import ru.investbook.parser.SingleInitializableReportTable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 import static java.util.Collections.unmodifiableCollection;
 import static org.spacious_team.table_wrapper.api.AbstractTable.addWithEqualityChecker;
 
-public abstract class AbstractVtbCashFlowTable<RowType> extends InitializableReportTable<RowType> {
+public abstract class AbstractVtbCashFlowTable<RowType> extends SingleInitializableReportTable<RowType> {
 
     private final Collection<CashFlowEventTable.CashFlowEvent> events;
     private final BiPredicate<RowType, RowType> equalityChecker;

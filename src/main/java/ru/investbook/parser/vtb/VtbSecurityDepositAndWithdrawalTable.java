@@ -18,10 +18,10 @@
 
 package ru.investbook.parser.vtb;
 
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
+import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -33,13 +33,13 @@ import java.util.Optional;
 
 import static ru.investbook.parser.vtb.VtbSecurityFlowTable.VtbSecurityFlowTableHeader.*;
 
-public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<SecurityTransaction> {
+public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportTable<SecurityTransaction> {
 
     static final String TABLE_NAME = "Движение ценных бумаг";
 
     private final Map<String, Integer> bondRedemptions = new HashMap<>(1);
 
-    protected VtbSecurityDepositAndWithdrawalTable(BrokerReport report) {
+    protected VtbSecurityDepositAndWithdrawalTable(SingleBrokerReport report) {
         super(report, TABLE_NAME, null, VtbSecurityFlowTable.VtbSecurityFlowTableHeader.class);
     }
 

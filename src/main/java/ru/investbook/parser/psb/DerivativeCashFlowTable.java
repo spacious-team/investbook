@@ -23,12 +23,12 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.util.AbstractMap;
@@ -42,7 +42,7 @@ import static java.util.Collections.singletonList;
 import static ru.investbook.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.*;
 
 @Slf4j
-public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCashFlow> {
+public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityEventCashFlow> {
 
     private static final String TABLE1_NAME = "Прочие операции";
     static final String TABLE2_NAME = "Движение стандартных контрактов";

@@ -24,13 +24,14 @@ import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
-import org.spacious_team.broker.report_parser.api.PortfolioCash;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.ReportTables;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
@@ -44,9 +45,13 @@ public class ReportParserService {
 
     public void parse(ReportTables reportTables) {
         try {
-            boolean isAdded = api.addPortfolio(Portfolio.builder()
-                    .id(reportTables.getReport().getPortfolio())
-                    .build());
+            boolean isAdded = true;
+            BrokerReport report = reportTables.getReport();
+            if (report instanceof SingleBrokerReport) {
+                isAdded = api.addPortfolio(Portfolio.builder()
+                        .id(((SingleBrokerReport) report).getPortfolio())
+                        .build());
+            }
             if (isAdded) {
                 ReportTable<PortfolioCash> portfolioCashTable = reportTables.getCashTable();
                 ReportTable<PortfolioProperty> portfolioPropertyTable = reportTables.getPortfolioPropertyTable();
@@ -87,7 +92,7 @@ public class ReportParserService {
                 foreignExchangeRateReportTable.getData().forEach(api::addForeignExchangeRate);
             }
         } catch (Exception e) {
-            log.warn("Не могу распарсить отчет {}", reportTables.getReport().getPath(), e);
+            log.warn("Не могу распарсить отчет {}", reportTables.getReport(), e);
             throw new RuntimeException(e);
         }
     }

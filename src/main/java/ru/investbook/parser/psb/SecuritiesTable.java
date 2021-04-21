@@ -21,11 +21,11 @@ package ru.investbook.parser.psb;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -35,7 +35,7 @@ import static ru.investbook.parser.psb.SecuritiesTable.SecuritiesTableHeader.ISI
 import static ru.investbook.parser.psb.SecuritiesTable.SecuritiesTableHeader.NAME;
 
 @Slf4j
-public class SecuritiesTable extends AbstractReportTable<Security> {
+public class SecuritiesTable extends SingleAbstractReportTable<Security> {
     static final String TABLE_NAME = "Портфель на конец дня на биржевом рынке";
     static final String TABLE_END_TEXT = "* цена последней сделки (на организованных торгах)";
     static final String INVALID_TEXT = "Итого в валюте цены";

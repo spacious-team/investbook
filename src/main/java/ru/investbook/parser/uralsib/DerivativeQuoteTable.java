@@ -20,11 +20,11 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import org.spacious_team.broker.pojo.SecurityQuote;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -34,7 +34,7 @@ import static java.util.Collections.emptyList;
 import static ru.investbook.parser.uralsib.DerivativeQuoteTable.ContractCountTableHeader.CONTRACT;
 import static ru.investbook.parser.uralsib.DerivativeQuoteTable.ContractCountTableHeader.QUOTE;
 
-public class DerivativeQuoteTable extends AbstractReportTable<SecurityQuote> {
+public class DerivativeQuoteTable extends SingleAbstractReportTable<SecurityQuote> {
 
     private static final String TABLE_NAME = "Движение стандартных контрактов";
     private static final String TABLE_END_TEXT = "Итого:";

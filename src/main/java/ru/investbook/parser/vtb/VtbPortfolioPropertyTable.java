@@ -21,8 +21,8 @@ package ru.investbook.parser.vtb;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.broker.report_parser.api.InitializableReportTable;
+import ru.investbook.parser.SingleBrokerReport;
+import ru.investbook.parser.SingleInitializableReportTable;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -31,11 +31,11 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 
 @Slf4j
-public class VtbPortfolioPropertyTable extends InitializableReportTable<PortfolioProperty> {
+public class VtbPortfolioPropertyTable extends SingleInitializableReportTable<PortfolioProperty> {
 
     private static final String TOTAL_ASSETS = "ОЦЕНКА активов (по курсу ЦБ с учётом незавершенных сделок)";
 
-    public VtbPortfolioPropertyTable(BrokerReport report) {
+    public VtbPortfolioPropertyTable(SingleBrokerReport report) {
         super(report);
     }
 

@@ -21,12 +21,12 @@ package ru.investbook.parser.vtb;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.Security;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
+import ru.investbook.parser.SingleBrokerReport;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -35,12 +35,12 @@ import java.util.Map;
 
 import static ru.investbook.parser.vtb.VtbSecurityFlowTable.VtbSecurityFlowTableHeader.NAME_REGNUMBER_ISIN;
 
-public class VtbSecurityFlowTable extends AbstractReportTable<Security> {
+public class VtbSecurityFlowTable extends SingleAbstractReportTable<Security> {
 
     // security registration number -> isin
     private final Map<String, String> securityRegNumberToIsin = new HashMap<>();
 
-    protected VtbSecurityFlowTable(BrokerReport report) {
+    protected VtbSecurityFlowTable(SingleBrokerReport report) {
         super(report, VtbSecurityDepositAndWithdrawalTable.TABLE_NAME, null, VtbSecurityFlowTableHeader.class);
     }
 

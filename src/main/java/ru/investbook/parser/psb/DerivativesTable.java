@@ -19,15 +19,15 @@
 package ru.investbook.parser.psb;
 
 import org.spacious_team.broker.pojo.Security;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.util.Collection;
 import java.util.Collections;
 
 import static ru.investbook.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.CONTRACT;
 
-public class DerivativesTable extends AbstractReportTable<Security> {
+public class DerivativesTable extends SingleAbstractReportTable<Security> {
 
     public DerivativesTable(PsbBrokerReport report) {
         super(report, DerivativeCashFlowTable.TABLE2_NAME, DerivativeCashFlowTable.TABLE_END_TEXT,

@@ -24,11 +24,11 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
 
 import java.util.Collection;
@@ -37,7 +37,7 @@ import static java.util.Collections.singletonList;
 import static ru.investbook.parser.uralsib.SecuritiesTable.SecuritiesTableHeader.*;
 
 @Slf4j
-public class SecuritiesTable extends AbstractReportTable<ReportSecurityInformation> {
+public class SecuritiesTable extends SingleAbstractReportTable<ReportSecurityInformation> {
     static final String TABLE_NAME = "СОСТОЯНИЕ ПОРТФЕЛЯ ЦЕННЫХ БУМАГ";
     static final String TABLE_END_TEXT = "Итого:";
 

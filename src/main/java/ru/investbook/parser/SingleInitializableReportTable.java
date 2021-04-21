@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,22 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.vtb;
+package ru.investbook.parser;
 
-import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.broker.report_parser.api.ReportTables;
-import org.spacious_team.broker.report_parser.api.ReportTablesFactory;
-import org.springframework.stereotype.Component;
+import org.spacious_team.broker.report_parser.api.InitializableReportTable;
 
-@Component
-public class VtbReportTablesFactory implements ReportTablesFactory {
-    @Override
-    public boolean canCreate(BrokerReport brokerReport) {
-        return (brokerReport instanceof VtbBrokerReport);
+/**
+ * Report table reading information from {@link SingleBrokerReport}
+ */
+public abstract class SingleInitializableReportTable<T>  extends InitializableReportTable<T> {
+
+
+    public SingleInitializableReportTable(SingleBrokerReport report) {
+        super(report);
     }
 
     @Override
-    public ReportTables create(BrokerReport brokerReport) {
-        return new VtbReportTables((VtbBrokerReport) brokerReport);
+    public SingleBrokerReport getReport() {
+        return (SingleBrokerReport) super.getReport();
     }
 }

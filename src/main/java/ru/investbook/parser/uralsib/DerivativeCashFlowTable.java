@@ -21,8 +21,8 @@ package ru.investbook.parser.uralsib;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.util.Collection;
 import java.util.regex.Matcher;
@@ -33,7 +33,7 @@ import static java.util.Collections.singletonList;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
-public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCashFlow> {
+public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityEventCashFlow> {
 
     private final Pattern contractPattern = Pattern.compile(".*\\sвариационной маржи по\\s(.+)$");
 

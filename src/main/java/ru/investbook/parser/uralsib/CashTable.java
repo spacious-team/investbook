@@ -20,12 +20,12 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.PortfolioCash;
+import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.util.Collection;
 
@@ -34,7 +34,7 @@ import static ru.investbook.parser.uralsib.CashTable.CashTableHeader.CURRENCY;
 import static ru.investbook.parser.uralsib.CashTable.CashTableHeader.VALUE;
 
 @Slf4j
-public class CashTable extends AbstractReportTable<PortfolioCash> {
+public class CashTable extends SingleAbstractReportTable<PortfolioCash> {
 
     private static final String TABLE_NAME = "ПОЗИЦИЯ ПО ДЕНЕЖНЫМ СРЕДСТВАМ";
 

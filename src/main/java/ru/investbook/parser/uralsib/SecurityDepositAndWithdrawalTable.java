@@ -19,9 +19,9 @@
 package ru.investbook.parser.uralsib;
 
 import org.spacious_team.broker.pojo.Security;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -33,7 +33,7 @@ import static ru.investbook.parser.uralsib.SecurityRedemptionTable.SecurityFlowT
 /**
  * Ввод и вывод ценных бумаг со счета
  */
-public class SecurityDepositAndWithdrawalTable extends AbstractReportTable<SecurityTransaction> {
+public class SecurityDepositAndWithdrawalTable extends SingleAbstractReportTable<SecurityTransaction> {
     private static final String TABLE_NAME = SecurityRedemptionTable.TABLE_NAME;
     private static final String IN_DESCRIPTION = "ввод цб";
     private static final String OUT_DESCRIPTION = "вывод цб";

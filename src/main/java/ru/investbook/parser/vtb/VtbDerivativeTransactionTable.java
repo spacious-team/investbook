@@ -19,13 +19,13 @@
 package ru.investbook.parser.vtb;
 
 import lombok.Getter;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
+import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -33,11 +33,11 @@ import java.util.Collections;
 
 import static ru.investbook.parser.vtb.VtbDerivativeTransactionTable.VtbDerivativeTransactionTableHeader.*;
 
-public class VtbDerivativeTransactionTable extends AbstractReportTable<DerivativeTransaction> {
+public class VtbDerivativeTransactionTable extends SingleAbstractReportTable<DerivativeTransaction> {
 
     private static final String TABLE_NAME = "Сделки с Производными финансовыми инструментами в отчетном периоде";
 
-    protected VtbDerivativeTransactionTable(BrokerReport report) {
+    protected VtbDerivativeTransactionTable(SingleBrokerReport report) {
         super(report, TABLE_NAME, null, VtbDerivativeTransactionTableHeader.class);
     }
 

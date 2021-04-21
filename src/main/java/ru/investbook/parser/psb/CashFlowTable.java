@@ -22,12 +22,12 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.springframework.util.StringUtils;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -37,7 +37,7 @@ import static java.util.Collections.singletonList;
 import static ru.investbook.parser.psb.CashFlowTable.CashFlowTableHeader.*;
 
 @Slf4j
-public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
+public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
 
     private static final String TABLE_NAME = "Внешнее движение денежных средств в валюте счета";
 

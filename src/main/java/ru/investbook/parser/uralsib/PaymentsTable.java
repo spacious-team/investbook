@@ -24,7 +24,6 @@ import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.AbstractTable;
@@ -33,6 +32,7 @@ import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
 
 import java.math.BigDecimal;
@@ -51,7 +51,7 @@ import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 import static ru.investbook.parser.uralsib.UralsibBrokerReport.convertToCurrency;
 
 @Slf4j
-abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> {
+abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCashFlow> {
 
     static final String TABLE_NAME = "ДВИЖЕНИЕ ДЕНЕЖНЫХ СРЕДСТВ ЗА ОТЧЕТНЫЙ ПЕРИОД";
     protected static final BigDecimal minValue = BigDecimal.valueOf(0.01);
@@ -72,7 +72,7 @@ abstract class PaymentsTable extends AbstractReportTable<SecurityEventCashFlow> 
 
     @Override
     protected Collection<SecurityEventCashFlow> parseTable(Table table) {
-        return table.getDataCollection(getReport().getPath(), this::getRowAndSaveDescription,
+        return table.getDataCollection(getReport(), this::getRowAndSaveDescription,
                 this::checkEquality, this::mergeDuplicates);
     }
 

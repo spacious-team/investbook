@@ -21,9 +21,9 @@ package ru.investbook.parser.psb.foreignmarket;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleBrokerReport;
 import ru.investbook.parser.psb.ForeignExchangeRateTable;
 import ru.investbook.parser.psb.PortfolioPropertyTable;
 
@@ -39,7 +39,7 @@ public class ForeignExchangePortfolioPropertyTable extends PortfolioPropertyTabl
 
     static final String ASSETS = "Остаток средств на счете";
 
-    public ForeignExchangePortfolioPropertyTable(BrokerReport report) {
+    public ForeignExchangePortfolioPropertyTable(SingleBrokerReport report) {
         super(report);
     }
 

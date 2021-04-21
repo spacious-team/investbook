@@ -19,11 +19,11 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.time.Instant;
 import java.util.AbstractMap;
@@ -37,7 +37,7 @@ import static ru.investbook.parser.uralsib.SecurityRedemptionTable.SecurityFlowT
 /**
  * Builds list of (security name; redemption date) tuples
  */
-public class SecurityRedemptionTable extends AbstractReportTable<Map.Entry<String, Instant>> {
+public class SecurityRedemptionTable extends SingleAbstractReportTable<Map.Entry<String, Instant>> {
     static final String TABLE_NAME = "ДВИЖЕНИЕ ЦЕННЫХ БУМАГ ЗА ОТЧЕТНЫЙ ПЕРИОД";
     private static final String REDEMPTION_DESCRIPTION = "Списание ЦБ после погашения";
 

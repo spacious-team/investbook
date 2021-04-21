@@ -21,28 +21,28 @@ package ru.investbook.parser.vtb;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.broker.report_parser.api.PortfolioCash;
+import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
+import ru.investbook.parser.SingleBrokerReport;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
 @Slf4j
-public class VtbCashTable extends AbstractReportTable<PortfolioCash> {
+public class VtbCashTable extends SingleAbstractReportTable<PortfolioCash> {
 
     private static final String TABLE_NAME = "Отчет об остатках денежных средств";
     private static final String TABLE_FOOTER = "Сумма денежных средств";
 
 
-    protected VtbCashTable(BrokerReport report) {
+    protected VtbCashTable(SingleBrokerReport report) {
         super(report, TABLE_NAME, TABLE_FOOTER, VtbCashTableHeader.class, 3);
     }
 

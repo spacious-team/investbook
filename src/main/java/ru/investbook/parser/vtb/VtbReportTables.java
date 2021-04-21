@@ -32,8 +32,9 @@ import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.broker.report_parser.api.WrappingReportTable;
+import ru.investbook.parser.SingleBrokerReport;
 
-public class VtbReportTables extends AbstractReportTables<BrokerReport> {
+public class VtbReportTables extends AbstractReportTables<SingleBrokerReport> {
 
     @Getter
     private final ReportTable<Security> securitiesTable;
@@ -42,7 +43,7 @@ public class VtbReportTables extends AbstractReportTables<BrokerReport> {
     private final CashFlowEventTable cashFlowEventTable;
     private final VtbSecurityDepositAndWithdrawalTable vtbSecurityDepositAndWithdrawalTable;
 
-    public VtbReportTables(BrokerReport report) {
+    public VtbReportTables(SingleBrokerReport report) {
         super(report);
         VtbSecuritiesTable vtbSecuritiesTable = new VtbSecuritiesTable(report);
         VtbSecurityFlowTable vtbSecurityFlowTable = new VtbSecurityFlowTable(report);

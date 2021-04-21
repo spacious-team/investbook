@@ -19,9 +19,9 @@
 package ru.investbook.parser.vtb;
 
 import org.spacious_team.broker.pojo.SecurityQuote;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
+import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -32,9 +32,9 @@ import java.util.Optional;
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
 import static ru.investbook.parser.vtb.VtbSecuritiesTable.VtbSecuritiesTableHeader.*;
 
-public class VtbSecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
+public class VtbSecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote> {
 
-    public VtbSecurityQuoteTable(BrokerReport report) {
+    public VtbSecurityQuoteTable(SingleBrokerReport report) {
         super(report, VtbSecuritiesTable.TABLE_NAME, VtbSecuritiesTable.TABLE_FOOTER,
                 VtbSecuritiesTable.VtbSecuritiesTableHeader.class);
     }

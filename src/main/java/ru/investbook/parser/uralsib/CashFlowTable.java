@@ -21,9 +21,9 @@ package ru.investbook.parser.uralsib;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.springframework.util.StringUtils;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.util.Collection;
 import java.util.regex.Matcher;
@@ -34,7 +34,7 @@ import static java.util.Collections.singletonList;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
-public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
+public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
 
     private final Pattern moneyTransferFromDescriptionPattern = Pattern.compile(".*\\s+с\\s+[^\\s]+\\s+([^\\s.]+)");
     private final Pattern moneyTransferToDescriptionPattern = Pattern.compile(".*\\s+на\\s+[^\\s]+\\s+([^\\s.]+)");

@@ -23,13 +23,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.springframework.util.StringUtils;
+import ru.investbook.parser.SingleAbstractReportTable;
+import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -40,11 +40,11 @@ import java.util.List;
 
 import static ru.investbook.parser.vtb.CashFlowEventTable.VtbCashFlowTableHeader.*;
 
-public class CashFlowEventTable extends AbstractReportTable<CashFlowEventTable.CashFlowEvent> {
+public class CashFlowEventTable extends SingleAbstractReportTable<CashFlowEventTable.CashFlowEvent> {
     private static final String TABLE_NAME = "Движение денежных средств";
     private boolean isSubaccountPaymentsRemoved = false;
 
-    public CashFlowEventTable(BrokerReport report) {
+    public CashFlowEventTable(SingleBrokerReport report) {
         super(report, TABLE_NAME, null, VtbCashFlowTableHeader.class);
     }
 
