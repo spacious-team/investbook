@@ -44,7 +44,7 @@ public class DividendTable extends SingleAbstractReportTable<SecurityEventCashFl
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> getRow(TableRow row) {
+    protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .security(row.getStringCellValue(ISIN))
                 .portfolio(getReport().getPortfolio())

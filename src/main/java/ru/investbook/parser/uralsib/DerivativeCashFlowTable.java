@@ -41,7 +41,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
         super(report, PaymentsTable.TABLE_NAME, "", PaymentsTable.PaymentsTableHeader.class);
     }
 
-    protected Collection<SecurityEventCashFlow> getRow(TableRow row) {
+    protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
         String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         if (!action.equalsIgnoreCase("вариационная маржа")) {

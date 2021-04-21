@@ -45,7 +45,7 @@ public class SecuritiesTable extends SingleAbstractReportTable<Security> {
     }
 
     @Override
-    protected Collection<Security> getRow(TableRow row) {
+    protected Collection<Security> parseRowToCollection(TableRow row) {
         return row.rowContains(INVALID_TEXT) ?
                 emptyList() :
                 Collections.singletonList(Security.builder()

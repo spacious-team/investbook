@@ -46,7 +46,7 @@ public class SecurityRedemptionTable extends SingleAbstractReportTable<Map.Entry
     }
 
     @Override
-    protected Collection<Map.Entry<String, Instant>> getRow(TableRow row) {
+    protected Collection<Map.Entry<String, Instant>> parseRowToCollection(TableRow row) {
         return row.getStringCellValue(OPERATION).equalsIgnoreCase(REDEMPTION_DESCRIPTION) ?
                 singletonList(new AbstractMap.SimpleEntry<>(
                         row.getStringCellValue(NAME),

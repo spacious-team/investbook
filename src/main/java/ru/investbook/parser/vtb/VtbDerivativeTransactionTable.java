@@ -42,7 +42,7 @@ public class VtbDerivativeTransactionTable extends SingleAbstractReportTable<Der
     }
 
     @Override
-    protected Collection<DerivativeTransaction> getRow(TableRow row) {
+    protected Collection<DerivativeTransaction> parseRowToCollection(TableRow row) {
 
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         int count = row.getIntCellValue(COUNT);

@@ -48,7 +48,7 @@ public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
     }
 
     @Override
-    protected Collection<Security> getRow(TableRow row) {
+    protected Collection<Security> parseRowToCollection(TableRow row) {
         if (row.getCellValue(SECTION) == null) {
             return Collections.emptyList(); // sub-header row
         }

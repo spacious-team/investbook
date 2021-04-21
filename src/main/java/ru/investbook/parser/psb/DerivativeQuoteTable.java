@@ -40,7 +40,7 @@ public class DerivativeQuoteTable extends SingleAbstractReportTable<SecurityQuot
     }
 
     @Override
-    protected Collection<SecurityQuote> getRow(TableRow row) {
+    protected Collection<SecurityQuote> parseRowToCollection(TableRow row) {
         BigDecimal price = row.getBigDecimalCellValue(PRICE);
         BigDecimal tickValue = row.getBigDecimalCellValue(PRICE_TICK_VALUE);
         if (price.compareTo(minValue) < 0 || tickValue.compareTo(minValue) < 0) {

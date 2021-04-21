@@ -28,7 +28,7 @@ import java.io.InputStream;
 
 public abstract class AbstractExcelBrokerReport extends AbstractBrokerReport {
 
-    protected Workbook getWorkBook(String excelFileName, InputStream is) {
+    public static Workbook getWorkBook(String excelFileName, InputStream is) {
         try {
             is = new CloseIgnoringInputStream(is); // HSSFWorkbook() constructor close is
             if (excelFileName.endsWith(".xls")) {

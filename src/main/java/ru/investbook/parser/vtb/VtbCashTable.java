@@ -47,7 +47,7 @@ public class VtbCashTable extends SingleAbstractReportTable<PortfolioCash> {
     }
 
     @Override
-    protected Collection<PortfolioCash> getRow(TableRow row) {
+    protected Collection<PortfolioCash> parseRowToCollection(TableRow row) {
         Collection<PortfolioCash> cashes = new ArrayList<>();
         cashes.addAll(getPortfolioCash(row, VtbCashTableHeader.STOCK_MARKET, "основной рынок"));
         cashes.addAll(getPortfolioCash(row, VtbCashTableHeader.FORTS_MARKET, "срочный рынок"));

@@ -45,7 +45,7 @@ public class VtbSecurityFlowTable extends SingleAbstractReportTable<Security> {
     }
 
     @Override
-    protected Collection<Security> getRow(TableRow row) {
+    protected Collection<Security> parseRowToCollection(TableRow row) {
         String[] description = row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",");
         String name = description[0].trim();
         String registrationNumber = description[1].toUpperCase().trim();

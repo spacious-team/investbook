@@ -46,7 +46,7 @@ public class DividendTable extends PaymentsTable {
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> getRow(TableRow row) {
+    protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
         String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         String description = row.getStringCellValueOrDefault(DESCRIPTION, "");

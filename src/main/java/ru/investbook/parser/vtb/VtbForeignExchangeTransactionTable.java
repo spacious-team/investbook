@@ -42,7 +42,7 @@ public class VtbForeignExchangeTransactionTable extends SingleAbstractReportTabl
     }
 
     @Override
-    protected Collection<ForeignExchangeTransaction> getRow(TableRow row) {
+    protected Collection<ForeignExchangeTransaction> parseRowToCollection(TableRow row) {
         boolean isBuy = row.getStringCellValue(DIRECTION).trim().equalsIgnoreCase("Покупка");
         BigDecimal value = row.getBigDecimalCellValue(VALUE);
         if (isBuy) {

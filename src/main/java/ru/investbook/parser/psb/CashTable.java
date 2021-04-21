@@ -45,7 +45,7 @@ public class CashTable extends SingleAbstractReportTable<PortfolioCash> {
     }
 
     @Override
-    protected Collection<PortfolioCash> getRow(TableRow row) {
+    protected Collection<PortfolioCash> parseRowToCollection(TableRow row) {
         return row.rowContains(INVALID_TEXT) ?
                 emptyList() :
                 singletonList(PortfolioCash.builder()

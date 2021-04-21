@@ -49,7 +49,7 @@ public class CashFlowEventTable extends SingleAbstractReportTable<CashFlowEventT
     }
 
     @Override
-    protected Collection<CashFlowEvent> getRow(TableRow row) {
+    protected Collection<CashFlowEvent> parseRowToCollection(TableRow row) {
         String operation = row.getStringCellValueOrDefault(OPERATION, null);
         if (operation == null) {
             return Collections.emptyList();

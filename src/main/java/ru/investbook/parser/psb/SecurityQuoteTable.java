@@ -40,7 +40,7 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
     }
 
     @Override
-    protected Collection<SecurityQuote> getRow(TableRow row) {
+    protected Collection<SecurityQuote> parseRowToCollection(TableRow row) {
         if (row.rowContains(SecuritiesTable.INVALID_TEXT)) {
             return emptyList();
         }

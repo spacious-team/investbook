@@ -43,7 +43,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
     }
 
     @Override
-    protected Collection<ForeignExchangeTransaction> getRow(TableRow row) {
+    protected Collection<ForeignExchangeTransaction> parseRowToCollection(TableRow row) {
         String dateTime = row.getStringCellValue(DATE_TIME); // 08.02.2019 23:37
         Instant transactionInstant = convertToInstant(dateTime);
         String notUniqTransactionId = row.getStringCellValue(TRANSACTION);

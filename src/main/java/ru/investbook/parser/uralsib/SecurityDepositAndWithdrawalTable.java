@@ -45,7 +45,7 @@ public class SecurityDepositAndWithdrawalTable extends SingleAbstractReportTable
     }
 
     @Override
-    protected Collection<SecurityTransaction> getRow(TableRow row) {
+    protected Collection<SecurityTransaction> parseRowToCollection(TableRow row) {
         String operation = row.getStringCellValue(OPERATION);
         if (!operation.equalsIgnoreCase(IN_DESCRIPTION) && !operation.equalsIgnoreCase(OUT_DESCRIPTION)) {
             return Collections.emptyList();

@@ -45,7 +45,7 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
     }
 
     @Override
-    protected Collection<EventCashFlow> getRow(TableRow row) {
+    protected Collection<EventCashFlow> parseRowToCollection(TableRow row) {
         String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         String description = row.getStringCellValueOrDefault(DESCRIPTION, "");

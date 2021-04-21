@@ -52,7 +52,7 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
     }
 
     @Override
-    protected Collection<DerivativeTransaction> getRow(TableRow row) {
+    protected Collection<DerivativeTransaction> parseRowToCollection(TableRow row) {
         if (expirationTableReached) return emptyList();
         String transactionId = SecurityTransactionTable.getTransactionId(row, TRANSACTION);
         if (transactionId == null) {

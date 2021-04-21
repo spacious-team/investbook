@@ -51,7 +51,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
         this.redemptionDates = new SecurityRedemptionTable(report).getData();
     }
 
-    protected Collection<SecurityEventCashFlow> getRow(TableRow row) {
+    protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
         CashFlowType event;
         String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();

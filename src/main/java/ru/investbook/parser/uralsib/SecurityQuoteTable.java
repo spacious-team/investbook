@@ -44,7 +44,7 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
     }
 
     @Override
-    protected Collection<SecurityQuote> getRow(TableRow row) {
+    protected Collection<SecurityQuote> parseRowToCollection(TableRow row) {
         BigDecimal amountInRub = row.getBigDecimalCellValueOrDefault(AMOUNT, null);
         if (amountInRub == null || amountInRub.compareTo(minValue) < 0) {
             return Collections.emptyList();

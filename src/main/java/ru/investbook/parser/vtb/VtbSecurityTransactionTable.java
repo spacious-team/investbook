@@ -44,7 +44,7 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
     }
 
     @Override
-    protected Collection<SecurityTransaction> getRow(TableRow row) {
+    protected Collection<SecurityTransaction> parseRowToCollection(TableRow row) {
         String isin = row.getStringCellValue(NAME_AND_ISIN).split(",")[2].trim();
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         BigDecimal value = row.getBigDecimalCellValue(VALUE_WITH_ACCRUED_INTEREST);

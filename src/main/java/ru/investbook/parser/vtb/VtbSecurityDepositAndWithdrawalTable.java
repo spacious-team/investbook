@@ -44,7 +44,7 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
     }
 
     @Override
-    protected Collection<SecurityTransaction> getRow(TableRow row) {
+    protected Collection<SecurityTransaction> parseRowToCollection(TableRow row) {
         String operation = row.getStringCellValueOrDefault(OPERATION, "").toLowerCase().trim();
         switch (operation) {
             case "перевод цб": // перевод между субсчетами

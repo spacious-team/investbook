@@ -51,7 +51,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
     }
 
     @Override
-    protected Collection<SecurityTransaction> getRow(TableRow row) {
+    protected Collection<SecurityTransaction> parseRowToCollection(TableRow row) {
         String transactionId = getTransactionId(row, TRANSACTION);
         if (transactionId == null) return emptyList();
 

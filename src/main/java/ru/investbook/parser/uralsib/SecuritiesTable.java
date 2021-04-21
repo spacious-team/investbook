@@ -46,7 +46,7 @@ public class SecuritiesTable extends SingleAbstractReportTable<ReportSecurityInf
     }
 
     @Override
-    protected Collection<ReportSecurityInformation> getRow(TableRow row) {
+    protected Collection<ReportSecurityInformation> parseRowToCollection(TableRow row) {
         Security security = Security.builder()
                 .id(row.getStringCellValue(ISIN))
                 .name(row.getStringCellValue(NAME))

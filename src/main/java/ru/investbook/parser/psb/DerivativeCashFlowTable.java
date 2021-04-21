@@ -82,7 +82,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> getRow(TableRow row) {
+    protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
         BigDecimal value = row.getBigDecimalCellValue(DerivativeCashFlowTableHeader.INCOMING)
                 .subtract(row.getBigDecimalCellValue(DerivativeCashFlowTableHeader.OUTGOING));
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()

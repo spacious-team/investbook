@@ -35,7 +35,7 @@ public class DerivativesTable extends SingleAbstractReportTable<Security> {
     }
 
     @Override
-    protected Collection<Security> getRow(TableRow row) {
+    protected Collection<Security> parseRowToCollection(TableRow row) {
         return Collections.singletonList(Security.builder()
                 .id(row.getStringCellValue(CONTRACT))
                 .build());

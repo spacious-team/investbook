@@ -46,7 +46,7 @@ public class CouponAmortizationRedemptionTable extends SingleAbstractReportTable
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> getRow(TableRow row) {
+    protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
         CashFlowType event;
         String action = row.getStringCellValue(TYPE);
         if (action.equalsIgnoreCase("Погашение купона")) {

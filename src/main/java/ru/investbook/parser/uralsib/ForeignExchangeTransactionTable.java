@@ -45,7 +45,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
     }
 
     @Override
-    protected Collection<ForeignExchangeTransaction> getRow(TableRow row) {
+    protected Collection<ForeignExchangeTransaction> parseRowToCollection(TableRow row) {
         String transactionId;
         Object cellValue = row.getCellValue(TRANSACTION);
         if (cellValue instanceof String) {
