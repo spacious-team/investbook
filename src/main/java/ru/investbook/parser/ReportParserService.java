@@ -62,7 +62,7 @@ public class ReportParserService {
                 ReportTable<ForeignExchangeRate> foreignExchangeRateReportTable = reportTables.getForeignExchangeRateTable();
 
                 portfolioPropertyTable.getData().forEach(api::addPortfolioProperty);
-                api.addCashInfo(portfolioCashTable);
+                api.addPortfolioCash(portfolioCashTable.getData());
                 portfolioSecuritiesTable.getData().forEach(api::addSecurity);
                 cashFlowTable.getData().forEach(api::addEventCashFlow);
                 securityTransactionTable.getData().forEach(api::addTransaction);

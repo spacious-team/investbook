@@ -56,6 +56,8 @@ public class ForeignExchangeCashTable extends InitializableReportTable<Portfolio
             BigDecimal cash = row.getBigDecimalCellValueOrDefault(currency, null);
             if (cash != null) {
                 cashes.add(PortfolioCash.builder()
+                        .portfolio(getReport().getPortfolio())
+                        .timestamp(getReport().getReportEndDateTime())
                         .section("валютный рынок")
                         .value(cash)
                         .currency(currency.name())

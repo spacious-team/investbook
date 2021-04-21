@@ -45,6 +45,8 @@ public class CashTable extends AbstractReportTable<PortfolioCash> {
     @Override
     protected Collection<PortfolioCash> getRow(TableRow row) {
         return singletonList(PortfolioCash.builder()
+                .portfolio(getReport().getPortfolio())
+                .timestamp(getReport().getReportEndDateTime())
                 .section("all")
                 .value(row.getBigDecimalCellValue(VALUE))
                 .currency(UralsibBrokerReport.convertToCurrency(row.getStringCellValue(CURRENCY)))

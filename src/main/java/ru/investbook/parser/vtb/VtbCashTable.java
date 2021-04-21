@@ -58,6 +58,8 @@ public class VtbCashTable extends AbstractReportTable<PortfolioCash> {
     private Collection<PortfolioCash> getPortfolioCash(TableRow row, VtbCashTableHeader column, String section) {
         try {
             return Collections.singleton(PortfolioCash.builder()
+                    .portfolio(getReport().getPortfolio())
+                    .timestamp(getReport().getReportEndDateTime())
                     .currency(VtbBrokerReport.convertToCurrency(row.getStringCellValue(VtbCashTableHeader.CURRENCY)))
                     .section(section)
                     .value(row.getBigDecimalCellValue(column))

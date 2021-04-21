@@ -49,6 +49,8 @@ public class CashTable extends AbstractReportTable<PortfolioCash> {
         return row.rowContains(INVALID_TEXT) ?
                 emptyList() :
                 singletonList(PortfolioCash.builder()
+                        .portfolio(getReport().getPortfolio())
+                        .timestamp(getReport().getReportEndDateTime())
                         .section(row.getStringCellValue(SECTION))
                         .value(row.getBigDecimalCellValue(VALUE))
                         .currency(row.getStringCellValue(CURRENCY))
