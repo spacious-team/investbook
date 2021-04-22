@@ -22,9 +22,6 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import static ru.investbook.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.CONTRACT;
 
 public class DerivativesTable extends SingleAbstractReportTable<Security> {
@@ -35,9 +32,9 @@ public class DerivativesTable extends SingleAbstractReportTable<Security> {
     }
 
     @Override
-    protected Collection<Security> parseRowToCollection(TableRow row) {
-        return Collections.singletonList(Security.builder()
+    protected Security parseRow(TableRow row) {
+        return Security.builder()
                 .id(row.getStringCellValue(CONTRACT))
-                .build());
+                .build();
     }
 }

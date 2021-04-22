@@ -31,11 +31,8 @@ import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 
-import static java.util.Collections.emptyList;
 import static ru.investbook.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.*;
 
 @Slf4j
@@ -51,9 +48,9 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
     }
 
     @Override
-    protected Collection<SecurityTransaction> parseRowToCollection(TableRow row) {
+    protected SecurityTransaction parseRow(TableRow row) {
         String transactionId = getTransactionId(row, TRANSACTION);
-        if (transactionId == null) return emptyList();
+        if (transactionId == null) return null;
 
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         BigDecimal value = row.getBigDecimalCellValue(VALUE);
@@ -108,7 +105,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                 }
             }
         }
-        return Collections.singletonList(SecurityTransaction.builder()
+        return SecurityTransaction.builder()
                 .timestamp(timestamp)
                 .transactionId(transactionId)
                 .portfolio(getReport().getPortfolio())
@@ -119,7 +116,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                 .commission(commission.negate())
                 .valueCurrency(valueCurrency)
                 .commissionCurrency(commissionCurrency)
-                .build());
+                .build();
     }
 
     static String getTransactionId(TableRow row, TableColumnDescription column) {

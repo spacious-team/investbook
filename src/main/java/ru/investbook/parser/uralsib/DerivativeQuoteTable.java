@@ -27,10 +27,7 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
 
-import static java.util.Collections.emptyList;
 import static ru.investbook.parser.uralsib.DerivativeQuoteTable.ContractCountTableHeader.CONTRACT;
 import static ru.investbook.parser.uralsib.DerivativeQuoteTable.ContractCountTableHeader.QUOTE;
 
@@ -45,16 +42,16 @@ public class DerivativeQuoteTable extends SingleAbstractReportTable<SecurityQuot
     }
 
     @Override
-    protected Collection<SecurityQuote> parseRowToCollection(TableRow row) {
+    protected SecurityQuote parseRow(TableRow row) {
         BigDecimal quote = row.getBigDecimalCellValueOrDefault(QUOTE, null);
         if (quote == null || quote.compareTo(minValue) < 0) {
-            return emptyList();
+            return null;
         }
-        return Collections.singletonList(SecurityQuote.builder()
+        return SecurityQuote.builder()
                 .security(row.getStringCellValue(CONTRACT))
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
-                .build());
+                .build();
     }
 
     enum ContractCountTableHeader implements TableColumnDescription {

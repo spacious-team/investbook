@@ -29,8 +29,6 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
@@ -45,7 +43,7 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
     }
 
     @Override
-    protected Collection<EventCashFlow> parseRowToCollection(TableRow row) {
+    protected EventCashFlow parseRow(TableRow row) {
         String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         String description = row.getStringCellValueOrDefault(DESCRIPTION, "");
@@ -68,7 +66,7 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
                         }
                     }
                 }
-                return emptyList();
+                return null;
             case "налог":
                 type = CashFlowType.TAX;
                 break;
@@ -77,16 +75,16 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
                 type = CashFlowType.COMMISSION;
                 break;
             default:
-                return emptyList();
+                return null;
         }
-        return singletonList(EventCashFlow.builder()
+        return EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(type)
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                 .value(row.getBigDecimalCellValue(VALUE))
                 .currency(UralsibBrokerReport.convertToCurrency(row.getStringCellValue(CURRENCY)))
                 .description(StringUtils.hasLength(description) ? description : null)
-                .build());
+                .build();
     }
 
     private boolean isCurrentPortfolioAccount(String account) {

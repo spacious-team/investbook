@@ -27,10 +27,6 @@ import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
-import java.util.Collection;
-
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static ru.investbook.parser.psb.CashTable.CashTableHeader.*;
 
 @Slf4j
@@ -45,16 +41,15 @@ public class CashTable extends SingleAbstractReportTable<PortfolioCash> {
     }
 
     @Override
-    protected Collection<PortfolioCash> parseRowToCollection(TableRow row) {
-        return row.rowContains(INVALID_TEXT) ?
-                emptyList() :
-                singletonList(PortfolioCash.builder()
+    protected PortfolioCash parseRow(TableRow row) {
+        return row.rowContains(INVALID_TEXT) ? null :
+                PortfolioCash.builder()
                         .portfolio(getReport().getPortfolio())
                         .timestamp(getReport().getReportEndDateTime())
                         .section(row.getStringCellValue(SECTION))
                         .value(row.getBigDecimalCellValue(VALUE))
                         .currency(row.getStringCellValue(CURRENCY))
-                        .build());
+                        .build();
     }
 
     enum CashTableHeader implements TableColumnDescription {

@@ -55,7 +55,7 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
     }
 
     @Override
-    protected Collection<EventCashFlow> parseRowToCollection(TableRow row) {
+    protected EventCashFlow parseRow(TableRow row) {
         String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         boolean isPositive;
@@ -64,7 +64,7 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
             case "вывод дс" -> isPositive = false;
             default -> {
                 log.debug("Не известный тип операции '{}' в таблице '{}'", action, row.getTable());
-                return emptyList();
+                return null;
             }
         }
         String currency;
@@ -80,18 +80,18 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
                 if (value.compareTo(min) > 0) {
                     currency = "EUR";
                 } else {
-                    return emptyList();
+                    return null;
                 }
             }
         }
-        return singletonList(EventCashFlow.builder()
+        return EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(CashFlowType.CASH)
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                 .value(value.multiply(BigDecimal.valueOf(isPositive ? 1 : -1)))
                 .currency(currency)
                 .description("Операция по валютному счету")
-                .build());
+                .build();
     }
 
     private Collection<EventCashFlow> getDailyBrokerCommission() {

@@ -31,9 +31,6 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
 
-import java.util.Collection;
-
-import static java.util.Collections.singletonList;
 import static ru.investbook.parser.uralsib.SecuritiesTable.SecuritiesTableHeader.*;
 
 @Slf4j
@@ -46,16 +43,16 @@ public class SecuritiesTable extends SingleAbstractReportTable<ReportSecurityInf
     }
 
     @Override
-    protected Collection<ReportSecurityInformation> parseRowToCollection(TableRow row) {
+    protected ReportSecurityInformation parseRow(TableRow row) {
         Security security = Security.builder()
                 .id(row.getStringCellValue(ISIN))
                 .name(row.getStringCellValue(NAME))
                 .build();
-        return singletonList(ReportSecurityInformation.builder()
+        return ReportSecurityInformation.builder()
                 .security(security)
                 .cfi(row.getStringCellValue(CFI))
                 .incomingCount(row.getIntCellValue(INCOMING_COUNT))
-                .build());
+                .build();
     }
 
     enum SecuritiesTableHeader implements TableColumnDescription {

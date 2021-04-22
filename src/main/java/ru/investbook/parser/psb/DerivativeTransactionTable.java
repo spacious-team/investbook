@@ -31,7 +31,6 @@ import ru.investbook.parser.SingleAbstractReportTable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 import static ru.investbook.parser.psb.DerivativeTransactionTable.FortsTableHeader.*;
 
@@ -53,7 +52,7 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
     }
 
     @Override
-    protected Collection<DerivativeTransaction> parseRowToCollection(TableRow row) {
+    protected DerivativeTransaction parseRow(TableRow row) {
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         int count = row.getIntCellValue(COUNT);
         String type = row.getStringCellValue(TYPE).toLowerCase();
@@ -77,7 +76,7 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
         BigDecimal commission = row.getBigDecimalCellValue(MARKET_COMMISSION)
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .negate();
-        return Collections.singleton(DerivativeTransaction.builder()
+        return DerivativeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .transactionId(String.valueOf(row.getLongCellValue(TRANSACTION))) // double numbers
                 .portfolio(getReport().getPortfolio())
@@ -88,7 +87,7 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
                 .commission(commission)
                 .valueCurrency("RUB") // FORTS, only RUB
                 .commissionCurrency("RUB") // FORTS, only RUB
-                .build());
+                .build();
     }
 
     enum FortsTableHeader implements TableColumnDescription {

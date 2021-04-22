@@ -28,8 +28,6 @@ import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
 
 import static ru.investbook.parser.vtb.VtbDerivativeTransactionTable.VtbDerivativeTransactionTableHeader.*;
 
@@ -42,8 +40,7 @@ public class VtbDerivativeTransactionTable extends SingleAbstractReportTable<Der
     }
 
     @Override
-    protected Collection<DerivativeTransaction> parseRowToCollection(TableRow row) {
-
+    protected DerivativeTransaction parseRow(TableRow row) {
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         int count = row.getIntCellValue(COUNT);
         BigDecimal valueInPoints = row.getBigDecimalCellValue(QUOTE).multiply(BigDecimal.valueOf(count));
@@ -53,7 +50,7 @@ public class VtbDerivativeTransactionTable extends SingleAbstractReportTable<Der
         BigDecimal commission = row.getBigDecimalCellValue(BROKER_CLEARING_COMMISSION)
                 .add(row.getBigDecimalCellValue(BROKER_TRANSACTION_COMMISSION))
                 .negate();
-        return Collections.singleton(DerivativeTransaction.builder()
+        return DerivativeTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .transactionId(row.getStringCellValue(TRANSACTION))
                 .portfolio(getReport().getPortfolio())
@@ -62,7 +59,7 @@ public class VtbDerivativeTransactionTable extends SingleAbstractReportTable<Der
                 .valueInPoints(valueInPoints)
                 .commission(commission)
                 .commissionCurrency("RUB") // FORTS, only RUB
-                .build());
+                .build();
     }
 
     enum VtbDerivativeTransactionTableHeader implements TableColumnDescription {

@@ -25,8 +25,6 @@ import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
@@ -40,10 +38,10 @@ public class VtbSecurityQuoteTable extends SingleAbstractReportTable<SecurityQuo
     }
 
     @Override
-    protected Collection<SecurityQuote> parseRowToCollection(TableRow row) {
+    protected SecurityQuote parseRow(TableRow row) {
         BigDecimal quote = row.getBigDecimalCellValueOrDefault(QUOTE, null);
         if (quote == null) {
-            return Collections.emptyList();
+            return null;
         }
         BigDecimal price = Optional.ofNullable(row.getBigDecimalCellValueOrDefault(FACE_VALUE, null))
                 .filter(faceValue -> faceValue.compareTo(minValue) > 0)
@@ -59,12 +57,12 @@ public class VtbSecurityQuoteTable extends SingleAbstractReportTable<SecurityQuo
                         return (count <= 0) ? null : interest.divide(BigDecimal.valueOf(count), 2, RoundingMode.HALF_UP);
                     }).orElse(null);
         }
-        return Collections.singletonList(SecurityQuote.builder()
+        return SecurityQuote.builder()
                 .security(row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",")[2].trim())
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .price(price)
                 .accruedInterest(accruedInterest)
-                .build());
+                .build();
     }
 }

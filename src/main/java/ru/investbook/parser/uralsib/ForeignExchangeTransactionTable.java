@@ -28,10 +28,7 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
 
-import static java.util.Collections.emptyList;
 import static ru.investbook.parser.uralsib.ForeignExchangeTransactionTable.FxTransactionTableHeader.*;
 
 @Slf4j
@@ -45,7 +42,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
     }
 
     @Override
-    protected Collection<ForeignExchangeTransaction> parseRowToCollection(TableRow row) {
+    protected ForeignExchangeTransaction parseRow(TableRow row) {
         String transactionId;
         Object cellValue = row.getCellValue(TRANSACTION);
         if (cellValue instanceof String) {
@@ -57,16 +54,16 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
                 if (stringValue.startsWith(CONTRACT_PREFIX)) {
                     instrument = stringValue.substring(CONTRACT_PREFIX.length()).trim();
                 }
-                return emptyList();
+                return null;
             }
         } else if (cellValue instanceof Number) {
             // double
             transactionId = String.valueOf(((Number) cellValue).longValue());
         } else {
-            return emptyList();
+            return null;
         }
         if (instrument == null || instrument.isEmpty()) {
-            return emptyList();
+            return null;
         }
 
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
@@ -78,7 +75,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .negate();
 
-        return Collections.singletonList(ForeignExchangeTransaction.builder()
+        return ForeignExchangeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .transactionId(transactionId)
                 .portfolio(getReport().getPortfolio())
@@ -88,7 +85,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
                 .commission(commission)
                 .valueCurrency(UralsibBrokerReport.convertToCurrency(row.getStringCellValue(VALUE_CURRENCY)))
                 .commissionCurrency("RUB")
-                .build());
+                .build();
     }
 
     enum FxTransactionTableHeader implements TableColumnDescription {

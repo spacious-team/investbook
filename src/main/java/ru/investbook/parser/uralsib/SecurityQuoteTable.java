@@ -25,7 +25,6 @@ import ru.investbook.parser.SingleAbstractReportTable;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static java.math.RoundingMode.HALF_UP;
@@ -44,14 +43,14 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
     }
 
     @Override
-    protected Collection<SecurityQuote> parseRowToCollection(TableRow row) {
+    protected SecurityQuote parseRow(TableRow row) {
         BigDecimal amountInRub = row.getBigDecimalCellValueOrDefault(AMOUNT, null);
         if (amountInRub == null || amountInRub.compareTo(minValue) < 0) {
-            return Collections.emptyList();
+            return null;
         }
         int count = row.getIntCellValue(OUTGOING_COUNT);
         if (count == 0) {
-            return Collections.emptyList();
+            return null;
         }
         BigDecimal priceInRub = amountInRub.divide(BigDecimal.valueOf(count), 4, HALF_UP);
         BigDecimal quote = row.getBigDecimalCellValue(QUOTE);
@@ -78,12 +77,12 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
                 }
             }
         }
-        return Collections.singletonList(SecurityQuote.builder()
+        return SecurityQuote.builder()
                 .security(isin)
                 .timestamp(reportEndDateTime)
                 .quote(quote)
                 .price(priceInRub)
                 .accruedInterest(accruedInterest)
-                .build());
+                .build();
     }
 }

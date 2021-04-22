@@ -29,8 +29,6 @@ import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
 
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
 import static ru.investbook.parser.vtb.VtbSecurityTransactionTable.VtbSecurityTransactionTableHeader.*;
@@ -44,7 +42,7 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
     }
 
     @Override
-    protected Collection<SecurityTransaction> parseRowToCollection(TableRow row) {
+    protected SecurityTransaction parseRow(TableRow row) {
         String isin = row.getStringCellValue(NAME_AND_ISIN).split(",")[2].trim();
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         BigDecimal value = row.getBigDecimalCellValue(VALUE_WITH_ACCRUED_INTEREST);
@@ -62,7 +60,7 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
                 .add(row.getBigDecimalCellValueOrDefault(BROKER_COMMISSION, BigDecimal.ZERO))
                 .negate();
         String currency = VtbBrokerReport.convertToCurrency(row.getStringCellValue(VALUE_CURRENCY));
-        return Collections.singleton(SecurityTransaction.builder()
+        return SecurityTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE))
                 .transactionId(row.getStringCellValue(TRANSACTION))
                 .portfolio(getReport().getPortfolio())
@@ -73,7 +71,7 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
                 .commission(commission)
                 .valueCurrency(currency)
                 .commissionCurrency(currency)
-                .build());
+                .build();
     }
 
 

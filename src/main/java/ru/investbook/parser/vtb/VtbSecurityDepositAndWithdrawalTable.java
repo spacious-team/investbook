@@ -25,8 +25,6 @@ import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -44,7 +42,7 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
     }
 
     @Override
-    protected Collection<SecurityTransaction> parseRowToCollection(TableRow row) {
+    protected SecurityTransaction parseRow(TableRow row) {
         String operation = row.getStringCellValueOrDefault(OPERATION, "").toLowerCase().trim();
         switch (operation) {
             case "перевод цб": // перевод между субсчетами
@@ -58,15 +56,14 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
                 bondRedemptions.put(isin, count);
                 // no break;
             default:
-                return Collections.emptyList();
+                return null;
         }
 
         String portfolio = getReport().getPortfolio();
         String isin = row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",")[2].trim();
         Instant timestamp = row.getInstantCellValue(DATE);
         String transactionId = generateTransactionId(portfolio, timestamp, isin);
-        return Collections.singleton(
-                SecurityTransaction.builder()
+        return SecurityTransaction.builder()
                         .transactionId(transactionId)
                         .timestamp(timestamp)
                         .portfolio(portfolio)
@@ -77,7 +74,7 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
                         .commission(BigDecimal.ZERO)
                         .valueCurrency("RUB")
                         .commissionCurrency("RUB")
-                        .build());
+                        .build();
     }
 
     private static String generateTransactionId(String portfolio, Instant instant, String isin) {

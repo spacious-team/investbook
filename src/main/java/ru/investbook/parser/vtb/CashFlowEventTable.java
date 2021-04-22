@@ -35,7 +35,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static ru.investbook.parser.vtb.CashFlowEventTable.VtbCashFlowTableHeader.*;
@@ -49,18 +48,18 @@ public class CashFlowEventTable extends SingleAbstractReportTable<CashFlowEventT
     }
 
     @Override
-    protected Collection<CashFlowEvent> parseRowToCollection(TableRow row) {
+    protected CashFlowEvent parseRow(TableRow row) {
         String operation = row.getStringCellValueOrDefault(OPERATION, null);
         if (operation == null) {
-            return Collections.emptyList();
+            return null;
         }
-        return Collections.singleton(CashFlowEvent.builder()
+        return CashFlowEvent.builder()
                 .date(row.getInstantCellValue(DATE))
                 .operation(operation.toLowerCase().trim())
                 .value(row.getBigDecimalCellValue(VALUE))
                 .currency(VtbBrokerReport.convertToCurrency(row.getStringCellValue(CURRENCY)))
                 .description(row.getStringCellValueOrDefault(DESCRIPTION, ""))
-                .build());
+                .build();
     }
 
     @Override

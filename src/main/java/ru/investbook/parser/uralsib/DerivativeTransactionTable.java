@@ -31,10 +31,7 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
 
-import static java.util.Collections.emptyList;
 import static ru.investbook.parser.uralsib.DerivativeTransactionTable.FortsTableHeader.*;
 
 @Slf4j
@@ -52,14 +49,14 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
     }
 
     @Override
-    protected Collection<DerivativeTransaction> parseRowToCollection(TableRow row) {
-        if (expirationTableReached) return emptyList();
+    protected DerivativeTransaction parseRow(TableRow row) {
+        if (expirationTableReached) return null;
         String transactionId = SecurityTransactionTable.getTransactionId(row, TRANSACTION);
         if (transactionId == null) {
             if (DerivativeExpirationTable.TABLE_NAME.equals(row.getStringCellValueOrDefault(TRANSACTION, null))) {
                 expirationTableReached = true;
             }
-            return emptyList();
+            return null;
         }
 
         String direction = row.getStringCellValue(DIRECTION);
@@ -77,7 +74,7 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .add(row.getBigDecimalCellValueOrDefault(CLEARING_COMMISSION, BigDecimal.ZERO))
                 .negate();
-        return Collections.singleton(DerivativeTransaction.builder()
+        return DerivativeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .transactionId(transactionId)
                 .portfolio(getReport().getPortfolio())
@@ -88,7 +85,7 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
                 .commission(commission)
                 .valueCurrency(valueCurrency)
                 .commissionCurrency("RUB") // FORTS, only RUB
-                .build());
+                .build();
     }
 
     @RequiredArgsConstructor

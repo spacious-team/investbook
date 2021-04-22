@@ -37,8 +37,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static ru.investbook.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.*;
 
 @Slf4j
@@ -82,7 +80,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
+    protected SecurityEventCashFlow parseRow(TableRow row) {
         BigDecimal value = row.getBigDecimalCellValue(DerivativeCashFlowTableHeader.INCOMING)
                 .subtract(row.getBigDecimalCellValue(DerivativeCashFlowTableHeader.OUTGOING));
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
@@ -99,15 +97,15 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
                 if (count == null) {
                     throw new IllegalArgumentException("Открытых контрактов не найдено");
                 }
-                return singletonList(builder.eventType(CashFlowType.DERIVATIVE_PROFIT)
+                return builder.eventType(CashFlowType.DERIVATIVE_PROFIT)
                         .security(contract)
                         .count(count)
-                        .build());
+                        .build();
             case "биржевой сбор":
-                return emptyList(); // изменения отображаются в ликвидной стоимости портфеля
+                return null; // изменения отображаются в ликвидной стоимости портфеля
             // латиница в слове "заблокированo" - это опечатка в брокерском отчёте
             case "заблокированo / разблокировано средств под го":
-                return emptyList(); // не влияет на размер собственных денежных средств
+                return null; // не влияет на размер собственных денежных средств
             default:
                 throw new IllegalArgumentException("Неизвестный вид операции " + action);
         }

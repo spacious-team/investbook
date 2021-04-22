@@ -27,10 +27,6 @@ import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import static java.util.Collections.emptyList;
 import static ru.investbook.parser.psb.SecuritiesTable.SecuritiesTableHeader.ISIN;
 import static ru.investbook.parser.psb.SecuritiesTable.SecuritiesTableHeader.NAME;
 
@@ -45,13 +41,12 @@ public class SecuritiesTable extends SingleAbstractReportTable<Security> {
     }
 
     @Override
-    protected Collection<Security> parseRowToCollection(TableRow row) {
-        return row.rowContains(INVALID_TEXT) ?
-                emptyList() :
-                Collections.singletonList(Security.builder()
+    protected Security parseRow(TableRow row) {
+        return row.rowContains(INVALID_TEXT) ? null :
+                Security.builder()
                         .id(row.getStringCellValue(ISIN))
                         .name(row.getStringCellValue(NAME))
-                        .build());
+                        .build();
     }
 
     enum SecuritiesTableHeader implements TableColumnDescription {

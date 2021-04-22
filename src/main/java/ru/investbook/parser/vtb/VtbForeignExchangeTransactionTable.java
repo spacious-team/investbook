@@ -28,8 +28,6 @@ import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
 
 import static ru.investbook.parser.vtb.VtbForeignExchangeTransactionTable.FxTransactionTableHeader.*;
 
@@ -42,7 +40,7 @@ public class VtbForeignExchangeTransactionTable extends SingleAbstractReportTabl
     }
 
     @Override
-    protected Collection<ForeignExchangeTransaction> parseRowToCollection(TableRow row) {
+    protected ForeignExchangeTransaction parseRow(TableRow row) {
         boolean isBuy = row.getStringCellValue(DIRECTION).trim().equalsIgnoreCase("Покупка");
         BigDecimal value = row.getBigDecimalCellValue(VALUE);
         if (isBuy) {
@@ -51,7 +49,7 @@ public class VtbForeignExchangeTransactionTable extends SingleAbstractReportTabl
         BigDecimal commission = row.getBigDecimalCellValue(MARKET_COMMISSION)
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .negate();
-        return Collections.singletonList(ForeignExchangeTransaction.builder()
+        return ForeignExchangeTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .transactionId(row.getStringCellValue(TRANSACTION))
                 .portfolio(getReport().getPortfolio())
@@ -61,7 +59,7 @@ public class VtbForeignExchangeTransactionTable extends SingleAbstractReportTabl
                 .commission(commission)
                 .valueCurrency(VtbBrokerReport.convertToCurrency(row.getStringCellValue(VALUE_CURRENCY)))
                 .commissionCurrency("RUB")
-                .build());
+                .build();
     }
 
     enum FxTransactionTableHeader implements TableColumnDescription {

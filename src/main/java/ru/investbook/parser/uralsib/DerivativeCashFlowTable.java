@@ -28,8 +28,6 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
@@ -41,20 +39,20 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
         super(report, PaymentsTable.TABLE_NAME, "", PaymentsTable.PaymentsTableHeader.class);
     }
 
-    protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
+    protected SecurityEventCashFlow parseRow(TableRow row) {
         String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         if (!action.equalsIgnoreCase("вариационная маржа")) {
-            return emptyList();
+            return null;
         }
-        return singletonList(SecurityEventCashFlow.builder()
+        return SecurityEventCashFlow.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                 .portfolio(getReport().getPortfolio())
                 .value(row.getBigDecimalCellValue(VALUE))
                 .currency(UralsibBrokerReport.convertToCurrency(row.getStringCellValue(CURRENCY)))
                 .eventType(CashFlowType.DERIVATIVE_PROFIT)
                 .security(getContract(row))
-                .build());
+                .build();
     }
 
     private String getContract(TableRow row) {

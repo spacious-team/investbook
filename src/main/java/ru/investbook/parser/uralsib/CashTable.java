@@ -27,9 +27,6 @@ import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
-import java.util.Collection;
-
-import static java.util.Collections.singletonList;
 import static ru.investbook.parser.uralsib.CashTable.CashTableHeader.CURRENCY;
 import static ru.investbook.parser.uralsib.CashTable.CashTableHeader.VALUE;
 
@@ -43,14 +40,14 @@ public class CashTable extends SingleAbstractReportTable<PortfolioCash> {
     }
 
     @Override
-    protected Collection<PortfolioCash> parseRowToCollection(TableRow row) {
-        return singletonList(PortfolioCash.builder()
+    protected PortfolioCash parseRow(TableRow row) {
+        return PortfolioCash.builder()
                 .portfolio(getReport().getPortfolio())
                 .timestamp(getReport().getReportEndDateTime())
                 .section("all")
                 .value(row.getBigDecimalCellValue(VALUE))
                 .currency(UralsibBrokerReport.convertToCurrency(row.getStringCellValue(CURRENCY)))
-                .build());
+                .build();
     }
 
     enum CashTableHeader implements TableColumnDescription {

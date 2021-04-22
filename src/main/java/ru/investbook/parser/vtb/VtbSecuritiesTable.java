@@ -28,8 +28,6 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.SingleBrokerReport;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,19 +46,19 @@ public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
     }
 
     @Override
-    protected Collection<Security> parseRowToCollection(TableRow row) {
+    protected Security parseRow(TableRow row) {
         if (row.getCellValue(SECTION) == null) {
-            return Collections.emptyList(); // sub-header row
+            return null; // sub-header row
         }
         String[] description = row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",");
         String name = description[0].trim();
         String registrationNumber = description[1].toUpperCase().trim();
         String isin = description[2].toUpperCase().trim();
         securityRegNumberToIsin.put(registrationNumber, isin);
-        return Collections.singleton(Security.builder()
+        return Security.builder()
                 .id(isin)
                 .name(name)
-                .build());
+                .build();
     }
 
     public Map<String, String> getSecurityRegNumberToIsin() {

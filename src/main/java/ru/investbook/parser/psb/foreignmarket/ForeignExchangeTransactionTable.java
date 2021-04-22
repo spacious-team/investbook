@@ -29,8 +29,6 @@ import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Collections;
 
 import static ru.investbook.parser.psb.foreignmarket.ForeignExchangeTransactionTable.FxTransactionTableHeader.*;
 
@@ -43,7 +41,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
     }
 
     @Override
-    protected Collection<ForeignExchangeTransaction> parseRowToCollection(TableRow row) {
+    protected ForeignExchangeTransaction parseRow(TableRow row) {
         String dateTime = row.getStringCellValue(DATE_TIME); // 08.02.2019 23:37
         Instant transactionInstant = convertToInstant(dateTime);
         String notUniqTransactionId = row.getStringCellValue(TRANSACTION);
@@ -55,7 +53,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
         }
         String contract = row.getStringCellValue(CONTRACT);
         String quoteCurrency = contract.substring(3, 6).toUpperCase(); // extracts RUB from USDRUB_TOM
-        return Collections.singletonList(ForeignExchangeTransaction.builder()
+        return ForeignExchangeTransaction.builder()
                 .timestamp(transactionInstant)
                 .transactionId(transactionId)
                 .portfolio(getReport().getPortfolio())
@@ -65,7 +63,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
                 .commission(row.getBigDecimalCellValue(MARKET_COMMISSION).negate())
                 .valueCurrency(quoteCurrency)
                 .commissionCurrency("RUB")
-                .build());
+                .build();
     }
 
     enum FxTransactionTableHeader implements TableColumnDescription {
