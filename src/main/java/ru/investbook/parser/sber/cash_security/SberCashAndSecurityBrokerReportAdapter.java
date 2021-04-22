@@ -16,52 +16,50 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.sber.transaction;
+package ru.investbook.parser.sber.cash_security;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.ToString;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.spacious_team.table_wrapper.excel.ExcelSheet;
+import org.spacious_team.table_wrapper.api.ReportPage;
 import ru.investbook.parser.MultiPortfolioBrokerReport;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.Set;
 
 import static ru.investbook.parser.AbstractExcelBrokerReport.getWorkBook;
 import static ru.investbook.parser.sber.SberBrokerReportHelper.findPortfolios;
 
-@EqualsAndHashCode(of = "toString")
-@ToString(of = "toString", includeFieldNames = false)
-public class SberTrBrokerReport implements MultiPortfolioBrokerReport {
+public class SberCashAndSecurityBrokerReportAdapter implements MultiPortfolioBrokerReport {
 
     @Getter
-    private final ExcelSheet reportPage;
+    private final SberCashBrokerReport cashReport;
+
+    @Getter
+    private final SberSecurityDepositBrokerReport securityDepositReport;
 
     @Getter
     private final Set<String> portfolios;
 
     private final Workbook book;
-    private final String toString;
 
-    public SberTrBrokerReport(String excelFileName, InputStream is) {
+    public SberCashAndSecurityBrokerReportAdapter(String excelFileName, InputStream is) {
         this.book = getWorkBook(excelFileName, is);
-        this.reportPage = new ExcelSheet(book.getSheetAt(0));
-        checkReportFormat(excelFileName, reportPage);
-        this.toString = excelFileName;
-        this.portfolios = findPortfolios(reportPage);
-    }
-
-    public static void checkReportFormat(String excelFileName, ExcelSheet reportPage) {
-        if (reportPage.getSheet().getSheetName().equals("Сделки") &&
-                reportPage.getRow(0).getCell(0).getStringValue().equals("Номер договора")) {
-            return;
-        }
-        throw new RuntimeException("В файле " + excelFileName + " не содержится отчета сделок брокера Сбербанк");
+        this.cashReport = new SberCashBrokerReport(excelFileName, book);
+        this.securityDepositReport = new SberSecurityDepositBrokerReport(excelFileName, book);
+        Set<String> portfolios = new HashSet<>(findPortfolios(cashReport.getReportPage()));
+        portfolios.addAll(findPortfolios(securityDepositReport.getReportPage()));
+        this.portfolios = Set.copyOf(portfolios);
     }
 
     @Override
-    public void close() throws Exception {
-        this.book.close();
+    public ReportPage getReportPage() {
+        throw new UnsupportedOperationException("This is a BrokerReport adapter");
+    }
+
+    @Override
+    public void close() throws IOException {
+        book.close();
     }
 }

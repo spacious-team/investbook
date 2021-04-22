@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.sber.cash;
+package ru.investbook.parser.sber.cash_security;
 
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
@@ -26,15 +26,14 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTables;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 
-public class SberCashReportTables extends AbstractReportTables<BrokerReport> {
+public class SberCashAndSecurityReportTables extends AbstractReportTables<SberCashAndSecurityBrokerReportAdapter> {
 
-    protected SberCashReportTables(BrokerReport report) {
+    protected SberCashAndSecurityReportTables(SberCashAndSecurityBrokerReportAdapter report) {
         super(report);
     }
 
@@ -50,7 +49,7 @@ public class SberCashReportTables extends AbstractReportTables<BrokerReport> {
 
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
-        return emptyTable();
+        return new SberCashFlowTable(report.getCashReport());
     }
 
     @Override

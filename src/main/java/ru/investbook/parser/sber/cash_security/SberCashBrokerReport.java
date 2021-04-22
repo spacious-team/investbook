@@ -16,40 +16,40 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.sber.cash;
+package ru.investbook.parser.sber.cash_security;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
-import ru.investbook.parser.AbstractExcelBrokerReport;
 
-import java.io.InputStream;
-import java.nio.file.Paths;
+@EqualsAndHashCode(of = "toString")
+@ToString(of = "toString", includeFieldNames = false)
+public class SberCashBrokerReport implements BrokerReport {
 
-public class SberCashBrokerReport extends AbstractExcelBrokerReport {
+    @Getter
+    private final ExcelSheet reportPage;
+    private final String toString;
 
-    private final Workbook book;
-
-    public SberCashBrokerReport(String excelFileName, InputStream is) {
-        this.book = getWorkBook(excelFileName, is);
-        ExcelSheet reportPage = new ExcelSheet(book.getSheetAt(0));
+    public SberCashBrokerReport(String excelFileName, Workbook book) {
+        this.reportPage = new ExcelSheet(book.getSheetAt(0));
+        this.toString = excelFileName;
         checkReportFormat(excelFileName, reportPage);
-        setPath(Paths.get(excelFileName));
-        setReportPage(reportPage);
     }
 
     public static void checkReportFormat(String excelFileName, ExcelSheet reportPage) {
         Sheet sheet = reportPage.getSheet();
         if (sheet.getSheetName().equals("Движение ДС") &&
-                sheet.getWorkbook().getSheetAt(1).getSheetName().equals("Движение ЦБ") &&
                 reportPage.getRow(0).getCell(0).getStringValue().equals("Номер договора")) {
             return;
         }
-        throw new RuntimeException("В файле " + excelFileName + " не содержится отчета сделок брокера Сбербанк");
+        throw new RuntimeException("В файле " + excelFileName + " не содержится отчета движения ДС брокера Сбербанк");
     }
 
     @Override
     public void close() throws Exception {
-        this.book.close();
     }
 }

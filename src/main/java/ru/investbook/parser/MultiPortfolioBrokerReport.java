@@ -16,23 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.sber.cash;
+package ru.investbook.parser;
 
 import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.broker.report_parser.api.ReportTables;
-import org.spacious_team.broker.report_parser.api.ReportTablesFactory;
-import org.springframework.stereotype.Component;
 
-@Component
-public class SberCashReportTablesFactory implements ReportTablesFactory {
+import java.util.Set;
 
-    @Override
-    public boolean canCreate(BrokerReport brokerReport) {
-        return brokerReport instanceof SberCashBrokerReport;
-    }
+public interface MultiPortfolioBrokerReport extends BrokerReport {
 
-    @Override
-    public ReportTables create(BrokerReport brokerReport) {
-        return new SberCashReportTables(brokerReport);
-    }
+    Set<String> getPortfolios();
+
 }

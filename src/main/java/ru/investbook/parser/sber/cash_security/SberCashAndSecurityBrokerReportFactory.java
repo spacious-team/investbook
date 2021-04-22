@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.sber.cash;
+package ru.investbook.parser.sber.cash_security;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 @Component
 @Slf4j
-public class SberCashBrokerReportFactory extends AbstractBrokerReportFactory {
+public class SberCashAndSecurityBrokerReportFactory extends AbstractBrokerReportFactory {
 
     @Getter
     private final String brokerName = "Сбербанк";
@@ -37,7 +37,8 @@ public class SberCashBrokerReportFactory extends AbstractBrokerReportFactory {
 
     @Override
     public BrokerReport create(String excelFileName, InputStream is) {
-        BrokerReport brokerReport = create(expectedFileNamePattern, excelFileName, is, SberCashBrokerReport::new);
+        BrokerReport brokerReport = create(expectedFileNamePattern, excelFileName, is,
+                SberCashAndSecurityBrokerReportAdapter::new);
         if (brokerReport != null) {
             log.info("Обнаружен отчет зачислений и списаний '{}' СберБанк брокера", excelFileName);
         }

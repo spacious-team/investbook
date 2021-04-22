@@ -51,6 +51,10 @@ public class ReportParserService {
                 isAdded = api.addPortfolio(Portfolio.builder()
                         .id(((SingleBrokerReport) report).getPortfolio())
                         .build());
+            } else if (report instanceof MultiPortfolioBrokerReport) {
+                isAdded = ((MultiPortfolioBrokerReport) report).getPortfolios()
+                        .stream()
+                        .allMatch(portfolio -> api.addPortfolio(Portfolio.builder().id(portfolio).build()));
             }
             if (isAdded) {
                 ReportTable<PortfolioCash> portfolioCashTable = reportTables.getCashTable();
