@@ -28,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2021.3.3</version>
+    <version>2021.4</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -74,7 +74,7 @@
             <dependency>
                 <groupId>com.github.spacious-team</groupId>
                 <artifactId>table-wrapper-api</artifactId>
-                <version>e458b2c2f4</version>
+                <version>2021.5</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -83,7 +83,7 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>f1e44ebed2</version>
+            <version>2021.5</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
