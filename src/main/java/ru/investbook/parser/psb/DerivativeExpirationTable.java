@@ -20,21 +20,19 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
 
 import static ru.investbook.parser.psb.DerivativeExpirationTable.ExpirationTableHeader.*;
 
 @Slf4j
-class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransaction> {
+class DerivativeExpirationTable extends SingleAbstractReportTable<DerivativeTransaction> {
     private static final String TABLE_NAME = "Исполнение контрактов";
     private static final String TABLE_END_TEXT = "Итого";
 
@@ -43,7 +41,7 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
     }
 
     @Override
-    protected Collection<DerivativeTransaction> getRow(TableRow row) {
+    protected DerivativeTransaction parseRow(TableRow row) {
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         int count = row.getIntCellValue(COUNT);
         String type = row.getStringCellValue(TYPE).toLowerCase();
@@ -64,7 +62,7 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
         BigDecimal commission = row.getBigDecimalCellValue(MARKET_COMMISSION)
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .negate();
-        return Collections.singleton(DerivativeTransaction.builder()
+        return DerivativeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .portfolio(getReport().getPortfolio())
                 .transactionId(String.valueOf(row.getLongCellValue(TRANSACTION)))
@@ -75,7 +73,7 @@ class DerivativeExpirationTable extends AbstractReportTable<DerivativeTransactio
                 .commission(commission)
                 .valueCurrency("RUB") // FORTS, only RUB
                 .commissionCurrency("RUB") // FORTS, only RUB
-                .build());
+                .build();
     }
 
     enum ExpirationTableHeader implements TableColumnDescription {

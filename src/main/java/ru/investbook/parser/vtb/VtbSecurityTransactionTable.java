@@ -20,31 +20,29 @@ package ru.investbook.parser.vtb;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
+import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
 
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
 import static ru.investbook.parser.vtb.VtbSecurityTransactionTable.VtbSecurityTransactionTableHeader.*;
 
-public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTransaction> {
+public class VtbSecurityTransactionTable extends SingleAbstractReportTable<SecurityTransaction> {
 
     private static final String TABLE_NAME = "Завершенные в отчетном периоде сделки с ценными бумагами (обязательства прекращены)";
 
-    protected VtbSecurityTransactionTable(BrokerReport report) {
+    protected VtbSecurityTransactionTable(SingleBrokerReport report) {
         super(report, TABLE_NAME, null, VtbSecurityTransactionTableHeader.class);
     }
 
     @Override
-    protected Collection<SecurityTransaction> getRow(TableRow row) {
+    protected SecurityTransaction parseRow(TableRow row) {
         String isin = row.getStringCellValue(NAME_AND_ISIN).split(",")[2].trim();
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         BigDecimal value = row.getBigDecimalCellValue(VALUE_WITH_ACCRUED_INTEREST);
@@ -62,7 +60,7 @@ public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTra
                 .add(row.getBigDecimalCellValueOrDefault(BROKER_COMMISSION, BigDecimal.ZERO))
                 .negate();
         String currency = VtbBrokerReport.convertToCurrency(row.getStringCellValue(VALUE_CURRENCY));
-        return Collections.singleton(SecurityTransaction.builder()
+        return SecurityTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE))
                 .transactionId(row.getStringCellValue(TRANSACTION))
                 .portfolio(getReport().getPortfolio())
@@ -73,7 +71,7 @@ public class VtbSecurityTransactionTable extends AbstractReportTable<SecurityTra
                 .commission(commission)
                 .valueCurrency(currency)
                 .commissionCurrency(currency)
-                .build());
+                .build();
     }
 
 

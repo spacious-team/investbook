@@ -21,23 +21,21 @@ package ru.investbook.parser.vtb;
 import lombok.Getter;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
+import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.spacious_team.broker.report_parser.api.AbstractReportTables;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
-import org.spacious_team.broker.report_parser.api.EmptyReportTable;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
-import org.spacious_team.broker.report_parser.api.PortfolioCash;
 import org.spacious_team.broker.report_parser.api.ReportTable;
-import org.spacious_team.broker.report_parser.api.ReportTables;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.broker.report_parser.api.WrappingReportTable;
+import ru.investbook.parser.SingleBrokerReport;
 
-public class VtbReportTables implements ReportTables {
-    @Getter
-    private final BrokerReport report;
+public class VtbReportTables extends AbstractReportTables<SingleBrokerReport> {
+
     @Getter
     private final ReportTable<Security> securitiesTable;
     @Getter
@@ -45,8 +43,8 @@ public class VtbReportTables implements ReportTables {
     private final CashFlowEventTable cashFlowEventTable;
     private final VtbSecurityDepositAndWithdrawalTable vtbSecurityDepositAndWithdrawalTable;
 
-    public VtbReportTables(BrokerReport report) {
-        this.report = report;
+    public VtbReportTables(SingleBrokerReport report) {
+        super(report);
         VtbSecuritiesTable vtbSecuritiesTable = new VtbSecuritiesTable(report);
         VtbSecurityFlowTable vtbSecurityFlowTable = new VtbSecurityFlowTable(report);
         this.securitiesTable = WrappingReportTable.of(vtbSecuritiesTable, vtbSecurityFlowTable);
@@ -95,12 +93,12 @@ public class VtbReportTables implements ReportTables {
 
     @Override
     public ReportTable<SecurityEventCashFlow> getDividendTable() {
-        return new EmptyReportTable<>(report);
+        return emptyTable();
     }
-    
+
     @Override
     public ReportTable<SecurityEventCashFlow> getDerivativeCashFlowTable() {
-        return new EmptyReportTable<>(report);
+        return emptyTable();
     }
 
     @Override

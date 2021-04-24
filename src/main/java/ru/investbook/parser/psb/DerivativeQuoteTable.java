@@ -19,18 +19,15 @@
 package ru.investbook.parser.psb;
 
 import org.spacious_team.broker.pojo.SecurityQuote;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collection;
-import java.util.Collections;
 
-import static java.util.Collections.emptyList;
 import static ru.investbook.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.*;
 
-public class DerivativeQuoteTable extends AbstractReportTable<SecurityQuote> {
+public class DerivativeQuoteTable extends SingleAbstractReportTable<SecurityQuote> {
 
     private final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
@@ -40,20 +37,20 @@ public class DerivativeQuoteTable extends AbstractReportTable<SecurityQuote> {
     }
 
     @Override
-    protected Collection<SecurityQuote> getRow(TableRow row) {
+    protected SecurityQuote parseRow(TableRow row) {
         BigDecimal price = row.getBigDecimalCellValue(PRICE);
         BigDecimal tickValue = row.getBigDecimalCellValue(PRICE_TICK_VALUE);
         if (price.compareTo(minValue) < 0 || tickValue.compareTo(minValue) < 0) {
-            return emptyList();
+            return null;
         }
         BigDecimal tick = row.getBigDecimalCellValue(PRICE_TICK);
         BigDecimal quote = price.multiply(tick)
                 .divide(tickValue, 2, RoundingMode.HALF_UP);
-        return Collections.singletonList(SecurityQuote.builder()
+        return SecurityQuote.builder()
                 .security(row.getStringCellValue(CONTRACT))
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .price(price)
-                .build());
+                .build();
     }
 }

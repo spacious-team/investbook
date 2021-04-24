@@ -22,11 +22,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import java.util.Collection;
 import static ru.investbook.parser.psb.DividendTable.DividendTableHeader.*;
 
 @Slf4j
-public class DividendTable extends AbstractReportTable<SecurityEventCashFlow> {
+public class DividendTable extends SingleAbstractReportTable<SecurityEventCashFlow> {
     private static final String TABLE_NAME = "Выплата дивидендов";
     private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
@@ -44,7 +44,7 @@ public class DividendTable extends AbstractReportTable<SecurityEventCashFlow> {
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> getRow(TableRow row) {
+    protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .security(row.getStringCellValue(ISIN))
                 .portfolio(getReport().getPortfolio())

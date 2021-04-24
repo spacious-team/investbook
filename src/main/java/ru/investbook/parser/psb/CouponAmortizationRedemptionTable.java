@@ -22,11 +22,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import java.util.Collection;
 import static ru.investbook.parser.psb.CouponAmortizationRedemptionTable.CouponAndAmortizationTableHeader.*;
 
 @Slf4j
-public class CouponAmortizationRedemptionTable extends AbstractReportTable<SecurityEventCashFlow> {
+public class CouponAmortizationRedemptionTable extends SingleAbstractReportTable<SecurityEventCashFlow> {
 
     private static final String TABLE_NAME = "Погашение купонов и ЦБ";
     private static final String TABLE_END_TEXT = "*Налог удерживается с рублевого брокерского счета";
@@ -46,7 +46,7 @@ public class CouponAmortizationRedemptionTable extends AbstractReportTable<Secur
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> getRow(TableRow row) {
+    protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
         CashFlowType event;
         String action = row.getStringCellValue(TYPE);
         if (action.equalsIgnoreCase("Погашение купона")) {

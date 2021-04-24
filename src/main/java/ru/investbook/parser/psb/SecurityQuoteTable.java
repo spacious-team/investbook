@@ -19,18 +19,15 @@
 package ru.investbook.parser.psb;
 
 import org.spacious_team.broker.pojo.SecurityQuote;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collection;
-import java.util.Collections;
 
-import static java.util.Collections.emptyList;
 import static ru.investbook.parser.psb.SecuritiesTable.SecuritiesTableHeader.*;
 
-public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
+public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote> {
 
     private final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
@@ -40,13 +37,13 @@ public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
     }
 
     @Override
-    protected Collection<SecurityQuote> getRow(TableRow row) {
+    protected SecurityQuote parseRow(TableRow row) {
         if (row.rowContains(SecuritiesTable.INVALID_TEXT)) {
-            return emptyList();
+            return null;
         }
         int count = row.getIntCellValue(OUTGOING);
         if (count == 0) {
-            return emptyList();
+            return null;
         }
         BigDecimal amount = row.getBigDecimalCellValue(AMOUNT);
         BigDecimal price = amount.divide(BigDecimal.valueOf(count), 4, RoundingMode.HALF_UP);
@@ -58,12 +55,12 @@ public class SecurityQuoteTable extends AbstractReportTable<SecurityQuote> {
             price = null;
             accruedInterest = null;
         }
-        return Collections.singletonList(SecurityQuote.builder()
+        return SecurityQuote.builder()
                 .security(row.getStringCellValue(ISIN))
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .price(price)
                 .accruedInterest(accruedInterest)
-                .build());
+                .build();
     }
 }

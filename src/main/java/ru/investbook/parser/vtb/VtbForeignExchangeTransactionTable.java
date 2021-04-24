@@ -19,30 +19,28 @@
 package ru.investbook.parser.vtb;
 
 import lombok.Getter;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
+import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
 
 import static ru.investbook.parser.vtb.VtbForeignExchangeTransactionTable.FxTransactionTableHeader.*;
 
-public class VtbForeignExchangeTransactionTable extends AbstractReportTable<ForeignExchangeTransaction> {
+public class VtbForeignExchangeTransactionTable extends SingleAbstractReportTable<ForeignExchangeTransaction> {
 
     private static final String TABLE_NAME = "Заключенные в отчетном периоде сделки с иностранной валютой";
 
-    protected VtbForeignExchangeTransactionTable(BrokerReport report) {
+    protected VtbForeignExchangeTransactionTable(SingleBrokerReport report) {
         super(report, TABLE_NAME, null, FxTransactionTableHeader.class);
     }
 
     @Override
-    protected Collection<ForeignExchangeTransaction> getRow(TableRow row) {
+    protected ForeignExchangeTransaction parseRow(TableRow row) {
         boolean isBuy = row.getStringCellValue(DIRECTION).trim().equalsIgnoreCase("Покупка");
         BigDecimal value = row.getBigDecimalCellValue(VALUE);
         if (isBuy) {
@@ -51,7 +49,7 @@ public class VtbForeignExchangeTransactionTable extends AbstractReportTable<Fore
         BigDecimal commission = row.getBigDecimalCellValue(MARKET_COMMISSION)
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .negate();
-        return Collections.singletonList(ForeignExchangeTransaction.builder()
+        return ForeignExchangeTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .transactionId(row.getStringCellValue(TRANSACTION))
                 .portfolio(getReport().getPortfolio())
@@ -61,7 +59,7 @@ public class VtbForeignExchangeTransactionTable extends AbstractReportTable<Fore
                 .commission(commission)
                 .valueCurrency(VtbBrokerReport.convertToCurrency(row.getStringCellValue(VALUE_CURRENCY)))
                 .commissionCurrency("RUB")
-                .build());
+                .build();
     }
 
     enum FxTransactionTableHeader implements TableColumnDescription {

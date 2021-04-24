@@ -22,14 +22,13 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.util.CloseIgnoringInputStream;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.spacious_team.broker.report_parser.api.AbstractBrokerReport;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public abstract class AbstractExcelBrokerReport extends AbstractBrokerReport {
 
-    protected Workbook getWorkBook(String excelFileName, InputStream is) {
+    public static Workbook getWorkBook(String excelFileName, InputStream is) {
         try {
             is = new CloseIgnoringInputStream(is); // HSSFWorkbook() constructor close is
             if (excelFileName.endsWith(".xls")) {

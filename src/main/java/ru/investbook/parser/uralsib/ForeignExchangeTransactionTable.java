@@ -20,22 +20,19 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
 
-import static java.util.Collections.emptyList;
 import static ru.investbook.parser.uralsib.ForeignExchangeTransactionTable.FxTransactionTableHeader.*;
 
 @Slf4j
-public class ForeignExchangeTransactionTable extends AbstractReportTable<ForeignExchangeTransaction> {
+public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<ForeignExchangeTransaction> {
     private static final String TABLE_NAME = "Биржевые валютные сделки, совершенные в отчетном периоде";
     private static final String CONTRACT_PREFIX = "Инструмент:";
     private String instrument = null;
@@ -45,7 +42,7 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
     }
 
     @Override
-    protected Collection<ForeignExchangeTransaction> getRow(TableRow row) {
+    protected ForeignExchangeTransaction parseRow(TableRow row) {
         String transactionId;
         Object cellValue = row.getCellValue(TRANSACTION);
         if (cellValue instanceof String) {
@@ -57,16 +54,16 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
                 if (stringValue.startsWith(CONTRACT_PREFIX)) {
                     instrument = stringValue.substring(CONTRACT_PREFIX.length()).trim();
                 }
-                return emptyList();
+                return null;
             }
         } else if (cellValue instanceof Number) {
             // double
             transactionId = String.valueOf(((Number) cellValue).longValue());
         } else {
-            return emptyList();
+            return null;
         }
         if (instrument == null || instrument.isEmpty()) {
-            return emptyList();
+            return null;
         }
 
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
@@ -78,8 +75,8 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .negate();
 
-        return Collections.singletonList(ForeignExchangeTransaction.builder()
-                .timestamp(getReport().convertToInstant(row.getStringCellValue(DATE_TIME)))
+        return ForeignExchangeTransaction.builder()
+                .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .transactionId(transactionId)
                 .portfolio(getReport().getPortfolio())
                 .security(instrument)
@@ -88,7 +85,7 @@ public class ForeignExchangeTransactionTable extends AbstractReportTable<Foreign
                 .commission(commission)
                 .valueCurrency(UralsibBrokerReport.convertToCurrency(row.getStringCellValue(VALUE_CURRENCY)))
                 .commissionCurrency("RUB")
-                .build());
+                .build();
     }
 
     enum FxTransactionTableHeader implements TableColumnDescription {

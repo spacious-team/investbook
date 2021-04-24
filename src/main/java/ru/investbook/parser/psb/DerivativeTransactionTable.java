@@ -20,23 +20,22 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 import static ru.investbook.parser.psb.DerivativeTransactionTable.FortsTableHeader.*;
 
 @Slf4j
-public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTransaction> {
+public class DerivativeTransactionTable extends SingleAbstractReportTable<DerivativeTransaction> {
     private static final String TABLE_NAME = "Информация о заключенных сделках";
     private static final String TABLE_END_TEXT = "Итого";
 
@@ -53,7 +52,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
     }
 
     @Override
-    protected Collection<DerivativeTransaction> getRow(TableRow row) {
+    protected DerivativeTransaction parseRow(TableRow row) {
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         int count = row.getIntCellValue(COUNT);
         String type = row.getStringCellValue(TYPE).toLowerCase();
@@ -77,7 +76,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
         BigDecimal commission = row.getBigDecimalCellValue(MARKET_COMMISSION)
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .negate();
-        return Collections.singleton(DerivativeTransaction.builder()
+        return DerivativeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .transactionId(String.valueOf(row.getLongCellValue(TRANSACTION))) // double numbers
                 .portfolio(getReport().getPortfolio())
@@ -88,7 +87,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
                 .commission(commission)
                 .valueCurrency("RUB") // FORTS, only RUB
                 .commissionCurrency("RUB") // FORTS, only RUB
-                .build());
+                .build();
     }
 
     enum FortsTableHeader implements TableColumnDescription {

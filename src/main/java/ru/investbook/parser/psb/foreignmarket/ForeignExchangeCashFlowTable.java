@@ -22,12 +22,12 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -37,7 +37,7 @@ import static java.util.Collections.singletonList;
 import static ru.investbook.parser.psb.foreignmarket.ForeignExchangeCashFlowTable.FxCashFlowTableHeader.*;
 
 @Slf4j
-public class ForeignExchangeCashFlowTable extends AbstractReportTable<EventCashFlow> {
+public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
 
     private static final String TABLE_NAME = "Информация об операциях с активами";
     private static final String BROKER_COMMISSION = "Комиссия брокера";
@@ -55,20 +55,17 @@ public class ForeignExchangeCashFlowTable extends AbstractReportTable<EventCashF
     }
 
     @Override
-    protected Collection<EventCashFlow> getRow(TableRow row) {
+    protected EventCashFlow parseRow(TableRow row) {
         String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         boolean isPositive;
         switch (action) {
-            case "ввод дс":
-                isPositive = true;
-                break;
-            case "вывод дс":
-                isPositive = false;
-                break;
-            default:
+            case "ввод дс" -> isPositive = true;
+            case "вывод дс" -> isPositive = false;
+            default -> {
                 log.debug("Не известный тип операции '{}' в таблице '{}'", action, row.getTable());
-                return emptyList();
+                return null;
+            }
         }
         String currency;
         BigDecimal value = row.getBigDecimalCellValue(RUB);
@@ -83,18 +80,18 @@ public class ForeignExchangeCashFlowTable extends AbstractReportTable<EventCashF
                 if (value.compareTo(min) > 0) {
                     currency = "EUR";
                 } else {
-                    return emptyList();
+                    return null;
                 }
             }
         }
-        return singletonList(EventCashFlow.builder()
+        return EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(CashFlowType.CASH)
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                 .value(value.multiply(BigDecimal.valueOf(isPositive ? 1 : -1)))
                 .currency(currency)
                 .description("Операция по валютному счету")
-                .build());
+                .build();
     }
 
     private Collection<EventCashFlow> getDailyBrokerCommission() {

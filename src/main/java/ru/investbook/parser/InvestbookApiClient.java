@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.pojo.Security;
@@ -32,8 +33,6 @@ import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
-import org.spacious_team.broker.report_parser.api.PortfolioCash;
-import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,8 +47,16 @@ import ru.investbook.api.SecurityRestController;
 import ru.investbook.api.TransactionCashFlowRestController;
 import ru.investbook.api.TransactionRestController;
 
+import java.time.Instant;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Supplier;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import static ru.investbook.repository.RepositoryHelper.isUniqIndexViolationException;
 
 @Component
@@ -136,6 +143,29 @@ public class InvestbookApiClient {
                 "Не могу добавить информацию о движении денежных средств " + securityEventCashFlow);
     }
 
+    // TODO replace by storing to new 'portfolio_cash' table
+    @Deprecated
+    public void addPortfolioCash(Collection<PortfolioCash> cash) {
+        try {
+            Map<Entry<String, Instant>, List<PortfolioCash>> groupedCash = cash.stream()
+                    .collect(
+                            groupingBy(
+                                    v -> new SimpleEntry<>(v.getPortfolio(), v.getTimestamp()),
+                                    toList()));
+            groupedCash.entrySet()
+                    .stream()
+                    .map(e -> PortfolioProperty.builder()
+                            .portfolio(e.getKey().getKey())
+                            .timestamp(e.getKey().getValue())
+                            .property(PortfolioPropertyType.CASH)
+                            .value(PortfolioCash.serialize(e.getValue()))
+                            .build())
+                    .forEach(this::addPortfolioProperty);
+        } catch (Exception e) {
+            log.warn("Не могу добавить информацию о наличных средствах {}", cash, e);
+        }
+    }
+
     public void addPortfolioProperty(PortfolioProperty property) {
         handlePost(
                 () -> portfolioPropertyRestController.post(property),
@@ -152,21 +182,6 @@ public class InvestbookApiClient {
         handlePost(
                 () -> foreignExchangeRateRestController.post(exchangeRate),
                 "Не могу добавить информацию о курсе валюты " + exchangeRate);
-    }
-
-    public void addCashInfo(ReportTable<PortfolioCash> cashTable) {
-        try {
-            if (!cashTable.getData().isEmpty()) {
-                addPortfolioProperty(PortfolioProperty.builder()
-                        .portfolio(cashTable.getReport().getPortfolio())
-                        .property(PortfolioPropertyType.CASH)
-                        .value(PortfolioCash.serialize(cashTable.getData()))
-                        .timestamp(cashTable.getReport().getReportEndDateTime())
-                        .build());
-            }
-        } catch (Exception e) {
-            log.warn("Не могу добавить информацию о наличных средствах {}", cashTable.getData(), e);
-        }
     }
 
     /**

@@ -32,6 +32,6 @@ public class VtbReportTablesFactory implements ReportTablesFactory {
 
     @Override
     public ReportTables create(BrokerReport brokerReport) {
-        return new VtbReportTables(brokerReport);
+        return new VtbReportTables((VtbBrokerReport) brokerReport);
     }
 }

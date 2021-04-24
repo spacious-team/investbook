@@ -19,13 +19,11 @@
 package ru.investbook.parser.uralsib;
 
 import org.spacious_team.broker.pojo.Security;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static ru.investbook.parser.uralsib.SecurityRedemptionTable.SecurityFlowTableHeader.*;
@@ -33,7 +31,7 @@ import static ru.investbook.parser.uralsib.SecurityRedemptionTable.SecurityFlowT
 /**
  * Ввод и вывод ценных бумаг со счета
  */
-public class SecurityDepositAndWithdrawalTable extends AbstractReportTable<SecurityTransaction> {
+public class SecurityDepositAndWithdrawalTable extends SingleAbstractReportTable<SecurityTransaction> {
     private static final String TABLE_NAME = SecurityRedemptionTable.TABLE_NAME;
     private static final String IN_DESCRIPTION = "ввод цб";
     private static final String OUT_DESCRIPTION = "вывод цб";
@@ -45,12 +43,12 @@ public class SecurityDepositAndWithdrawalTable extends AbstractReportTable<Secur
     }
 
     @Override
-    protected Collection<SecurityTransaction> getRow(TableRow row) {
+    protected SecurityTransaction parseRow(TableRow row) {
         String operation = row.getStringCellValue(OPERATION);
         if (!operation.equalsIgnoreCase(IN_DESCRIPTION) && !operation.equalsIgnoreCase(OUT_DESCRIPTION)) {
-            return Collections.emptyList();
+            return null;
         }
-        return Collections.singletonList(SecurityTransaction.builder()
+        return SecurityTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                 .transactionId(row.getStringCellValue(ID))
                 .portfolio(getReport().getPortfolio())
@@ -61,7 +59,7 @@ public class SecurityDepositAndWithdrawalTable extends AbstractReportTable<Secur
                 .commission(BigDecimal.ZERO)
                 .valueCurrency("RUB")
                 .commissionCurrency("RUB")
-                .build());
+                .build();
     }
 
     private Security getSecurity(TableRow row) {

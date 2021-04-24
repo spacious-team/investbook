@@ -19,15 +19,15 @@
 package ru.investbook.parser.psb.foreignmarket;
 
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.Table;
+import ru.investbook.parser.SingleBrokerReport;
 import ru.investbook.parser.psb.PortfolioPropertyTable;
 
 import java.util.Collection;
 
 public class ForeignExchangeRateTable extends ru.investbook.parser.psb.ForeignExchangeRateTable {
 
-    public ForeignExchangeRateTable(BrokerReport report) {
+    public ForeignExchangeRateTable(SingleBrokerReport report) {
         super(report);
     }
 

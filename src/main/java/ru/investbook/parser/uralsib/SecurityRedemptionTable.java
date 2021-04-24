@@ -19,25 +19,22 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.time.Instant;
 import java.util.AbstractMap;
-import java.util.Collection;
-import java.util.Map;
+import java.util.Map.Entry;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static ru.investbook.parser.uralsib.SecurityRedemptionTable.SecurityFlowTableHeader.*;
 
 /**
  * Builds list of (security name; redemption date) tuples
  */
-public class SecurityRedemptionTable extends AbstractReportTable<Map.Entry<String, Instant>> {
+public class SecurityRedemptionTable extends SingleAbstractReportTable<Entry<String, Instant>> {
     static final String TABLE_NAME = "ДВИЖЕНИЕ ЦЕННЫХ БУМАГ ЗА ОТЧЕТНЫЙ ПЕРИОД";
     private static final String REDEMPTION_DESCRIPTION = "Списание ЦБ после погашения";
 
@@ -46,12 +43,12 @@ public class SecurityRedemptionTable extends AbstractReportTable<Map.Entry<Strin
     }
 
     @Override
-    protected Collection<Map.Entry<String, Instant>> getRow(TableRow row) {
+    protected Entry<String, Instant> parseRow(TableRow row) {
         return row.getStringCellValue(OPERATION).equalsIgnoreCase(REDEMPTION_DESCRIPTION) ?
-                singletonList(new AbstractMap.SimpleEntry<>(
+                new AbstractMap.SimpleEntry<>(
                         row.getStringCellValue(NAME),
-                        convertToInstant(row.getStringCellValue(DATE)))) :
-                emptyList();
+                        convertToInstant(row.getStringCellValue(DATE))) :
+                null;
     }
 
     enum SecurityFlowTableHeader implements TableColumnDescription {

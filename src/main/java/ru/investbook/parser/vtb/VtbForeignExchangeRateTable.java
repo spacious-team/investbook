@@ -20,9 +20,9 @@ package ru.investbook.parser.vtb;
 
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.broker.report_parser.api.InitializableReportTable;
 import ru.investbook.parser.CurrencyPair;
+import ru.investbook.parser.SingleBrokerReport;
+import ru.investbook.parser.SingleInitializableReportTable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -34,14 +34,14 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 
 @Slf4j
-public class VtbForeignExchangeRateTable extends InitializableReportTable<ForeignExchangeRate> {
+public class VtbForeignExchangeRateTable extends SingleInitializableReportTable<ForeignExchangeRate> {
 
     private static final String USD_EXCHANGE_RATE = "Курс USD (по курсу ЦБ на конечную дату отчета)";
     private static final String EUR_EXCHANGE_RATE = "Курс EUR (по курсу ЦБ на конечную дату отчета)";
     private static final String CHF_EXCHANGE_RATE = "Курс CHF (по курсу ЦБ на конечную дату отчета)";
     private static final String GBP_EXCHANGE_RATE = "Курс GBP (по курсу ЦБ на конечную дату отчета)";
 
-    public VtbForeignExchangeRateTable(BrokerReport report) {
+    public VtbForeignExchangeRateTable(SingleBrokerReport report) {
         super(report);
     }
 
@@ -76,7 +76,7 @@ public class VtbForeignExchangeRateTable extends InitializableReportTable<Foreig
                     .rate(rate)
                     .build());
         } catch (Exception e) {
-            log.debug("Не удалось распарсить '{}' из {}", rowHeader, getReport().getPath());
+            log.debug("Не удалось распарсить '{}' из отчета {}", rowHeader, getReport());
             return emptyList();
         }
     }

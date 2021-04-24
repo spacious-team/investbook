@@ -20,10 +20,10 @@ package ru.investbook.parser.uralsib;
 
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.broker.report_parser.api.InitializableReportTable;
 import org.spacious_team.table_wrapper.api.TableCell;
 import org.spacious_team.table_wrapper.api.TableCellAddress;
+import ru.investbook.parser.SingleBrokerReport;
+import ru.investbook.parser.SingleInitializableReportTable;
 import ru.investbook.report.ForeignExchangeRateService;
 
 import java.math.BigDecimal;
@@ -38,7 +38,7 @@ import static java.lang.Double.parseDouble;
 import static java.util.Collections.emptyList;
 
 @Slf4j
-public class ForeignExchangeRateTable extends InitializableReportTable<ForeignExchangeRate> {
+public class ForeignExchangeRateTable extends SingleInitializableReportTable<ForeignExchangeRate> {
     private static final String EXCHANGE_RATE = "Официальный обменный курс";
     private final ForeignExchangeRateService foreignExchangeRateService;
 
@@ -50,7 +50,7 @@ public class ForeignExchangeRateTable extends InitializableReportTable<ForeignEx
     @Override
     protected Collection<ForeignExchangeRate> parseTable() {
         try {
-            BrokerReport report = getReport();
+            SingleBrokerReport report = getReport();
             TableCellAddress address = report.getReportPage().find(EXCHANGE_RATE);
             if (address == TableCellAddress.NOT_FOUND) {
                 return emptyList();
@@ -77,7 +77,7 @@ public class ForeignExchangeRateTable extends InitializableReportTable<ForeignEx
             }
             return exchangeRates;
         } catch (Exception e) {
-            log.debug("Не могу найти обменный курс в файле {}", getReport().getPath().getFileName(), e);
+            log.debug("Не могу найти обменный курс в отчете {}", getReport(), e);
             return emptyList();
         }
     }
