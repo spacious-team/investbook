@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 public class SberTrBrokerReportFactory extends AbstractBrokerReportFactory {
 
     @Getter
-    private final String brokerName = "Сбербанк";
+    private final String brokerName = "Сбербанк Онлайн (сделки)";
     private final Pattern expectedFileNamePattern = Pattern.compile("^Сделки_.*");
 
     @Override
