@@ -139,10 +139,14 @@ public class ExcelChartPlotHelper {
     }
 
     static CellRangeAddress nonEmptyCellRangeAddress(Sheet sheet, int firstRow, int lastRow, int firstCol, int lastCol) {
+        int count = 0;
         for (int i = firstRow; i <= lastRow; i++) {
             Row row = sheet.getRow(i);
             for (int j = firstCol; j <= lastCol; j++) {
                 if (row.getCell(j) != null) {
+                    count++;
+                }
+                if (count > 1) { // for plotting graph 2 or more values requires
                     return new CellRangeAddress(firstRow, lastRow, firstCol, lastCol);
                 }
             }
