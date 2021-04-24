@@ -22,24 +22,19 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
-import ru.investbook.parser.MultiPortfolioBrokerReport;
 
 import java.io.InputStream;
-import java.util.Set;
 
 import static ru.investbook.parser.AbstractExcelBrokerReport.getWorkBook;
-import static ru.investbook.parser.sber.SberBrokerReportHelper.findPortfolios;
 
 @EqualsAndHashCode(of = "toString")
 @ToString(of = "toString", includeFieldNames = false)
-public class SberTrBrokerReport implements MultiPortfolioBrokerReport {
+public class SberTrBrokerReport implements BrokerReport {
 
     @Getter
     private final ExcelSheet reportPage;
-
-    @Getter
-    private final Set<String> portfolios;
 
     private final Workbook book;
     private final String toString;
@@ -47,9 +42,8 @@ public class SberTrBrokerReport implements MultiPortfolioBrokerReport {
     public SberTrBrokerReport(String excelFileName, InputStream is) {
         this.book = getWorkBook(excelFileName, is);
         this.reportPage = new ExcelSheet(book.getSheetAt(0));
-        checkReportFormat(excelFileName, reportPage);
         this.toString = excelFileName;
-        this.portfolios = findPortfolios(reportPage);
+        checkReportFormat(excelFileName, reportPage);
     }
 
     public static void checkReportFormat(String excelFileName, ExcelSheet reportPage) {
