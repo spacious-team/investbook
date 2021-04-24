@@ -69,17 +69,18 @@ public class AssetsTable extends SingleInitializableReportTable<PortfolioPropert
                 return emptyList();
             }
 
-            TableRow row = table.findRow(ASSETS);
-            if (row == null) {
-                return emptyList();
-            }
+            TableRow row = table.stream()
+                    .filter(tableRow -> tableRow.rowContains(ASSETS))
+                    .findAny()
+                    .orElse(null);
 
-            return singletonList(PortfolioProperty.builder()
-                    .portfolio(report.getPortfolio())
-                    .timestamp(report.getReportEndDateTime())
-                    .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
-                    .value(row.getBigDecimalCellValue(RUB).toString())
-                    .build());
+            return (row == null) ? emptyList() :
+                    singletonList(PortfolioProperty.builder()
+                            .portfolio(report.getPortfolio())
+                            .timestamp(report.getReportEndDateTime())
+                            .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
+                            .value(row.getBigDecimalCellValue(RUB).toString())
+                            .build());
         } catch (Exception e) {
             log.info("Не могу распарсить таблицу '{}' из отчета {}", ASSETS_TABLE, getReport(), e);
             return emptyList();
