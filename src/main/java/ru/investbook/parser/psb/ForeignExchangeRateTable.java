@@ -20,11 +20,11 @@ package ru.investbook.parser.psb;
 
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.broker.report_parser.api.InitializableReportTable;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.CurrencyPair;
+import ru.investbook.parser.SingleBrokerReport;
+import ru.investbook.parser.SingleInitializableReportTable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -36,11 +36,11 @@ import static java.util.Collections.singletonList;
 import static ru.investbook.parser.psb.PortfolioPropertyTable.SummaryTableHeader.*;
 
 @Slf4j
-public class ForeignExchangeRateTable extends InitializableReportTable<ForeignExchangeRate> {
+public class ForeignExchangeRateTable extends SingleInitializableReportTable<ForeignExchangeRate> {
     public static final String EXCHANGE_RATE_ROW = "Курс валют ЦБ РФ";
     private final BigDecimal min = BigDecimal.valueOf(0.01);
 
-    public ForeignExchangeRateTable(BrokerReport report) {
+    public ForeignExchangeRateTable(SingleBrokerReport report) {
         super(report);
     }
 
@@ -63,7 +63,7 @@ public class ForeignExchangeRateTable extends InitializableReportTable<ForeignEx
             rates.addAll(createExchangeRateProperty(row, CHF, CurrencyPair.CHFRUB));
             return rates;
         } catch (Exception e) {
-            log.info("Ошибка поиска стоимости активов или обменного курса в файле {}", getReport().getPath().getFileName(), e);
+            log.info("Ошибка поиска стоимости активов или обменного курса в отчете {}", getReport(), e);
             return emptyList();
         }
     }

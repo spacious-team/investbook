@@ -19,11 +19,11 @@
 package ru.investbook.parser.psb.foreignmarket;
 
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.broker.report_parser.api.InitializableReportTable;
-import org.spacious_team.broker.report_parser.api.PortfolioCash;
+import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleBrokerReport;
+import ru.investbook.parser.SingleInitializableReportTable;
 import ru.investbook.parser.psb.PortfolioPropertyTable;
 
 import java.math.BigDecimal;
@@ -36,11 +36,11 @@ import static ru.investbook.parser.psb.PortfolioPropertyTable.SummaryTableHeader
 import static ru.investbook.parser.psb.foreignmarket.ForeignExchangePortfolioPropertyTable.ASSETS;
 
 @Slf4j
-public class ForeignExchangeCashTable extends InitializableReportTable<PortfolioCash> {
+public class ForeignExchangeCashTable extends SingleInitializableReportTable<PortfolioCash> {
 
     private final PortfolioPropertyTable.SummaryTableHeader[] CURRENCIES = new PortfolioPropertyTable.SummaryTableHeader[]{ RUB, USD, EUR, GBP, CHF };
 
-    public ForeignExchangeCashTable(BrokerReport report) {
+    public ForeignExchangeCashTable(SingleBrokerReport report) {
         super(report);
     }
 
@@ -56,6 +56,8 @@ public class ForeignExchangeCashTable extends InitializableReportTable<Portfolio
             BigDecimal cash = row.getBigDecimalCellValueOrDefault(currency, null);
             if (cash != null) {
                 cashes.add(PortfolioCash.builder()
+                        .portfolio(getReport().getPortfolio())
+                        .timestamp(getReport().getReportEndDateTime())
                         .section("валютный рынок")
                         .value(cash)
                         .currency(currency.name())

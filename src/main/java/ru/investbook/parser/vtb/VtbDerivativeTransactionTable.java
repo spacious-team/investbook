@@ -19,31 +19,28 @@
 package ru.investbook.parser.vtb;
 
 import lombok.Getter;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
+import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
 
 import static ru.investbook.parser.vtb.VtbDerivativeTransactionTable.VtbDerivativeTransactionTableHeader.*;
 
-public class VtbDerivativeTransactionTable extends AbstractReportTable<DerivativeTransaction> {
+public class VtbDerivativeTransactionTable extends SingleAbstractReportTable<DerivativeTransaction> {
 
     private static final String TABLE_NAME = "Сделки с Производными финансовыми инструментами в отчетном периоде";
 
-    protected VtbDerivativeTransactionTable(BrokerReport report) {
+    protected VtbDerivativeTransactionTable(SingleBrokerReport report) {
         super(report, TABLE_NAME, null, VtbDerivativeTransactionTableHeader.class);
     }
 
     @Override
-    protected Collection<DerivativeTransaction> getRow(TableRow row) {
-
+    protected DerivativeTransaction parseRow(TableRow row) {
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         int count = row.getIntCellValue(COUNT);
         BigDecimal valueInPoints = row.getBigDecimalCellValue(QUOTE).multiply(BigDecimal.valueOf(count));
@@ -53,7 +50,7 @@ public class VtbDerivativeTransactionTable extends AbstractReportTable<Derivativ
         BigDecimal commission = row.getBigDecimalCellValue(BROKER_CLEARING_COMMISSION)
                 .add(row.getBigDecimalCellValue(BROKER_TRANSACTION_COMMISSION))
                 .negate();
-        return Collections.singleton(DerivativeTransaction.builder()
+        return DerivativeTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .transactionId(row.getStringCellValue(TRANSACTION))
                 .portfolio(getReport().getPortfolio())
@@ -62,7 +59,7 @@ public class VtbDerivativeTransactionTable extends AbstractReportTable<Derivativ
                 .valueInPoints(valueInPoints)
                 .commission(commission)
                 .commissionCurrency("RUB") // FORTS, only RUB
-                .build());
+                .build();
     }
 
     enum VtbDerivativeTransactionTableHeader implements TableColumnDescription {

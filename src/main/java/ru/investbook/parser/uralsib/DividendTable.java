@@ -46,7 +46,7 @@ public class DividendTable extends PaymentsTable {
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> getRow(TableRow row) {
+    protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
         String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         String description = row.getStringCellValueOrDefault(DESCRIPTION, "");
@@ -57,7 +57,7 @@ public class DividendTable extends PaymentsTable {
 
         Security security = getSecurity(row, CashFlowType.DIVIDEND);
         if (security == null) return emptyList();
-        Instant timestamp = getReport().convertToInstant(row.getStringCellValue(DATE));
+        Instant timestamp = convertToInstant(row.getStringCellValue(DATE));
 
         BigDecimal tax = getTax(row);
         BigDecimal value = row.getBigDecimalCellValue(VALUE)

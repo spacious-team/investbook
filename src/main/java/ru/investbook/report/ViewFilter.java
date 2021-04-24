@@ -21,7 +21,7 @@ package ru.investbook.report;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import ru.investbook.web.ViewFilterModel;
+import ru.investbook.web.model.ViewFilterModel;
 
 import java.time.Instant;
 import java.time.LocalDate;

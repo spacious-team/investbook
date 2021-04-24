@@ -22,22 +22,20 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.springframework.util.StringUtils;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.util.Collection;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static ru.investbook.parser.psb.CashFlowTable.CashFlowTableHeader.*;
 
 @Slf4j
-public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
+public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
 
     private static final String TABLE_NAME = "Внешнее движение денежных средств в валюте счета";
 
@@ -46,7 +44,7 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
     }
 
     @Override
-    protected Collection<EventCashFlow> getRow(TableRow row) {
+    protected EventCashFlow parseRow(TableRow row) {
         String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         CashFlowType type = CashFlowType.CASH;
@@ -63,13 +61,13 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
                 type = CashFlowType.TAX;
                 break;
             default:
-                return emptyList();
+                return null;
         }
         if (type == CashFlowType.CASH && !row.getStringCellValue(DESCRIPTION).isEmpty()) {
-            return emptyList(); // cash in/out records has no description
+            return null; // cash in/out records has no description
         }
         String description = row.getStringCellValueOrDefault(DESCRIPTION, null);
-        return singletonList(EventCashFlow.builder()
+        return EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(type)
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
@@ -77,7 +75,7 @@ public class CashFlowTable extends AbstractReportTable<EventCashFlow> {
                         .multiply(BigDecimal.valueOf(isPositive ? 1 : -1)))
                 .currency(row.getStringCellValue(CURRENCY))
                 .description(StringUtils.hasLength(description) ? description : null)
-                .build());
+                .build();
     }
 
     @Override

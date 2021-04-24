@@ -23,44 +23,43 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.springframework.util.StringUtils;
+import ru.investbook.parser.SingleAbstractReportTable;
+import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static ru.investbook.parser.vtb.CashFlowEventTable.VtbCashFlowTableHeader.*;
 
-public class CashFlowEventTable extends AbstractReportTable<CashFlowEventTable.CashFlowEvent> {
+public class CashFlowEventTable extends SingleAbstractReportTable<CashFlowEventTable.CashFlowEvent> {
     private static final String TABLE_NAME = "Движение денежных средств";
     private boolean isSubaccountPaymentsRemoved = false;
 
-    public CashFlowEventTable(BrokerReport report) {
+    public CashFlowEventTable(SingleBrokerReport report) {
         super(report, TABLE_NAME, null, VtbCashFlowTableHeader.class);
     }
 
     @Override
-    protected Collection<CashFlowEvent> getRow(TableRow row) {
+    protected CashFlowEvent parseRow(TableRow row) {
         String operation = row.getStringCellValueOrDefault(OPERATION, null);
         if (operation == null) {
-            return Collections.emptyList();
+            return null;
         }
-        return Collections.singleton(CashFlowEvent.builder()
+        return CashFlowEvent.builder()
                 .date(row.getInstantCellValue(DATE))
                 .operation(operation.toLowerCase().trim())
                 .value(row.getBigDecimalCellValue(VALUE))
                 .currency(VtbBrokerReport.convertToCurrency(row.getStringCellValue(CURRENCY)))
                 .description(row.getStringCellValueOrDefault(DESCRIPTION, ""))
-                .build());
+                .build();
     }
 
     @Override

@@ -16,24 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.web;
+package ru.investbook.parser;
 
-import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.spacious_team.broker.report_parser.api.InitializableReportTable;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
+/**
+ * Report table reading information from {@link SingleBrokerReport}
+ */
+public abstract class SingleInitializableReportTable<T>  extends InitializableReportTable<T> {
 
-@Data
-public class ViewFilterModel {
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate fromDate = LocalDate.of(1997, 9, 22);
+    public SingleInitializableReportTable(SingleBrokerReport report) {
+        super(report);
+    }
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate toDate = LocalDate.now();
-
-    private Collection<String> portfolios = Collections.emptySet();
-
+    @Override
+    public SingleBrokerReport getReport() {
+        return (SingleBrokerReport) super.getReport();
+    }
 }

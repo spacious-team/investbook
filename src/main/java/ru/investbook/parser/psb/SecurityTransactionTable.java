@@ -20,13 +20,13 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.report_parser.api.InitializableReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleInitializableReportTable;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ import java.util.List;
 import static ru.investbook.parser.psb.SecurityTransactionTable.TransactionTableHeader.*;
 
 @Slf4j
-public class SecurityTransactionTable extends InitializableReportTable<SecurityTransaction> {
+public class SecurityTransactionTable extends SingleInitializableReportTable<SecurityTransaction> {
     private static final String TABLE1_NAME = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами в дату заключения";
     private static final String TABLE2_NAME = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами Т+, рассчитанные в отчетном периоде";
     private static final String TABLE_END_TEXT = "Итого оборот";
@@ -58,7 +58,7 @@ public class SecurityTransactionTable extends InitializableReportTable<SecurityT
         return getReport().getReportPage()
                 .create(tableName, TABLE_END_TEXT, TransactionTableHeader.class)
                 .excludeTotalRow()
-                .getData(getReport().getPath(), this::getTransaction);
+                .getData(getReport(), this::getTransaction);
     }
 
     private SecurityTransaction getTransaction(TableRow row) {

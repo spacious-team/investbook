@@ -24,9 +24,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
-import org.spacious_team.broker.report_parser.api.PortfolioCash;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.converter.PortfolioPropertyConverter;
@@ -351,7 +351,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         // date-time -> summed values
         LinkedHashMap<Instant, BigDecimal> allPortfolioSummedValues = new LinkedHashMap<>();
         for (PortfolioProperty property : assets) {
-            lastTotalAssets.put(property.getPortfolio(), BigDecimal.valueOf(parseDouble(property.getValue())));
+            lastTotalAssets.put(property.getPortfolio(), getAssets(property));
             if (lastTotalAssets.size() >= portfolioCount) {
                 BigDecimal sum = lastTotalAssets.values()
                         .stream()
@@ -360,6 +360,15 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
             }
         }
         return allPortfolioSummedValues;
+    }
+
+    private BigDecimal getAssets(PortfolioProperty property) {
+        try {
+            return BigDecimal.valueOf(parseDouble(property.getValue()));
+        } catch (Exception e) {
+            log.error("В поле актив ожидается число: {}", property);
+            return BigDecimal.ZERO;
+        }
     }
 
     /**

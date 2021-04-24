@@ -21,46 +21,44 @@ package ru.investbook.parser.vtb;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.Security;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
+import ru.investbook.parser.SingleBrokerReport;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import static ru.investbook.parser.vtb.VtbSecuritiesTable.VtbSecuritiesTableHeader.NAME_REGNUMBER_ISIN;
 import static ru.investbook.parser.vtb.VtbSecuritiesTable.VtbSecuritiesTableHeader.SECTION;
 
-public class VtbSecuritiesTable extends AbstractReportTable<Security> {
+public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
 
     static final String TABLE_NAME = "Отчет об остатках ценных бумаг";
     static final String TABLE_FOOTER = "ИТОГО:";
     // security registration number -> isin
     private final Map<String, String> securityRegNumberToIsin = new HashMap<>();
 
-    protected VtbSecuritiesTable(BrokerReport report) {
+    protected VtbSecuritiesTable(SingleBrokerReport report) {
         super(report, TABLE_NAME, TABLE_FOOTER, VtbSecuritiesTableHeader.class);
     }
 
     @Override
-    protected Collection<Security> getRow(TableRow row) {
+    protected Security parseRow(TableRow row) {
         if (row.getCellValue(SECTION) == null) {
-            return Collections.emptyList(); // sub-header row
+            return null; // sub-header row
         }
         String[] description = row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",");
         String name = description[0].trim();
         String registrationNumber = description[1].toUpperCase().trim();
         String isin = description[2].toUpperCase().trim();
         securityRegNumberToIsin.put(registrationNumber, isin);
-        return Collections.singleton(Security.builder()
+        return Security.builder()
                 .id(isin)
                 .name(name)
-                .build());
+                .build();
     }
 
     public Map<String, String> getSecurityRegNumberToIsin() {

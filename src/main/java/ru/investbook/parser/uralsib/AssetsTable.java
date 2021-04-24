@@ -23,8 +23,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.broker.report_parser.api.InitializableReportTable;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
 import org.spacious_team.table_wrapper.api.Table;
@@ -32,6 +30,8 @@ import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleBrokerReport;
+import ru.investbook.parser.SingleInitializableReportTable;
 
 import java.util.Collection;
 
@@ -44,7 +44,7 @@ import static ru.investbook.parser.uralsib.AssetsTable.SummaryTableHeader.RUB;
  * In that case assets should be calculated by {@link CashTable}.
  */
 @Slf4j
-public class AssetsTable extends InitializableReportTable<PortfolioProperty> {
+public class AssetsTable extends SingleInitializableReportTable<PortfolioProperty> {
     private static final String ASSETS_TABLE = "ОЦЕНКА АКТИВОВ";
     private static final String TABLE_FIRST_HEADER_LINE = "На конец отчетного периода";
     private static final String TABLE_SECOND_HEADER_LINE = "по цене закрытия";
@@ -57,7 +57,7 @@ public class AssetsTable extends InitializableReportTable<PortfolioProperty> {
     @Override
     protected Collection<PortfolioProperty> parseTable() {
         try {
-            BrokerReport report = getReport();
+            SingleBrokerReport report = getReport();
             Table table = report.getReportPage()
                     .createNameless(ASSETS_TABLE, TABLE_FIRST_HEADER_LINE, SummaryTableHeader.class, 3);
             if (table.isEmpty()) {
@@ -69,19 +69,20 @@ public class AssetsTable extends InitializableReportTable<PortfolioProperty> {
                 return emptyList();
             }
 
-            TableRow row = table.findRow(ASSETS);
-            if (row == null) {
-                return emptyList();
-            }
+            TableRow row = table.stream()
+                    .filter(tableRow -> tableRow.rowContains(ASSETS))
+                    .findAny()
+                    .orElse(null);
 
-            return singletonList(PortfolioProperty.builder()
-                    .portfolio(report.getPortfolio())
-                    .timestamp(report.getReportEndDateTime())
-                    .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
-                    .value(row.getBigDecimalCellValue(RUB).toString())
-                    .build());
+            return (row == null) ? emptyList() :
+                    singletonList(PortfolioProperty.builder()
+                            .portfolio(report.getPortfolio())
+                            .timestamp(report.getReportEndDateTime())
+                            .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
+                            .value(row.getBigDecimalCellValue(RUB).toString())
+                            .build());
         } catch (Exception e) {
-            log.info("Не могу распарсить таблицу '{}' в файле {}", ASSETS_TABLE, getReport().getPath().getFileName(), e);
+            log.info("Не могу распарсить таблицу '{}' из отчета {}", ASSETS_TABLE, getReport(), e);
             return emptyList();
         }
     }

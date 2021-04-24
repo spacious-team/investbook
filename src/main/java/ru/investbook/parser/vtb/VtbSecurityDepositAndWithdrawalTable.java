@@ -18,33 +18,31 @@
 
 package ru.investbook.parser.vtb;
 
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
+import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import static ru.investbook.parser.vtb.VtbSecurityFlowTable.VtbSecurityFlowTableHeader.*;
 
-public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<SecurityTransaction> {
+public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportTable<SecurityTransaction> {
 
     static final String TABLE_NAME = "Движение ценных бумаг";
 
     private final Map<String, Integer> bondRedemptions = new HashMap<>(1);
 
-    protected VtbSecurityDepositAndWithdrawalTable(BrokerReport report) {
+    protected VtbSecurityDepositAndWithdrawalTable(SingleBrokerReport report) {
         super(report, TABLE_NAME, null, VtbSecurityFlowTable.VtbSecurityFlowTableHeader.class);
     }
 
     @Override
-    protected Collection<SecurityTransaction> getRow(TableRow row) {
+    protected SecurityTransaction parseRow(TableRow row) {
         String operation = row.getStringCellValueOrDefault(OPERATION, "").toLowerCase().trim();
         switch (operation) {
             case "перевод цб": // перевод между субсчетами
@@ -58,15 +56,14 @@ public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<S
                 bondRedemptions.put(isin, count);
                 // no break;
             default:
-                return Collections.emptyList();
+                return null;
         }
 
         String portfolio = getReport().getPortfolio();
         String isin = row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",")[2].trim();
         Instant timestamp = row.getInstantCellValue(DATE);
         String transactionId = generateTransactionId(portfolio, timestamp, isin);
-        return Collections.singleton(
-                SecurityTransaction.builder()
+        return SecurityTransaction.builder()
                         .transactionId(transactionId)
                         .timestamp(timestamp)
                         .portfolio(portfolio)
@@ -77,7 +74,7 @@ public class VtbSecurityDepositAndWithdrawalTable  extends AbstractReportTable<S
                         .commission(BigDecimal.ZERO)
                         .valueCurrency("RUB")
                         .commissionCurrency("RUB")
-                        .build());
+                        .build();
     }
 
     private static String generateTransactionId(String portfolio, Instant instant, String isin) {

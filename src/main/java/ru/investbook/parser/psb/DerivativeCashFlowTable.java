@@ -23,12 +23,12 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 import java.util.AbstractMap;
@@ -37,12 +37,10 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static ru.investbook.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.*;
 
 @Slf4j
-public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCashFlow> {
+public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityEventCashFlow> {
 
     private static final String TABLE1_NAME = "Прочие операции";
     static final String TABLE2_NAME = "Движение стандартных контрактов";
@@ -63,7 +61,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
         contractCount = getReport().getReportPage()
                 .create(TABLE2_NAME, TABLE_END_TEXT, ContractCountTableHeader.class)
                 .excludeTotalRow()
-                .getData(getReport().getPath(), DerivativeCashFlowTable::getCount)
+                .getData(getReport(), DerivativeCashFlowTable::getCount)
                 .stream()
                 .filter(e -> e.getValue() != 0)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -82,7 +80,7 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
     }
 
     @Override
-    protected Collection<SecurityEventCashFlow> getRow(TableRow row) {
+    protected SecurityEventCashFlow parseRow(TableRow row) {
         BigDecimal value = row.getBigDecimalCellValue(DerivativeCashFlowTableHeader.INCOMING)
                 .subtract(row.getBigDecimalCellValue(DerivativeCashFlowTableHeader.OUTGOING));
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
@@ -99,15 +97,15 @@ public class DerivativeCashFlowTable extends AbstractReportTable<SecurityEventCa
                 if (count == null) {
                     throw new IllegalArgumentException("Открытых контрактов не найдено");
                 }
-                return singletonList(builder.eventType(CashFlowType.DERIVATIVE_PROFIT)
+                return builder.eventType(CashFlowType.DERIVATIVE_PROFIT)
                         .security(contract)
                         .count(count)
-                        .build());
+                        .build();
             case "биржевой сбор":
-                return emptyList(); // изменения отображаются в ликвидной стоимости портфеля
+                return null; // изменения отображаются в ликвидной стоимости портфеля
             // латиница в слове "заблокированo" - это опечатка в брокерском отчёте
             case "заблокированo / разблокировано средств под го":
-                return emptyList(); // не влияет на размер собственных денежных средств
+                return null; // не влияет на размер собственных денежных средств
             default:
                 throw new IllegalArgumentException("Неизвестный вид операции " + action);
         }

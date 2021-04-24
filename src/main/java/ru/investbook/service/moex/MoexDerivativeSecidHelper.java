@@ -25,6 +25,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.Integer.parseInt;
+
 /**
  * Converts derivative short names (for ex. Si-6.21) to secid (a.k.a ticker codes, for ex SiM1)
  *
@@ -137,8 +139,8 @@ public class MoexDerivativeSecidHelper {
             if (dotPosition == -1) {
                 return Optional.empty();
             }
-            int month = Integer.parseInt(contractShortName.substring(dashPosition + 1, dotPosition));
-            int year = Integer.parseInt(contractShortName.substring(dotPosition + 1));
+            int month = parseInt(contractShortName.substring(dashPosition + 1, dotPosition));
+            int year = parseInt(contractShortName.substring(dotPosition + 1));
             return Optional.ofNullable(shortnamesToSecid.get(contractShortName.substring(0, dashPosition)))
                     .map(prefix -> prefix + futuresContractMonthCodes[month - 1] + (year % 10));
         } catch (Exception e) {
@@ -169,32 +171,30 @@ public class MoexDerivativeSecidHelper {
      */
     public boolean isSecidPossibleOption(String moexSecid) {
         int length = moexSecid.length();
-        return (length == 10) || (length == 11);
+        return (length >= 10) && (length <= 12);
     }
 
     /**
-     * @param optionSecid option's moex secid in {@code Si65000BC9} or {@code Si65000BC9D} format
+     * @param optionSecid option's moex secid in {@code Si65000BC9}, {@code Si65000BC9D}, {@code RI180000BD1} or
+     *                   {@code RI180000BD1A} format
      * @return futures contract secid (for ex. {@code SiH9}) if it can be calculated, empty optional otherwise
      */
     public Optional<String> getOptionUnderlingFuturesContract(String optionSecid) {
         try {
             String code = optionSecid.substring(0, 2);
-            if (shortnamesToSecid.containsKey(code)) {
-                Character optionMonth = optionSecid.charAt(8);
+            if (shortnamesToSecid.containsValue(code)) {
+                int monthPos = Character.isDigit(optionSecid.charAt(optionSecid.length() - 1)) ?
+                        optionSecid.length() - 2 :
+                        optionSecid.length() - 3;
+                char optionMonth = optionSecid.charAt(monthPos);
                 int month = optionMonth - callOptionMonthCodes[0];
                 if (month < 0 || month > 11) {
                     month = optionMonth - putOptionMonthCodes[0];
                 }
-                if (month < 0 || month > 11) {
-                    return Optional.empty();
+                if (month >= 0 && month <= 11) {
+                    char optionYear = optionSecid.charAt(monthPos + 1);
+                    return Optional.of(code + futuresContractMonthCodes[month] + parseInt(Character.toString(optionYear)));
                 }
-                int year;
-                try {
-                    year = Integer.parseInt(optionSecid.substring(optionSecid.length() - 1));
-                } catch (Exception e) {
-                    year = Integer.parseInt(optionSecid.substring(optionSecid.length() - 2));
-                }
-                return Optional.of(code + futuresContractMonthCodes[month] + year);
             }
         } catch (Exception ignore) {
         }

@@ -21,7 +21,6 @@ package ru.investbook.parser.uralsib;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
@@ -29,16 +28,14 @@ import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
 
-import static java.util.Collections.emptyList;
 import static ru.investbook.parser.uralsib.DerivativeTransactionTable.FortsTableHeader.*;
 
 @Slf4j
-public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTransaction> {
+public class DerivativeTransactionTable extends SingleAbstractReportTable<DerivativeTransaction> {
     private static final String TABLE_NAME = "СДЕЛКИ С ФЬЮЧЕРСАМИ И ОПЦИОНАМИ";
     private static final String TABLE_END_TEXT = PaymentsTable.TABLE_NAME;
     private boolean expirationTableReached = false;
@@ -52,14 +49,14 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
     }
 
     @Override
-    protected Collection<DerivativeTransaction> getRow(TableRow row) {
-        if (expirationTableReached) return emptyList();
+    protected DerivativeTransaction parseRow(TableRow row) {
+        if (expirationTableReached) return null;
         String transactionId = SecurityTransactionTable.getTransactionId(row, TRANSACTION);
         if (transactionId == null) {
             if (DerivativeExpirationTable.TABLE_NAME.equals(row.getStringCellValueOrDefault(TRANSACTION, null))) {
                 expirationTableReached = true;
             }
-            return emptyList();
+            return null;
         }
 
         String direction = row.getStringCellValue(DIRECTION);
@@ -77,7 +74,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .add(row.getBigDecimalCellValueOrDefault(CLEARING_COMMISSION, BigDecimal.ZERO))
                 .negate();
-        return Collections.singleton(DerivativeTransaction.builder()
+        return DerivativeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .transactionId(transactionId)
                 .portfolio(getReport().getPortfolio())
@@ -88,7 +85,7 @@ public class DerivativeTransactionTable extends AbstractReportTable<DerivativeTr
                 .commission(commission)
                 .valueCurrency(valueCurrency)
                 .commissionCurrency("RUB") // FORTS, only RUB
-                .build());
+                .build();
     }
 
     @RequiredArgsConstructor
