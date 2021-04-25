@@ -137,7 +137,7 @@
 решили улучшать приложение в этом репозитории, ознакомьтесь, пожалуйста, со следующей [информацией](docs/CONTRIBUTING.md).
 
 ### Контакты
-- Teletram чат [технической поддержки](https://t.me/investbook_support);
+- Телеграм чат [технической поддержки](https://t.me/investbook_support);
 - Обсуждение на форуме [banki.ru](https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=380178);
 - Страница приложения на [smart-lab.ru](https://smart-lab.ru/trading-software/Investbook) и
   [страница для связи](https://smart-lab.ru/profile/VitaliyAnanev/);  

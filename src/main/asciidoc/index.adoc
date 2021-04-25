@@ -28,9 +28,13 @@
 . Самостоятельное <<troubleshooting.adoc#,исправление проблем>>
 . Обратиться за помощью в https://t.me/investbook_support[техническую поддержку]
 
-=== Контакты
-- Teletram чат https://t.me/investbook_support[технической поддержки];
+==== Контакты
+- Телеграм чат https://t.me/investbook_support[технической поддержки];
 - Обсуждение на форуме https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=380178[banki.ru];
 - Страница приложения на https://smart-lab.ru/trading-software/Investbook[smart-lab.ru] и
   https://smart-lab.ru/profile/VitaliyAnanev/[страница для связи];
 - e-mail: mailto:spacious-team@ya.ru[spacious-team@ya.ru]
+
+== Тонкая настройка
+. <<configuration.adoc#,Настройка приложения>>
+. <<dbms-changing.adoc#,Смена СУБД>>
