@@ -65,4 +65,8 @@ public class SecurityQuoteEntity {
     @Basic
     @Column(name = "accrued_interest")
     private BigDecimal accruedInterest;
+
+    @Basic
+    @Column(name = "currency")
+    private String currency;
 }
