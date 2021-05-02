@@ -69,6 +69,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.singleton;
 import static org.spacious_team.broker.pojo.SecurityType.*;
+import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.report.excel.PortfolioStatusExcelTableHeader.*;
 
 @Component
@@ -241,8 +242,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     .orElse(null));
             if (securityType != CURRENCY_PAIR) {
                 row.put(LAST_EVENT_DATE, getLastEventDate(portfolios, security, filter)
-                                .map(SecurityEventCashFlowEntity::getTimestamp)
-                                .orElse(null));
+                        .map(SecurityEventCashFlowEntity::getTimestamp)
+                        .orElse(null));
             }
             row.put(BUY_COUNT, positions.getTransactions()
                     .stream()
@@ -259,8 +260,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                             .mapToInt(SecurityEventCashFlow::getCount)
                             .sum());
 
-            SecurityQuote securityQuote = null;
-            String quoteCurrency = null;
+            SecurityQuote quote = null;
             int count = positions.getCurrentOpenedPositionsCount();
             row.put(COUNT, count);
             if (count == 0) {
@@ -275,35 +275,31 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         .divide(BigDecimal.valueOf(Math.max(1, Math.abs(count))), 6, RoundingMode.CEILING));
 
                 if (securityType == CURRENCY_PAIR) {
-                    BigDecimal lastPrice;
-                    String currencyPair = getCurrencyPair(security.getId());
-                    String currency = currencyPair.substring(0, 3);
-                    quoteCurrency = currencyPair.substring(3, 6);
+                    String baseCurrency = getCurrencyPair(security.getId()).substring(0, 3);
                     LocalDate toDate = LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault());
-                    if (toDate.compareTo(LocalDate.now()) >= 0) {
-                        lastPrice = foreignExchangeRateService.getExchangeRate(currency, quoteCurrency);
-                    } else {
-                        lastPrice = foreignExchangeRateService.getExchangeRateOrDefault(
-                                currency,
-                                quoteCurrency,
-                                LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault()));
-                    }
-                    row.put(LAST_PRICE, convertToCurrency(lastPrice, quoteCurrency, toCurrency));
-                    securityQuote = SecurityQuote.builder()
+                    BigDecimal lastPrice = toDate.isBefore(LocalDate.now()) ?
+                            foreignExchangeRateService.getExchangeRateOrDefault(baseCurrency, toCurrency, toDate) :
+                            foreignExchangeRateService.getExchangeRate(baseCurrency, toCurrency);
+                    quote = SecurityQuote.builder()
                             .security(security.getId())
                             .timestamp(filter.getToDate())
                             .quote(lastPrice)
+                            .currency(toCurrency)
                             .build();
                 } else {
-                    Optional<SecurityQuote> optionalQuote = securityQuoteRepository
+                    quote = securityQuoteRepository
                             .findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(security.getId(), filter.getToDate())
-                            .map(securityQuoteConverter::fromEntity);
-                    optionalQuote.ifPresent(quote -> {
-                        row.put(LAST_PRICE, quote.getCleanPriceInCurrency());
-                        row.put(LAST_ACCRUED_INTEREST, quote.getAccruedInterest());
-                    });
-                    securityQuote = optionalQuote.orElse(null);
-                    quoteCurrency = toCurrency; // TODO не известно точно в какой валюте котируется инструмент, делаем предположение, что в валюте сделки
+                            .map(securityQuoteConverter::fromEntity)
+                            .map(_quote -> foreignExchangeRateService.convertQuoteToCurrency(_quote, toCurrency))
+                            .map(_quote -> hasLength(_quote.getCurrency()) ? _quote : _quote.toBuilder()
+                                    .currency(toCurrency) // Не известно точно в какой валюте котируется инструмент,
+                                    .build())             // делаем предположение, что в валюте сделки
+                            .orElse(null);
+                }
+
+                if (quote != null) {
+                    row.put(LAST_PRICE, quote.getCleanPriceInCurrency());
+                    row.put(LAST_ACCRUED_INTEREST, quote.getAccruedInterest());
                 }
 
                 if (securityType == STOCK_OR_BOND || securityType == CURRENCY_PAIR) {
@@ -331,7 +327,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 row.put(TAX, sumPaymentsForType(portfolios, security, CashFlowType.TAX, toCurrency).abs());
             }
             row.put(PROFIT, PROFIT_FORMULA);
-            row.put(INTERNAL_RATE_OF_RETURN, internalRateOfReturn.calc(portfolios, security, securityQuote, quoteCurrency, filter));
+            row.put(INTERNAL_RATE_OF_RETURN, internalRateOfReturn.calc(portfolios, security, quote, filter));
             row.put(PROFIT_PROPORTION, PROFIT_PROPORTION_FORMULA);
         } catch (Exception e) {
             log.error("Ошибка при формировании агрегированных данных по бумаге {}", security, e);
