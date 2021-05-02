@@ -61,23 +61,23 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
 
         boolean isShare = false;
         BigDecimal price = null;
-        String quoteCurrency = null;
+        String currency = null;
 
         if (accruedInterest.compareTo(minValue) < 0) { // акция или облигация с НКД == 0 ?
             if (priceInRub.subtract(quote).abs().compareTo(minValue) < 0) {
                 // акция, котировка в руб
                 isShare = true;
-                quoteCurrency = "RUB";
+                currency = "RUB";
                 price = null;
                 accruedInterest = null;
             } else {
-                for (String currency : currencies) {
+                for (String tryCurrency : currencies) {
                     try {
-                        BigDecimal rate = foreignExchangeRateTable.getExchangeRate(currency, "RUB", reportEndDateTime);
+                        BigDecimal rate = foreignExchangeRateTable.getExchangeRate(tryCurrency, "RUB", reportEndDateTime);
                         if (priceInRub.divide(rate, 2, HALF_UP).subtract(quote).abs().compareTo(minValue) < 0) {
                             // акция (Tesla, Apple), котировка в иностранной валюте
                             isShare = true;
-                            quoteCurrency = currency;
+                            currency = tryCurrency;
                             price = null;
                             accruedInterest = null;
                             break;
@@ -97,7 +97,7 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
                 if (exactTotalFaceValueInRub % 1000 == 0 || exactTotalFaceValueInRub % 100 == 0) {
                     // скорее всего рублевая облигация
                     isRubBond = true;
-                    quoteCurrency = "RUB";
+                    currency = "RUB";
                     price = priceInRub;
                     // НКД уже в рублях
                 }
@@ -105,12 +105,12 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
             }
 
             if (!isRubBond) {
-                for (String currency : currencies) {
+                for (String tryCurrency : currencies) {
                     try {
-                        BigDecimal rate = foreignExchangeRateTable.getExchangeRate(currency, "RUB", reportEndDateTime);
+                        BigDecimal rate = foreignExchangeRateTable.getExchangeRate(tryCurrency, "RUB", reportEndDateTime);
                         totalFaceValueInRub.divide(rate, 2, HALF_UP).intValueExact();
                         // облигация в иностранной валюте, приводим цену к валюте
-                        quoteCurrency = currency;
+                        currency = tryCurrency;
                         price = priceInRub.divide(rate, 4, HALF_UP);
                         // НКД уже в валюте
                         break;
@@ -119,7 +119,7 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
                 }
             }
 
-            if (quoteCurrency == null && accruedInterest.floatValue() > 0.01) {
+            if (currency == null && accruedInterest.floatValue() > 0.01) {
                 throw new IllegalArgumentException("Не смогли вычислить валюту облигации " + isin +
                         " , цена и НКД могут быть в разных валютах");
             }
@@ -130,7 +130,7 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
                 .quote(quote)
                 .price(price)
                 .accruedInterest(accruedInterest)
-                .currency(quoteCurrency)
+                .currency(currency)
                 .build();
     }
 }
