@@ -275,20 +275,11 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         .divide(BigDecimal.valueOf(Math.max(1, Math.abs(count))), 6, RoundingMode.CEILING));
 
                 if (securityType == CURRENCY_PAIR) {
-                    BigDecimal lastPrice;
-                    String currencyPair = getCurrencyPair(security.getId());
-                    String currency = currencyPair.substring(0, 3);
-                    String quoteCurrency = currencyPair.substring(3, 6);
+                    String currency = getCurrencyPair(security.getId()).substring(0, 3);
                     LocalDate toDate = LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault());
-                    if (toDate.compareTo(LocalDate.now()) >= 0) {
-                        lastPrice = foreignExchangeRateService.getExchangeRate(currency, quoteCurrency);
-                    } else {
-                        lastPrice = foreignExchangeRateService.getExchangeRateOrDefault(
-                                currency,
-                                quoteCurrency,
-                                LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault()));
-                    }
-                    lastPrice = convertToCurrency(lastPrice, quoteCurrency, toCurrency);
+                    BigDecimal lastPrice = (toDate.compareTo(LocalDate.now()) >= 0) ?
+                        foreignExchangeRateService.getExchangeRate(currency, toCurrency) :
+                        foreignExchangeRateService.getExchangeRateOrDefault(currency, toCurrency, toDate);
                     row.put(LAST_PRICE, lastPrice);
                     securityQuote = SecurityQuote.builder()
                             .security(security.getId())
