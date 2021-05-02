@@ -65,12 +65,11 @@ public class InternalRateOfReturn {
      * Возвращает внутреннюю норму доходности вложений. Не рассчитывается для срочных инструментов, т.к.
      * вложение (гарантийное обеспечение) не хранится на данный момент в БД.
      * @param currentQuote may be null only if current security position is zero
-     * @param quoteCurrency quote currency
      * @return internal rate of return if can be calculated or null otherwise
      */
     // TODO convert all values to same currency
     public Double calc(Collection<String> portfolios, Security security,
-                       SecurityQuote currentQuote, String quoteCurrency, ViewFilter filter) {
+                       SecurityQuote currentQuote, ViewFilter filter) {
         try {
             if (SecurityType.getSecurityType(security.getId()) == DERIVATIVE) {
                 return null;
@@ -94,7 +93,7 @@ public class InternalRateOfReturn {
                     .map(cash -> castToXirrTransaction(cash, toCurrency))
                     .collect(Collectors.toCollection(() -> transactions));
 
-            castToXirrTransaction(currentQuote, quoteCurrency, toCurrency, count)
+            castToXirrTransaction(currentQuote, toCurrency, count)
                     .ifPresent(transactions::add);
 
             return xirrBuilder
@@ -136,11 +135,11 @@ public class InternalRateOfReturn {
                         .toLocalDate());
     }
 
-    private Optional<org.decampo.xirr.Transaction> castToXirrTransaction(SecurityQuote quote, String quoteCurrency,
+    private Optional<org.decampo.xirr.Transaction> castToXirrTransaction(SecurityQuote quote,
                                                                          String toCurrency, int positionCount) {
         return Optional.ofNullable(quote)
                 .map(SecurityQuote::getDirtyPriceInCurrency)
-                .map(dirtyPrice -> convertToCurrency(dirtyPrice, quoteCurrency, toCurrency))
+                .map(dirtyPrice -> convertToCurrency(dirtyPrice, quote.getCurrency(), toCurrency))
                 .map(dirtyPrice -> new org.decampo.xirr.Transaction(
                         positionCount * dirtyPrice.doubleValue(),
                         quote.getTimestamp()

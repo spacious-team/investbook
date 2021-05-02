@@ -69,6 +69,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.singleton;
 import static org.spacious_team.broker.pojo.SecurityType.*;
+import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.report.excel.PortfolioStatusExcelTableHeader.*;
 
 @Component
@@ -241,8 +242,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     .orElse(null));
             if (securityType != CURRENCY_PAIR) {
                 row.put(LAST_EVENT_DATE, getLastEventDate(portfolios, security, filter)
-                                .map(SecurityEventCashFlowEntity::getTimestamp)
-                                .orElse(null));
+                        .map(SecurityEventCashFlowEntity::getTimestamp)
+                        .orElse(null));
             }
             row.put(BUY_COUNT, positions.getTransactions()
                     .stream()
@@ -260,7 +261,6 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                             .sum());
 
             SecurityQuote securityQuote = null;
-            String quoteCurrency = null;
             int count = positions.getCurrentOpenedPositionsCount();
             row.put(COUNT, count);
             if (count == 0) {
@@ -278,7 +278,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     BigDecimal lastPrice;
                     String currencyPair = getCurrencyPair(security.getId());
                     String currency = currencyPair.substring(0, 3);
-                    quoteCurrency = currencyPair.substring(3, 6);
+                    String quoteCurrency = currencyPair.substring(3, 6);
                     LocalDate toDate = LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault());
                     if (toDate.compareTo(LocalDate.now()) >= 0) {
                         lastPrice = foreignExchangeRateService.getExchangeRate(currency, quoteCurrency);
@@ -288,22 +288,27 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                                 quoteCurrency,
                                 LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault()));
                     }
-                    row.put(LAST_PRICE, convertToCurrency(lastPrice, quoteCurrency, toCurrency));
+                    lastPrice = convertToCurrency(lastPrice, quoteCurrency, toCurrency);
+                    row.put(LAST_PRICE, lastPrice);
                     securityQuote = SecurityQuote.builder()
                             .security(security.getId())
                             .timestamp(filter.getToDate())
                             .quote(lastPrice)
+                            .currency(toCurrency)
                             .build();
                 } else {
                     Optional<SecurityQuote> optionalQuote = securityQuoteRepository
                             .findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(security.getId(), filter.getToDate())
-                            .map(securityQuoteConverter::fromEntity);
+                            .map(securityQuoteConverter::fromEntity)
+                            .map(quote -> foreignExchangeRateService.convertQuoteToCurrency(quote, toCurrency))
+                            .map(quote -> hasLength(quote.getCurrency()) ? quote : quote.toBuilder()
+                                    .currency(toCurrency) // Не известно точно в какой валюте котируется инструмент,
+                                    .build());            // делаем предположение, что в валюте сделки
                     optionalQuote.ifPresent(quote -> {
                         row.put(LAST_PRICE, quote.getCleanPriceInCurrency());
                         row.put(LAST_ACCRUED_INTEREST, quote.getAccruedInterest());
                     });
                     securityQuote = optionalQuote.orElse(null);
-                    quoteCurrency = toCurrency; // TODO не известно точно в какой валюте котируется инструмент, делаем предположение, что в валюте сделки
                 }
 
                 if (securityType == STOCK_OR_BOND || securityType == CURRENCY_PAIR) {
@@ -331,7 +336,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 row.put(TAX, sumPaymentsForType(portfolios, security, CashFlowType.TAX, toCurrency).abs());
             }
             row.put(PROFIT, PROFIT_FORMULA);
-            row.put(INTERNAL_RATE_OF_RETURN, internalRateOfReturn.calc(portfolios, security, securityQuote, quoteCurrency, filter));
+            row.put(INTERNAL_RATE_OF_RETURN, internalRateOfReturn.calc(portfolios, security, securityQuote, filter));
             row.put(PROFIT_PROPORTION, PROFIT_PROPORTION_FORMULA);
         } catch (Exception e) {
             log.error("Ошибка при формировании агрегированных данных по бумаге {}", security, e);
