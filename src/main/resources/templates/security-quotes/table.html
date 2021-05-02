@@ -48,6 +48,7 @@
         <th class="value">Котировка</th>
         <th class="value">Цена</th>
         <th class="value">НКД</th>
+        <th>Валюта</th>
     </tr>
     <tr th:each="quote : ${quotes}">
         <td><a th:href="@{/security-quotes/edit-form(id=${quote.id})}" th:text="${quote.id}"/></td>
@@ -59,6 +60,7 @@
             class="value"/>
         <td th:text="${(quote.accruedInterest != null) ? quote.accruedInterest.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}"
             class="value"/>
+        <td th:text="${quote.currency}"/>
     </tr>
 </table>
 

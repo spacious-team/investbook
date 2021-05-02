@@ -25,11 +25,13 @@ import org.springframework.lang.Nullable;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
 import static java.time.ZoneId.systemDefault;
+import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
 
 @Data
 public class SecurityQuoteModel {
@@ -47,7 +49,7 @@ public class SecurityQuoteModel {
     private SecurityType securityType;
 
     @NotNull
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @DateTimeFormat(iso = DATE_TIME)
     private Instant timestamp = LocalDate.now().atTime(12, 0).atZone(systemDefault()).toInstant();
 
     @NotNull
@@ -57,8 +59,10 @@ public class SecurityQuoteModel {
     @Positive
     private BigDecimal price;
 
-    @Positive
+    @PositiveOrZero
     private BigDecimal accruedInterest;
+
+    private String currency;
 
     public void setSecurity(String securityId, String securityName) {
         this.security = SecurityHelper.getSecurityDescription(securityId, securityName);
