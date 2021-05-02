@@ -262,7 +262,7 @@ public class ForeignExchangeRateService {
         }
     }
 
-    private SecurityQuoteBuilder convertQuoteToCurrency(SecurityQuote quote, Supplier<BigDecimal> exchangeRateSupplier) {
+    private static SecurityQuoteBuilder convertQuoteToCurrency(SecurityQuote quote, Supplier<BigDecimal> exchangeRateSupplier) {
         BigDecimal exchangeRate = exchangeRateSupplier.get();
         BigDecimal accruedInterest = quote.getAccruedInterest();
         SecurityType type = getSecurityType(quote.getSecurity());

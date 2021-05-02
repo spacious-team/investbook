@@ -260,7 +260,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                             .mapToInt(SecurityEventCashFlow::getCount)
                             .sum());
 
-            SecurityQuote securityQuote = null;
+            SecurityQuote quote = null;
             int count = positions.getCurrentOpenedPositionsCount();
             row.put(COUNT, count);
             if (count == 0) {
@@ -275,31 +275,31 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         .divide(BigDecimal.valueOf(Math.max(1, Math.abs(count))), 6, RoundingMode.CEILING));
 
                 if (securityType == CURRENCY_PAIR) {
-                    String currency = getCurrencyPair(security.getId()).substring(0, 3);
+                    String baseCurrency = getCurrencyPair(security.getId()).substring(0, 3);
                     LocalDate toDate = LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault());
-                    BigDecimal lastPrice = (toDate.compareTo(LocalDate.now()) >= 0) ?
-                        foreignExchangeRateService.getExchangeRate(currency, toCurrency) :
-                        foreignExchangeRateService.getExchangeRateOrDefault(currency, toCurrency, toDate);
-                    row.put(LAST_PRICE, lastPrice);
-                    securityQuote = SecurityQuote.builder()
+                    BigDecimal lastPrice = toDate.isBefore(LocalDate.now()) ?
+                            foreignExchangeRateService.getExchangeRateOrDefault(baseCurrency, toCurrency, toDate) :
+                            foreignExchangeRateService.getExchangeRate(baseCurrency, toCurrency);
+                    quote = SecurityQuote.builder()
                             .security(security.getId())
                             .timestamp(filter.getToDate())
                             .quote(lastPrice)
                             .currency(toCurrency)
                             .build();
                 } else {
-                    Optional<SecurityQuote> optionalQuote = securityQuoteRepository
+                    quote = securityQuoteRepository
                             .findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(security.getId(), filter.getToDate())
                             .map(securityQuoteConverter::fromEntity)
-                            .map(quote -> foreignExchangeRateService.convertQuoteToCurrency(quote, toCurrency))
-                            .map(quote -> hasLength(quote.getCurrency()) ? quote : quote.toBuilder()
+                            .map(_quote -> foreignExchangeRateService.convertQuoteToCurrency(_quote, toCurrency))
+                            .map(_quote -> hasLength(_quote.getCurrency()) ? _quote : _quote.toBuilder()
                                     .currency(toCurrency) // Не известно точно в какой валюте котируется инструмент,
-                                    .build());            // делаем предположение, что в валюте сделки
-                    optionalQuote.ifPresent(quote -> {
-                        row.put(LAST_PRICE, quote.getCleanPriceInCurrency());
-                        row.put(LAST_ACCRUED_INTEREST, quote.getAccruedInterest());
-                    });
-                    securityQuote = optionalQuote.orElse(null);
+                                    .build())             // делаем предположение, что в валюте сделки
+                            .orElse(null);
+                }
+
+                if (quote != null) {
+                    row.put(LAST_PRICE, quote.getCleanPriceInCurrency());
+                    row.put(LAST_ACCRUED_INTEREST, quote.getAccruedInterest());
                 }
 
                 if (securityType == STOCK_OR_BOND || securityType == CURRENCY_PAIR) {
@@ -327,7 +327,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 row.put(TAX, sumPaymentsForType(portfolios, security, CashFlowType.TAX, toCurrency).abs());
             }
             row.put(PROFIT, PROFIT_FORMULA);
-            row.put(INTERNAL_RATE_OF_RETURN, internalRateOfReturn.calc(portfolios, security, securityQuote, filter));
+            row.put(INTERNAL_RATE_OF_RETURN, internalRateOfReturn.calc(portfolios, security, quote, filter));
             row.put(PROFIT_PROPORTION, PROFIT_PROPORTION_FORMULA);
         } catch (Exception e) {
             log.error("Ошибка при формировании агрегированных данных по бумаге {}", security, e);

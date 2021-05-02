@@ -64,19 +64,18 @@ public class InternalRateOfReturn {
     /**
      * Возвращает внутреннюю норму доходности вложений. Не рассчитывается для срочных инструментов, т.к.
      * вложение (гарантийное обеспечение) не хранится на данный момент в БД.
-     * @param currentQuote may be null only if current security position is zero
+     * @param quote may be null only if current security position is zero
      * @return internal rate of return if can be calculated or null otherwise
      */
     // TODO convert all values to same currency
-    public Double calc(Collection<String> portfolios, Security security,
-                       SecurityQuote currentQuote, ViewFilter filter) {
+    public Double calc(Collection<String> portfolios, Security security, SecurityQuote quote, ViewFilter filter) {
         try {
             if (SecurityType.getSecurityType(security.getId()) == DERIVATIVE) {
                 return null;
             }
             FifoPositions positions = positionsFactory.get(portfolios, security, filter);
             int count = positions.getCurrentOpenedPositionsCount();
-            if (count != 0 && (currentQuote == null || currentQuote.getDirtyPriceInCurrency() == null)) {
+            if (count != 0 && (quote == null || quote.getDirtyPriceInCurrency() == null)) {
                 return null;
             }
 
@@ -93,7 +92,7 @@ public class InternalRateOfReturn {
                     .map(cash -> castToXirrTransaction(cash, toCurrency))
                     .collect(Collectors.toCollection(() -> transactions));
 
-            castToXirrTransaction(currentQuote, toCurrency, count)
+            castToXirrTransaction(quote, toCurrency, count)
                     .ifPresent(transactions::add);
 
             return xirrBuilder
