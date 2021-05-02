@@ -63,7 +63,7 @@ public class SecuritiesTable extends SingleAbstractReportTable<ReportSecurityInf
         OUTGOING_COUNT("количество", "на конец периода"),
         QUOTE("цена закрытия одной цб без учета нкд"),
         AMOUNT("Стоимость позиции по цене закрытия"), // в рублях для СПБ биржи
-        ACCRUED_INTEREST("^нкд$");
+        ACCRUED_INTEREST("^нкд$"); // в валюте для валютных облигаций
 
         @Getter
         private final TableColumn column;

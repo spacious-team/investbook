@@ -43,6 +43,7 @@ public class SecurityQuoteConverter implements EntityConverter<SecurityQuoteEnti
         entity.setQuote(quote.getQuote());
         entity.setPrice(quote.getPrice());
         entity.setAccruedInterest(quote.getAccruedInterest());
+        entity.setCurrency(quote.getCurrency());
         return entity;
     }
 
@@ -55,6 +56,7 @@ public class SecurityQuoteConverter implements EntityConverter<SecurityQuoteEnti
                 .quote(entity.getQuote())
                 .price(entity.getPrice())
                 .accruedInterest(entity.getAccruedInterest())
+                .currency(entity.getCurrency())
                 .build();
     }
 }

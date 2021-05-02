@@ -35,6 +35,7 @@
 </p>
 <p th:text="'Цена: ' + ${quote.price}" th:if="${quote.price != null}"/>
 <p th:text="'НКД: ' + ${quote.accruedInterest}" th:if="${quote.accruedInterest != null}"/>
+<p th:text="'Валюта: ' + ${quote.currency}" th:if="${quote.currency != null}"></p>
 <a href="/security-quotes/edit-form">Добавить еще</a><br>
 <a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Котировки/delete_2">Удалить котировку</a><br>
 <a href="/security-quotes">Посмотреть все котировки</a><br>
