@@ -72,7 +72,7 @@ public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
         NAME_REGNUMBER_ISIN("наименование", "гос. регистрации", "isin"),
         SECTION("площадка"),
         OUTGOING("исходящий остаток"),
-        CURRENCY("валюта цены"),
+        CURRENCY("валюта цены", "номинала для облигаций"),
         QUOTE("цена", "для облигаций"),
         FACE_VALUE("номинал"),
         ACCRUED_INTEREST("НКД в валюте номинала");

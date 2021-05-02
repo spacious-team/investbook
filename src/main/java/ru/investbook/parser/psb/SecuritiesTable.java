@@ -58,6 +58,7 @@ public class SecuritiesTable extends SingleAbstractReportTable<Security> {
         QUOTE("цена*", "для обл"),
         AMOUNT("оценочная стоимость в валюте цены"),
         ACCRUED_INTEREST("нкд"),
+        FACEUNIT("валюта бумаги"),
         CURRENCY("валюта цены");
 
         @Getter

@@ -63,6 +63,7 @@ public class VtbSecurityQuoteTable extends SingleAbstractReportTable<SecurityQuo
                 .quote(quote)
                 .price(price)
                 .accruedInterest(accruedInterest)
+                .currency(row.getStringCellValueOrDefault(CURRENCY, null))
                 .build();
     }
 }

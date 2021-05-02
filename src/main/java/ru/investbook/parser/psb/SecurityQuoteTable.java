@@ -45,22 +45,33 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
         if (count == 0) {
             return null;
         }
+        String isin = row.getStringCellValue(ISIN);
         BigDecimal amount = row.getBigDecimalCellValue(AMOUNT);
         BigDecimal price = amount.divide(BigDecimal.valueOf(count), 4, RoundingMode.HALF_UP);
         BigDecimal quote = row.getBigDecimalCellValue(QUOTE);
         BigDecimal accruedInterest = row.getBigDecimalCellValue(ACCRUED_INTEREST)
                 .divide(BigDecimal.valueOf(count), 2, RoundingMode.HALF_UP);
+        String currency = row.getStringCellValue(CURRENCY);
         if (accruedInterest.compareTo(minValue) < 0 && price.subtract(quote).abs().compareTo(minValue) < 0) {
             // акция
             price = null;
             accruedInterest = null;
+        } else {
+            // облигация
+            String accruedInterestCurrency = row.getStringCellValue(FACEUNIT);
+            if (!currency.equals(accruedInterestCurrency)) {
+                throw new UnsupportedOperationException("ISIN: " + isin + ". " +
+                        "Валюта купона и оценка стоимости в отчете брокера в разных валютах." +
+                        " Не могу привести валюту купона к валюте цены, не реализовано.");
+            }
         }
         return SecurityQuote.builder()
-                .security(row.getStringCellValue(ISIN))
+                .security(isin)
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .price(price)
                 .accruedInterest(accruedInterest)
+                .currency(currency)
                 .build();
     }
 }
