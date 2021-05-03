@@ -25,8 +25,8 @@ import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
 import static ru.investbook.parser.vtb.VtbSecuritiesTable.VtbSecuritiesTableHeader.*;
 
@@ -43,27 +43,30 @@ public class VtbSecurityQuoteTable extends SingleAbstractReportTable<SecurityQuo
         if (quote == null) {
             return null;
         }
-        BigDecimal price = Optional.ofNullable(row.getBigDecimalCellValueOrDefault(FACE_VALUE, null))
+        BigDecimal price = ofNullable(row.getBigDecimalCellValueOrDefault(FACE_VALUE, null))
                 .filter(faceValue -> faceValue.compareTo(minValue) > 0)
                 .map(faceValue -> faceValue.multiply(quote).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP))
                 .orElse(null);
         BigDecimal accruedInterest = null;
         if (price != null) {
             // имеет смысл только для облигаций, для акций price = null
-            accruedInterest = Optional.ofNullable(row.getBigDecimalCellValueOrDefault(ACCRUED_INTEREST, null))
+            accruedInterest = ofNullable(row.getBigDecimalCellValueOrDefault(ACCRUED_INTEREST, null))
                     .filter(interest -> interest.compareTo(minValue) > 0) // otherwise outgoing count may be = 0
                     .map(interest -> {
                         int count = row.getIntCellValueOrDefault(OUTGOING, -1);
                         return (count <= 0) ? null : interest.divide(BigDecimal.valueOf(count), 2, RoundingMode.HALF_UP);
                     }).orElse(null);
         }
+        String currency = ofNullable(row.getStringCellValueOrDefault(CURRENCY, null))
+                .map(VtbBrokerReport::convertToCurrency)
+                .orElse(null);
         return SecurityQuote.builder()
                 .security(row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",")[2].trim())
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .price(price)
                 .accruedInterest(accruedInterest)
-                .currency(row.getStringCellValueOrDefault(CURRENCY, null))
+                .currency(currency)
                 .build();
     }
 }
