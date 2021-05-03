@@ -73,7 +73,6 @@ public class InternalRateOfReturn {
      * @param quote may be null only if current security position is zero
      * @return internal rate of return if can be calculated or null otherwise
      */
-    // TODO convert all values to same currency
     public Double calc(Collection<String> portfolios, Security security, SecurityQuote quote, ViewFilter filter) {
         try {
             if (getSecurityType(security.getId()) == DERIVATIVE) {
