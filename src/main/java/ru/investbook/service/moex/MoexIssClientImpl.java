@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,7 @@ package ru.investbook.service.moex;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.pojo.SecurityQuote.SecurityQuoteBuilder;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -71,7 +72,7 @@ public class MoexIssClientImpl implements MoexIssClient {
             "q={query}";
     private static final String securityUri = "http://iss.moex.com/iss/securities/{secId}.json?" +
             "iss.only=boards&" +
-            "boards.columns=is_primary,engine,market,boardid";
+            "boards.columns=is_primary,engine,market,boardid,currencyid";
     private static final String quoteUri = "http://iss.moex.com/iss/engines/{engine}/markets/{market}/boards/{board}/securities/{secId}.json?" +
             "iss.meta=off&" +
             "iss.only=securities&" +
@@ -121,7 +122,9 @@ public class MoexIssClientImpl implements MoexIssClient {
                 .map(MoexJsonResponseParser::buildFromIntObjectMap)
                 .flatMap(_quote -> _quote.stream()
                         .findAny()
-                        .flatMap(MoexSecurityQuoteHelper::parse));
+                        .flatMap(MoexSecurityQuoteHelper::parse))
+                .map(quoteBuilder -> quoteBuilder.currency(market.getCurrency()))
+                .map(SecurityQuoteBuilder::build);
         if (quote.isPresent() && moexDerivativeSecidHelper.isSecidPossibleOption(moexSecId)) {
             // Котировка опциона не содержит цену SecurityQuote.price,
             // т.к. ИСС МосБиржи, определяя MINSTEP, не сообщает STEPPRICE.

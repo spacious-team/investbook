@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -33,6 +33,8 @@ import static ru.investbook.parser.vtb.VtbForeignExchangeTransactionTable.FxTran
 
 public class VtbForeignExchangeTransactionTable extends SingleAbstractReportTable<ForeignExchangeTransaction> {
 
+    // Не использовать "Завершенные в отчетном периоде сделки с иностранной валютой (обязательства прекращены)",
+    // иначе не примутся в расчет сделки выполненные без обналичивания валюты
     private static final String TABLE_NAME = "Заключенные в отчетном периоде сделки с иностранной валютой";
 
     protected VtbForeignExchangeTransactionTable(SingleBrokerReport report) {

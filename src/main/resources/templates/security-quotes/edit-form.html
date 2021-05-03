@@ -1,6 +1,6 @@
 <!--
   ~ InvestBook
-  ~ Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+  ~ Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU Affero General Public License as
@@ -32,8 +32,7 @@
         }
 
         #time {
-            margin-right: 30px;
-            width: 80px;
+            width: 86px;
         }
 
         input {
@@ -42,6 +41,10 @@
 
         input[type="submit"] {
             width: 150px;
+        }
+
+        #quote {
+            width: 130px;
         }
     </style>
 </head>
@@ -81,23 +84,36 @@
         Время
         <input type="time" th:value="${#temporals.format(quote.timestamp, 'HH:mm')}" id="time" required/>
     </label>
+    <br>
     <label>
         Котировка
-        <input type="number" step="any" min="0.01" th:field="*{quote}" size="10" required/>
+        <input type="number" step="any" min="0.01" th:field="*{quote}" id="quote" required/>
     </label>
     <label id="price">
         Цена
-        <input type="number" step="any" min="0.01" th:field="*{price}" size="10"/>
+        <input type="number" step="any" min="0.01" th:field="*{price}"/>
     </label>
     <label id="accrued-interest">
         НКД
-        <input type="number" step="0.01" min="0" th:field="*{accruedInterest}" size="10"/>
+        <input type="number" step="0.01" min="0" th:field="*{accruedInterest}"/>
+    </label>
+    <label id="currency">
+        Валюта
+        <input type="text" th:field="*{currency}" value="RUB" list="currencies" required/>
     </label>
     <br/>
     <input type="submit" onclick="checkValues()" value="Сохранить"/>
 
     <datalist id="securities">
         <option th:each="security : ${securities}" th:text="${security}"></option>
+    </datalist>
+
+    <datalist id="currencies">
+        <option>RUB</option>
+        <option>USD</option>
+        <option>EUR</option>
+        <option>GBP</option>
+        <option>CHF</option>
     </datalist>
 </form>
 
@@ -135,6 +151,7 @@
         // for type = SHARE and CURRENCY
         hide('price')
         hide('accrued-interest')
+        display('currency')
         setPattern('security', '^.*\\s+\\([A-Z0-9]+\\)\\s*$')
 
         switch (type) {
@@ -144,9 +161,12 @@
                 break
             case "DERIVATIVE":
                 display('price')
-                // no break
+                removePattern('security')
+                hide('currency')
+                break
             case "CURRENCY":
                 removePattern('security')
+                hide('currency')
                 break
         }
     }
@@ -183,12 +203,17 @@
         let type = e.options[e.selectedIndex].value
         switch (type) {
             case "SHARE":
-            case "CURRENCY":
                 erase('price')
                 erase('accrued-interest')
                 break
+            case "CURRENCY":
+                erase('price')
+                erase('accrued-interest')
+                erase('currency')
+                break
             case "DERIVATIVE":
                 erase('accrued-interest')
+                erase('currency')
                 break
         }
         document.getElementById('timestamp').value =

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -24,7 +24,6 @@ import org.decampo.xirr.NewtonRaphson;
 import org.decampo.xirr.Xirr;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
-import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
@@ -33,6 +32,8 @@ import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.List;
@@ -40,8 +41,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toCollection;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static org.spacious_team.broker.pojo.SecurityType.DERIVATIVE;
+import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 
 @Component
 @RequiredArgsConstructor
@@ -64,20 +69,18 @@ public class InternalRateOfReturn {
     /**
      * Возвращает внутреннюю норму доходности вложений. Не рассчитывается для срочных инструментов, т.к.
      * вложение (гарантийное обеспечение) не хранится на данный момент в БД.
-     * @param currentQuote may be null only if current security position is zero
-     * @param quoteCurrency quote currency
+     *
+     * @param quote may be null only if current security position is zero
      * @return internal rate of return if can be calculated or null otherwise
      */
-    // TODO convert all values to same currency
-    public Double calc(Collection<String> portfolios, Security security,
-                       SecurityQuote currentQuote, String quoteCurrency, ViewFilter filter) {
+    public Double calc(Collection<String> portfolios, Security security, SecurityQuote quote, ViewFilter filter) {
         try {
-            if (SecurityType.getSecurityType(security.getId()) == DERIVATIVE) {
+            if (getSecurityType(security.getId()) == DERIVATIVE) {
                 return null;
             }
             FifoPositions positions = positionsFactory.get(portfolios, security, filter);
             int count = positions.getCurrentOpenedPositionsCount();
-            if (count != 0 && (currentQuote == null || currentQuote.getDirtyPriceInCurrency() == null)) {
+            if (count != 0 && (quote == null || quote.getDirtyPriceInCurrency() == null)) {
                 return null;
             }
 
@@ -85,16 +88,15 @@ public class InternalRateOfReturn {
             Collection<org.decampo.xirr.Transaction> transactions = positions.getTransactions()
                     .stream()
                     .map(transaction -> castToXirrTransaction(transaction, toCurrency))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+                    .flatMap(Optional::stream)
                     .collect(Collectors.toList());
 
             getSecurityEventCashFlowEntities(portfolios, security, paymentTypes)
                     .stream()
                     .map(cash -> castToXirrTransaction(cash, toCurrency))
-                    .collect(Collectors.toCollection(() -> transactions));
+                    .collect(toCollection(() -> transactions));
 
-            castToXirrTransaction(currentQuote, quoteCurrency, toCurrency, count)
+            castToXirrTransaction(quote, toCurrency, count)
                     .ifPresent(transactions::add);
 
             return xirrBuilder
@@ -111,8 +113,7 @@ public class InternalRateOfReturn {
                 .stream()
                 .map(t -> transactionCashFlowRepository
                         .findByPkPortfolioAndPkTransactionIdAndPkType(t.getPortfolio(), t.getId(), PRICE.getId()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .map(TransactionCashFlowEntity::getCurrency)
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("Can't find any transaction payment currency"));
@@ -122,30 +123,24 @@ public class InternalRateOfReturn {
         return getTransactionValue(transaction, toCurrency)
                 .map(value -> new org.decampo.xirr.Transaction(
                         value.doubleValue(),
-                        transaction.getTimestamp()
-                                .atZone(zoneId)
-                                .toLocalDate()));
+                        toLocalDate(transaction.getTimestamp())));
     }
 
     private org.decampo.xirr.Transaction castToXirrTransaction(SecurityEventCashFlowEntity cashFlowEntity, String toCurrency) {
         BigDecimal value = convertToCurrency(cashFlowEntity.getValue(), cashFlowEntity.getCurrency(), toCurrency);
         return new org.decampo.xirr.Transaction(
                 value.doubleValue(),
-                cashFlowEntity.getTimestamp()
-                        .atZone(zoneId)
-                        .toLocalDate());
+                toLocalDate(cashFlowEntity.getTimestamp()));
     }
 
-    private Optional<org.decampo.xirr.Transaction> castToXirrTransaction(SecurityQuote quote, String quoteCurrency,
+    private Optional<org.decampo.xirr.Transaction> castToXirrTransaction(SecurityQuote quote,
                                                                          String toCurrency, int positionCount) {
-        return Optional.ofNullable(quote)
+        return ofNullable(quote)
                 .map(SecurityQuote::getDirtyPriceInCurrency)
-                .map(dirtyPrice -> convertToCurrency(dirtyPrice, quoteCurrency, toCurrency))
+                .map(dirtyPrice -> convertToCurrency(dirtyPrice, quote.getCurrency(), toCurrency))
                 .map(dirtyPrice -> new org.decampo.xirr.Transaction(
                         positionCount * dirtyPrice.doubleValue(),
-                        quote.getTimestamp()
-                                .atZone(zoneId)
-                                .toLocalDate()));
+                        toLocalDate(quote.getTimestamp())));
     }
 
     private Optional<BigDecimal> getTransactionValue(Transaction t, String toCurrency) {
@@ -156,7 +151,7 @@ public class InternalRateOfReturn {
                     .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         }
-        return (BigDecimal.ZERO.equals(value)) ? Optional.empty() : Optional.ofNullable(value);
+        return (BigDecimal.ZERO.equals(value)) ? empty() : ofNullable(value);
     }
 
     public List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
@@ -180,5 +175,9 @@ public class InternalRateOfReturn {
 
     private BigDecimal convertToCurrency(BigDecimal value, String fromCurrency, String toCurrency) {
         return foreignExchangeRateService.convertValueToCurrency(value, fromCurrency, toCurrency);
+    }
+
+    private LocalDate toLocalDate(Instant instant) {
+        return instant.atZone(zoneId).toLocalDate();
     }
 }

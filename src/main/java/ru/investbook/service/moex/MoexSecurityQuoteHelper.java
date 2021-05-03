@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -22,15 +22,16 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.pojo.SecurityQuote.SecurityQuoteBuilder;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 
@@ -52,11 +53,13 @@ import static java.util.Optional.ofNullable;
 @RequiredArgsConstructor
 public class MoexSecurityQuoteHelper {
 
-    static Optional<SecurityQuote> parse(Map<String, Object> description) {
+    private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
+
+    static Optional<SecurityQuoteBuilder> parse(Map<String, Object> description) {
         try {
             LocalDate date = ofNullable(description.get("PREVDATE"))
                     .map(String::valueOf)
-                    .map(value -> LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE))
+                    .map(value -> LocalDate.parse(value, ISO_LOCAL_DATE))
                     .orElseGet(() -> LocalDate.now().minusDays(1));
             BigDecimal quote = ofNullable(description.get("PREVADMITTEDQUOTE")) // share or bond
                     .or(() -> ofNullable(description.get("PREVSETTLEPRICE"))) // forts
@@ -71,7 +74,7 @@ public class MoexSecurityQuoteHelper {
                 price = toBigDecimal(description.get("LOTVALUE"))
                         .divide(toBigDecimal(description.get("LOTSIZE")), 4, RoundingMode.HALF_UP)
                         .multiply(quote)
-                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                        .divide(HUNDRED, 2, RoundingMode.HALF_UP);
             } else if (description.containsKey("STEPPRICE")) { // forts
                 price = quote.multiply(toBigDecimal(description.get("STEPPRICE")))
                         .divide(toBigDecimal(description.get("MINSTEP")), 2, RoundingMode.HALF_UP);
@@ -81,8 +84,7 @@ public class MoexSecurityQuoteHelper {
                     .timestamp(date.atStartOfDay(ZoneId.systemDefault()).toInstant())
                     .quote(quote)
                     .price(price)
-                    .accruedInterest(accruedInterest)
-                    .build());
+                    .accruedInterest(accruedInterest));
         } catch (Exception e) {
             log.warn("Ответ Moex ISS не содержит сведений о котировке", e);
             return Optional.empty();

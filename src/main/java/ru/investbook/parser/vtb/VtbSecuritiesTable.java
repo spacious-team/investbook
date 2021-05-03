@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -72,7 +72,7 @@ public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
         NAME_REGNUMBER_ISIN("наименование", "гос. регистрации", "isin"),
         SECTION("площадка"),
         OUTGOING("исходящий остаток"),
-        CURRENCY("валюта цены"),
+        CURRENCY("валюта цены", "номинала для облигаций"),
         QUOTE("цена", "для облигаций"),
         FACE_VALUE("номинал"),
         ACCRUED_INTEREST("НКД в валюте номинала");

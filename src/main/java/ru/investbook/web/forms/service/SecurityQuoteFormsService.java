@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
+import static org.springframework.util.StringUtils.hasLength;
 
 @Service
 @RequiredArgsConstructor
@@ -69,6 +70,7 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
                         .quote(e.getQuote())
                         .price(e.getPrice())
                         .accruedInterest(e.getAccruedInterest())
+                        .currency(hasLength(e.getCurrency()) ? e.getCurrency() : null)
                         .build()));
         e.setId(entity.getId());
     }
@@ -91,6 +93,7 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
         m.setQuote(e.getQuote());
         m.setPrice(e.getPrice());
         m.setAccruedInterest(e.getAccruedInterest());
+        m.setCurrency(e.getCurrency());
         if (e.getAccruedInterest() == null) {
             m.setSecurityType(SecurityType.valueOf(getSecurityType(e.getSecurity().getId())));
         } else {

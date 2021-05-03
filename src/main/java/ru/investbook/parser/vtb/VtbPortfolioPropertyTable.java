@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -33,7 +33,8 @@ import static java.util.Collections.singleton;
 @Slf4j
 public class VtbPortfolioPropertyTable extends SingleInitializableReportTable<PortfolioProperty> {
 
-    private static final String TOTAL_ASSETS = "ОЦЕНКА активов (по курсу ЦБ с учётом незавершенных сделок)";
+    private static final String TOTAL_ASSETS1 = "ОЦЕНКА активов (по курсу ЦБ с учётом незавершенных сделок)";
+    private static final String TOTAL_ASSETS2 = "ОЦЕНКА активов по Kурсу с учётом незавершенных сделок";
 
     public VtbPortfolioPropertyTable(SingleBrokerReport report) {
         super(report);
@@ -49,14 +50,20 @@ public class VtbPortfolioPropertyTable extends SingleInitializableReportTable<Po
                     .value(getBigDecimalValue().toString())
                     .build());
         } catch (Exception e) {
-            log.debug("Не удалось распарсить свойство '{}' из отчета {}", TOTAL_ASSETS, getReport());
+            log.debug("Не удалось распарсить свойство '{}' или '{}' из отчета {}",
+                    TOTAL_ASSETS1, TOTAL_ASSETS2, getReport());
             return emptyList();
         }
     }
 
     private BigDecimal getBigDecimalValue() {
-            Object value = getReport().getReportPage().getNextColumnValue(TOTAL_ASSETS);
-            return BigDecimal.valueOf(
-                    Double.parseDouble(value.toString()));
+        Object value;
+        try {
+            value = getReport().getReportPage().getNextColumnValue(TOTAL_ASSETS1);
+        } catch (Exception e) {
+            value = getReport().getReportPage().getNextColumnValue(TOTAL_ASSETS2);
+        }
+        return BigDecimal.valueOf(
+                Double.parseDouble(value.toString()));
     }
 }

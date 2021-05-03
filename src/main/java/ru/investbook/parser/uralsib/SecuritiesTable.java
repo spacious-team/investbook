@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -63,7 +63,7 @@ public class SecuritiesTable extends SingleAbstractReportTable<ReportSecurityInf
         OUTGOING_COUNT("количество", "на конец периода"),
         QUOTE("цена закрытия одной цб без учета нкд"),
         AMOUNT("Стоимость позиции по цене закрытия"), // в рублях для СПБ биржи
-        ACCRUED_INTEREST("^нкд$");
+        ACCRUED_INTEREST("^нкд$"); // в валюте для валютных облигаций
 
         @Getter
         private final TableColumn column;

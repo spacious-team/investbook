@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -43,6 +43,7 @@ public class SecurityQuoteConverter implements EntityConverter<SecurityQuoteEnti
         entity.setQuote(quote.getQuote());
         entity.setPrice(quote.getPrice());
         entity.setAccruedInterest(quote.getAccruedInterest());
+        entity.setCurrency(quote.getCurrency());
         return entity;
     }
 
@@ -55,6 +56,7 @@ public class SecurityQuoteConverter implements EntityConverter<SecurityQuoteEnti
                 .quote(entity.getQuote())
                 .price(entity.getPrice())
                 .accruedInterest(entity.getAccruedInterest())
+                .currency(entity.getCurrency())
                 .build();
     }
 }

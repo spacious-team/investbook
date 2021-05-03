@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -19,12 +19,14 @@
 package ru.investbook.service.moex;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
 
 import static java.lang.String.valueOf;
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
 
 @EqualsAndHashCode
 @RequiredArgsConstructor
@@ -32,12 +34,17 @@ class MoexMarketDescription {
     private final String engine;
     private final String market;
     private final String board;
+    @Getter
+    private final String currency; // may be null (exactly null for futures, options, currency pairs)
 
     static MoexMarketDescription of(Map<String, Object> description) {
         String engine = valueOf(requireNonNull(description.get("engine")));
         String market = valueOf(requireNonNull(description.get("market")));
         String board = valueOf(requireNonNull(description.get("boardid")));
-        return new MoexMarketDescription(engine, market, board);
+        String currency = ofNullable(description.get("currencyid"))
+                .map(String::valueOf)
+                .orElse(null);
+        return new MoexMarketDescription(engine, market, board, currency);
     }
 
     Map<String, String> toMap() {

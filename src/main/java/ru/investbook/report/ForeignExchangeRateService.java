@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,9 @@ package ru.investbook.report;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.pojo.SecurityQuote.SecurityQuoteBuilder;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.investbook.entity.ForeignExchangeRateEntity;
@@ -31,6 +34,10 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
+
+import static org.spacious_team.broker.pojo.SecurityType.*;
+
 
 @Service
 @RequiredArgsConstructor
@@ -44,19 +51,6 @@ public class ForeignExchangeRateService {
     private final Map<String, Map<String, Map<LocalDate, BigDecimal>>> cacheByDate = new ConcurrentHashMap<>();
     @Value("${server.port}")
     private int serverPort;
-
-    /**
-     * Конвертирует сумму денежных средств из заданной валюты в целевую валюту по последнему известному курсу или
-     * курсу по-умолчанию, если официальный курс не известен.
-     */
-    public BigDecimal convertValueToCurrency(BigDecimal value, String fromCurrency, String toCurrency) {
-        if (fromCurrency.equalsIgnoreCase(toCurrency)) {
-            return value;
-        } else {
-            BigDecimal exchangeRate = getExchangeRate(fromCurrency, toCurrency);
-            return value.multiply(exchangeRate);
-        }
-    }
 
     /**
      * Возвращает последнюю известную котировку базовой валюты в цене котируемой валюты. Например, для USD/RUB базовая валюта - USD.
@@ -238,5 +232,44 @@ public class ForeignExchangeRateService {
         log.debug("Не могу в БД найти курс валюты {}, использую значение по умолчанию = {}",
                 currency, exchangeRate);
         return exchangeRate;
+    }
+
+    /**
+     * Конвертирует сумму денежных средств из заданной валюты в целевую валюту по последнему известному курсу или
+     * курсу по-умолчанию, если официальный курс не известен.
+     */
+    public BigDecimal convertValueToCurrency(BigDecimal value, String fromCurrency, String toCurrency) {
+        if (fromCurrency.equalsIgnoreCase(toCurrency)) {
+            return value;
+        } else {
+            BigDecimal exchangeRate = getExchangeRate(fromCurrency, toCurrency);
+            return value.multiply(exchangeRate);
+        }
+    }
+
+    /**
+     * Конвертирует котировку из заданной валюты в целевую валюту по последнему известному курсу или
+     * курсу по-умолчанию, если официальный курс не известен.
+     */
+    public SecurityQuote convertQuoteToCurrency(SecurityQuote quote, String toCurrency) {
+        String fromCurrency = quote.getCurrency();
+        if (fromCurrency == null || fromCurrency.equalsIgnoreCase(toCurrency)) {
+            return quote;
+        } else {
+            return convertQuoteToCurrency(quote, () -> getExchangeRate(fromCurrency, toCurrency))
+                    .currency(toCurrency)
+                    .build();
+        }
+    }
+
+    private static SecurityQuoteBuilder convertQuoteToCurrency(SecurityQuote quote, Supplier<BigDecimal> exchangeRateSupplier) {
+        BigDecimal exchangeRate = exchangeRateSupplier.get();
+        BigDecimal accruedInterest = quote.getAccruedInterest();
+        SecurityType type = getSecurityType(quote.getSecurity());
+        boolean nonCurrencyQuote = ((type == STOCK_OR_BOND) && (accruedInterest != null)) || (type == DERIVATIVE);
+        return quote.toBuilder()
+                .quote(nonCurrencyQuote ? quote.getQuote() : quote.getQuote().multiply(exchangeRate))
+                .price((quote.getPrice() == null) ? null : quote.getPrice().multiply(exchangeRate))
+                .accruedInterest((accruedInterest == null) ? null : accruedInterest.multiply(exchangeRate));
     }
 }
