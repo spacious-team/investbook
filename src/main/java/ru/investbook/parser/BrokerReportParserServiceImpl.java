@@ -172,7 +172,8 @@ public class BrokerReportParserServiceImpl implements BrokerReportParserService 
     private ReportTables getReportTables(BrokerReport brokerReport) {
         for (ReportTablesFactory reportTablesFactory : reportTablesFactories) {
             if (reportTablesFactory.canCreate(brokerReport)) {
-                return reportTablesFactory.create(brokerReport);
+                ReportTables reportTables = reportTablesFactory.create(brokerReport);
+                return new ReportTablesCachingWrapper(reportTables);
             }
         }
         throw new IllegalArgumentException(
