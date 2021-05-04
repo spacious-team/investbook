@@ -33,7 +33,7 @@ public class SberCashAndSecurityBrokerReportFactory extends AbstractBrokerReport
 
     @Getter
     private final String brokerName = "Сбербанк Онлайн (деньги)";
-    private final Pattern expectedFileNamePattern = Pattern.compile("^Зачисления_и_Списания_.*");
+    private final Pattern expectedFileNamePattern = Pattern.compile("^Зачисления[_-]и[_-]Списания[_-].*");
 
     @Override
     public BrokerReport create(String excelFileName, InputStream is) {

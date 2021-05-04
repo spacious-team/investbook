@@ -33,7 +33,7 @@ public class SberTrBrokerReportFactory extends AbstractBrokerReportFactory {
 
     @Getter
     private final String brokerName = "Сбербанк Онлайн (сделки)";
-    private final Pattern expectedFileNamePattern = Pattern.compile("^Сделки_.*");
+    private final Pattern expectedFileNamePattern = Pattern.compile("^Сделки[_-].*");
 
     @Override
     public BrokerReport create(String excelFileName, InputStream is) {
