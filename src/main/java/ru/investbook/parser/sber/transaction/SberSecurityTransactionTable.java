@@ -56,7 +56,7 @@ public class SberSecurityTransactionTable extends AbstractReportTable<SecurityTr
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .transactionId(String.valueOf(row.getLongCellValue(TRANSACTION))) // may be double numbers in future
                 .security(getSecurity(row))
-                .count(row.getIntCellValue(COUNT))
+                .count(row.getIntCellValue(COUNT) * (isBuy ? 1 : -1))
                 .value(value)
                 .accruedInterest(accruedInterest)
                 .commission(row.getBigDecimalCellValue(MARKET_COMMISSION)
