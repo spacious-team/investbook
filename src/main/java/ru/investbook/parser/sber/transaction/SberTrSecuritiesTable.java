@@ -23,15 +23,15 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableRow;
-import ru.investbook.parser.sber.transaction.SberSecurityTransactionTable.SberTransactionTableHeader;
+import ru.investbook.parser.sber.transaction.SberTrSecurityTransactionTable.SberTransactionTableHeader;
 
-import static ru.investbook.parser.sber.transaction.SberSecurityTransactionTable.SberTransactionTableHeader.NAME_AND_ISIN;
+import static ru.investbook.parser.sber.transaction.SberTrSecurityTransactionTable.SberTransactionTableHeader.NAME_AND_ISIN;
 
 @Slf4j
-public class SberSecuritiesTable extends AbstractReportTable<Security> {
+public class SberTrSecuritiesTable extends AbstractReportTable<Security> {
     private static final String FIRST_LINE = "Номер договора";
 
-    protected SberSecuritiesTable(BrokerReport report) {
+    protected SberTrSecuritiesTable(BrokerReport report) {
         super(report, "Сделки", FIRST_LINE, null, SberTransactionTableHeader.class);
     }
 

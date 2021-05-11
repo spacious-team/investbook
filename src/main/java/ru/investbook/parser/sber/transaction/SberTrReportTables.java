@@ -55,12 +55,12 @@ public class SberTrReportTables extends AbstractReportTables<BrokerReport> {
 
     @Override
     public ReportTable<Security> getSecuritiesTable() {
-        return new SberSecuritiesTable(report);
+        return new SberTrSecuritiesTable(report);
     }
 
     @Override
     public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
-        return new SberSecurityTransactionTable(report);
+        return new SberTrSecurityTransactionTable(report);
     }
 
     @Override
