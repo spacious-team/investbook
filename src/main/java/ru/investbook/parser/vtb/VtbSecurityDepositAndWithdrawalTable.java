@@ -23,7 +23,6 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.SingleBrokerReport;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,11 +68,6 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
                         .portfolio(portfolio)
                         .security(isin)
                         .count(row.getIntCellValue(COUNT))
-                        .value(BigDecimal.ZERO)
-                        .accruedInterest(BigDecimal.ZERO)
-                        .commission(BigDecimal.ZERO)
-                        .valueCurrency("RUB")
-                        .commissionCurrency("RUB")
                         .build();
     }
 

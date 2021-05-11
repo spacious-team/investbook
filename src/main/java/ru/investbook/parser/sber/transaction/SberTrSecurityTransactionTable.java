@@ -30,13 +30,13 @@ import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
 
-import static ru.investbook.parser.sber.transaction.SberSecurityTransactionTable.SberTransactionTableHeader.*;
+import static ru.investbook.parser.sber.transaction.SberTrSecurityTransactionTable.SberTransactionTableHeader.*;
 
 @Slf4j
-public class SberSecurityTransactionTable extends AbstractReportTable<SecurityTransaction> {
+public class SberTrSecurityTransactionTable extends AbstractReportTable<SecurityTransaction> {
     private static final String FIRST_LINE = "Номер договора";
 
-    protected SberSecurityTransactionTable(BrokerReport report) {
+    protected SberTrSecurityTransactionTable(BrokerReport report) {
         super(report, "Сделки", FIRST_LINE, null, SberTransactionTableHeader.class);
     }
 
