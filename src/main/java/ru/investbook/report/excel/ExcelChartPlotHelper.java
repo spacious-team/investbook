@@ -41,16 +41,22 @@ import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 @Slf4j
 public class ExcelChartPlotHelper {
 
+    private static String NO_VALUE_IN_CELL_RANGE = "No value in cell range";
+
     static void plotChart(String name, Sheet sheet, BiConsumer<String, XSSFSheet> plotter) {
         try {
             plotter.accept(name, (XSSFSheet) sheet);
         } catch (Exception e) {
-            String message = "Не могу построить график '{}' на вкладке '{}'";
+            String message = "Не возможно построить график '{}' на вкладке '{}'";
+            if (Objects.equals(e.getMessage(), NO_VALUE_IN_CELL_RANGE)) {
+                message += ": менее 2 точек для построения графика";
+            }
             log.info(message, name, sheet.getSheetName());
             log.debug(message, name, sheet.getSheetName(), e);
         }
@@ -151,6 +157,6 @@ public class ExcelChartPlotHelper {
                 }
             }
         }
-        throw new IllegalArgumentException("No value in cell range");
+        throw new IllegalArgumentException(NO_VALUE_IN_CELL_RANGE);
     }
 }

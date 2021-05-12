@@ -32,6 +32,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static ru.investbook.parser.sber.SecurityHelper.getSecurityId;
 import static ru.investbook.parser.sber.cash_security.SberSecurityDepsitAndWithdrawalTable.SberSecurityDepositAndWithdrawalTableHeader.*;
 
 @Slf4j
@@ -63,18 +64,18 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Se
         }
         String portfolio = row.getStringCellValue(PORTFOLIO);
         Instant instant = row.getInstantCellValue(DATE_TIME);
-        String code = row.getStringCellValue(CODE);
+        String securityId = getSecurityId(row.getStringCellValue(CODE), row.getStringCellValue(SECTION));
         return SecurityTransaction.builder()
-                .transactionId(generateTransactionId(portfolio, instant, code))
+                .transactionId(generateTransactionId(portfolio, instant, securityId))
                 .timestamp(instant)
                 .portfolio(portfolio)
-                .security(code)
+                .security(securityId)
                 .count(count)
                 .build();
     }
 
-    private static String generateTransactionId(String portfolio, Instant instant, String code) {
-        String id = instant.getEpochSecond() + code + portfolio;
+    private static String generateTransactionId(String portfolio, Instant instant, String securityId) {
+        String id = instant.getEpochSecond() + securityId + portfolio;
         return id.substring(0, Math.min(32, id.length()));
     }
 
@@ -83,6 +84,7 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Se
         DATE_TIME("Дата исполнения поручения"),
         CODE("Код финансового инструмента"),
         NAME("Наименование финансового инструмента"),
+        SECTION("Тип рынка"),
         OPERATION("Операция"),
         COUNT("Количество"),
         DESCRIPTION("Содержание операции"),

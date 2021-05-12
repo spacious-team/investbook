@@ -25,7 +25,10 @@ import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.sber.transaction.SberTrSecurityTransactionTable.SberTransactionTableHeader;
 
+import static ru.investbook.parser.sber.SecurityHelper.getSecurityId;
+import static ru.investbook.parser.sber.SecurityHelper.getSecurityName;
 import static ru.investbook.parser.sber.transaction.SberTrSecurityTransactionTable.SberTransactionTableHeader.NAME_AND_ISIN;
+import static ru.investbook.parser.sber.transaction.SberTrSecurityTransactionTable.SberTransactionTableHeader.SECTION;
 
 @Slf4j
 public class SberTrSecuritiesTable extends AbstractReportTable<Security> {
@@ -37,14 +40,10 @@ public class SberTrSecuritiesTable extends AbstractReportTable<Security> {
 
     @Override
     protected Security parseRow(TableRow row) {
-        String nameAndIsin = row.getStringCellValue(NAME_AND_ISIN); // format: "<name>\s*(<isin>)"
-        int start = nameAndIsin.indexOf('(');
-        int end = nameAndIsin.indexOf(')');
-        String id = nameAndIsin.substring(start + 1, (end > -1) ? end : nameAndIsin.length());
-        String name = (start == -1) ? null : nameAndIsin.substring(0, start).trim();
+        String nameAndIsin = row.getStringCellValue(NAME_AND_ISIN);
         return Security.builder()
-                .id(id)
-                .name(name)
+                .id(getSecurityId(nameAndIsin, row.getStringCellValue(SECTION)))
+                .name(getSecurityName(nameAndIsin))
                 .build();
     }
 }
