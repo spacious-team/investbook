@@ -48,6 +48,8 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Se
     protected SecurityTransaction parseRow(TableRow row) {
         if (!"Исполнено".equalsIgnoreCase(row.getStringCellValueOrDefault(STATUS, null))) {
             return null;
+        } else if ("Погашение ценной бумаги".equalsIgnoreCase(row.getStringCellValueOrDefault(DESCRIPTION, null))) {
+            return null;
         }
         String operation = row.getStringCellValue(OPERATION);
         int count;
