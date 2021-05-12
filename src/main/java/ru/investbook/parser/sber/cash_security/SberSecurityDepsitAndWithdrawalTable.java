@@ -50,8 +50,10 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Se
             return null;
         }
         String operation = row.getStringCellValue(OPERATION);
+        int count;
         switch (operation) {
-            case "Ввод ЦБ", "Вывод ЦБ" -> {} // по "Вывод ЦБ" - нет примера отчеты
+            case "Ввод ЦБ" -> count = row.getIntCellValue(COUNT);
+            case "Вывод ЦБ" -> count = -row.getIntCellValue(COUNT);
             default -> {
                 log.warn("Неизвестный тип операции: {} в отчете {}", operation, getReport());
                 return null;
@@ -65,7 +67,7 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Se
                 .timestamp(instant)
                 .portfolio(portfolio)
                 .security(code)
-                .count(row.getIntCellValue(COUNT))
+                .count(count)
                 .build();
     }
 
