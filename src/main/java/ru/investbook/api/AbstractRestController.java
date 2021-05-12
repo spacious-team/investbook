@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.util.UriUtils;
 import ru.investbook.converter.EntityConverter;
 
 import java.net.URI;
@@ -29,6 +30,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @RequiredArgsConstructor
 public abstract class AbstractRestController<ID, Pojo, Entity> {
@@ -127,7 +130,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
     }
 
     protected URI getLocationURI(Pojo object) throws URISyntaxException {
-        return new URI(getLocation() + "/" + getId(object));
+        return new URI(UriUtils.encodePath(getLocation() + "/" + getId(object), UTF_8));
     }
 
     protected abstract String getLocation();
