@@ -80,13 +80,13 @@ public interface PortfolioPropertyRepository extends JpaRepository<PortfolioProp
             @Param("from") Instant startDate,
             @Param("to") Instant endDate);
 
-    List<PortfolioPropertyEntity> findByPropertyAndTimestampBetweenOrderByTimestampDesc(String property,
-                                                                                        Instant startDate,
-                                                                                        Instant endDate);
+    List<PortfolioPropertyEntity> findByPropertyInAndTimestampBetweenOrderByTimestampDesc(Collection<String> properties,
+                                                                                          Instant startDate,
+                                                                                          Instant endDate);
 
-    List<PortfolioPropertyEntity> findByPortfolioIdInAndPropertyAndTimestampBetweenOrderByTimestampDesc(
+    List<PortfolioPropertyEntity> findByPortfolioIdInAndPropertyInAndTimestampBetweenOrderByTimestampDesc(
             Collection<String> portfolios,
-            String property,
+            Collection<String> properties,
             Instant startDate,
             Instant endDate);
 }
