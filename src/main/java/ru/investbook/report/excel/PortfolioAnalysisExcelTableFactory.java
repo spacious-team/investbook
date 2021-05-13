@@ -61,7 +61,6 @@ import static java.util.stream.Collectors.reducing;
 import static org.spacious_team.broker.pojo.CashFlowType.CASH;
 import static ru.investbook.report.excel.ExcelTableHeader.getColumnsRange;
 import static ru.investbook.report.excel.PortfolioAnalysisExcelTableHeader.*;
-import static ru.investbook.report.excel.PortfolioStatusExcelTableFactory.minCash;
 
 @Component
 @RequiredArgsConstructor
@@ -116,9 +115,9 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         for (EventCashFlow cashFlow : cashFlows) {
             Table.Record record = recordOf(table, cashFlow.getTimestamp(), cashFlow.getCurrency());
             record.merge(INVESTMENT_AMOUNT, cashFlow.getValue(), (v1, v2) -> ((BigDecimal) v1).add(((BigDecimal) v2)));
-            record.putIfAbsent(INVESTMENT_AMOUNT_USD, foreignExchangeRateTableFactory
+            record.computeIfAbsent(INVESTMENT_AMOUNT_USD, $ -> foreignExchangeRateTableFactory
                     .cashConvertToUsdExcelFormula(cashFlow.getCurrency(), INVESTMENT_AMOUNT, EXCHANGE_RATE));
-            record.putIfAbsent(TOTAL_INVESTMENT_USD,
+            record.computeIfAbsent(TOTAL_INVESTMENT_USD, $ ->
                     "=SUM(" + INVESTMENT_AMOUNT_USD.getColumnIndex() + "3:" + INVESTMENT_AMOUNT_USD.getCellAddr() + ")");
         }
     }
@@ -243,7 +242,9 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
      */
     private LinkedHashMap<Instant, Map<String, BigDecimal>> getCashBalance(Collection<String> portfolios) {
         List<PortfolioProperty> portfolioCashes = getPortfolioProperty(portfolios, PortfolioPropertyType.CASH);
-        return getAllPortfolioCashBalance(portfolioCashes);
+        List<PortfolioInstantCurrencyValue> balances = sumCashCashWithSameCurrency(portfolioCashes);
+        int portfolioCount = countPortfolios(portfolioCashes);
+        return getAllPortfolioCashBalance(balances, portfolioCount);
     }
 
     // TODO add second method with PortfolioPropertyType.TOTAL_ASSETS_USD and combine both results late
@@ -288,13 +289,37 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
      *
      * @return map of date -> currency -> value
      */
-    private LinkedHashMap<Instant, Map<String, BigDecimal>> getAllPortfolioCashBalance(List<PortfolioProperty> portfolioCashes) {
-        int portfolioCount = (int) portfolioCashes.stream()
+    private static LinkedHashMap<Instant, Map<String, BigDecimal>> getAllPortfolioCashBalance(
+            List<PortfolioInstantCurrencyValue> balances, int portfolioCount) {
+        // date -> currency -> cash balance
+        LinkedHashMap<Instant, Map<String, BigDecimal>> allPortfolioCashBalance = new LinkedHashMap<>();
+        // temp var: portfolio -> summed balances
+        Map<String, PortfolioInstantCurrencyValue> lastBalances = new HashMap<>();
+        for (PortfolioInstantCurrencyValue balance : balances) {
+            lastBalances.put(balance.getPortfolio(), balance);
+            if (lastBalances.size() >= portfolioCount) {
+                Map<String, BigDecimal> joinedBalance = lastBalances.values()
+                        .stream()
+                        .map(PortfolioInstantCurrencyValue::getCurrencyValue)
+                        .reduce(new HashMap<>(), (currencyValue1, currencyValue2) -> {
+                            currencyValue2.forEach((currency, value) -> currencyValue1.merge(currency, value, BigDecimal::add));
+                            return currencyValue1;
+                        });
+                allPortfolioCashBalance.put(balance.getInstant(), joinedBalance);
+            }
+        }
+        return allPortfolioCashBalance;
+    }
+
+    private static int countPortfolios(List<PortfolioProperty> portfolioCashes) {
+        return (int) portfolioCashes.stream()
                 .map(PortfolioProperty::getPortfolio)
                 .distinct()
                 .count();
-        // summing cash values with same currency
-        List<PortfolioInstantCurrencyValue> balances = portfolioCashes.stream()
+    }
+
+    private static List<PortfolioInstantCurrencyValue> sumCashCashWithSameCurrency(List<PortfolioProperty> portfolioCashes) {
+        return portfolioCashes.stream()
                 .map(portfolioProperty -> {
                     Map<String, BigDecimal> currencyValue;
                     try {
@@ -313,24 +338,6 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                             .build();
                 })
                 .collect(Collectors.toList());
-        // portfolio -> summed balances
-        Map<String, PortfolioInstantCurrencyValue> lastBalances = new HashMap<>();
-        // date -> currency -> cash balance
-        LinkedHashMap<Instant, Map<String, BigDecimal>> allPortfolioCashBalance = new LinkedHashMap<>();
-        for (PortfolioInstantCurrencyValue balance : balances) {
-            lastBalances.put(balance.getPortfolio(), balance);
-            if (lastBalances.size() >= portfolioCount) {
-                Map<String, BigDecimal> joinedBalance = lastBalances.values()
-                        .stream()
-                        .map(PortfolioInstantCurrencyValue::getCurrencyValue)
-                        .reduce(new HashMap<>(), (currencyValue1, currencyValue2) -> {
-                            currencyValue2.forEach((currency, value) -> currencyValue1.merge(currency, value, BigDecimal::add));
-                            return currencyValue1;
-                        });
-                allPortfolioCashBalance.put(balance.getInstant(), joinedBalance);
-            }
-        }
-        return allPortfolioCashBalance;
     }
 
     @Getter
@@ -342,10 +349,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     }
 
     private LinkedHashMap<Instant, BigDecimal> getAllPortfolioTotalAssets(List<PortfolioProperty> assets) {
-        int portfolioCount = (int) assets.stream()
-                .map(PortfolioProperty::getPortfolio)
-                .distinct()
-                .count();
+        int portfolioCount = countPortfolios(assets);
         // portfolio -> value
         Map<String, BigDecimal> lastTotalAssets = new HashMap<>();
         // date-time -> summed values
@@ -405,6 +409,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         String growth = SP500.getCellAddr() + "*100/" + initialSp500Value + "-100";
         return "=IF(" + nonEmptyValues + "," + growth + ",\"\")";
     }
+
     private static String getSp500InitialValue() {
         String firstNonEmptyRow = getInitialInvestmentUsdAndInitialAssetsUsdRowFormula();
         return "INDEX(" +
