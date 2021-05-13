@@ -64,6 +64,7 @@ import static org.spacious_team.broker.pojo.CashFlowType.CASH;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 import static ru.investbook.report.excel.ExcelTableHeader.getColumnsRange;
 import static ru.investbook.report.excel.PortfolioAnalysisExcelTableHeader.*;
+import static ru.investbook.report.excel.PortfolioStatusExcelTableFactory.minCash;
 
 @Component
 @RequiredArgsConstructor
@@ -167,11 +168,10 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     private static void addAssetsGrowthColumn(Table table) {
         boolean isTotalInvestmentUsdKnown = false;
         for (var record : table) {
-            if (!isTotalInvestmentUsdKnown && record.containsKey(TOTAL_INVESTMENT_USD)) {
-                isTotalInvestmentUsdKnown = true;
-            }
+            isTotalInvestmentUsdKnown = isTotalInvestmentUsdKnown || record.containsKey(TOTAL_INVESTMENT_USD);
             if (isTotalInvestmentUsdKnown) {
-                record.putIfAbsent(TOTAL_INVESTMENT_USD, "=INDIRECT(\"" + TOTAL_INVESTMENT_USD.getColumnIndex() + "\" & ROW() - 1)");
+                record.computeIfAbsent(TOTAL_INVESTMENT_USD,
+                        $ -> "=" + TOTAL_INVESTMENT_USD.getRelativeCellAddr(-1, 0));
                 BigDecimal assetsRub = (BigDecimal) record.get(ASSETS_RUB);
                 if (assetsRub != null && assetsRub.compareTo(minCash) > 0) {
                     record.put(ASSETS_GROWTH, ASSETS_GROWTH_FORMULA);
@@ -190,7 +190,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                 record.put(SP500, value);
                 record.put(SP500_GROWTH, SP500_GROWTH_FORMULA);
             } else if (isSp500ValueKnown) {
-                record.put(SP500, "=INDIRECT(\"" + SP500.getColumnIndex() + "\" & ROW() - 1)");
+                record.put(SP500, "=" + SP500.getRelativeCellAddr(-1, 0));
                 record.put(SP500_GROWTH, SP500_GROWTH_FORMULA);
             }
         }
