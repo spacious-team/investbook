@@ -74,7 +74,7 @@
             <dependency>
                 <groupId>com.github.spacious-team</groupId>
                 <artifactId>table-wrapper-api</artifactId>
-                <version>2021.5</version>
+                <version>256470ab33</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
