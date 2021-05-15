@@ -167,7 +167,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
         BigDecimal cnt = BigDecimal.valueOf(count);
         m.setAction(count >= 0 ? TransactionModel.Action.BUY : TransactionModel.Action.CELL);
         m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
-        m.setSecurity(e.getSecurity().getId(), e.getSecurity().getName());
+        m.setSecurity(e.getSecurity().getId(), ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()));
         m.setSecurityType(SecurityType.valueOf(getSecurityType(e.getSecurity().getId())));
         m.setCount(abs(count));
         List<TransactionCashFlowEntity> cashFlows = transactionCashFlowRepository.findByPkPortfolioAndPkTransactionIdAndPkTypeIn(

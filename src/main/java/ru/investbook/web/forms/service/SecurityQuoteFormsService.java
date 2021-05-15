@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
 import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 import static org.springframework.util.StringUtils.hasLength;
 
@@ -88,7 +89,7 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
     private SecurityQuoteModel toSecurityQuoteModel(SecurityQuoteEntity e) {
         SecurityQuoteModel m = new SecurityQuoteModel();
         m.setId(e.getId());
-        m.setSecurity(e.getSecurity().getId(), e.getSecurity().getName());
+        m.setSecurity(e.getSecurity().getId(), ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()));
         m.setTimestamp(e.getTimestamp());
         m.setQuote(e.getQuote());
         m.setPrice(e.getPrice());

@@ -40,6 +40,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
+
 @Service
 @RequiredArgsConstructor
 public class SecurityEventCashFlowFormsService implements FormsService<SecurityEventCashFlowModel> {
@@ -122,7 +124,7 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
         m.setId(e.getId());
         m.setPortfolio(e.getPortfolio().getId());
         m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
-        m.setSecurity(e.getSecurity().getId(), e.getSecurity().getName());
+        m.setSecurity(e.getSecurity().getId(), ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()));
         m.setCount(e.getCount());
         m.setType(CashFlowType.valueOf(e.getCashFlowType().getId()));
         m.setValue(e.getValue().abs());
