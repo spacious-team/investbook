@@ -68,6 +68,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singleton;
+import static java.util.Optional.ofNullable;
 import static org.spacious_team.broker.pojo.SecurityType.*;
 import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.report.excel.PortfolioStatusExcelTableHeader.*;
@@ -226,7 +227,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         Table.Record row = new Table.Record();
         SecurityType securityType = getSecurityType(security);
         row.put(SECURITY,
-                Optional.ofNullable(security.getName())
+                ofNullable(security.getName())
+                        .or(() -> ofNullable(security.getTicker()))
                         .orElse((securityType == CURRENCY_PAIR) ?
                                 getCurrencyPair(security.getId()) :
                                 security.getId()));

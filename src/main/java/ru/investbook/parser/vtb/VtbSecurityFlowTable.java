@@ -46,11 +46,17 @@ public class VtbSecurityFlowTable extends SingleAbstractReportTable<Security> {
     protected Security parseRow(TableRow row) {
         String[] description = row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",");
         String name = description[0].trim();
+        String ticker = null;
+        if (name.endsWith(" US Equity") || name.endsWith(" US")) {
+            ticker = name.substring(0, name.lastIndexOf(" US"));
+            name = null;
+        }
         String registrationNumber = description[1].toUpperCase().trim();
         String isin = description[2].toUpperCase().trim();
         securityRegNumberToIsin.put(registrationNumber, isin);
         return Security.builder()
                 .id(isin)
+                .ticker(ticker)
                 .name(name)
                 .build();
     }
