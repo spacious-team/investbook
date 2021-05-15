@@ -65,8 +65,11 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     @Override
     public Collection<ExcelTable> createExcelTables() {
         Collection<ExcelTable> tables = new ArrayList<>();
-        Table table = tableFactory.create(ViewFilter.get().getPortfolios());
-        tables.add(ExcelTable.of("Обзор", table, this));
+        Collection<String> portfolios = ViewFilter.get().getPortfolios();
+        if (portfolios.size() > 1 || (portfolios.isEmpty() && portfolioRepository.count() > 1)) {
+            Table table = tableFactory.create(portfolios);
+            tables.add(ExcelTable.of("Обзор", table, this));
+        }
         tables.addAll(super.createExcelTables());
         return tables;
     }

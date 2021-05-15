@@ -48,6 +48,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static ru.investbook.report.excel.ExcelChartPlotHelper.*;
 import static ru.investbook.report.excel.ExcelConditionalFormatHelper.highlightNegativeByRed;
@@ -81,8 +82,11 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     }
 
     private Collection<ExcelTable> createExcelTablesByCurrencies() {
-        Collection<ExcelTable> tables = new ArrayList<>();
         Collection<String> portfolios = ViewFilter.get().getPortfolios();
+        if (portfolios.size() == 1 || (portfolios.isEmpty() && portfolioRepository.count() == 1)) {
+            return emptyList();
+        }
+        Collection<ExcelTable> tables = new ArrayList<>();
         List<String> currencies = portfolios.isEmpty() ?
                 transactionCashFlowRepository.findDistinctCurrencyByPkTypeIn(
                         Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId())) :
