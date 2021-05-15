@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.PortfolioCash;
+import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
@@ -74,12 +75,21 @@ public class VtbCashTable extends SingleAbstractReportTable<PortfolioCash> {
     @RequiredArgsConstructor
     private enum VtbCashTableHeader implements TableColumnDescription {
         CURRENCY(TableColumnImpl.of("Валюта")),
-        STOCK_MARKET(OptionalTableColumn.of(
-                MultiLineTableColumn.of("Исходящий остаток", "площадка", "основной рынок"))),
-        FORTS_MARKET(OptionalTableColumn.of(
-                MultiLineTableColumn.of("Исходящий остаток", "площадка", "срочный рынок"))),
-        NON_MARKET(OptionalTableColumn.of(
-                MultiLineTableColumn.of("Исходящий остаток", "площадка", "внебирж. рынок")));
+        STOCK_MARKET(
+                OptionalTableColumn.of(
+                        AnyOfTableColumn.of(
+                                MultiLineTableColumn.of("Исходящий остаток", "", "основной рынок"),
+                                MultiLineTableColumn.of("Исходящий остаток", "площадка", "основной рынок")))),
+        FORTS_MARKET(
+                OptionalTableColumn.of(
+                        AnyOfTableColumn.of(
+                                MultiLineTableColumn.of("Исходящий остаток", "", "срочный рынок"),
+                                MultiLineTableColumn.of("Исходящий остаток", "площадка", "срочный рынок")))),
+        NON_MARKET(
+                OptionalTableColumn.of(
+                        AnyOfTableColumn.of(
+                                MultiLineTableColumn.of("Исходящий остаток", "", "внебирж. рынок"),
+                                MultiLineTableColumn.of("Исходящий остаток", "площадка", "внебирж. рынок"))));
 
         private final TableColumn column;
     }
