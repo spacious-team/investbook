@@ -65,7 +65,6 @@ public class CbrForeignExchangeRateService {
             "CHF", "R01775");
     private final ForeignExchangeRateRepository foreignExchangeRateRepository;
     private final ForeignExchangeRateConverter foreignExchangeRateConverter;
-    private final ForeignExchangeRateService foreignExchangeRateService;
     private final RestTemplate restTemplate;
 
     @Transactional
@@ -78,7 +77,6 @@ public class CbrForeignExchangeRateService {
                         .parallelStream()
                         .forEach(e -> updateCurrencyRate(formattedFromDate, e)))
                 .get();
-        foreignExchangeRateService.invalidateCache();
         log.info("Курсы валют обновлены за {}", Duration.ofNanos(System.nanoTime() - t0));
     }
 

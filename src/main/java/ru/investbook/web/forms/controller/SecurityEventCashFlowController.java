@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.ControllerHelper;
@@ -43,6 +44,7 @@ public class SecurityEventCashFlowController {
     private final SecurityEventCashFlowFormsService securityEventCashFlowFormsService;
     private final PortfolioRepository portfolioRepository;
     private final SecurityRepository securityRepository;
+    private final FifoPositionsFactory fifoPositionsFactory;
     private volatile Collection<String> securities;
     private volatile Collection<String> portfolios;
     private volatile String selectedPortfolio;
@@ -82,6 +84,7 @@ public class SecurityEventCashFlowController {
     public String postSecurityEventCashFlow(@Valid @ModelAttribute("event") SecurityEventCashFlowModel event) {
         selectedPortfolio = event.getPortfolio();
         securityEventCashFlowFormsService.save(event);
+        fifoPositionsFactory.invalidateCache();
         return "security-events/view-single";
     }
 }

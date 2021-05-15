@@ -89,7 +89,7 @@ public class TransactionRestController extends AbstractRestController<Transactio
      * see {@link AbstractRestController#put(Object, Object)}
      */
     @PutMapping("/portfolios/{portfolio}/ids/{id}")
-    @Operation(summary = "Обновить параметры", description = "Обновляет праметры указанной сделки")
+    @Operation(summary = "Обновить параметры", description = "Обновляет параметры указанной сделки")
     public ResponseEntity<Void> put(@PathVariable("portfolio")
                                     @Parameter(description = "Идентификатор счета брокера")
                                             String portfolio,
