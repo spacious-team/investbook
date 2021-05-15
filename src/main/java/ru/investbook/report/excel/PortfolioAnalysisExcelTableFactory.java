@@ -64,13 +64,11 @@ import static org.spacious_team.broker.pojo.CashFlowType.CASH;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 import static ru.investbook.report.excel.ExcelTableHeader.getColumnsRange;
 import static ru.investbook.report.excel.PortfolioAnalysisExcelTableHeader.*;
-import static ru.investbook.report.excel.PortfolioStatusExcelTableFactory.minCash;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class PortfolioAnalysisExcelTableFactory implements TableFactory {
-    private static final String ASSETS_GROWTH_FORMULA = getAssetsGrowthFormula();
     private static final String SP500_GROWTH_FORMULA = getSp500GrowthFormula();
     private final EventCashFlowRepository eventCashFlowRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
@@ -119,6 +117,8 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         addAssetsGrowthColumn(table);
         addSp500GrowthColumn(sp500, table);
 
+        fillEmptyTotalInvestmentCells(table);
+
         addCurrencyExchangeRateColumns(table);
         return table;
     }
@@ -165,19 +165,47 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         }
     }
 
-    private static void addAssetsGrowthColumn(Table table) {
-        boolean isTotalInvestmentUsdKnown = false;
-        for (var record : table) {
-            isTotalInvestmentUsdKnown = isTotalInvestmentUsdKnown || record.containsKey(TOTAL_INVESTMENT_USD);
-            if (isTotalInvestmentUsdKnown) {
-                record.computeIfAbsent(TOTAL_INVESTMENT_USD,
-                        $ -> "=" + TOTAL_INVESTMENT_USD.getRelativeCellAddr(-1, 0));
-                BigDecimal assetsRub = (BigDecimal) record.get(ASSETS_RUB);
-                if (assetsRub != null && assetsRub.compareTo(minCash) > 0) {
-                    record.put(ASSETS_GROWTH, ASSETS_GROWTH_FORMULA);
+    private void addAssetsGrowthColumn(Table table) {
+        try {
+            double usdToRubExchangeRate = foreignExchangeRateService.getExchangeRateToRub("USD").doubleValue();
+            Double divider = null;
+            double investmentUsd = 0;
+            for (var record : table) {
+                investmentUsd += getInvestmentUsd(record);
+                Number assetsRub = (Number) record.get(ASSETS_RUB);
+                if (assetsRub != null) {
+                    double assetsUsd = assetsRub.doubleValue() / usdToRubExchangeRate;
+                    divider = updateDivider(divider, assetsUsd, investmentUsd);
+                    investmentUsd = 0;
+                    if (divider != null) {
+                        record.put(ASSETS_GROWTH, "=(" + ASSETS_USD.getCellAddr() + "/" + divider + "-1)*100");
+                    }
                 }
             }
+        } catch (Exception e) {
+            log.error("Ошибка при расчете роста активов в %", e);
         }
+    }
+
+    private double getInvestmentUsd(Table.Record record) {
+        BigDecimal investment = (BigDecimal) record.get(INVESTMENT_AMOUNT);
+        if (investment != null) {
+            return foreignExchangeRateService.convertValueToCurrency(investment,
+                    record.get(INVESTMENT_CURRENCY).toString(), "USD")
+                    .doubleValue();
+        }
+        return 0;
+    }
+
+    private Double updateDivider(Double divider, double assetsUsd, double investmentUsd) {
+        if (divider == null) {
+            divider = assetsUsd;
+        } else {
+            double assetsBeforeInvestment = assetsUsd - investmentUsd;
+            divider = divider * assetsUsd / assetsBeforeInvestment;
+        }
+        divider = (divider.isNaN() || divider.isInfinite() || divider < 0.0001)  ? null : divider;
+        return divider;
     }
 
     private static void addSp500GrowthColumn(Map<LocalDate, BigDecimal> sp500, Table table) {
@@ -192,6 +220,17 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
             } else if (isSp500ValueKnown) {
                 record.put(SP500, "=" + SP500.getRelativeCellAddr(-1, 0));
                 record.put(SP500_GROWTH, SP500_GROWTH_FORMULA);
+            }
+        }
+    }
+
+    private void fillEmptyTotalInvestmentCells(Table table) {
+        boolean isTotalInvestmentUsdKnown = false;
+        for (var record : table) {
+            isTotalInvestmentUsdKnown = isTotalInvestmentUsdKnown || record.containsKey(TOTAL_INVESTMENT_USD);
+            if (isTotalInvestmentUsdKnown) {
+                record.computeIfAbsent(TOTAL_INVESTMENT_USD,
+                        $ -> "=" + TOTAL_INVESTMENT_USD.getRelativeCellAddr(-1, 0));
             }
         }
     }
@@ -432,34 +471,6 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         }
     }
 
-    /**
-     * (CurrentAssets / CurrentInvestment) * (InitialInvestment / InitialAssets) - 1,
-     * where
-     * CurrentInvestment = (InitialInvestment + InvestmentDelta),
-     * InitialInvestment = InitialAssets
-     */
-    private static String getAssetsGrowthFormula() {
-        String initialInvestment = getInitialAssetsUsdFormula();
-        String investmentDelta = "(" + TOTAL_INVESTMENT_USD.getCellAddr() + "-" + getFirstKnownInvestmentUsdFormula() + ")";
-        String currentInvestment = "(" + initialInvestment + "+" + investmentDelta + ")";
-        String assetsGrowth = ASSETS_USD.getCellAddr() + "*100/" + currentInvestment + "-100";
-        return "=IF(" + TOTAL_INVESTMENT_USD.getCellAddr() + ">0," + assetsGrowth + ",\"\")";
-    }
-
-    private static String getFirstKnownInvestmentUsdFormula() {
-        String firstNonEmptyRow = getInitialInvestmentUsdAndInitialAssetsUsdRowFormula();
-        return "INDEX(" +
-                getColumnsRange(TOTAL_INVESTMENT_USD, 3, ASSETS_USD, 10000) + "," +
-                firstNonEmptyRow + ",1)";
-    }
-
-    private static String getInitialAssetsUsdFormula() {
-        String firstNonEmptyRow = getInitialInvestmentUsdAndInitialAssetsUsdRowFormula();
-        return "INDEX(" +
-                getColumnsRange(TOTAL_INVESTMENT_USD, 3, ASSETS_USD, 10000) + "," +
-                firstNonEmptyRow + "," + (1 + Math.abs(ASSETS_USD.ordinal() - TOTAL_INVESTMENT_USD.ordinal())) + ")";
-    }
-
     private static String getSp500GrowthFormula() {
         String initialSp500Value = getSp500InitialValue();
         String nonEmptyValues = "AND(" + SP500.getCellAddr() + "<>\"\"," + initialSp500Value + "<>\"\")";
@@ -468,15 +479,9 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     }
 
     private static String getSp500InitialValue() {
-        String firstNonEmptyRow = getInitialInvestmentUsdAndInitialAssetsUsdRowFormula();
+        String firstNonEmptyRow = "MATCH(true,INDEX((" + ASSETS_USD.getRange(3, 10000) + "<>0),0),0)";
         return "INDEX(" +
                 getColumnsRange(SP500, 3, SP500, 10000) + "," +
                 firstNonEmptyRow + ",1)";
-    }
-
-    private static String getInitialInvestmentUsdAndInitialAssetsUsdRowFormula() {
-        String firstNonEmptyTotalInvestmentUsdRow = "MATCH(true,INDEX((" + TOTAL_INVESTMENT_USD.getRange(3, 10000) + "<>0),0),0)";
-        String firstNonEmptyAssetsUsdRow = "MATCH(true,INDEX((" + ASSETS_USD.getRange(3, 10000) + "<>0),0),0)";
-        return "MAX(" + firstNonEmptyTotalInvestmentUsdRow + "," + firstNonEmptyAssetsUsdRow + ")";
     }
 }
