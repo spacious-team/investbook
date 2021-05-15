@@ -56,6 +56,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import static java.lang.Double.isFinite;
 import static java.lang.Double.parseDouble;
 import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
@@ -204,7 +205,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
             double assetsBeforeInvestment = assetsUsd - investmentUsd;
             divider = divider * assetsUsd / assetsBeforeInvestment;
         }
-        divider = (divider.isNaN() || divider.isInfinite() || divider < 0.0001)  ? null : divider;
+        divider = (!isFinite(divider) || divider < 0.0001)  ? null : divider;
         return divider;
     }
 

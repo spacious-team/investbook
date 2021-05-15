@@ -177,7 +177,7 @@
         hide('price-tick')
         hide('price-tick-value')
         hide('price-tick-value-currency')
-        setPriceCurrency('RUB', false)
+        resetPriceCurrencyIfPNT()
         setPattern('security', '^.*\\s+\\([A-Z0-9]+\\)\\s*$')
 
         switch (type) {
@@ -188,7 +188,7 @@
                 display('price-tick')
                 display('price-tick-value')
                 displayWithValue('price-tick-value-currency', 'RUB')
-                setPriceCurrency('PNT', true)
+                setPntPriceCurrency()
                 // no break
             case "CURRENCY":
                 removePattern('security')
@@ -221,10 +221,24 @@
         input.required = true
     }
 
-    function setPriceCurrency(value, isReadOnly) {
+    function resetPriceCurrencyIfPNT() {
         let e = document.getElementById('price-currency')
-        e.value = value
-        e.readOnly = isReadOnly
+        if (e.value === 'PNT') {
+            if (prevPriceCurrency) {
+                e.value = prevPriceCurrency
+            } else {
+                e.value = 'RUB'
+            }
+            e.readOnly = false
+        }
+    }
+
+    let prevPriceCurrency
+    function setPntPriceCurrency() {
+        let e = document.getElementById('price-currency')
+        prevPriceCurrency = e.value
+        e.value = 'PNT'
+        e.readOnly = true
     }
 
     function setPattern(id, pattern) {
