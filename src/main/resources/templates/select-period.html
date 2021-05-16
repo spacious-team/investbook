@@ -18,7 +18,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
-    <title>Аналитика за период</title>
+    <title>Аналитика</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
@@ -48,13 +48,13 @@
             color: #D0D0D0;
         }
 
-        input[type=checkbox] {
+        #portfolios input[type=checkbox] {
             margin-left: 16px;
         }
     </style>
 </head>
 <body>
-<h1>Аналитика за период</h1>
+<h1>Аналитика</h1>
 
 <a href="/">На главную</a>
 
@@ -70,7 +70,7 @@
         &emsp;
         <input type="submit" value="Получить"/>
     </div>
-    <p>Счета:
+    <p id='portfolios'>Счета:
         <input type="checkbox" name="roles"
                th:each="portfolio : ${viewFilter.portfolios}"
                th:text="${portfolio}"
@@ -78,6 +78,7 @@
                th:field="*{portfolios}"
                checked/>
     </p>
+    <p><input type="checkbox" th:field="*{showDetails}">Детальный отчет (если убрать, отобразится только аналитическая сводка)</p>
 </form>
 </body>
 

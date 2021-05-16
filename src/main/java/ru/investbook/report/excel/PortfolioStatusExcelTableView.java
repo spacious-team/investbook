@@ -59,6 +59,8 @@ import static ru.investbook.report.excel.PortfolioStatusExcelTableHeader.*;
 public class PortfolioStatusExcelTableView extends ExcelTableView {
 
     @Getter
+    private final boolean summaryView = true;
+    @Getter
     private final int sheetOrder = 1;
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> "Портфель (" + portfolio + ")";
@@ -75,30 +77,40 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
 
     @Override
     public Collection<ExcelTable> createExcelTables() {
-        Collection<ExcelTable> tables = new ArrayList<>();
-        tables.addAll(createExcelTablesByCurrencies());
-        tables.addAll(super.createExcelTables());
+        Collection<ExcelTable> tables = new ArrayList<>(createExcelTablesByCurrencies());
+        if (!showOnlySummary(ViewFilter.get())) {
+            tables.addAll(super.createExcelTables());
+        }
         return tables;
     }
 
     private Collection<ExcelTable> createExcelTablesByCurrencies() {
-        Collection<String> portfolios = ViewFilter.get().getPortfolios();
-        if (portfolios.size() == 1 || (portfolios.isEmpty() && portfolioRepository.count() == 1)) {
-            return emptyList();
+        ViewFilter filter = ViewFilter.get();
+        Collection<String> portfolios = filter.getPortfolios();
+        if (showOnlySummary(filter) || isManyPortfolioRequested(portfolios)) {
+            Collection<ExcelTable> tables = new ArrayList<>();
+            List<String> currencies = portfolios.isEmpty() ?
+                    transactionCashFlowRepository.findDistinctCurrencyByPkTypeIn(
+                            Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId())) :
+                    transactionCashFlowRepository.findDistinctCurrencyByPkPortfolioAndPkTypeIn(
+                            portfolios,
+                            Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId()));
+            for (String currency : currencies) {
+                Table table = tableFactory.create(portfolios, currency);
+                String sheetName = "Портфель " + currency;
+                tables.add(ExcelTable.of(sheetName, table, this));
+            }
+            return tables;
         }
-        Collection<ExcelTable> tables = new ArrayList<>();
-        List<String> currencies = portfolios.isEmpty() ?
-                transactionCashFlowRepository.findDistinctCurrencyByPkTypeIn(
-                        Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId())) :
-                transactionCashFlowRepository.findDistinctCurrencyByPkPortfolioAndPkTypeIn(
-                        portfolios,
-                        Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId()));
-        for (String currency : currencies) {
-            Table table = tableFactory.create(portfolios, currency);
-            String sheetName = "Портфель " + currency;
-            tables.add(ExcelTable.of(sheetName, table, this));
-        }
-        return tables;
+        return emptyList();
+    }
+
+    private boolean isManyPortfolioRequested(Collection<String> portfolios) {
+        return portfolios.size() > 1 || (portfolios.isEmpty() && portfolioRepository.count() > 1);
+    }
+
+    private static boolean showOnlySummary(ViewFilter filter) {
+        return !filter.isShowDetails();
     }
 
     @Override

@@ -40,6 +40,8 @@ import static ru.investbook.report.excel.CommissionExcelTableHeader.*;
 public class CommissionExcelTableView extends ExcelTableView {
 
     @Getter
+    private final boolean summaryView = false;
+    @Getter
     private final int sheetOrder = 10;
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> "Комиссия (" + portfolio + ")";

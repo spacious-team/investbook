@@ -41,6 +41,8 @@ import static ru.investbook.report.excel.SecuritiesDepositAndWithdrawalExcelTabl
 public class SecuritiesDepositAndWithdrawalExcelTableView extends ExcelTableView {
 
     @Getter
+    private final boolean summaryView = false;
+    @Getter
     private final int sheetOrder = 7;
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (ввод-вывод цб)";
