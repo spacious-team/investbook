@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import ru.investbook.entity.SecurityQuoteEntity;
+import ru.investbook.repository.SecurityQuoteRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.service.moex.MoexIssSecurityQuoteService;
 import ru.investbook.web.ControllerHelper;
@@ -36,6 +38,8 @@ import ru.investbook.web.forms.service.SecurityQuoteFormsService;
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
@@ -48,6 +52,7 @@ public class SecurityQuoteController {
     private final SecurityQuoteFormsService securityQuoteFormsService;
     private final MoexIssSecurityQuoteService moexIssSecurityQuoteService;
     private final SecurityRepository securityRepository;
+    private final SecurityQuoteRepository securityQuoteRepository;
     private volatile Collection<String> securities;
 
     @PostConstruct
@@ -91,8 +96,13 @@ public class SecurityQuoteController {
                         .parallelStream()
                         .forEach(moexIssSecurityQuoteService::updateQuote))
                 .get();
-        log.info("Котировки обновлены за {}", Duration.ofNanos(System.nanoTime() - t0));
-        model.addAttribute("message", "Котировки обновлены.");
+        String message = securityQuoteRepository.findFirstByOrderByTimestampDesc()
+                .map(SecurityQuoteEntity::getTimestamp)
+                .map(instant -> LocalDate.ofInstant(instant, ZoneId.systemDefault()))
+                .map(latestQuoteDate -> "Котировки обновлены по " + latestQuoteDate + " включительно")
+                .orElse("Запрос выполнен, но МосБиржа не вернула котировок");
+        log.info(message + " за " + Duration.ofNanos(System.nanoTime() - t0));
+        model.addAttribute("message", message);
         return "success";
     }
 }

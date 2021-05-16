@@ -33,4 +33,5 @@ public interface SecurityQuoteRepository extends JpaRepository<SecurityQuoteEnti
             String isin,
             Instant date);
 
+    Optional<SecurityQuoteEntity> findFirstByOrderByTimestampDesc();
 }
