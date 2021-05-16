@@ -29,16 +29,20 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleInitializableReportTable;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ru.investbook.parser.psb.SecurityTransactionTable.TransactionTableHeader.*;
 
 @Slf4j
 public class SecurityTransactionTable extends SingleInitializableReportTable<SecurityTransaction> {
-    private static final String TABLE1_NAME = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами в дату заключения";
-    private static final String TABLE2_NAME = "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами Т+, рассчитанные в отчетном периоде";
+    private static final String[] TABLE_NAMES = {
+            "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами в дату заключения",
+            "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами Т+, рассчитанные в отчетном периоде",
+            "Сделки, совершенные с ЦБ на биржевых торговых площадках (Основной рынок ММВБ) с расчетами в дату заключения",
+            "Сделки, совершенные с ЦБ на биржевых торговых площадках (Основной рынок ММВБ) с расчетами Т+, рассчитанные в отчетном периоде"};
     private static final String TABLE_END_TEXT = "Итого оборот";
     private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
 
@@ -48,10 +52,10 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
 
     @Override
     protected Collection<SecurityTransaction> parseTable() {
-        List<SecurityTransaction> data = new ArrayList<>();
-        data.addAll(parseTable(TABLE1_NAME));
-        data.addAll(parseTable(TABLE2_NAME));
-        return data;
+        return Stream.of(TABLE_NAMES)
+                .map(this::parseTable)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 
     private List<SecurityTransaction> parseTable(String tableName) {
