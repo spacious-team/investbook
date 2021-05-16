@@ -21,13 +21,10 @@ package ru.investbook.parser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
-import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
@@ -57,38 +54,45 @@ public class ReportParserService {
                 return;
             }
 
-            ReportTable<PortfolioProperty> portfolioPropertyTable = reportTables.getPortfolioPropertyTable();
-            ReportTable<PortfolioCash> portfolioCashTable = reportTables.getCashTable();
-            ReportTable<EventCashFlow> cashFlowTable = reportTables.getCashFlowTable();
-            ReportTable<Security> portfolioSecuritiesTable = reportTables.getSecuritiesTable();
-            ReportTable<SecurityTransaction> securityTransactionTable = reportTables.getSecurityTransactionTable();
-            ReportTable<SecurityEventCashFlow> couponAndAmortizationTable = reportTables.getCouponAmortizationRedemptionTable();
-            ReportTable<SecurityEventCashFlow> dividendTable = reportTables.getDividendTable();
-            ReportTable<DerivativeTransaction> derivativeTransactionTable = reportTables.getDerivativeTransactionTable();
-            ReportTable<SecurityEventCashFlow> derivativeCashFlowTable = reportTables.getDerivativeCashFlowTable();
-            ReportTable<ForeignExchangeTransaction> fxTransactionTable = reportTables.getForeignExchangeTransactionTable();
-            ReportTable<SecurityQuote> securityQuoteTable = reportTables.getSecurityQuoteTable();
-            ReportTable<ForeignExchangeRate> foreignExchangeRateReportTable = reportTables.getForeignExchangeRateTable();
-
-            portfolioPropertyTable.getData().forEach(api::addPortfolioProperty);
-            api.addPortfolioCash(portfolioCashTable.getData());
-            portfolioSecuritiesTable.getData().forEach(api::addSecurity);
-            cashFlowTable.getData().forEach(api::addEventCashFlow);
-            securityTransactionTable.getData().forEach(api::addTransaction);
-            couponAndAmortizationTable.getData()
+            reportTables.getPortfolioPropertyTable()
+                    .getData()
+                    .forEach(api::addPortfolioProperty);
+            api.addPortfolioCash(reportTables.getCashTable().getData());
+            reportTables.getSecuritiesTable()
+                    .getData()
+                    .forEach(api::addSecurity);
+            reportTables.getCashFlowTable()
+                    .getData()
+                    .forEach(api::addEventCashFlow);
+            reportTables.getSecurityTransactionTable()
+                    .getData()
+                    .forEach(api::addTransaction);
+            reportTables.getCouponAmortizationRedemptionTable()
+                    .getData()
                     .stream()
                     .filter(c -> api.addSecurity(c.getSecurity())) // required for amortization
                     .forEach(api::addSecurityEventCashFlow);
-            dividendTable.getData().forEach(api::addSecurityEventCashFlow);
-            derivativeTransactionTable.getData().forEach(api::addTransaction);
-            derivativeCashFlowTable.getData()
+            reportTables.getDividendTable()
+                    .getData()
+                    .forEach(api::addSecurityEventCashFlow);
+            reportTables.getDerivativeTransactionTable()
+                    .getData()
+                    .forEach(api::addTransaction);
+            reportTables.getDerivativeCashFlowTable()
+                    .getData()
                     .stream()
                     .filter(c -> api.addSecurity(c.getSecurity()))
                     .map(ReportParserService::setDerivativeCashFlowDefaults)
                     .forEach(api::addSecurityEventCashFlow);
-            fxTransactionTable.getData().forEach(api::addTransaction);
-            securityQuoteTable.getData().forEach(api::addSecurityQuote);
-            foreignExchangeRateReportTable.getData().forEach(api::addForeignExchangeRate);
+            reportTables.getForeignExchangeTransactionTable()
+                    .getData()
+                    .forEach(api::addTransaction);
+            reportTables.getSecurityQuoteTable()
+                    .getData()
+                    .forEach(api::addSecurityQuote);
+            reportTables.getForeignExchangeRateTable()
+                    .getData()
+                    .forEach(api::addForeignExchangeRate);
 
         } catch (Exception e) {
             log.warn("Не могу распарсить отчет {}", reportTables.getReport(), e);
