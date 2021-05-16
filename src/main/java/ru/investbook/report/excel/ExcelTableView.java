@@ -94,6 +94,8 @@ public abstract class ExcelTableView {
 
     protected abstract UnaryOperator<String> getSheetNameCreator();
 
+    public abstract boolean isSummaryView();
+
     public abstract int getSheetOrder();
 
     /**

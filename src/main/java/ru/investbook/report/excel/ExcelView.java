@@ -51,16 +51,17 @@ public class ExcelView {
         ExecutorService tableWriterExecutor = Executors.newSingleThreadExecutor();
         Collection<Future<?>> sheetWriterFutures = new ArrayList<>();
         int cpuCnt = Runtime.getRuntime().availableProcessors();
-        for (int idx = 0, delta = 1; idx < excelTableViews.size();) {
+        List<ExcelTableView> usedExcelTableViews = getExcelTableViews(filter);
+        for (int idx = 0, delta = 1; idx < usedExcelTableViews.size(); ) {
             int fromIndex = idx;
             idx += delta;
             delta = cpuCnt;
-            int toIndex = min(idx, excelTableViews.size());
-            final var tables = excelTableViews.subList(fromIndex, toIndex)
-                            .parallelStream()
-                            .map(excelTableView -> getExcelTables(excelTableView, filter))
-                            .flatMap(Collection::stream)
-                            .collect(Collectors.toList());
+            int toIndex = min(idx, usedExcelTableViews.size());
+            final var tables = usedExcelTableViews.subList(fromIndex, toIndex)
+                    .parallelStream()
+                    .map(excelTableView -> getExcelTables(excelTableView, filter))
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
             Future<?> future = tableWriterExecutor.submit(() -> writeExcelTables(tables, book, styles));
             sheetWriterFutures.add(future);
         }
@@ -71,6 +72,16 @@ public class ExcelView {
 
         if (book.getNumberOfSheets() == 0) {
             book.createSheet("пустой отчет");
+        }
+    }
+
+    private List<ExcelTableView> getExcelTableViews(ViewFilter filter) {
+        if (filter.isShowDetails()) {
+            return excelTableViews;
+        } else {
+            return excelTableViews.stream()
+                    .filter(ExcelTableView::isSummaryView)
+                    .collect(Collectors.toList());
         }
     }
 

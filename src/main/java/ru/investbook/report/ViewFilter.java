@@ -54,6 +54,7 @@ public class ViewFilter {
                 .fromDate(toInstant.apply(viewFilterModel.getFromDate()))
                 .toDate(toInstant.apply(viewFilterModel.getToDate()).plus(1, ChronoUnit.DAYS).minusSeconds(1))
                 .portfolios(portfolios)
+                .showDetails(viewFilterModel.isShowDetails())
                 .build();
     }
 
@@ -68,6 +69,9 @@ public class ViewFilter {
      */
     @Builder.Default
     private final Collection<String> portfolios = Collections.emptySet();
+
+    @Builder.Default
+    private final boolean showDetails = true;
 
     public static void set(ViewFilter viewFilter) {
         filters.set(viewFilter);

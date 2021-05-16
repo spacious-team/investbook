@@ -43,6 +43,8 @@ import static ru.investbook.report.excel.CashFlowExcelTableHeader.*;
 public class CashFlowExcelTableView extends ExcelTableView {
 
     @Getter
+    private final boolean summaryView = true;
+    @Getter
     private final int sheetOrder = 8;
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> "Доходность (" + portfolio + ")";
