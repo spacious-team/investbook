@@ -40,6 +40,8 @@ import static ru.investbook.report.excel.TaxExcelTableHeader.*;
 public class TaxExcelTableView extends ExcelTableView {
 
     @Getter
+    private final boolean summaryView = false;
+    @Getter
     private final int sheetOrder = 9;
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> "Налог (" + portfolio + ")";

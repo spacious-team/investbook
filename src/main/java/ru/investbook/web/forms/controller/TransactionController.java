@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.ControllerHelper;
@@ -43,6 +44,7 @@ public class TransactionController {
     private final TransactionFormsService transactionFormsService;
     private final PortfolioRepository portfolioRepository;
     private final SecurityRepository securityRepository;
+    private final FifoPositionsFactory fifoPositionsFactory;
     private volatile Collection<String> securities;
     private volatile Collection<String> portfolios;
     private volatile String selectedPortfolio;
@@ -89,6 +91,7 @@ public class TransactionController {
     public String postTransaction(@Valid @ModelAttribute("transaction") TransactionModel transaction) {
         selectedPortfolio = transaction.getPortfolio();
         transactionFormsService.save(transaction);
+        fifoPositionsFactory.invalidateCache();
         return "transactions/view-single";
     }
 }

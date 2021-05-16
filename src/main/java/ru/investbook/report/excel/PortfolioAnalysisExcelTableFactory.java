@@ -33,6 +33,7 @@ import ru.investbook.converter.PortfolioPropertyConverter;
 import ru.investbook.entity.EventCashFlowEntity;
 import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.entity.StockMarketIndexEntity;
+import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
 import ru.investbook.report.ViewFilter;
@@ -51,46 +52,56 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.lang.Double.isFinite;
 import static java.lang.Double.parseDouble;
 import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.reducing;
+import static java.util.stream.Collectors.*;
 import static org.spacious_team.broker.pojo.CashFlowType.CASH;
+import static ru.investbook.report.ForeignExchangeRateService.RUB;
 import static ru.investbook.report.excel.ExcelTableHeader.getColumnsRange;
 import static ru.investbook.report.excel.PortfolioAnalysisExcelTableHeader.*;
-import static ru.investbook.report.excel.PortfolioStatusExcelTableFactory.minCash;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class PortfolioAnalysisExcelTableFactory implements TableFactory {
-    private static final String ASSETS_GROWTH_FORMULA = getAssetsGrowthFormula();
     private static final String SP500_GROWTH_FORMULA = getSp500GrowthFormula();
     private final EventCashFlowRepository eventCashFlowRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
     private final PortfolioPropertyRepository portfolioPropertyRepository;
     private final PortfolioPropertyConverter portfolioPropertyConverter;
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
+    private final ForeignExchangeRateService foreignExchangeRateService;
     private final StockMarketIndexRepository stockMarketIndexRepository;
+    private final TreeMap<Instant, BigDecimal> emptyTreeMap = new TreeMap<>();
+    private final Set<String> cashProperty = Set.of(PortfolioPropertyType.CASH.name());
+    private final Set<String> totalAssetsProperty = Set.of(
+            PortfolioPropertyType.TOTAL_ASSETS_RUB.name(),
+            PortfolioPropertyType.TOTAL_ASSETS_USD.name());
 
     @Override
     public Table create(Collection<String> portfolios) {
+        List<EventCashFlow> cashFlow = getCashFlow(portfolios);
         return createTable(
-                getCashFlow(portfolios),
+                cashFlow,
                 getCashBalance(portfolios),
-                getTotalAssets(portfolios),
+                getTotalAssets(portfolios, cashFlow),
                 getSp500Index());
     }
 
     @Override
     public Table create(Portfolio portfolio) {
+        List<EventCashFlow> cashFlow = getCashFlow(singleton(portfolio.getId()));
         return createTable(
-                getCashFlow(singleton(portfolio.getId())),
+                cashFlow,
                 getCashBalance(singleton(portfolio.getId())),
-                getTotalAssets(singleton(portfolio.getId())),
+                getTotalAssets(singleton(portfolio.getId()), cashFlow),
                 getSp500Index());
     }
 
@@ -108,6 +119,8 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         addAssetsGrowthColumn(table);
         addSp500GrowthColumn(sp500, table);
 
+        fillEmptyTotalInvestmentCells(table);
+
         addCurrencyExchangeRateColumns(table);
         return table;
     }
@@ -116,9 +129,9 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         for (EventCashFlow cashFlow : cashFlows) {
             Table.Record record = recordOf(table, cashFlow.getTimestamp(), cashFlow.getCurrency());
             record.merge(INVESTMENT_AMOUNT, cashFlow.getValue(), (v1, v2) -> ((BigDecimal) v1).add(((BigDecimal) v2)));
-            record.putIfAbsent(INVESTMENT_AMOUNT_USD, foreignExchangeRateTableFactory
+            record.computeIfAbsent(INVESTMENT_AMOUNT_USD, $ -> foreignExchangeRateTableFactory
                     .cashConvertToUsdExcelFormula(cashFlow.getCurrency(), INVESTMENT_AMOUNT, EXCHANGE_RATE));
-            record.putIfAbsent(TOTAL_INVESTMENT_USD,
+            record.computeIfAbsent(TOTAL_INVESTMENT_USD, $ ->
                     "=SUM(" + INVESTMENT_AMOUNT_USD.getColumnIndex() + "3:" + INVESTMENT_AMOUNT_USD.getCellAddr() + ")");
         }
     }
@@ -154,20 +167,47 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         }
     }
 
-    private static void addAssetsGrowthColumn(Table table) {
-        boolean isTotalInvestmentUsdKnown = false;
-        for (var record : table) {
-            if (!isTotalInvestmentUsdKnown && record.containsKey(TOTAL_INVESTMENT_USD)) {
-                isTotalInvestmentUsdKnown = true;
-            }
-            if (isTotalInvestmentUsdKnown) {
-                record.putIfAbsent(TOTAL_INVESTMENT_USD, "=INDIRECT(\"" + TOTAL_INVESTMENT_USD.getColumnIndex() + "\" & ROW() - 1)");
-                BigDecimal assetsRub = (BigDecimal) record.get(ASSETS_RUB);
-                if (assetsRub != null && assetsRub.compareTo(minCash) > 0) {
-                    record.put(ASSETS_GROWTH, ASSETS_GROWTH_FORMULA);
+    private void addAssetsGrowthColumn(Table table) {
+        try {
+            double usdToRubExchangeRate = foreignExchangeRateService.getExchangeRateToRub("USD").doubleValue();
+            Double divider = null;
+            double investmentUsd = 0;
+            for (var record : table) {
+                investmentUsd += getInvestmentUsd(record);
+                Number assetsRub = (Number) record.get(ASSETS_RUB);
+                if (assetsRub != null) {
+                    double assetsUsd = assetsRub.doubleValue() / usdToRubExchangeRate;
+                    divider = updateDivider(divider, assetsUsd, investmentUsd);
+                    investmentUsd = 0;
+                    if (divider != null) {
+                        record.put(ASSETS_GROWTH, "=(" + ASSETS_USD.getCellAddr() + "/" + divider + "-1)*100");
+                    }
                 }
             }
+        } catch (Exception e) {
+            log.error("Ошибка при расчете роста активов в %", e);
         }
+    }
+
+    private double getInvestmentUsd(Table.Record record) {
+        BigDecimal investment = (BigDecimal) record.get(INVESTMENT_AMOUNT);
+        if (investment != null) {
+            return foreignExchangeRateService.convertValueToCurrency(investment,
+                    record.get(INVESTMENT_CURRENCY).toString(), "USD")
+                    .doubleValue();
+        }
+        return 0;
+    }
+
+    private Double updateDivider(Double divider, double assetsUsd, double investmentUsd) {
+        if (divider == null) {
+            divider = assetsUsd;
+        } else {
+            double assetsBeforeInvestment = assetsUsd - investmentUsd;
+            divider = divider * assetsUsd / assetsBeforeInvestment;
+        }
+        divider = (!isFinite(divider) || divider < 0.0001)  ? null : divider;
+        return divider;
     }
 
     private static void addSp500GrowthColumn(Map<LocalDate, BigDecimal> sp500, Table table) {
@@ -180,8 +220,19 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                 record.put(SP500, value);
                 record.put(SP500_GROWTH, SP500_GROWTH_FORMULA);
             } else if (isSp500ValueKnown) {
-                record.put(SP500, "=INDIRECT(\"" + SP500.getColumnIndex() + "\" & ROW() - 1)");
+                record.put(SP500, "=" + SP500.getRelativeCellAddr(-1, 0));
                 record.put(SP500_GROWTH, SP500_GROWTH_FORMULA);
+            }
+        }
+    }
+
+    private void fillEmptyTotalInvestmentCells(Table table) {
+        boolean isTotalInvestmentUsdKnown = false;
+        for (var record : table) {
+            isTotalInvestmentUsdKnown = isTotalInvestmentUsdKnown || record.containsKey(TOTAL_INVESTMENT_USD);
+            if (isTotalInvestmentUsdKnown) {
+                record.computeIfAbsent(TOTAL_INVESTMENT_USD,
+                        $ -> "=" + TOTAL_INVESTMENT_USD.getRelativeCellAddr(-1, 0));
             }
         }
     }
@@ -242,28 +293,31 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
      * @return map of date -> currency -> value
      */
     private LinkedHashMap<Instant, Map<String, BigDecimal>> getCashBalance(Collection<String> portfolios) {
-        List<PortfolioProperty> portfolioCashes = getPortfolioProperty(portfolios, PortfolioPropertyType.CASH);
-        return getAllPortfolioCashBalance(portfolioCashes);
+        List<PortfolioProperty> portfolioCashes = getPortfolioProperty(portfolios, cashProperty);
+        List<PortfolioInstantCurrencyValue> balances = sumCashWithSameCurrency(portfolioCashes);
+        int portfolioCount = countPortfolios(portfolioCashes);
+        return getAllPortfolioCashBalance(balances, portfolioCount);
     }
 
-    // TODO add second method with PortfolioPropertyType.TOTAL_ASSETS_USD and combine both results late
-    private LinkedHashMap<Instant, BigDecimal> getTotalAssets(Collection<String> portfolios) {
-        List<PortfolioProperty> assets = getPortfolioProperty(portfolios, PortfolioPropertyType.TOTAL_ASSETS_RUB);
-        return getAllPortfolioTotalAssets(assets);
+    // TODO PortfolioPropertyType.TOTAL_ASSETS_RUB and TOTAL_ASSETS_USD both exists for same timestamp
+    private LinkedHashMap<Instant, BigDecimal> getTotalAssets(Collection<String> portfolios,
+                                                              List<EventCashFlow> cashFlows) {
+        List<PortfolioProperty> assets = getPortfolioProperty(portfolios, totalAssetsProperty);
+        return getAllPortfolioTotalAssets(assets, cashFlows);
     }
 
-    private List<PortfolioProperty> getPortfolioProperty(Collection<String> portfolios, PortfolioPropertyType property) {
+    private List<PortfolioProperty> getPortfolioProperty(Collection<String> portfolios, Collection<String> propertyTypes) {
         ViewFilter viewFilter = ViewFilter.get();
         List<PortfolioPropertyEntity> entities = portfolios.isEmpty() ?
                 portfolioPropertyRepository
-                        .findByPropertyAndTimestampBetweenOrderByTimestampDesc(
-                                property.name(),
+                        .findByPropertyInAndTimestampBetweenOrderByTimestampDesc(
+                                propertyTypes,
                                 viewFilter.getFromDate(),
                                 viewFilter.getToDate()) :
                 portfolioPropertyRepository
-                        .findByPortfolioIdInAndPropertyAndTimestampBetweenOrderByTimestampDesc(
+                        .findByPortfolioIdInAndPropertyInAndTimestampBetweenOrderByTimestampDesc(
                                 portfolios,
-                                property.name(),
+                                propertyTypes,
                                 viewFilter.getFromDate(),
                                 viewFilter.getToDate());
         List<PortfolioProperty> properties = entities.stream()
@@ -288,13 +342,37 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
      *
      * @return map of date -> currency -> value
      */
-    private LinkedHashMap<Instant, Map<String, BigDecimal>> getAllPortfolioCashBalance(List<PortfolioProperty> portfolioCashes) {
-        int portfolioCount = (int) portfolioCashes.stream()
+    private static LinkedHashMap<Instant, Map<String, BigDecimal>> getAllPortfolioCashBalance(
+            List<PortfolioInstantCurrencyValue> balances, int portfolioCount) {
+        // date -> currency -> cash balance
+        LinkedHashMap<Instant, Map<String, BigDecimal>> allPortfolioCashBalance = new LinkedHashMap<>();
+        // temp var: portfolio -> summed balances
+        Map<String, PortfolioInstantCurrencyValue> lastBalances = new HashMap<>();
+        for (PortfolioInstantCurrencyValue balance : balances) {
+            lastBalances.put(balance.getPortfolio(), balance);
+            if (lastBalances.size() >= portfolioCount) {
+                Map<String, BigDecimal> joinedBalance = lastBalances.values()
+                        .stream()
+                        .map(PortfolioInstantCurrencyValue::getCurrencyValue)
+                        .reduce(new HashMap<>(), (currencyValue1, currencyValue2) -> {
+                            currencyValue2.forEach((currency, value) -> currencyValue1.merge(currency, value, BigDecimal::add));
+                            return currencyValue1;
+                        });
+                allPortfolioCashBalance.put(balance.getInstant(), joinedBalance);
+            }
+        }
+        return allPortfolioCashBalance;
+    }
+
+    private static int countPortfolios(List<PortfolioProperty> portfolioCashes) {
+        return (int) portfolioCashes.stream()
                 .map(PortfolioProperty::getPortfolio)
                 .distinct()
                 .count();
-        // summing cash values with same currency
-        List<PortfolioInstantCurrencyValue> balances = portfolioCashes.stream()
+    }
+
+    private static List<PortfolioInstantCurrencyValue> sumCashWithSameCurrency(List<PortfolioProperty> portfolioCashes) {
+        return portfolioCashes.stream()
                 .map(portfolioProperty -> {
                     Map<String, BigDecimal> currencyValue;
                     try {
@@ -312,25 +390,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                             .currencyValue(currencyValue)
                             .build();
                 })
-                .collect(Collectors.toList());
-        // portfolio -> summed balances
-        Map<String, PortfolioInstantCurrencyValue> lastBalances = new HashMap<>();
-        // date -> currency -> cash balance
-        LinkedHashMap<Instant, Map<String, BigDecimal>> allPortfolioCashBalance = new LinkedHashMap<>();
-        for (PortfolioInstantCurrencyValue balance : balances) {
-            lastBalances.put(balance.getPortfolio(), balance);
-            if (lastBalances.size() >= portfolioCount) {
-                Map<String, BigDecimal> joinedBalance = lastBalances.values()
-                        .stream()
-                        .map(PortfolioInstantCurrencyValue::getCurrencyValue)
-                        .reduce(new HashMap<>(), (currencyValue1, currencyValue2) -> {
-                            currencyValue2.forEach((currency, value) -> currencyValue1.merge(currency, value, BigDecimal::add));
-                            return currencyValue1;
-                        });
-                allPortfolioCashBalance.put(balance.getInstant(), joinedBalance);
-            }
-        }
-        return allPortfolioCashBalance;
+                .collect(toList());
     }
 
     @Getter
@@ -341,28 +401,74 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         private final Map<String, BigDecimal> currencyValue;
     }
 
-    private LinkedHashMap<Instant, BigDecimal> getAllPortfolioTotalAssets(List<PortfolioProperty> assets) {
-        int portfolioCount = (int) assets.stream()
-                .map(PortfolioProperty::getPortfolio)
-                .distinct()
-                .count();
-        // portfolio -> value
-        Map<String, BigDecimal> lastTotalAssets = new HashMap<>();
-        // date-time -> summed values
-        LinkedHashMap<Instant, BigDecimal> allPortfolioSummedValues = new LinkedHashMap<>();
-        for (PortfolioProperty property : assets) {
-            lastTotalAssets.put(property.getPortfolio(), getAssets(property));
-            if (lastTotalAssets.size() >= portfolioCount) {
-                BigDecimal sum = lastTotalAssets.values()
-                        .stream()
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-                allPortfolioSummedValues.put(property.getTimestamp(), sum);
-            }
+    /**
+     * Assets in ruble
+     */
+    private LinkedHashMap<Instant, BigDecimal> getAllPortfolioTotalAssets(List<PortfolioProperty> assets,
+                                                                          List<EventCashFlow> cashFlows) {
+        // temp var: portfolio -> assets
+        Map<String, BigDecimal> lastTotalAssets = initPortfoliosByZero(assets);
+        Instant lastInstant = Instant.MIN;
+        // date-time -> summed assets for all portfolios
+        LinkedHashMap<Instant, BigDecimal> allPortfolioSummedAssets = new LinkedHashMap<>();
+
+        // portfolio -> timestamp -> cash flows in rub
+        Map<String, TreeMap<Instant, BigDecimal>> rubCashFlowsGroupedByPortfolio =
+                convertCashFlowsToRubAndGroupByPortfolio(cashFlows);
+
+        for (PortfolioProperty updatingAssets : assets) {
+            updateKnownPortfolioAssets(lastTotalAssets, updatingAssets, rubCashFlowsGroupedByPortfolio, lastInstant);
+            lastInstant = updatingAssets.getTimestamp();
+            BigDecimal sum = lastTotalAssets.values()
+                    .stream()
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            allPortfolioSummedAssets.put(updatingAssets.getTimestamp(), sum);
         }
-        return allPortfolioSummedValues;
+        return allPortfolioSummedAssets;
     }
 
-    private BigDecimal getAssets(PortfolioProperty property) {
+    private Map<String, TreeMap<Instant, BigDecimal>> convertCashFlowsToRubAndGroupByPortfolio(List<EventCashFlow> cashFlows) {
+        return cashFlows.stream()
+                .collect(groupingBy(EventCashFlow::getPortfolio,
+                        toMap(EventCashFlow::getTimestamp,
+                                v -> foreignExchangeRateService.convertValueToCurrency(v.getValue(), v.getCurrency(), RUB),
+                                BigDecimal::add,
+                                TreeMap::new)));
+    }
+
+    private Map<String, BigDecimal> initPortfoliosByZero(Collection<PortfolioProperty> assets) {
+        return assets.stream()
+                .map(PortfolioProperty::getPortfolio)
+                .distinct()
+                .collect(toMap(Function.identity(), $ -> BigDecimal.ZERO));
+    }
+
+    private void updateKnownPortfolioAssets(Map<String, BigDecimal> lastPortfolioAssets,
+                                            PortfolioProperty updatingAssets,
+                                            Map<String, TreeMap<Instant, BigDecimal>> rubCashFlowsGroupedByPortfolio,
+                                            Instant lastInstant) {
+        String updatingPortfolio = updatingAssets.getPortfolio();
+        lastPortfolioAssets.put(updatingPortfolio, convertAssetsToRub(updatingAssets));
+        lastPortfolioAssets.replaceAll((portfolio, portfolioAssets) ->
+                portfolio.equals(updatingPortfolio) ? portfolioAssets :
+                        // update other portfolios by invested sum
+                        rubCashFlowsGroupedByPortfolio.getOrDefault(portfolio, emptyTreeMap)
+                                .subMap(lastInstant, false, updatingAssets.getTimestamp(), true)
+                                .values()
+                                .stream()
+                                .reduce(portfolioAssets, BigDecimal::add));
+    }
+
+    private BigDecimal convertAssetsToRub(PortfolioProperty updatingAssets) {
+        String currency = switch (updatingAssets.getProperty()) {
+            case TOTAL_ASSETS_RUB -> RUB;
+            case TOTAL_ASSETS_USD -> "USD";
+            default -> throw new IllegalArgumentException("Unsupported property " + updatingAssets.getProperty());
+        };
+        return foreignExchangeRateService.convertValueToCurrency(getAssets(updatingAssets), currency, RUB);
+    }
+
+    private static BigDecimal getAssets(PortfolioProperty property) {
         try {
             return BigDecimal.valueOf(parseDouble(property.getValue()));
         } catch (Exception e) {
@@ -371,50 +477,17 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         }
     }
 
-    /**
-     * (CurrentAssets / CurrentInvestment) * (InitialInvestment / InitialAssets) - 1,
-     * where
-     * CurrentInvestment = (InitialInvestment + InvestmentDelta),
-     * InitialInvestment = InitialAssets
-     */
-    private static String getAssetsGrowthFormula() {
-        String initialInvestment = getInitialAssetsUsdFormula();
-        String investmentDelta = "(" + TOTAL_INVESTMENT_USD.getCellAddr() + "-" + getFirstKnownInvestmentUsdFormula() + ")";
-        String currentInvestment = "(" + initialInvestment + "+" + investmentDelta + ")";
-        String assetsGrowth = ASSETS_USD.getCellAddr() + "*100/" + currentInvestment + "-100";
-        return "=IF(" + TOTAL_INVESTMENT_USD.getCellAddr() + ">0," + assetsGrowth + ",\"\")";
-    }
-
-    private static String getFirstKnownInvestmentUsdFormula() {
-        String firstNonEmptyRow = getInitialInvestmentUsdAndInitialAssetsUsdRowFormula();
-        return "INDEX(" +
-                getColumnsRange(TOTAL_INVESTMENT_USD, 3, ASSETS_USD, 10000) + "," +
-                firstNonEmptyRow + ",1)";
-    }
-
-    private static String getInitialAssetsUsdFormula() {
-        String firstNonEmptyRow = getInitialInvestmentUsdAndInitialAssetsUsdRowFormula();
-        return "INDEX(" +
-                getColumnsRange(TOTAL_INVESTMENT_USD, 3, ASSETS_USD, 10000) + "," +
-                firstNonEmptyRow + "," + (1 + Math.abs(ASSETS_USD.ordinal() - TOTAL_INVESTMENT_USD.ordinal())) + ")";
-    }
-
     private static String getSp500GrowthFormula() {
         String initialSp500Value = getSp500InitialValue();
         String nonEmptyValues = "AND(" + SP500.getCellAddr() + "<>\"\"," + initialSp500Value + "<>\"\")";
         String growth = SP500.getCellAddr() + "*100/" + initialSp500Value + "-100";
         return "=IF(" + nonEmptyValues + "," + growth + ",\"\")";
     }
+
     private static String getSp500InitialValue() {
-        String firstNonEmptyRow = getInitialInvestmentUsdAndInitialAssetsUsdRowFormula();
+        String firstNonEmptyRow = "MATCH(true,INDEX((" + ASSETS_USD.getRange(3, 10000) + "<>0),0),0)";
         return "INDEX(" +
                 getColumnsRange(SP500, 3, SP500, 10000) + "," +
                 firstNonEmptyRow + ",1)";
-    }
-
-    private static String getInitialInvestmentUsdAndInitialAssetsUsdRowFormula() {
-        String firstNonEmptyTotalInvestmentUsdRow = "MATCH(true,INDEX((" + TOTAL_INVESTMENT_USD.getRange(3, 10000) + "<>0),0),0)";
-        String firstNonEmptyAssetsUsdRow = "MATCH(true,INDEX((" + ASSETS_USD.getRange(3, 10000) + "<>0),0),0)";
-        return "MAX(" + firstNonEmptyTotalInvestmentUsdRow + "," + firstNonEmptyAssetsUsdRow + ")";
     }
 }

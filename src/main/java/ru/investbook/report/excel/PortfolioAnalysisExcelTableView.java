@@ -52,6 +52,8 @@ import static ru.investbook.report.excel.PortfolioAnalysisExcelTableHeader.*;
 public class PortfolioAnalysisExcelTableView extends ExcelTableView {
 
     @Getter
+    private final boolean summaryView = true;
+    @Getter
     private final int sheetOrder = 0;
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> "Обзор (" + portfolio + ")";
@@ -65,10 +67,24 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     @Override
     public Collection<ExcelTable> createExcelTables() {
         Collection<ExcelTable> tables = new ArrayList<>();
-        Table table = tableFactory.create(ViewFilter.get().getPortfolios());
-        tables.add(ExcelTable.of("Обзор", table, this));
-        tables.addAll(super.createExcelTables());
+        ViewFilter filter = ViewFilter.get();
+        Collection<String> portfolios = filter.getPortfolios();
+        if (showOnlySummary(filter) || isManyPortfolioRequested(portfolios)) {
+            Table table = tableFactory.create(portfolios);
+            tables.add(ExcelTable.of("Обзор", table, this));
+        }
+        if (!showOnlySummary(filter)) {
+            tables.addAll(super.createExcelTables());
+        }
         return tables;
+    }
+
+    private boolean isManyPortfolioRequested(Collection<String> portfolios) {
+        return portfolios.size() > 1 || (portfolios.isEmpty() && portfolioRepository.count() > 1);
+    }
+
+    private static boolean showOnlySummary(ViewFilter filter) {
+        return !filter.isShowDetails();
     }
 
     @Override

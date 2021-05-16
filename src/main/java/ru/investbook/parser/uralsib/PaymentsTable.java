@@ -46,6 +46,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.lang.Character.isLetterOrDigit;
 import static java.lang.Double.parseDouble;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 import static ru.investbook.parser.uralsib.UralsibBrokerReport.convertToCurrency;
@@ -132,7 +133,17 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
     }
 
     private boolean contains(String description, String securityParameter) {
-        return securityParameter != null && description.contains(securityParameter.toLowerCase());
+        if (securityParameter == null) {
+            return false;
+        }
+        int start = description.indexOf(securityParameter.toLowerCase());
+        if (start < 0) {
+            return false;
+        }
+        int end = start + securityParameter.length(); // exclusive
+        boolean leftWordBoundary = (start == 0 || !isLetterOrDigit(description.charAt(start - 1)));
+        boolean rightWordBoundary = (end == description.length() || !isLetterOrDigit(description.charAt(end)));
+        return leftWordBoundary && rightWordBoundary;
     }
 
     protected BigDecimal getTax(TableRow row) {

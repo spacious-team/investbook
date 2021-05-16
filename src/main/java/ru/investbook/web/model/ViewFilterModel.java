@@ -36,4 +36,5 @@ public class ViewFilterModel {
 
     private Collection<String> portfolios = Collections.emptySet();
 
+    private boolean showDetails = true;
 }

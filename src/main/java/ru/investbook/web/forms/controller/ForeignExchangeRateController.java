@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.repository.ForeignExchangeRateRepository;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.service.CbrForeignExchangeRateService;
@@ -42,6 +43,7 @@ import java.time.ZoneId;
 @RequiredArgsConstructor
 public class ForeignExchangeRateController {
     private final ForeignExchangeRateFormsService foreignExchangeRateFormsService;
+    private final ForeignExchangeRateService foreignExchangeRateService;
     private final CbrForeignExchangeRateService cbrForeignExchangeRateService;
     private final ForeignExchangeRateRepository foreignExchangeRateRepository;
     private final TransactionRepository transactionRepository;
@@ -77,12 +79,14 @@ public class ForeignExchangeRateController {
     @PostMapping
     public String postForeignExchangeRate(@Valid @ModelAttribute("rate") ForeignExchangeRateModel rate) {
         foreignExchangeRateFormsService.save(rate);
+        foreignExchangeRateService.invalidateCache();
         return "foreign-exchange-rates/view-single";
     }
 
     @GetMapping("update")
     public String updateForeignExchangeRate(Model model) {
         cbrForeignExchangeRateService.updateFrom(getFirstTransactionDate());
+        foreignExchangeRateService.invalidateCache();
         model.addAttribute("message",
                 "Официальные курсы обновлены по " + getLatestDateOfAllFxRateKnown() + " включительно.");
         return "success";

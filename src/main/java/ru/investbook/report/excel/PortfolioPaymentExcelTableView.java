@@ -40,6 +40,8 @@ import static ru.investbook.report.excel.PortfolioPaymentExcelTableHeader.*;
 public class PortfolioPaymentExcelTableView extends ExcelTableView {
 
     @Getter
+    private final boolean summaryView = false;
+    @Getter
     private final int sheetOrder = 2;
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (выплаты)";

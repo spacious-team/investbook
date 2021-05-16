@@ -30,13 +30,14 @@ import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
 
-import static ru.investbook.parser.sber.transaction.SberSecurityTransactionTable.SberTransactionTableHeader.*;
+import static ru.investbook.parser.sber.SecurityHelper.getSecurityId;
+import static ru.investbook.parser.sber.transaction.SberTrSecurityTransactionTable.SberTransactionTableHeader.*;
 
 @Slf4j
-public class SberSecurityTransactionTable extends AbstractReportTable<SecurityTransaction> {
+public class SberTrSecurityTransactionTable extends AbstractReportTable<SecurityTransaction> {
     private static final String FIRST_LINE = "Номер договора";
 
-    protected SberSecurityTransactionTable(BrokerReport report) {
+    protected SberTrSecurityTransactionTable(BrokerReport report) {
         super(report, "Сделки", FIRST_LINE, null, SberTransactionTableHeader.class);
     }
 
@@ -55,8 +56,8 @@ public class SberSecurityTransactionTable extends AbstractReportTable<SecurityTr
                 .portfolio(row.getStringCellValue(PORTFOLIO))
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .transactionId(String.valueOf(row.getLongCellValue(TRANSACTION))) // may be double numbers in future
-                .security(getSecurity(row))
-                .count(row.getIntCellValue(COUNT))
+                .security(getSecurityId(row.getStringCellValue(NAME_AND_ISIN), row.getStringCellValue(SECTION)))
+                .count(row.getIntCellValue(COUNT) * (isBuy ? 1 : -1))
                 .value(value)
                 .accruedInterest(accruedInterest)
                 .commission(row.getBigDecimalCellValue(MARKET_COMMISSION)
@@ -66,19 +67,13 @@ public class SberSecurityTransactionTable extends AbstractReportTable<SecurityTr
                 .build();
     }
 
-    private static String getSecurity(TableRow row) {
-        String nameAndIsin = row.getStringCellValue(NAME_AND_ISIN); // format: "<name>\s*(<isin>)"
-        int start = nameAndIsin.indexOf('(') + 1;
-        int end = nameAndIsin.indexOf(')');
-        return nameAndIsin.substring(start, (end == -1) ? nameAndIsin.length() : end);
-    }
-
-    enum SberTransactionTableHeader implements TableColumnDescription {
+    public enum SberTransactionTableHeader implements TableColumnDescription {
         PORTFOLIO("Номер договора"),
         TRANSACTION("Номер сделки"),
         DATE_TIME("Дата расчётов"),
         NAME_AND_ISIN("Код финансового инструмента"),
         SECURITY_TYPE("Тип финансового инструмента"),
+        SECTION("Тип рынка"),
         OPERATION("Операция"),
         COUNT("Количество"),
         VALUE("Объём сделки"), // без учета НКД и комиссий

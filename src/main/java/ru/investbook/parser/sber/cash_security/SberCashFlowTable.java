@@ -30,6 +30,8 @@ import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
 
+import static org.spacious_team.broker.pojo.CashFlowType.AMORTIZATION;
+import static org.spacious_team.broker.pojo.CashFlowType.REDEMPTION;
 import static ru.investbook.parser.sber.cash_security.SberCashFlowTable.SberCashFlowTableHeader.*;
 
 @Slf4j
@@ -48,15 +50,17 @@ public class SberCashFlowTable extends AbstractReportTable<EventCashFlow> {
         CashFlowType type;
         boolean isNegative = false;
         String operation = row.getStringCellValue(OPERATION);
+        String description = row.getStringCellValue(DESCRIPTION);
         switch (operation) {
             case "Ввод ДС" -> type = CashFlowType.CASH;
-            case "Вывод ДС" -> { // предположение, нет примера отчета
+            case "Вывод ДС" -> {
                 type = CashFlowType.CASH;
                 isNegative = true;
             }
             case "Зачисление дивидендов" -> type = CashFlowType.DIVIDEND;
             case "Зачисление купона" -> type = CashFlowType.COUPON;
-            case "Зачисление суммы от погашения ЦБ" -> type = CashFlowType.AMORTIZATION; // нет примера для REDEMPTION
+            case "Зачисление суммы от погашения ЦБ" -> // и амортизация и погашение
+                    type = (description.toLowerCase().contains("амортизация")) ? AMORTIZATION : REDEMPTION;
             case "Списание налогов" -> {
                 type = CashFlowType.TAX;
                 isNegative = true;
@@ -80,7 +84,7 @@ public class SberCashFlowTable extends AbstractReportTable<EventCashFlow> {
                 .eventType(type)
                 .value(value)
                 .currency(row.getStringCellValue(CURRENCY))
-                .description(row.getStringCellValue(DESCRIPTION))
+                .description(description)
                 .build();
     }
 

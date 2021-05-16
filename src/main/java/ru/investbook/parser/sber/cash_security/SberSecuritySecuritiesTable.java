@@ -16,35 +16,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.sber.transaction;
+package ru.investbook.parser.sber.cash_security;
 
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableRow;
-import ru.investbook.parser.sber.transaction.SberSecurityTransactionTable.SberTransactionTableHeader;
+import ru.investbook.parser.sber.SecurityHelper;
+import ru.investbook.parser.sber.cash_security.SberSecurityDepsitAndWithdrawalTable.SberSecurityDepositAndWithdrawalTableHeader;
 
-import static ru.investbook.parser.sber.transaction.SberSecurityTransactionTable.SberTransactionTableHeader.NAME_AND_ISIN;
+import static ru.investbook.parser.sber.cash_security.SberSecurityDepsitAndWithdrawalTable.FIRST_LINE;
+import static ru.investbook.parser.sber.cash_security.SberSecurityDepsitAndWithdrawalTable.SberSecurityDepositAndWithdrawalTableHeader.*;
 
 @Slf4j
-public class SberSecuritiesTable extends AbstractReportTable<Security> {
-    private static final String FIRST_LINE = "Номер договора";
+public class SberSecuritySecuritiesTable extends AbstractReportTable<Security> {
 
-    protected SberSecuritiesTable(BrokerReport report) {
-        super(report, "Сделки", FIRST_LINE, null, SberTransactionTableHeader.class);
+    protected SberSecuritySecuritiesTable(BrokerReport report) {
+        super(report, "Движение ЦБ", FIRST_LINE, null, SberSecurityDepositAndWithdrawalTableHeader.class);
     }
 
     @Override
     protected Security parseRow(TableRow row) {
-        String nameAndIsin = row.getStringCellValue(NAME_AND_ISIN); // format: "<name>\s*(<isin>)"
-        int start = nameAndIsin.indexOf('(');
-        int end = nameAndIsin.indexOf(')');
-        String id = nameAndIsin.substring(start + 1, (end > -1) ? end : nameAndIsin.length());
-        String name = (start == -1) ? null : nameAndIsin.substring(0, start).trim();
+        String code = row.getStringCellValue(CODE);
         return Security.builder()
-                .id(id)
-                .name(name)
+                .id(SecurityHelper.getSecurityId(code, row.getStringCellValue(SECTION)))
+                .name(row.getStringCellValueOrDefault(NAME, null))
                 .build();
     }
 }

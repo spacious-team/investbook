@@ -32,7 +32,7 @@ import static ru.investbook.parser.psb.SecuritiesTable.SecuritiesTableHeader.NAM
 
 @Slf4j
 public class SecuritiesTable extends SingleAbstractReportTable<Security> {
-    static final String TABLE_NAME = "Портфель на конец дня на биржевом рынке";
+    static final String TABLE_NAME = "Портфель на конец дня"; // старые отчеты, новые - "Портфель на конец дня на биржевом рынке"
     static final String TABLE_END_TEXT = "* цена последней сделки (на организованных торгах)";
     static final String INVALID_TEXT = "Итого в валюте цены";
 

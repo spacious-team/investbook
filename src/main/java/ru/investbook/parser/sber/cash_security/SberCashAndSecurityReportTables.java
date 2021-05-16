@@ -54,12 +54,12 @@ public class SberCashAndSecurityReportTables extends AbstractReportTables<SberCa
 
     @Override
     public ReportTable<Security> getSecuritiesTable() {
-        return emptyTable();
+        return new SberSecuritySecuritiesTable(report.getSecurityDepositReport());
     }
 
     @Override
     public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
-        return emptyTable();
+        return new SberSecurityDepsitAndWithdrawalTable(report.getSecurityDepositReport());
     }
 
     @Override

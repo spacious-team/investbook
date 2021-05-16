@@ -20,6 +20,8 @@ package ru.investbook.report.excel;
 
 import ru.investbook.report.TableHeader;
 
+import static java.lang.String.valueOf;
+
 public interface ExcelTableHeader extends TableHeader {
     String ROW_NUM_PLACE_HOLDER = "{rowNum}";
 
@@ -29,6 +31,12 @@ public interface ExcelTableHeader extends TableHeader {
 
     default String getCellAddr(int rowNum) {
         return "" + getColumnIndex() + rowNum;
+    }
+
+    default String getRelativeCellAddr(int rowDelta, int columnDelta) {
+        String _rowDelta = (rowDelta < 0) ? valueOf(rowDelta) : ("+" + rowDelta);
+        char column = (char) ('A' + this.ordinal() + columnDelta);
+        return "INDIRECT(\"" + column + "\" & ROW() " + _rowDelta + ")";
     }
 
     default char getColumnIndex() {

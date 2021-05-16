@@ -40,6 +40,8 @@ import static ru.investbook.report.excel.DerivativesMarketProfitExcelTableHeader
 public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
 
     @Getter
+    private final boolean summaryView = false;
+    @Getter
     private final int sheetOrder = 5;
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (срочный)";
