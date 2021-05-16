@@ -148,7 +148,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         }
         row.put(OPEN_PRICE, openPrice);
         if (openPrice != null) {
-            row.put(OPEN_AMOUNT, "=" + OPEN_PRICE.getCellAddr() + "*" + COUNT.getCellAddr());
+            row.put(OPEN_AMOUNT, "=ABS(" + OPEN_PRICE.getCellAddr() + "*" + COUNT.getCellAddr() + ")");
         }
         double multiplier = Math.abs(1d * position.getCount() / transaction.getCount());
         row.put(OPEN_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier, toCurrency));
@@ -307,7 +307,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     }
 
     private String getClosedPositionYield(boolean isLongPosition) {
-        String profit = getClosedPositionProfit(isLongPosition).replace("=", "");
+        String profit = getClosedPositionProfit(isLongPosition).substring(1); // remove leading '='
         String open = "(" + OPEN_AMOUNT.getCellAddr() + "+" + OPEN_ACCRUED_INTEREST.getCellAddr() + ")";
         String openCommission = OPEN_COMMISSION.getCellAddr();
         // TODO DAYS() excel function not impl by Apache POI: https://bz.apache.org/bugzilla/show_bug.cgi?id=58468
