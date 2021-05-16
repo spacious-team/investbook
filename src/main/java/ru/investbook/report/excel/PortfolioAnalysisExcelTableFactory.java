@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.lang.Double.isFinite;
@@ -405,9 +406,8 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
      */
     private LinkedHashMap<Instant, BigDecimal> getAllPortfolioTotalAssets(List<PortfolioProperty> assets,
                                                                           List<EventCashFlow> cashFlows) {
-        int portfolioCount = countPortfolios(assets);
         // temp var: portfolio -> assets
-        Map<String, BigDecimal> lastTotalAssets = new HashMap<>();
+        Map<String, BigDecimal> lastTotalAssets = initPortfoliosByZero(assets);
         Instant lastInstant = Instant.MIN;
         // date-time -> summed assets for all portfolios
         LinkedHashMap<Instant, BigDecimal> allPortfolioSummedAssets = new LinkedHashMap<>();
@@ -419,12 +419,10 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         for (PortfolioProperty updatingAssets : assets) {
             updateKnownPortfolioAssets(lastTotalAssets, updatingAssets, rubCashFlowsGroupedByPortfolio, lastInstant);
             lastInstant = updatingAssets.getTimestamp();
-            if (lastTotalAssets.size() >= portfolioCount) {
-                BigDecimal sum = lastTotalAssets.values()
-                        .stream()
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-                allPortfolioSummedAssets.put(updatingAssets.getTimestamp(), sum);
-            }
+            BigDecimal sum = lastTotalAssets.values()
+                    .stream()
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            allPortfolioSummedAssets.put(updatingAssets.getTimestamp(), sum);
         }
         return allPortfolioSummedAssets;
     }
@@ -436,6 +434,13 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                                 v -> foreignExchangeRateService.convertValueToCurrency(v.getValue(), v.getCurrency(), RUB),
                                 BigDecimal::add,
                                 TreeMap::new)));
+    }
+
+    private Map<String, BigDecimal> initPortfoliosByZero(Collection<PortfolioProperty> assets) {
+        return assets.stream()
+                .map(PortfolioProperty::getPortfolio)
+                .distinct()
+                .collect(toMap(Function.identity(), $ -> BigDecimal.ZERO));
     }
 
     private void updateKnownPortfolioAssets(Map<String, BigDecimal> lastPortfolioAssets,
