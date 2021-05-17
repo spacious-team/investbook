@@ -6,7 +6,7 @@
    $ java -version
    ```
    Если версия 16 или выше, пропустите следующий пункт.
-1. Скачать [Java 16](https://jdk.java.net/16/ и распаковать папку `jdk-16` в директорию `/opt`.
+1. Скачать [Java 16](https://jdk.java.net/16/) и распаковать папку `jdk-16` в директорию `/opt`.
    Для для 32 разрядных ОС можно скачать [Java 16 x86 JRE](https://bell-sw.com/).
 1. Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest) архив `.zip` и
    распаковать в директорию `/opt`.
