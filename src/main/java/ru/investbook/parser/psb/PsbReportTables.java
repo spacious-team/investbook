@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.psb;
 
+import lombok.Getter;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.spacious_team.broker.pojo.PortfolioCash;
@@ -29,13 +30,23 @@ import org.spacious_team.broker.report_parser.api.AbstractReportTables;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
-import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.broker.report_parser.api.WrappingReportTable;
 
 public class PsbReportTables extends AbstractReportTables<PsbBrokerReport> {
 
+    @Getter
+    private final SecurityTransactionTable securityTransactionTable;
+
+    @Getter
+    private final ReportTable<Security> securitiesTable;
+
     protected PsbReportTables(PsbBrokerReport report) {
         super(report);
+        this.securityTransactionTable = new SecurityTransactionTable(report);
+        this.securitiesTable = WrappingReportTable.of(
+                new SecuritiesTable(report),
+                new DerivativesTable(report),
+                WrappingReportTable.of(report, securityTransactionTable.getSecurities()));
     }
 
     @Override
@@ -51,18 +62,6 @@ public class PsbReportTables extends AbstractReportTables<PsbBrokerReport> {
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
         return new CashFlowTable(report);
-    }
-    
-    @Override
-    public ReportTable<Security> getSecuritiesTable() {
-        return WrappingReportTable.of(
-                new SecuritiesTable(report),
-                new DerivativesTable(report));
-    }
-    
-    @Override
-    public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
-        return new SecurityTransactionTable(report);
     }
 
     @Override
