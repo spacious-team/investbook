@@ -20,6 +20,7 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
@@ -30,21 +31,28 @@ import ru.investbook.parser.SingleInitializableReportTable;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ru.investbook.parser.psb.SecuritiesTable.SecuritiesTableHeader.NAME;
 import static ru.investbook.parser.psb.SecurityTransactionTable.TransactionTableHeader.*;
 
 @Slf4j
 public class SecurityTransactionTable extends SingleInitializableReportTable<SecurityTransaction> {
+
+    // Не использовать таблицы "... рассчитанные в отчетном периоде",
+    // иначе в расчет не возьмутся позиции, закрытые в течении T+2 (до исполнения)
     private static final String[] TABLE_NAMES = {
             "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами в дату заключения",
-            "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами Т+, рассчитанные в отчетном периоде",
+            "Сделки, совершенные с ЦБ на биржевых торговых площадках (Фондовый рынок) с расчетами Т+, незавершенные в отчетном периоде",
             "Сделки, совершенные с ЦБ на биржевых торговых площадках (Основной рынок ММВБ) с расчетами в дату заключения",
-            "Сделки, совершенные с ЦБ на биржевых торговых площадках (Основной рынок ММВБ) с расчетами Т+, рассчитанные в отчетном периоде"};
+            "Сделки, совершенные с ЦБ на биржевых торговых площадках (Основной рынок ММВБ) с расчетами Т+, незавершенные в отчетном периоде"};
     private static final String TABLE_END_TEXT = "Итого оборот";
     private static final BigDecimal minValue = BigDecimal.valueOf(0.01);
+    private final Set<Security> securities = new HashSet<>();
 
     public SecurityTransactionTable(PsbBrokerReport report) {
         super(report);
@@ -78,11 +86,12 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
                 .add(row.getBigDecimalCellValue(CLEARING_COMMISSION))
                 .add(row.getBigDecimalCellValue(ITS_COMMISSION))
                 .negate();
+        Security security = getSecurity(row);
         return SecurityTransaction.builder()
                 .timestamp(getReport().convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .transactionId(String.valueOf(row.getLongCellValue(TRANSACTION))) // may be double numbers in future
                 .portfolio(getReport().getPortfolio())
-                .security(row.getStringCellValue(ISIN))
+                .security(security.getId())
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)
                 .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)
@@ -92,9 +101,24 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
                 .build();
     }
 
+    private Security getSecurity(TableRow row) {
+        Security security = Security.builder()
+                .id(row.getStringCellValue(ISIN))
+                .name(row.getStringCellValue(NAME))
+                .build();
+        securities.add(security);
+        return security;
+    }
+
+    public Set<Security> getSecurities() {
+        initializeIfNeed();
+        return Set.copyOf(securities);
+    }
+
     enum TransactionTableHeader implements TableColumnDescription {
         DATE_TIME(TableColumnImpl.of("дата", "исполнения"), TableColumnImpl.of("дата и время")),
         TRANSACTION("номер сделки"),
+        NAME("наименование"),
         ISIN("isin"),
         DIRECTION("покупка", "продажа"),
         COUNT("кол-во"),
