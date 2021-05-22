@@ -129,6 +129,50 @@ public class MoexDerivativeNamingHelper {
             new Character[] {'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X'};
 
     /**
+     * Only for derivative contracts.
+     *
+     * @return true for futures contract (in {@code Si-6.21} or {@code SiM1} format),
+     *         false for options (in {@code Si65000BC9}, {@code Si65000BC9D} or {@code Si-6.19M280319CA65000} format)
+     */
+    public boolean isFutures(String contract) {
+        return isFuturesCode(contract) || isFuturesShortname(contract);
+    }
+
+    /**
+     * @return true for futures in format {@code SiM1}
+     */
+    private boolean isFuturesCode(String code) {
+        return code.length() == 4 &&
+                shortnamesToCode.containsValue(code.substring(0, 2)) &&
+                isArrayContains(futuresMonthCodes, code.charAt(2)) &&
+                isDigit(code.charAt(3));
+    }
+
+    /**
+     * @return true for futures in format {@code Si-3.21}
+     */
+    private boolean isFuturesShortname(String shortname) {
+        try {
+            int dotIdx = shortname.length() - 3;
+            if (shortname.charAt(dotIdx) != '.') {
+                return false;
+            }
+            int dashIdx = shortname.indexOf('-');
+            if (dashIdx == -1) {
+                return false;
+            }
+            boolean isYearSymbolsDigit = isDigit(shortname.charAt(dotIdx + 1)) &&
+                    isDigit(shortname.charAt(dotIdx + 2));
+            if (isYearSymbolsDigit && shortnamesToCode.containsKey(shortname.substring(0, dashIdx))) {
+                int month = parseInt(shortname.substring(dashIdx + 1, dotIdx));
+                return month >= 1 && month <= 12;
+            }
+        } catch (Exception ignore) {
+        }
+        return false;
+    }
+
+    /**
      * @return {@code SiM1} for futures contract in {@code Si-6.21} or {@code SiM1} format
      */
     public Optional<String> getFuturesCode(String contract) {
@@ -148,50 +192,6 @@ public class MoexDerivativeNamingHelper {
         } catch (Exception e) {
             return Optional.empty();
         }
-    }
-
-    /**
-     * Only for derivative contracts.
-     *
-     * @return true for futures contract (in {@code Si-6.21} or {@code SiM1} format),
-     *         false for options (in {@code Si65000BC9}, {@code Si65000BC9D} or {@code Si-6.19M280319CA65000} format)
-     */
-    public boolean isFutures(String contract) {
-        return isFuturesCode(contract) || isFuturesShortName(contract);
-    }
-
-    /**
-     * @return true for futures in format {@code SiM1}
-     */
-    private boolean isFuturesCode(String code) {
-        return code.length() == 4 &&
-                shortnamesToCode.containsValue(code.substring(0, 2)) &&
-                isArrayContains(futuresMonthCodes, code.charAt(2)) &&
-                isDigit(code.charAt(3));
-    }
-
-    /**
-     * @return true for futures in format {@code Si-3.21}
-     */
-    private boolean isFuturesShortName(String shortName) {
-        try {
-            int dotIdx = shortName.length() - 3;
-            if (shortName.charAt(dotIdx) != '.') {
-                return false;
-            }
-            int dashIdx = shortName.indexOf('-');
-            if (dashIdx == -1) {
-                return false;
-            }
-            boolean isYearSymbolsDigit = isDigit(shortName.charAt(dotIdx + 1)) &&
-                    isDigit(shortName.charAt(dotIdx + 2));
-            if (isYearSymbolsDigit && shortnamesToCode.containsKey(shortName.substring(0, dashIdx))) {
-                int month = parseInt(shortName.substring(dashIdx + 1, dotIdx));
-                return month >= 1 && month <= 12;
-            }
-        } catch (Exception ignore) {
-        }
-        return false;
     }
 
     /**
