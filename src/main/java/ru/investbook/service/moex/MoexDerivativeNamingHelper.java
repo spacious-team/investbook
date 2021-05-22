@@ -260,12 +260,13 @@ public class MoexDerivativeNamingHelper {
         char type = code.charAt(typeIdx);
         int strikeIdx = typeIdx - 1;
         if ((type == 'B' || type == 'A') && strikeIdx > 1) {
-            for (; strikeIdx > 1; strikeIdx--) {
+            for (; strikeIdx > 2; strikeIdx--) {
                 if (!isDigit(code.charAt(strikeIdx))) {
                     return false;
                 }
             }
-            return true;
+            char signCharOrDigit = code.charAt(3);
+            return isDigit(signCharOrDigit) || (signCharOrDigit == '-');
         }
         return false;
     }

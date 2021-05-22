@@ -107,6 +107,7 @@ public class MoexDerivativeNamingHelperTest {
                 {"RI15000000BS9B", "RIN9"},
                 {"BR50BE1", "BRK1"},
                 {"BR50BE1A", "BRK1"},
+                {"BR-10BF0", "BRM0"},
                 {"Ri150000BS9B", null},
                 {"RI150000B9", null},
                 {"RI150000S9B", null},
