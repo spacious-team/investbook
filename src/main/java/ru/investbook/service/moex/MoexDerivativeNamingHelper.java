@@ -19,6 +19,7 @@
 package ru.investbook.service.moex;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -42,6 +43,7 @@ import static java.util.Optional.empty;
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class MoexDerivativeNamingHelper {
 
     private final Map<String, String> codeToShortnames = Stream.of(new String[][]{
@@ -147,6 +149,7 @@ public class MoexDerivativeNamingHelper {
     private static final String contractDescription = "http://iss.moex.com/iss/securities/{secId}.json?" +
             "iss.meta=off&iss.only=description&description.columns=name,value";
     private final Map<String, Optional<String>> optionCodeToStortNames = new ConcurrentHashMap<>();
+    private final Map<String, Optional<String>> optionUnderlingFutures = new ConcurrentHashMap<>();
 
     /**
      * @return true for futures contract (in {@code Si-6.21} or {@code SiM1} format)
@@ -306,48 +309,42 @@ public class MoexDerivativeNamingHelper {
         if (isOptionShortname(contract)) {
             return Optional.of(contract);
         } else if (isOptionCode(contract)) {
-            return optionCodeToStortNames.computeIfAbsent(contract, this::getOptionShortnameFromMoex);
+            return optionCodeToStortNames.computeIfAbsent(contract, cntr -> getContractDescriptionFromMoex(cntr, "SHORTNAME"));
         }
         return empty();
     }
 
-    private Optional<String> getOptionShortnameFromMoex(String contract) {
+    /**
+     * @param contract option's moex secid in {@code Si65000BC9}, {@code Si65000BC9D}, {@code RI180000BD1} or
+     *                   {@code RI180000BD1A} format
+     * @return futures contract secid (for ex. {@code SiH9}) if it can be calculated, empty optional otherwise
+     */
+    public Optional<String> getOptionUnderlingFutures(String contract) {
+        if (isOptionCode(contract)) {
+            return optionUnderlingFutures.computeIfAbsent(contract, this::getOptionUnderlingFuturesFromMoex);
+        }
+        return empty();
+    }
+
+    private Optional<String> getOptionUnderlingFuturesFromMoex(String contract) {
+        return getContractDescriptionFromMoex(contract, "NAME")
+                .map(description -> description.substring(description.lastIndexOf(' ') + 1))
+                .flatMap(this::getFuturesCode);
+    }
+
+    private Optional<String> getContractDescriptionFromMoex(String contract, String key) {
         try {
             return Optional.ofNullable(restTemplate.getForObject(contractDescription, Map.class, contract))
                     .map(MoexJsonResponseParser::buildFromIntObjectMap)
                     .flatMap(response -> response.stream()
-                            .filter(record -> Objects.equals(record.get("name"), "SHORTNAME"))
+                            .filter(record -> Objects.equals(record.get("name"), key))
                             .map(record -> (String) record.get("value"))
                             .filter(Objects::nonNull)
                             .findAny());
         } catch (Exception e) {
+            log.debug("Can't get {} contract description for {}", contract, key);
             return empty();
         }
-    }
-
-    /**
-     * @param optionCode option's moex secid in {@code Si65000BC9}, {@code Si65000BC9D}, {@code RI180000BD1} or
-     *                   {@code RI180000BD1A} format
-     * @return futures contract secid (for ex. {@code SiH9}) if it can be calculated, empty optional otherwise
-     */
-    public Optional<String> getOptionUnderlingFutures(String optionCode) {
-        int length = optionCode.length();
-        if (length > 5) {
-            int yearIdx = length;
-            boolean hasYearDigit = isDigit(optionCode.charAt(--yearIdx)) || isDigit(optionCode.charAt(--yearIdx));
-            if (hasYearDigit) {
-                int monthIdx = yearIdx - 1;
-                int month = getOptionMonth(optionCode.charAt(monthIdx));
-                if (month != -1 && isValidOptionTypeAndStrike(optionCode, monthIdx)) {
-                    String prefix = optionCode.substring(0, 2);
-                    if (shortnameToCodes.containsValue(prefix)) {
-                        char year = optionCode.charAt(yearIdx);
-                        return Optional.of(prefix + futuresMonthCodes[month] + year);
-                    }
-                }
-            }
-        }
-        return empty();
     }
 
     private static boolean isValidOptionTypeAndStrike(String code, int monthIdx) {

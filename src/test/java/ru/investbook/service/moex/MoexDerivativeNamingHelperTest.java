@@ -21,8 +21,6 @@ package ru.investbook.service.moex;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,11 +29,11 @@ import static org.testng.Assert.assertEquals;
 @ExtendWith(MockitoExtension.class)
 public class MoexDerivativeNamingHelperTest {
 
-    @Mock
-    RestTemplate restTemplate;
+    //@Mock
+    RestTemplate restTemplate = new RestTemplate();
 
-    @InjectMocks
-    MoexDerivativeNamingHelper helper;
+    //@InjectMocks
+    MoexDerivativeNamingHelper helper = new MoexDerivativeNamingHelper(new RestTemplate());
 
     static Object[][] getFuturesCodes() {
         return new Object[][] {
@@ -127,15 +125,16 @@ public class MoexDerivativeNamingHelperTest {
     static Object[][] getOptionUnderlingFutures() {
         return new Object[][] {
                 {"Si75000BL1", "SiZ1"},
-                {"Si75000BL1D", "SiZ1"},
-                {"RI150000BG9", "RIN9"},
-                {"RI150000BS9", "RIN9"},
-                {"RI150000BG9A", "RIN9"},
-                {"RI150000BS9B", "RIN9"},
-                {"RI15000000BS9B", "RIN9"},
-                {"BR50BE1", "BRK1"},
-                {"BR50BE1A", "BRK1"},
-                {"BR-10BF0", "BRM0"},
+                {"Si75000BL0D", "SiH1"},
+                {"RI150000BG9", "RIU9"},
+                {"RI150000BS9", "RIU9"},
+                {"RI150000BG9A", "RIU9"},
+                {"RI150000BS9B", "RIU9"},
+                {"RI90000BS9", "RIU9"},
+                {"BR50BE1", "BRM1"},
+                {"BR50BE1A", "BRM1"},
+                {"BR50BF1", "BRN1"},
+                //{"BR-10BE0", "BRM0"}, // пока только пример из документации МосБиржи
                 {"Ri150000BS9B", null},
                 {"RI150000B9", null},
                 {"RI150000S9B", null},
