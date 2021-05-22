@@ -88,6 +88,7 @@ public class MoexDerivativeNamingHelperTest {
     void getFuturesShortname(String code, String shortName) {
         assertEquals(helper.getFuturesShortname(code).orElse(null), shortName);
     }
+
     @ParameterizedTest
     @MethodSource("getFuturesCodes")
     void isFuturesTest1(String shortName, String code) {
@@ -150,5 +151,17 @@ public class MoexDerivativeNamingHelperTest {
     @MethodSource("getOptionUnderlingFutures")
     void getOptionUnderlingFuturesTest(String optionCode, String futuresCode) {
         assertEquals(helper.getOptionUnderlingFutures(optionCode).orElse(null), futuresCode);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getOptionShortnames")
+    void isOptionTest1(String shortName, String code) {
+        assertEquals(helper.isOption(shortName), code != null);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getOptionUnderlingFutures")
+    void isOptionTest2(String code, String shortName) {
+        assertEquals(helper.isOption(code), shortName != null);
     }
 }

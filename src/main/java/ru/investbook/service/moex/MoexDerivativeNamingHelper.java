@@ -149,10 +149,7 @@ public class MoexDerivativeNamingHelper {
     private final Map<String, Optional<String>> optionCodeToStortNames = new ConcurrentHashMap<>();
 
     /**
-     * Only for derivative contracts.
-     *
-     * @return true for futures contract (in {@code Si-6.21} or {@code SiM1} format),
-     * false for options (in {@code Si65000BC9}, {@code Si65000BC9D} or {@code Si-6.19M280319CA65000} format)
+     * @return true for futures contract (in {@code Si-6.21} or {@code SiM1} format)
      */
     public boolean isFutures(String contract) {
         return isFuturesCode(contract) || isFuturesShortname(contract);
@@ -193,17 +190,38 @@ public class MoexDerivativeNamingHelper {
     }
 
     /**
+     * @return true for for options (in {@code Si65000BC9}, {@code Si65000BC9D}, {@code Si-6.19M280319CA65000}
+     * or {@code BR-7.16M270616CA 50} format)
+     */
+    public boolean isOption(String contract) {
+        return isOptionCode(contract) || isOptionShortname(contract);
+    }
+
+    /**
      * @return true for option in format {@code BR10BF0} and {@code BR-10BF0}
      */
-    public boolean isOptionCode(String contract) {
-        return getOptionUnderlingFutures(contract).isPresent();
+    private boolean isOptionCode(String contract) {
+        int length = contract.length();
+        if (length > 5) {
+            int yearIdx = length;
+            boolean hasYearDigit = isDigit(contract.charAt(--yearIdx)) || isDigit(contract.charAt(--yearIdx));
+            if (hasYearDigit) {
+                int monthIdx = yearIdx - 1;
+                int month = getOptionMonth(contract.charAt(monthIdx));
+                if (month != -1 && isValidOptionTypeAndStrike(contract, monthIdx)) {
+                    String prefix = contract.substring(0, 2);
+                    return shortnameToCodes.containsValue(prefix);
+                }
+            }
+        }
+        return false;
     }
 
     /**
      * @return true for option in format {@code BR-7.20M250620СA10}, {@code BR-7.20M250620СA-10}
      * and {@code BR-7.16M270616CA 50}
      */
-    public boolean isOptionShortname(String contract) {
+    private boolean isOptionShortname(String contract) {
         int dashIdx = contract.indexOf('-');
         if (dashIdx == -1) {
             return false;
