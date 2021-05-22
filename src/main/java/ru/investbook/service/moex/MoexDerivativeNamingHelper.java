@@ -20,8 +20,9 @@ package ru.investbook.service.moex;
 
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,7 +38,7 @@ import static java.lang.Integer.parseInt;
 @Component
 public class MoexDerivativeNamingHelper {
 
-    private final Map<String, String> shortnamesToCode = Stream.of(new String[][]{
+    private final Map<String, String> codeToShortnames = Stream.of(new String[][]{
             {"MX", "MIX"},  // Индекс МосБиржи
             {"MM", "MXI"},  // Индекс МосБиржи (мини)
             {"RI", "RTS"},  // Индекс РТС
@@ -67,7 +68,7 @@ public class MoexDerivativeNamingHelper {
             {"TN", "TRNF"}, // ПАО "Транснефть" (п.а.)
             {"TF", "TRNS"}, // 0, 1 стоимости одной акции ПАО "Транснефть"
             {"VB", "VTBR"}, // Банк ВТБ (ПАО) (о.а.)
-            {"MG", "MAGN"}, // ПАО "Магнитогорский металлургический ком­бинат" (о.а.)
+            {"MG", "MAGN"}, // ПАО "Магнитогорский металлургический комбинат" (о.а.)
             {"PL", "PLZL"}, // ПАО "Полюс" (о.а.)
             {"YN", "YNDF"}, // Яндекс Н.В. (о.а.)
             {"AK", "AFKS"}, // АФК Система (о.а.)
@@ -119,20 +120,28 @@ public class MoexDerivativeNamingHelper {
             {"Zn", "Zn"},   // цинк
             {"NG", "NG"},   // природный газ
             {"WH", "WH4"}   // пшеница
-    }).collect(Collectors.toMap(a -> a[1], a -> a[0]));
+    }).collect(Collectors.toMap(a -> a[0], a -> a[1]));
+
+    private final Map<String, String> shortnameToCodes = codeToShortnames.entrySet()
+            .stream()
+            .collect(Collectors.toMap(Entry::getValue, Entry::getKey));
 
     private final Character[] futuresMonthCodes =
-            new Character[] {'F', 'G', 'H', 'J', 'K', 'M', 'N', 'Q', 'U', 'V', 'X', 'Z'};
+            new Character[]{'F', 'G', 'H', 'J', 'K', 'M', 'N', 'Q', 'U', 'V', 'X', 'Z'};
     private final Character[] callOptionMonthCodes =
-            new Character[] {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'G', 'K', 'L'};
+            new Character[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'};
     private final Character[] putOptionMonthCodes =
-            new Character[] {'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X'};
+            new Character[]{'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X'};
+
+    private final int currentYear = LocalDate.now().getYear();
+    // 2000-th, 2010-th, 2020-th and so on
+    private final int currentYearDecade = currentYear / 10 * 10;
 
     /**
      * Only for derivative contracts.
      *
      * @return true for futures contract (in {@code Si-6.21} or {@code SiM1} format),
-     *         false for options (in {@code Si65000BC9}, {@code Si65000BC9D} or {@code Si-6.19M280319CA65000} format)
+     * false for options (in {@code Si65000BC9}, {@code Si65000BC9D} or {@code Si-6.19M280319CA65000} format)
      */
     public boolean isFutures(String contract) {
         return isFuturesCode(contract) || isFuturesShortname(contract);
@@ -143,8 +152,8 @@ public class MoexDerivativeNamingHelper {
      */
     private boolean isFuturesCode(String code) {
         return code.length() == 4 &&
-                shortnamesToCode.containsValue(code.substring(0, 2)) &&
-                isArrayContains(futuresMonthCodes, code.charAt(2)) &&
+                shortnameToCodes.containsValue(code.substring(0, 2)) &&
+                getFuturesMonth(code.charAt(2)) != -1 &&
                 isDigit(code.charAt(3));
     }
 
@@ -163,7 +172,7 @@ public class MoexDerivativeNamingHelper {
             }
             boolean isYearSymbolsDigit = isDigit(shortname.charAt(dotIdx + 1)) &&
                     isDigit(shortname.charAt(dotIdx + 2));
-            if (isYearSymbolsDigit && shortnamesToCode.containsKey(shortname.substring(0, dashIdx))) {
+            if (isYearSymbolsDigit && shortnameToCodes.containsKey(shortname.substring(0, dashIdx))) {
                 int month = parseInt(shortname.substring(dashIdx + 1, dotIdx));
                 return month >= 1 && month <= 12;
             }
@@ -187,11 +196,38 @@ public class MoexDerivativeNamingHelper {
             }
             int month = parseInt(contract.substring(dashIdx + 1, dotIdx));
             int year = parseInt(contract.substring(dotIdx + 1));
-            return Optional.ofNullable(shortnamesToCode.get(contract.substring(0, dashIdx)))
+            return Optional.ofNullable(shortnameToCodes.get(contract.substring(0, dashIdx)))
                     .map(prefix -> prefix + futuresMonthCodes[month - 1] + (year % 10));
         } catch (Exception e) {
             return Optional.empty();
         }
+    }
+
+    /**
+     * @return {@code Si-6.21} for futures contract in {@code Si-6.21} or {@code SiM1} format
+     */
+    public Optional<String> getFuturesShortname(String contract) {
+        if (isFuturesShortname(contract)) {
+            return Optional.of(contract);
+        } else if (contract.length() != 4) {
+            return Optional.empty();
+        }
+        int month = getFuturesMonth(contract.charAt(2));
+        if (month != -1) {
+            char yearChar = contract.charAt(3);
+            if (isDigit(yearChar)) {
+                String prefix = codeToShortnames.get(contract.substring(0, 2));
+                if (prefix != null) {
+                    int year = yearChar - '0';
+                    int shortnameYear = currentYearDecade + year;
+                    if (shortnameYear > (currentYear + 3)) {
+                        shortnameYear -= 10;
+                    }
+                    return Optional.of(prefix + '-' + (month + 1) + '.' + shortnameYear % 100);
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     /**
@@ -208,10 +244,10 @@ public class MoexDerivativeNamingHelper {
                 int monthIdx = yearIdx - 1;
                 int month = getOptionMonth(optionCode.charAt(monthIdx));
                 if (month != -1 && isValidOptionTypeAndStrike(optionCode, monthIdx)) {
-                    String code = optionCode.substring(0, 2);
-                    if (shortnamesToCode.containsValue(code)) {
+                    String prefix = optionCode.substring(0, 2);
+                    if (shortnameToCodes.containsValue(prefix)) {
                         char year = optionCode.charAt(yearIdx);
-                        return Optional.of(code + futuresMonthCodes[month] + year);
+                        return Optional.of(prefix + futuresMonthCodes[month] + year);
                     }
                 }
             }
@@ -234,6 +270,17 @@ public class MoexDerivativeNamingHelper {
         return false;
     }
 
+    private int getFuturesMonth(char monthChar) {
+        int month = 0;
+        for (char e : futuresMonthCodes) {
+            if (e == monthChar) {
+                return month;
+            }
+            month++;
+        }
+        return -1;
+    }
+
     /**
      * @return option month (0-based) or -1 if not found
      */
@@ -247,14 +294,5 @@ public class MoexDerivativeNamingHelper {
             return month;
         }
         return -1;
-    }
-
-    private static boolean isArrayContains(Object[] array, Object value) {
-        for (Object e : array) {
-            if (Objects.equals(e, value)) {
-                return true;
-            }
-        }
-        return false;
     }
 }
