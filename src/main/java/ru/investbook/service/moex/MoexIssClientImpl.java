@@ -77,7 +77,7 @@ public class MoexIssClientImpl implements MoexIssClient {
             "iss.meta=off&" +
             "iss.only=securities&" +
             "securities.columns=SECID,PREVDATE,PREVADMITTEDQUOTE,PREVSETTLEPRICE,PREVPRICE,ACCRUEDINT,LOTSIZE,LOTVALUE,MINSTEP,STEPPRICE";
-    private final MoexDerivativeSecidHelper moexDerivativeSecidHelper;
+    private final MoexDerivativeNamingHelper moexDerivativeNamingHelper;
     private final RestTemplate restTemplate;
     private int currentYear = getCurrentYear();
     private long fastCoarseDayCounter = getFastCoarseDayCounter();
@@ -87,7 +87,7 @@ public class MoexIssClientImpl implements MoexIssClient {
         SecurityType securityType = getSecurityType(isinOrContractName);
         if (securityType == DERIVATIVE) {
             // Moex couldn't find futures contract (too many records). Try evaluate contract name
-            Optional<String> secid = moexDerivativeSecidHelper.getFuturesContractSecidIfCan(isinOrContractName);
+            Optional<String> secid = moexDerivativeNamingHelper.getFuturesCode(isinOrContractName);
             if (secid.isPresent()) {
                 return secid;
             }
@@ -125,12 +125,12 @@ public class MoexIssClientImpl implements MoexIssClient {
                         .flatMap(MoexSecurityQuoteHelper::parse))
                 .map(quoteBuilder -> quoteBuilder.currency(market.getCurrency()))
                 .map(SecurityQuoteBuilder::build);
-        if (quote.isPresent() && moexDerivativeSecidHelper.isSecidPossibleOption(moexSecId)) {
+        if (quote.isPresent()) {
             // Котировка опциона не содержит цену SecurityQuote.price,
             // т.к. ИСС МосБиржи, определяя MINSTEP, не сообщает STEPPRICE.
             // STEPPRICE нужно получить из базового актива (фьючерса)
-            return moexDerivativeSecidHelper.getOptionUnderlingFuturesContract(moexSecId)
-                    .filter(moexDerivativeSecidHelper::isFutures)
+            return moexDerivativeNamingHelper.getOptionUnderlingFutures(moexSecId)
+                    .filter(moexDerivativeNamingHelper::isFutures)
                     .flatMap(underlyingSecid -> getMarket(underlyingSecid)
                             .flatMap(underlyingMarket -> getQuote(underlyingSecid, underlyingMarket)))
                     .map(futuresContract -> futuresContract.getPrice()
