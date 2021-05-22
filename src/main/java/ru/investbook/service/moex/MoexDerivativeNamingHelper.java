@@ -21,14 +21,11 @@ package ru.investbook.service.moex;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -145,12 +142,6 @@ public class MoexDerivativeNamingHelper {
     // 2000-th, 2010-th, 2020-th and so on
     private final int currentYearDecade = currentYear / 10 * 10;
 
-    private final RestTemplate restTemplate;
-    private static final String contractDescription = "http://iss.moex.com/iss/securities/{secId}.json?" +
-            "iss.meta=off&iss.only=description&description.columns=name,value";
-    private final Map<String, Optional<String>> optionCodeToStortNames = new ConcurrentHashMap<>();
-    private final Map<String, Optional<String>> optionUnderlingFutures = new ConcurrentHashMap<>();
-
     /**
      * @return true for futures contract (in {@code Si-6.21} or {@code SiM1} format)
      */
@@ -161,7 +152,7 @@ public class MoexDerivativeNamingHelper {
     /**
      * @return true for futures in format {@code SiM1}
      */
-    private boolean isFuturesCode(String contract) {
+    public boolean isFuturesCode(String contract) {
         return contract.length() == 4 &&
                 shortnameToCodes.containsValue(contract.substring(0, 2)) &&
                 getFuturesMonth(contract.charAt(2)) != -1 &&
@@ -171,7 +162,7 @@ public class MoexDerivativeNamingHelper {
     /**
      * @return true for futures in format {@code Si-3.21}
      */
-    private boolean isFuturesShortname(String contract) {
+    public boolean isFuturesShortname(String contract) {
         try {
             int dotIdx = contract.length() - 3;
             if (contract.charAt(dotIdx) != '.') {
@@ -203,7 +194,7 @@ public class MoexDerivativeNamingHelper {
     /**
      * @return true for option in format {@code BR10BF0} and {@code BR-10BF0}
      */
-    private boolean isOptionCode(String contract) {
+    public boolean isOptionCode(String contract) {
         int length = contract.length();
         if (length > 5) {
             int yearIdx = length;
@@ -224,7 +215,7 @@ public class MoexDerivativeNamingHelper {
      * @return true for option in format {@code BR-7.20M250620СA10}, {@code BR-7.20M250620СA-10}
      * and {@code BR-7.16M270616CA 50}
      */
-    private boolean isOptionShortname(String contract) {
+    public boolean isOptionShortname(String contract) {
         int dashIdx = contract.indexOf('-');
         if (dashIdx == -1) {
             return false;
@@ -299,52 +290,6 @@ public class MoexDerivativeNamingHelper {
             }
         }
         return empty();
-    }
-
-    /**
-     * @return {@code Si-6.21M270521CA75000} for futures contract in {@code Si-6.21M270521CA75000} or {@code Si75000BE1D} format;
-     * {@code Si-6.21M170621PA71000} for futures contract in {@code Si-6.21M170621PA71000} or {@code Si71000BR1} format
-     */
-    public Optional<String> getOptionShortname(String contract) {
-        if (isOptionShortname(contract)) {
-            return Optional.of(contract);
-        } else if (isOptionCode(contract)) {
-            return optionCodeToStortNames.computeIfAbsent(contract, cntr -> getContractDescriptionFromMoex(cntr, "SHORTNAME"));
-        }
-        return empty();
-    }
-
-    /**
-     * @param contract option's moex secid in {@code Si65000BC9}, {@code Si65000BC9D}, {@code RI180000BD1} or
-     *                   {@code RI180000BD1A} format
-     * @return futures contract secid (for ex. {@code SiH9}) if it can be calculated, empty optional otherwise
-     */
-    public Optional<String> getOptionUnderlingFutures(String contract) {
-        if (isOptionCode(contract)) {
-            return optionUnderlingFutures.computeIfAbsent(contract, this::getOptionUnderlingFuturesFromMoex);
-        }
-        return empty();
-    }
-
-    private Optional<String> getOptionUnderlingFuturesFromMoex(String contract) {
-        return getContractDescriptionFromMoex(contract, "NAME")
-                .map(description -> description.substring(description.lastIndexOf(' ') + 1))
-                .flatMap(this::getFuturesCode);
-    }
-
-    private Optional<String> getContractDescriptionFromMoex(String contract, String key) {
-        try {
-            return Optional.ofNullable(restTemplate.getForObject(contractDescription, Map.class, contract))
-                    .map(MoexJsonResponseParser::buildFromIntObjectMap)
-                    .flatMap(response -> response.stream()
-                            .filter(record -> Objects.equals(record.get("name"), key))
-                            .map(record -> (String) record.get("value"))
-                            .filter(Objects::nonNull)
-                            .findAny());
-        } catch (Exception e) {
-            log.debug("Can't get {} contract description for {}", contract, key);
-            return empty();
-        }
     }
 
     private static boolean isValidOptionTypeAndStrike(String code, int monthIdx) {

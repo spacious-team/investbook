@@ -104,9 +104,9 @@ public class MoexDerivativeNamingHelperTest {
     static Object[][] getOptionShortnames() {
         return new Object[][] {
                 {"BR-7.16M270616CA 50", "BR-7.16M270616CA 50"},
-//                {"BR50BF6", "BR-7.16M270616CA 50"}, requires internet
-//                {"BR50BE1", "BR-6.21M250521CA50"},
-//                {"BR50BE1A", "BR-6.21M060521CA50"},
+                {"BR50BF6", "BR-7.16M270616CA 50"},
+                {"BR50BE1", "BR-6.21M250521CA50"},
+                {"BR50BE1A", "BR-6.21M060521CA50"},
                 {"Ri150000BS9B", null},
                 {"RI150000B9", null},
                 {"RI150000S9B", null},
@@ -118,11 +118,11 @@ public class MoexDerivativeNamingHelperTest {
         };
     }
 
-    @ParameterizedTest
-    @MethodSource("getOptionShortnames")
-    void getOptionShortnamesTest(String contract, String shortname) {
-        assertEquals(helper.getOptionShortname(contract).orElse(null), shortname);
-    }
+//    @ParameterizedTest
+//    @MethodSource("getOptionShortnames")
+//    void getOptionShortnamesTest(String contract, String shortname) {
+//        assertEquals(moexIssClient.getOptionShortname(contract).orElse(null), shortname);
+//    }
 
     static Object[][] getOptionUnderlingFutures() {
         return new Object[][] {
@@ -152,7 +152,7 @@ public class MoexDerivativeNamingHelperTest {
 //    @ParameterizedTest
 //    @MethodSource("getOptionUnderlingFutures")
 //    void getOptionUnderlingFuturesTest(String optionCode, String futuresCode) {
-//        assertEquals(helper.getOptionUnderlingFutures(optionCode).orElse(null), futuresCode);
+//        assertEquals(moexIssClient.getOptionUnderlingFutures(optionCode).orElse(null), futuresCode);
 //    }
 
     @ParameterizedTest
