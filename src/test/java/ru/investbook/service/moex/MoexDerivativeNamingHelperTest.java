@@ -21,6 +21,8 @@ package ru.investbook.service.moex;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
 
@@ -29,11 +31,11 @@ import static org.testng.Assert.assertEquals;
 @ExtendWith(MockitoExtension.class)
 public class MoexDerivativeNamingHelperTest {
 
-    //@Mock
-    RestTemplate restTemplate = new RestTemplate();
+    @Mock
+    RestTemplate restTemplate;
 
-    //@InjectMocks
-    MoexDerivativeNamingHelper helper = new MoexDerivativeNamingHelper(new RestTemplate());
+    @InjectMocks
+    MoexDerivativeNamingHelper helper;
 
     static Object[][] getFuturesCodes() {
         return new Object[][] {
@@ -146,11 +148,12 @@ public class MoexDerivativeNamingHelperTest {
         };
     }
 
-    @ParameterizedTest
-    @MethodSource("getOptionUnderlingFutures")
-    void getOptionUnderlingFuturesTest(String optionCode, String futuresCode) {
-        assertEquals(helper.getOptionUnderlingFutures(optionCode).orElse(null), futuresCode);
-    }
+//    Requires internet connection
+//    @ParameterizedTest
+//    @MethodSource("getOptionUnderlingFutures")
+//    void getOptionUnderlingFuturesTest(String optionCode, String futuresCode) {
+//        assertEquals(helper.getOptionUnderlingFutures(optionCode).orElse(null), futuresCode);
+//    }
 
     @ParameterizedTest
     @MethodSource("getOptionShortnames")
