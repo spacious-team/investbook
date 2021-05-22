@@ -18,17 +18,22 @@
 
 package ru.investbook.service.moex;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.Character.isDigit;
 import static java.lang.Integer.parseInt;
+import static java.util.Optional.empty;
 
 /**
  * Converts derivative short names (for ex. Si-6.21) to secid (a.k.a ticker codes, for ex SiM1)
@@ -36,6 +41,7 @@ import static java.lang.Integer.parseInt;
  * @see <a href="https://www.moex.com/s205">Specifications ticker codes for Futures and Options</a>
  */
 @Component
+@RequiredArgsConstructor
 public class MoexDerivativeNamingHelper {
 
     private final Map<String, String> codeToShortnames = Stream.of(new String[][]{
@@ -137,6 +143,11 @@ public class MoexDerivativeNamingHelper {
     // 2000-th, 2010-th, 2020-th and so on
     private final int currentYearDecade = currentYear / 10 * 10;
 
+    private final RestTemplate restTemplate;
+    private static final String contractDescription = "http://iss.moex.com/iss/securities/{secId}.json?" +
+            "iss.meta=off&iss.only=description&description.columns=name,value";
+    private final Map<String, Optional<String>> optionCodeToStortNames = new ConcurrentHashMap<>();
+
     /**
      * Only for derivative contracts.
      *
@@ -150,33 +161,74 @@ public class MoexDerivativeNamingHelper {
     /**
      * @return true for futures in format {@code SiM1}
      */
-    private boolean isFuturesCode(String code) {
-        return code.length() == 4 &&
-                shortnameToCodes.containsValue(code.substring(0, 2)) &&
-                getFuturesMonth(code.charAt(2)) != -1 &&
-                isDigit(code.charAt(3));
+    private boolean isFuturesCode(String contract) {
+        return contract.length() == 4 &&
+                shortnameToCodes.containsValue(contract.substring(0, 2)) &&
+                getFuturesMonth(contract.charAt(2)) != -1 &&
+                isDigit(contract.charAt(3));
     }
 
     /**
      * @return true for futures in format {@code Si-3.21}
      */
-    private boolean isFuturesShortname(String shortname) {
+    private boolean isFuturesShortname(String contract) {
         try {
-            int dotIdx = shortname.length() - 3;
-            if (shortname.charAt(dotIdx) != '.') {
+            int dotIdx = contract.length() - 3;
+            if (contract.charAt(dotIdx) != '.') {
                 return false;
             }
-            int dashIdx = shortname.indexOf('-');
+            int dashIdx = contract.indexOf('-');
             if (dashIdx == -1) {
                 return false;
             }
-            boolean isYearSymbolsDigit = isDigit(shortname.charAt(dotIdx + 1)) &&
-                    isDigit(shortname.charAt(dotIdx + 2));
-            if (isYearSymbolsDigit && shortnameToCodes.containsKey(shortname.substring(0, dashIdx))) {
-                int month = parseInt(shortname.substring(dashIdx + 1, dotIdx));
+            boolean isYearSymbolsDigit = isDigit(contract.charAt(dotIdx + 1)) &&
+                    isDigit(contract.charAt(dotIdx + 2));
+            if (isYearSymbolsDigit && shortnameToCodes.containsKey(contract.substring(0, dashIdx))) {
+                int month = parseInt(contract.substring(dashIdx + 1, dotIdx));
                 return month >= 1 && month <= 12;
             }
         } catch (Exception ignore) {
+        }
+        return false;
+    }
+
+    /**
+     * @return true for option in format {@code BR10BF0} and {@code BR-10BF0}
+     */
+    public boolean isOptionCode(String contract) {
+        return getOptionUnderlingFutures(contract).isPresent();
+    }
+
+    /**
+     * @return true for option in format {@code BR-7.20M250620СA10}, {@code BR-7.20M250620СA-10}
+     * and {@code BR-7.16M270616CA 50}
+     */
+    public boolean isOptionShortname(String contract) {
+        int dashIdx = contract.indexOf('-');
+        if (dashIdx == -1) {
+            return false;
+        }
+        int MIdx = contract.indexOf('M');
+        int AIdx = contract.indexOf('A');
+        if (MIdx == -1 || AIdx == -1) {
+            return false;
+        }
+        char optionType = contract.charAt(AIdx - 1);
+        if (optionType == 'C' || optionType == 'P') {
+            for (int i = MIdx + 1, cnt = MIdx + 7; i < cnt; i++) {
+                if (!isDigit(contract.charAt(i))) {
+                    return false;
+                }
+            }
+            char signCharOrDigit = contract.charAt(AIdx + 1);
+            if (isDigit(signCharOrDigit) || signCharOrDigit == '-' || signCharOrDigit == ' ') {
+                for (int i = AIdx + 2, cnt = contract.length(); i < cnt; i++) {
+                    if (!isDigit(contract.charAt(i))) {
+                        return false;
+                    }
+                }
+                return isFuturesShortname(contract.substring(0, MIdx));
+            }
         }
         return false;
     }
@@ -188,18 +240,18 @@ public class MoexDerivativeNamingHelper {
         try {
             int dashIdx = contract.indexOf('-');
             if (dashIdx == -1) {
-                return isFuturesCode(contract) ? Optional.of(contract) : Optional.empty();
+                return isFuturesCode(contract) ? Optional.of(contract) : empty();
             }
             int dotIdx = contract.length() - 3;
             if (contract.charAt(dotIdx) != '.') {
-                return Optional.empty();
+                return empty();
             }
             int month = parseInt(contract.substring(dashIdx + 1, dotIdx));
             int year = parseInt(contract.substring(dotIdx + 1));
             return Optional.ofNullable(shortnameToCodes.get(contract.substring(0, dashIdx)))
                     .map(prefix -> prefix + futuresMonthCodes[month - 1] + (year % 10));
         } catch (Exception e) {
-            return Optional.empty();
+            return empty();
         }
     }
 
@@ -210,7 +262,7 @@ public class MoexDerivativeNamingHelper {
         if (isFuturesShortname(contract)) {
             return Optional.of(contract);
         } else if (contract.length() != 4) {
-            return Optional.empty();
+            return empty();
         }
         int month = getFuturesMonth(contract.charAt(2));
         if (month != -1) {
@@ -218,16 +270,41 @@ public class MoexDerivativeNamingHelper {
             if (isDigit(yearChar)) {
                 String prefix = codeToShortnames.get(contract.substring(0, 2));
                 if (prefix != null) {
-                    int year = yearChar - '0';
-                    int shortnameYear = currentYearDecade + year;
-                    if (shortnameYear > (currentYear + 3)) {
-                        shortnameYear -= 10;
+                    int year = getShortnameYear(yearChar);
+                    if (year != -1) {
+                        return Optional.of(prefix + '-' + (month + 1) + '.' + year);
                     }
-                    return Optional.of(prefix + '-' + (month + 1) + '.' + shortnameYear % 100);
                 }
             }
         }
-        return Optional.empty();
+        return empty();
+    }
+
+    /**
+     * @return {@code Si-6.21M270521CA75000} for futures contract in {@code Si-6.21M270521CA75000} or {@code Si75000BE1D} format;
+     * {@code Si-6.21M170621PA71000} for futures contract in {@code Si-6.21M170621PA71000} or {@code Si71000BR1} format
+     */
+    public Optional<String> getOptionShortname(String contract) {
+        if (isOptionShortname(contract)) {
+            return Optional.of(contract);
+        } else if (isOptionCode(contract)) {
+            return optionCodeToStortNames.computeIfAbsent(contract, this::getOptionShortnameFromMoex);
+        }
+        return empty();
+    }
+
+    private Optional<String> getOptionShortnameFromMoex(String contract) {
+        try {
+            return Optional.ofNullable(restTemplate.getForObject(contractDescription, Map.class, contract))
+                    .map(MoexJsonResponseParser::buildFromIntObjectMap)
+                    .flatMap(response -> response.stream()
+                            .filter(record -> Objects.equals(record.get("name"), "SHORTNAME"))
+                            .map(record -> (String) record.get("value"))
+                            .filter(Objects::nonNull)
+                            .findAny());
+        } catch (Exception e) {
+            return empty();
+        }
     }
 
     /**
@@ -252,7 +329,7 @@ public class MoexDerivativeNamingHelper {
                 }
             }
         }
-        return Optional.empty();
+        return empty();
     }
 
     private static boolean isValidOptionTypeAndStrike(String code, int monthIdx) {
@@ -271,6 +348,23 @@ public class MoexDerivativeNamingHelper {
         return false;
     }
 
+    /**
+     * @param yearChar char containing year last digit, '1' for 2021
+     * @return 2-digit code like 21, 22 and so on or -1 for invalid yearChar
+     */
+    private int getShortnameYear(char yearChar) {
+        int year = yearChar - '0';
+        if (year < 0 || year > 9) {
+            return -1;
+        }
+        int shortnameYear = currentYearDecade + year;
+        if (shortnameYear > (currentYear + 3)) {
+            shortnameYear -= 10;
+        }
+        shortnameYear = shortnameYear % 100;
+        return shortnameYear;
+    }
+
     private int getFuturesMonth(char monthChar) {
         int month = 0;
         for (char e : futuresMonthCodes) {
@@ -286,11 +380,29 @@ public class MoexDerivativeNamingHelper {
      * @return option month (0-based) or -1 if not found
      */
     private int getOptionMonth(char monthChar) {
+        int month = getCallOptionMonth(monthChar);
+        if (month == -1) {
+            month = getPutOptionMonth(monthChar);
+        }
+        return month;
+    }
+
+    /**
+     * @return CALL option month (0-based) or -1 if not found
+     */
+    private int getCallOptionMonth(char monthChar) {
         int month = monthChar - callOptionMonthCodes[0];
         if (month >= 0 && month <= 11) {
             return month;
         }
-        month = monthChar - putOptionMonthCodes[0];
+        return -1;
+    }
+
+    /**
+     * @return PUT option month (0-based) or -1 if not found
+     */
+    private int getPutOptionMonth(char monthChar) {
+        int month = monthChar - putOptionMonthCodes[0];
         if (month >= 0 && month <= 11) {
             return month;
         }

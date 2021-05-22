@@ -21,15 +21,20 @@ package ru.investbook.service.moex;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Spy;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.client.RestTemplate;
 
 import static org.testng.Assert.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class MoexDerivativeNamingHelperTest {
 
-    @Spy
+    @Mock
+    RestTemplate restTemplate;
+
+    @InjectMocks
     MoexDerivativeNamingHelper helper;
 
     static Object[][] getFuturesCodes() {
@@ -95,6 +100,28 @@ public class MoexDerivativeNamingHelperTest {
         assertEquals(helper.isFutures(code), shortName != null);
     }
 
+    static Object[][] getOptionShortnames() {
+        return new Object[][] {
+                {"BR-7.16M270616CA 50", "BR-7.16M270616CA 50"},
+//                {"BR50BF6", "BR-7.16M270616CA 50"}, requires internet
+//                {"BR50BE1", "BR-6.21M250521CA50"},
+//                {"BR50BE1A", "BR-6.21M060521CA50"},
+                {"Ri150000BS9B", null},
+                {"RI150000B9", null},
+                {"RI150000S9B", null},
+                {"RIBS9B", null},
+                {"RI1a5BS9", null},
+                {"abc", null},
+                {"SiZ1", null},
+                {"Si-6.21", null}
+        };
+    }
+
+    @ParameterizedTest
+    @MethodSource("getOptionShortnames")
+    void getOptionShortnamesTest(String contract, String shortname) {
+        assertEquals(helper.getOptionShortname(contract).orElse(null), shortname);
+    }
 
     static Object[][] getOptionUnderlingFutures() {
         return new Object[][] {
