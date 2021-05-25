@@ -50,7 +50,6 @@ public class MoexDerivativeCodeService {
             {"RS", "RTSS"}, // Индекс голубых фишек
             {"4B", "ALSI"}, // Индекс FTSE/JSE Top40
             {"VI", "RVI"},  // Волатильность российского рынка
-            {"SF", "SPYF"}, // SPDR S&P 500 ETF Trust
             {"AF", "AFLT"}, // ПАО "Аэрофлот" (о.а.)
             {"AL", "ALRS"}, // АК "АЛРОСА" (ПАО) (о.а.)
             {"CH", "CHMF"}, // ПАО "Северсталь" (о.а.)
@@ -85,6 +84,7 @@ public class MoexDerivativeCodeService {
             {"ML", "MAIL"}, // ГДР Мэйл.ру Груп Лимитед
             {"OZ", "OZON"}, // АДР Озон Холдингс Пи Эл Си
             {"BW", "GBMW"}, // BMW AG (о.а.)
+            {"SF", "SPYF"}, // SPDR S&P 500 ETF Trust
             {"DM", "GDAI"}, // Daimler AG (о.а.)
             {"DB", "GDBK"}, // Deutsche Bank AG (о.а.)
             {"SM", "GSIE"}, // Siemens AG (о.а.)
