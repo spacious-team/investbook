@@ -82,7 +82,7 @@ public class MoexIssClientImpl implements MoexIssClient {
             "securities.columns=SECID,PREVDATE,PREVADMITTEDQUOTE,PREVSETTLEPRICE,PREVPRICE,ACCRUEDINT,LOTSIZE,LOTVALUE,MINSTEP,STEPPRICE";
     private static final String contractDescription = "http://iss.moex.com/iss/securities/{secId}.json?" +
             "iss.meta=off&iss.only=description&description.columns=name,value";
-    private final MoexDerivativeNamingHelper moexDerivativeNamingHelper;
+    private final MoexDerivativeCodeService moexDerivativeCodeService;
     private final RestTemplate restTemplate;
     private int currentYear = getCurrentYear();
     private long fastCoarseDayCounter = getFastCoarseDayCounter();
@@ -94,7 +94,7 @@ public class MoexIssClientImpl implements MoexIssClient {
         SecurityType securityType = getSecurityType(isinOrContractName);
         if (securityType == DERIVATIVE) {
             // Moex couldn't find futures contract (too many records). Try evaluate contract name
-            Optional<String> secid = moexDerivativeNamingHelper.getFuturesCode(isinOrContractName);
+            Optional<String> secid = moexDerivativeCodeService.getFuturesCode(isinOrContractName);
             if (secid.isPresent()) {
                 return secid;
             }
@@ -137,7 +137,7 @@ public class MoexIssClientImpl implements MoexIssClient {
             // т.к. ИСС МосБиржи, определяя MINSTEP, не сообщает STEPPRICE.
             // STEPPRICE нужно получить из базового актива (фьючерса)
             return getOptionUnderlingFutures(moexSecId)
-                    .filter(moexDerivativeNamingHelper::isFutures)
+                    .filter(moexDerivativeCodeService::isFutures)
                     .flatMap(underlyingSecid -> getMarket(underlyingSecid)
                             .flatMap(underlyingMarket -> getQuote(underlyingSecid, underlyingMarket)))
                     .map(futuresContract -> futuresContract.getPrice()
@@ -197,16 +197,16 @@ public class MoexIssClientImpl implements MoexIssClient {
     }
 
     public Optional<String> getOptionShortname(String contract) {
-        if (moexDerivativeNamingHelper.isOptionShortname(contract)) {
+        if (moexDerivativeCodeService.isOptionShortname(contract)) {
             return Optional.of(contract);
-        } else if (moexDerivativeNamingHelper.isOptionCode(contract)) {
+        } else if (moexDerivativeCodeService.isOptionCode(contract)) {
             return optionCodeToShortNames.computeIfAbsent(contract, cntr -> getContractDescriptionFromMoex(cntr, "SHORTNAME"));
         }
         return empty();
     }
 
     public Optional<String> getOptionUnderlingFutures(String contract) {
-        if (moexDerivativeNamingHelper.isOptionCode(contract)) {
+        if (moexDerivativeCodeService.isOptionCode(contract)) {
             return optionUnderlingFutures.computeIfAbsent(contract, this::getOptionUnderlingFuturesFromMoex);
         }
         return empty();
@@ -215,7 +215,7 @@ public class MoexIssClientImpl implements MoexIssClient {
     private Optional<String> getOptionUnderlingFuturesFromMoex(String contract) {
         return getContractDescriptionFromMoex(contract, "NAME")
                 .map(description -> description.substring(description.lastIndexOf(' ') + 1))
-                .flatMap(moexDerivativeNamingHelper::getFuturesCode);
+                .flatMap(moexDerivativeCodeService::getFuturesCode);
     }
 
     private Optional<String> getContractDescriptionFromMoex(String contract, String key) {

@@ -29,13 +29,13 @@ import org.springframework.web.client.RestTemplate;
 import static org.testng.Assert.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-public class MoexDerivativeNamingHelperTest {
+public class MoexDerivativeCodeServiceTest {
 
     @Mock
     RestTemplate restTemplate;
 
     @InjectMocks
-    MoexDerivativeNamingHelper helper;
+    MoexDerivativeCodeService service;
 
     static Object[][] getFuturesCodes() {
         return new Object[][] {
@@ -58,7 +58,7 @@ public class MoexDerivativeNamingHelperTest {
     @MethodSource("getFuturesCodes")
     void getFuturesCode(String shortName, String code) {
         if (shortName != null) {
-            assertEquals(helper.getFuturesCode(shortName).orElse(null), code);
+            assertEquals(service.getFuturesCode(shortName).orElse(null), code);
         }
     }
 
@@ -86,19 +86,19 @@ public class MoexDerivativeNamingHelperTest {
     @ParameterizedTest
     @MethodSource("getFuturesShortnames")
     void getFuturesShortname(String code, String shortName) {
-        assertEquals(helper.getFuturesShortname(code).orElse(null), shortName);
+        assertEquals(service.getFuturesShortname(code).orElse(null), shortName);
     }
 
     @ParameterizedTest
     @MethodSource("getFuturesCodes")
     void isFuturesTest1(String shortName, String code) {
-        assertEquals(helper.isFutures(shortName), code != null);
+        assertEquals(service.isFutures(shortName), code != null);
     }
 
     @ParameterizedTest
     @MethodSource("getFuturesShortnames")
     void isFuturesTest2(String code, String shortName) {
-        assertEquals(helper.isFutures(code), shortName != null);
+        assertEquals(service.isFutures(code), shortName != null);
     }
 
     static Object[][] getOptionShortnames() {
@@ -158,12 +158,12 @@ public class MoexDerivativeNamingHelperTest {
     @ParameterizedTest
     @MethodSource("getOptionShortnames")
     void isOptionTest1(String shortName, String code) {
-        assertEquals(helper.isOption(shortName), code != null);
+        assertEquals(service.isOption(shortName), code != null);
     }
 
     @ParameterizedTest
     @MethodSource("getOptionUnderlingFutures")
     void isOptionTest2(String code, String shortName) {
-        assertEquals(helper.isOption(code), shortName != null);
+        assertEquals(service.isOption(code), shortName != null);
     }
 }

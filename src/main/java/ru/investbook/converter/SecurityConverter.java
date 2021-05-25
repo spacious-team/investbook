@@ -36,7 +36,7 @@ public class SecurityConverter implements EntityConverter<SecurityEntity, Securi
         IssuerEntity issuerEntity = null;
         if (security.getInn() != null) {
             issuerEntity = issuerRepository.findByInn(security.getInn())
-                    .orElseThrow(() -> new IllegalArgumentException("Эмитетнт с ИНН не найден: " + security.getInn()));
+                    .orElseThrow(() -> new IllegalArgumentException("Эмитент с ИНН не найден: " + security.getInn()));
         }
 
         SecurityEntity entity = new SecurityEntity();

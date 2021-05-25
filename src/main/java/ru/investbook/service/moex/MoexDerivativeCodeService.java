@@ -41,7 +41,7 @@ import static java.util.Optional.empty;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class MoexDerivativeNamingHelper {
+public class MoexDerivativeCodeService {
 
     private final Map<String, String> codeToShortnames = Stream.of(new String[][]{
             {"MX", "MIX"},  // Индекс МосБиржи
@@ -50,6 +50,7 @@ public class MoexDerivativeNamingHelper {
             {"RS", "RTSS"}, // Индекс голубых фишек
             {"4B", "ALSI"}, // Индекс FTSE/JSE Top40
             {"VI", "RVI"},  // Волатильность российского рынка
+            {"SF", "SPYF"}, // SPDR S&P 500 ETF Trust
             {"AF", "AFLT"}, // ПАО "Аэрофлот" (о.а.)
             {"AL", "ALRS"}, // АК "АЛРОСА" (ПАО) (о.а.)
             {"CH", "CHMF"}, // ПАО "Северсталь" (о.а.)
@@ -292,6 +293,15 @@ public class MoexDerivativeNamingHelper {
         return empty();
     }
 
+    /**
+     * Convert derivative codes before storing to DB if need
+     */
+    public String convertDerivativeSecurityId(String securityId) {
+        return isFuturesCode(securityId) ?
+                getFuturesShortname(securityId).orElse(securityId) :
+                securityId;
+    }
+
     private static boolean isValidOptionTypeAndStrike(String code, int monthIdx) {
         int typeIdx = monthIdx - 1;
         char type = code.charAt(typeIdx);
@@ -326,12 +336,10 @@ public class MoexDerivativeNamingHelper {
     }
 
     private int getFuturesMonth(char monthChar) {
-        int month = 0;
-        for (char e : futuresMonthCodes) {
-            if (e == monthChar) {
+        for (int month = 0; month < futuresMonthCodes.length; month++) {
+            if (futuresMonthCodes[month] == monthChar) {
                 return month;
             }
-            month++;
         }
         return -1;
     }
