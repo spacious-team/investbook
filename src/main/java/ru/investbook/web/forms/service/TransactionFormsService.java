@@ -41,6 +41,7 @@ import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
+import ru.investbook.service.moex.MoexDerivativeCodeService;
 import ru.investbook.web.forms.model.SecurityType;
 import ru.investbook.web.forms.model.TransactionModel;
 
@@ -56,6 +57,7 @@ import java.util.stream.Collectors;
 import static java.lang.Math.abs;
 import static java.util.Optional.ofNullable;
 import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
+import static ru.investbook.web.forms.model.SecurityType.DERIVATIVE;
 
 @Component
 @RequiredArgsConstructor
@@ -69,6 +71,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
     private final TransactionConverter transactionConverter;
     private final SecurityConverter securityConverter;
     private final PortfolioConverter portfolioConverter;
+    private final MoexDerivativeCodeService moexDerivativeCodeService;
     private final Set<Integer> cashFlowTypes = Set.of(CashFlowType.PRICE.getId(),
             CashFlowType.ACCRUED_INTEREST.getId(),
             CashFlowType.DERIVATIVE_QUOTE.getId(),
@@ -93,6 +96,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
 
     @Override
     public void save(TransactionModel tr) {
+        convertDerivativeSecurityId(tr);
         int direction = ((tr.getAction() == TransactionModel.Action.BUY) ? 1 : -1);
         BigDecimal multiplier = BigDecimal.valueOf(-direction * tr.getCount());
 
@@ -131,6 +135,13 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 .build();
 
         saveAndFlush(tr, transaction.getTransaction(), transaction.getTransactionCashFlows());
+    }
+
+    private void convertDerivativeSecurityId(TransactionModel model) {
+        if (model.getSecurityType() == DERIVATIVE) {
+            String securityId = moexDerivativeCodeService.convertDerivativeSecurityId(model.getSecurityId());
+            model.setSecurity(securityId);
+        }
     }
 
     private void saveAndFlush(TransactionModel transactionModel,
@@ -175,26 +186,26 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 e.getPk().getId(),
                 cashFlowTypes);
         cashFlows.forEach(value -> {
-                    CashFlowType type = CashFlowType.valueOf(value.getCashFlowType().getId());
-                    switch (type) {
-                        case PRICE, DERIVATIVE_QUOTE -> {
-                            m.setPrice(value.getValue().divide(cnt, 6, RoundingMode.HALF_UP).abs());
-                            m.setPriceCurrency(value.getCurrency());
-                            if (type == CashFlowType.DERIVATIVE_QUOTE) {
-                                m.setSecurityType(SecurityType.DERIVATIVE);
-                            }
-                        }
-                        case ACCRUED_INTEREST -> {
-                            m.setAccruedInterest(value.getValue().divide(cnt, 6, RoundingMode.HALF_UP).abs());
-                            m.setSecurityType(SecurityType.BOND);
-                        }
-                        case COMMISSION -> {
-                            m.setCommission(value.getValue().abs());
-                            m.setCommissionCurrency(value.getCurrency());
-                        }
+            CashFlowType type = CashFlowType.valueOf(value.getCashFlowType().getId());
+            switch (type) {
+                case PRICE, DERIVATIVE_QUOTE -> {
+                    m.setPrice(value.getValue().divide(cnt, 6, RoundingMode.HALF_UP).abs());
+                    m.setPriceCurrency(value.getCurrency());
+                    if (type == CashFlowType.DERIVATIVE_QUOTE) {
+                        m.setSecurityType(DERIVATIVE);
                     }
-                });
-        if (m.getSecurityType() == SecurityType.DERIVATIVE &&
+                }
+                case ACCRUED_INTEREST -> {
+                    m.setAccruedInterest(value.getValue().divide(cnt, 6, RoundingMode.HALF_UP).abs());
+                    m.setSecurityType(SecurityType.BOND);
+                }
+                case COMMISSION -> {
+                    m.setCommission(value.getValue().abs());
+                    m.setCommissionCurrency(value.getCurrency());
+                }
+            }
+        });
+        if (m.getSecurityType() == DERIVATIVE &&
                 m.getPrice() != null && m.getPrice().floatValue() > 0.000001) {
             cashFlows.stream()
                     .filter(value -> CashFlowType.valueOf(value.getCashFlowType().getId()) == CashFlowType.DERIVATIVE_PRICE)

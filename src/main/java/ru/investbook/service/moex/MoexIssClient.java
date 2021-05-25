@@ -36,4 +36,17 @@ public interface MoexIssClient {
      * @return true if Moex hasn't quotes
      */
     boolean isDerivativeAndExpired(String shortnameOrSecid);
+
+    /**
+     * @param contract option's code (moex secid) in {@code Si65000BC9}, {@code Si65000BC9D}, {@code RI180000BD1} or
+     *                   {@code RI180000BD1A} format
+     * @return futures contract code (secid) for ex. {@code SiH9} if it can be calculated, empty optional otherwise
+     */
+    Optional<String> getOptionUnderlingFutures(String contract);
+
+    /**
+     * @return {@code Si-6.21M270521CA75000} for option contract in {@code Si-6.21M270521CA75000} or {@code Si75000BE1D} format;
+     * {@code Si-6.21M170621PA71000} for option contract in {@code Si-6.21M170621PA71000} or {@code Si71000BR1} format
+     */
+    Optional<String> getOptionShortname(String contract);
 }

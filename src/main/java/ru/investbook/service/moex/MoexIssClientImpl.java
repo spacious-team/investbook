@@ -30,8 +30,11 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
+import static java.util.Optional.empty;
 import static org.spacious_team.broker.pojo.SecurityType.*;
 
 /**
@@ -77,17 +80,21 @@ public class MoexIssClientImpl implements MoexIssClient {
             "iss.meta=off&" +
             "iss.only=securities&" +
             "securities.columns=SECID,PREVDATE,PREVADMITTEDQUOTE,PREVSETTLEPRICE,PREVPRICE,ACCRUEDINT,LOTSIZE,LOTVALUE,MINSTEP,STEPPRICE";
-    private final MoexDerivativeSecidHelper moexDerivativeSecidHelper;
+    private static final String contractDescription = "http://iss.moex.com/iss/securities/{secId}.json?" +
+            "iss.meta=off&iss.only=description&description.columns=name,value";
+    private final MoexDerivativeCodeService moexDerivativeCodeService;
     private final RestTemplate restTemplate;
     private int currentYear = getCurrentYear();
     private long fastCoarseDayCounter = getFastCoarseDayCounter();
+    private final Map<String, Optional<String>> optionCodeToShortNames = new ConcurrentHashMap<>();
+    private final Map<String, Optional<String>> optionUnderlingFutures = new ConcurrentHashMap<>();
 
     @Override
     public Optional<String> getSecId(String isinOrContractName) {
         SecurityType securityType = getSecurityType(isinOrContractName);
         if (securityType == DERIVATIVE) {
             // Moex couldn't find futures contract (too many records). Try evaluate contract name
-            Optional<String> secid = moexDerivativeSecidHelper.getFuturesContractSecidIfCan(isinOrContractName);
+            Optional<String> secid = moexDerivativeCodeService.getFuturesCode(isinOrContractName);
             if (secid.isPresent()) {
                 return secid;
             }
@@ -125,12 +132,12 @@ public class MoexIssClientImpl implements MoexIssClient {
                         .flatMap(MoexSecurityQuoteHelper::parse))
                 .map(quoteBuilder -> quoteBuilder.currency(market.getCurrency()))
                 .map(SecurityQuoteBuilder::build);
-        if (quote.isPresent() && moexDerivativeSecidHelper.isSecidPossibleOption(moexSecId)) {
+        if (quote.isPresent()) {
             // Котировка опциона не содержит цену SecurityQuote.price,
             // т.к. ИСС МосБиржи, определяя MINSTEP, не сообщает STEPPRICE.
             // STEPPRICE нужно получить из базового актива (фьючерса)
-            return moexDerivativeSecidHelper.getOptionUnderlingFuturesContract(moexSecId)
-                    .filter(moexDerivativeSecidHelper::isFutures)
+            return getOptionUnderlingFutures(moexSecId)
+                    .filter(moexDerivativeCodeService::isFutures)
                     .flatMap(underlyingSecid -> getMarket(underlyingSecid)
                             .flatMap(underlyingMarket -> getQuote(underlyingSecid, underlyingMarket)))
                     .map(futuresContract -> futuresContract.getPrice()
@@ -187,5 +194,42 @@ public class MoexIssClientImpl implements MoexIssClient {
 
     private static long getFastCoarseDayCounter() {
         return System.currentTimeMillis() >>> 26; // increments each 18,6 hours
+    }
+
+    public Optional<String> getOptionShortname(String contract) {
+        if (moexDerivativeCodeService.isOptionShortname(contract)) {
+            return Optional.of(contract);
+        } else if (moexDerivativeCodeService.isOptionCode(contract)) {
+            return optionCodeToShortNames.computeIfAbsent(contract, cntr -> getContractDescriptionFromMoex(cntr, "SHORTNAME"));
+        }
+        return empty();
+    }
+
+    public Optional<String> getOptionUnderlingFutures(String contract) {
+        if (moexDerivativeCodeService.isOptionCode(contract)) {
+            return optionUnderlingFutures.computeIfAbsent(contract, this::getOptionUnderlingFuturesFromMoex);
+        }
+        return empty();
+    }
+
+    private Optional<String> getOptionUnderlingFuturesFromMoex(String contract) {
+        return getContractDescriptionFromMoex(contract, "NAME")
+                .map(description -> description.substring(description.lastIndexOf(' ') + 1))
+                .flatMap(moexDerivativeCodeService::getFuturesCode);
+    }
+
+    private Optional<String> getContractDescriptionFromMoex(String contract, String key) {
+        try {
+            return Optional.ofNullable(restTemplate.getForObject(contractDescription, Map.class, contract))
+                    .map(MoexJsonResponseParser::buildFromIntObjectMap)
+                    .flatMap(response -> response.stream()
+                            .filter(record -> Objects.equals(record.get("name"), key))
+                            .map(record -> (String) record.get("value"))
+                            .filter(Objects::nonNull)
+                            .findAny());
+        } catch (Exception e) {
+            log.debug("Can't get {} contract description for {}", contract, key);
+            return empty();
+        }
     }
 }

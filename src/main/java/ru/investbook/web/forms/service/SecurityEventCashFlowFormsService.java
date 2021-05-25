@@ -32,12 +32,12 @@ import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityRepository;
+import ru.investbook.service.moex.MoexDerivativeCodeService;
 import ru.investbook.web.forms.model.SecurityEventCashFlowModel;
 
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -52,11 +52,7 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
     private final SecurityConverter securityConverter;
     private final PortfolioConverter portfolioConverter;
-    private final Set<Integer> cashFlowTypes = Set.of(CashFlowType.PRICE.getId(),
-            CashFlowType.ACCRUED_INTEREST.getId(),
-            CashFlowType.DERIVATIVE_QUOTE.getId(),
-            CashFlowType.DERIVATIVE_PRICE.getId(),
-            CashFlowType.COMMISSION.getId());
+    private final MoexDerivativeCodeService moexDerivativeCodeService;
 
     public Optional<SecurityEventCashFlowModel> getById(Integer id) {
         return securityEventCashFlowRepository.findById(id)
@@ -74,6 +70,7 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
 
     @Override
     public void save(SecurityEventCashFlowModel e) {
+        convertDerivativeSecurityId(e);
         saveAndFlush(e.getPortfolio(), e.getSecurityId(), e.getSecurityName());
         SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .portfolio(e.getPortfolio())
@@ -101,6 +98,14 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
             securityEventCashFlowRepository.deleteById(e.getTaxId());
         }
         securityEventCashFlowRepository.flush();
+    }
+
+    private void convertDerivativeSecurityId(SecurityEventCashFlowModel model) {
+        String security = model.getSecurity();
+        if (moexDerivativeCodeService.isFuturesCode(security)) {
+            security = moexDerivativeCodeService.convertDerivativeSecurityId(security);
+            model.setSecurity(security);
+        }
     }
 
     private void saveAndFlush(String portfolio, String securityId, String securityName) {
