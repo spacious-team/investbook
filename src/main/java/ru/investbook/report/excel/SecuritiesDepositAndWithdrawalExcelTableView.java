@@ -43,7 +43,7 @@ public class SecuritiesDepositAndWithdrawalExcelTableView extends ExcelTableView
     @Getter
     private final boolean summaryView = false;
     @Getter
-    private final int sheetOrder = 7;
+    private final int sheetOrder = 8;
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (ввод-вывод цб)";
 

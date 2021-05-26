@@ -42,7 +42,7 @@ public class ForeignMarketProfitExcelTableView extends ExcelTableView {
     @Getter
     private final boolean summaryView = false;
     @Getter
-    private final int sheetOrder = 6;
+    private final int sheetOrder = 7;
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (валюта)";
 
