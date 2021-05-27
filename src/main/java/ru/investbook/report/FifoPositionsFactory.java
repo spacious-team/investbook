@@ -127,7 +127,7 @@ public class FifoPositionsFactory {
                                 filter.getToDate());
     }
 
-    private LinkedList<Transaction> getTransactions(Collection<String> portfolios, String isin, ViewFilter filter) {
+    public LinkedList<Transaction> getTransactions(Collection<String> portfolios, String isin, ViewFilter filter) {
         List<TransactionEntity> entities = portfolios.isEmpty() ?
                 transactionRepository
                         .findBySecurityIdAndTimestampBetweenOrderByTimestampAscPkIdAsc(

@@ -302,6 +302,25 @@ public class MoexDerivativeCodeService {
                 securityId;
     }
 
+    /**
+     * Return contracts group.
+     * For example for {@code MXI-6.21}, {@code MMM1}, {@code MXI-6.21M170621CA3000} and {@code MM3000BF1} returns "MM".
+     * Returns empty optional if argument is not futures or optional.
+     */
+    public Optional<String> getContractGroup(String contract) {
+        if (isFuturesShortname(contract) || isOptionShortname(contract)) {
+            String shortname = contract.substring(0, contract.indexOf('-'));
+            return Optional.ofNullable(shortnameToCodes.get(shortname));
+        } else if (isFuturesCode(contract) || isOptionCode(contract)) {
+            return Optional.of(contract.substring(0, 2));
+        }
+        return empty();
+    }
+
+    public Optional<String> codePrefixToShortnamePrefix(String codePrefix) {
+        return Optional.ofNullable(codeToShortnames.get(codePrefix));
+    }
+
     private static boolean isValidOptionTypeAndStrike(String code, int monthIdx) {
         int typeIdx = monthIdx - 1;
         char type = code.charAt(typeIdx);

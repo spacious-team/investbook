@@ -25,6 +25,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xddf.usermodel.chart.LegendPosition;
 import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
 import org.apache.poi.xddf.usermodel.chart.XDDFDataSource;
 import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
@@ -51,28 +52,29 @@ import java.util.function.UnaryOperator;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
+import static ru.investbook.report.ForeignExchangeRateService.RUB;
+import static ru.investbook.report.excel.DerivativesMarketTotalProfitExcelTableHeader.*;
 import static ru.investbook.report.excel.ExcelChartPlotHelper.*;
 import static ru.investbook.report.excel.ExcelConditionalFormatHelper.highlightNegativeByRed;
-import static ru.investbook.report.excel.PortfolioStatusExcelTableHeader.*;
 
 @Component
 @Slf4j
-public class PortfolioStatusExcelTableView extends ExcelTableView {
+public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
 
     @Getter
     private final boolean summaryView = true;
     @Getter
-    private final int sheetOrder = 1;
+    private final int sheetOrder = 2;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Портфель (" + portfolio + ")";
+    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Портфель трейдера (" + portfolio + ")";
 
     private final TransactionCashFlowRepository transactionCashFlowRepository;
-    private final Set<Integer> types = Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId());
+    private final Set<Integer> types = Set.of(CashFlowType.DERIVATIVE_PRICE.getId());
 
-    public PortfolioStatusExcelTableView(PortfolioRepository portfolioRepository,
-                                         PortfolioStatusExcelTableFactory tableFactory,
-                                         PortfolioConverter portfolioConverter,
-                                         TransactionCashFlowRepository transactionCashFlowRepository) {
+    public DerivativesMarketTotalProfitExcelTableView(PortfolioRepository portfolioRepository,
+                                                      DerivativesMarketTotalProfitExcelTableFactory tableFactory,
+                                                      PortfolioConverter portfolioConverter,
+                                                      TransactionCashFlowRepository transactionCashFlowRepository) {
         super(portfolioRepository, tableFactory, portfolioConverter);
         this.transactionCashFlowRepository = transactionCashFlowRepository;
     }
@@ -94,9 +96,10 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
             List<String> currencies = portfolios.isEmpty() ?
                     transactionCashFlowRepository.findDistinctCurrencyByPkTypeIn(types) :
                     transactionCashFlowRepository.findDistinctCurrencyByPkPortfolioAndPkTypeIn(portfolios, types);
+            if (!currencies.contains(RUB)) currencies.add(RUB);
             for (String currency : currencies) {
                 Table table = tableFactory.create(portfolios, currency);
-                String sheetName = "Портфель " + currency;
+                String sheetName = "Портфель трейдера " + currency;
                 tables.add(ExcelTable.of(sheetName, table, this));
             }
             return tables;
@@ -116,6 +119,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     protected Collection<ExcelTable> createExcelTables(Portfolio portfolio, String sheetName) {
         List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPkPortfolioAndPkTypeIn(
                 singleton(portfolio.getId()), types);
+        if (!currencies.contains(RUB)) currencies.add(RUB);
         return currencies.stream()
                 .map(currency -> createExcelTables(portfolio, sheetName, currency))
                 .collect(toList());
@@ -131,53 +135,25 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         for (TableHeader header : headerType.getEnumConstants()) {
-            sheet.setColumnWidth(header.ordinal(), 15 * 256);
+            sheet.setColumnWidth(header.ordinal(), 16 * 256);
         }
-        sheet.setColumnWidth(SECURITY.ordinal(), 45 * 256);
-        sheet.setColumnWidth(TYPE.ordinal(), 19 * 256);
-        sheet.setColumnHidden(TYPE.ordinal(), true);
-        sheet.setColumnWidth(FIRST_TRANSACTION_DATE.ordinal(), 12 * 256);
-        sheet.setColumnWidth(LAST_TRANSACTION_DATE.ordinal(), 12 * 256);
-        sheet.setColumnWidth(BUY_COUNT.ordinal(), 12 * 256);
-        sheet.setColumnWidth(CELL_COUNT.ordinal(), 12 * 256);
-        sheet.setColumnWidth(COUNT.ordinal(), 14 * 256);
-        sheet.setColumnWidth(AVERAGE_PRICE.ordinal(), 14 * 256);
-        sheet.setColumnWidth(AVERAGE_ACCRUED_INTEREST.ordinal(), 14 * 256);
-        sheet.setColumnWidth(COMMISSION.ordinal(), 12 * 256);
-        sheet.setColumnWidth(LAST_EVENT_DATE.ordinal(), 14 * 256);
-        sheet.setColumnWidth(AMORTIZATION.ordinal(), 16 * 256);
-        sheet.setColumnWidth(LAST_PRICE.ordinal(), 13 * 256);
-        sheet.setColumnWidth(LAST_ACCRUED_INTEREST.ordinal(), 13 * 256);
-        sheet.setColumnWidth(TAX.ordinal(), 19 * 256);
-        sheet.setColumnWidth(INTERNAL_RATE_OF_RETURN.ordinal(), (int) (12.5 * 256));
-        sheet.setColumnWidth(PROFIT_PROPORTION.ordinal(), 11 * 256);
-        sheet.setColumnWidth(INVESTMENT_PROPORTION.ordinal(), 11 * 256);
-        sheet.setColumnWidth(PROPORTION.ordinal(), 11 * 256);
+        sheet.setColumnWidth(CONTRACT_GROUP.ordinal(), 24 * 256);
+        sheet.setColumnWidth(GROSS_PROFIT_PNT.ordinal(), 19 * 256);
     }
 
     @Override
     protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
         Table.Record totalRow = Table.newRecord();
-        for (PortfolioStatusExcelTableHeader column : PortfolioStatusExcelTableHeader.values()) {
+        for (DerivativesMarketTotalProfitExcelTableHeader column : DerivativesMarketTotalProfitExcelTableHeader.values()) {
             totalRow.put(column, "=SUM(" + column.getRange(3, table.size() + 2) + ")");
         }
-        totalRow.put(SECURITY, "Итого:");
-        totalRow.put(COUNT, "=SUMPRODUCT(ABS(" + COUNT.getRange(3, table.size() + 2 - 1 /* without cash row */) + "))");
+        totalRow.put(CONTRACT_GROUP, "Итого:");
+        totalRow.put(COUNT, "=SUMPRODUCT(ABS(" + COUNT.getRange(3, table.size() + 2) + "))");
         totalRow.remove(FIRST_TRANSACTION_DATE);
         totalRow.remove(LAST_TRANSACTION_DATE);
         totalRow.remove(LAST_EVENT_DATE);
-        totalRow.remove(AVERAGE_PRICE);
-        totalRow.remove(AVERAGE_ACCRUED_INTEREST);
-        totalRow.remove(LAST_PRICE);
-        totalRow.remove(LAST_ACCRUED_INTEREST);
-        totalRow.remove(INTERNAL_RATE_OF_RETURN);
+        totalRow.remove(GROSS_PROFIT_PNT);
         return totalRow;
-    }
-
-    @Override
-    protected void sheetPreCreate(Sheet sheet, Table table) {
-        super.sheetPreCreate(sheet, table);
-        sheet.setZoom(82); // show all columns for 24 inch monitor for securities sheet
     }
 
     @Override
@@ -186,25 +162,16 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue;
             Cell cell;
-            if ((cell = row.getCell(SECURITY.ordinal())) != null) {
+            if ((cell = row.getCell(CONTRACT_GROUP.ordinal())) != null) {
                 cell.setCellStyle(styles.getLeftAlignedTextStyle());
             }
-            if ((cell = row.getCell(INTERNAL_RATE_OF_RETURN.ordinal())) != null) {
-                cell.setCellStyle(styles.getPercentStyle());
-            }
             if ((cell = row.getCell(PROFIT_PROPORTION.ordinal())) != null) {
-                cell.setCellStyle(styles.getPercentStyle());
-            }
-            if ((cell = row.getCell(INVESTMENT_PROPORTION.ordinal())) != null) {
-                cell.setCellStyle(styles.getPercentStyle());
-            }
-            if ((cell = row.getCell(PROPORTION.ordinal())) != null) {
                 cell.setCellStyle(styles.getPercentStyle());
             }
         }
         for (Cell cell : sheet.getRow(1)) {
             if (cell == null) continue;
-            if (cell.getColumnIndex() == SECURITY.ordinal()) {
+            if (cell.getColumnIndex() == CONTRACT_GROUP.ordinal()) {
                 cell.setCellStyle(styles.getTotalTextStyle());
             } else if (cell.getColumnIndex() == BUY_COUNT.ordinal()) {
                 cell.setCellStyle(styles.getIntStyle());
@@ -214,29 +181,25 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
                 cell.setCellStyle(styles.getIntStyle());
             } else if (cell.getColumnIndex() == PROFIT_PROPORTION.ordinal()) {
                 cell.setCellStyle(styles.getPercentStyle());
-            } else if (cell.getColumnIndex() == INVESTMENT_PROPORTION.ordinal()) {
-                cell.setCellStyle(styles.getPercentStyle());
-            } else if (cell.getColumnIndex() == PROPORTION.ordinal()) {
-                cell.setCellStyle(styles.getPercentStyle());
             } else {
                 cell.setCellStyle(styles.getTotalRowStyle());
             }
         }
         highlightNegativeByRed(sheet, PROFIT);
-        highlightNegativeByRed(sheet, INTERNAL_RATE_OF_RETURN);
-        plotChart("Состав портфеля", sheet, PortfolioStatusExcelTableView::addPieChart);
+        plotChart("Прибыль", sheet, DerivativesMarketTotalProfitExcelTableView::addPieChart);
     }
 
     private static void addPieChart(String name, XSSFSheet sheet) {
         int rowCount = sheet.getLastRowNum();
 
         XDDFDataSource<String> securities = XDDFDataSourcesFactory.fromStringCellRange(sheet,
-                nonEmptyCellRangeAddress(sheet,2, rowCount, SECURITY.ordinal(), SECURITY.ordinal()));
+                nonEmptyCellRangeAddress(sheet,2, rowCount, CONTRACT_GROUP.ordinal(), CONTRACT_GROUP.ordinal()));
         XDDFNumericalDataSource<Double> proportions = XDDFDataSourcesFactory.fromNumericCellRange(sheet,
-                nonEmptyCellRangeAddress(sheet,2, rowCount, PROPORTION.ordinal(), PROPORTION.ordinal()));
+                nonEmptyCellRangeAddress(sheet,2, rowCount, PROFIT_PROPORTION.ordinal(), PROFIT_PROPORTION.ordinal()));
 
-        XSSFChart chart = createChart(sheet, name, 0, rowCount + 2, PROPORTION.ordinal() + 1, 36);
+        XSSFChart chart = createChart(sheet, name, 0, rowCount + 2, PROFIT_PROPORTION.ordinal() + 1, 30);
         XDDFChartData data = createPieChartData(chart);
+        chart.getOrAddLegend().setPosition(LegendPosition.TOP);
 
         data.addSeries(securities, proportions);
         chart.plot(data);

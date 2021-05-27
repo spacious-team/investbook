@@ -243,7 +243,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     .map(PositionHistory::getInstant)
                     .orElse(null));
             if (securityType != CURRENCY_PAIR) {
-                row.put(LAST_EVENT_DATE, getLastEventDate(portfolios, security, filter)
+                row.put(LAST_EVENT_DATE, getLastEvent(portfolios, security, filter)
                         .map(SecurityEventCashFlowEntity::getTimestamp)
                         .orElse(null));
             }
@@ -337,7 +337,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         return row;
     }
 
-    private Optional<SecurityEventCashFlowEntity> getLastEventDate(Collection<String> portfolios, Security security, ViewFilter filter) {
+    private Optional<SecurityEventCashFlowEntity> getLastEvent(Collection<String> portfolios, Security security, ViewFilter filter) {
         return portfolios.isEmpty() ?
                 securityEventCashFlowRepository
                         .findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(

@@ -42,7 +42,7 @@ public class PortfolioPaymentExcelTableView extends ExcelTableView {
     @Getter
     private final boolean summaryView = false;
     @Getter
-    private final int sheetOrder = 2;
+    private final int sheetOrder = 3;
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (выплаты)";
 

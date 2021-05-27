@@ -42,7 +42,7 @@ public class CommissionExcelTableView extends ExcelTableView {
     @Getter
     private final boolean summaryView = false;
     @Getter
-    private final int sheetOrder = 10;
+    private final int sheetOrder = 11;
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> "Комиссия (" + portfolio + ")";
 
