@@ -50,6 +50,7 @@ import java.util.function.UnaryOperator;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
 import static ru.investbook.report.excel.ExcelChartPlotHelper.*;
 import static ru.investbook.report.excel.ExcelConditionalFormatHelper.highlightNegativeByRed;
 import static ru.investbook.report.excel.PortfolioStatusExcelTableHeader.*;
@@ -115,13 +116,15 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     protected Collection<ExcelTable> createExcelTables(Portfolio portfolio, String sheetName) {
         List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPkPortfolioAndPkTypeIn(
                 singleton(portfolio.getId()), types);
-        Collection<ExcelTable> tables = new ArrayList<>(currencies.size());
-        for (String currency : currencies) {
-            Table table = tableFactory.create(portfolio, currency);
-            String sheetNameWithCurrency = sheetName + " " + currency;
-            tables.add(ExcelTable.of(portfolio, sheetNameWithCurrency, table, this));
-        }
-        return tables;
+        return currencies.stream()
+                .map(currency -> createExcelTables(portfolio, sheetName, currency))
+                .collect(toList());
+    }
+
+    private ExcelTable createExcelTables(Portfolio portfolio, String sheetName, String currency) {
+        Table table = tableFactory.create(portfolio, currency);
+        String sheetNameWithCurrency = sheetName + " " + currency;
+        return ExcelTable.of(portfolio, sheetNameWithCurrency, table, this);
     }
 
     @Override

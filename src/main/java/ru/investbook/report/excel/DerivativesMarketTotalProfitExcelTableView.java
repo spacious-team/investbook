@@ -51,6 +51,7 @@ import java.util.function.UnaryOperator;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 import static ru.investbook.report.excel.DerivativesMarketTotalProfitExcelTableHeader.*;
 import static ru.investbook.report.excel.ExcelChartPlotHelper.*;
@@ -65,7 +66,7 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
     @Getter
     private final int sheetOrder = 2;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Срочный обзорно (" + portfolio + ")";
+    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Портфель трейдера (" + portfolio + ")";
 
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final Set<Integer> types = Set.of(CashFlowType.DERIVATIVE_PRICE.getId());
@@ -98,7 +99,7 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
             if (!currencies.contains(RUB)) currencies.add(RUB);
             for (String currency : currencies) {
                 Table table = tableFactory.create(portfolios, currency);
-                String sheetName = "Срочный обзорно " + currency;
+                String sheetName = "Портфель трейдера " + currency;
                 tables.add(ExcelTable.of(sheetName, table, this));
             }
             return tables;
@@ -119,13 +120,15 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
         List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPkPortfolioAndPkTypeIn(
                 singleton(portfolio.getId()), types);
         if (!currencies.contains(RUB)) currencies.add(RUB);
-        Collection<ExcelTable> tables = new ArrayList<>(currencies.size());
-        for (String currency : currencies) {
-            Table table = tableFactory.create(portfolio, currency);
-            String sheetNameWithCurrency = sheetName + " " + currency;
-            tables.add(ExcelTable.of(portfolio, sheetNameWithCurrency, table, this));
-        }
-        return tables;
+        return currencies.stream()
+                .map(currency -> createExcelTables(portfolio, sheetName, currency))
+                .collect(toList());
+    }
+
+    private ExcelTable createExcelTables(Portfolio portfolio, String sheetName, String currency) {
+        Table table = tableFactory.create(portfolio, currency);
+        String sheetNameWithCurrency = sheetName + " " + currency;
+        return ExcelTable.of(portfolio, sheetNameWithCurrency, table, this);
     }
 
     @Override
