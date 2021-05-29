@@ -316,7 +316,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         row.put(GROSS_PROFIT, getGrossProfit(portfolios, security, positions, toCurrency));
                     }
                 }
-                if (securityType == STOCK_OR_BOND || securityType == CURRENCY_PAIR) {
+                if (securityType == STOCK_OR_BOND) {
                     row.put(INVESTMENT_PROPORTION, INVESTMENT_PROPORTION_FORMULA);
                     row.put(PROPORTION, PROPORTION_FORMULA);
                 }
