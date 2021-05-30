@@ -98,7 +98,9 @@ CREATE TABLE IF NOT EXISTS `security` (
 
 -- Дамп структуры для таблица portfolio.security_description
 -- Нужно проверить наличие issuer.id, может отсутствовать для БД < 2021.5. На колонку создается ссылка.
-ALTER TABLE `issuer` ADD COLUMN IF NOT EXISTS `id` int(11) NOT NULL AUTO_INCREMENT FIRST;
+ALTER TABLE `security` DROP CONSTRAINT IF EXISTS `security_issuer_inn_fkey`;
+ALTER TABLE `issuer` DROP PRIMARY KEY;
+ALTER TABLE `issuer` ADD COLUMN IF NOT EXISTS `id` int(11) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT FIRST;
 CREATE TABLE IF NOT EXISTS `security_description` (
     `security` varchar(64) NOT NULL COMMENT 'Идентификатор ценной бумаги',
     `sector` varchar(32) DEFAULT NULL COMMENT 'Сектор экономики (применимо только для акций)',
