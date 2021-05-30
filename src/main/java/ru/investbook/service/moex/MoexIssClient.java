@@ -26,6 +26,8 @@ public interface MoexIssClient {
 
     Optional<String> getSecId(String isinOrContractName);
 
+    Optional<String> getIsin(String secId);
+
     Optional<MoexMarketDescription> getMarket(String moexSecId);
 
     Optional<SecurityQuote> getQuote(String moexSecId, MoexMarketDescription market);
