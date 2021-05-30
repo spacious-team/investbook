@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `security_event_cash_flow_timestamp_security_type_portfolio_uniq` (`timestamp`,`security`,`type`,`portfolio`),
   KEY `security_event_cash_flow_type_ix` (`type`),
-  KEY `security_event_cash_flow_ticker_ix` (`security`),
+  KEY `security_event_cash_flow_security_ix` (`security`),
   KEY `security_event_cash_flow_portfolio_ix` (`portfolio`),
   CONSTRAINT `security_event_cash_flow_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `security_event_cash_flow_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS `security_quote` (
   `currency` char(3) DEFAULT NULL COMMENT 'Код валюты (опционально)',
   PRIMARY KEY (`id`),
   UNIQUE KEY `security_quote_security_timestamp_uniq_ix` (`security`, `timestamp`),
-  KEY `security_quote_security_fkey` (`security`),
+  KEY `security_quote_security_ix` (`security`),
   CONSTRAINT `security_quote_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Котировка (цена) финансовых инструментов';
 
@@ -174,7 +174,7 @@ CREATE TABLE IF NOT EXISTS `transaction_cash_flow` (
   `value` decimal(12,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
   PRIMARY KEY (`transaction_id`,`portfolio`,`type`),
-  KEY `transaction_cash_flow_type_key` (`type`),
+  KEY `transaction_cash_flow_type_ix` (`type`),
   KEY `transaction_cash_flow_transaction_id_ix` (`transaction_id`),
   KEY `transaction_cash_flow_portfolio_ix` (`portfolio`),
   CONSTRAINT `transaction_cash_flow_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
