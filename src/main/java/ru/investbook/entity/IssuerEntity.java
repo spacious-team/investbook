@@ -19,10 +19,11 @@
 package ru.investbook.entity;
 
 import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -31,10 +32,14 @@ import javax.persistence.Table;
 @Data
 public class IssuerEntity {
     @Id
-    @Column(name = "inn")
-    private long inn;
+    @GenericGenerator(name = "UseExistingOrGenerateIdGenerator", strategy = "ru.investbook.entity.UseExistingOrGenerateIdGenerator")
+    @GeneratedValue(generator = "UseExistingOrGenerateIdGenerator")
+    @Column(name = "id")
+    private Integer id;
 
-    @Basic
-    @Column(name = "name")
+    @Column(name = "taxpayer_id")
+    private Long taxpayerId;
+
+    @Column(name = "name", nullable = false)
     private String name;
 }

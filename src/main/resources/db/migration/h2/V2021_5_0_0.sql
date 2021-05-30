@@ -16,11 +16,49 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+-- rename wrong named indices
+ALTER INDEX IF EXISTS
+	`security_event_cash_flow_ticker_ix` RENAME TO `security_event_cash_flow_security_ix`;
+
 ALTER INDEX IF EXISTS
 	`security_quote_security_fkey` RENAME TO `security_quote_security_ix`;
 
 ALTER INDEX IF EXISTS
 	`transaction_cash_flow_type_key` RENAME TO `transaction_cash_flow_type_ix`;
 
-ALTER INDEX IF EXISTS
-	`security_event_cash_flow_ticker_ix` RENAME TO `security_event_cash_flow_security_ix`;
+-- change schema to 2021.5
+ALTER TABLE `security`
+    DROP CONSTRAINT IF EXISTS `security_issuer_inn_ix`;
+ALTER TABLE `security`
+    DROP CONSTRAINT IF EXISTS `security_issuer_inn_fkey`;
+ALTER TABLE `security`
+    DROP COLUMN IF EXISTS `issuer_inn`;
+ALTER TABLE `security`
+    ADD COLUMN IF NOT EXISTS `isin` char(12) DEFAULT NULL COMMENT 'ISIN' AFTER id;
+
+ALTER TABLE `issuer`
+    ADD COLUMN IF NOT EXISTS `id` int(11) NOT NULL AUTO_INCREMENT FIRST;
+ALTER TABLE `issuer`
+    DROP COLUMN IF EXISTS `inn`;
+ALTER TABLE `issuer`
+    ADD COLUMN IF NOT EXISTS
+    `taxpayer_id` varchar(16) DEFAULT NULL COMMENT 'Идентификатор налогоплательщика (Россия - ИНН, США - EIN и т.д.)'
+    AFTER `id`;
+
+-- DROP TABLE IF EXISTS `issuer`;
+-- CREATE TABLE IF NOT EXISTS `issuer` (
+--     `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+--     `taxpayer_id` varchar(16) DEFAULT NULL COMMENT 'Идентификатор налогоплательщика (Россия - ИНН, США - EIN и т.д.)',
+--     `name` varchar(100) NOT NULL COMMENT 'Наименование',
+--     PRIMARY KEY (`id`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Эмитенты';
+--
+-- CREATE TABLE IF NOT EXISTS `security_description` (
+--     `security` varchar(64) NOT NULL COMMENT 'Идентификатор ценной бумаги',
+--     `sector` varchar(32) DEFAULT NULL COMMENT 'Сектор экономики (применимо только для акций)',
+--     `issuer` int(10) unsigned DEFAULT NULL COMMENT 'Эмитент',
+--     PRIMARY KEY (`security`),
+--     KEY `security_description_issuer_ix` (`issuer`),
+--     CONSTRAINT `security_description_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE,
+--     CONSTRAINT `security_description_issuer_fkey` FOREIGN KEY (`issuer`) REFERENCES `issuer` (`id`) ON UPDATE CASCADE
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Расширенная информация по ценным бумагам';

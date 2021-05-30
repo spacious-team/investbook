@@ -16,31 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.entity;
+package ru.investbook.repository;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.springframework.data.jpa.repository.JpaRepository;
+import ru.investbook.entity.SecurityDescriptionEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-@Entity
-@Table(name = "security")
-@Data
-@EqualsAndHashCode(of = "id")
-public class SecurityEntity {
-    @Id
-    @Column(name = "id")
-    private String id;
-
-    @Column(name = "isin")
-    private String isin;
-
-    @Column(name = "ticker")
-    private String ticker;
-
-    @Column(name = "name")
-    private String name;
+public interface SecurityDescriptionRepository extends JpaRepository<SecurityDescriptionEntity, String> {
 }

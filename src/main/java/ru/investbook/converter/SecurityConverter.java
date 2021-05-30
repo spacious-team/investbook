@@ -21,7 +21,6 @@ package ru.investbook.converter;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.Security;
 import org.springframework.stereotype.Component;
-import ru.investbook.entity.IssuerEntity;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.IssuerRepository;
 
@@ -33,17 +32,11 @@ public class SecurityConverter implements EntityConverter<SecurityEntity, Securi
 
     @Override
     public SecurityEntity toEntity(Security security) {
-        IssuerEntity issuerEntity = null;
-        if (security.getInn() != null) {
-            issuerEntity = issuerRepository.findByInn(security.getInn())
-                    .orElseThrow(() -> new IllegalArgumentException("Эмитент с ИНН не найден: " + security.getInn()));
-        }
-
         SecurityEntity entity = new SecurityEntity();
+        entity.setId(security.getId());
+        entity.setIsin(security.getIsin());
         entity.setTicker(security.getTicker());
         entity.setName(security.getName());
-        entity.setId(security.getId());
-        entity.setIssuer(issuerEntity);
         return entity;
     }
 
@@ -51,9 +44,9 @@ public class SecurityConverter implements EntityConverter<SecurityEntity, Securi
     public Security fromEntity(SecurityEntity entity) {
         return Security.builder()
                 .id(entity.getId())
+                .isin(entity.getIsin())
                 .ticker(entity.getTicker())
                 .name(entity.getName())
-                .inn((entity.getIssuer() != null) ? entity.getIssuer().getInn() : null)
                 .build();
     }
 }

@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
--- fix V2020_13_0_0.sql run after schema.sql update on 2021.5. May be removed if base version changed to >= 2021.5
-ALTER TABLE `security_quote`
-    ADD KEY IF NOT EXISTS `security_quote_security_fkey` (`security`);
-ALTER TABLE `security_quote`
-    DROP KEY IF EXISTS `security_quote_security_ix`;
+-- Исправляет проблему запуска патча V2020_13_0_0.sql поверх schema.sql из версии 2021.5
+-- Можно убрать для flyway.baseline-version >= 2021.5
+-- ALTER TABLE `security_quote`
+--     ADD KEY IF NOT EXISTS `security_quote_security_fkey` (`security`);
+-- ALTER TABLE `security_quote`
+--     DROP KEY IF EXISTS `security_quote_security_ix`;
