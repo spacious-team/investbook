@@ -117,6 +117,14 @@ CREATE TABLE IF NOT EXISTS `security` (
   CONSTRAINT `security_issuer_inn_fkey` FOREIGN KEY (`issuer_inn`) REFERENCES `issuer` (`inn`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Общая информация по ценным бумагам';
 
+-- Дамп структуры для таблица portfolio.security_description
+CREATE TABLE IF NOT EXISTS `security_description` (
+    `security` varchar(64) NOT NULL COMMENT 'Идентификатор ценной бумаги',
+    `sector` varchar(32) DEFAULT NULL COMMENT 'Сектор экономики (применимо только для акций)',
+    PRIMARY KEY (`security`),
+    CONSTRAINT `security_description_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Расширенная информация по ценным бумагам';
+
 -- Дамп структуры для таблица portfolio.security_event_cash_flow
 CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
