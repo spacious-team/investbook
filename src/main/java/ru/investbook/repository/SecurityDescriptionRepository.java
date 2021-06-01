@@ -19,7 +19,31 @@
 package ru.investbook.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.SecurityDescriptionEntity;
 
+
+
+@Transactional(readOnly = true)
 public interface SecurityDescriptionRepository extends JpaRepository<SecurityDescriptionEntity, String> {
+
+    @Transactional
+    default void createOrUpdateSector(String securityId, String sector) {
+        findById(securityId)
+                .ifPresentOrElse(
+                        $ -> updateSector(securityId, sector),
+                        () -> {
+                            var entity = new SecurityDescriptionEntity();
+                            entity.setSecurity(securityId);
+                            entity.setSector(sector);
+                            save(entity);
+                        });
+    }
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE SecurityDescriptionEntity SET sector = :sector WHERE security = :securityId")
+    int updateSector(String securityId, String sector);
 }
