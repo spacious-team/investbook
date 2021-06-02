@@ -30,7 +30,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -56,10 +55,6 @@ public interface SecurityProfitService {
     BigDecimal getTotal(Deque<Transaction> transactions, CashFlowType type, String toCurrency);
 
     BigDecimal sumPaymentsForType(Collection<String> portfolios, Security security, CashFlowType cashFlowType, String toCurrency);
-
-    List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
-                                                                       String securityId,
-                                                                       CashFlowType cashFlowType);
 
     /**
      * Возвращает для портфеля последний известный остаток денежных средств соответствующей дате, не позже указанной.

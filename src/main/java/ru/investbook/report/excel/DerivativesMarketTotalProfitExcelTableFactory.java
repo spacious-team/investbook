@@ -22,8 +22,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
+import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.FifoPositionsFactory;
@@ -65,6 +67,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     private static final String PROFIT_PROPORTION_FORMULA = getProfitProportionFormula();
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
+    private final SecurityConverter securityConverter;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final FifoPositionsFactory positionsFactory;
@@ -116,11 +119,11 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
                 .collect(toCollection(LinkedHashSet::new));
     }
 
-    private Set<String> getContracts(String contractGroup) {
+    private Set<Security> getContracts(String contractGroup) {
         return securityRepository.findAll()
                 .stream()
                 .filter(security -> belongsToContractGroup(security, contractGroup))
-                .map(SecurityEntity::getId)
+                .map(securityConverter::fromEntity)
                 .collect(toSet());
     }
 
@@ -133,7 +136,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     private Table.Record getSecurityStatus(Collection<String> portfolios, String contractGroup, String toCurrency) {
         Table.Record row = new Table.Record();
         try {
-            Set<String> contracts = getContracts(contractGroup);
+            Set<Security> contracts = getContracts(contractGroup);
             Deque<Transaction> transactions = getTransactions(portfolios, contracts);
 
             row.put(CONTRACT_GROUP, moexDerivativeCodeService.codePrefixToShortnamePrefix(contractGroup)
@@ -174,19 +177,19 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
         return row;
     }
 
-    private Deque<Transaction> getTransactions(Collection<String> portfolios, Set<String> contracts) {
+    private Deque<Transaction> getTransactions(Collection<String> portfolios, Set<Security> contracts) {
         ViewFilter filter = ViewFilter.get();
         return contracts.stream()
-                .map(contract -> positionsFactory.getTransactions(portfolios, contract, filter))
+                .map(contract -> positionsFactory.getTransactions(portfolios, contract.getId(), filter))
                 .flatMap(Collection::stream)
                 .sorted(Comparator.comparing(Transaction::getTimestamp))
                 .collect(toCollection(LinkedList::new));
     }
 
-    private Instant getLastEventDate(Collection<String> portfolios, Collection<String> contracts) {
+    private Instant getLastEventDate(Collection<String> portfolios, Collection<Security> contracts) {
         ViewFilter filter = ViewFilter.get();
         return contracts.stream()
-                .map(contract -> getLastEventDate(portfolios, contract, filter))
+                .map(contract -> getLastEventDate(portfolios, contract.getId(), filter))
                 .flatMap(Optional::stream)
                 .map(SecurityEventCashFlowEntity::getTimestamp)
                 .max(Comparator.naturalOrder())
@@ -207,7 +210,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     /**
      * Cуммарная вариационная маржа по всем контрактам
      */
-    private BigDecimal getGrossProfit(Collection<String> portfolios, Collection<String> contracts, String toCurrency) {
+    private BigDecimal getGrossProfit(Collection<String> portfolios, Collection<Security> contracts, String toCurrency) {
         return contracts.stream()
                 .map(contract -> sumDerivativeProfitPayments(portfolios, contract, toCurrency))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -228,11 +231,8 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
                 .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency));
     }
 
-    private BigDecimal sumDerivativeProfitPayments(Collection<String> portfolios, String contract, String toCurrency) {
-        return securityProfitService.getSecurityEventCashFlowEntities(portfolios, contract, DERIVATIVE_PROFIT)
-                .stream()
-                .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    private BigDecimal sumDerivativeProfitPayments(Collection<String> portfolios, Security contract, String toCurrency) {
+        return securityProfitService.sumPaymentsForType(portfolios, contract, DERIVATIVE_PROFIT, toCurrency);
     }
 
     private BigDecimal convertToCurrency(BigDecimal value, String fromCurrency, String toCurrency) {
