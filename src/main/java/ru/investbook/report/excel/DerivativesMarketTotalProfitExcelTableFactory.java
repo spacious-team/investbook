@@ -189,22 +189,11 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     private Instant getLastEventDate(Collection<String> portfolios, Collection<Security> contracts) {
         ViewFilter filter = ViewFilter.get();
         return contracts.stream()
-                .map(contract -> getLastEventDate(portfolios, contract.getId(), filter))
+                .map(contract -> securityProfitService.getLastEvent(portfolios, contract, paymentEvents, filter))
                 .flatMap(Optional::stream)
                 .map(SecurityEventCashFlowEntity::getTimestamp)
                 .max(Comparator.naturalOrder())
                 .orElse(null);
-    }
-
-    private Optional<SecurityEventCashFlowEntity> getLastEventDate(Collection<String> portfolios,
-                                                                   String contract, ViewFilter filter) {
-        return portfolios.isEmpty() ?
-                securityEventCashFlowRepository
-                        .findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                contract, paymentEvents, filter.getFromDate(), filter.getToDate()) :
-                securityEventCashFlowRepository
-                        .findFirstByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                portfolios, contract, paymentEvents, filter.getFromDate(), filter.getToDate());
     }
 
     /**
@@ -212,7 +201,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
      */
     private BigDecimal getGrossProfit(Collection<String> portfolios, Collection<Security> contracts, String toCurrency) {
         return contracts.stream()
-                .map(contract -> sumDerivativeProfitPayments(portfolios, contract, toCurrency))
+                .map(contract -> securityProfitService.sumPaymentsForType(portfolios, contract, DERIVATIVE_PROFIT, toCurrency))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -229,10 +218,6 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
         return transactionCashFlowRepository
                 .findByPkPortfolioAndPkTransactionIdAndPkType(t.getPortfolio(), t.getId(), type.getId())
                 .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency));
-    }
-
-    private BigDecimal sumDerivativeProfitPayments(Collection<String> portfolios, Security contract, String toCurrency) {
-        return securityProfitService.sumPaymentsForType(portfolios, contract, DERIVATIVE_PROFIT, toCurrency);
     }
 
     private BigDecimal convertToCurrency(BigDecimal value, String fromCurrency, String toCurrency) {
