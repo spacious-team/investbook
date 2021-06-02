@@ -24,7 +24,6 @@ import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
@@ -34,24 +33,19 @@ import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioPropertyConverter;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.converter.SecurityQuoteConverter;
-import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
-import ru.investbook.report.ClosedPosition;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.report.InternalRateOfReturn;
-import ru.investbook.report.OpenedPosition;
 import ru.investbook.report.PositionHistory;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
 import ru.investbook.report.ViewFilter;
-import ru.investbook.repository.PortfolioPropertyRepository;
-import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityQuoteRepository;
 import ru.investbook.repository.SecurityRepository;
-import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
+import ru.investbook.service.SecurityProfitService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -61,11 +55,8 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Deque;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.singleton;
 import static java.util.Optional.ofNullable;
@@ -86,15 +77,13 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     private static final String PROPORTION_FORMULA = getProportionFormula();
     protected final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
-    private final TransactionCashFlowRepository transactionCashFlowRepository;
-    private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityQuoteRepository securityQuoteRepository;
     private final SecurityQuoteConverter securityQuoteConverter;
     private final SecurityConverter securityConverter;
     protected final PortfolioPropertyConverter portfolioPropertyConverter;
     private final FifoPositionsFactory positionsFactory;
     private final ForeignExchangeRateService foreignExchangeRateService;
-    protected final PortfolioPropertyRepository portfolioPropertyRepository;
+    private final SecurityProfitService securityProfitService;
     private final InternalRateOfReturn internalRateOfReturn;
     private final Instant instantOf2000_01_01 = LocalDate.of(2000, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant();
     private final Set<Integer> paymentEvents = Set.of(
@@ -182,7 +171,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 ViewFilter.get().getToDate().getEpochSecond(),
                 Instant.now().getEpochSecond()));
         row.put(SECURITY, "Остаток денежных средств, " + forCurrency.toLowerCase());
-        Collection<PortfolioProperty> portfolioCashes = getPortfolioCash(portfolios, atTime);
+        Collection<PortfolioProperty> portfolioCashes = securityProfitService.getPortfolioCash(portfolios, atTime);
         row.put(LAST_EVENT_DATE, portfolioCashes.stream()
                 .map(PortfolioProperty::getTimestamp)
                 .reduce((t1, t2) -> t1.isAfter(t2) ? t1 : t2)
@@ -243,7 +232,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     .map(PositionHistory::getInstant)
                     .orElse(null));
             if (securityType != CURRENCY_PAIR) {
-                row.put(LAST_EVENT_DATE, getLastEvent(portfolios, security, filter)
+                row.put(LAST_EVENT_DATE, securityProfitService.getLastEvent(portfolios, security, paymentEvents, filter)
                         .map(SecurityEventCashFlowEntity::getTimestamp)
                         .orElse(null));
             }
@@ -266,13 +255,13 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             int count = positions.getCurrentOpenedPositionsCount();
             row.put(COUNT, count);
             if (count == 0) {
-                row.put(GROSS_PROFIT, "=" + getGrossProfit(portfolios, security, positions, toCurrency) +
+                row.put(GROSS_PROFIT, "=" + securityProfitService.getGrossProfit(portfolios, security, positions, toCurrency) +
                         ((securityType == STOCK_OR_BOND) ? ("+" + AMORTIZATION.getCellAddr()) : ""));
             } else {
-                row.put(AVERAGE_PRICE, getPurchaseCost(security, positions, toCurrency)
+                row.put(AVERAGE_PRICE, securityProfitService.getPurchaseCost(security, positions, toCurrency)
                         .abs()
                         .divide(BigDecimal.valueOf(Math.max(1, Math.abs(count))), 6, RoundingMode.CEILING));
-                row.put(AVERAGE_ACCRUED_INTEREST, getPurchaseAccruedInterest(security, positions, toCurrency)
+                row.put(AVERAGE_ACCRUED_INTEREST, securityProfitService.getPurchaseAccruedInterest(security, positions, toCurrency)
                         .abs()
                         .divide(BigDecimal.valueOf(Math.max(1, Math.abs(count))), 6, RoundingMode.CEILING));
 
@@ -313,7 +302,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     if (row.containsKey(LAST_PRICE) && row.containsKey(AVERAGE_PRICE)) {
                         row.put(GROSS_PROFIT, DERIVATIVE_GROSS_PROFIT_FORMULA);
                     } else {
-                        row.put(GROSS_PROFIT, getGrossProfit(portfolios, security, positions, toCurrency));
+                        row.put(GROSS_PROFIT, securityProfitService.getGrossProfit(portfolios, security, positions, toCurrency));
                     }
                 }
                 if (securityType == STOCK_OR_BOND) {
@@ -321,12 +310,12 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     row.put(PROPORTION, PROPORTION_FORMULA);
                 }
             }
-            row.put(COMMISSION, getTotal(positions.getTransactions(), CashFlowType.COMMISSION, toCurrency).abs());
+            row.put(COMMISSION, securityProfitService.getTotal(positions.getTransactions(), CashFlowType.COMMISSION, toCurrency).abs());
             if (securityType == STOCK_OR_BOND) {
-                row.put(COUPON, sumPaymentsForType(portfolios, security, CashFlowType.COUPON, toCurrency));
-                row.put(AMORTIZATION, sumPaymentsForType(portfolios, security, CashFlowType.AMORTIZATION, toCurrency));
-                row.put(DIVIDEND, sumPaymentsForType(portfolios, security, CashFlowType.DIVIDEND, toCurrency));
-                row.put(TAX, sumPaymentsForType(portfolios, security, CashFlowType.TAX, toCurrency).abs());
+                row.put(COUPON, securityProfitService.sumPaymentsForType(portfolios, security, CashFlowType.COUPON, toCurrency));
+                row.put(AMORTIZATION, securityProfitService.sumPaymentsForType(portfolios, security, CashFlowType.AMORTIZATION, toCurrency));
+                row.put(DIVIDEND, securityProfitService.sumPaymentsForType(portfolios, security, CashFlowType.DIVIDEND, toCurrency));
+                row.put(TAX, securityProfitService.sumPaymentsForType(portfolios, security, CashFlowType.TAX, toCurrency).abs());
             }
             row.put(PROFIT, PROFIT_FORMULA);
             row.put(INTERNAL_RATE_OF_RETURN, internalRateOfReturn.calc(portfolios, security, quote, filter));
@@ -335,178 +324,6 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             log.error("Ошибка при формировании агрегированных данных по бумаге {}", security, e);
         }
         return row;
-    }
-
-    private Optional<SecurityEventCashFlowEntity> getLastEvent(Collection<String> portfolios, Security security, ViewFilter filter) {
-        return portfolios.isEmpty() ?
-                securityEventCashFlowRepository
-                        .findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                security.getId(), paymentEvents, filter.getFromDate(), filter.getToDate()) :
-                securityEventCashFlowRepository
-                        .findFirstByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                portfolios, security.getId(), paymentEvents, filter.getFromDate(), filter.getToDate());
-
-    }
-
-    /**
-     * Курсовой доход с купли-продажи (для деривативов - суммарная вариационная маржа)
-     */
-    private BigDecimal getGrossProfit(Collection<String> portfolios, Security security, FifoPositions positions, String toCurrency) {
-        SecurityType securityType = getSecurityType(security);
-        return switch (securityType) {
-            case STOCK_OR_BOND -> getPurchaseCost(security, positions, toCurrency)
-                    .add(getPurchaseAccruedInterest(security, positions, toCurrency));
-            case DERIVATIVE -> sumPaymentsForType(portfolios, security, CashFlowType.DERIVATIVE_PROFIT, toCurrency);
-            case CURRENCY_PAIR -> getPurchaseCost(security, positions, toCurrency);
-        };
-    }
-
-    /**
-     * Разница доходов с продажи и расходов на покупку
-     */
-    private BigDecimal getPurchaseCost(Security security, FifoPositions positions, String toCurrency) {
-        SecurityType securityType = getSecurityType(security);
-        return switch (securityType) {
-            case STOCK_OR_BOND -> getStockOrBondPurchaseCost(positions, toCurrency);
-            case DERIVATIVE -> getTotal(positions.getTransactions(), CashFlowType.DERIVATIVE_PRICE, toCurrency);
-            case CURRENCY_PAIR -> getTotal(positions.getTransactions(), CashFlowType.PRICE, toCurrency);
-        };
-    }
-
-    /**
-     * Разница цен продаж и покупок. Не учитывается цена покупки, если ЦБ выведена со счета, не учитывается цена
-     * продажи, если ЦБ введена на счет
-     */
-    private BigDecimal getStockOrBondPurchaseCost(FifoPositions positions, String toCurrency) {
-        BigDecimal purchaseCost = positions.getOpenedPositions()
-                .stream()
-                .map(openPosition -> getTransactionValue(openPosition.getOpenTransaction(), CashFlowType.PRICE, toCurrency)
-                        .map(value -> value.multiply(getOpenAmountMultiplier(openPosition))))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .reduce(BigDecimal.ZERO, BigDecimal::add); // если ценная бумага не вводилась на счет, а была куплена (есть цена покупки)
-        for (ClosedPosition closedPosition : positions.getClosedPositions()) {
-            BigDecimal openPrice = getTransactionValue(closedPosition.getOpenTransaction(), CashFlowType.PRICE, toCurrency)
-                    .map(value -> value.multiply(getOpenAmountMultiplier(closedPosition)))
-                    .orElse(null);
-            BigDecimal closePrice = getTransactionValue(closedPosition.getCloseTransaction(), CashFlowType.PRICE, toCurrency)
-                    .map(value -> value.multiply(getClosedAmountMultiplier(closedPosition)))
-                    // redemption closing price will be taken into account later
-                    .orElseGet(() -> (closedPosition.getClosingEvent() == CashFlowType.REDEMPTION) ? BigDecimal.ZERO : null);
-            if (openPrice != null && closePrice != null) {
-                // если ценная бумага не вводилась и не выводилась со счета, а была куплена и продана
-                // (есть цены покупки и продажи)
-                purchaseCost = purchaseCost.add(openPrice).add(closePrice);
-            }
-        }
-        return positions.getRedemptions()
-                .stream()
-                .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency))
-                .map(BigDecimal::abs)
-                .reduce(purchaseCost, BigDecimal::add);
-    }
-
-    /**
-     * Разница проданного и купленного НКД
-     */
-    private BigDecimal getPurchaseAccruedInterest(Security security, FifoPositions positions, String toCurrency) {
-        if (getSecurityType(security) == STOCK_OR_BOND) {
-            return getTotal(positions.getTransactions(), CashFlowType.ACCRUED_INTEREST, toCurrency);
-        }
-        return BigDecimal.ZERO;
-    }
-
-    private BigDecimal getTotal(Deque<Transaction> transactions, CashFlowType type, String toCurrency) {
-        return transactions.stream()
-                .filter(t -> t.getId() != null && t.getCount() != 0)
-                .map(t -> getTransactionValue(t, type, toCurrency))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    private Optional<BigDecimal> getTransactionValue(Transaction t, CashFlowType type, String toCurrency) {
-        if (t.getId() == null) { // redemption
-            return Optional.empty();
-        }
-        return transactionCashFlowRepository
-                .findByPkPortfolioAndPkTransactionIdAndPkType(t.getPortfolio(), t.getId(), type.getId())
-                .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency));
-    }
-
-    private BigDecimal getOpenAmountMultiplier(OpenedPosition openedPosition) {
-        int positionCount = Math.abs(openedPosition.getCount());
-        int transactionCount = Math.abs(openedPosition.getOpenTransaction().getCount());
-        if (positionCount == transactionCount) {
-            return BigDecimal.ONE;
-        } else {
-            return BigDecimal.valueOf(positionCount)
-                    .divide(BigDecimal.valueOf(transactionCount), 6, RoundingMode.HALF_UP);
-        }
-    }
-
-    private BigDecimal getClosedAmountMultiplier(ClosedPosition closedPosition) {
-        int positionCount = Math.abs(closedPosition.getCount());
-        int transactionCount = Math.abs(closedPosition.getCloseTransaction().getCount());
-        if (positionCount == transactionCount) {
-            return BigDecimal.ONE;
-        } else {
-            return BigDecimal.valueOf(positionCount)
-                    .divide(BigDecimal.valueOf(transactionCount), 6, RoundingMode.HALF_UP);
-        }
-    }
-
-    private BigDecimal sumPaymentsForType(Collection<String> portfolios, Security security, CashFlowType cashFlowType, String toCurrency) {
-        return getSecurityEventCashFlowEntities(portfolios, security, cashFlowType)
-                .stream()
-                .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    public List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
-                                                                              Security security,
-                                                                              CashFlowType cashFlowType) {
-        return portfolios.isEmpty() ?
-                securityEventCashFlowRepository
-                        .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                security.getId(),
-                                cashFlowType.getId(),
-                                ViewFilter.get().getFromDate(),
-                                ViewFilter.get().getToDate()) :
-                securityEventCashFlowRepository
-                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                portfolios,
-                                security.getId(),
-                                cashFlowType.getId(),
-                                ViewFilter.get().getFromDate(),
-                                ViewFilter.get().getToDate());
-    }
-
-    /**
-     * Возвращает для портфеля последний известный остаток денежных средств соответствующей дате, не позже указанной.
-     * Если портфель не указан, возвращает для всех портфелей сумму последних известных остатков денежных средств
-     * соответствующих дате, не позже указанной.
-     */
-    protected Collection<PortfolioProperty> getPortfolioCash(Collection<String> portfolios, Instant atInstant) {
-        List<PortfolioPropertyEntity> entities = portfolios.isEmpty() ?
-                portfolioPropertyRepository
-                        .findDistinctOnPortfolioIdByPropertyAndTimestampBetweenOrderByTimestampDesc(
-                                PortfolioPropertyType.CASH.name(),
-                                Instant.ofEpochSecond(0),
-                                atInstant) :
-                portfolioPropertyRepository
-                        .findDistinctOnPortfolioIdByPortfolioIdInAndPropertyAndTimestampBetweenOrderByTimestampDesc(
-                                portfolios,
-                                PortfolioPropertyType.CASH.name(),
-                                Instant.ofEpochSecond(0),
-                                atInstant);
-        return entities.stream()
-                .map(portfolioPropertyConverter::fromEntity)
-                .collect(Collectors.toList());
-    }
-
-    private BigDecimal convertToCurrency(BigDecimal value, String fromCurrency, String toCurrency) {
-        return foreignExchangeRateService.convertValueToCurrency(value, fromCurrency, toCurrency);
     }
 
     private static String getStockOrBondGrossProfitFormula() {
