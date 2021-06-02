@@ -29,13 +29,10 @@ import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.FifoPositionsFactory;
-import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
 import ru.investbook.report.ViewFilter;
-import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityRepository;
-import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.service.SecurityProfitService;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
@@ -56,6 +53,7 @@ import static java.util.Collections.singleton;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.*;
 import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
+import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_QUOTE;
 import static ru.investbook.report.excel.DerivativesMarketTotalProfitExcelTableHeader.*;
 
 @Component
@@ -68,10 +66,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final SecurityConverter securityConverter;
-    private final TransactionCashFlowRepository transactionCashFlowRepository;
-    private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final FifoPositionsFactory positionsFactory;
-    private final ForeignExchangeRateService foreignExchangeRateService;
     private final Set<Integer> paymentEvents = Set.of(DERIVATIVE_PROFIT.getId());
     private final MoexDerivativeCodeService moexDerivativeCodeService;
     private final SecurityProfitService securityProfitService;
@@ -164,9 +159,9 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
             int openedPositions = contractToOpenedPositions.values().stream().mapToInt(Math::abs).sum();
 
             row.put(COUNT, openedPositions);
-            row.put(COMMISSION, getTotal(transactions, CashFlowType.COMMISSION, toCurrency).abs());
+            row.put(COMMISSION, securityProfitService.getTotal(transactions, CashFlowType.COMMISSION, toCurrency).abs());
             if (openedPositions == 0) {
-                row.put(GROSS_PROFIT_PNT, getTotal(transactions, CashFlowType.DERIVATIVE_QUOTE, QUOTE_CURRENCY));
+                row.put(GROSS_PROFIT_PNT, securityProfitService.getTotal(transactions, DERIVATIVE_QUOTE, QUOTE_CURRENCY));
             }
             row.put(GROSS_PROFIT, getGrossProfit(portfolios, contracts, toCurrency));
             row.put(PROFIT, PROFIT_FORMULA);
@@ -204,26 +199,6 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
                 .map(contract -> securityProfitService.sumPaymentsForType(portfolios, contract, DERIVATIVE_PROFIT, toCurrency))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-
-    private BigDecimal getTotal(Deque<Transaction> transactions, CashFlowType type, String toCurrency) {
-        return transactions.stream()
-                .filter(t -> t.getId() != null && t.getCount() != 0)
-                .map(t -> getTransactionValue(t, type, toCurrency))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    private Optional<BigDecimal> getTransactionValue(Transaction t, CashFlowType type, String toCurrency) {
-        return transactionCashFlowRepository
-                .findByPkPortfolioAndPkTransactionIdAndPkType(t.getPortfolio(), t.getId(), type.getId())
-                .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency));
-    }
-
-    private BigDecimal convertToCurrency(BigDecimal value, String fromCurrency, String toCurrency) {
-        return foreignExchangeRateService.convertValueToCurrency(value, fromCurrency, toCurrency);
-    }
-
 
     private static String getProfitFormula() {
         return "=" + GROSS_PROFIT.getCellAddr() + "-" + COMMISSION.getCellAddr();
