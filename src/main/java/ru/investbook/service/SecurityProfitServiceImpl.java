@@ -178,26 +178,27 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
 
     @Override
     public BigDecimal sumPaymentsForType(Collection<String> portfolios, Security security, CashFlowType cashFlowType, String toCurrency) {
-        return getSecurityEventCashFlowEntities(portfolios, security, cashFlowType)
+        return getSecurityEventCashFlowEntities(portfolios, security.getId(), cashFlowType)
                 .stream()
                 .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
-                                                                              Security security,
+    @Override
+    public List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
+                                                                              String securityId,
                                                                               CashFlowType cashFlowType) {
         return portfolios.isEmpty() ?
                 securityEventCashFlowRepository
                         .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                security.getId(),
+                                securityId,
                                 cashFlowType.getId(),
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate()) :
                 securityEventCashFlowRepository
                         .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                                 portfolios,
-                                security.getId(),
+                                securityId,
                                 cashFlowType.getId(),
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate());

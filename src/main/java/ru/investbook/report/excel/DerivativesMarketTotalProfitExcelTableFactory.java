@@ -24,7 +24,6 @@ import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
-import ru.investbook.converter.PortfolioPropertyConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.FifoPositionsFactory;
@@ -32,11 +31,11 @@ import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
 import ru.investbook.report.ViewFilter;
-import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
+import ru.investbook.service.SecurityProfitService;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
 
 import java.math.BigDecimal;
@@ -46,7 +45,6 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -55,6 +53,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.*;
+import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
 import static ru.investbook.report.excel.DerivativesMarketTotalProfitExcelTableHeader.*;
 
 @Component
@@ -64,16 +63,15 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     private static final String QUOTE_CURRENCY = "PNT"; // point
     private static final String PROFIT_FORMULA = getProfitFormula();
     private static final String PROFIT_PROPORTION_FORMULA = getProfitProportionFormula();
-    protected final TransactionRepository transactionRepository;
+    private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
-    protected final PortfolioPropertyConverter portfolioPropertyConverter;
     private final FifoPositionsFactory positionsFactory;
     private final ForeignExchangeRateService foreignExchangeRateService;
-    protected final PortfolioPropertyRepository portfolioPropertyRepository;
-    private final Set<Integer> paymentEvents = Set.of(CashFlowType.DERIVATIVE_PROFIT.getId());
+    private final Set<Integer> paymentEvents = Set.of(DERIVATIVE_PROFIT.getId());
     private final MoexDerivativeCodeService moexDerivativeCodeService;
+    private final SecurityProfitService securityProfitService;
 
     public Table create(Portfolio portfolio) {
         throw new UnsupportedOperationException();
@@ -231,29 +229,10 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     }
 
     private BigDecimal sumDerivativeProfitPayments(Collection<String> portfolios, String contract, String toCurrency) {
-        return getSecurityEventCashFlowEntities(portfolios, contract, CashFlowType.DERIVATIVE_PROFIT)
+        return securityProfitService.getSecurityEventCashFlowEntities(portfolios, contract, DERIVATIVE_PROFIT)
                 .stream()
                 .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    public List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
-                                                                              String contract,
-                                                                              CashFlowType cashFlowType) {
-        return portfolios.isEmpty() ?
-                securityEventCashFlowRepository
-                        .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                contract,
-                                cashFlowType.getId(),
-                                ViewFilter.get().getFromDate(),
-                                ViewFilter.get().getToDate()) :
-                securityEventCashFlowRepository
-                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                portfolios,
-                                contract,
-                                cashFlowType.getId(),
-                                ViewFilter.get().getFromDate(),
-                                ViewFilter.get().getToDate());
     }
 
     private BigDecimal convertToCurrency(BigDecimal value, String fromCurrency, String toCurrency) {
