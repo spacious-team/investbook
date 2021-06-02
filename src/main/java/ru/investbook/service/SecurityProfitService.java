@@ -21,6 +21,7 @@ package ru.investbook.service;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.Transaction;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.ViewFilter;
@@ -54,6 +55,8 @@ public interface SecurityProfitService {
     BigDecimal getTotal(Deque<Transaction> transactions, CashFlowType type, String toCurrency);
 
     BigDecimal sumPaymentsForType(Collection<String> portfolios, Security security, CashFlowType cashFlowType, String toCurrency);
+
+    SecurityQuote getSecurityQuote(Security security, String toCurrency, ViewFilter filter);
 
     /**
      * Возвращает для портфеля последний известный остаток денежных средств соответствующей дате, не позже указанной.

@@ -23,10 +23,12 @@ import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Service;
 import ru.investbook.converter.PortfolioPropertyConverter;
+import ru.investbook.converter.SecurityQuoteConverter;
 import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.ClosedPosition;
@@ -36,11 +38,14 @@ import ru.investbook.report.OpenedPosition;
 import ru.investbook.report.ViewFilter;
 import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
+import ru.investbook.repository.SecurityQuoteRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
@@ -48,8 +53,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.spacious_team.broker.pojo.SecurityType.STOCK_OR_BOND;
-import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
+import static org.spacious_team.broker.pojo.SecurityType.*;
+import static org.springframework.util.StringUtils.hasLength;
 
 @Service
 @RequiredArgsConstructor
@@ -57,6 +62,8 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
 
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
+    private final SecurityQuoteRepository securityQuoteRepository;
+    private final SecurityQuoteConverter securityQuoteConverter;
     private final PortfolioPropertyRepository portfolioPropertyRepository;
     private final PortfolioPropertyConverter portfolioPropertyConverter;
     private final ForeignExchangeRateService foreignExchangeRateService;
@@ -201,6 +208,31 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                                 cashFlowType.getId(),
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate());
+    }
+
+    @Override
+    public SecurityQuote getSecurityQuote(Security security, String toCurrency, ViewFilter filter) {
+        if (getSecurityType(security) == CURRENCY_PAIR) {
+            String baseCurrency = getCurrencyPair(security.getId()).substring(0, 3);
+            LocalDate toDate = LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault());
+            BigDecimal lastPrice = toDate.isBefore(LocalDate.now()) ?
+                    foreignExchangeRateService.getExchangeRateOrDefault(baseCurrency, toCurrency, toDate) :
+                    foreignExchangeRateService.getExchangeRate(baseCurrency, toCurrency);
+            return SecurityQuote.builder()
+                    .security(security.getId())
+                    .timestamp(filter.getToDate())
+                    .quote(lastPrice)
+                    .currency(toCurrency)
+                    .build();
+        }
+        return securityQuoteRepository
+                .findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(security.getId(), filter.getToDate())
+                .map(securityQuoteConverter::fromEntity)
+                .map(_quote -> foreignExchangeRateService.convertQuoteToCurrency(_quote, toCurrency))
+                .map(_quote -> hasLength(_quote.getCurrency()) ? _quote : _quote.toBuilder()
+                        .currency(toCurrency) // Не известно точно в какой валюте котируется инструмент,
+                        .build())             // делаем предположение, что в валюте сделки
+                .orElse(null);
     }
 
     @Override

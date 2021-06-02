@@ -50,7 +50,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,7 +59,6 @@ import java.util.Set;
 import static java.util.Collections.singleton;
 import static java.util.Optional.ofNullable;
 import static org.spacious_team.broker.pojo.SecurityType.*;
-import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.report.excel.PortfolioStatusExcelTableHeader.*;
 
 @Component
@@ -264,28 +262,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         .abs()
                         .divide(BigDecimal.valueOf(Math.max(1, Math.abs(count))), 6, RoundingMode.CEILING));
 
-                if (securityType == CURRENCY_PAIR) {
-                    String baseCurrency = getCurrencyPair(security.getId()).substring(0, 3);
-                    LocalDate toDate = LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault());
-                    BigDecimal lastPrice = toDate.isBefore(LocalDate.now()) ?
-                            foreignExchangeRateService.getExchangeRateOrDefault(baseCurrency, toCurrency, toDate) :
-                            foreignExchangeRateService.getExchangeRate(baseCurrency, toCurrency);
-                    quote = SecurityQuote.builder()
-                            .security(security.getId())
-                            .timestamp(filter.getToDate())
-                            .quote(lastPrice)
-                            .currency(toCurrency)
-                            .build();
-                } else {
-                    quote = securityQuoteRepository
-                            .findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(security.getId(), filter.getToDate())
-                            .map(securityQuoteConverter::fromEntity)
-                            .map(_quote -> foreignExchangeRateService.convertQuoteToCurrency(_quote, toCurrency))
-                            .map(_quote -> hasLength(_quote.getCurrency()) ? _quote : _quote.toBuilder()
-                                    .currency(toCurrency) // Не известно точно в какой валюте котируется инструмент,
-                                    .build())             // делаем предположение, что в валюте сделки
-                            .orElse(null);
-                }
+                quote = securityProfitService.getSecurityQuote(security, toCurrency, filter);
 
                 if (quote != null) {
                     row.put(LAST_PRICE, quote.getCleanPriceInCurrency());
