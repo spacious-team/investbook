@@ -32,6 +32,8 @@
 
 ![main-page](https://user-images.githubusercontent.com/11336712/112064959-e175e800-8b74-11eb-9c3e-6cbd1e86013d.png)
 
+![portfolio-composition](https://user-images.githubusercontent.com/11336712/120564463-a5cc8980-c413-11eb-8326-46efcdc85c23.gif)
+
 Все что нужно - это подгружать свежие отчеты брокера или [вручную вводить](src/main/asciidoc/investbook-forms.adoc)
 информацию. По каждому счету в отдельности и подводя единый итог по всем счетам, будет доступна следующая информация:
 - [обзор](src/main/asciidoc/portfolio-analysis.adoc) роста активов, рассчитанного по методике S&P 500,
