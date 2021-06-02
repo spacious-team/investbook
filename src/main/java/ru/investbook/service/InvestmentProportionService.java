@@ -57,9 +57,9 @@ public class InvestmentProportionService {
     private final SecurityProfitService securityProfitService;
 
     public Map<String, Float> getSectorProportions(ViewFilter filter) {
-        long t0 = nanoTime();
         try {
-            return securityRepository.findAll()
+            long t0 = nanoTime();
+            Map<String, Float> result = securityRepository.findAll()
                     .stream()
                     .filter(security -> getSecurityType(security.getId()) == STOCK_OR_BOND)
                     .map(securityConverter::fromEntity)
@@ -67,8 +67,12 @@ public class InvestmentProportionService {
                     .filter(v -> v.investment().floatValue() > 1)
                     .collect(Collectors.groupingBy(this::getEconomicSector,
                             mapping(SecurityInvestment::getInvestment, reducing(0f, Float::sum))));
-        } finally {
             log.info("Рассчитаны объемы инвестиций в сектора экономики за {}", Duration.ofNanos(nanoTime() - t0));
+            return result;
+        } catch (Exception e) {
+            String message = "Ошибка при расчете объемов инвестиций в сектора экономики";
+            log.error(message, e);
+            throw new RuntimeException(message, e);
         }
     }
 

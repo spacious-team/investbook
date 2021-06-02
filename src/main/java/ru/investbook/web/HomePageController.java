@@ -79,7 +79,7 @@ public class HomePageController {
         return "Приложение остановлено";
     }
 
-    private List<String> getPortfolios() {
+    public List<String> getPortfolios() {
         return portfolioRepository.findAll()
                 .stream()
                 .map(PortfolioEntity::getId)
@@ -108,7 +108,7 @@ public class HomePageController {
         }
     }
 
-    private BigDecimal getTotalCash(Collection<String> portfolios) {
+    public BigDecimal getTotalCash(Collection<String> portfolios) {
         return portfolios.stream()
                 .map(portfolio -> portfolioPropertyRepository.findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(
                         portfolio, PortfolioPropertyType.CASH.name()))
@@ -117,7 +117,6 @@ public class HomePageController {
                 .map(HomePageController::groupByCurrency)
                 .map(this::convertToRubAndSum)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-
     }
 
     /**
