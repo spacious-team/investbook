@@ -27,7 +27,6 @@ import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
-import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
@@ -184,9 +183,8 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     private Instant getLastEventDate(Collection<String> portfolios, Collection<Security> contracts) {
         ViewFilter filter = ViewFilter.get();
         return contracts.stream()
-                .map(contract -> securityProfitService.getLastEvent(portfolios, contract, paymentEvents, filter))
+                .map(contract -> securityProfitService.getLastEventTimestamp(portfolios, contract, paymentEvents, filter))
                 .flatMap(Optional::stream)
-                .map(SecurityEventCashFlowEntity::getTimestamp)
                 .max(Comparator.naturalOrder())
                 .orElse(null);
     }

@@ -62,15 +62,15 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
     private final ForeignExchangeRateService foreignExchangeRateService;
 
     @Override
-    public Optional<SecurityEventCashFlowEntity> getLastEvent(Collection<String> portfolios, Security security, Set<Integer> events, ViewFilter filter) {
-        return portfolios.isEmpty() ?
+    public Optional<Instant> getLastEventTimestamp(Collection<String> portfolios, Security security, Set<Integer> events, ViewFilter filter) {
+        Optional<SecurityEventCashFlowEntity> optional = portfolios.isEmpty() ?
                 securityEventCashFlowRepository
                         .findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
                                 security.getId(), events, filter.getFromDate(), filter.getToDate()) :
                 securityEventCashFlowRepository
                         .findFirstByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
                                 portfolios, security.getId(), events, filter.getFromDate(), filter.getToDate());
-
+        return optional.map(SecurityEventCashFlowEntity::getTimestamp);
     }
 
     @Override

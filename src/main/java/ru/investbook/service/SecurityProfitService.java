@@ -22,7 +22,6 @@ import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.Transaction;
-import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.ViewFilter;
 
@@ -35,7 +34,7 @@ import java.util.Set;
 
 public interface SecurityProfitService {
 
-    Optional<SecurityEventCashFlowEntity> getLastEvent(Collection<String> portfolios, Security security, Set<Integer> events, ViewFilter filter);
+    Optional<Instant> getLastEventTimestamp(Collection<String> portfolios, Security security, Set<Integer> events, ViewFilter filter);
 
     /**
      * Курсовой доход с купли-продажи (для деривативов - суммарная вариационная маржа)

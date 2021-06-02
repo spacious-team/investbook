@@ -33,7 +33,6 @@ import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioPropertyConverter;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.converter.SecurityQuoteConverter;
-import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.report.ForeignExchangeRateService;
@@ -232,9 +231,9 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     .map(PositionHistory::getInstant)
                     .orElse(null));
             if (securityType != CURRENCY_PAIR) {
-                row.put(LAST_EVENT_DATE, securityProfitService.getLastEvent(portfolios, security, paymentEvents, filter)
-                        .map(SecurityEventCashFlowEntity::getTimestamp)
-                        .orElse(null));
+                row.put(LAST_EVENT_DATE,
+                        securityProfitService.getLastEventTimestamp(portfolios, security, paymentEvents, filter)
+                                .orElse(null));
             }
             row.put(BUY_COUNT, positions.getTransactions()
                     .stream()
