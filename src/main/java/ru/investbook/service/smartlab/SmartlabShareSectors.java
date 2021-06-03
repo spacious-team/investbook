@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
@@ -40,6 +41,35 @@ import static org.springframework.util.StringUtils.capitalize;
 public class SmartlabShareSectors {
 
     private static final String SECTORS_URL = "https://smart-lab.ru/forum/sectors";
+    private final Map<String, String> mapping = Stream.of(new String[][]{
+            {"Металлургия черн.", "Металлургия"},
+            {"Металлургия цвет.", "Металлургия"},
+            {"Химия удобрения", "Химическая промышленность"},
+            {"Химия разное", "Химическая промышленность"},
+            {"Энергосбыт", "Электроэнергетика"},
+            {"Ритейл", "Розничная торговля"},
+            {"Интернет", "Информационные технологии"},
+            {"Строители", "Девелопмент"},
+            {"Драг.металлы", "Драгоценные металлы"},
+            {"Горнодобывающие", "Полезные ископаемые"},
+            {"Э/генерация", "Электроэнергетика"},
+            {"Электросети", "Электроэнергетика"},
+            {"Телеком", "Телекоммуникации"},
+            {"Потреб", "Товары и услуги"},
+            {"High tech", "Информационные технологии"},
+            {"Financials", "Финансы"},
+            {"Consumer discretionary", "Товары и услуги"},
+            {"Consumer staples", "Розничная торговля"},
+            {"Technology", "Информационные технологии"},
+            {"Energy", "Энергоресурсы"},
+            {"Industrials", "Промышленность"},
+            {"Telecom", "Телекоммуникации"},
+            {"Utilities", "Коммунальные услуги"},
+            {"Real estate", "Девелопмент"},
+            {"Healthcare", "Здравоохранение"},
+            {"Materials", "Полезные ископаемые"},
+            {"Etf", "ETF"}})
+            .collect(Collectors.toMap(v -> v[0], v -> v[1]));
 
     /**
      * @ return sector -> share identity map. Most often, the identifier is a ticker, but this should be checked.
@@ -48,7 +78,7 @@ public class SmartlabShareSectors {
         try {
             Elements sectorElements = getHtmlDocument().select(".kompanii_sector");
             return sectorElements.stream()
-                    .collect(groupingBy(SmartlabShareSectors::getSectorName,
+                    .collect(groupingBy(this::getSectorName,
                             flatMapping(SmartlabShareSectors::getSmartlabShareIds, toList())));
         } catch (Exception e) {
             throw new RuntimeException("Произошла ошибка при получении списка секторов со Smart-Lab", e);
@@ -61,9 +91,10 @@ public class SmartlabShareSectors {
                 .get();
     }
 
-    private static String getSectorName(Element sectorElement) {
+    private String getSectorName(Element sectorElement) {
         String sector = sectorElement.getElementsByTag("h2").get(0).text();
-        return capitalize(sector.toLowerCase());
+        sector = capitalize(sector.toLowerCase());
+        return mapping.getOrDefault(sector, sector);
     }
 
     private static Stream<String> getSmartlabShareIds(Element sectorElement) {
