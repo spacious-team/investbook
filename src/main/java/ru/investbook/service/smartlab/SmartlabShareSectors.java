@@ -72,7 +72,7 @@ public class SmartlabShareSectors {
             .collect(Collectors.toMap(v -> v[0], v -> v[1]));
 
     /**
-     * @ return sector -> share identity map. Most often, the identifier is a ticker, but this should be checked.
+     * @return sector -> share identity map. Most often, the identifier is a ticker, but this should be checked.
      */
     public Map<String, List<String>> getShareSectors() {
         try {

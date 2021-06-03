@@ -37,6 +37,7 @@ import java.util.Optional;
 
 import static java.lang.System.nanoTime;
 import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 
 @Service
@@ -75,7 +76,7 @@ public class SecuritySectorService {
                 .stream()
                 .flatMap(entry -> entry.getValue()
                         .stream()
-                        .map(ticker -> new TickerAndSector(ticker, entry.getKey())))
+                        .map(ticker -> new TickerAndSector(ticker.toUpperCase(), entry.getKey())))
                 .collect(toMap(TickerAndSector::ticker, TickerAndSector::sector));
     }
 
@@ -83,18 +84,19 @@ public class SecuritySectorService {
     }
 
     private Optional<SecurityDescription> getSecuritySector(Map<String, String> tickerToSector, SecurityEntity security) {
-        String sector = null;
-        String ticker = security.getTicker();
-        if (ticker != null) {
-            sector = tickerToSector.get(ticker);
-        }
-        if (sector == null) {
-            String isin = Optional.ofNullable(security.getIsin())
-                    .orElse(security.getId());
-            // For shares moex secId equals to ticker
-            ticker = moexIssClient.getSecId(isin).orElse(null);
-            sector = tickerToSector.get(ticker);
-        }
+        String sector = ofNullable(security.getTicker())
+                .map(String::toUpperCase)
+                .map(tickerToSector::get)
+                .or(() -> ofNullable(security.getName()) // may be ticker saved by broker in name?
+                        .map(String::toUpperCase)
+                        .map(tickerToSector::get))
+                .or(() -> ofNullable(security.getIsin())
+                        .or(() -> ofNullable(security.getId()))
+                        .flatMap(moexIssClient::getSecId) // for shares moex secId returns ticker
+                        .map(t -> t.endsWith("-RM") ? t.substring(0, t.length() - 2) : t)
+                        .map(String::toUpperCase)
+                        .map(tickerToSector::get))
+                .orElse(null);
         if (sector == null) {
             return empty();
         }
