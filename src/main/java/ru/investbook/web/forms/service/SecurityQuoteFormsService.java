@@ -99,7 +99,9 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
     private SecurityQuoteModel toSecurityQuoteModel(SecurityQuoteEntity e) {
         SecurityQuoteModel m = new SecurityQuoteModel();
         m.setId(e.getId());
-        m.setSecurity(e.getSecurity().getId(), ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()));
+        m.setSecurity(
+                ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),
+                ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()));
         m.setTimestamp(e.getTimestamp());
         m.setQuote(e.getQuote());
         m.setPrice(e.getPrice());

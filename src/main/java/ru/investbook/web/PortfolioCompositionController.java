@@ -24,10 +24,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.report.ViewFilter;
 import ru.investbook.service.InvestmentProportionService;
-import ru.investbook.service.SecuritySectorService;
 
 import java.util.Collection;
 import java.util.List;
@@ -42,18 +40,12 @@ import static java.util.stream.Collectors.toList;
 public class PortfolioCompositionController {
 
     private final InvestmentProportionService investmentProportionService;
-    private final SecuritySectorService securitySectorService;
     private final HomePageController homePageController;
     private final ViewFilter currentState = ViewFilter.builder().build();
 
     @GetMapping
-    public String getPage(@RequestParam(name = "upload-sectors", required = false, defaultValue = "false")
-                                  boolean uploadSectors,
-                          Model model) {
+    public String getPage(Model model) {
         try {
-            if (uploadSectors) {
-                securitySectorService.uploadAndUpdateSecuritySectors();
-            }
             Collection<Map<String, ?>> investmentProportion = investmentProportionService.getSectorProportions(currentState)
                     .entrySet()
                     .stream()
