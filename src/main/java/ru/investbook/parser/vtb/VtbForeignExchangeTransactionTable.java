@@ -24,24 +24,44 @@ import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
-import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.SingleBrokerReport;
+import ru.investbook.parser.SingleInitializableReportTable;
 
 import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ru.investbook.parser.vtb.VtbForeignExchangeTransactionTable.FxTransactionTableHeader.*;
 
-public class VtbForeignExchangeTransactionTable extends SingleAbstractReportTable<ForeignExchangeTransaction> {
+public class VtbForeignExchangeTransactionTable extends SingleInitializableReportTable<ForeignExchangeTransaction> {
 
     // Не использовать "Завершенные в отчетном периоде сделки с иностранной валютой (обязательства прекращены)",
     // иначе не примутся в расчет сделки выполненные без обналичивания валюты
-    private static final String TABLE_NAME = "Заключенные в отчетном периоде сделки с иностранной валютой";
+    private static final String[] TABLE_NAMES = {
+            "Заключенные в отчетном периоде сделки с иностранной валютой",
+            // Таблица незавершенных сделок может не содержать комиссию по сделкам после 19-00. Парсинг по таким сделкам
+            // падает. Загружаем такие сделки из следующего отчета в таблице завершенных сделок.
+           "Завершенные в отчетном периоде сделки с иностранной валютой (обязательства прекращены)"};
 
     protected VtbForeignExchangeTransactionTable(SingleBrokerReport report) {
-        super(report, TABLE_NAME, null, FxTransactionTableHeader.class);
+        super(report);
     }
 
     @Override
+    protected Collection<ForeignExchangeTransaction> parseTable() {
+        return Stream.of(TABLE_NAMES)
+                .map(this::parseTable)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    private Collection<ForeignExchangeTransaction> parseTable(String tableName) {
+        return getReport().getReportPage()
+                .create(tableName, FxTransactionTableHeader.class)
+                .getData(getReport(), this::parseRow);
+    }
+
     protected ForeignExchangeTransaction parseRow(TableRow row) {
         boolean isBuy = row.getStringCellValue(DIRECTION).trim().equalsIgnoreCase("Покупка");
         BigDecimal value = row.getBigDecimalCellValue(VALUE);
@@ -77,7 +97,8 @@ public class VtbForeignExchangeTransactionTable extends SingleAbstractReportTabl
 
         @Getter
         private final TableColumn column;
-        FxTransactionTableHeader(String ... words) {
+
+        FxTransactionTableHeader(String... words) {
             this.column = TableColumnImpl.of(words);
         }
     }
