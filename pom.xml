@@ -28,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2021.4.2</version>
+    <version>2021.5</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -47,7 +47,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>21.4.2</win.msi.version>
+        <win.msi.version>21.5</win.msi.version>
         <java.version>16</java.version>
         <!-- version 3.2.0 provided by Spring Boot 2.4.1 has bug, using version from Spring Boot 2.3.4
          TODO remove after fix -->
@@ -74,7 +74,7 @@
             <dependency>
                 <groupId>com.github.spacious-team</groupId>
                 <artifactId>table-wrapper-api</artifactId>
-                <version>435b0abc7b</version>
+                <version>2021.6.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -83,7 +83,7 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>056c421017</version>
+            <version>v2021.7</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
