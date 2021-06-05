@@ -21,8 +21,5 @@ package ru.investbook.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.investbook.entity.IssuerEntity;
 
-import java.util.Optional;
-
-public interface IssuerRepository extends JpaRepository<IssuerEntity, Long> {
-    Optional<IssuerEntity> findByInn(Long integer);
+public interface IssuerRepository extends JpaRepository<IssuerEntity, Integer> {
 }

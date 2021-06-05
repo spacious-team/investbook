@@ -39,21 +39,30 @@ public class VtbReportTables extends AbstractReportTables<SingleBrokerReport> {
     @Getter
     private final ReportTable<Security> securitiesTable;
     @Getter
+    private final ReportTable<SecurityTransaction> securityTransactionTable;
+    @Getter
     private final VtbCouponAmortizationRedemptionTable couponAmortizationRedemptionTable;
     private final CashFlowEventTable cashFlowEventTable;
-    private final VtbSecurityDepositAndWithdrawalTable vtbSecurityDepositAndWithdrawalTable;
 
     public VtbReportTables(SingleBrokerReport report) {
         super(report);
-        VtbSecuritiesTable vtbSecuritiesTable = new VtbSecuritiesTable(report);
-        VtbSecurityFlowTable vtbSecurityFlowTable = new VtbSecurityFlowTable(report);
-        this.securitiesTable = WrappingReportTable.of(vtbSecuritiesTable, vtbSecurityFlowTable);
+        VtbSecuritiesTable securitiesTable = new VtbSecuritiesTable(report);
+        VtbSecurityFlowTable securityFlowTable = new VtbSecurityFlowTable(report);
+        VtbSecurityTransactionTable securityTransactionTable = new VtbSecurityTransactionTable(report);
+        this.securitiesTable = WrappingReportTable.of(
+                securitiesTable,
+                securityFlowTable,
+                WrappingReportTable.of(report, securityTransactionTable.getSecurities()));
         SecurityRegNumberToIsinConverter securityRegNumberToIsinConverter = new SecurityRegNumberToIsinConverterImpl(
-                vtbSecuritiesTable, vtbSecurityFlowTable);
+                securitiesTable, securityFlowTable);
         this.cashFlowEventTable = new CashFlowEventTable(report);
-        this.vtbSecurityDepositAndWithdrawalTable = new VtbSecurityDepositAndWithdrawalTable(report);
+        VtbSecurityDepositAndWithdrawalTable securityDepositAndWithdrawalTable =
+                new VtbSecurityDepositAndWithdrawalTable(report);
+        this.securityTransactionTable = WrappingReportTable.of(
+                securityTransactionTable,
+                securityDepositAndWithdrawalTable);
         this.couponAmortizationRedemptionTable = new VtbCouponAmortizationRedemptionTable(
-                cashFlowEventTable, securityRegNumberToIsinConverter, vtbSecurityDepositAndWithdrawalTable);
+                cashFlowEventTable, securityRegNumberToIsinConverter, securityDepositAndWithdrawalTable);
     }
 
     @Override
@@ -72,13 +81,6 @@ public class VtbReportTables extends AbstractReportTables<SingleBrokerReport> {
                 new VtbCashFlowTable(cashFlowEventTable),
                 new VtbDividendTable(cashFlowEventTable),
                 WrappingReportTable.of(report, couponAmortizationRedemptionTable.getExternalBondPayments()));
-    }
-
-    @Override
-    public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
-        return WrappingReportTable.of(
-                new VtbSecurityTransactionTable(report),
-                vtbSecurityDepositAndWithdrawalTable);
     }
 
     @Override

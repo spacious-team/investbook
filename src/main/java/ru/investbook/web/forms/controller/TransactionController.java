@@ -85,7 +85,7 @@ public class TransactionController {
     /**
      * Saves transaction to storage
      *
-     * @param transaction transaction attribute for save, same model attribute user for display in view
+     * @param transaction transaction attribute for save, same model attribute used for display in view
      */
     @PostMapping
     public String postTransaction(@Valid @ModelAttribute("transaction") TransactionModel transaction) {

@@ -20,6 +20,7 @@ package ru.investbook.parser.vtb;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
@@ -29,13 +30,18 @@ import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
 import static ru.investbook.parser.vtb.VtbSecurityTransactionTable.VtbSecurityTransactionTableHeader.*;
 
 public class VtbSecurityTransactionTable extends SingleAbstractReportTable<SecurityTransaction> {
 
-    private static final String TABLE_NAME = "Завершенные в отчетном периоде сделки с ценными бумагами (обязательства прекращены)";
+    // Не использовать "Завершенные в отчетном периоде сделки с ценными бумагами (обязательства прекращены)",
+    // иначе в расчет не возьмутся позиции, закрытые в течении T+2 (до исполнения)
+    private static final String TABLE_NAME = "Заключенные в отчетном периоде сделки с ценными бумагами";
+    private final Set<Security> securities = new HashSet<>();
 
     protected VtbSecurityTransactionTable(SingleBrokerReport report) {
         super(report, TABLE_NAME, null, VtbSecurityTransactionTableHeader.class);
@@ -43,7 +49,6 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
 
     @Override
     protected SecurityTransaction parseRow(TableRow row) {
-        String isin = row.getStringCellValue(NAME_AND_ISIN).split(",")[2].trim();
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         BigDecimal value = row.getBigDecimalCellValue(VALUE_WITH_ACCRUED_INTEREST);
         BigDecimal accruedInterest = row.getBigDecimalCellValue(ACCRUED_INTEREST);
@@ -60,11 +65,15 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
                 .add(row.getBigDecimalCellValueOrDefault(BROKER_COMMISSION, BigDecimal.ZERO))
                 .negate();
         String currency = VtbBrokerReport.convertToCurrency(row.getStringCellValue(VALUE_CURRENCY));
+
+        Security security = VtbReportHelper.getSecurity(row.getStringCellValue(NAME_AND_ISIN));
+        securities.add(security);
+
         return SecurityTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE))
                 .transactionId(row.getStringCellValue(TRANSACTION))
                 .portfolio(getReport().getPortfolio())
-                .security(isin)
+                .security(security.getId())
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)
                 .accruedInterest(accruedInterest)
@@ -74,6 +83,10 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
                 .build();
     }
 
+    public Set<Security> getSecurities() {
+        initializeIfNeed();
+        return Set.copyOf(securities);
+    }
 
     @RequiredArgsConstructor
     enum VtbSecurityTransactionTableHeader implements TableColumnDescription {

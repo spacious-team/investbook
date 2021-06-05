@@ -48,7 +48,7 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
     @Getter
     private final boolean summaryView = false;
     @Getter
-    private final int sheetOrder = 4;
+    private final int sheetOrder = 5;
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (фондовый)";
     private final TransactionCashFlowRepository transactionCashFlowRepository;

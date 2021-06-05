@@ -25,7 +25,6 @@ import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -59,7 +58,6 @@ public class SecurityEventCashFlowModel {
     private CashFlowType type;
 
     @NotNull
-    @Positive
     private BigDecimal value;
 
     @NotEmpty

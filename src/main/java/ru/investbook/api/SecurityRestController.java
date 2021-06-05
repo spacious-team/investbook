@@ -88,7 +88,7 @@ public class SecurityRestController extends AbstractRestController<String, Secur
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Сведения о биржевом инструменте и всех его сделках по всем счетам")
+    @Operation(summary = "Удалить", description = "Удалить сведения о биржевом инструменте и всех его сделках по всем счетам")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Идентификатор", example = "ISIN, BR-2.21, USDRUB_TOM")
                                String id) {

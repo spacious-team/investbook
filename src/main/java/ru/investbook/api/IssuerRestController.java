@@ -42,9 +42,9 @@ import java.util.Optional;
 @RestController
 @Tag(name = "Эмитенты", description = "Информация об эмитентах")
 @RequestMapping("/api/v1/issuers")
-public class IssuerRestController extends AbstractRestController<Long, Issuer, IssuerEntity> {
+public class IssuerRestController extends AbstractRestController<Integer, Issuer, IssuerEntity> {
 
-    public IssuerRestController(JpaRepository<IssuerEntity, Long> repository, EntityConverter<IssuerEntity, Issuer> converter) {
+    public IssuerRestController(JpaRepository<IssuerEntity, Integer> repository, EntityConverter<IssuerEntity, Issuer> converter) {
         super(repository, converter);
     }
 
@@ -56,12 +56,12 @@ public class IssuerRestController extends AbstractRestController<Long, Issuer, I
     }
 
     @Override
-    @GetMapping("{inn}")
-    @Operation(summary = "Отобразить одного", description = "Отобразить информацию по организации по идентификатору налогоплательщика")
-    public ResponseEntity<Issuer> get(@PathVariable("inn")
-                                      @Parameter(description = "Идентификатор налогоплательщика, например ИНН в России")
-                                              Long inn) {
-        return super.get(inn);
+    @GetMapping("{id}")
+    @Operation(summary = "Отобразить одного", description = "Отобразить информацию об эмитенте по его номеру")
+    public ResponseEntity<Issuer> get(@PathVariable("id")
+                                      @Parameter(description = "Внутренний идентификатор эмитента")
+                                              Integer id) {
+        return super.get(id);
     }
 
     @Override
@@ -72,38 +72,38 @@ public class IssuerRestController extends AbstractRestController<Long, Issuer, I
     }
 
     @Override
-    @PutMapping("{inn}")
+    @PutMapping("{id}")
     @Operation(summary = "Обновить сведения")
-    public ResponseEntity<Void> put(@PathVariable("inn")
-                                    @Parameter(description = "Идентификатор налогоплательщика, например ИНН в России")
-                                            Long inn,
+    public ResponseEntity<Void> put(@PathVariable("id")
+                                    @Parameter(description = "Внутренний идентификатор эмитента")
+                                            Integer id,
                                     @Valid @RequestBody
                                             Issuer issuer) {
-        return super.put(inn, issuer);
+        return super.put(id, issuer);
     }
 
     @Override
-    @DeleteMapping("{inn}")
-    @Operation(summary = "Удалить", description = "Удаляет сведения об организации из БД")
-    public void delete(@PathVariable("inn")
-                       @Parameter(description = "Идентификатор налогоплательщика, например ИНН в России")
-                               Long inn) {
-        super.delete(inn);
+    @DeleteMapping("{id}")
+    @Operation(summary = "Удалить", description = "Удаляет сведения об эмитенте из БД")
+    public void delete(@PathVariable("id")
+                       @Parameter(description = "Внутренний идентификатор эмитента")
+                               Integer id) {
+        super.delete(id);
     }
 
     @Override
-    protected Optional<IssuerEntity> getById(Long id) {
+    protected Optional<IssuerEntity> getById(Integer id) {
         return repository.findById(id);
     }
 
     @Override
-    protected Long getId(Issuer object) {
-        return object.getInn();
+    protected Integer getId(Issuer object) {
+        return object.getId();
     }
 
     @Override
-    protected Issuer updateId(Long inn, Issuer object) {
-        return object.toBuilder().inn(inn).build();
+    protected Issuer updateId(Integer id, Issuer object) {
+        return object.toBuilder().id(id).build();
     }
 
     @Override

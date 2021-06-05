@@ -46,6 +46,7 @@ import ru.investbook.api.SecurityQuoteRestController;
 import ru.investbook.api.SecurityRestController;
 import ru.investbook.api.TransactionCashFlowRestController;
 import ru.investbook.api.TransactionRestController;
+import ru.investbook.service.moex.MoexDerivativeCodeService;
 
 import java.time.Instant;
 import java.util.AbstractMap.SimpleEntry;
@@ -53,6 +54,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -72,6 +74,7 @@ public class InvestbookApiClient {
     private final PortfolioPropertyRestController portfolioPropertyRestController;
     private final SecurityQuoteRestController securityQuoteRestController;
     private final ForeignExchangeRateRestController foreignExchangeRateRestController;
+    private final MoexDerivativeCodeService moexDerivativeCodeService;
 
     public boolean addPortfolio(Portfolio portfolio) {
         return handlePost(
@@ -91,9 +94,21 @@ public class InvestbookApiClient {
     }
 
     public boolean addSecurity(Security security) {
+        Security _security = convertDerivativeSecurityId(security);
         return handlePost(
-                () -> securityRestController.post(security),
+                () -> securityRestController.post(_security),
                 "Не могу добавить ЦБ " + security + " в список");
+    }
+
+    private Security convertDerivativeSecurityId(Security security) {
+        String id = security.getId();
+        String newId = moexDerivativeCodeService.convertDerivativeSecurityId(id);
+        if (!Objects.equals(id, newId)) {
+            security = security.toBuilder()
+                    .id(newId)
+                    .build();
+        }
+        return security;
     }
 
     public void addTransaction(SecurityTransaction securityTransaction) {

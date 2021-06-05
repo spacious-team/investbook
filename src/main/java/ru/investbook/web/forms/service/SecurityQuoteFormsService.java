@@ -27,6 +27,7 @@ import ru.investbook.converter.SecurityQuoteConverter;
 import ru.investbook.entity.SecurityQuoteEntity;
 import ru.investbook.repository.SecurityQuoteRepository;
 import ru.investbook.repository.SecurityRepository;
+import ru.investbook.service.moex.MoexDerivativeCodeService;
 import ru.investbook.web.forms.model.SecurityQuoteModel;
 import ru.investbook.web.forms.model.SecurityType;
 
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 import static org.springframework.util.StringUtils.hasLength;
+import static ru.investbook.web.forms.model.SecurityType.DERIVATIVE;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +47,7 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
     private final SecurityRepository securityRepository;
     private final SecurityQuoteConverter securityQuoteConverter;
     private final SecurityConverter securityConverter;
-
+    private final MoexDerivativeCodeService moexDerivativeCodeService;
 
     public Optional<SecurityQuoteModel> getById(Integer id) {
         return securityQuoteRepository.findById(id)
@@ -62,6 +64,7 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
 
     @Override
     public void save(SecurityQuoteModel e) {
+        convertDerivativeSecurityId(e);
         saveAndFlush(e.getSecurityId(), e.getSecurityName());
         SecurityQuoteEntity entity = securityQuoteRepository.saveAndFlush(
                 securityQuoteConverter.toEntity(SecurityQuote.builder()
@@ -74,6 +77,13 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
                         .currency(hasLength(e.getCurrency()) ? e.getCurrency() : null)
                         .build()));
         e.setId(entity.getId());
+    }
+
+    private void convertDerivativeSecurityId(SecurityQuoteModel model) {
+        if (model.getSecurityType() == DERIVATIVE) {
+            String securityId = moexDerivativeCodeService.convertDerivativeSecurityId(model.getSecurityId());
+            model.setSecurity(securityId);
+        }
     }
 
     private void saveAndFlush(String securityId, String securityName) {
@@ -89,7 +99,9 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
     private SecurityQuoteModel toSecurityQuoteModel(SecurityQuoteEntity e) {
         SecurityQuoteModel m = new SecurityQuoteModel();
         m.setId(e.getId());
-        m.setSecurity(e.getSecurity().getId(), ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()));
+        m.setSecurity(
+                ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),
+                ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()));
         m.setTimestamp(e.getTimestamp());
         m.setQuote(e.getQuote());
         m.setPrice(e.getPrice());

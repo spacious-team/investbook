@@ -45,7 +45,7 @@ public class CashFlowExcelTableView extends ExcelTableView {
     @Getter
     private final boolean summaryView = true;
     @Getter
-    private final int sheetOrder = 8;
+    private final int sheetOrder = 9;
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> "Доходность (" + portfolio + ")";
     private final PortfolioPropertyRepository portfolioPropertyRepository;

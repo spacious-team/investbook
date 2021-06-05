@@ -28,7 +28,8 @@ public class IssuerConverter implements EntityConverter<IssuerEntity, Issuer>  {
     @Override
     public IssuerEntity toEntity(Issuer issuer) {
         IssuerEntity entity = new IssuerEntity();
-        entity.setInn(issuer.getInn());
+        entity.setId(issuer.getId());
+        entity.setTaxpayerId(issuer.getTaxpayerId());
         entity.setName(issuer.getName());
         return entity;
     }
@@ -36,7 +37,8 @@ public class IssuerConverter implements EntityConverter<IssuerEntity, Issuer>  {
     @Override
     public Issuer fromEntity(IssuerEntity entity) {
         return Issuer.builder()
-                .inn(entity.getInn())
+                .id(entity.getId())
+                .taxpayerId(entity.getTaxpayerId())
                 .name(entity.getName())
                 .build();
     }

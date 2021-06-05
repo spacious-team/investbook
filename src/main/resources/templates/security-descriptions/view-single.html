@@ -1,0 +1,39 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Сохранена информация</title>
+    <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
+    <link rel="stylesheet" href="/water-wrapper.css">
+</head>
+<body>
+
+<h1>Сохранена информация</h1>
+<p th:text="'Идентификатор: ' +  ${securityDescription.getSecurityId()}"/>
+<p th:text="'Инструмент: ' +  ${securityDescription.getSecurityDisplayName()}"/>
+<p th:text="'Сектор экономики: ' + ${securityDescription.sector}" th:if="${securityDescription.sector != null}"></p>
+<a href="/security-descriptions/edit-form">Добавить еще</a><br>
+<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Информация по инструментам/delete_4">Удалить информацию</a><br>
+<a href="/security-descriptions">Посмотреть информацию по всем инструментам</a><br>
+<a href="/forms.html">На главную</a><br>
+
+</body>
+</html>

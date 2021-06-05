@@ -31,7 +31,7 @@ import static java.util.Collections.unmodifiableMap;
 public class MoexJsonResponseParser {
 
     @SuppressWarnings("unchecked")
-    public static List<Map<String, Object>> buildFromIntObjectMap(Map<?, ?> indicesResponse) {
+    public static List<Map<String, Object>> convertFromIntObjectMap(Map<?, ?> indicesResponse) {
         try {
             indicesResponse = (Map<?, ?>) indicesResponse.values().iterator().next();
             List<String> columnNames = (List<String>) indicesResponse.get("columns");
