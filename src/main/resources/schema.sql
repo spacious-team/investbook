@@ -68,9 +68,10 @@ CREATE TABLE IF NOT EXISTS `event_cash_flow` (
 
 -- Дамп структуры для таблица portfolio.issuer
 CREATE TABLE IF NOT EXISTS `issuer` (
-  `inn` bigint(10) unsigned NOT NULL COMMENT 'ИНН',
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `taxpayer_id` varchar(16) DEFAULT NULL COMMENT 'Идентификатор налогоплательщика (Россия - ИНН, США - EIN и т.д.)',
   `name` varchar(100) NOT NULL COMMENT 'Наименование',
-  PRIMARY KEY (`inn`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Эмитенты';
 
 -- Дамп структуры для таблица portfolio.portfolio_property
@@ -86,36 +87,29 @@ CREATE TABLE IF NOT EXISTS `portfolio_property` (
   CONSTRAINT `portfolio_property_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Свойства портфеля';
 
-/*
- * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
--- Экспортируемые данные не выделены.
-
 -- Дамп структуры для таблица portfolio.security
 CREATE TABLE IF NOT EXISTS `security` (
   `id` varchar(64) NOT NULL COMMENT 'Идентификатор ценной бумаги: ISIN - для акций, облигаций; наименование контракта - для срочного и валютного рынка',
+  `isin` char(12) DEFAULT NULL COMMENT 'ISIN',
   `ticker` varchar(16) DEFAULT NULL COMMENT 'Тикер',
   `name` varchar(100) DEFAULT NULL COMMENT 'Полное наименование ценной бумаги или контракта',
-  `issuer_inn` bigint(10) unsigned DEFAULT NULL COMMENT 'Эмитент (ИНН)',
-  PRIMARY KEY (`id`),
-  KEY `security_issuer_inn_ix` (`issuer_inn`),
-  CONSTRAINT `security_issuer_inn_fkey` FOREIGN KEY (`issuer_inn`) REFERENCES `issuer` (`inn`) ON UPDATE CASCADE
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Общая информация по ценным бумагам';
+
+-- Дамп структуры для таблица portfolio.security_description
+-- Нужно проверить наличие issuer.id, может отсутствовать для БД < 2021.5. На колонку создается ссылка.
+ALTER TABLE `security` DROP CONSTRAINT IF EXISTS `security_issuer_inn_fkey`;
+ALTER TABLE `issuer` DROP COLUMN IF EXISTS `inn`;
+ALTER TABLE `issuer` ADD COLUMN IF NOT EXISTS `id` int(11) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT FIRST;
+CREATE TABLE IF NOT EXISTS `security_description` (
+    `security` varchar(64) NOT NULL COMMENT 'Идентификатор ценной бумаги',
+    `sector` varchar(32) DEFAULT NULL COMMENT 'Сектор экономики (применимо только для акций)',
+    `issuer` int(10) unsigned DEFAULT NULL COMMENT 'Эмитент',
+    PRIMARY KEY (`security`),
+    KEY `security_description_issuer_ix` (`issuer`),
+    CONSTRAINT `security_description_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE,
+    CONSTRAINT `security_description_issuer_fkey` FOREIGN KEY (`issuer`) REFERENCES `issuer` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Расширенная информация по ценным бумагам';
 
 -- Дамп структуры для таблица portfolio.security_event_cash_flow
 CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
@@ -130,7 +124,7 @@ CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `security_event_cash_flow_timestamp_security_type_portfolio_uniq` (`timestamp`,`security`,`type`,`portfolio`),
   KEY `security_event_cash_flow_type_ix` (`type`),
-  KEY `security_event_cash_flow_ticker_ix` (`security`),
+  KEY `security_event_cash_flow_security_ix` (`security`),
   KEY `security_event_cash_flow_portfolio_ix` (`portfolio`),
   CONSTRAINT `security_event_cash_flow_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `security_event_cash_flow_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -148,7 +142,7 @@ CREATE TABLE IF NOT EXISTS `security_quote` (
   `currency` char(3) DEFAULT NULL COMMENT 'Код валюты (опционально)',
   PRIMARY KEY (`id`),
   UNIQUE KEY `security_quote_security_timestamp_uniq_ix` (`security`, `timestamp`),
-  KEY `security_quote_security_fkey` (`security`),
+  KEY `security_quote_security_ix` (`security`),
   CONSTRAINT `security_quote_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Котировка (цена) финансовых инструментов';
 
@@ -174,7 +168,7 @@ CREATE TABLE IF NOT EXISTS `transaction_cash_flow` (
   `value` decimal(12,2) NOT NULL COMMENT 'Размер',
   `currency` char(3) NOT NULL DEFAULT 'RUR' COMMENT 'Код валюты',
   PRIMARY KEY (`transaction_id`,`portfolio`,`type`),
-  KEY `transaction_cash_flow_type_key` (`type`),
+  KEY `transaction_cash_flow_type_ix` (`type`),
   KEY `transaction_cash_flow_transaction_id_ix` (`transaction_id`),
   KEY `transaction_cash_flow_portfolio_ix` (`portfolio`),
   CONSTRAINT `transaction_cash_flow_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,

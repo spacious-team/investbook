@@ -41,6 +41,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
 
 @Service
 @RequiredArgsConstructor
@@ -129,10 +130,13 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
         m.setId(e.getId());
         m.setPortfolio(e.getPortfolio().getId());
         m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
-        m.setSecurity(e.getSecurity().getId(), ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()));
+        m.setSecurity(
+                ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),
+                ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()));
         m.setCount(e.getCount());
-        m.setType(CashFlowType.valueOf(e.getCashFlowType().getId()));
-        m.setValue(e.getValue().abs());
+        CashFlowType type = CashFlowType.valueOf(e.getCashFlowType().getId());
+        m.setType(type);
+        m.setValue(type == DERIVATIVE_PROFIT ? e.getValue() :  e.getValue().abs());
         m.setValueCurrency(e.getCurrency());
 
         if (m.getType() != CashFlowType.TAX) {

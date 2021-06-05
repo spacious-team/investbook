@@ -28,12 +28,14 @@ import org.springframework.web.client.RestTemplate;
 
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.lang.String.valueOf;
 import static java.util.Optional.empty;
 import static org.spacious_team.broker.pojo.SecurityType.*;
 
@@ -73,9 +75,12 @@ public class MoexIssClientImpl implements MoexIssClient {
             "start=0&" +
             "limit=10&" +
             "q={query}";
-    private static final String securityUri = "http://iss.moex.com/iss/securities/{secId}.json?" +
+    private static final String securityBoardsUri = "http://iss.moex.com/iss/securities/{secId}.json?" +
             "iss.only=boards&" +
             "boards.columns=is_primary,engine,market,boardid,currencyid";
+    private static final String securityDescriptionUri = "http://iss.moex.com/iss/securities/{secId}.json?" +
+            "iss.only=description&" +
+            "iss.meta=off";
     private static final String quoteUri = "http://iss.moex.com/iss/engines/{engine}/markets/{market}/boards/{board}/securities/{secId}.json?" +
             "iss.meta=off&" +
             "iss.only=securities&" +
@@ -102,34 +107,51 @@ public class MoexIssClientImpl implements MoexIssClient {
         // Moex couldn't find contract  (shortname=USDRUB_TOM) by USDRUB_TOM, but finds it by USDRUB
         String query = (securityType == CURRENCY_PAIR) ? getCurrencyPair(isinOrContractName) : isinOrContractName;
         return Optional.ofNullable(restTemplate.getForObject(securitiesUri, Map.class, query))
-                .map(MoexJsonResponseParser::buildFromIntObjectMap)
-                .flatMap(securities -> securities.stream()
-                        .filter(security -> isinOrContractName.equals(security.get("isin")) ||
-                                isinOrContractName.equals(security.get("shortname")) ||
-                                isinOrContractName.equals(security.get("secid")))
-                        .map(s -> s.get("secid"))
-                        .map(String::valueOf)
-                        .findAny());
+                .map(MoexJsonResponseParser::convertFromIntObjectMap)
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(security -> isinOrContractName.equals(security.get("isin")) ||
+                        isinOrContractName.equals(security.get("shortname")) ||
+                        isinOrContractName.equals(security.get("secid")))
+                .map(s -> s.get("secid"))
+                .filter(Objects::nonNull)
+                .map(String::valueOf)
+                .findAny();
+    }
+
+    @Override
+    public Optional<String> getIsin(String secId) {
+        return Optional.ofNullable(restTemplate.getForObject(securityDescriptionUri, Map.class, secId))
+                .map(MoexJsonResponseParser::convertFromIntObjectMap)
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(description -> "ISIN".equalsIgnoreCase(valueOf(description.get("name"))))
+                .map(s -> s.get("value"))
+                .filter(Objects::nonNull)
+                .map(String::valueOf)
+                .findAny();
     }
 
     @Override
     public Optional<MoexMarketDescription> getMarket(String moexSecId) {
-        return Optional.ofNullable(restTemplate.getForObject(securityUri, Map.class, moexSecId))
-                .map(MoexJsonResponseParser::buildFromIntObjectMap)
-                .flatMap(response -> response.stream()
-                        .filter(m -> Integer.valueOf(1).equals(m.get("is_primary")))
-                        .map(MoexMarketDescription::of)
-                        .findAny());
+        return Optional.ofNullable(restTemplate.getForObject(securityBoardsUri, Map.class, moexSecId))
+                .map(MoexJsonResponseParser::convertFromIntObjectMap)
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(m -> Integer.valueOf(1).equals(m.get("is_primary")))
+                .map(MoexMarketDescription::of)
+                .findAny();
     }
 
     public Optional<SecurityQuote> getQuote(String moexSecId, MoexMarketDescription market) {
         Map<String, String> variables = new HashMap<>(market.toMap());
         variables.put("secId", moexSecId);
         Optional<SecurityQuote> quote = Optional.ofNullable(restTemplate.getForObject(quoteUri, Map.class, variables))
-                .map(MoexJsonResponseParser::buildFromIntObjectMap)
-                .flatMap(_quote -> _quote.stream()
-                        .findAny()
-                        .flatMap(MoexSecurityQuoteHelper::parse))
+                .map(MoexJsonResponseParser::convertFromIntObjectMap)
+                .stream()
+                .flatMap(Collection::stream)
+                .findAny()
+                .flatMap(MoexSecurityQuoteHelper::parse)
                 .map(quoteBuilder -> quoteBuilder.currency(market.getCurrency()))
                 .map(SecurityQuoteBuilder::build);
         if (quote.isPresent()) {
@@ -221,7 +243,7 @@ public class MoexIssClientImpl implements MoexIssClient {
     private Optional<String> getContractDescriptionFromMoex(String contract, String key) {
         try {
             return Optional.ofNullable(restTemplate.getForObject(contractDescription, Map.class, contract))
-                    .map(MoexJsonResponseParser::buildFromIntObjectMap)
+                    .map(MoexJsonResponseParser::convertFromIntObjectMap)
                     .flatMap(response -> response.stream()
                             .filter(record -> Objects.equals(record.get("name"), key))
                             .map(record -> (String) record.get("value"))

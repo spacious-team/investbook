@@ -19,31 +19,11 @@
 package ru.investbook.web.forms.model;
 
 import lombok.Data;
-import org.spacious_team.broker.pojo.CashFlowType;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PositiveOrZero;
-import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Data
-public class SecurityEventCashFlowModel {
-
-    @Nullable
-    private Integer id;
-
-    @Nullable
-    private Integer taxId;
-
-    @NotEmpty
-    private String portfolio;
-
-    @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date = LocalDate.now();
+public class SecurityDescriptionModel {
 
     /**
      * In "name (isin)" or "contract-name" format
@@ -51,35 +31,15 @@ public class SecurityEventCashFlowModel {
     @NotEmpty
     private String security;
 
-    @NotNull
-    private int count;
-
-    @NotNull
-    private CashFlowType type;
-
-    @NotNull
-    private BigDecimal value;
-
     @NotEmpty
-    private String valueCurrency = "RUB";
-
-    @Nullable
-    @PositiveOrZero
-    private BigDecimal tax;
-
-    @Nullable
-    private String taxCurrency = "RUB";
-
-    public void setValueCurrency(String currency) {
-        this.valueCurrency = currency.toUpperCase();
-    }
-
-    public void setTaxCurrency(String currency) {
-        this.taxCurrency = currency.toUpperCase();
-    }
+    private String sector;
 
     public void setSecurity(String securityId, String securityName) {
         this.security = SecurityHelper.getSecurityDescription(securityId, securityName);
+    }
+
+    public String getSecurityDisplayName() {
+        return SecurityHelper.getSecurityDisplayName(security);
     }
 
     /**
@@ -94,9 +54,5 @@ public class SecurityEventCashFlowModel {
      */
     public String getSecurityName() {
         return SecurityHelper.getSecurityName(security);
-    }
-
-    public String getSecurityDisplayName() {
-        return SecurityHelper.getSecurityDisplayName(security);
     }
 }

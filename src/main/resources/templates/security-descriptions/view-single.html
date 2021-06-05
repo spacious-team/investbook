@@ -20,25 +20,19 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Сохранено свойство</title>
+    <title>Сохранена информация</title>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
 </head>
 <body>
 
-<h1>Сохранено свойство</h1>
-
-<p th:text="'Счет: ' +  ${property.portfolio}"/>
-<p th:text="'Номер записи: ' +  ${property.id}"/>
-<p th:text="'Дата: ' + ${property.date}"/>
-<p th:text="${property.cashRub} + ' RUB'" th:if="${property.cashRub.floatValue() > 0.001}"/>
-<p th:text="${property.cashUsd} + ' USD'" th:if="${property.cashUsd.floatValue() > 0.001}"/>
-<p th:text="${property.cashEur} + ' EUR'" th:if="${property.cashEur.floatValue() > 0.001}"/>
-<p th:text="${property.cashGbp} + ' GBP'" th:if="${property.cashGbp.floatValue() > 0.001}"/>
-<p th:text="${property.cashChf} + ' CHF'" th:if="${property.cashChf.floatValue() > 0.001}"/>
-<a href="/portfolio-properties/edit-form/cash">Добавить еще</a><br>
-<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Информация по счетам/delete_7">Удалить свойство</a><br>
-<a href="/portfolio-properties">Посмотреть все</a><br>
+<h1>Сохранена информация</h1>
+<p th:text="'Идентификатор: ' +  ${securityDescription.getSecurityId()}"/>
+<p th:text="'Инструмент: ' +  ${securityDescription.getSecurityDisplayName()}"/>
+<p th:text="'Сектор экономики: ' + ${securityDescription.sector}" th:if="${securityDescription.sector != null}"></p>
+<a href="/security-descriptions/edit-form">Добавить еще</a><br>
+<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Информация по инструментам/delete_4">Удалить информацию</a><br>
+<a href="/security-descriptions">Посмотреть информацию по всем инструментам</a><br>
 <a href="/forms.html">На главную</a><br>
 
 </body>

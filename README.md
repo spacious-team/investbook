@@ -32,6 +32,8 @@
 
 ![main-page](https://user-images.githubusercontent.com/11336712/112064959-e175e800-8b74-11eb-9c3e-6cbd1e86013d.png)
 
+![portfolio-composition](https://user-images.githubusercontent.com/11336712/120564463-a5cc8980-c413-11eb-8326-46efcdc85c23.gif)
+
 Все что нужно - это подгружать свежие отчеты брокера или [вручную вводить](src/main/asciidoc/investbook-forms.adoc)
 информацию. По каждому счету в отдельности и подводя единый итог по всем счетам, будет доступна следующая информация:
 - [обзор](src/main/asciidoc/portfolio-analysis.adoc) роста активов, рассчитанного по методике S&P 500,
@@ -49,7 +51,7 @@
   сделок на срочном рынке в разрезе группы контрактов (например, по всем фьючерсам и опционам Si, то же по BR и т.д.);  
   ![derivatires-marker-total-profit](https://user-images.githubusercontent.com/11336712/119887746-30f1df00-bf3d-11eb-9c52-713093ae4d72.png)
 - распределение прибыли по группам срочных контрактов в [портфеле трейдера](src/main/asciidoc/derivatives-market-total-profit.adoc);  
-  ![derivatires-profit-proportion](https://user-images.githubusercontent.com/11336712/119885911-1454a780-bf3b-11eb-9c75-c8b3d871708a.png)
+  ![derivatives-profit-proportion](https://user-images.githubusercontent.com/11336712/120565530-fb099a80-c415-11eb-82bb-8288ed9b7806.png)
 - детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/portfolio-payment.adoc);  
   ![portfolio-payment](https://user-images.githubusercontent.com/11336712/88460806-93a2c600-cea7-11ea-8ac9-95406fd6cec8.png)
 - детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/foreign-portfolio-payment.adoc),

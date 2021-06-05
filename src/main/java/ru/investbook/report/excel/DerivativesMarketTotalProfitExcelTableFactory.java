@@ -22,21 +22,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
-import ru.investbook.converter.PortfolioPropertyConverter;
+import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
-import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.FifoPositionsFactory;
-import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
 import ru.investbook.report.ViewFilter;
-import ru.investbook.repository.PortfolioPropertyRepository;
-import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityRepository;
-import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
+import ru.investbook.service.SecurityProfitService;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
 
 import java.math.BigDecimal;
@@ -46,7 +43,6 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -55,6 +51,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.*;
+import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
+import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_QUOTE;
 import static ru.investbook.report.excel.DerivativesMarketTotalProfitExcelTableHeader.*;
 
 @Component
@@ -64,16 +62,13 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     private static final String QUOTE_CURRENCY = "PNT"; // point
     private static final String PROFIT_FORMULA = getProfitFormula();
     private static final String PROFIT_PROPORTION_FORMULA = getProfitProportionFormula();
-    protected final TransactionRepository transactionRepository;
+    private final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
-    private final TransactionCashFlowRepository transactionCashFlowRepository;
-    private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
-    protected final PortfolioPropertyConverter portfolioPropertyConverter;
+    private final SecurityConverter securityConverter;
     private final FifoPositionsFactory positionsFactory;
-    private final ForeignExchangeRateService foreignExchangeRateService;
-    protected final PortfolioPropertyRepository portfolioPropertyRepository;
-    private final Set<Integer> paymentEvents = Set.of(CashFlowType.DERIVATIVE_PROFIT.getId());
+    private final Set<Integer> paymentEvents = Set.of(DERIVATIVE_PROFIT.getId());
     private final MoexDerivativeCodeService moexDerivativeCodeService;
+    private final SecurityProfitService securityProfitService;
 
     public Table create(Portfolio portfolio) {
         throw new UnsupportedOperationException();
@@ -118,11 +113,11 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
                 .collect(toCollection(LinkedHashSet::new));
     }
 
-    private Set<String> getContracts(String contractGroup) {
+    private Set<Security> getContracts(String contractGroup) {
         return securityRepository.findAll()
                 .stream()
                 .filter(security -> belongsToContractGroup(security, contractGroup))
-                .map(SecurityEntity::getId)
+                .map(securityConverter::fromEntity)
                 .collect(toSet());
     }
 
@@ -135,7 +130,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     private Table.Record getSecurityStatus(Collection<String> portfolios, String contractGroup, String toCurrency) {
         Table.Record row = new Table.Record();
         try {
-            Set<String> contracts = getContracts(contractGroup);
+            Set<Security> contracts = getContracts(contractGroup);
             Deque<Transaction> transactions = getTransactions(portfolios, contracts);
 
             row.put(CONTRACT_GROUP, moexDerivativeCodeService.codePrefixToShortnamePrefix(contractGroup)
@@ -163,9 +158,9 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
             int openedPositions = contractToOpenedPositions.values().stream().mapToInt(Math::abs).sum();
 
             row.put(COUNT, openedPositions);
-            row.put(COMMISSION, getTotal(transactions, CashFlowType.COMMISSION, toCurrency).abs());
+            row.put(COMMISSION, securityProfitService.getTotal(transactions, CashFlowType.COMMISSION, toCurrency).abs());
             if (openedPositions == 0) {
-                row.put(GROSS_PROFIT_PNT, getTotal(transactions, CashFlowType.DERIVATIVE_QUOTE, QUOTE_CURRENCY));
+                row.put(GROSS_PROFIT_PNT, securityProfitService.getTotal(transactions, DERIVATIVE_QUOTE, QUOTE_CURRENCY));
             }
             row.put(GROSS_PROFIT, getGrossProfit(portfolios, contracts, toCurrency));
             row.put(PROFIT, PROFIT_FORMULA);
@@ -176,90 +171,32 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
         return row;
     }
 
-    private Deque<Transaction> getTransactions(Collection<String> portfolios, Set<String> contracts) {
+    private Deque<Transaction> getTransactions(Collection<String> portfolios, Set<Security> contracts) {
         ViewFilter filter = ViewFilter.get();
         return contracts.stream()
-                .map(contract -> positionsFactory.getTransactions(portfolios, contract, filter))
+                .map(contract -> positionsFactory.getTransactions(portfolios, contract.getId(), filter))
                 .flatMap(Collection::stream)
                 .sorted(Comparator.comparing(Transaction::getTimestamp))
                 .collect(toCollection(LinkedList::new));
     }
 
-    private Instant getLastEventDate(Collection<String> portfolios, Collection<String> contracts) {
+    private Instant getLastEventDate(Collection<String> portfolios, Collection<Security> contracts) {
         ViewFilter filter = ViewFilter.get();
         return contracts.stream()
-                .map(contract -> getLastEventDate(portfolios, contract, filter))
+                .map(contract -> securityProfitService.getLastEventTimestamp(portfolios, contract, paymentEvents, filter))
                 .flatMap(Optional::stream)
-                .map(SecurityEventCashFlowEntity::getTimestamp)
                 .max(Comparator.naturalOrder())
                 .orElse(null);
-    }
-
-    private Optional<SecurityEventCashFlowEntity> getLastEventDate(Collection<String> portfolios,
-                                                                   String contract, ViewFilter filter) {
-        return portfolios.isEmpty() ?
-                securityEventCashFlowRepository
-                        .findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                contract, paymentEvents, filter.getFromDate(), filter.getToDate()) :
-                securityEventCashFlowRepository
-                        .findFirstByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                portfolios, contract, paymentEvents, filter.getFromDate(), filter.getToDate());
     }
 
     /**
      * Cуммарная вариационная маржа по всем контрактам
      */
-    private BigDecimal getGrossProfit(Collection<String> portfolios, Collection<String> contracts, String toCurrency) {
+    private BigDecimal getGrossProfit(Collection<String> portfolios, Collection<Security> contracts, String toCurrency) {
         return contracts.stream()
-                .map(contract -> sumDerivativeProfitPayments(portfolios, contract, toCurrency))
+                .map(contract -> securityProfitService.sumPaymentsForType(portfolios, contract, DERIVATIVE_PROFIT, toCurrency))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
-
-    private BigDecimal getTotal(Deque<Transaction> transactions, CashFlowType type, String toCurrency) {
-        return transactions.stream()
-                .filter(t -> t.getId() != null && t.getCount() != 0)
-                .map(t -> getTransactionValue(t, type, toCurrency))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    private Optional<BigDecimal> getTransactionValue(Transaction t, CashFlowType type, String toCurrency) {
-        return transactionCashFlowRepository
-                .findByPkPortfolioAndPkTransactionIdAndPkType(t.getPortfolio(), t.getId(), type.getId())
-                .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency));
-    }
-
-    private BigDecimal sumDerivativeProfitPayments(Collection<String> portfolios, String contract, String toCurrency) {
-        return getSecurityEventCashFlowEntities(portfolios, contract, CashFlowType.DERIVATIVE_PROFIT)
-                .stream()
-                .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    public List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
-                                                                              String contract,
-                                                                              CashFlowType cashFlowType) {
-        return portfolios.isEmpty() ?
-                securityEventCashFlowRepository
-                        .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                contract,
-                                cashFlowType.getId(),
-                                ViewFilter.get().getFromDate(),
-                                ViewFilter.get().getToDate()) :
-                securityEventCashFlowRepository
-                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                portfolios,
-                                contract,
-                                cashFlowType.getId(),
-                                ViewFilter.get().getFromDate(),
-                                ViewFilter.get().getToDate());
-    }
-
-    private BigDecimal convertToCurrency(BigDecimal value, String fromCurrency, String toCurrency) {
-        return foreignExchangeRateService.convertValueToCurrency(value, fromCurrency, toCurrency);
-    }
-
 
     private static String getProfitFormula() {
         return "=" + GROSS_PROFIT.getCellAddr() + "-" + COMMISSION.getCellAddr();
