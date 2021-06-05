@@ -25,6 +25,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.investbook.report.ViewFilter;
+import ru.investbook.service.AssetsAndCashService;
 import ru.investbook.service.InvestmentProportionService;
 
 import java.util.Collection;
@@ -40,7 +41,7 @@ import static java.util.stream.Collectors.toList;
 public class PortfolioCompositionController {
 
     private final InvestmentProportionService investmentProportionService;
-    private final HomePageController homePageController;
+    private final AssetsAndCashService assetsAndCashService;
     private final ViewFilter currentState = ViewFilter.builder().build();
 
     @GetMapping
@@ -51,16 +52,17 @@ public class PortfolioCompositionController {
                     .stream()
                     .map(e -> Map.of("sector", e.getKey(), "investment", ((Number) e.getValue()).intValue()))
                     .collect(toList());
-            List<String> portfolios = homePageController.getPortfolios();
-            investmentProportion.add(
-                    Map.of("sector", "Кеш",
-                            "investment", homePageController.getTotalCash(portfolios).intValue()));
+            List<String> portfolios = assetsAndCashService.getPortfolios();
+            int cash = assetsAndCashService.getTotalCash(portfolios)
+                    .map(Number::intValue)
+                    .orElse(0);
+            investmentProportion.add(Map.of("sector", "Кеш", "investment", cash));
             model.addAttribute("investmentProportion", investmentProportion);
             return "portfolio-composition";
         } catch (Exception e) {
             model.addAttribute("title", "Ошибка");
             model.addAttribute("message",
-                    "При сборке круговой диаграмы состава портфеля возникла ошибка: " + e.getMessage() +
+                    "При сборке круговой диаграммы состава портфеля возникла ошибка: " + e.getMessage() +
                             ". Полное описание ошибки доступно в файле лога, обратитесь в техническую поддержку.");
             return "success";
         }
