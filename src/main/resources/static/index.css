@@ -48,6 +48,11 @@ a:hover {
     cursor: default;
 }
 
+#logo {
+    width: 38px;
+    height: 38px;
+}
+
 .row {
     width: 100%;
     display: flex;
