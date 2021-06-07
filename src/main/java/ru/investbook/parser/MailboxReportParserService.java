@@ -37,7 +37,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.search.AndTerm;
 import javax.mail.search.FlagTerm;
 import javax.mail.search.FromTerm;
-import javax.mail.search.HeaderTerm;
 import javax.mail.search.SearchTerm;
 import java.time.Duration;
 import java.util.Properties;
@@ -93,17 +92,13 @@ public class MailboxReportParserService {
     @SneakyThrows
     private SearchTerm getSearchTerm(MailboxDescriptor mailbox) {
         SearchTerm notSeen = new FlagTerm(SEEN_FLAG, false);
-        SearchTerm multipartMixed = new HeaderTerm("Content-Type", "multipart/");
         String filterByFrom = mailbox.getFilterByFrom();
         if (hasLength(filterByFrom)) {
             return new AndTerm(new SearchTerm[]{
                     notSeen,
-                    multipartMixed,
                     new FromTerm(new InternetAddress(filterByFrom))});
         } else {
-            return new AndTerm(new SearchTerm[]{
-                    notSeen,
-                    multipartMixed});
+            return notSeen;
         }
     }
 
