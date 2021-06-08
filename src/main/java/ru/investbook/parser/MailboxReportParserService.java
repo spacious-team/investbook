@@ -66,7 +66,7 @@ public class MailboxReportParserService {
         inbox.open(Folder.READ_WRITE);
         SearchTerm searchTerm = getSearchTerm(mailbox);
         Message[] messages = inbox.search(searchTerm);
-        log.info("Найдено {} писем, удовлетворяющих фильтру (не прочитанные c content-type = multipart)", messages.length);
+        log.info("Найдено {} не прочитанных писем, удовлетворяющих фильтру", messages.length);
         int parsedReportCount = Stream.of(messages)
                 .parallel()
                 .mapToInt(message -> handleMessage(message, mailbox))
