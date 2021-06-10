@@ -148,7 +148,7 @@
 - Телеграм чат [технической поддержки](https://t.me/investbook_support);
 - Обсуждение на форуме [banki.ru](https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=380178);
 - Страница приложения на [smart-lab.ru](https://smart-lab.ru/trading-software/Investbook) и
-  [страница для связи](https://smart-lab.ru/profile/VitaliyAnanev/);  
+  [страница для связи](https://smart-lab.ru/profile/SpaciousTeam);  
 - e-mail: [spacious-team@ya.ru](mailto:spacious-team@ya.ru)
 
 <img src="https://user-images.githubusercontent.com/11336712/85948991-b13e4780-b95c-11ea-9df6-a28be74c489d.png" width="100%"/>
