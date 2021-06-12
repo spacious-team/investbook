@@ -42,7 +42,7 @@
 - Телеграм чат https://t.me/investbook_support[технической поддержки];
 - Обсуждение на форуме https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=380178[banki.ru];
 - Страница приложения на https://smart-lab.ru/trading-software/Investbook[smart-lab.ru] и
-  https://smart-lab.ru/profile/VitaliyAnanev/[страница для связи];
+  https://smart-lab.ru/profile/SpaciousTeam[страница для связи];
 - e-mail: mailto:spacious-team@ya.ru[spacious-team@ya.ru]
 
 == Тонкая настройка

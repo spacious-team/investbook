@@ -30,7 +30,7 @@
 несколько счетов у разных брокеров, информация будет представлена в разном месте, объеме и форматах. Приложение
 объективно, отображает данные в едином формате для всех брокеров.
 
-![main-page](https://user-images.githubusercontent.com/11336712/112064959-e175e800-8b74-11eb-9c3e-6cbd1e86013d.png)
+![main-page](https://user-images.githubusercontent.com/11336712/121085977-41cb0c00-c7eb-11eb-9056-3434df1544b9.png)
 
 ![portfolio-composition](https://user-images.githubusercontent.com/11336712/120564463-a5cc8980-c413-11eb-8326-46efcdc85c23.gif)
 
@@ -148,7 +148,7 @@
 - Телеграм чат [технической поддержки](https://t.me/investbook_support);
 - Обсуждение на форуме [banki.ru](https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=380178);
 - Страница приложения на [smart-lab.ru](https://smart-lab.ru/trading-software/Investbook) и
-  [страница для связи](https://smart-lab.ru/profile/VitaliyAnanev/);  
+  [страница для связи](https://smart-lab.ru/profile/SpaciousTeam);  
 - e-mail: [spacious-team@ya.ru](mailto:spacious-team@ya.ru)
 
 <img src="https://user-images.githubusercontent.com/11336712/85948991-b13e4780-b95c-11ea-9df6-a28be74c489d.png" width="100%"/>

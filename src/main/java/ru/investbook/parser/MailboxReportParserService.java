@@ -37,7 +37,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.search.AndTerm;
 import javax.mail.search.FlagTerm;
 import javax.mail.search.FromTerm;
-import javax.mail.search.HeaderTerm;
 import javax.mail.search.SearchTerm;
 import java.time.Duration;
 import java.util.Properties;
@@ -67,7 +66,7 @@ public class MailboxReportParserService {
         inbox.open(Folder.READ_WRITE);
         SearchTerm searchTerm = getSearchTerm(mailbox);
         Message[] messages = inbox.search(searchTerm);
-        log.info("Найдено {} писем, удовлетворяющих фильтру (не прочитанные c content-type = multipart)", messages.length);
+        log.info("Найдено {} не прочитанных писем, удовлетворяющих фильтру", messages.length);
         int parsedReportCount = Stream.of(messages)
                 .parallel()
                 .mapToInt(message -> handleMessage(message, mailbox))
@@ -93,17 +92,13 @@ public class MailboxReportParserService {
     @SneakyThrows
     private SearchTerm getSearchTerm(MailboxDescriptor mailbox) {
         SearchTerm notSeen = new FlagTerm(SEEN_FLAG, false);
-        SearchTerm multipartMixed = new HeaderTerm("Content-Type", "multipart/");
         String filterByFrom = mailbox.getFilterByFrom();
         if (hasLength(filterByFrom)) {
             return new AndTerm(new SearchTerm[]{
                     notSeen,
-                    multipartMixed,
                     new FromTerm(new InternetAddress(filterByFrom))});
         } else {
-            return new AndTerm(new SearchTerm[]{
-                    notSeen,
-                    multipartMixed});
+            return notSeen;
         }
     }
 
