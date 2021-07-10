@@ -19,7 +19,20 @@
 package ru.investbook.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.SecurityEntity;
 
 public interface SecurityRepository extends JpaRepository<SecurityEntity, String> {
+
+    @Transactional
+    default void createOrUpdate(String securityId, String securityName) {
+        findById(securityId).ifPresentOrElse(
+                security -> security.setName(securityName),
+                () -> {
+                    SecurityEntity entity = new SecurityEntity();
+                    entity.setId(securityId);
+                    entity.setName(securityName);
+                    save(entity);
+                });
+    }
 }

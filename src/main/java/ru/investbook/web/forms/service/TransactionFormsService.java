@@ -21,7 +21,6 @@ package ru.investbook.web.forms.service;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
-import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
@@ -161,13 +160,8 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                             .id(portfolio)
                             .build()));
         }
-        if (!securityRepository.existsById(securityId)) {
-            securityRepository.saveAndFlush(
-                    securityConverter.toEntity(Security.builder()
-                            .id(securityId)
-                            .name(securityName)
-                            .build()));
-        }
+        securityRepository.createOrUpdate(securityId, securityName);
+        securityRepository.flush();
     }
 
     private TransactionModel toTransactionModel(TransactionEntity e) {

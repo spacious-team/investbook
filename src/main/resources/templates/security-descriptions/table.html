@@ -27,8 +27,9 @@
 <body>
 
 <h1>Информация по инструментам</h1>
-<a href="/security-descriptions/edit-form">Добавить информацию</a><br>
-<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Информация по инструментам/delete_4">Удалить</a><br>
+<a href="/security-descriptions/edit-form">Добавить инструмент</a><br>
+<!--a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Информация по инструментам/delete_4">Удалить</a><br-->
+<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Инструменты/delete_5" class="delete">Удалить (только если нет сделок)</a><br>
 <a href="/forms.html">На главную</a><br>
 
 <p class="hint">
@@ -47,6 +48,10 @@
         <td th:text="${description.getSector}"/>
     </tr>
 </table>
+
+<p class="hint">
+    Используемые инструменты срочного и валютного рынков не отображаются.
+</p>
 
 </body>
 </html>
