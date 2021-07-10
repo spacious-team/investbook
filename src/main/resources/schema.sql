@@ -107,8 +107,8 @@ CREATE TABLE IF NOT EXISTS `security_description` (
     `issuer` int(10) unsigned DEFAULT NULL COMMENT 'Эмитент',
     PRIMARY KEY (`security`),
     KEY `security_description_issuer_ix` (`issuer`),
-    CONSTRAINT `security_description_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE,
-    CONSTRAINT `security_description_issuer_fkey` FOREIGN KEY (`issuer`) REFERENCES `issuer` (`id`) ON UPDATE CASCADE
+    CONSTRAINT `security_description_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT `security_description_issuer_fkey` FOREIGN KEY (`issuer`) REFERENCES `issuer` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Расширенная информация по ценным бумагам';
 
 -- Дамп структуры для таблица portfolio.security_event_cash_flow
