@@ -39,12 +39,15 @@ import static java.lang.System.nanoTime;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
+import static org.spacious_team.broker.pojo.SecurityType.STOCK_OR_BOND;
+import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class SecuritySectorService {
 
+    public static final String UNKNOWN_SECTOR = "Другое";
     private final SecurityRepository securityRepository;
     private final SecurityDescriptionRepository securityDescriptionRepository;
     private final SecurityDescriptionConverter securityDescriptionConverter;
@@ -96,6 +99,9 @@ public class SecuritySectorService {
                         .map(t -> t.endsWith("-RM") ? t.substring(0, t.length() - 2) : t)
                         .map(String::toUpperCase)
                         .map(tickerToSector::get))
+                .or(() -> ofNullable(security.getId())
+                        .filter(id -> getSecurityType(id) == STOCK_OR_BOND)
+                        .map($ -> UNKNOWN_SECTOR))
                 .orElse(null);
         if (sector == null) {
             return empty();
