@@ -69,3 +69,15 @@ input.security {
 .value {
     text-align: right;
 }
+
+.table-row-control {
+    opacity: 0;
+}
+
+.table-row-control a:hover {
+    text-decoration: none;
+}
+
+tr:hover > .table-row-control {
+    opacity: 1;
+}

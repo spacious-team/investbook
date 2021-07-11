@@ -94,4 +94,15 @@ public class TransactionController {
         fifoPositionsFactory.invalidateCache();
         return "transactions/view-single";
     }
+
+    @GetMapping("/delete")
+    public String delete(@RequestParam(name = "portfolio") String portfolio,
+                              @RequestParam(name = "transaction-id") String transactionId,
+                              Model model) {
+        transactionFormsService.delete(portfolio, transactionId);
+        fifoPositionsFactory.invalidateCache();
+        model.addAttribute("message", "Сделка удалена");
+        model.addAttribute("backLink", "/transactions");
+        return "success";
+    }
 }

@@ -34,12 +34,10 @@
 <h1>Информация по счету</h1>
 <a href="/portfolio-properties/edit-form/total-assets">Добавить активы</a><br>
 <a href="/portfolio-properties/edit-form/cash">Добавить денежные средства</a><br>
-<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Информация по счетам/delete_7">Удалить
-    свойство</a><br>
 <a href="/forms.html">На главную</a><br>
 
 <p class="hint">
-    Для редактирования свойства кликните по его номеру.
+    Для редактирования свойства кликните по его номеру, для удаления - на крестик.
 </p>
 
 <table>
@@ -49,6 +47,7 @@
         <th>Дата</th>
         <th>Свойство</th>
         <th class="value">Значение</th>
+        <th></th>
     </tr>
     <th:block th:each="property : ${properties}">
         <tr th:if="${property instanceof T(ru.investbook.web.forms.model.PortfolioPropertyTotalAssetsModel)}">
@@ -57,6 +56,7 @@
             <td th:text="${property.date}"/>
             <td>Активы</td>
             <td th:text="${property.totalAssets.setScale(2, T(java.math.RoundingMode).HALF_UP)} + '&emsp;' + ${property.totalAssetsCurrency}" class="value"/>
+            <td class="table-row-control"><a th:href="@{/portfolio-properties/delete(id=${property.id})}" title="Удалить">&#x274c;</a></td>
         </tr>
         <th:block th:if="${property instanceof T(ru.investbook.web.forms.model.PortfolioPropertyCashModel)}">
             <tr th:if="${property.cashRub != null && property.cashRub.floatValue() > 0.001}">
@@ -65,6 +65,7 @@
                 <td th:text="${property.date}"/>
                 <td>Денежные средства</td>
                 <td th:text="${property.cashRub.setScale(2, T(java.math.RoundingMode).HALF_UP)} + '&emsp;RUB'" class="value"/>
+                <td class="table-row-control"><a th:href="@{/portfolio-properties/delete(id=${property.id})}" title="Удалить">&#x274c;</a></td>
             </tr>
             <tr th:if="${property.cashUsd != null && property.cashUsd.floatValue() > 0.001}">
                 <td th:text="${property.portfolio}"/>
@@ -72,6 +73,7 @@
                 <td th:text="${property.date}"/>
                 <td>Денежные средства</td>
                 <td th:text="${property.cashUsd.setScale(2, T(java.math.RoundingMode).HALF_UP)} + '&emsp;USD'" class="value"/>
+                <td class="table-row-control"><a th:href="@{/portfolio-properties/delete(id=${property.id})}" title="Удалить">&#x274c;</a></td>
             </tr>
             <tr th:if="${property.cashEur != null && property.cashEur.floatValue() > 0.001}">
                 <td th:text="${property.portfolio}"/>
@@ -79,6 +81,7 @@
                 <td th:text="${property.date}"/>
                 <td>Денежные средства</td>
                 <td th:text="${property.cashEur.setScale(2, T(java.math.RoundingMode).HALF_UP)} + '&emsp;EUR'" class="value"/>
+                <td class="table-row-control"><a th:href="@{/portfolio-properties/delete(id=${property.id})}" title="Удалить">&#x274c;</a></td>
             </tr>
             <tr th:if="${property.cashGbp != null && property.cashGbp.floatValue() > 0.001}">
                 <td th:text="${property.portfolio}"/>
@@ -86,6 +89,7 @@
                 <td th:text="${property.date}"/>
                 <td>Денежные средства</td>
                 <td th:text="${property.cashGbp.setScale(2, T(java.math.RoundingMode).HALF_UP)} + '&emsp;GBP'" class="value"/>
+                <td class="table-row-control"><a th:href="@{/portfolio-properties/delete(id=${property.id})}" title="Удалить">&#x274c;</a></td>
             </tr>
             <tr th:if="${property.cashChf != null && property.cashChf.floatValue() > 0.001}">
                 <td th:text="${property.portfolio}"/>
@@ -93,6 +97,7 @@
                 <td th:text="${property.date}"/>
                 <td>Денежные средства</td>
                 <td th:text="${property.cashChf.setScale(2, T(java.math.RoundingMode).HALF_UP)} + '&emsp;CHF'" class="value"/>
+                <td class="table-row-control"><a th:href="@{/portfolio-properties/delete(id=${property.id})}" title="Удалить">&#x274c;</a></td>
             </tr>
         </th:block>
     </th:block>

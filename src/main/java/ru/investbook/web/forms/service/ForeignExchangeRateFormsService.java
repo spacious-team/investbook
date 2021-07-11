@@ -75,4 +75,12 @@ public class ForeignExchangeRateFormsService implements FormsService<ForeignExch
         m.setRate(e.getRate());
         return m;
     }
+
+    public void delete(LocalDate date, String baseCurrency, String quoteCurrency) {
+        ForeignExchangeRateEntityPk pk = new ForeignExchangeRateEntityPk();
+        pk.setDate(date);
+        pk.setCurrencyPair(baseCurrency + quoteCurrency);
+        foreignExchangeRateRepository.deleteById(pk);
+        foreignExchangeRateRepository.flush();
+    }
 }

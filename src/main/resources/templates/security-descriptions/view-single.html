@@ -31,8 +31,7 @@
 <p th:text="'Инструмент: ' +  ${securityDescription.getSecurityDisplayName()}"/>
 <p th:text="'Сектор экономики: ' + ${securityDescription.sector}" th:if="${securityDescription.sector != null}"></p>
 <a href="/security-descriptions/edit-form">Добавить еще</a><br>
-<!--a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Информация по инструментам/delete_4">Удалить информацию</a><br-->
-<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Инструменты/delete_5" class="delete">Удалить (только если нет сделок)</a><br>
+<a th:href="@{/security-descriptions/delete(security-id=${securityDescription.getSecurityId})}" class="delete">Удалить этот инструмент (только если нет сделок)</a><br>
 <a href="/security-descriptions">Посмотреть информацию по всем инструментам</a><br>
 <a href="/forms.html">На главную</a><br>
 

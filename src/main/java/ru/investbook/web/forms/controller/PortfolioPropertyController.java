@@ -111,4 +111,12 @@ public class PortfolioPropertyController {
             "portfolio-properties/cash-view-single" :
             "portfolio-properties/total-assets-view-single";
     }
+
+    @GetMapping("/delete")
+    public String delete(@RequestParam(name = "id") Integer id, Model model) {
+        portfolioPropertyFormsService.delete(id);
+        model.addAttribute("message", "Запись удалена");
+        model.addAttribute("backLink", "/portfolio-properties");
+        return "success";
+    }
 }

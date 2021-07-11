@@ -153,4 +153,9 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
             }
         };
     }
+
+    public void delete(Integer id) {
+        portfolioPropertyRepository.deleteById(id);
+        portfolioPropertyRepository.flush();
+    }
 }

@@ -107,4 +107,9 @@ public class EventCashFlowFormsService implements FormsService<EventCashFlowMode
         m.setDescription(e.getDescription());
         return m;
     }
+
+    public void delete(Integer id) {
+        eventCashFlowRepository.deleteById(id);
+        eventCashFlowRepository.flush();
+    }
 }
