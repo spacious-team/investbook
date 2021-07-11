@@ -64,6 +64,7 @@ public class SecurityDescriptionController {
         securitySectorService.uploadAndUpdateSecuritySectors();
         model.addAttribute("message",
                 "Список секторов выгружен со Smart-Lab страницы https://smart-lab.ru/forum/sectors");
+        model.addAttribute("backLink", "/portfolio-composition");
         return "success";
     }
 

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <an-vitek@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,10 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
--- gh-223: lets patching from 2021.1.1 to 2021.2
-ALTER TABLE `security_quote`
-    DROP CONSTRAINT IF EXISTS `security_quote_isin_fkey`;
-ALTER TABLE `security_quote`
-    ADD CONSTRAINT IF NOT EXISTS `security_quote_security_fkey` FOREIGN KEY (`security`)
-        REFERENCES `security` (`id`) ON UPDATE CASCADE;
-
+-- Дамп структуры для таблица portfolio.stock_market_index
+CREATE TABLE IF NOT EXISTS `stock_market_index` (
+    `date` DATE NOT NULL,
+    `sp500` DECIMAL(7,2) NULL DEFAULT NULL COMMENT 'Значение индекса S&P 500',
+    PRIMARY KEY (`date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Индексы фондовых рынков';

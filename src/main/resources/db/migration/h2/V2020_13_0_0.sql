@@ -16,7 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-ALTER TABLE `security` ALTER COLUMN IF EXISTS `isin` RENAME TO `id`;
+EXECUTE IMMEDIATE NVL2(
+    QUOTE_IDENT((SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'SECURITY' AND COLUMN_NAME = 'ID')),
+    'CREATE ALIAS RANDOM_NAME1 FOR "java.lang.Math.sqrt"', -- do any noop command
+    'ALTER TABLE "SECURITY" ALTER COLUMN IF EXISTS "ISIN" RENAME TO "ID"'
+);
 ALTER TABLE `security_event_cash_flow` ALTER COLUMN IF EXISTS `isin` RENAME TO `security`;
 ALTER TABLE `security_quote` ALTER COLUMN IF EXISTS `isin` RENAME TO `security`;
 ALTER TABLE `transaction` ALTER COLUMN IF EXISTS `isin` RENAME TO `security`;
