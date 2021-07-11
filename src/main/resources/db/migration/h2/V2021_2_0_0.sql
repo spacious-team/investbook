@@ -41,7 +41,7 @@ ALTER TABLE `transaction`
         REFERENCES `portfolio` (`id`) ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE `security_quote`
-    DROP FOREIGN KEY `security_quote_security_fkey`;
+    DROP CONSTRAINT IF EXISTS `security_quote_isin_fkey`;
 ALTER TABLE `security_quote`
-    ADD CONSTRAINT `security_quote_security_fkey` FOREIGN KEY (`security`)
+    ADD CONSTRAINT IF NOT EXISTS `security_quote_security_fkey` FOREIGN KEY (`security`)
         REFERENCES `security` (`id`) ON UPDATE CASCADE ON DELETE CASCADE;

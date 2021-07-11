@@ -16,6 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+-- Дамп структуры для таблица portfolio.security_description
+-- Нужно проверить наличие issuer.id, может отсутствовать для БД < 2021.5. На колонку создается ссылка.
+ALTER TABLE `security` DROP CONSTRAINT IF EXISTS `security_issuer_inn_fkey`;
+ALTER TABLE `issuer` DROP COLUMN IF EXISTS `inn`;
+ALTER TABLE `issuer` ADD COLUMN IF NOT EXISTS `id` int(11) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT FIRST;
+CREATE TABLE IF NOT EXISTS `security_description` (
+    `security` varchar(64) NOT NULL COMMENT 'Идентификатор ценной бумаги',
+    `sector` varchar(32) DEFAULT NULL COMMENT 'Сектор экономики (применимо только для акций)',
+    `issuer` int(10) unsigned DEFAULT NULL COMMENT 'Эмитент',
+    PRIMARY KEY (`security`),
+    KEY `security_description_issuer_ix` (`issuer`),
+    CONSTRAINT `security_description_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT `security_description_issuer_fkey` FOREIGN KEY (`issuer`) REFERENCES `issuer` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Расширенная информация по ценным бумагам';
+
 -- rename wrong named indices
 ALTER INDEX IF EXISTS
 	`security_event_cash_flow_ticker_ix` RENAME TO `security_event_cash_flow_security_ix`;
