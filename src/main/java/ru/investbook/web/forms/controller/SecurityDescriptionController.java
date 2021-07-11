@@ -86,4 +86,18 @@ public class SecurityDescriptionController {
         securityDescriptionFormsService.save(securityDescription);
         return "security-descriptions/view-single";
     }
+
+    @GetMapping("/delete")
+    public String delete(@RequestParam(name = "security-id") String securityId, Model model) {
+        try {
+            securityDescriptionFormsService.delete(securityId);
+            model.addAttribute("message", "Инструмент удален");
+        } catch (Exception e) {
+            model.addAttribute("title", "Сработала защита");
+            model.addAttribute("message", "Возможно по инструменту есть сделки или выплаты. " +
+                    "Удалите их перед удалением инструмента.");
+        }
+        model.addAttribute("backLink", "/security-descriptions");
+        return "success";
+    }
 }

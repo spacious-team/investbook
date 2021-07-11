@@ -43,8 +43,7 @@
 </p>
 <p th:text="'Налог: ' + ${event.tax} + ' ' + ${event.taxCurrency}" th:if="${event.tax != null}"/>
 <a href="/security-events/edit-form">Добавить еще</a><br>
-<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/События по бумаге/delete_3">Удалить
-    событие</a><br>
+<a th:href="@{/security-events/delete(id=${event.id})}">Удалить это событие</a><br>
 <a href="/security-events">Посмотреть все события</a><br>
 <a href="/forms.html">На главную</a><br>
 

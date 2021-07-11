@@ -108,4 +108,9 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
         }
         return m;
     }
+
+    public void delete(Integer id) {
+        securityQuoteRepository.deleteById(id);
+        securityQuoteRepository.flush();
+    }
 }

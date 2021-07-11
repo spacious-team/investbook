@@ -148,4 +148,11 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
         }
         return m;
     }
+
+    public void delete(Integer id) {
+        getById(id).map(SecurityEventCashFlowModel::getTaxId)
+                .ifPresent(securityEventCashFlowRepository::deleteById);
+        securityEventCashFlowRepository.deleteById(id);
+        securityEventCashFlowRepository.flush();
+    }
 }

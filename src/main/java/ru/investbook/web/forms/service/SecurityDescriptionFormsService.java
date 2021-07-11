@@ -93,4 +93,9 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
         m.setSector(e.getSector());
         return m;
     }
+
+    public void delete(String securityId) {
+        securityRepository.deleteById(securityId);
+        securityRepository.flush();
+    }
 }

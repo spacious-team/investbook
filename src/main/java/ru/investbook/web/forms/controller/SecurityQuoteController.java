@@ -105,4 +105,12 @@ public class SecurityQuoteController {
         model.addAttribute("message", message);
         return "success";
     }
+
+    @GetMapping("/delete")
+    public String delete(@RequestParam(name = "id") Integer id, Model model) {
+        securityQuoteFormsService.delete(id);
+        model.addAttribute("message", "Котировка удалена");
+        model.addAttribute("backLink", "/security-quotes");
+        return "success";
+    }
 }

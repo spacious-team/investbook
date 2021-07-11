@@ -45,8 +45,7 @@
 <br th:if="${event.description != null}">
 <p th:text="${event.description}" th:if="${event.description != null}"/>
 <a href="/events/edit-form">Добавить еще</a><br>
-<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Движения ДС по счету/delete_10">Удалить
-    событие</a><br>
+<a th:href="@{/events/delete(id=${event.id})}">Удалить это событие</a><br>
 <a href="/events">Посмотреть все события</a><br>
 <a href="/forms.html">На главную</a><br>
 
