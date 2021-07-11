@@ -33,11 +33,10 @@
 
 <h1>Котировки</h1>
 <a href="/security-quotes/edit-form">Добавить котировку</a><br>
-<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Котировки/delete_2">Удалить котировку</a><br>
 <a href="/forms.html">На главную</a><br>
 
 <p class="hint">
-    Для редактирования котировки кликните по ее номеру.
+    Для редактирования котировки кликните по ее номеру, для удаления - на крестик.
 </p>
 
 <table>
@@ -49,6 +48,7 @@
         <th class="value">Цена</th>
         <th class="value">НКД</th>
         <th>Валюта</th>
+        <th></th>
     </tr>
     <tr th:each="quote : ${quotes}">
         <td><a th:href="@{/security-quotes/edit-form(id=${quote.id})}" th:text="${quote.id}"/></td>
@@ -61,6 +61,9 @@
         <td th:text="${(quote.accruedInterest != null) ? quote.accruedInterest.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}"
             class="value"/>
         <td th:text="${quote.currency}"/>
+        <td class="table-row-control">
+            <a th:href="@{/security-quotes/delete(id=${quote.id})}" title="Удалить">&#x274c;</a>
+        </td>
     </tr>
 </table>
 

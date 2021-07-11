@@ -87,4 +87,13 @@ public class SecurityEventCashFlowController {
         fifoPositionsFactory.invalidateCache();
         return "security-events/view-single";
     }
+
+    @GetMapping("/delete")
+    public String delete(@RequestParam(name = "id") Integer id, Model model) {
+        securityEventCashFlowFormsService.delete(id);
+        fifoPositionsFactory.invalidateCache();
+        model.addAttribute("message", "Запись удалена");
+        model.addAttribute("backLink", "/security-events");
+        return "success";
+    }
 }

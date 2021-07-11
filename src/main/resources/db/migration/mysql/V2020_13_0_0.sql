@@ -16,11 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-ALTER TABLE `security`
-    CHANGE COLUMN IF EXISTS `isin` `id` VARCHAR(64) NOT NULL
-        COMMENT 'Идентификатор ценной бумаги: ISIN - для акций, облигаций; наименование контракта - для срочного и валютного рынка'
-        FIRST;
-
+-- ALTER TABLE `security`
+--    CHANGE COLUMN IF EXISTS `isin` `id` VARCHAR(64) NOT NULL
+--        COMMENT 'Идентификатор ценной бумаги: ISIN - для акций, облигаций; наименование контракта - для срочного и валютного рынка'
+--        FIRST;
 
 ALTER TABLE `security_event_cash_flow`
     CHANGE COLUMN IF EXISTS `isin` `security` varchar(64) NOT NULL
@@ -41,7 +40,8 @@ ALTER TABLE `security_quote`
     DROP KEY IF EXISTS `security_quote_isin_timestamp_uniq_ix`,
     ADD UNIQUE KEY IF NOT EXISTS `security_quote_security_timestamp_uniq_ix` (`security`, `timestamp`),
     DROP KEY IF EXISTS `security_quote_isin_fkey`,
-    ADD KEY IF NOT EXISTS `security_quote_security_fkey` (`security`),
+    ADD KEY IF NOT EXISTS `security_quote_security_fkey` (`security`);
+ALTER TABLE `security_quote`
     DROP FOREIGN KEY IF EXISTS `security_quote_isin_fkey`,
     ADD CONSTRAINT `security_quote_security_fkey` FOREIGN KEY IF NOT EXISTS  (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE;
 

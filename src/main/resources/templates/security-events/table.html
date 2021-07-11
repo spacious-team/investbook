@@ -38,15 +38,10 @@
 </p>
 
 <a href="/security-events/edit-form">Добавить событие</a><br>
-<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/События по бумаге/delete_3">Удалить событие</a><br>
 <a href="/forms.html">На главную</a><br>
 
 <p class="hint">
-    Для редактирования события кликните по ее номеру.
-</p>
-
-<p class="hint">
-    При удалении события, не забудьте также удалить налоговое событие по номеру, если оно указано в скобках.
+    Для редактирования события кликните по ее номеру, для удаления - на крестик.
 </p>
 
 <table>
@@ -61,6 +56,7 @@
         <th>Валюта</th>
         <th class="value">Налог</th>
         <th>Валюта налога</th>
+        <th></th>
     </tr>
     <tr th:each="e : ${events}">
         <td th:text="${e.portfolio}"/>
@@ -82,6 +78,9 @@
         <td th:text="${e.valueCurrency}"/>
         <td th:text="${(e.tax != null) ? e.tax.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}" class="value"/>
         <td th:text="${(e.tax != null) ? e.taxCurrency : ''}"/>
+        <td class="table-row-control">
+            <a th:href="@{/security-events/delete(id=${e.id})}" title="Удалить">&#x274c;</a>
+        </td>
     </tr>
 </table>
 

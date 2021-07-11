@@ -16,68 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-html {
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
-}
-
-body {
-    margin: auto;
-    padding-bottom: 100px;
-}
-
-h1 {
-    margin-bottom: 1em;
-}
-
-table {
-    table-layout: auto;
-}
-
-input {
-    width: 192px;
-}
-
-input[type=date] {
-    width:130px;
-}
-
-input[type=submit] {
-    width: auto;
-}
-
-input.portfolio {
-    width: 117px;
-}
-
-input.security {
-    width: 390px;
-    padding-right: 34px;
-}
-
-.input-width {
-    min-width: 214px;
-}
-
-.hint {
-    font-size: medium;
-    color: dimgray;
-    text-align: justify;
-}
-
-.value {
-    text-align: right;
-}
-
-.table-row-control {
-    opacity: 0;
-}
-
-.table-row-control a:hover {
-    text-decoration: none;
-}
-
-tr:hover > .table-row-control {
-    opacity: 1;
-}
+-- Дамп структуры для таблица portfolio.stock_market_index
+CREATE TABLE IF NOT EXISTS `stock_market_index` (
+    `date` DATE NOT NULL,
+    `sp500` DECIMAL(7,2) NULL DEFAULT NULL COMMENT 'Значение индекса S&P 500',
+    PRIMARY KEY (`date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Индексы фондовых рынков';

@@ -49,7 +49,6 @@ import static ru.investbook.report.ForeignExchangeRateService.RUB;
 @Slf4j
 public class InvestmentProportionService {
 
-    private static final String UNKNOWN_SECTOR = "Другое";
     private final SecurityRepository securityRepository;
     private final SecurityConverter securityConverter;
     private final SecurityDescriptionRepository securityDescriptionRepository;
@@ -90,7 +89,7 @@ public class InvestmentProportionService {
     private String getEconomicSector(SecurityInvestment securityInvestment) {
         return securityDescriptionRepository.findById(securityInvestment.security().getId())
                 .map(SecurityDescriptionEntity::getSector)
-                .orElse(UNKNOWN_SECTOR);
+                .orElse(SecuritySectorService.UNKNOWN_SECTOR);
     }
 
     private static record SecurityInvestment(Security security, BigDecimal investment) {

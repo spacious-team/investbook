@@ -64,6 +64,7 @@ public class SecurityDescriptionController {
         securitySectorService.uploadAndUpdateSecuritySectors();
         model.addAttribute("message",
                 "Список секторов выгружен со Smart-Lab страницы https://smart-lab.ru/forum/sectors");
+        model.addAttribute("backLink", "/portfolio-composition");
         return "success";
     }
 
@@ -85,5 +86,19 @@ public class SecurityDescriptionController {
     public String postTransaction(@Valid @ModelAttribute("securityDescription") SecurityDescriptionModel securityDescription) {
         securityDescriptionFormsService.save(securityDescription);
         return "security-descriptions/view-single";
+    }
+
+    @GetMapping("/delete")
+    public String delete(@RequestParam(name = "security-id") String securityId, Model model) {
+        try {
+            securityDescriptionFormsService.delete(securityId);
+            model.addAttribute("message", "Инструмент удален");
+        } catch (Exception e) {
+            model.addAttribute("title", "Сработала защита");
+            model.addAttribute("message", "Возможно по инструменту есть сделки или выплаты. " +
+                    "Удалите их перед удалением инструмента.");
+        }
+        model.addAttribute("backLink", "/security-descriptions");
+        return "success";
     }
 }

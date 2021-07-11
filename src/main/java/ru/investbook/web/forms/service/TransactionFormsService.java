@@ -21,7 +21,6 @@ package ru.investbook.web.forms.service;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
-import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
@@ -31,7 +30,6 @@ import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
-import ru.investbook.converter.SecurityConverter;
 import ru.investbook.converter.TransactionCashFlowConverter;
 import ru.investbook.converter.TransactionConverter;
 import ru.investbook.entity.TransactionCashFlowEntity;
@@ -69,7 +67,6 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
     private final PortfolioRepository portfolioRepository;
     private final TransactionCashFlowConverter transactionCashFlowConverter;
     private final TransactionConverter transactionConverter;
-    private final SecurityConverter securityConverter;
     private final PortfolioConverter portfolioConverter;
     private final MoexDerivativeCodeService moexDerivativeCodeService;
     private final Set<Integer> cashFlowTypes = Set.of(CashFlowType.PRICE.getId(),
@@ -161,13 +158,8 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                             .id(portfolio)
                             .build()));
         }
-        if (!securityRepository.existsById(securityId)) {
-            securityRepository.saveAndFlush(
-                    securityConverter.toEntity(Security.builder()
-                            .id(securityId)
-                            .name(securityName)
-                            .build()));
-        }
+        securityRepository.createOrUpdate(securityId, securityName);
+        securityRepository.flush();
     }
 
     private TransactionModel toTransactionModel(TransactionEntity e) {
@@ -221,5 +213,13 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                     });
         }
         return m;
+    }
+
+    public void delete(String portfolio, String transactionId) {
+        TransactionEntityPK pk = new TransactionEntityPK();
+        pk.setId(transactionId);
+        pk.setPortfolio(portfolio);
+        transactionRepository.deleteById(pk);
+        transactionRepository.flush();
     }
 }

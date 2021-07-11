@@ -21,7 +21,6 @@ package ru.investbook.web.forms.service;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
-import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow.SecurityEventCashFlowBuilder;
 import org.springframework.stereotype.Service;
@@ -116,13 +115,8 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
                             .id(portfolio)
                             .build()));
         }
-        if (!securityRepository.existsById(securityId)) {
-            securityRepository.saveAndFlush(
-                    securityConverter.toEntity(Security.builder()
-                            .id(securityId)
-                            .name(securityName)
-                            .build()));
-        }
+        securityRepository.createOrUpdate(securityId, securityName);
+        securityRepository.flush();
     }
 
     private SecurityEventCashFlowModel toSecurityEventModel(SecurityEventCashFlowEntity e) {
@@ -153,5 +147,12 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
                     });
         }
         return m;
+    }
+
+    public void delete(Integer id) {
+        getById(id).map(SecurityEventCashFlowModel::getTaxId)
+                .ifPresent(securityEventCashFlowRepository::deleteById);
+        securityEventCashFlowRepository.deleteById(id);
+        securityEventCashFlowRepository.flush();
     }
 }

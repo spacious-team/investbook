@@ -133,7 +133,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         for (TableHeader header : headerType.getEnumConstants()) {
             sheet.setColumnWidth(header.ordinal(), 15 * 256);
         }
-        sheet.setColumnWidth(SECURITY.ordinal(), 45 * 256);
+        sheet.setColumnWidth(SECURITY.ordinal(), 44 * 256);
         sheet.setColumnWidth(TYPE.ordinal(), 19 * 256);
         sheet.setColumnHidden(TYPE.ordinal(), true);
         sheet.setColumnWidth(FIRST_TRANSACTION_DATE.ordinal(), 12 * 256);
@@ -143,7 +143,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         sheet.setColumnWidth(COUNT.ordinal(), 14 * 256);
         sheet.setColumnWidth(AVERAGE_PRICE.ordinal(), 14 * 256);
         sheet.setColumnWidth(AVERAGE_ACCRUED_INTEREST.ordinal(), 14 * 256);
-        sheet.setColumnWidth(COMMISSION.ordinal(), 12 * 256);
+        sheet.setColumnWidth(COMMISSION.ordinal(), 13 * 256);
         sheet.setColumnWidth(LAST_EVENT_DATE.ordinal(), 14 * 256);
         sheet.setColumnWidth(AMORTIZATION.ordinal(), 16 * 256);
         sheet.setColumnWidth(LAST_PRICE.ordinal(), 13 * 256);

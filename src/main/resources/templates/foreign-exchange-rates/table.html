@@ -28,12 +28,10 @@
 
 <h1>Официальные обменные курсы</h1>
 <a href="/foreign-exchange-rates/edit-form">Добавить событие</a><br>
-<a href="/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config#/Официальные обменные курсы/delete_9">Удалить
-    событие</a><br>
 <a href="/forms.html">На главную</a><br>
 
 <p class="hint">
-    Для редактирования курса кликните по его дате.
+    Для редактирования курса кликните по его дате, для удаления - на крестик.
 </p>
 
 <table>
@@ -42,6 +40,7 @@
         <th>Базовая валюта</th>
         <th class="value">Курс базовой валюты</th>
         <th>Котируемая валюта</th>
+        <th></th>
     </tr>
     <tr th:each="rate : ${rates}">
         <td>
@@ -52,6 +51,9 @@
         <td th:text="${(rate.rate != null) ? rate.rate.abs().setScale(4, T(java.math.RoundingMode).HALF_UP) : ''}"
             class="value"/>
         <td th:text="${rate.quoteCurrency}"/>
+        <td class="table-row-control">
+            <a th:href="@{/foreign-exchange-rates/delete(date=${rate.date}, baseCurrency=${rate.baseCurrency}, quoteCurrency=${rate.quoteCurrency})}" title="Удалить">&#x274c;</a>
+        </td>
     </tr>
 </table>
 

@@ -79,4 +79,12 @@ public class EventCashFlowController {
         eventCashFlowFormsService.save(event);
         return "events/view-single";
     }
+
+    @GetMapping("/delete")
+    public String delete(@RequestParam(name = "id") Integer id, Model model) {
+        eventCashFlowFormsService.delete(id);
+        model.addAttribute("message", "Запись удалена");
+        model.addAttribute("backLink", "/events");
+        return "success";
+    }
 }

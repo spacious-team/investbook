@@ -104,4 +104,20 @@ public class ForeignExchangeRateController {
                 .min(LocalDate::compareTo)
                 .orElseGet(() -> LocalDate.of(2010, 1, 1));
     }
+
+    @GetMapping("/delete")
+    public String delete(@RequestParam(name = "date")
+                              @DateTimeFormat(pattern = "yyyy-MM-dd")
+                                      LocalDate date,
+                              @RequestParam(name = "baseCurrency")
+                                      String baseCurrency,
+                              @RequestParam(name = "quoteCurrency")
+                                      String quoteCurrency,
+                              Model model) {
+        foreignExchangeRateFormsService.delete(date, baseCurrency, quoteCurrency);
+        foreignExchangeRateService.invalidateCache();
+        model.addAttribute("message", "Обменный курс удален");
+        model.addAttribute("backLink", "/foreign-exchange-rates");
+        return "success";
+    }
 }

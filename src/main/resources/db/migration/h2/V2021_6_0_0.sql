@@ -16,10 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
--- gh-223: lets patching from 2021.1.1 to 2021.2
-ALTER TABLE `security_quote`
-    DROP CONSTRAINT IF EXISTS `security_quote_isin_fkey`;
-ALTER TABLE `security_quote`
-    ADD CONSTRAINT IF NOT EXISTS `security_quote_security_fkey` FOREIGN KEY (`security`)
-        REFERENCES `security` (`id`) ON UPDATE CASCADE;
+ALTER TABLE `security_description`
+    DROP FOREIGN KEY `security_description_issuer_fkey`;
+ALTER TABLE `security_description`
+    ADD CONSTRAINT `security_description_issuer_fkey` FOREIGN KEY (`issuer`)
+        REFERENCES `issuer` (`id`) ON UPDATE CASCADE ON DELETE CASCADE;
 
+ALTER TABLE `security_description`
+	DROP FOREIGN KEY `security_description_security_fkey`;
+ALTER TABLE `security_description`
+	ADD CONSTRAINT `security_description_security_fkey` FOREIGN KEY (`security`)
+        REFERENCES `security` (`id`) ON UPDATE CASCADE ON DELETE CASCADE;

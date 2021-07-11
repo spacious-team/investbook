@@ -19,7 +19,6 @@
 package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
-import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.springframework.stereotype.Service;
 import ru.investbook.converter.SecurityConverter;
@@ -87,13 +86,8 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
     }
 
     private void saveAndFlush(String securityId, String securityName) {
-        if (!securityRepository.existsById(securityId)) {
-            securityRepository.saveAndFlush(
-                    securityConverter.toEntity(Security.builder()
-                            .id(securityId)
-                            .name(securityName)
-                            .build()));
-        }
+        securityRepository.createOrUpdate(securityId, securityName);
+        securityRepository.flush();
     }
 
     private SecurityQuoteModel toSecurityQuoteModel(SecurityQuoteEntity e) {
@@ -113,5 +107,10 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
             m.setSecurityType(SecurityType.BOND);
         }
         return m;
+    }
+
+    public void delete(Integer id) {
+        securityQuoteRepository.deleteById(id);
+        securityQuoteRepository.flush();
     }
 }

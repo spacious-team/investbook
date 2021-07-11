@@ -19,7 +19,6 @@
 package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
-import org.spacious_team.broker.pojo.Security;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.SecurityConverter;
@@ -77,13 +76,8 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
     }
 
     private void saveAndFlushSecurity(String securityId, String securityName) {
-        if (!securityRepository.existsById(securityId)) {
-            securityRepository.saveAndFlush(
-                    securityConverter.toEntity(Security.builder()
-                            .id(securityId)
-                            .name(securityName)
-                            .build()));
-        }
+        securityRepository.createOrUpdate(securityId, securityName);
+        securityRepository.flush();
     }
 
     private void saveAndFlushSecurityDescription(String securityId, String sector) {
@@ -98,5 +92,10 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
                 ofNullable(security.getName()).orElse(security.getTicker()));
         m.setSector(e.getSector());
         return m;
+    }
+
+    public void delete(String securityId) {
+        securityRepository.deleteById(securityId);
+        securityRepository.flush();
     }
 }

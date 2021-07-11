@@ -41,6 +41,25 @@ CREATE TABLE IF NOT EXISTS `cash_flow_type` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Тип движения средств';
 
+-- Дамп данных таблицы portfolio.cash_flow_type: ~13 rows (приблизительно)
+/*!40000 ALTER TABLE `cash_flow_type` DISABLE KEYS */;
+INSERT IGNORE INTO `cash_flow_type` (`id`, `name`) VALUES
+(0, 'Пополнение и снятие'),
+(1, 'Чистая стоимость сделки (без НКД)'),
+(2, 'НКД на день сделки'),
+(3, 'Комиссия'),
+(4, 'Амортизация облигации'),
+(5, 'Погашение облигации'),
+(6, 'Купонный доход (до удержания налога)'),
+(7, 'Дивиденды (до удержания налога)'),
+(8, 'Вариационная маржа'),
+(9, 'Гарантийное обеспечение'),
+(10, 'Налог уплаченный (с купона, с дивидендов)'),
+(11, 'Прогнозируемый налог'),
+(12, 'Стоимость сделки с деривативом, валюта'),
+(13, 'Стоимость сделки с деривативом, пункты');
+/*!40000 ALTER TABLE `cash_flow_type` ENABLE KEYS */;
+
 -- Дамп структуры для таблица portfolio.portfolio
 CREATE TABLE IF NOT EXISTS `portfolio` (
   `id` varchar(32) NOT NULL COMMENT 'Портфель (номер брокерского счета)',
@@ -96,21 +115,6 @@ CREATE TABLE IF NOT EXISTS `security` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Общая информация по ценным бумагам';
 
--- Дамп структуры для таблица portfolio.security_description
--- Нужно проверить наличие issuer.id, может отсутствовать для БД < 2021.5. На колонку создается ссылка.
-ALTER TABLE `security` DROP CONSTRAINT IF EXISTS `security_issuer_inn_fkey`;
-ALTER TABLE `issuer` DROP COLUMN IF EXISTS `inn`;
-ALTER TABLE `issuer` ADD COLUMN IF NOT EXISTS `id` int(11) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT FIRST;
-CREATE TABLE IF NOT EXISTS `security_description` (
-    `security` varchar(64) NOT NULL COMMENT 'Идентификатор ценной бумаги',
-    `sector` varchar(32) DEFAULT NULL COMMENT 'Сектор экономики (применимо только для акций)',
-    `issuer` int(10) unsigned DEFAULT NULL COMMENT 'Эмитент',
-    PRIMARY KEY (`security`),
-    KEY `security_description_issuer_ix` (`issuer`),
-    CONSTRAINT `security_description_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE,
-    CONSTRAINT `security_description_issuer_fkey` FOREIGN KEY (`issuer`) REFERENCES `issuer` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Расширенная информация по ценным бумагам';
-
 -- Дамп структуры для таблица portfolio.security_event_cash_flow
 CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -130,21 +134,6 @@ CREATE TABLE IF NOT EXISTS `security_event_cash_flow` (
   CONSTRAINT `security_event_cash_flow_portfolio_fkey` FOREIGN KEY (`portfolio`) REFERENCES `portfolio` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT `security_event_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Движение денежных средств, связанное с ЦБ';
-
--- Дамп структуры для таблица portfolio.security_quote
-CREATE TABLE IF NOT EXISTS `security_quote` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `security` varchar(64) NOT NULL COMMENT 'Инструмент (акция, облигация, контракт)',
-  `timestamp` timestamp NOT NULL COMMENT 'Время котировки',
-  `quote` decimal(12,6) NOT NULL COMMENT 'Котировка акции в валюте/ дериватива - пунктах / облигации - в процентах / валютной пары - в валюте котируемой валюты',
-  `price` decimal(12,6) DEFAULT NULL COMMENT 'Чистая цена облигации в валюте / стоимость срочных контрактов в валюте / для акций и валютной пары не заполняется',
-  `accrued_interest` decimal(12,6) DEFAULT NULL COMMENT 'НКД для облигаций',
-  `currency` char(3) DEFAULT NULL COMMENT 'Код валюты (опционально)',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `security_quote_security_timestamp_uniq_ix` (`security`, `timestamp`),
-  KEY `security_quote_security_ix` (`security`),
-  CONSTRAINT `security_quote_security_fkey` FOREIGN KEY (`security`) REFERENCES `security` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Котировка (цена) финансовых инструментов';
 
 -- Дамп структуры для таблица portfolio.transaction
 CREATE TABLE IF NOT EXISTS `transaction` (
@@ -175,21 +164,6 @@ CREATE TABLE IF NOT EXISTS `transaction_cash_flow` (
   CONSTRAINT `transaction_cash_flow_transaction_id_fkey` FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `transaction_cash_flow_type_fkey` FOREIGN KEY (`type`) REFERENCES `cash_flow_type` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Движение денежных средств';
-
--- Дамп структуры для таблица portfolio.stock_market_index
-CREATE TABLE IF NOT EXISTS `stock_market_index` (
-  `date` DATE NOT NULL,
-  `sp500` DECIMAL(7,2) NULL DEFAULT NULL COMMENT 'Значение индекса S&P 500',
-  PRIMARY KEY (`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Индексы фондовых рынков';
-
--- Дамп структуры для таблица portfolio.foreign_exchange_rate
-CREATE TABLE IF NOT EXISTS `foreign_exchange_rate` (
-  `date` DATE NOT NULL,
-  `currency_pair` CHAR(6) NOT NULL COMMENT 'Валютная пара (например USDRUB, базовая USD и котировальная валюты RUB)',
-  `rate` DECIMAL(7,4) NOT NULL COMMENT 'Официальный обменный курс ЦБ',
-  PRIMARY KEY (`currency_pair`, `date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Официальные обменные курсы валют';
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
