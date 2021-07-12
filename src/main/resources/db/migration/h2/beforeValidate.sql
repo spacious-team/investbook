@@ -27,8 +27,15 @@ EXECUTE IMMEDIATE NVL2(
 -- Move schema.sql + data.sql statements to V2020_7_0_0.sql.
 EXECUTE IMMEDIATE NVL2(
     QUOTE_IDENT((SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'flyway_schema_history')),
-    'UPDATE "flyway_schema_history" SET "type" = ''SQL'', "script" = ''V1__init_schema.sql'', "description" = ''init schema'', "checksum" = 796963534 WHERE "installed_rank" = 1',
+    'UPDATE "flyway_schema_history" SET "type" = ''SQL'', "script" = ''V1__init_schema.sql'', "description" = ''init schema'', "checksum" = 796963534 WHERE "version" = ''1''',
     'CREATE ALIAS MY_SQRT2 FOR "java.lang.Math.sqrt"' -- do any noop command
+);
+
+-- Fix failed db update from first installed 2021.5 to 2021.6
+EXECUTE IMMEDIATE NVL2(
+    QUOTE_IDENT((SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'flyway_schema_history')),
+    'UPDATE "flyway_schema_history" SET "type" = ''BASELINE'', "description" = ''<< Flyway Baseline >>'', "script" = ''<< Flyway Baseline >>'', "version" = ''2021.5.0.0'', "checksum" = null  WHERE "version" = ''2021.5'' AND "installed_rank" = 1',
+    'CREATE ALIAS MY_SQRT11 FOR "java.lang.Math.sqrt"' -- do any noop command
 );
 
 -- Update V2020_11_0_0.sql
@@ -77,6 +84,6 @@ EXECUTE IMMEDIATE NVL2(
 -- Update V2021_5_0_0.sql
 EXECUTE IMMEDIATE NVL2(
     QUOTE_IDENT((SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'flyway_schema_history')),
-    'UPDATE "flyway_schema_history" SET "checksum" = 38693906 WHERE "version" = ''2021.5.0.0''',
+    'UPDATE "flyway_schema_history" SET "checksum" = 38693906 WHERE "version" = ''2021.5.0.0'' AND "installed_rank" <> 1',
     'CREATE ALIAS MY_SQRT10 FOR "java.lang.Math.sqrt"' -- do any noop command
 );
