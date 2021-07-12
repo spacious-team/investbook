@@ -35,7 +35,7 @@ EXECUTE IMMEDIATE NVL2(
 EXECUTE IMMEDIATE NVL2(
     QUOTE_IDENT((SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'flyway_schema_history')),
     'UPDATE "flyway_schema_history" SET "type" = ''BASELINE'', "description" = ''<< Flyway Baseline >>'', "script" = ''<< Flyway Baseline >>'', "version" = ''2021.5.0.0'', "checksum" = null  WHERE "version" = ''2021.5'' AND "installed_rank" = 1',
-    'CREATE ALIAS MY_SQRT10 FOR "java.lang.Math.sqrt"' -- do any noop command
+    'CREATE ALIAS MY_SQRT11 FOR "java.lang.Math.sqrt"' -- do any noop command
 );
 
 -- Update V2020_11_0_0.sql
