@@ -19,35 +19,36 @@
 package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.investbook.entity.StockMarketIndexEntity;
-import ru.investbook.repository.StockMarketIndexRepository;
-import ru.investbook.service.Sp500Service;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.ExecutionException;
 
 @Controller
-@RequestMapping("/sp500")
+@RequestMapping("/external-sources")
+@Slf4j
 @RequiredArgsConstructor
-public class Sp500Controller {
+public class ExternalSourcesGetterController {
+    private final ForeignExchangeRateController foreignExchangeRateController;
+    private final SecurityQuoteController securityQuoteController;
+    private final Sp500Controller sp500Controller;
+    private final SecurityDescriptionController securityDescriptionController;
+    
 
-    private final Sp500Service sp500Service;
-    private final StockMarketIndexRepository stockMarketIndexRepository;
-
-    @GetMapping("update")
-    public String updateSp500(Model model) {
-        String message = updateSp500Index();
-        model.addAttribute("title", "S&P 500");
-        model.addAttribute("message", message);
+    @GetMapping("/get")
+    public String get(Model model) throws ExecutionException, InterruptedException {
+        Collection<String> messages = new ArrayList<>();
+        messages.add(foreignExchangeRateController.updateForeignExchangeRateFromCbr());
+        messages.add(securityQuoteController.updateQuoteFromMoexIssApi());
+        messages.add(sp500Controller.updateSp500Index());
+        messages.add(securityDescriptionController.updateSectorsFromSmartLab());
+        model.addAttribute("message", String.join(". ", messages));
         return "success";
     }
 
-    public String updateSp500Index() {
-        sp500Service.update();
-        return stockMarketIndexRepository.findFirstBySp500NotNullOrderByDateDesc()
-                .map(StockMarketIndexEntity::getDate)
-                .map(date -> "Индекс обновлен обновлен по " + date + " включительно")
-                .orElse("Запрос выполнен, но сервер https://www.spglobal.com/ не вернул данные");
-    }
 }

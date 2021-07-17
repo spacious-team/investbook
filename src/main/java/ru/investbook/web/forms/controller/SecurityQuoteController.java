@@ -90,6 +90,12 @@ public class SecurityQuoteController {
 
     @GetMapping("update")
     public String updateFromMoexIssApi(Model model) throws ExecutionException, InterruptedException {
+        String message = updateQuoteFromMoexIssApi();
+        model.addAttribute("message", message);
+        return "success";
+    }
+
+    public String updateQuoteFromMoexIssApi() throws InterruptedException, ExecutionException {
         long t0 = System.nanoTime();
         new ForkJoinPool(4 * Runtime.getRuntime().availableProcessors())
                 .submit(() -> securityRepository.findAll()
@@ -102,8 +108,7 @@ public class SecurityQuoteController {
                 .map(latestQuoteDate -> "Котировки обновлены по " + latestQuoteDate + " включительно")
                 .orElse("Запрос выполнен, но МосБиржа не вернула котировок");
         log.info(message + " за " + Duration.ofNanos(System.nanoTime() - t0));
-        model.addAttribute("message", message);
-        return "success";
+        return message;
     }
 
     @GetMapping("/delete")

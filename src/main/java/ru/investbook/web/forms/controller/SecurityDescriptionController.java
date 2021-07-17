@@ -61,11 +61,15 @@ public class SecurityDescriptionController {
 
     @GetMapping("update")
     public String updateFromSmartLab(Model model) {
-        securitySectorService.uploadAndUpdateSecuritySectors();
-        model.addAttribute("message",
-                "Список секторов выгружен со Smart-Lab страницы https://smart-lab.ru/forum/sectors");
+        String message = updateSectorsFromSmartLab();
+        model.addAttribute("message", message);
         model.addAttribute("backLink", "/portfolio-composition");
         return "success";
+    }
+
+    public String updateSectorsFromSmartLab() {
+        securitySectorService.uploadAndUpdateSecuritySectors();
+        return "Список секторов выгружен со Smart-Lab страницы https://smart-lab.ru/forum/sectors";
     }
 
     @GetMapping("/edit-form")
