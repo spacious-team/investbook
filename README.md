@@ -145,11 +145,11 @@
 решили улучшать приложение в этом репозитории, ознакомьтесь, пожалуйста, со следующей [информацией](docs/CONTRIBUTING.md).
 
 ### Контакты
-- Телеграм чат [технической поддержки](https://t.me/investbook_support) и телеграм [канал](https://t.me/investbook_official);
+- Телеграм [канал](https://t.me/investbook_official) и чат [технической поддержки](https://t.me/investbook_support);
 - Обсуждение на форуме [banki.ru](https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=380178);
 - Страница приложения на [smart-lab.ru](https://smart-lab.ru/trading-software/Investbook) и
   [страница для связи](https://smart-lab.ru/profile/SpaciousTeam);  
-- e-mail: [spacious-team@ya.ru](mailto:spacious-team@ya.ru);
+- e-mail: [spacious-team@ya.ru](mailto:spacious-team@ya.ru).
 
 Используете приложение Investbook? Оставьте, пожалуйста, отзыв на сайте [otzovik.com](https://otzovik.com/show_filter.php?cat_id=819&f[b]=Spacious+Team).
 
