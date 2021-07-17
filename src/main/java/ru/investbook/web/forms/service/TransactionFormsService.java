@@ -97,38 +97,51 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
         int direction = ((tr.getAction() == TransactionModel.Action.BUY) ? 1 : -1);
         BigDecimal multiplier = BigDecimal.valueOf(-direction * tr.getCount());
 
-        AbstractTransactionBuilder<?, ?> builder = switch (tr.getSecurityType()) {
-            case SHARE, BOND -> SecurityTransaction.builder()
-                    .value(tr.getPrice().multiply(multiplier))
-                    .valueCurrency(tr.getPriceCurrency())
-                    .accruedInterest(ofNullable(tr.getAccruedInterest())
-                            .map(v -> v.multiply(multiplier))
-                            .orElse(null));
-            case DERIVATIVE -> {
-                BigDecimal value = null;
-                BigDecimal valueInPoints = tr.getPrice().multiply(multiplier);
-                if (tr.hasDerivativeTickValue()) {
-                    value = valueInPoints
-                            .multiply(tr.getPriceTickValue())
-                            .divide(tr.getPriceTick(), 6, RoundingMode.HALF_UP);
+        AbstractTransactionBuilder<?, ?> builder;
+
+        if (tr.getPrice() != null) {
+            builder = switch (tr.getSecurityType()) {
+                case SHARE, BOND -> SecurityTransaction.builder()
+                        .value(tr.getPrice().multiply(multiplier))
+                        .valueCurrency(tr.getPriceCurrency())
+                        .accruedInterest(ofNullable(tr.getAccruedInterest())
+                                .map(v -> v.multiply(multiplier))
+                                .orElse(null));
+                case DERIVATIVE -> {
+                    BigDecimal value = null;
+                    BigDecimal valueInPoints = tr.getPrice().multiply(multiplier);
+                    if (tr.hasDerivativeTickValue()) {
+                        value = valueInPoints
+                                .multiply(tr.getPriceTickValue())
+                                .divide(tr.getPriceTick(), 6, RoundingMode.HALF_UP);
+                    }
+                    yield DerivativeTransaction.builder()
+                            .valueInPoints(valueInPoints)
+                            .value(value)
+                            .valueCurrency(tr.getPriceTickValueCurrency());
                 }
-                yield DerivativeTransaction.builder()
-                        .valueInPoints(valueInPoints)
-                        .value(value)
-                        .valueCurrency(tr.getPriceTickValueCurrency());
+                case CURRENCY -> ForeignExchangeTransaction.builder()
+                        .value(tr.getPrice().multiply(multiplier))
+                        .valueCurrency(tr.getPriceCurrency());
+            };
+
+            if (tr.getCommission() != null) {
+                builder
+                        .commission(tr.getCommission().negate())
+                        .commissionCurrency(tr.getCommissionCurrency());
             }
-            case CURRENCY -> ForeignExchangeTransaction.builder()
-                    .value(tr.getPrice().multiply(multiplier))
-                    .valueCurrency(tr.getPriceCurrency());
-        };
+        } else {
+            builder = switch (tr.getSecurityType()) {
+                case SHARE, BOND -> SecurityTransaction.builder();
+                default -> throw new IllegalArgumentException("Only bond and stock can have deposit and withdrawal events");
+            };
+        }
 
         AbstractTransaction transaction = builder.portfolio(tr.getPortfolio())
                 .transactionId(tr.getTransactionId())
                 .timestamp(tr.getDate().atStartOfDay(zoneId).toInstant())
                 .security(tr.getSecurityId())
                 .count(abs(tr.getCount()) * direction)
-                .commission(tr.getCommission().negate())
-                .commissionCurrency(tr.getCommissionCurrency())
                 .build();
 
         saveAndFlush(tr, transaction.getTransaction(), transaction.getTransactionCashFlows());
