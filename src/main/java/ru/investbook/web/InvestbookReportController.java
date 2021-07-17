@@ -39,12 +39,12 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
+import static java.time.ZoneId.systemDefault;
 import static java.util.stream.Collectors.joining;
 import static ru.investbook.web.ControllerHelper.getPortfolios;
 
@@ -54,10 +54,8 @@ import static ru.investbook.web.ControllerHelper.getPortfolios;
 @Slf4j
 public class InvestbookReportController {
 
-    private static final String FROM_DATE_FIELD = "from-date";
-    private static final String TO_DATE_FIELD = "to-date";
     private static final String REPORT_NAME = "investbook";
-    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault());
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private final PortfolioRepository portfolioRepository;
     private final ExcelView excelView;
     private volatile int expectedFileSize = 0xFFFF;
@@ -103,11 +101,13 @@ public class InvestbookReportController {
     }
 
     private String getReportName(ViewFilter filter) {
-        Instant toDate = filter.getToDate();
-        if (toDate.isAfter(Instant.now())) {
-            toDate = Instant.now();
+        LocalDate fromDate = LocalDate.ofInstant(filter.getFromDate(), systemDefault());
+        LocalDate toDate = LocalDate.ofInstant(filter.getToDate(), systemDefault());
+        LocalDate maxToDate = LocalDate.now().plusDays(2);
+        if (toDate.isAfter(maxToDate)) {
+            toDate = maxToDate;
         }
-        return REPORT_NAME + " с " + dateFormatter.format(filter.getFromDate()) + " по " + dateFormatter.format(toDate) + ".xlsx";
+        return REPORT_NAME + " с " + dateFormatter.format(fromDate) + " по " + dateFormatter.format(toDate) + ".xlsx";
     }
 
     private void sendSuccessHeader(HttpServletResponse response, String fileName) {
