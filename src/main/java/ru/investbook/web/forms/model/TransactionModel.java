@@ -75,7 +75,10 @@ public class TransactionModel {
     @Positive
     private int count;
 
-    @NotNull
+    /**
+     * May be null for security deposit and withdrawal
+     */
+    @Nullable
     @Positive
     private BigDecimal price;
 
@@ -100,7 +103,10 @@ public class TransactionModel {
     @Nullable
     private String priceTickValueCurrency = "RUB";
 
-    @NotNull
+    /**
+     * May be null for security deposit and withdrawal
+     */
+    @Nullable
     @Positive
     private BigDecimal commission;
 
