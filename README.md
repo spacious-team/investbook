@@ -149,6 +149,8 @@
 - Обсуждение на форуме [banki.ru](https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=380178);
 - Страница приложения на [smart-lab.ru](https://smart-lab.ru/trading-software/Investbook) и
   [страница для связи](https://smart-lab.ru/profile/SpaciousTeam);  
-- e-mail: [spacious-team@ya.ru](mailto:spacious-team@ya.ru)
+- e-mail: [spacious-team@ya.ru](mailto:spacious-team@ya.ru);
+
+Используете приложение Investbook? Оставьте, пожалуйста, отзыв на сайте [otzovik.com](https://otzovik.com/show_filter.php?cat_id=819&f[b]=Spacious+Team).
 
 <img src="https://user-images.githubusercontent.com/11336712/85948991-b13e4780-b95c-11ea-9df6-a28be74c489d.png" width="100%"/>
