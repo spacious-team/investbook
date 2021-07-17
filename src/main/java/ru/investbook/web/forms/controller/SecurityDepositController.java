@@ -18,7 +18,6 @@
 
 package ru.investbook.web.forms.controller;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,63 +28,41 @@ import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
-import ru.investbook.web.ControllerHelper;
 import ru.investbook.web.forms.model.TransactionModel;
 import ru.investbook.web.forms.service.TransactionFormsService;
 
-import javax.annotation.PostConstruct;
 import javax.validation.Valid;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/transactions")
-@RequiredArgsConstructor
-public class TransactionController {
-    protected final TransactionFormsService transactionFormsService;
-    private final PortfolioRepository portfolioRepository;
-    private final SecurityRepository securityRepository;
-    private final FifoPositionsFactory fifoPositionsFactory;
-    private volatile Collection<String> securities;
-    private volatile Collection<String> portfolios;
-    private volatile String selectedPortfolio;
+@RequestMapping("/security-deposit")
+public class SecurityDepositController extends TransactionController{
 
-    @PostConstruct
-    public void start() {
-        portfolios = ControllerHelper.getPortfolios(portfolioRepository);
-        securities = ControllerHelper.getSecuritiesDescriptions(securityRepository);
+    public SecurityDepositController(TransactionFormsService transactionFormsService,
+                                     PortfolioRepository portfolioRepository, SecurityRepository securityRepository,
+                                     FifoPositionsFactory fifoPositionsFactory) {
+        super(transactionFormsService, portfolioRepository, securityRepository, fifoPositionsFactory);
     }
 
     @GetMapping
+    @Override
     public String get(Model model) {
         List<TransactionModel> models = transactionFormsService.getAll()
                 .stream()
-                .filter(tr -> tr.getPrice() != null)
+                .filter(tr -> tr.getPrice() == null)
                 .collect(Collectors.toList());
         model.addAttribute("transactions", models);
-        return "transactions/table";
+        return "security-deposit/table";
     }
 
     @GetMapping("/edit-form")
+    @Override
     public String getEditForm(@RequestParam(name = "portfolio", required = false) String portfolio,
                               @RequestParam(name = "transaction-id", required = false) String transactionId,
                               Model model) {
-        model.addAttribute("transaction", getTransaction(portfolio, transactionId));
-        model.addAttribute("securities", securities);
-        model.addAttribute("portfolios", portfolios);
-        return "transactions/edit-form";
-    }
-
-    private TransactionModel getTransaction(String portfolio, String transactionId) {
-        if (portfolio != null && transactionId != null) {
-            return transactionFormsService.getById(portfolio, transactionId)
-                    .orElseGet(TransactionModel::new);
-        } else {
-            TransactionModel transaction = new TransactionModel();
-            transaction.setPortfolio(selectedPortfolio);
-            return transaction;
-        }
+        super.getEditForm(portfolio, transactionId, model);
+        return "security-deposit/edit-form";
     }
 
     /**
@@ -94,25 +71,20 @@ public class TransactionController {
      * @param transaction transaction attribute for save, same model attribute used for display in view
      */
     @PostMapping
+    @Override
     public String postTransaction(@Valid @ModelAttribute("transaction") TransactionModel transaction) {
-        selectedPortfolio = transaction.getPortfolio();
-        transactionFormsService.save(transaction);
-        fifoPositionsFactory.invalidateCache();
-        return "transactions/view-single";
+        super.postTransaction(transaction);
+        return "security-deposit/view-single";
     }
 
     @GetMapping("/delete")
+    @Override
     public String delete(@RequestParam(name = "portfolio") String portfolio,
                               @RequestParam(name = "transaction-id") String transactionId,
                               Model model) {
-        doDelete(portfolio, transactionId);
-        model.addAttribute("message", "Сделка удалена");
-        model.addAttribute("backLink", "/transactions");
+        super.doDelete(portfolio, transactionId);
+        model.addAttribute("message", "Запись удалена");
+        model.addAttribute("backLink", "/security-deposit");
         return "success";
-    }
-
-    protected void doDelete(String portfolio, String transactionId) {
-        transactionFormsService.delete(portfolio, transactionId);
-        fifoPositionsFactory.invalidateCache();
     }
 }

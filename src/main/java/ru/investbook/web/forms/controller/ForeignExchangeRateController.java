@@ -85,11 +85,15 @@ public class ForeignExchangeRateController {
 
     @GetMapping("update")
     public String updateForeignExchangeRate(Model model) {
+        String message = updateForeignExchangeRateFromCbr();
+        model.addAttribute("message", message);
+        return "success";
+    }
+
+    public String updateForeignExchangeRateFromCbr() {
         cbrForeignExchangeRateService.updateFrom(getFirstTransactionDate());
         foreignExchangeRateService.invalidateCache();
-        model.addAttribute("message",
-                "Официальные курсы обновлены по " + getLatestDateOfAllFxRateKnown() + " включительно.");
-        return "success";
+        return "Официальные курсы обновлены по " + getLatestDateOfAllFxRateKnown() + " включительно";
     }
 
     private LocalDate getFirstTransactionDate() {
