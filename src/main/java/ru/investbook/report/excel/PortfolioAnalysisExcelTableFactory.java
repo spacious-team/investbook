@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
@@ -173,7 +174,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
             Double divider = null;
             double investmentUsd = 0;
             for (var record : table) {
-                investmentUsd += getInvestmentUsd(record);
+                investmentUsd += getInvestmentUsd(record, usdToRubExchangeRate);
                 Number assetsRub = (Number) record.get(ASSETS_RUB);
                 if (assetsRub != null) {
                     double assetsUsd = assetsRub.doubleValue() / usdToRubExchangeRate;
@@ -189,12 +190,18 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         }
     }
 
-    private double getInvestmentUsd(Table.Record record) {
+    private double getInvestmentUsd(Table.Record record, double usdToRubExchangeRate) {
         BigDecimal investment = (BigDecimal) record.get(INVESTMENT_AMOUNT);
         if (investment != null) {
-            return foreignExchangeRateService.convertValueToCurrency(investment,
-                    record.get(INVESTMENT_CURRENCY).toString(), "USD")
-                    .doubleValue();
+            String fromCurrency = record.get(INVESTMENT_CURRENCY).toString();
+            if (Objects.equals(fromCurrency, "RUB")) {
+                // используем тот же коэффициент-курс для приведения, что и в вызывающем цикле
+                return investment.doubleValue() / usdToRubExchangeRate;
+            } else {
+                // придется обращаться к сервису и зависеть от его реализации
+                return foreignExchangeRateService.convertValueToCurrency(investment, fromCurrency, "USD")
+                        .doubleValue();
+            }
         }
         return 0;
     }
