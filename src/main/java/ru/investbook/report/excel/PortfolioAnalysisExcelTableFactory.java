@@ -173,15 +173,17 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
             double usdToRubExchangeRate = foreignExchangeRateService.getExchangeRateToRub("USD").doubleValue();
             Double divider = null;
             double investmentUsd = 0;
+            Double prevAssetsGrownValue = null;
             for (var record : table) {
                 investmentUsd += getInvestmentUsd(record, usdToRubExchangeRate);
                 Number assetsRub = (Number) record.get(ASSETS_RUB);
                 if (assetsRub != null) {
                     double assetsUsd = assetsRub.doubleValue() / usdToRubExchangeRate;
-                    divider = updateDivider(divider, assetsUsd, investmentUsd);
+                    divider = updateDivider(divider, assetsUsd, investmentUsd, prevAssetsGrownValue);
                     investmentUsd = 0;
                     if (divider != null) {
                         record.put(ASSETS_GROWTH, "=(" + ASSETS_USD.getCellAddr() + "/" + divider + "-1)*100");
+                        prevAssetsGrownValue = assetsUsd / divider;
                     }
                 }
             }
@@ -206,9 +208,16 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         return 0;
     }
 
-    private Double updateDivider(Double divider, double assetsUsd, double investmentUsd) {
+    private Double updateDivider(Double divider, double assetsUsd, double investmentUsd, Double prevAssetsGrowth) {
         if (divider == null) {
-            divider = assetsUsd;
+            if (prevAssetsGrowth == null) {
+                // начинаем график роста активов с нулевой отметки
+                divider = assetsUsd;
+            } else {
+                // счет был опустошен, сейчас деньги снова заведены,
+                // график роста активов остановился на отметке prevAssetsGrowth, начинаем с него же
+                divider = assetsUsd / prevAssetsGrowth;
+            }
         } else {
             double assetsBeforeInvestment = assetsUsd - investmentUsd;
             divider = divider * assetsUsd / assetsBeforeInvestment;
