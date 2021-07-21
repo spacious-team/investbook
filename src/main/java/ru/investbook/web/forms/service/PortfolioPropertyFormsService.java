@@ -147,11 +147,22 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
             }
             case TOTAL_ASSETS_RUB, TOTAL_ASSETS_USD -> {
                 PortfolioPropertyTotalAssetsModel a = (PortfolioPropertyTotalAssetsModel) m;
-                a.setTotalAssets(BigDecimal.valueOf(Double.parseDouble(e.getValue())));
+                a.setTotalAssets(getPropertyValue(e));
                 a.setTotalAssetsCurrency(PortfolioPropertyTotalAssetsModel.Currency.valueOf(type));
                 yield a;
             }
         };
+    }
+
+    private static BigDecimal getPropertyValue(PortfolioPropertyEntity entity) {
+        try {
+            return BigDecimal.valueOf(
+                    Double.parseDouble(
+                            entity.getValue()));
+        } catch (Exception e) {
+            log.error("Значение должно содержать число, сохранено {}", entity);
+            return BigDecimal.ZERO;
+        }
     }
 
     public void delete(Integer id) {

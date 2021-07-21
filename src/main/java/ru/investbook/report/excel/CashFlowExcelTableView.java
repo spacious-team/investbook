@@ -20,6 +20,7 @@ package ru.investbook.report.excel;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -28,6 +29,7 @@ import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
 import ru.investbook.repository.PortfolioPropertyRepository;
@@ -40,6 +42,7 @@ import java.util.function.UnaryOperator;
 import static ru.investbook.report.excel.CashFlowExcelTableHeader.*;
 
 @Component
+@Slf4j
 public class CashFlowExcelTableView extends ExcelTableView {
 
     @Getter
@@ -81,7 +84,7 @@ public class CashFlowExcelTableView extends ExcelTableView {
                                 .orElseThrow(() -> new IllegalArgumentException("Ожидается портфель"))
                                 .getId(),
                         PortfolioPropertyType.TOTAL_ASSETS_RUB.name()) // TODO sum with TOTAL_ASSETS_USD div by USDRUB exchange rate
-                .map(e -> BigDecimal.valueOf(Double.parseDouble(e.getValue())))
+                .map(CashFlowExcelTableView::getPropertyValue)
                 .orElse(BigDecimal.ZERO);
         total.put(DATE, "Итого:");
         total.put(CASH_RUB, "=SUM(" +
@@ -94,6 +97,17 @@ public class CashFlowExcelTableView extends ExcelTableView {
         total.put(CASH_BALANCE, "=SUMPRODUCT(" + CASH_BALANCE.getRange(3, table.size() + 2) + ","
                 + EXCHANGE_RATE.getRange(3, table.size() + 2) + ")");
         return total;
+    }
+
+    private static BigDecimal getPropertyValue(PortfolioPropertyEntity entity) {
+        try {
+            return BigDecimal.valueOf(
+                    Double.parseDouble(
+                            entity.getValue()));
+        } catch (Exception e) {
+            log.error("Значение должно содержать число, сохранено {}", entity);
+            return BigDecimal.ZERO;
+        }
     }
 
     @Override
