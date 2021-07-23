@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.ConstantPositionTableColumn;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
 import org.spacious_team.table_wrapper.api.Table;
@@ -89,7 +90,9 @@ public class PortfolioPropertyTable extends SingleInitializableReportTable<Portf
     @RequiredArgsConstructor
     public enum SummaryTableHeader implements TableColumnDescription {
         DESCRIPTION(1),
-        RUB("RUB"),
+        RUB(AnyOfTableColumn.of(
+                TableColumnImpl.of("RUB"),
+                TableColumnImpl.of("RUR"))), // for fx market reports since 7.2021
         USD(OptionalTableColumn.of(TableColumnImpl.of("USD"))),
         EUR(OptionalTableColumn.of(TableColumnImpl.of("EUR"))),
         GBP(OptionalTableColumn.of(TableColumnImpl.of("GBP"))),
@@ -97,10 +100,6 @@ public class PortfolioPropertyTable extends SingleInitializableReportTable<Portf
 
         @Getter
         private final TableColumn column;
-        SummaryTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
-        }
-
         SummaryTableHeader(int columnIndex) {
             this.column = ConstantPositionTableColumn.of(columnIndex);
         }
