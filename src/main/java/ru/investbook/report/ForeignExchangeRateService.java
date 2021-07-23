@@ -67,13 +67,13 @@ public class ForeignExchangeRateService {
         if (exchangeRate != null) {
             return exchangeRate;
         } else if (baseCurrency.equalsIgnoreCase("RUB")) {
-            exchangeRate = BigDecimal.ONE.divide(getExchangeRateToRub(quoteCurrency), 6, RoundingMode.HALF_UP);
+            exchangeRate = BigDecimal.ONE.divide(getExchangeRateToRub(quoteCurrency), 20, RoundingMode.HALF_UP);
         } else if (quoteCurrency.equalsIgnoreCase("RUB")) {
             exchangeRate = getExchangeRateToRub(baseCurrency);
         } else {
             BigDecimal baseToRub = getExchangeRateToRub(baseCurrency);
             BigDecimal quoteToRub = getExchangeRateToRub(quoteCurrency);
-            exchangeRate = baseToRub.divide(quoteToRub, 6, RoundingMode.HALF_UP);
+            exchangeRate = baseToRub.divide(quoteToRub, 20, RoundingMode.HALF_UP);
         }
         cache(baseCurrency, quoteCurrency, exchangeRate);
         return exchangeRate;
@@ -115,7 +115,7 @@ public class ForeignExchangeRateService {
         } catch (Exception e) {
             BigDecimal baseToRub = getExchangeRateToRubOrDefault(baseCurrency, atDate);
             BigDecimal quoteToRub = getExchangeRateToRubOrDefault(quoteCurrency, atDate);
-            BigDecimal defaultExchangeRate = baseToRub.divide(quoteToRub, 6, RoundingMode.HALF_UP);
+            BigDecimal defaultExchangeRate = baseToRub.divide(quoteToRub, 20, RoundingMode.HALF_UP);
             log.warn("Курс валюты {}{} на дату {} не известен, использую ориентировочное значение {}",
                     baseCurrency, quoteCurrency, atDate, defaultExchangeRate);
             return defaultExchangeRate;
@@ -139,13 +139,13 @@ public class ForeignExchangeRateService {
         if (exchangeRate != null) {
             return exchangeRate;
         } else if (baseCurrency.equalsIgnoreCase("RUB")) {
-            exchangeRate = BigDecimal.ONE.divide(getExchangeRateToRub(quoteCurrency, atDate), 6, RoundingMode.HALF_UP);
+            exchangeRate = BigDecimal.ONE.divide(getExchangeRateToRub(quoteCurrency, atDate), 20, RoundingMode.HALF_UP);
         } else if (quoteCurrency.equalsIgnoreCase("RUB")) {
             exchangeRate = getExchangeRateToRub(baseCurrency, atDate);
         } else {
             BigDecimal baseToRub = getExchangeRateToRub(baseCurrency, atDate);
             BigDecimal quoteToRub = getExchangeRateToRub(quoteCurrency, atDate);
-            exchangeRate = baseToRub.divide(quoteToRub, 6, RoundingMode.HALF_UP);
+            exchangeRate = baseToRub.divide(quoteToRub, 20, RoundingMode.HALF_UP);
         }
         cache(baseCurrency, quoteCurrency, atDate, exchangeRate);
         return exchangeRate;

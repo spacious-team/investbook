@@ -110,6 +110,10 @@ public class PsbBrokerForeignMarketReport extends AbstractBrokerReport {
         }
     }
 
+    public static String convertToCurrency(String value) {
+        return value.replace("RUR", "RUB"); // RUR (used till 1998) code in reports
+    }
+
     @Override
     public void close() {
     }

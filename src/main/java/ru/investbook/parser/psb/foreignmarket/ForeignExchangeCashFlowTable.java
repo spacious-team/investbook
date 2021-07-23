@@ -19,9 +19,11 @@
 package ru.investbook.parser.psb.foreignmarket;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
+import org.spacious_team.table_wrapper.api.OptionalTableColumn;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
@@ -30,11 +32,14 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static ru.investbook.parser.psb.foreignmarket.ForeignExchangeCashFlowTable.FxCashFlowTableHeader.*;
+import static ru.investbook.parser.psb.foreignmarket.PsbBrokerForeignMarketReport.convertToCurrency;
 
 @Slf4j
 public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
@@ -55,7 +60,7 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
     }
 
     @Override
-    protected EventCashFlow parseRow(TableRow row) {
+    protected Collection<EventCashFlow> parseRowToCollection(TableRow row) {
         String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         boolean isPositive;
@@ -67,31 +72,33 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
                 return null;
             }
         }
-        String currency;
-        BigDecimal value = row.getBigDecimalCellValue(RUB);
-        if (value.compareTo(min) > 0) {
-            currency = "RUB";
-        } else {
-            value = row.getBigDecimalCellValue(USD);
-            if (value.compareTo(min) > 0) {
-                currency = "USD";
-            } else {
-                value = row.getBigDecimalCellValue(EUR);
-                if (value.compareTo(min) > 0) {
-                    currency = "EUR";
-                } else {
-                    return null;
-                }
-            }
-        }
-        return EventCashFlow.builder()
+        EventCashFlow.EventCashFlowBuilder builder = EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(CashFlowType.CASH)
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
-                .value(value.multiply(BigDecimal.valueOf(isPositive ? 1 : -1)))
-                .currency(currency)
-                .description("Операция по валютному счету")
-                .build();
+                .description("Операция по валютному счету");
+
+        Collection<EventCashFlow> values = new ArrayList<>();
+        getBigDecimal(row, RUB, isPositive)
+                .map(value -> builder.value(value).currency("RUB").build())
+                .ifPresent(values::add);
+        getBigDecimal(row, USD, isPositive)
+                .map(value -> builder.value(value).currency("USD").build())
+                .ifPresent(values::add);
+        getBigDecimal(row, EUR, isPositive)
+                .map(value -> builder.value(value).currency("EUR").build())
+                .ifPresent(values::add);
+        getBigDecimal(row, VALUE, isPositive)
+                .map(value -> builder.value(value).currency(convertToCurrency(row.getStringCellValue(CURRENCY))).build())
+                .ifPresent(values::add);
+
+        return values;
+    }
+
+    private Optional<BigDecimal> getBigDecimal(TableRow row, FxCashFlowTableHeader column, boolean isPositive) {
+        return Optional.ofNullable(row.getBigDecimalCellValueOrDefault(column, null))
+                .filter(value -> value.compareTo(min) > 0)
+                .map(value -> isPositive ? value : value.negate());
     }
 
     private Collection<EventCashFlow> getDailyBrokerCommission() {
@@ -124,12 +131,15 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
         return EventCashFlow.mergeDuplicates(old, nw);
     }
 
+    @RequiredArgsConstructor
     enum FxCashFlowTableHeader implements TableColumnDescription {
         DATE("дата"),
         OPERATION("вид"),
-        RUB("RUB"),
-        USD("USD"),
-        EUR("EUR");
+        RUB(OptionalTableColumn.of(TableColumnImpl.of("RUB"))),  // old format
+        USD(OptionalTableColumn.of(TableColumnImpl.of("USD"))),  // old format
+        EUR(OptionalTableColumn.of(TableColumnImpl.of("EUR"))),  // old format
+        VALUE(OptionalTableColumn.of(TableColumnImpl.of("Сумма"))),     // new format
+        CURRENCY(OptionalTableColumn.of(TableColumnImpl.of("Валюта"))); // new format
 
         @Getter
         private final TableColumn column;
