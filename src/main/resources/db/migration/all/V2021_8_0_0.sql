@@ -16,5 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-ALTER TABLE `portfolio`
-    ADD `enabled` BOOLEAN NOT NULL COMMENT 'Признак активного счета: если false, то счет исключается из аналитического расчета'
+ALTER TABLE IF EXISTS `portfolio`
+    ADD COLUMN IF NOT EXISTS `enabled` BOOLEAN DEFAULT TRUE NOT NULL
+    COMMENT 'Признак активного счета: если false, то счет исключается из аналитического расчета'
