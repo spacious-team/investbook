@@ -31,15 +31,18 @@
 <p th:text="'Счет: ' +  ${event.portfolio}"/>
 <p th:text="'Номер записи: ' +  ${event.id}"/>
 <p th:text="'Дата: ' + ${event.date}"/>
-<p th:switch="${event.type.name}">
+<p th:switch="${event.getStringType}">
+    <span th:case="CASH_IN">Пополнение</span>
+    <span th:case="CASH_OUT">Снятие</span>
     <span th:case="DIVIDEND">Дивиденд</span>
     <span th:case="COUPON">Купон</span>
     <span th:case="AMORTIZATION">Амортизация облигации</span>
     <span th:case="REDEMPTION">Погашение облигации</span>
-    <span th:case="COMMISSION">Комиссия</span>
-    <span th:case="TAX">Налог</span>
-    <span th:text="Пополнение" th:if="${event.type.name == 'CASH' && event.value >= 0}"/>
-    <span th:text="Снятие" th:if="${event.type.name == 'CASH' && event.value < 0}"/>
+    <span th:case="COMMISSION_OUT">Комиссия</span>
+    <span th:case="COMMISSION_IN">Возврат комиссии</span>
+    <span th:case="TAX_OUT">Налог</span>
+    <span th:case="TAX_IN">Возврат налога</span>
+    <span th:case="TAX_IIS_A">Вычет ИИС тип А</span>
     <span th:text="': ' + ${event.value.abs()} + ' ' + ${event.valueCurrency}"/>
 </p>
 <br th:if="${event.description != null}">

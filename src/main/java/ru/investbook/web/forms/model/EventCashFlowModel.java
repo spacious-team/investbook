@@ -59,4 +59,31 @@ public class EventCashFlowModel {
     public void setValueCurrency(String currency) {
         this.valueCurrency = currency.toUpperCase();
     }
+
+    public String getStringType() {
+        if (type == null)  return null;
+        return switch (type) {
+            case DIVIDEND, COUPON, REDEMPTION, AMORTIZATION, ACCRUED_INTEREST -> type.name();
+            case CASH -> {
+                var desc = String.valueOf(description).toLowerCase();
+                if (desc.contains("вычет") && desc.contains("иис")) {
+                    yield "TAX_IIS_A";
+                }
+                yield type.name() + (isValuePositive() ? "_IN" : "_OUT");
+            }
+            default ->  type.name() + (isValuePositive() ? "_IN" : "_OUT");
+        };
+    }
+
+    public void setStringType(String value) {
+        if (value.equals("TAX_IIS_A")) {
+            type = CashFlowType.CASH;
+        } else {
+            type = CashFlowType.valueOf(value.split("_")[0]);
+        }
+    }
+
+    private boolean isValuePositive() {
+        return value.compareTo(BigDecimal.ZERO) >= 0;
+    }
 }
