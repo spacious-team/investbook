@@ -113,7 +113,7 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
                         .timestamp(getReport().getReportEndDateTime())
                         .value(brockerCommission)
                         .currency("RUB")
-                        .description("Комиссия брокера за обналичивание валюты")
+                        .description("Комиссия на валютном рынке")
                         .build());
             }
         } catch (Exception ignore) {
