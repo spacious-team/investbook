@@ -31,13 +31,10 @@ import ru.investbook.repository.EventCashFlowRepository;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.web.forms.model.EventCashFlowModel;
 
-import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static org.spacious_team.broker.pojo.CashFlowType.CASH;
 
 @Service
 @RequiredArgsConstructor
@@ -70,7 +67,7 @@ public class EventCashFlowFormsService implements FormsService<EventCashFlowMode
                         .portfolio(e.getPortfolio())
                         .timestamp(e.getDate().atStartOfDay(zoneId).toInstant())
                         .eventType(e.getType())
-                        .value(getValue(e))
+                        .value(e.getValue())
                         .currency(e.getValueCurrency())
                         .description(StringUtils.hasText(e.getDescription()) ? e.getDescription() : null)
                         .build()));
@@ -87,14 +84,6 @@ public class EventCashFlowFormsService implements FormsService<EventCashFlowMode
         }
     }
 
-    private BigDecimal getValue(EventCashFlowModel e) {
-        return switch (e.getType()) {
-            case CASH -> e.getValue(); // as is
-            case COMMISSION, TAX -> e.getValue().abs().negate();
-            default -> e.getValue().abs();
-        };
-    }
-
     private EventCashFlowModel toModel(EventCashFlowEntity e) {
         CashFlowType type = CashFlowType.valueOf(e.getCashFlowType().getId());
         EventCashFlowModel m = new EventCashFlowModel();
@@ -102,7 +91,7 @@ public class EventCashFlowFormsService implements FormsService<EventCashFlowMode
         m.setPortfolio(e.getPortfolio().getId());
         m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
         m.setType(type);
-        m.setValue(type == CASH ? e.getValue() : e.getValue().abs());
+        m.setValue(e.getValue());
         m.setValueCurrency(e.getCurrency());
         m.setDescription(e.getDescription());
         return m;
