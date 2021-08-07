@@ -30,7 +30,7 @@
 несколько счетов у разных брокеров, информация будет представлена в разном месте, объеме и форматах. Приложение
 объективно, отображает данные в едином формате для всех брокеров.
 
-![main-page](https://user-images.githubusercontent.com/11336712/121085977-41cb0c00-c7eb-11eb-9056-3434df1544b9.png)
+![main-page](https://user-images.githubusercontent.com/11336712/128609729-08b5cb5e-9f58-452e-a661-a0258d7fb512.png)
 
 ![portfolio-composition](https://user-images.githubusercontent.com/11336712/120564463-a5cc8980-c413-11eb-8326-46efcdc85c23.gif)
 
