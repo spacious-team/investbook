@@ -21,6 +21,7 @@ package ru.investbook.entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -34,4 +35,8 @@ public class PortfolioEntity {
     @Id
     @Column(name = "id")
     private String id;
+
+    @Basic
+    @Column(name = "enabled")
+    private boolean enabled;
 }
