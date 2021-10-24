@@ -44,13 +44,13 @@
             по <span th:text="${portfolios.size()}"></span> счетам
         </span>
         </div>
-        <div class="cell">
+        <a href="/portfolios/archive" class="cell">
             <p>Счета</p>
             <span class="portfolios"
-                  th:text="${T(java.lang.String).join(', ', portfolios.subList(0, T(java.lang.Math).min(3, portfolios.size())))}"></span><span
+                  th:text="${T(java.lang.String).join(', ', T(java.util.List).copyOf(portfolios).subList(0, T(java.lang.Math).min(3, portfolios.size())))}"></span><span
                 class="portfolios" th:if="${portfolios.size() > 3}">, ...</span>
-        </div>
-        <div class="cell" title="Остаток средств на всех счетах">
+        </a>
+        <div class="cell" title="Остаток средств на активных счетах">
             <div class="wallet">
                 <svg viewBox="0 0 25 25">
                     <path style="stroke: #eee; stroke-width: 0.5;" d="M20,15a1,1,0,1,1-1-1A1,1,0,0,1,20,15Zm5-1.75v3.5A1.23,1.23,0,0,1,24,18v3.8A1.25,1.25,0,0,1,22.75,23H2.5A2.5,2.5,0,0,1,0,20.5V5.5A2.5,2.5,0,0,1,2.5,3H20.75A1.25,1.25,0,0,1,22,4.25V7h.75A1.25,1.25,0,0,1,24,8.25v3.8A1.23,1.23,0,0,1,25,13.25ZM1,5.5a1.46,1.46,0,0,0,.46,1.08A1.49,1.49,0,0,0,2.5,7H21V6H3V5H21V4.25A.25.25,0,0,0,20.75,4H2.5A1.5,1.5,0,0,0,1,5.5ZM23,18H19a3,3,0,1,1,0-6h4V8.25A.25.25,0,0,0,22.75,8H2.5A2.47,2.47,0,0,1,1,7.48v13A1.5,1.5,0,0,0,2.5,22H22.75a.25.25,0,0,0,.25-.25Zm1-4.75a.25.25,0,0,0-.25-.25H19a2,2,0,0,0-2,2.34A2.08,2.08,0,0,0,19.11,17h4.64a.25.25,0,0,0,.25-.25Z"/>

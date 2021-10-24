@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.ContentDisposition;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,6 +47,7 @@ import java.util.stream.Stream;
 
 import static java.time.ZoneId.systemDefault;
 import static java.util.stream.Collectors.joining;
+import static ru.investbook.web.ControllerHelper.getActivePortfolios;
 import static ru.investbook.web.ControllerHelper.getPortfolios;
 
 @Controller
@@ -61,8 +63,9 @@ public class InvestbookReportController {
     private volatile int expectedFileSize = 0xFFFF;
 
     @GetMapping("/select-period")
-    public String getPage(@ModelAttribute("viewFilter") ViewFilterModel viewFilter) {
-        viewFilter.setPortfolios(getPortfolios(portfolioRepository));
+    public String getPage(Model model, @ModelAttribute("viewFilter") ViewFilterModel viewFilter) {
+        viewFilter.setPortfolios(getActivePortfolios(portfolioRepository));
+        model.addAttribute("allPortfolios", getPortfolios(portfolioRepository));
         return "select-period";
     }
 

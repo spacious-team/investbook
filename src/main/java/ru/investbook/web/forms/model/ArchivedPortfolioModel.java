@@ -16,25 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.web.model;
+package ru.investbook.web.forms.model;
 
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDate;
-import java.util.Collections;
+import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Data
-public class ViewFilterModel {
+public class ArchivedPortfolioModel {
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate fromDate = LocalDate.of(1997, 9, 22);
+    @NotNull
+    private Set<String> portfolios;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate toDate = LocalDate.now();
-
-    private Set<String> portfolios = Collections.emptySet();
-
-    private boolean showDetails = true;
 }

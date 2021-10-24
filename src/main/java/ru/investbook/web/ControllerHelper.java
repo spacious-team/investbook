@@ -38,6 +38,21 @@ public class ControllerHelper {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
+    public static Set<String> getActivePortfolios(PortfolioRepository portfolioRepository) {
+        return portfolioRepository.findByEnabledIsTrue()
+                .stream()
+                .map(PortfolioEntity::getId)
+                .sorted()
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    public static Set<String> getInactivePortfolios(PortfolioRepository portfolioRepository) {
+        return portfolioRepository.findByEnabledIsFalse()
+                .stream()
+                .map(PortfolioEntity::getId)
+                .collect(Collectors.toSet());
+    }
+
     public static Set<String> getSecuritiesDescriptions(SecurityRepository securityRepository) {
         return securityRepository.findAll()
                 .stream()

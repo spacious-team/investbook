@@ -30,6 +30,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public interface TransactionRepository extends JpaRepository<TransactionEntity, TransactionEntityPK> {
@@ -302,4 +303,6 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             @Param("portfolio") Portfolio portfolio,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
+
+    int countByPkPortfolioIn(Set<String> portfolio);
 }
