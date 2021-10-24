@@ -69,6 +69,7 @@ public class FifoPositionsFactory {
         return get(portfolios, security.getId(), filter);
     }
 
+    // TODO проверить, возможно первый аргумент 'portfolios' всегда равен ViewFilter.getPortfolios() ?
     public FifoPositions get(Collection<String> portfolios, String isinOrContract, ViewFilter filter) {
         String key = portfolios.stream().sorted().collect(Collectors.joining(","));
         return positionsCache
