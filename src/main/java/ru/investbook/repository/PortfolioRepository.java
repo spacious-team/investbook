@@ -19,12 +19,22 @@
 package ru.investbook.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.PortfolioEntity;
 
 import java.util.Set;
 
+@Transactional(readOnly = true)
 public interface PortfolioRepository extends JpaRepository<PortfolioEntity, String> {
 
     Set<PortfolioEntity> findByEnabledIsTrue();
 
+    Set<PortfolioEntity> findByEnabledIsFalse();
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE PortfolioEntity SET enabled = :enabled WHERE id = :portfolio")
+    int setEnabledForPortfolio(String portfolio, boolean enabled);
 }

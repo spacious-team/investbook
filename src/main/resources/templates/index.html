@@ -44,12 +44,12 @@
             по <span th:text="${portfolios.size()}"></span> счетам
         </span>
         </div>
-        <div class="cell">
+        <a href="/portfolios/archive" class="cell">
             <p>Счета</p>
             <span class="portfolios"
                   th:text="${T(java.lang.String).join(', ', T(java.util.List).copyOf(portfolios).subList(0, T(java.lang.Math).min(3, portfolios.size())))}"></span><span
                 class="portfolios" th:if="${portfolios.size() > 3}">, ...</span>
-        </div>
+        </a>
         <div class="cell" title="Остаток средств на активных счетах">
             <div class="wallet">
                 <svg viewBox="0 0 25 25">
