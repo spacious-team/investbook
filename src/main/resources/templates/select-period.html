@@ -71,12 +71,12 @@
         <input type="submit" value="Получить"/>
     </div>
     <p id='portfolios'>Счета:
-        <input type="checkbox" name="roles"
-               th:each="portfolio : ${viewFilter.portfolios}"
-               th:text="${portfolio}"
-               th:value="${portfolio}"
-               th:field="*{portfolios}"
-               checked/>
+        <span th:each="portfolio : ${allPortfolios}">
+            <input type="checkbox"
+                   th:text="${portfolio}"
+                   th:value="${portfolio}"
+                   th:field="*{portfolios}"/>
+        </span>
     </p>
     <p><input type="checkbox" th:field="*{showDetails}">Детальный отчет (если убрать, отобразится только аналитическая сводка)</p>
 </form>

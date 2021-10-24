@@ -21,5 +21,10 @@ package ru.investbook.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.investbook.entity.PortfolioEntity;
 
+import java.util.Set;
+
 public interface PortfolioRepository extends JpaRepository<PortfolioEntity, String> {
+
+    Set<PortfolioEntity> findByEnabledIsTrue();
+
 }
