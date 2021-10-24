@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.service.AssetsAndCashService;
 
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -45,7 +45,7 @@ public class HomePageController {
 
     @GetMapping
     public String index(Model model) {
-        List<String> portfolios = assetsAndCashService.getPortfolios();
+        Set<String> portfolios = assetsAndCashService.getActivePortfolios();
         model.addAttribute("transactionsCount", transactionRepository.count());
         model.addAttribute("portfolios", portfolios);
         model.addAttribute("assets", assetsAndCashService.getAssets(portfolios));
