@@ -1,0 +1,51 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <title>Архивные счета</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
+    <link rel="stylesheet" href="/water-wrapper.css">
+    <style>
+        form input[type=submit] {
+            margin-top: 16px
+        }
+    </style>
+</head>
+<body>
+<h1>Архивные счета</h1>
+<a href="/">На главную</a>
+
+<p class="hint">
+    Выберите неактивные счета (счета, по которым нет изменений). Информация по таким счетам не отображается
+    на главной станице и странице "<a href="/portfolio-composition">Состав портфеля</a>".
+</p>
+
+
+<form action="/portfolios/archive" method="POST" id="get-portfolio" class="grey-smaller" th:object="${archive}">
+    <div th:each="portfolio : ${allPortfolios}">
+        <input type="checkbox"
+               th:text="${portfolio}"
+               th:value="${portfolio}"
+               th:field="*{portfolios}"/>
+    </div>
+    <input type="submit" value="Сохранить"/>
+</form>
+</body>
+</html>

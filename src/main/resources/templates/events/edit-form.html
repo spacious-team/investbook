@@ -56,16 +56,18 @@
     </label>
     <label>
         Операция
-        <select th:field="*{type}" id="operation-type" onchange="setDescription(this)" required>
-            <option value="CASH">Пополнение</option>
-            <option value="CASH">Снятие</option> <!-- view value only -->
+        <select th:field="*{stringType}" id="operation-type" onchange="setDescription(this)" required>
+            <option value="CASH_IN">Пополнение</option>
+            <option value="CASH_OUT">Снятие</option>
             <option value="DIVIDEND">Дивиденд</option>
             <option value="COUPON">Купон</option>
             <option value="AMORTIZATION">Амортизация облигации</option>
             <option value="REDEMPTION">Погашение облигации</option>
-            <option value="COMMISSION">Комиссия</option>
-            <option value="TAX">Налог</option>
-            <option value="CASH">Вычет ИИС тип А</option> <!-- view value only -->
+            <option value="COMMISSION_OUT">Комиссия</option>
+            <option value="COMMISSION_IN">Возврат комиссии</option>
+            <option value="TAX_OUT">Налог</option>
+            <option value="TAX_IN">Возврат налога</option>
+            <option value="TAX_IIS_A">Вычет ИИС тип А</option>
         </select>
     </label>
     <br/>
@@ -98,31 +100,13 @@
 
 <script type="text/javascript">
 
-    selectType()
-
-    function selectType() {
-        let typeElement = document.getElementById('operation-type');
-        let valueElement = document.getElementById('value')
-        let type = typeElement.options[typeElement.selectedIndex].value
-        if (type === "CASH") {
-            let descriptionElement = document.getElementById('description');
-            let desc = descriptionElement.value.toLowerCase()
-            if (desc.includes("вычет") && desc.includes("иис")) {
-                // из БД подгружен "возврат ИИС", укажем на web-странице этот тип
-                typeElement.options.selectedIndex = 8
-            } else {
-                // обычное пополнение снятие
-                typeElement.options.selectedIndex = (valueElement.value >= 0) ? 0 : 1
-                valueElement.value = Math.abs(valueElement.value)
-            }
-        }
-        // отображаем положительные значения для удобства пользователя,
-        // перед сохранением в БД при необходимости сохраняются отрицательные значения
-        valueElement.value = Math.abs(valueElement.value)
-    }
+    // отображаем положительные значения для удобства пользователя,
+    // перед сохранением в БД при необходимости сохраняются отрицательные значения
+    let valueElement = document.getElementById('value')
+    valueElement.value = Math.abs(valueElement.value)
 
     function setDescription(selectElement) {
-        if (selectElement.options.selectedIndex === 8) {
+        if (selectElement.options[typeElement.selectedIndex].value === "TAX_IIS_A") {
             let descriptionElement = document.getElementById('description');
             if (descriptionElement.value === "") {
                 // вручную выбран "возврат ИИС", но не еще указан комментарий
@@ -133,9 +117,9 @@
 
     function checkValues() {
         let e = document.getElementById('operation-type');
-        let text = e.options[e.selectedIndex].text
+        let type = e.options[e.selectedIndex].value
         let valueElement = document.getElementById('value')
-        valueElement.value = (text === "Снятие" || text === "Вычет ИИС тип А") ?
+        valueElement.value = (type === "TAX_IIS_A" || type.endsWith("_OUT")) ?
             -Math.abs(valueElement.value) :
             Math.abs(valueElement.value)
     }

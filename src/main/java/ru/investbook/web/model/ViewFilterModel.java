@@ -22,8 +22,8 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 @Data
 public class ViewFilterModel {
@@ -34,7 +34,7 @@ public class ViewFilterModel {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate toDate = LocalDate.now();
 
-    private Collection<String> portfolios = Collections.emptySet();
+    private Set<String> portfolios = Collections.emptySet();
 
     private boolean showDetails = true;
 }

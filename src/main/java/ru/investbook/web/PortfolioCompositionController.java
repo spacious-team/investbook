@@ -29,8 +29,8 @@ import ru.investbook.service.AssetsAndCashService;
 import ru.investbook.service.InvestmentProportionService;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
 
@@ -42,17 +42,19 @@ public class PortfolioCompositionController {
 
     private final InvestmentProportionService investmentProportionService;
     private final AssetsAndCashService assetsAndCashService;
-    private final ViewFilter currentState = ViewFilter.builder().build();
 
     @GetMapping
     public String getPage(Model model) {
         try {
+            Set<String> portfolios = assetsAndCashService.getActivePortfolios();
+            ViewFilter currentState = ViewFilter.builder()
+                    .portfolios(portfolios)
+                    .build();
             Collection<Map<String, ?>> investmentProportion = investmentProportionService.getSectorProportions(currentState)
                     .entrySet()
                     .stream()
                     .map(e -> Map.of("sector", e.getKey(), "investment", ((Number) e.getValue()).intValue()))
                     .collect(toList());
-            List<String> portfolios = assetsAndCashService.getPortfolios();
             int cash = assetsAndCashService.getTotalCash(portfolios)
                     .map(Number::intValue)
                     .orElse(0);

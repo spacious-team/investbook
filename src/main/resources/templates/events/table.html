@@ -71,7 +71,7 @@
             <span th:text="Пополнение" th:if="${e.type.name == 'CASH' && e.value >= 0}"/>
             <span th:text="Снятие" th:if="${e.type.name == 'CASH' && e.value < 0}"/>
         </td>
-        <td th:text="${(e.value != null) ? e.value.abs().setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}" class="value"/>
+        <td th:text="${(e.value != null) ? e.value.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}" class="value"/>
         <td th:text="${e.valueCurrency}"/>
         <td th:text="${e.description}"/>
         <td class="table-row-control">

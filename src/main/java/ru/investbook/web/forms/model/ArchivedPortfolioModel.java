@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,27 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.entity;
+package ru.investbook.web.forms.model;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import java.util.Set;
 
-@Entity
-@Table(name = "portfolio")
 @Data
-@EqualsAndHashCode(of = "id")
-public class PortfolioEntity {
-    @Id
-    @Column(name = "id")
-    private String id;
+public class ArchivedPortfolioModel {
 
-    @Basic
-    @Column(name = "enabled")
-    private boolean enabled;
+    @NotNull
+    private Set<String> portfolios;
+
 }

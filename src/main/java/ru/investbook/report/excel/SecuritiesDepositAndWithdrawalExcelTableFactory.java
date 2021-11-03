@@ -30,8 +30,7 @@ import ru.investbook.report.TableFactory;
 import ru.investbook.report.ViewFilter;
 import ru.investbook.repository.TransactionRepository;
 
-import java.util.Optional;
-
+import static java.util.Optional.ofNullable;
 import static ru.investbook.report.excel.SecuritiesDepositAndWithdrawalExcelTableHeader.*;
 
 @Component
@@ -53,7 +52,8 @@ public class SecuritiesDepositAndWithdrawalExcelTableFactory implements TableFac
             record.put(DATE, transactionEntity.getTimestamp());
             record.put(COUNT, transactionEntity.getCount());
             SecurityEntity securityEntity = transactionEntity.getSecurity();
-            record.put(SECURITY, Optional.ofNullable(securityEntity.getName())
+            record.put(SECURITY, ofNullable(securityEntity.getName())
+                    .or(() -> ofNullable(securityEntity.getTicker()))
                     .orElse(securityEntity.getId()));
         }
         return table;

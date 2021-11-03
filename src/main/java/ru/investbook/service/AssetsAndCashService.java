@@ -23,19 +23,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.springframework.stereotype.Service;
-import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.web.ControllerHelper;
 
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import static java.util.stream.Collectors.*;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
@@ -48,11 +47,8 @@ public class AssetsAndCashService {
     private final ForeignExchangeRateService foreignExchangeRateService;
     private final PortfolioRepository portfolioRepository;
 
-    public List<String> getPortfolios() {
-        return portfolioRepository.findAll()
-                .stream()
-                .map(PortfolioEntity::getId)
-                .collect(Collectors.toList());
+    public Set<String> getActivePortfolios() {
+        return ControllerHelper.getActivePortfolios(portfolioRepository);
     }
 
     public Optional<BigDecimal> getAssets(Collection<String> portfolios) {

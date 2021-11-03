@@ -26,8 +26,8 @@ import ru.investbook.web.model.ViewFilterModel;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -41,11 +41,11 @@ public class ViewFilter {
     public static final Instant defaultFromDate = Instant.ofEpochSecond(0);
     private static final Function<LocalDate, Instant> toInstant = date -> date.atStartOfDay(systemDefault()).toInstant();
 
-    public static ViewFilter of(ViewFilterModel viewFilterModel, Supplier<? extends Collection<String>> allPortfoliosSupplier) {
-        Collection<String> portfolios = viewFilterModel.getPortfolios();
+    public static ViewFilter of(ViewFilterModel viewFilterModel, Supplier<? extends Set<String>> allPortfoliosSupplier) {
+        Set<String> portfolios = viewFilterModel.getPortfolios();
         if (!portfolios.isEmpty()) {
-            Collection<String> allPortfolios = allPortfoliosSupplier.get();
-            if (portfolios.size() == allPortfolios.size() && portfolios.containsAll(allPortfolios)) {
+            Set<String> allPortfolios = allPortfoliosSupplier.get();
+            if (portfolios.equals(allPortfolios)) {
                 // portfolio filter not required
                 portfolios = Collections.emptySet();
             }
@@ -68,7 +68,7 @@ public class ViewFilter {
      * Show all portfolios if empty
      */
     @Builder.Default
-    private final Collection<String> portfolios = Collections.emptySet();
+    private final Set<String> portfolios = Collections.emptySet();
 
     @Builder.Default
     private final boolean showDetails = true;

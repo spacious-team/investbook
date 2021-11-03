@@ -30,6 +30,7 @@ public class PortfolioConverter implements EntityConverter<PortfolioEntity, Port
     public PortfolioEntity toEntity(Portfolio pojo) {
         PortfolioEntity entity = new PortfolioEntity();
         entity.setId(pojo.getId());
+        entity.setEnabled(pojo.isEnabled());
         return entity;
     }
 
@@ -37,6 +38,7 @@ public class PortfolioConverter implements EntityConverter<PortfolioEntity, Port
     public Portfolio fromEntity(PortfolioEntity entity) {
         return Portfolio.builder()
                 .id(entity.getId())
+                .enabled(entity.isEnabled())
                 .build();
     }
 }

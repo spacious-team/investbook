@@ -48,12 +48,14 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
             case "конвертация цб":
             case "вывод цб": // указывался при сплите акций APPL 4:1 (count = +3) и TSLA 5:1 (count = +4)
             case "ввод цб": // догадка, нет примера отчета
+            case "зачисление цб": // gh-352, без примера
+            case "списание цб":   // gh-352, без примера
                 break;
             case "погашение цб":
                 String isin = row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",")[2].trim();
                 Integer count = Math.abs(row.getIntCellValue(COUNT));
                 bondRedemptions.put(isin, count);
-                // no break;
+                return null;
             default:
                 return null;
         }
