@@ -73,12 +73,14 @@ public class InternalRateOfReturn {
      * @param quote may be null only if current security position is zero
      * @return internal rate of return if can be calculated or null otherwise
      */
-    public Double calc(Collection<String> portfolios, Security security, SecurityQuote quote, ViewFilter filter) {
+    public Double calc(
+            Collection<String> portfolios, Security security, SecurityQuote quote, Instant fromDate, Instant toDate) {
+
         try {
             if (getSecurityType(security.getId()) == DERIVATIVE) {
                 return null;
             }
-            FifoPositionsFilter pf = FifoPositionsFilter.of(portfolios, filter.getFromDate(), filter.getToDate());
+            FifoPositionsFilter pf = FifoPositionsFilter.of(portfolios, fromDate, toDate);
             FifoPositions positions = positionsFactory.get(security, pf);
             int count = positions.getCurrentOpenedPositionsCount();
             if (count != 0 && (quote == null || quote.getDirtyPriceInCurrency() == null)) {

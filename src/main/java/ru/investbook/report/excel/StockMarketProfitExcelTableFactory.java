@@ -108,7 +108,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         ViewFilter filter = ViewFilter.get();
         FifoPositionsFilter pf = FifoPositionsFilter.of(portfolio, filter.getFromDate(), filter.getToDate());
         FifoPositions positions = positionsFactory.get(security, pf);
-        PaidInterest paidInterest = paidInterestFactory.get(portfolio, security, filter);
+        PaidInterest paidInterest = paidInterestFactory.get(portfolio, security, filter.getFromDate(), filter.getToDate());
         openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(),
                 paidInterest, this::getOpenedPositionProfit, toCurrency));
         closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(),

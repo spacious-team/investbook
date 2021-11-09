@@ -121,42 +121,43 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
 
     private Collection<String> getSecuritiesId(Collection<String> portfolios, String currency) {
         Collection<String> contracts = new ArrayList<>();
+        ViewFilter filter = ViewFilter.get();
         if (portfolios.isEmpty()) {
             contracts.addAll(
                     transactionRepository.findDistinctSecurityByCurrencyAndTimestampBetweenOrderByTimestampDesc(
                             currency,
-                            ViewFilter.get().getFromDate(),
-                            ViewFilter.get().getToDate()));
+                            filter.getFromDate(),
+                            filter.getToDate()));
             contracts.addAll(
                     transactionRepository.findDistinctFxCurrencyPairByCurrencyAndTimestampBetween(
                             currency,
-                            ViewFilter.get().getFromDate(),
-                            ViewFilter.get().getToDate()));
+                            filter.getFromDate(),
+                            filter.getToDate()));
             if (currency.equalsIgnoreCase("RUB")) {
                 contracts.addAll(
                         transactionRepository.findDistinctDerivativeByTimestampBetweenOrderByTimestampDesc(
-                                ViewFilter.get().getFromDate(),
-                                ViewFilter.get().getToDate()));
+                                filter.getFromDate(),
+                                filter.getToDate()));
             }
         } else {
             contracts.addAll(
                     transactionRepository.findDistinctSecurityByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
                             portfolios,
                             currency,
-                            ViewFilter.get().getFromDate(),
-                            ViewFilter.get().getToDate()));
+                            filter.getFromDate(),
+                            filter.getToDate()));
             contracts.addAll(
                     transactionRepository.findDistinctFxCurrencyPairByPortfolioInAndCurrencyAndTimestampBetween(
                             portfolios,
                             currency,
-                            ViewFilter.get().getFromDate(),
-                            ViewFilter.get().getToDate()));
+                            filter.getFromDate(),
+                            filter.getToDate()));
             if (currency.equalsIgnoreCase("RUB")) {
                 contracts.addAll(
                         transactionRepository.findDistinctDerivativeByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
                                 portfolios,
-                                ViewFilter.get().getFromDate(),
-                                ViewFilter.get().getToDate()));
+                                filter.getFromDate(),
+                                filter.getToDate()));
             }
         }
         return contracts;
@@ -231,7 +232,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     .orElse(null));
             if (securityType != CURRENCY_PAIR) {
                 row.put(LAST_EVENT_DATE,
-                        securityProfitService.getLastEventTimestamp(portfolios, security, paymentEvents, filter)
+                        securityProfitService.getLastEventTimestamp(
+                                        portfolios, security, paymentEvents, filter.getFromDate(), filter.getToDate())
                                 .orElse(null));
             }
             row.put(BUY_COUNT, positions.getTransactions()
@@ -263,7 +265,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         .abs()
                         .divide(BigDecimal.valueOf(Math.max(1, Math.abs(count))), 6, RoundingMode.CEILING));
 
-                quote = securityProfitService.getSecurityQuote(security, toCurrency, filter);
+                quote = securityProfitService.getSecurityQuote(security, toCurrency, filter.getToDate());
 
                 if (quote != null) {
                     row.put(LAST_PRICE, quote.getCleanPriceInCurrency());
@@ -288,7 +290,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 row.put(TAX, securityProfitService.sumPaymentsForType(portfolios, security, CashFlowType.TAX, toCurrency).abs());
             }
             row.put(PROFIT, PROFIT_FORMULA);
-            row.put(INTERNAL_RATE_OF_RETURN, internalRateOfReturn.calc(portfolios, security, quote, filter));
+            row.put(INTERNAL_RATE_OF_RETURN, internalRateOfReturn.calc(
+                    portfolios, security, quote, filter.getFromDate(), filter.getToDate()));
             row.put(PROFIT_PROPORTION, PROFIT_PROPORTION_FORMULA);
         } catch (Exception e) {
             log.error("Ошибка при формировании агрегированных данных по бумаге {}", security, e);

@@ -79,7 +79,7 @@ public class InvestmentProportionService {
     private SecurityInvestment getSecurityToInvestment(Security security, ViewFilter filter) {
         FifoPositions positions = fifoPositionsFactory.get(security, FifoPositionsFilter.of(filter));
         int openedPositions = positions.getCurrentOpenedPositionsCount();
-        BigDecimal investmentRub = ofNullable(securityProfitService.getSecurityQuote(security, RUB, filter))
+        BigDecimal investmentRub = ofNullable(securityProfitService.getSecurityQuote(security, RUB, filter.getToDate()))
                 .map(SecurityQuote::getDirtyPriceInCurrency)
                 .map(quote -> quote.multiply(BigDecimal.valueOf(openedPositions)))
                 .orElseGet(() -> securityProfitService.getPurchaseCost(security, positions, RUB)

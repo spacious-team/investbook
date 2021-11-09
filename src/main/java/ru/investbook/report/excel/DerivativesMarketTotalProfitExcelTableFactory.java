@@ -98,14 +98,15 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
         if (!currency.equalsIgnoreCase("RUB")) {
             return emptyList();
         }
+        ViewFilter filter = ViewFilter.get();
         Collection<String> contracts = portfolios.isEmpty() ?
                 transactionRepository.findDistinctDerivativeByTimestampBetweenOrderByTimestampDesc(
-                        ViewFilter.get().getFromDate(),
-                        ViewFilter.get().getToDate()) :
+                        filter.getFromDate(),
+                        filter.getToDate()) :
                 transactionRepository.findDistinctDerivativeByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
                         portfolios,
-                        ViewFilter.get().getFromDate(),
-                        ViewFilter.get().getToDate());
+                        filter.getFromDate(),
+                        filter.getToDate());
 
         return contracts.stream()
                 .map(moexDerivativeCodeService::getContractGroup)
@@ -185,7 +186,8 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     private Instant getLastEventDate(Collection<String> portfolios, Collection<Security> contracts) {
         ViewFilter filter = ViewFilter.get();
         return contracts.stream()
-                .map(contract -> securityProfitService.getLastEventTimestamp(portfolios, contract, paymentEvents, filter))
+                .map(contract -> securityProfitService.getLastEventTimestamp(
+                        portfolios, contract, paymentEvents, filter.getFromDate(), filter.getToDate()))
                 .flatMap(Optional::stream)
                 .max(Comparator.naturalOrder())
                 .orElse(null);

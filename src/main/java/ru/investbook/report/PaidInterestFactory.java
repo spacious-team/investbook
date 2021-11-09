@@ -56,15 +56,19 @@ public class PaidInterestFactory {
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
 
     @Transactional(readOnly = true)
-    public PaidInterest get(Portfolio portfolio, Security security, ViewFilter filter) {
+    public PaidInterest get(Portfolio portfolio, Security security, Instant fromDate, Instant toDate) {
         FifoPositions positions = positionsFactory.get(security, portfolio);
-        return create(portfolio.getId(), security, positions, filter);
+        return create(portfolio.getId(), security, positions, fromDate, toDate);
     }
 
-    private PaidInterest create(String portfolio, Security security, FifoPositions positions, ViewFilter filter) {
+    private PaidInterest create(
+            String portfolio, Security security, FifoPositions positions, Instant fromDate, Instant toDate) {
+
         PaidInterest paidInterest = new PaidInterest();
         for (CashFlowType type : PAY_TYPES) {
-            paidInterest.get(type).putAll(getPositionWithPayments(portfolio, security.getId(), positions, type, filter));
+            paidInterest.get(type)
+                    .putAll(getPositionWithPayments(
+                            portfolio, security.getId(), positions, type, fromDate, toDate));
         }
         return paidInterest;
     }
@@ -73,14 +77,15 @@ public class PaidInterestFactory {
                                                                                String isin,
                                                                                FifoPositions positions,
                                                                                CashFlowType event,
-                                                                               ViewFilter filter) {
+                                                                               Instant fromDate,
+                                                                               Instant toDate) {
         List<SecurityEventCashFlowEntity> eventCashFlowEntities = securityEventCashFlowRepository
                 .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         singleton(portfolio),
                         isin,
                         event.getId(),
-                        filter.getFromDate(),
-                        filter.getToDate());
+                        fromDate,
+                        toDate);
 
         Map<Position, List<SecurityEventCashFlow>> payments = new HashMap<>();
         for (SecurityEventCashFlowEntity entity : eventCashFlowEntities) {
@@ -92,7 +97,7 @@ public class PaidInterestFactory {
 
                 // filter only positions was opened in 'filter' interval
                 paidPositions = paidPositions.stream()
-                        .filter(position -> position.wasOpenedBetweenDates(filter.getFromDate(), filter.getToDate()))
+                        .filter(position -> position.wasOpenedBetweenDates(fromDate, toDate))
                         .collect(Collectors.toCollection(LinkedList::new));
 
                 getPayments(cash, paidPositions).forEach((position, cashs) ->

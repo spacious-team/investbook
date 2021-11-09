@@ -24,7 +24,6 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.Transaction;
 import ru.investbook.report.FifoPositions;
-import ru.investbook.report.ViewFilter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -35,12 +34,14 @@ import java.util.Set;
 
 public interface SecurityProfitService {
 
-    Optional<Instant> getLastEventTimestamp(Collection<String> portfolios, Security security, Set<Integer> events, ViewFilter filter);
+    Optional<Instant> getLastEventTimestamp(
+            Collection<String> portfolios, Security security, Set<Integer> events, Instant from, Instant to);
 
     /**
      * Курсовой доход с купли-продажи (для деривативов - суммарная вариационная маржа)
      */
-    BigDecimal getGrossProfit(Collection<String> portfolios, Security security, FifoPositions positions, String toCurrency);
+    BigDecimal getGrossProfit(
+            Collection<String> portfolios, Security security, FifoPositions positions, String toCurrency);
 
     /**
      * Разница доходов с продажи и расходов на покупку
@@ -54,9 +55,10 @@ public interface SecurityProfitService {
 
     BigDecimal getTotal(Deque<Transaction> transactions, CashFlowType type, String toCurrency);
 
-    BigDecimal sumPaymentsForType(Collection<String> portfolios, Security security, CashFlowType cashFlowType, String toCurrency);
+    BigDecimal sumPaymentsForType(
+            Collection<String> portfolios, Security security, CashFlowType cashFlowType, String toCurrency);
 
-    SecurityQuote getSecurityQuote(Security security, String toCurrency, ViewFilter filter);
+    SecurityQuote getSecurityQuote(Security security, String toCurrency, Instant to);
 
     /**
      * Возвращает для портфеля последний известный остаток денежных средств соответствующей дате, не позже указанной.
