@@ -35,6 +35,7 @@ import ru.investbook.converter.SecurityConverter;
 import ru.investbook.converter.SecurityQuoteConverter;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.FifoPositionsFactory;
+import ru.investbook.report.FifoPositionsFilter;
 import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.report.InternalRateOfReturn;
 import ru.investbook.report.PositionHistory;
@@ -220,7 +221,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         row.put(TYPE, securityType.getDescription());
         try {
             ViewFilter filter = ViewFilter.get();
-            FifoPositions positions = positionsFactory.get(portfolios, security, filter);
+            FifoPositionsFilter pf = FifoPositionsFilter.of(portfolios, filter.getFromDate(), filter.getToDate());
+            FifoPositions positions = positionsFactory.get(security, pf);
             row.put(FIRST_TRANSACTION_DATE, Optional.ofNullable(positions.getPositionHistories().peekFirst())
                     .map(PositionHistory::getInstant)
                     .orElse(null));

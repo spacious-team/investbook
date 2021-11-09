@@ -78,7 +78,8 @@ public class InternalRateOfReturn {
             if (getSecurityType(security.getId()) == DERIVATIVE) {
                 return null;
             }
-            FifoPositions positions = positionsFactory.get(portfolios, security, filter);
+            FifoPositionsFilter pf = FifoPositionsFilter.of(portfolios, filter.getFromDate(), filter.getToDate());
+            FifoPositions positions = positionsFactory.get(security, pf);
             int count = positions.getCurrentOpenedPositionsCount();
             if (count != 0 && (quote == null || quote.getDirtyPriceInCurrency() == null)) {
                 return null;

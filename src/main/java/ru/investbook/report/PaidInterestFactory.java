@@ -57,10 +57,7 @@ public class PaidInterestFactory {
 
     @Transactional(readOnly = true)
     public PaidInterest get(Portfolio portfolio, Security security, ViewFilter filter) {
-        ViewFilter filterTillToDate = filter.toBuilder()
-                .fromDate(ViewFilter.defaultFromDate) // the entire history of positions from the first transaction is required
-                .build();
-        FifoPositions positions = positionsFactory.get(portfolio, security, filterTillToDate);
+        FifoPositions positions = positionsFactory.get(security, portfolio);
         return create(portfolio.getId(), security, positions, filter);
     }
 

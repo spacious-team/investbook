@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.report.FifoPositionsFactory;
+import ru.investbook.report.FifoPositionsFilter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
 import ru.investbook.report.ViewFilter;
@@ -173,8 +174,9 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
 
     private Deque<Transaction> getTransactions(Collection<String> portfolios, Set<Security> contracts) {
         ViewFilter filter = ViewFilter.get();
+        FifoPositionsFilter pf = FifoPositionsFilter.of(portfolios, filter.getFromDate(), filter.getToDate());
         return contracts.stream()
-                .map(contract -> positionsFactory.getTransactions(portfolios, contract.getId(), filter))
+                .map(contract -> positionsFactory.getTransactions(contract.getId(), pf))
                 .flatMap(Collection::stream)
                 .sorted(Comparator.comparing(Transaction::getTimestamp))
                 .collect(toCollection(LinkedList::new));
