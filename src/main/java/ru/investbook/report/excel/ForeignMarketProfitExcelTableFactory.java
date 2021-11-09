@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import ru.investbook.report.ClosedPosition;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.FifoPositionsFactory;
+import ru.investbook.report.FifoPositionsFilter;
 import ru.investbook.report.OpenedPosition;
 import ru.investbook.report.Position;
 import ru.investbook.report.Table;
@@ -56,10 +57,12 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
     }
 
     public Table create(Portfolio portfolio, Collection<String> currencyPairs) {
+        ViewFilter f = ViewFilter.get();
+        FifoPositionsFilter positionsFilter = FifoPositionsFilter.of(portfolio, f.getFromDate(), f.getToDate());
         Table openPositionsProfit = new Table();
         Table closedPositionsProfit = new Table();
         for (String currencyPair : currencyPairs) {
-            FifoPositions positions = positionsFactory.get(portfolio, currencyPair, ViewFilter.get());
+            FifoPositions positions = positionsFactory.get(currencyPair, positionsFilter);
             openPositionsProfit.addAll(getPositionProfit(currencyPair, positions.getOpenedPositions(),
                     this::getOpenedPositionProfit));
             closedPositionsProfit.addAll(getPositionProfit(currencyPair, positions.getClosedPositions(),
