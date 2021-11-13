@@ -138,6 +138,7 @@ public class BrokerReportParserServiceImpl implements BrokerReportParserService 
         // convert to mark supporting input stream
 
         for (BrokerReportFactory brokerReportFactory : brokerReportFactories) {
+            if (!brokerReportFactory.canCreate(fileName, inputStream)) continue;
             brokerReport = brokerReportFactory.create(fileName, inputStream);
             if (brokerReport != null) {
                 return new BrokerNameAndReport(brokerReportFactory.getBrokerName(), brokerReport);
