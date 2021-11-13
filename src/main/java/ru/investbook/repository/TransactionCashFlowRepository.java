@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@Transactional(readOnly = true)
 public interface TransactionCashFlowRepository extends JpaRepository<TransactionCashFlowEntity, TransactionCashFlowEntityPK> {
 
     List<TransactionCashFlowEntity> findByPkPortfolioAndPkTransactionId(String portfolio,
@@ -45,14 +46,17 @@ public interface TransactionCashFlowRepository extends JpaRepository<Transaction
 
     @Query(value = "SELECT distinct t.currency FROM TransactionCashFlowEntity t " +
             "WHERE t.pk.portfolio = :portfolio AND t.pk.type = :#{#cashFlowType.id}")
+    @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     List<String> findDistinctCurrencyByPkPortfolioAndPkType(String portfolio, CashFlowType cashFlowType);
 
     @Query(value = "SELECT distinct t.currency FROM TransactionCashFlowEntity t " +
             "WHERE t.pk.portfolio IN (:portfolios) AND t.pk.type in (:#{#cashFlowTypes})")
+    @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     List<String> findDistinctCurrencyByPkPortfolioAndPkTypeIn(Collection<String> portfolios, Set<Integer> cashFlowTypes);
 
     @Query(value = "SELECT distinct t.currency FROM TransactionCashFlowEntity t " +
             "WHERE t.pk.type in (:#{#cashFlowTypes})")
+    @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     List<String> findDistinctCurrencyByPkTypeIn(Set<Integer> cashFlowTypes);
 
     @Transactional

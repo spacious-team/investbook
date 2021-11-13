@@ -21,6 +21,7 @@ package ru.investbook.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.PortfolioPropertyEntity;
 
 import java.time.Instant;
@@ -28,11 +29,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+@Transactional(readOnly = true)
 public interface PortfolioPropertyRepository extends JpaRepository<PortfolioPropertyEntity, Integer> {
 
     List<PortfolioPropertyEntity> findByPropertyInOrderByTimestampDesc(Collection<String> property);
-
-    Optional<PortfolioPropertyEntity> findFirstByPropertyOrderByTimestampDesc(String property);
 
     Optional<PortfolioPropertyEntity> findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(String portfolio,
                                                                                             String property);
@@ -45,12 +45,12 @@ public interface PortfolioPropertyRepository extends JpaRepository<PortfolioProp
     @Query(nativeQuery = true, value = """
             SELECT *
             FROM portfolio_property AS t1
-            WHERE property = :property 
+            WHERE property = :property
             AND timestamp = (
                 SELECT MAX(timestamp)
                 FROM portfolio_property AS t2
                 WHERE t1.portfolio = t2.portfolio
-                AND t2.property = :property 
+                AND t2.property = :property
                 AND t2.timestamp between :from AND :to
             )
             ORDER BY portfolio, timestamp DESC
@@ -63,13 +63,13 @@ public interface PortfolioPropertyRepository extends JpaRepository<PortfolioProp
     @Query(nativeQuery = true, value = """
             SELECT *
             FROM portfolio_property AS t1
-            WHERE portfolio IN (:portfolios) 
-            AND property = :property 
+            WHERE portfolio IN (:portfolios)
+            AND property = :property
             AND timestamp = (
                 SELECT MAX(timestamp)
                 FROM portfolio_property AS t2
                 WHERE t1.portfolio = t2.portfolio
-                AND t2.property = :property 
+                AND t2.property = :property
                 AND t2.timestamp between :from AND :to
             )
             ORDER BY portfolio, timestamp DESC

@@ -19,12 +19,14 @@
 package ru.investbook.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.SecurityQuoteEntity;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+@Transactional(readOnly = true)
 public interface SecurityQuoteRepository extends JpaRepository<SecurityQuoteEntity, Integer> {
 
     List<SecurityQuoteEntity> findByOrderByTimestampDescSecurityAsc();
