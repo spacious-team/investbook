@@ -45,5 +45,5 @@ public interface SecurityDescriptionRepository extends JpaRepository<SecurityDes
     @Transactional
     @Modifying
     @Query("UPDATE SecurityDescriptionEntity SET sector = :sector WHERE security = :securityId")
-    int updateSector(String securityId, String sector);
+    void updateSector(String securityId, String sector);
 }

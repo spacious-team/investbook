@@ -36,5 +36,5 @@ public interface PortfolioRepository extends JpaRepository<PortfolioEntity, Stri
     @Transactional
     @Modifying
     @Query("UPDATE PortfolioEntity SET enabled = :enabled WHERE id = :portfolio")
-    int setEnabledForPortfolio(String portfolio, boolean enabled);
+    void setEnabledForPortfolio(String portfolio, boolean enabled);
 }

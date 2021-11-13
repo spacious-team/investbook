@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriUtils;
 import ru.investbook.converter.EntityConverter;
 
@@ -64,6 +65,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
      * If entity already exists CONFLICT http status and Location header was returned.
      * @param object new entity (ID may not be provided if it AUTOINCREMENT)
      */
+    @Transactional
     protected ResponseEntity<Void> post(Pojo object) {
         try {
             ID id = getId(object);
@@ -92,8 +94,8 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
      * In create case  method returns CREATE http status, Location header and updated version of entity in body.
      * @param id     updating or creating entity
      * @param object new version of entity
-     * @throws URISyntaxException
      */
+    @Transactional
     public ResponseEntity<Void> put(ID id, Pojo object) {
         try {
             object = (getId(object) != null) ? object : updateId(id, object);
