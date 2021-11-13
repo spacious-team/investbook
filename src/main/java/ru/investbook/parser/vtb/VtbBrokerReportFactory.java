@@ -33,7 +33,7 @@ public class VtbBrokerReportFactory extends AbstractBrokerReportFactory {
 
     @Getter
     private final String brokerName = "ВТБ";
-    private final Pattern expectedFileNamePattern = Pattern.compile(".*");
+    private final Pattern expectedFileNamePattern = Pattern.compile("^[^_]+_[0-9]{8}_[0-9]{8}_[0-9]+\\.xls(x)?$");
 
     @Override
     public boolean canCreate(String excelFileName, InputStream is) {
