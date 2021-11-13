@@ -33,15 +33,16 @@ public class VtbBrokerReportFactory extends AbstractBrokerReportFactory {
 
     @Getter
     private final String brokerName = "ВТБ";
-    private final Pattern expectedFileNamePattern = Pattern.compile(".*");
+    private final Pattern expectedFileNamePattern = Pattern.compile("^[^_]+_[0-9]{8}_[0-9]{8}_[0-9]+\\.xls(x)?$");
+
+    @Override
+    public boolean canCreate(String excelFileName, InputStream is) {
+        return super.canCreate(expectedFileNamePattern, excelFileName, is);
+    }
 
     @Override
     public BrokerReport create(String excelFileName, InputStream is) {
-        BrokerReport brokerReport = create(
-                expectedFileNamePattern,
-                excelFileName,
-                is,
-                VtbBrokerReport::new);
+        BrokerReport brokerReport = create(excelFileName, is, VtbBrokerReport::new);
         if (brokerReport != null) {
             log.info("Обнаружен отчет '{}' брокера ВТБ", excelFileName);
         }

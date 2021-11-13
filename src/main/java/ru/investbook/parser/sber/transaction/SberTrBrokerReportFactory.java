@@ -36,8 +36,13 @@ public class SberTrBrokerReportFactory extends AbstractBrokerReportFactory {
     private final Pattern expectedFileNamePattern = Pattern.compile("^Сделки[_-].*");
 
     @Override
+    public boolean canCreate(String excelFileName, InputStream is) {
+        return super.canCreate(expectedFileNamePattern, excelFileName, is);
+    }
+
+    @Override
     public BrokerReport create(String excelFileName, InputStream is) {
-        BrokerReport brokerReport = create(expectedFileNamePattern, excelFileName, is, SberTrBrokerReport::new);
+        BrokerReport brokerReport = create(excelFileName, is, SberTrBrokerReport::new);
         if (brokerReport != null) {
             log.info("Обнаружен отчет сделок '{}' Сбербанк брокера", excelFileName);
         }

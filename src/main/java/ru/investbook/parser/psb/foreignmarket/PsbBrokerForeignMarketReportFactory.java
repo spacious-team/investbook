@@ -36,8 +36,13 @@ public class PsbBrokerForeignMarketReportFactory extends AbstractBrokerReportFac
     private final Pattern expectedFileNamePattern = Pattern.compile("^Report_[0-9()\\-_]+\\.xml$");
 
     @Override
+    public boolean canCreate(String excelFileName, InputStream is) {
+        return super.canCreate(expectedFileNamePattern, excelFileName, is);
+    }
+
+    @Override
     public BrokerReport create(String excelFileName, InputStream is) {
-        BrokerReport brokerReport = create(expectedFileNamePattern, excelFileName, is, PsbBrokerForeignMarketReport::new);
+        BrokerReport brokerReport = create(excelFileName, is, PsbBrokerForeignMarketReport::new);
         if (brokerReport != null) {
             log.info("Обнаружен отчет '{}' валютного рынка Промсвязьбанк брокера", excelFileName);
         }
