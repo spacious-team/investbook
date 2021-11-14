@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.TransactionCashFlowConverter;
 import ru.investbook.converter.TransactionConverter;
+import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.entity.TransactionEntityPK;
@@ -85,7 +86,12 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
 
     @Override
     public List<TransactionModel> getAll() {
-        return transactionRepository.findByOrderByPkPortfolioAscTimestampDescSecurityIdAsc()
+        Set<String> activePortfolios = portfolioRepository.findByEnabledIsTrue()
+                .stream()
+                .map(PortfolioEntity::getId)
+                .collect(Collectors.toSet());
+        return transactionRepository
+                .findByPkPortfolioInOrderByPkPortfolioAscTimestampDescSecurityIdAsc(activePortfolios)
                 .stream()
                 .map(this::toTransactionModel)
                 .collect(Collectors.toList());

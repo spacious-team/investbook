@@ -20,6 +20,7 @@ package ru.investbook.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
+import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 
 import java.time.Instant;
@@ -31,7 +32,8 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityEventCashFlowEntity, Integer> {
 
-    List<SecurityEventCashFlowEntity> findByOrderByPortfolioIdAscTimestampDescSecurityIdAsc();
+    List<SecurityEventCashFlowEntity> findByPortfolioInOrderByPortfolioIdAscTimestampDescSecurityIdAsc(
+            Collection<PortfolioEntity> portfolios);
 
     Optional<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampAndCount(
             String portfolio,

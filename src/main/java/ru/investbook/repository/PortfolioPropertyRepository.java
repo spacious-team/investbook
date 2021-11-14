@@ -22,6 +22,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.PortfolioPropertyEntity;
 
 import java.time.Instant;
@@ -32,7 +33,9 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public interface PortfolioPropertyRepository extends JpaRepository<PortfolioPropertyEntity, Integer> {
 
-    List<PortfolioPropertyEntity> findByPropertyInOrderByTimestampDesc(Collection<String> property);
+    List<PortfolioPropertyEntity> findByPortfolioInAndPropertyInOrderByTimestampDesc(
+            Collection<PortfolioEntity> portfolios,
+            Collection<String> property);
 
     Optional<PortfolioPropertyEntity> findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(String portfolio,
                                                                                             String property);

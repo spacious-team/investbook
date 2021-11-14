@@ -66,7 +66,10 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
 
     @Override
     public List<PortfolioPropertyModel> getAll() {
-        return portfolioPropertyRepository.findByPropertyInOrderByTimestampDesc(properties)
+        return portfolioPropertyRepository
+                .findByPortfolioInAndPropertyInOrderByTimestampDesc(
+                        portfolioRepository.findByEnabledIsTrue(),
+                        properties)
                 .stream()
                 .map(this::toModel)
                 .collect(Collectors.toList());
@@ -80,8 +83,7 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
                 .portfolio(m.getPortfolio())
                 .timestamp(m.getDate().atStartOfDay(zoneId).toInstant());
 
-        if (m instanceof PortfolioPropertyCashModel) {
-            PortfolioPropertyCashModel c = (PortfolioPropertyCashModel) m;
+        if (m instanceof PortfolioPropertyCashModel c) {
             PortfolioCash.PortfolioCashBuilder b = PortfolioCash.builder().section("all");
             Collection<PortfolioCash> cash = new ArrayList<>();
             cash.add(b.value(c.getCashRub()).currency("RUB").build());
@@ -94,8 +96,7 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
                     .collect(Collectors.toList());
             builder.property(CASH)
                     .value(PortfolioCash.serialize(cash));
-        } else if (m instanceof PortfolioPropertyTotalAssetsModel) {
-            PortfolioPropertyTotalAssetsModel a = (PortfolioPropertyTotalAssetsModel) m;
+        } else if (m instanceof PortfolioPropertyTotalAssetsModel a) {
             builder.property(a.getTotalAssetsCurrency().toPortfolioProperty())
                     .value(a.getTotalAssets().toString());
         } else {

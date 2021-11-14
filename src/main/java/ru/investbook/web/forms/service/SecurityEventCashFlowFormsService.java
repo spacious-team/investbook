@@ -61,7 +61,9 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
 
     @Override
     public List<SecurityEventCashFlowModel> getAll() {
-        return securityEventCashFlowRepository.findByOrderByPortfolioIdAscTimestampDescSecurityIdAsc()
+        return securityEventCashFlowRepository
+                .findByPortfolioInOrderByPortfolioIdAscTimestampDescSecurityIdAsc(
+                        portfolioRepository.findByEnabledIsTrue())
                 .stream()
                 .filter(e -> e.getCashFlowType().getId() != CashFlowType.TAX.getId())
                 .map(this::toSecurityEventModel)
