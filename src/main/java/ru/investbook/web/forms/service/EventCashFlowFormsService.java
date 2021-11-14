@@ -52,7 +52,8 @@ public class EventCashFlowFormsService implements FormsService<EventCashFlowMode
 
     @Override
     public List<EventCashFlowModel> getAll() {
-        return eventCashFlowRepository.findByOrderByPortfolioIdAscTimestampDesc()
+        return eventCashFlowRepository
+                .findByPortfolioInOrderByPortfolioIdAscTimestampDesc(portfolioRepository.findByEnabledIsTrue())
                 .stream()
                 .map(this::toModel)
                 .collect(Collectors.toList());

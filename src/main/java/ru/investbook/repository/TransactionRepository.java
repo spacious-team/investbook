@@ -39,7 +39,8 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
 
     Optional<TransactionEntity> findFirstByOrderByTimestampAsc();
 
-    List<TransactionEntity> findByOrderByPkPortfolioAscTimestampDescSecurityIdAsc();
+    List<TransactionEntity> findByPkPortfolioInOrderByPkPortfolioAscTimestampDescSecurityIdAsc(
+            Collection<String> portfolios);
 
     /**
      * Returns stock market share and bonds ISINs
