@@ -26,14 +26,12 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.spacious_team.broker.pojo.Portfolio;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
-import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
-import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.service.AssetsAndCashService;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -51,14 +49,14 @@ public class CashFlowExcelTableView extends ExcelTableView {
     private final int sheetOrder = 9;
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> "Доходность (" + portfolio + ")";
-    private final PortfolioPropertyRepository portfolioPropertyRepository;
+    private final AssetsAndCashService assetsAndCashService;
 
     public CashFlowExcelTableView(PortfolioRepository portfolioRepository,
                                   CashFlowExcelTableFactory tableFactory,
                                   PortfolioConverter portfolioConverter,
-                                  PortfolioPropertyRepository portfolioPropertyRepository) {
+                                  AssetsAndCashService assetsAndCashService) {
         super(portfolioRepository, tableFactory, portfolioConverter);
-        this.portfolioPropertyRepository = portfolioPropertyRepository;
+        this.assetsAndCashService = assetsAndCashService;
     }
 
     @Override
@@ -78,14 +76,10 @@ public class CashFlowExcelTableView extends ExcelTableView {
     @Override
     protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
         Table.Record total = Table.newRecord();
-        BigDecimal liquidationValueRub = portfolioPropertyRepository
-                .findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(
-                        portfolio
-                                .orElseThrow(() -> new IllegalArgumentException("Ожидается портфель"))
-                                .getId(),
-                        PortfolioPropertyType.TOTAL_ASSETS_RUB.name()) // TODO sum with TOTAL_ASSETS_USD div by USDRUB exchange rate
-                .map(CashFlowExcelTableView::getPropertyValue)
-                .orElse(BigDecimal.ZERO);
+        String _portfolio = portfolio
+                .orElseThrow(() -> new IllegalArgumentException("Ожидается портфель"))
+                .getId();
+        BigDecimal liquidationValueRub = assetsAndCashService.getTotalAssetsInRub(_portfolio);
         total.put(DATE, "Итого:");
         total.put(CASH_RUB, "=SUM(" +
                 CASH_RUB.getRange(3, table.size() + 2) + ")+" +
@@ -97,17 +91,6 @@ public class CashFlowExcelTableView extends ExcelTableView {
         total.put(CASH_BALANCE, "=SUMPRODUCT(" + CASH_BALANCE.getRange(3, table.size() + 2) + ","
                 + EXCHANGE_RATE.getRange(3, table.size() + 2) + ")");
         return total;
-    }
-
-    private static BigDecimal getPropertyValue(PortfolioPropertyEntity entity) {
-        try {
-            return BigDecimal.valueOf(
-                    Double.parseDouble(
-                            entity.getValue()));
-        } catch (Exception e) {
-            log.error("Значение должно содержать число, сохранено {}", entity);
-            return BigDecimal.ZERO;
-        }
     }
 
     @Override

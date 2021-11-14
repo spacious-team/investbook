@@ -30,11 +30,13 @@ import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.web.ControllerHelper;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 
 import static java.util.stream.Collectors.*;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
@@ -53,11 +55,7 @@ public class AssetsAndCashService {
 
     public Optional<BigDecimal> getAssets(Collection<String> portfolios) {
         Collection<BigDecimal> portfolioAssets = portfolios.stream()
-                .map(portfolio -> portfolioPropertyRepository.findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(
-                        portfolio, PortfolioPropertyType.TOTAL_ASSETS_RUB.name())) // TODO sum with TOTAL_ASSETS_USD
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(AssetsAndCashService::parseTotalAssetsIfCan)
+                .map(this::getTotalAssetsInRub)
                 .collect(toList());
         if (portfolioAssets.isEmpty()) {
             return Optional.empty();
@@ -65,6 +63,30 @@ public class AssetsAndCashService {
         return Optional.of(portfolioAssets.stream()
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
 
+    }
+
+    public BigDecimal getTotalAssetsInRub(String portfolio) {
+        Collection<PortfolioPropertyEntity> assets = new ArrayList<>(2);
+        getTotalAssets(portfolio, PortfolioPropertyType.TOTAL_ASSETS_RUB).ifPresent(assets::add);
+        getTotalAssets(portfolio, PortfolioPropertyType.TOTAL_ASSETS_USD).ifPresent(assets::add);
+        // finds last day assets
+        Map<String, BigDecimal> values = assets.stream()
+                .collect(groupingBy(PortfolioPropertyEntity::getTimestamp, TreeMap::new, toList())) // groups by date
+                .lastEntry() // finds last date assets
+                .getValue()
+                .stream()
+                .collect(toMap(AssetsAndCashService::getCurrency, AssetsAndCashService::parseTotalAssetsIfCan));
+        return convertToRubAndSum(values);
+    }
+
+    private Optional<PortfolioPropertyEntity> getTotalAssets(String portfolio, PortfolioPropertyType currency) {
+        return portfolioPropertyRepository
+                .findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(portfolio, currency.name());
+    }
+
+    private static String getCurrency(PortfolioPropertyEntity entity) {
+        int length = entity.getProperty().length();
+        return entity.getProperty().substring(length - 3, length);
     }
 
     private static BigDecimal parseTotalAssetsIfCan(PortfolioPropertyEntity entity) {
@@ -110,6 +132,9 @@ public class AssetsAndCashService {
         }
     }
 
+    /**
+     * @param values map of currency -> value
+     */
     private BigDecimal convertToRubAndSum(Map<String, BigDecimal> values) {
         return values.entrySet()
                 .stream()

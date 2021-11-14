@@ -315,7 +315,6 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         return getAllPortfolioCashBalance(balances, portfolioCount);
     }
 
-    // TODO PortfolioPropertyType.TOTAL_ASSETS_RUB and TOTAL_ASSETS_USD both exists for same timestamp
     private LinkedHashMap<Instant, BigDecimal> getTotalAssets(Collection<String> portfolios,
                                                               List<EventCashFlow> cashFlows) {
         List<PortfolioProperty> assets = getPortfolioProperty(portfolios, totalAssetsProperty);
@@ -464,7 +463,8 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                                             Map<String, TreeMap<Instant, BigDecimal>> rubCashFlowsGroupedByPortfolio,
                                             Instant lastInstant) {
         String updatingPortfolio = updatingAssets.getPortfolio();
-        lastPortfolioAssets.put(updatingPortfolio, convertAssetsToRub(updatingAssets));
+        // also sums PortfolioPropertyType.TOTAL_ASSETS_RUB and TOTAL_ASSETS_USD if both exists for same timestamp
+        lastPortfolioAssets.merge(updatingPortfolio, convertAssetsToRub(updatingAssets), BigDecimal::add);
         lastPortfolioAssets.replaceAll((portfolio, portfolioAssets) ->
                 portfolio.equals(updatingPortfolio) ? portfolioAssets :
                         // update other portfolios by invested sum
