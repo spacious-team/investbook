@@ -46,7 +46,7 @@ public class ExternalSourcesGetterController {
         messages.add(foreignExchangeRateController.updateForeignExchangeRateFromCbr());
         messages.add(securityQuoteController.updateQuoteFromMoexIssApi());
         messages.add(sp500Controller.updateSp500Index());
-        messages.add(securityDescriptionController.updateSectorsFromSmartLab());
+        messages.add(securityDescriptionController.updateSectorsFromSmartLab(false));
         model.addAttribute("message", String.join(". ", messages));
         return "success";
     }
