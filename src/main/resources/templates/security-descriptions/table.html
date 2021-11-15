@@ -28,6 +28,8 @@
 
 <h1>Информация по инструментам</h1>
 <a href="/security-descriptions/edit-form">Добавить инструмент</a><br>
+<a href="/security-descriptions/update">Получить недостающие данные со Smart-Lab</a><br>
+<a href="/security-descriptions/update?force=true">Принудительно обновить сектора экономики</a><br>
 <a href="/portfolio-composition">Состав портфеля на круговой диаграмме</a><br>
 <a href="/forms.html">На главную</a><br>
 
@@ -41,19 +43,28 @@
         <th>Инструмент</th>
         <th>Сектор</th>
         <th></th>
+        <th></th>
     </tr>
     <tr th:each="description : ${securityDescriptions}">
         <td><a th:href="@{/security-descriptions/edit-form(security-id=${description.getSecurityId})}" th:text="${description.getSecurityId}"/></td>
         <td th:text="${description.getSecurityDisplayName}"/>
         <td th:text="${description.getSector}"/>
         <td class="table-row-control">
-            <a th:href="@{/security-descriptions/delete(security-id=${description.getSecurityId})}" title="Удалить (только если нет сделок)">&#x274c;</a>
+            <a th:href="@{/security-descriptions/update(security-id=${description.getSecurityId}, force=true)}"
+               title="Обновить сектор экономики">&#x27F3;</a>
+        </td>
+        <td class="table-row-control">
+            <a th:href="@{/security-descriptions/delete(security-id=${description.getSecurityId})}"
+               title="Удалить (только если нет сделок)">&#x274c;</a>
         </td>
     </tr>
 </table>
 
 <p class="hint">
     Используемые инструменты срочного и валютного рынков не отображаются.
+</p>
+<p class="hint">
+    Сектора экономики выгружаются со страницы <a href="https://smart-lab.ru/forum/sectors">https://smart-lab.ru/forum/sectors</a>
 </p>
 
 </body>
