@@ -41,3 +41,4 @@ ALTER TABLE `transaction_cash_flow` ADD CONSTRAINT `transaction_cash_flow_transa
 ALTER TABLE `transaction_cash_flow` ADD COLUMN `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
 ALTER TABLE `transaction_cash_flow` DROP COLUMN `trade_id`;
 ALTER TABLE `transaction_cash_flow` DROP COLUMN `portfolio`;
+ALTER TABLE `transaction_cash_flow` ADD UNIQUE KEY `transaction_cash_flow_transaction_id_type_uniq` (`transaction_id`, `type`);
