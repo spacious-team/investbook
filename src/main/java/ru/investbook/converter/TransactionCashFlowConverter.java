@@ -22,9 +22,8 @@ import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.springframework.stereotype.Component;
+import ru.investbook.entity.CashFlowTypeEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
-import ru.investbook.entity.TransactionCashFlowEntityPK;
-import ru.investbook.entity.TransactionEntityPK;
 import ru.investbook.repository.CashFlowTypeRepository;
 import ru.investbook.repository.TransactionRepository;
 
@@ -36,20 +35,16 @@ public class TransactionCashFlowConverter implements EntityConverter<Transaction
 
     @Override
     public TransactionCashFlowEntity toEntity(TransactionCashFlow cash) {
-        TransactionEntityPK transactionPk = new TransactionEntityPK();
-        transactionPk.setId(cash.getTransactionId());
-        transactionPk.setPortfolio(cash.getPortfolio());
-        if (!transactionRepository.existsById(transactionPk))
+        if (!transactionRepository.existsById(cash.getTransactionId())) {
             throw new IllegalArgumentException("Транзакция с номером не найдена: " + cash.getTransactionId());
-        if (!cashFlowTypeRepository.existsById(cash.getEventType().getId()))
-            throw new IllegalArgumentException("В справочнике не найдено событие с типом: " + cash.getEventType().getId());
+        }
+        CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.findById(cash.getEventType().getId())
+                .orElseThrow(() -> new IllegalArgumentException("В справочнике не найдено событие с типом: " + cash.getEventType().getId()));
 
-        TransactionCashFlowEntityPK pk = new TransactionCashFlowEntityPK();
-        pk.setTransactionId(cash.getTransactionId());
-        pk.setPortfolio(cash.getPortfolio());
-        pk.setType(cash.getEventType().getId());
         TransactionCashFlowEntity entity = new TransactionCashFlowEntity();
-        entity.setPk(pk);
+        entity.setId(cash.getId());
+        entity.setTransactionId(cash.getTransactionId());
+        entity.setCashFlowType(cashFlowTypeEntity);
         entity.setValue(cash.getValue());
         if (cash.getCurrency() != null) entity.setCurrency(cash.getCurrency());
         return entity;
@@ -58,9 +53,9 @@ public class TransactionCashFlowConverter implements EntityConverter<Transaction
     @Override
     public TransactionCashFlow fromEntity(TransactionCashFlowEntity entity) {
         return TransactionCashFlow.builder()
-                .transactionId(entity.getPk().getTransactionId())
-                .portfolio(entity.getPk().getPortfolio())
-                .eventType(CashFlowType.valueOf(entity.getPk().getType()))
+                .id(entity.getId())
+                .transactionId(entity.getTransactionId())
+                .eventType(CashFlowType.valueOf(entity.getCashFlowType().getId()))
                 .value(entity.getValue())
                 .currency(entity.getCurrency())
                 .build();

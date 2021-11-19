@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.spacious_team.broker.pojo.Transaction;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,50 +30,86 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.investbook.converter.EntityConverter;
+import ru.investbook.converter.TransactionConverter;
 import ru.investbook.entity.TransactionEntity;
-import ru.investbook.entity.TransactionEntityPK;
 import ru.investbook.report.FifoPositionsFactory;
+import ru.investbook.repository.TransactionRepository;
 
 import javax.validation.Valid;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Сделки", description = "Операции купли/продажи биржевых инструментов")
 @RequestMapping("/api/v1/transactions")
-public class TransactionRestController extends AbstractRestController<TransactionEntityPK, Transaction, TransactionEntity> {
+public class TransactionRestController extends AbstractRestController<Integer, Transaction, TransactionEntity> {
+    private final TransactionRepository repository;
+    private final TransactionConverter converter;
     private final FifoPositionsFactory positionsFactory;
 
-    public TransactionRestController(JpaRepository<TransactionEntity, TransactionEntityPK> repository,
-                                     EntityConverter<TransactionEntity, Transaction> converter,
+    public TransactionRestController(TransactionRepository repository,
+                                     TransactionConverter converter,
                                      FifoPositionsFactory positionsFactory) {
         super(repository, converter);
+        this.repository = repository;
+        this.converter = converter;
         this.positionsFactory = positionsFactory;
     }
 
-    @Override
     @GetMapping
-    @Operation(summary = "Отобразить все", description = "Отображает все сделки по всем счетам")
-    protected List<Transaction> get() {
-        return super.get();
+    @Operation(summary = "Отобразить по фильтру", description = "Отображает сделки по счетам")
+    protected List<Transaction> get(@RequestParam(value = "portfolio", required = false)
+                                        @Parameter(description = "Идентификатор счета брокера")
+                                                String portfolio,
+                                    @RequestParam(value = "trade-id", required = false)
+                                        @Parameter(description = "Номер сделки в системе учета брокера")
+                                                String tradeId) {
+        if (portfolio != null && tradeId != null) {
+            return getByPortfolioAndTradeId(portfolio, tradeId);
+        } else if (portfolio != null) {
+            return getByPortfolio(portfolio);
+        } else if (tradeId != null) {
+            return getByTradeId(tradeId);
+        } else {
+            return super.get();
+        }
+    }
+
+    private List<Transaction> getByPortfolio(String portfolio) {
+        return repository.findByPortfolio(portfolio)
+                .stream()
+                .map(converter::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    private List<Transaction> getByTradeId(String tradeId) {
+        return repository.findByTradeId(tradeId)
+                .stream()
+                .map(converter::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    private List<Transaction> getByPortfolioAndTradeId(String portfolio, String tradeId) {
+        return repository.findByPortfolioAndTradeId(portfolio, tradeId)
+                .map(converter::fromEntity)
+                .map(Collections::singletonList)
+                .orElseGet(Collections::emptyList);
     }
 
     /**
      * see {@link AbstractRestController#get(Object)}
      */
-    @GetMapping("/portfolios/{portfolio}/ids/{id}")
-    @Operation(summary = "Отобразить одну", description = "Отображает сделку с указанными параметрами")
-    public ResponseEntity<Transaction> get(@PathVariable("portfolio")
-                                           @Parameter(description = "Идентификатор счета брокера")
-                                                   String portfolio,
-                                           @PathVariable("id")
-                                           @Parameter(description = "Идентификатор сделки")
-                                                   String id) {
-        return super.get(getId(portfolio, id));
+    @Override
+    @GetMapping("{id}")
+    @Operation(summary = "Отобразить одну", description = "Отображает одну сделку")
+    public ResponseEntity<Transaction> get(@PathVariable("id")
+                                           @Parameter(description = "Внутренний идентификатор сделки")
+                                                   Integer id) {
+        return super.get(id);
     }
 
     @Override
@@ -88,62 +123,45 @@ public class TransactionRestController extends AbstractRestController<Transactio
     /**
      * see {@link AbstractRestController#put(Object, Object)}
      */
-    @PutMapping("/portfolios/{portfolio}/ids/{id}")
+    @Override
+    @PutMapping("{id}")
     @Operation(summary = "Обновить параметры", description = "Обновляет параметры указанной сделки")
-    public ResponseEntity<Void> put(@PathVariable("portfolio")
-                                    @Parameter(description = "Идентификатор счета брокера")
-                                            String portfolio,
-                                    @PathVariable("id")
-                                    @Parameter(description = "Идентификатор сделки")
-                                            String id,
+    public ResponseEntity<Void> put(@PathVariable("id")
+                                    @Parameter(description = "Внутренний идентификатор сделки")
+                                            Integer id,
                                     @Valid @RequestBody Transaction object) {
         positionsFactory.invalidateCache();
-        return super.put(getId(portfolio, id), object);
+        return super.put(id, object);
     }
 
     /**
      * see {@link AbstractRestController#delete(Object)}
      */
-    @DeleteMapping("/portfolios/{portfolio}/ids/{id}")
+    @Override
+    @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = "Удаляет указанную сделку")
-    public void delete(@PathVariable("portfolio")
-                       @Parameter(description = "Идентификатор счета брокера")
-                               String portfolio,
-                       @PathVariable("id")
-                       @Parameter(description = "Идентификатор сделки")
-                               String id) {
+    public void delete(@PathVariable("id")
+                       @Parameter(description = "Внутренний идентификатор сделки")
+                               Integer id) {
         positionsFactory.invalidateCache();
-        super.delete(getId(portfolio, id));
+        super.delete(id);
     }
 
     @Override
-    protected Optional<TransactionEntity> getById(TransactionEntityPK id) {
+    protected Optional<TransactionEntity> getById(Integer id) {
         return repository.findById(id);
     }
 
     @Override
-    protected TransactionEntityPK getId(Transaction object) {
-        return getId(object.getPortfolio(), object.getId());
-    }
-
-    private TransactionEntityPK getId(String portfolio, String transactionId) {
-        TransactionEntityPK pk = new TransactionEntityPK();
-        pk.setId(transactionId);
-        pk.setPortfolio(portfolio);
-        return pk;
+    protected Integer getId(Transaction object) {
+        return object.getId();
     }
 
     @Override
-    protected Transaction updateId(TransactionEntityPK id, Transaction object) {
+    protected Transaction updateId(Integer id, Transaction object) {
         return object.toBuilder()
-                .id(id.getId())
-                .portfolio(id.getPortfolio())
+                .id(id)
                 .build();
-    }
-
-    @Override
-    protected URI getLocationURI(Transaction object) throws URISyntaxException {
-        return new URI(getLocation() + "/portfolios/" + object.getPortfolio() + "/ids/" + object.getId());
     }
 
     @Override
