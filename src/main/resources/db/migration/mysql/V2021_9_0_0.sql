@@ -23,18 +23,20 @@ ALTER TABLE `transaction_cash_flow` DROP KEY `transaction_cash_flow_portfolio_ix
 ALTER TABLE `transaction_cash_flow` DROP PRIMARY KEY;
 
 ALTER TABLE `transaction` DROP PRIMARY KEY;
-ALTER TABLE `transaction` ADD UNIQUE KEY `transaction_id_portfolio_uniq` (`id`, `portfolio`);
-ALTER TABLE `transaction` ADD COLUMN `pk` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
+ALTER TABLE `transaction` CHANGE COLUMN `id` `trade_id` varchar(32) NOT NULL COMMENT 'Номер сделки в системе учета брокера';
+ALTER TABLE `transaction` ADD UNIQUE KEY `transaction_trade_id_portfolio_uniq` (`trade_id`, `portfolio`);
+ALTER TABLE `transaction` ADD COLUMN `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
 
-ALTER TABLE `transaction_cash_flow` ADD COLUMN `transaction_pk` int(10) UNSIGNED NOT NULL FIRST;
+ALTER TABLE `transaction_cash_flow` CHANGE COLUMN `transaction_id` `trade_id` varchar(32) NOT NULL COMMENT 'ID транзакции';
+ALTER TABLE `transaction_cash_flow` ADD COLUMN `transaction_id` int(10) UNSIGNED NOT NULL FIRST;
 UPDATE `transaction_cash_flow` c JOIN `transaction` t
-    ON t.id = c.transaction_id AND t.portfolio = c.portfolio
-    SET c.transaction_pk = t.pk;
+    ON t.trade_id = c.trade_id AND t.portfolio = c.portfolio
+    SET c.transaction_id = t.id;
 
-ALTER TABLE `transaction_cash_flow` ADD KEY `transaction_cash_flow_transaction_pk_ix` (`transaction_pk`);
-ALTER TABLE `transaction_cash_flow` ADD CONSTRAINT `transaction_cash_flow_transaction_pk_fkey`
-    FOREIGN KEY (`transaction_pk`) REFERENCES `transaction` (`pk`) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE `transaction_cash_flow` ADD KEY `transaction_cash_flow_transaction_id_ix` (`transaction_id`);
+ALTER TABLE `transaction_cash_flow` ADD CONSTRAINT `transaction_cash_flow_transaction_id_fkey`
+    FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`id`) ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE `transaction_cash_flow` ADD COLUMN `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
-ALTER TABLE `transaction_cash_flow` DROP COLUMN `transaction_id`;
+ALTER TABLE `transaction_cash_flow` DROP COLUMN `trade_id`;
 ALTER TABLE `transaction_cash_flow` DROP COLUMN `portfolio`;

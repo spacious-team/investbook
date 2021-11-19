@@ -23,19 +23,21 @@ ALTER TABLE `transaction_cash_flow` DROP INDEX `transaction_cash_flow_portfolio_
 ALTER TABLE `transaction_cash_flow` DROP PRIMARY KEY;
 
 ALTER TABLE `transaction` DROP PRIMARY KEY;
-ALTER TABLE `transaction` ADD UNIQUE KEY `transaction_id_portfolio_uniq` (`id`, `portfolio`);
-ALTER TABLE `transaction` ADD COLUMN `pk` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
+ALTER TABLE `transaction` RENAME COLUMN `id` TO `trade_id`;
+ALTER TABLE `transaction` ADD UNIQUE KEY `transaction_trade_id_portfolio_uniq` (`trade_id`, `portfolio`);
+ALTER TABLE `transaction` ADD COLUMN `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
 
-ALTER TABLE `transaction_cash_flow` ADD COLUMN `transaction_pk` int(10) UNSIGNED FIRST;
+ALTER TABLE `transaction_cash_flow` RENAME COLUMN `transaction_id` TO `trade_id`;
+ALTER TABLE `transaction_cash_flow` ADD COLUMN `transaction_id` int(10) UNSIGNED FIRST;
 UPDATE `transaction_cash_flow` c
-    SET c.transaction_pk = (SELECT t.pk FROM `transaction` t WHERE t.id = c.transaction_id AND t.portfolio = c.portfolio)
-    WHERE EXISTS (SELECT t.id FROM `transaction` t WHERE t.id = c.transaction_id AND t.portfolio = c.portfolio);
-ALTER TABLE `transaction_cash_flow` ALTER COLUMN `transaction_pk` SET NOT NULL;
+    SET c.transaction_id = (SELECT t.id FROM `transaction` t WHERE t.trade_id = c.trade_id AND t.portfolio = c.portfolio)
+    WHERE EXISTS (SELECT t.id FROM `transaction` t WHERE t.trade_id = c.trade_id AND t.portfolio = c.portfolio);
+ALTER TABLE `transaction_cash_flow` ALTER COLUMN `transaction_id` SET NOT NULL;
 
-ALTER TABLE `transaction_cash_flow` ADD KEY `transaction_cash_flow_transaction_pk_ix` (`transaction_pk`);
-ALTER TABLE `transaction_cash_flow` ADD CONSTRAINT `transaction_cash_flow_transaction_pk_fkey`
-    FOREIGN KEY (`transaction_pk`) REFERENCES `transaction` (`pk`) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE `transaction_cash_flow` ADD KEY `transaction_cash_flow_transaction_id_ix` (`transaction_id`);
+ALTER TABLE `transaction_cash_flow` ADD CONSTRAINT `transaction_cash_flow_transaction_id_fkey`
+    FOREIGN KEY (`transaction_id`) REFERENCES `transaction` (`id`) ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE `transaction_cash_flow` ADD COLUMN `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
-ALTER TABLE `transaction_cash_flow` DROP COLUMN `transaction_id`;
+ALTER TABLE `transaction_cash_flow` DROP COLUMN `trade_id`;
 ALTER TABLE `transaction_cash_flow` DROP COLUMN `portfolio`;
