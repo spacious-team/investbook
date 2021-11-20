@@ -23,6 +23,7 @@ import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.converter.PortfolioConverter;
@@ -45,12 +46,14 @@ public class EventCashFlowFormsService implements FormsService<EventCashFlowMode
     private final EventCashFlowConverter eventCashFlowConverter;
     private final PortfolioConverter portfolioConverter;
 
+    @Transactional(readOnly = true)
     public Optional<EventCashFlowModel> getById(Integer id) {
         return eventCashFlowRepository.findById(id)
                 .map(this::toModel);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EventCashFlowModel> getAll() {
         return eventCashFlowRepository
                 .findByPortfolioInOrderByPortfolioIdAscTimestampDesc(portfolioRepository.findByEnabledIsTrue())
@@ -60,6 +63,7 @@ public class EventCashFlowFormsService implements FormsService<EventCashFlowMode
     }
 
     @Override
+    @Transactional
     public void save(EventCashFlowModel e) {
         saveAndFlush(e.getPortfolio());
         EventCashFlowEntity entity = eventCashFlowRepository.save(
@@ -72,7 +76,7 @@ public class EventCashFlowFormsService implements FormsService<EventCashFlowMode
                         .currency(e.getValueCurrency())
                         .description(StringUtils.hasText(e.getDescription()) ? e.getDescription() : null)
                         .build()));
-        e.setId(entity.getId());
+        e.setId(entity.getId()); // used in view
         eventCashFlowRepository.flush();
     }
 
@@ -98,6 +102,7 @@ public class EventCashFlowFormsService implements FormsService<EventCashFlowMode
         return m;
     }
 
+    @Transactional
     public void delete(Integer id) {
         eventCashFlowRepository.deleteById(id);
         eventCashFlowRepository.flush();

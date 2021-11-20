@@ -52,8 +52,8 @@
     <tr th:each="tr : ${transactions}">
         <td th:text="${tr.portfolio}"/>
         <td>
-            <a th:href="@{/security-deposit/edit-form(transaction-id=${tr.transactionId}, portfolio=${tr.portfolio})}"
-               th:text="${tr.transactionId}"/>
+            <a th:href="@{/security-deposit/edit-form(id=${tr.id})}"
+               th:text="${tr.tradeId}"/>
         </td>
         <td th:text="${tr.date}"/>
         <td th:text="${tr.getSecurityDisplayName}"/>
@@ -63,7 +63,7 @@
         </td>
         <td th:text="${tr.count}"/>
         <td class="table-row-control">
-            <a th:href="@{/security-deposit/delete(transaction-id=${tr.transactionId}, portfolio=${tr.portfolio})}" title="Удалить">&#x274c;</a>
+            <a th:href="@{/security-deposit/delete(id=${tr.id})}" title="Удалить">&#x274c;</a>
         </td>
     </tr>
 </table>

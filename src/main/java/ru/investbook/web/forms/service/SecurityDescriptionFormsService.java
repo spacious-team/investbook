@@ -62,6 +62,7 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
     }
 
     @Override
+    @Transactional
     public void save(SecurityDescriptionModel m) {
         convertDerivativeSecurityId(m);
         saveAndFlushSecurity(m.getSecurityId(), m.getSecurityName());
@@ -94,6 +95,7 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
         return m;
     }
 
+    @Transactional
     public void delete(String securityId) {
         securityRepository.deleteById(securityId);
         securityRepository.flush();

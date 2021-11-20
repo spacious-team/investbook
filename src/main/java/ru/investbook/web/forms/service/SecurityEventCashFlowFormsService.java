@@ -24,8 +24,8 @@ import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow.SecurityEventCashFlowBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.PortfolioConverter;
-import ru.investbook.converter.SecurityConverter;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.repository.PortfolioRepository;
@@ -50,16 +50,17 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
     private final SecurityRepository securityRepository;
     private final PortfolioRepository portfolioRepository;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
-    private final SecurityConverter securityConverter;
     private final PortfolioConverter portfolioConverter;
     private final MoexDerivativeCodeService moexDerivativeCodeService;
 
+    @Transactional(readOnly = true)
     public Optional<SecurityEventCashFlowModel> getById(Integer id) {
         return securityEventCashFlowRepository.findById(id)
                 .map(this::toSecurityEventModel);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<SecurityEventCashFlowModel> getAll() {
         return securityEventCashFlowRepository
                 .findByPortfolioInOrderByPortfolioIdAscTimestampDescSecurityIdAsc(
@@ -71,6 +72,7 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
     }
 
     @Override
+    @Transactional
     public void save(SecurityEventCashFlowModel e) {
         convertDerivativeSecurityId(e);
         saveAndFlush(e.getPortfolio(), e.getSecurityId(), e.getSecurityName());
@@ -86,7 +88,7 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
                         .value(e.getValue())
                         .currency(e.getValueCurrency())
                         .build()));
-        e.setId(entity.getId());
+        e.setId(entity.getId()); // used in view
         if (e.getTax() != null && e.getTax().floatValue() > 0.001) {
             entity = securityEventCashFlowRepository.save(securityEventCashFlowConverter.toEntity(
                     builder
@@ -151,6 +153,7 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
         return m;
     }
 
+    @Transactional
     public void delete(Integer id) {
         getById(id).map(SecurityEventCashFlowModel::getTaxId)
                 .ifPresent(securityEventCashFlowRepository::deleteById);

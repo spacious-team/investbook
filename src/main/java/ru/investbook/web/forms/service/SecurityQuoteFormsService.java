@@ -21,6 +21,7 @@ package ru.investbook.web.forms.service;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.converter.SecurityQuoteConverter;
 import ru.investbook.entity.SecurityQuoteEntity;
@@ -48,12 +49,14 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
     private final SecurityConverter securityConverter;
     private final MoexDerivativeCodeService moexDerivativeCodeService;
 
+    @Transactional(readOnly = true)
     public Optional<SecurityQuoteModel> getById(Integer id) {
         return securityQuoteRepository.findById(id)
                 .map(this::toSecurityQuoteModel);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<SecurityQuoteModel> getAll() {
         return securityQuoteRepository.findByOrderByTimestampDescSecurityAsc()
                 .stream()
@@ -62,6 +65,7 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
     }
 
     @Override
+    @Transactional
     public void save(SecurityQuoteModel e) {
         convertDerivativeSecurityId(e);
         saveAndFlush(e.getSecurityId(), e.getSecurityName());
@@ -75,7 +79,7 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
                         .accruedInterest(e.getAccruedInterest())
                         .currency(hasLength(e.getCurrency()) ? e.getCurrency() : null)
                         .build()));
-        e.setId(entity.getId());
+        e.setId(entity.getId()); // used in view
     }
 
     private void convertDerivativeSecurityId(SecurityQuoteModel model) {
@@ -109,6 +113,7 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
         return m;
     }
 
+    @Transactional
     public void delete(Integer id) {
         securityQuoteRepository.deleteById(id);
         securityQuoteRepository.flush();
