@@ -63,9 +63,9 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
         String portfolio = getReport().getPortfolio();
         String isin = row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",")[2].trim();
         Instant timestamp = row.getInstantCellValue(DATE);
-        String transactionId = generateTransactionId(portfolio, timestamp, isin);
+        String tradeId = generateTradeId(portfolio, timestamp, isin);
         return SecurityTransaction.builder()
-                        .transactionId(transactionId)
+                        .tradeId(tradeId)
                         .timestamp(timestamp)
                         .portfolio(portfolio)
                         .security(isin)
@@ -73,7 +73,7 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
                         .build();
     }
 
-    private static String generateTransactionId(String portfolio, Instant instant, String isin) {
+    private static String generateTradeId(String portfolio, Instant instant, String isin) {
         String id = instant.getEpochSecond() + isin + portfolio;
         return id.substring(0, Math.min(32, id.length()));
     }

@@ -43,13 +43,13 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
 
     @Override
     protected ForeignExchangeTransaction parseRow(TableRow row) {
-        String transactionId;
-        Object cellValue = row.getCellValue(TRANSACTION);
+        String tradeId;
+        Object cellValue = row.getCellValue(TRADE_ID);
         if (cellValue instanceof String) {
             String stringValue = cellValue.toString();
             try {
                 // some numbers (doubles) represented by string type cells
-                transactionId = String.valueOf(Long.parseLong(stringValue));
+                tradeId = String.valueOf(Long.parseLong(stringValue));
             } catch (NumberFormatException e) {
                 if (stringValue.startsWith(CONTRACT_PREFIX)) {
                     instrument = stringValue.substring(CONTRACT_PREFIX.length()).trim();
@@ -58,7 +58,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
             }
         } else if (cellValue instanceof Number) {
             // double
-            transactionId = String.valueOf(((Number) cellValue).longValue());
+            tradeId = String.valueOf(((Number) cellValue).longValue());
         } else {
             return null;
         }
@@ -77,7 +77,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
 
         return ForeignExchangeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
-                .transactionId(transactionId)
+                .tradeId(tradeId)
                 .portfolio(getReport().getPortfolio())
                 .security(instrument)
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
@@ -90,7 +90,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
 
     enum FxTransactionTableHeader implements TableColumnDescription {
         DATE_TIME("дата", "сделки"), // не "дата исполнения", иначе не примутся в расчет сделки выполненные без обналичивания валюты
-        TRANSACTION("номер сделки"),
+        TRADE_ID("номер сделки"),
         DIRECTION("вид", "сделки"),
         COUNT("кол-во","шт"),
         VALUE("сумма сопряженной валюты"),

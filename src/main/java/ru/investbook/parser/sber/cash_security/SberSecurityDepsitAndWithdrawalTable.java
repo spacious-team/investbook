@@ -66,7 +66,7 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Se
         Instant instant = row.getInstantCellValue(DATE_TIME);
         String securityId = getSecurityId(row.getStringCellValue(CODE), row.getStringCellValue(SECTION));
         return SecurityTransaction.builder()
-                .transactionId(generateTransactionId(portfolio, instant, securityId))
+                .tradeId(generateTradeId(portfolio, instant, securityId))
                 .timestamp(instant)
                 .portfolio(portfolio)
                 .security(securityId)
@@ -74,7 +74,7 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Se
                 .build();
     }
 
-    private static String generateTransactionId(String portfolio, Instant instant, String securityId) {
+    private static String generateTradeId(String portfolio, Instant instant, String securityId) {
         String id = instant.getEpochSecond() + securityId + portfolio;
         return id.substring(0, Math.min(32, id.length()));
     }
