@@ -54,7 +54,7 @@ public class CbrForeignExchangeRateService {
     private static final String uri = "https://www.cbr.ru/Queries/UniDbQuery/DownloadExcel/98956?" +
             "VAL_NM_RQ={currency}&" +
             "FromDate={from-date}&" +
-            "ToDate=01/01/2100&" +
+            "ToDate={to-date}&" +
             "mode=1&" +
             "Posted=true";
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
@@ -88,7 +88,7 @@ public class CbrForeignExchangeRateService {
             Resource resource = restTemplate.getForObject(
                     uri,
                     Resource.class,
-                    Map.of("currency", e.getValue(), "from-date", formattedFromDate));
+                    Map.of("currency", e.getValue(), "from-date", formattedFromDate, "to-date", LocalDate.now()));
             updateBy(resource, currencyPair);
             log.info("Курс {} обновлен за {}", currencyPair, Duration.ofNanos(System.nanoTime() - t0));
         } catch (Exception ex) {

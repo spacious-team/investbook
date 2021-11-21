@@ -27,6 +27,7 @@ import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityDescriptionEntity;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.FifoPositionsFactory;
+import ru.investbook.report.FifoPositionsFilter;
 import ru.investbook.report.ViewFilter;
 import ru.investbook.repository.SecurityDescriptionRepository;
 import ru.investbook.repository.SecurityRepository;
@@ -76,9 +77,9 @@ public class InvestmentProportionService {
     }
 
     private SecurityInvestment getSecurityToInvestment(Security security, ViewFilter filter) {
-        FifoPositions positions = fifoPositionsFactory.get(filter.getPortfolios(), security, filter);
+        FifoPositions positions = fifoPositionsFactory.get(security, FifoPositionsFilter.of(filter));
         int openedPositions = positions.getCurrentOpenedPositionsCount();
-        BigDecimal investmentRub = ofNullable(securityProfitService.getSecurityQuote(security, RUB, filter))
+        BigDecimal investmentRub = ofNullable(securityProfitService.getSecurityQuote(security, RUB, filter.getToDate()))
                 .map(SecurityQuote::getDirtyPriceInCurrency)
                 .map(quote -> quote.multiply(BigDecimal.valueOf(openedPositions)))
                 .orElseGet(() -> securityProfitService.getPurchaseCost(security, positions, RUB)

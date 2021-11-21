@@ -64,6 +64,8 @@ import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.*;
 import static org.spacious_team.broker.pojo.CashFlowType.CASH;
+import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_RUB;
+import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_USD;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 import static ru.investbook.report.excel.ExcelTableHeader.getColumnsRange;
 import static ru.investbook.report.excel.PortfolioAnalysisExcelTableHeader.*;
@@ -83,8 +85,8 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     private final TreeMap<Instant, BigDecimal> emptyTreeMap = new TreeMap<>();
     private final Set<String> cashProperty = Set.of(PortfolioPropertyType.CASH.name());
     private final Set<String> totalAssetsProperty = Set.of(
-            PortfolioPropertyType.TOTAL_ASSETS_RUB.name(),
-            PortfolioPropertyType.TOTAL_ASSETS_USD.name());
+            TOTAL_ASSETS_RUB.name(),
+            TOTAL_ASSETS_USD.name());
 
     @Override
     public Table create(Collection<String> portfolios) {
@@ -315,7 +317,6 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         return getAllPortfolioCashBalance(balances, portfolioCount);
     }
 
-    // TODO PortfolioPropertyType.TOTAL_ASSETS_RUB and TOTAL_ASSETS_USD both exists for same timestamp
     private LinkedHashMap<Instant, BigDecimal> getTotalAssets(Collection<String> portfolios,
                                                               List<EventCashFlow> cashFlows) {
         List<PortfolioProperty> assets = getPortfolioProperty(portfolios, totalAssetsProperty);
@@ -422,6 +423,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
      */
     private LinkedHashMap<Instant, BigDecimal> getAllPortfolioTotalAssets(List<PortfolioProperty> assets,
                                                                           List<EventCashFlow> cashFlows) {
+        List<PortfolioAssetsInRub> summedAssetsInRub = sumValuesOfSameInstantInRub(assets);
         // temp var: portfolio -> assets
         Map<String, BigDecimal> lastTotalAssets = initPortfoliosByZero(assets);
         Instant lastInstant = Instant.MIN;
@@ -432,15 +434,50 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         Map<String, TreeMap<Instant, BigDecimal>> rubCashFlowsGroupedByPortfolio =
                 convertCashFlowsToRubAndGroupByPortfolio(cashFlows);
 
-        for (PortfolioProperty updatingAssets : assets) {
+        for (PortfolioAssetsInRub updatingAssets : summedAssetsInRub) {
             updateKnownPortfolioAssets(lastTotalAssets, updatingAssets, rubCashFlowsGroupedByPortfolio, lastInstant);
-            lastInstant = updatingAssets.getTimestamp();
+            lastInstant = updatingAssets.instant();
             BigDecimal sum = lastTotalAssets.values()
                     .stream()
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            allPortfolioSummedAssets.put(updatingAssets.getTimestamp(), sum);
+            allPortfolioSummedAssets.put(updatingAssets.instant(), sum);
         }
         return allPortfolioSummedAssets;
+    }
+
+    /**
+     * Sums PortfolioPropertyType.TOTAL_ASSETS_RUB and TOTAL_ASSETS_USD if both exists for same timestamp
+     */
+    private List<PortfolioAssetsInRub> sumValuesOfSameInstantInRub(List<PortfolioProperty> assets) {
+        // portfolio -> Instant -> value in RUB
+        Map<String, Map<Instant, BigDecimal>> portfolioInstantValueInRub = assets.stream()
+                .collect(groupingBy(PortfolioProperty::getPortfolio,
+                        toMap(PortfolioProperty::getTimestamp, this::convertAssetsToRub, BigDecimal::add)));
+        List<PortfolioAssetsInRub> summedAssetsInRub = new ArrayList<>();
+        portfolioInstantValueInRub.forEach((portfolio, instantValueInRub) ->
+            instantValueInRub.forEach((instant, valueInRub) ->
+                summedAssetsInRub.add(new PortfolioAssetsInRub(portfolio, instant, valueInRub))));
+        summedAssetsInRub.sort(comparing(PortfolioAssetsInRub::instant));
+        return summedAssetsInRub;
+    }
+
+    private record PortfolioAssetsInRub(String portfolio, Instant instant, BigDecimal valueInRub) {
+    }
+
+    private BigDecimal convertAssetsToRub(PortfolioProperty updatingAssets) {
+        String currency = switch (updatingAssets.getProperty()) {
+            case TOTAL_ASSETS_RUB -> RUB;
+            case TOTAL_ASSETS_USD -> "USD";
+            default -> throw new IllegalArgumentException("Unsupported property " + updatingAssets.getProperty());
+        };
+        return foreignExchangeRateService.convertValueToCurrency(getAssets(updatingAssets), currency, RUB);
+    }
+
+    private Map<String, BigDecimal> initPortfoliosByZero(Collection<PortfolioProperty> assets) {
+        return assets.stream()
+                .map(PortfolioProperty::getPortfolio)
+                .distinct()
+                .collect(toMap(Function.identity(), $ -> BigDecimal.ZERO));
     }
 
     private Map<String, TreeMap<Instant, BigDecimal>> convertCashFlowsToRubAndGroupByPortfolio(List<EventCashFlow> cashFlows) {
@@ -452,36 +489,20 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                                 TreeMap::new)));
     }
 
-    private Map<String, BigDecimal> initPortfoliosByZero(Collection<PortfolioProperty> assets) {
-        return assets.stream()
-                .map(PortfolioProperty::getPortfolio)
-                .distinct()
-                .collect(toMap(Function.identity(), $ -> BigDecimal.ZERO));
-    }
-
     private void updateKnownPortfolioAssets(Map<String, BigDecimal> lastPortfolioAssets,
-                                            PortfolioProperty updatingAssets,
+                                            PortfolioAssetsInRub updatingAssets,
                                             Map<String, TreeMap<Instant, BigDecimal>> rubCashFlowsGroupedByPortfolio,
                                             Instant lastInstant) {
-        String updatingPortfolio = updatingAssets.getPortfolio();
-        lastPortfolioAssets.put(updatingPortfolio, convertAssetsToRub(updatingAssets));
+        String updatingPortfolio = updatingAssets.portfolio();
+        lastPortfolioAssets.put(updatingPortfolio, updatingAssets.valueInRub());
         lastPortfolioAssets.replaceAll((portfolio, portfolioAssets) ->
                 portfolio.equals(updatingPortfolio) ? portfolioAssets :
                         // update other portfolios by invested sum
                         rubCashFlowsGroupedByPortfolio.getOrDefault(portfolio, emptyTreeMap)
-                                .subMap(lastInstant, false, updatingAssets.getTimestamp(), true)
+                                .subMap(lastInstant, false, updatingAssets.instant(), true)
                                 .values()
                                 .stream()
                                 .reduce(portfolioAssets, BigDecimal::add));
-    }
-
-    private BigDecimal convertAssetsToRub(PortfolioProperty updatingAssets) {
-        String currency = switch (updatingAssets.getProperty()) {
-            case TOTAL_ASSETS_RUB -> RUB;
-            case TOTAL_ASSETS_USD -> "USD";
-            default -> throw new IllegalArgumentException("Unsupported property " + updatingAssets.getProperty());
-        };
-        return foreignExchangeRateService.convertValueToCurrency(getAssets(updatingAssets), currency, RUB);
     }
 
     private static BigDecimal getAssets(PortfolioProperty property) {

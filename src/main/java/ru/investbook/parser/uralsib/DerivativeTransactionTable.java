@@ -51,8 +51,8 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
     @Override
     protected DerivativeTransaction parseRow(TableRow row) {
         if (expirationTableReached) return null;
-        String transactionId = SecurityTransactionTable.getTransactionId(row, TRANSACTION);
-        if (transactionId == null) {
+        String tradeId = SecurityTransactionTable.getTradeId(row, TRANSACTION);
+        if (tradeId == null) {
             if (DerivativeExpirationTable.TABLE_NAME.equals(row.getStringCellValueOrDefault(TRANSACTION, null))) {
                 expirationTableReached = true;
             }
@@ -76,7 +76,7 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
                 .negate();
         return DerivativeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
-                .transactionId(transactionId)
+                .tradeId(tradeId)
                 .portfolio(getReport().getPortfolio())
                 .security(row.getStringCellValue(CONTRACT))
                 .count((isBuy ? 1 : -1) * count)

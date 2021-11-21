@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.singleton;
 import static org.spacious_team.broker.pojo.SecurityType.getCurrencyPair;
 
 @Component
@@ -57,64 +56,59 @@ public class FifoPositionsFactory {
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
     private final Map<String, Map<String, FifoPositions>> positionsCache = new ConcurrentHashMap<>();
 
-    public FifoPositions get(Portfolio portfolio, Security security, ViewFilter filter) {
-        return get(singleton(portfolio.getId()), security.getId(), filter);
+    public FifoPositions get(Security security, Portfolio portfolio) {
+        return get(security, FifoPositionsFilter.of(portfolio));
     }
 
-    public FifoPositions get(Portfolio portfolio, String isinOrContract, ViewFilter filter) {
-        return get(singleton(portfolio.getId()), isinOrContract, filter);
+    public FifoPositions get(Security security, FifoPositionsFilter filter) {
+        return get(security.getId(), filter);
     }
 
-    public FifoPositions get(Collection<String> portfolios, Security security, ViewFilter filter) {
-        return get(portfolios, security.getId(), filter);
-    }
-
-    // TODO проверить, возможно первый аргумент 'portfolios' всегда равен ViewFilter.getPortfolios() ?
-    public FifoPositions get(Collection<String> portfolios, String isinOrContract, ViewFilter filter) {
-        String key = portfolios.stream().sorted().collect(Collectors.joining(","));
+    public FifoPositions get(String isinOrContract, FifoPositionsFilter filter) {
+        String key = filter.getPortfolios().stream().sorted().collect(Collectors.joining(","));
         return positionsCache
                 .computeIfAbsent(
                         key.isEmpty() ? ALL_PORTFOLIO_KEY : key,
                         k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(
                         getCacheKey(isinOrContract, filter),
-                        k -> create(portfolios, isinOrContract, filter));
+                        k -> create(isinOrContract, filter));
     }
 
     public void invalidateCache() {
         positionsCache.clear();
     }
 
-    private String getCacheKey(String isinOrContract, ViewFilter filter) {
+    private String getCacheKey(String isinOrContract, FifoPositionsFilter filter) {
         String key = (SecurityType.getSecurityType(isinOrContract) == SecurityType.CURRENCY_PAIR) ?
                 getCurrencyPair(isinOrContract) :
                 isinOrContract;
         return key + filter.getFromDate().toString() + filter.getToDate().toString();
     }
 
-    private FifoPositions create(Collection<String> portfolios, String isinOrContract, ViewFilter filter) {
+    private FifoPositions create(String isinOrContract, FifoPositionsFilter filter) {
         SecurityType type = SecurityType.getSecurityType(isinOrContract);
         LinkedList<Transaction> transactions;
         if (type == SecurityType.CURRENCY_PAIR) {
             String currencyPair = getCurrencyPair(isinOrContract);
-            transactions = getFxContracts(portfolios, currencyPair, filter)
+            transactions = getFxContracts(currencyPair, filter)
                     .stream()
-                    .flatMap(contract -> getTransactions(portfolios, contract, filter).stream())
+                    .flatMap(contract -> getTransactions(contract, filter).stream())
                     .collect(Collectors.toCollection(LinkedList::new));
             transactions.sort(
                     Comparator.comparing(Transaction::getTimestamp)
                             .thenComparing(Transaction::getId));
         } else {
-            transactions = getTransactions(portfolios, isinOrContract, filter);
+            transactions = getTransactions(isinOrContract, filter);
         }
         Deque<SecurityEventCashFlow> redemption = (type == SecurityType.STOCK_OR_BOND) ?
-                getRedemption(portfolios, isinOrContract, filter) :
+                getRedemption(isinOrContract, filter) :
                 new ArrayDeque<>(0);
         return new FifoPositions(transactions, redemption);
     }
 
-    private Collection<String> getFxContracts(Collection<String> portfolios, String currencyPair, ViewFilter filter) {
-        return portfolios.isEmpty() ?
+    private Collection<String> getFxContracts(String currencyPair, FifoPositionsFilter filter) {
+        return filter.getPortfolios().isEmpty() ?
                 transactionRepository
                         .findDistinctFxContractByCurrencyPairAndTimestampBetween(
                                 currencyPair,
@@ -122,23 +116,23 @@ public class FifoPositionsFactory {
                                 filter.getToDate()) :
                 transactionRepository
                         .findDistinctFxContractByPortfolioInAndCurrencyPairAndTimestampBetween(
-                                portfolios,
+                                filter.getPortfolios(),
                                 currencyPair,
                                 filter.getFromDate(),
                                 filter.getToDate());
     }
 
-    public LinkedList<Transaction> getTransactions(Collection<String> portfolios, String isin, ViewFilter filter) {
-        List<TransactionEntity> entities = portfolios.isEmpty() ?
+    public LinkedList<Transaction> getTransactions(String isin, FifoPositionsFilter filter) {
+        List<TransactionEntity> entities = filter.getPortfolios().isEmpty() ?
                 transactionRepository
-                        .findBySecurityIdAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+                        .findBySecurityIdAndTimestampBetweenOrderByTimestampAscTradeIdAsc(
                                 isin,
                                 filter.getFromDate(),
                                 filter.getToDate()) :
                 transactionRepository
-                        .findBySecurityIdAndPkPortfolioInAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+                        .findBySecurityIdAndPortfolioInAndTimestampBetweenOrderByTimestampAscTradeIdAsc(
                                 isin,
-                                portfolios,
+                                filter.getPortfolios(),
                                 filter.getFromDate(),
                                 filter.getToDate());
         return entities.stream()
@@ -146,8 +140,8 @@ public class FifoPositionsFactory {
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    private Deque<SecurityEventCashFlow> getRedemption(Collection<String> portfolios, String isin, ViewFilter filter) {
-        List<SecurityEventCashFlowEntity> entities = portfolios.isEmpty() ?
+    private Deque<SecurityEventCashFlow> getRedemption(String isin, FifoPositionsFilter filter) {
+        List<SecurityEventCashFlowEntity> entities = filter.getPortfolios().isEmpty() ?
                 securityEventCashFlowRepository
                         .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                                 isin,
@@ -156,7 +150,7 @@ public class FifoPositionsFactory {
                                 filter.getToDate()) :
                 securityEventCashFlowRepository
                         .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                portfolios,
+                                filter.getPortfolios(),
                                 isin,
                                 CashFlowType.REDEMPTION.getId(),
                                 filter.getFromDate(),

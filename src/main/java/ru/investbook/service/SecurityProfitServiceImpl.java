@@ -69,14 +69,16 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
     private final ForeignExchangeRateService foreignExchangeRateService;
 
     @Override
-    public Optional<Instant> getLastEventTimestamp(Collection<String> portfolios, Security security, Set<Integer> events, ViewFilter filter) {
+    public Optional<Instant> getLastEventTimestamp(
+            Collection<String> portfolios, Security security, Set<Integer> events, Instant from, Instant to) {
+
         Optional<SecurityEventCashFlowEntity> optional = portfolios.isEmpty() ?
                 securityEventCashFlowRepository
                         .findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                security.getId(), events, filter.getFromDate(), filter.getToDate()) :
+                                security.getId(), events, from, to) :
                 securityEventCashFlowRepository
                         .findFirstByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                portfolios, security.getId(), events, filter.getFromDate(), filter.getToDate());
+                                portfolios, security.getId(), events, from, to);
         return optional.map(SecurityEventCashFlowEntity::getTimestamp);
     }
 
@@ -157,7 +159,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
             return Optional.empty();
         }
         return transactionCashFlowRepository
-                .findByPkPortfolioAndPkTransactionIdAndPkType(t.getPortfolio(), t.getId(), type.getId())
+                .findByTransactionIdAndCashFlowType(t.getId(), type)
                 .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency));
     }
 
@@ -211,22 +213,22 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
     }
 
     @Override
-    public SecurityQuote getSecurityQuote(Security security, String toCurrency, ViewFilter filter) {
+    public SecurityQuote getSecurityQuote(Security security, String toCurrency, Instant to) {
         if (getSecurityType(security) == CURRENCY_PAIR) {
             String baseCurrency = getCurrencyPair(security.getId()).substring(0, 3);
-            LocalDate toDate = LocalDate.ofInstant(filter.getToDate(), ZoneId.systemDefault());
+            LocalDate toDate = LocalDate.ofInstant(to, ZoneId.systemDefault());
             BigDecimal lastPrice = toDate.isBefore(LocalDate.now()) ?
                     foreignExchangeRateService.getExchangeRateOrDefault(baseCurrency, toCurrency, toDate) :
                     foreignExchangeRateService.getExchangeRate(baseCurrency, toCurrency);
             return SecurityQuote.builder()
                     .security(security.getId())
-                    .timestamp(filter.getToDate())
+                    .timestamp(to)
                     .quote(lastPrice)
                     .currency(toCurrency)
                     .build();
         }
         return securityQuoteRepository
-                .findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(security.getId(), filter.getToDate())
+                .findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(security.getId(), to)
                 .map(securityQuoteConverter::fromEntity)
                 .map(_quote -> foreignExchangeRateService.convertQuoteToCurrency(_quote, toCurrency))
                 .map(_quote -> hasLength(_quote.getCurrency()) ? _quote : _quote.toBuilder()

@@ -58,10 +58,8 @@ public class SecurityDepositController extends TransactionController{
 
     @GetMapping("/edit-form")
     @Override
-    public String getEditForm(@RequestParam(name = "portfolio", required = false) String portfolio,
-                              @RequestParam(name = "transaction-id", required = false) String transactionId,
-                              Model model) {
-        super.getEditForm(portfolio, transactionId, model);
+    public String getEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
+        super.getEditForm(id, model);
         return "security-deposit/edit-form";
     }
 
@@ -79,10 +77,8 @@ public class SecurityDepositController extends TransactionController{
 
     @GetMapping("/delete")
     @Override
-    public String delete(@RequestParam(name = "portfolio") String portfolio,
-                              @RequestParam(name = "transaction-id") String transactionId,
-                              Model model) {
-        super.doDelete(portfolio, transactionId);
+    public String delete(@RequestParam(name = "id") int id, Model model) {
+        super.doDelete(id);
         model.addAttribute("message", "Запись удалена");
         model.addAttribute("backLink", "/security-deposit");
         return "success";

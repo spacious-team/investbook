@@ -31,9 +31,7 @@ import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
-import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
-import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
-import org.spacious_team.broker.report_parser.api.SecurityTransaction;
+import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -55,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -111,27 +110,33 @@ public class InvestbookApiClient {
         return security;
     }
 
-    public void addTransaction(SecurityTransaction securityTransaction) {
-        boolean isAdded = addTransaction(securityTransaction.getTransaction());
+    public void addTransaction(AbstractTransaction transaction) {
+        addSecurity(transaction.getSecurity());
+        boolean isAdded = addTransaction(transaction.getTransaction());
         if (isAdded) {
-            securityTransaction.getTransactionCashFlows().forEach(this::addTransactionCashFlow);
+            Integer transactionId = Optional.ofNullable(transaction.getId())
+                    .or(() -> getSavedTransactionId(transaction))
+                    .orElse(null);
+            if (transactionId == null) {
+                log.warn("Не могу добавить транзакцию в БД, не задан внутренний идентификатор записи: {}", transaction);
+                return;
+            }
+            addCashTransactionFlows(transaction, transactionId);
         }
     }
 
-    public void addTransaction(DerivativeTransaction derivativeTransaction) {
-        addSecurity(derivativeTransaction.getSecurity());
-        boolean isAdded = addTransaction(derivativeTransaction.getTransaction());
-        if (isAdded) {
-            derivativeTransaction.getTransactionCashFlows().forEach(this::addTransactionCashFlow);
-        }
+    private Optional<Integer> getSavedTransactionId(AbstractTransaction transaction) {
+        return Optional.of(transactionRestController.get(transaction.getPortfolio(), transaction.getTradeId()))
+                .filter(result -> result.size() == 1)
+                .map(result -> result.get(0))
+                .map(Transaction::getId);
     }
 
-    public void addTransaction(ForeignExchangeTransaction fxTransaction) {
-        addSecurity(fxTransaction.getSecurity());
-        boolean isAdded = addTransaction(fxTransaction.getTransaction());
-        if (isAdded) {
-            fxTransaction.getTransactionCashFlows().forEach(this::addTransactionCashFlow);
-        }
+    private void addCashTransactionFlows(AbstractTransaction transaction, int transactionId) {
+        transaction.getTransactionCashFlows()
+                .stream()
+                .map(cash -> cash.toBuilder().transactionId(transactionId).build())
+                .forEach(this::addTransactionCashFlow);
     }
 
     protected boolean addTransaction(Transaction transaction) {

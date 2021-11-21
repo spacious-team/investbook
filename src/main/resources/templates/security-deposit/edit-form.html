@@ -20,8 +20,8 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title th:if="${transaction.transactionId == null}">Новая запись</title>
-    <title th:unless="${transaction.transactionId == null}">Редактировать запись</title>
+    <title th:if="${transaction.id == null}">Новая запись</title>
+    <title th:unless="${transaction.id == null}">Редактировать запись</title>
     <script type="text/javascript" src="/moex.js"></script>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
@@ -40,9 +40,12 @@
 </head>
 <body>
 
-<h1 th:if="${transaction.transactionId == null}">Новая запись</h1>
-<h1 th:unless="${transaction.transactionId == null}">Редактировать запись</h1>
+<h1 th:if="${transaction.id == null}">Новая запись</h1>
+<h1 th:unless="${transaction.id == null}">Редактировать запись</h1>
 <form action="#" th:action="@{/security-deposit}" th:object="${transaction}" method="post">
+    <label>
+        <input type="hidden" th:field="*{id}"/>
+    </label>
     <label>
         Дата исполнения
         <input type="date" th:field="*{date}" required/>
@@ -75,7 +78,7 @@
     </a>
     <label>
         Номер записи
-        <input type="text" th:field="*{transactionId}" placeholder="<не знаю>"/>
+        <input type="text" th:field="*{tradeId}" placeholder="<не знаю>"/>
     </label>
     <br/>
     <input type="hidden" id="securityType" name="securityType" value="SHARE"/>

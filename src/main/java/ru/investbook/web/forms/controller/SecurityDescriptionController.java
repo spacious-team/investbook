@@ -60,15 +60,21 @@ public class SecurityDescriptionController {
     }
 
     @GetMapping("update")
-    public String updateFromSmartLab(Model model) {
-        String message = updateSectorsFromSmartLab();
-        model.addAttribute("message", message);
-        model.addAttribute("backLink", "/portfolio-composition");
-        return "success";
+    public String updateFromSmartLab(@RequestParam(name = "security-id", required = false) String securityId,
+                                     @RequestParam(name = "force", defaultValue = "false") boolean forceUpdate,
+                                     Model model) {
+        if (securityId == null) {
+            String message = updateSectorsFromSmartLab(forceUpdate);
+            model.addAttribute("message", message);
+            return "success";
+        } else {
+            securitySectorService.uploadAndUpdateSecuritySector(securityId, forceUpdate);
+            return get(model);
+        }
     }
 
-    public String updateSectorsFromSmartLab() {
-        securitySectorService.uploadAndUpdateSecuritySectors();
+    public String updateSectorsFromSmartLab(boolean forceUpdate) {
+        securitySectorService.uploadAndUpdateSecuritySectors(forceUpdate);
         return "Список секторов выгружен со Smart-Lab страницы https://smart-lab.ru/forum/sectors";
     }
 

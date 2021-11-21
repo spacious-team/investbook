@@ -68,18 +68,16 @@ public class TransactionController {
     }
 
     @GetMapping("/edit-form")
-    public String getEditForm(@RequestParam(name = "portfolio", required = false) String portfolio,
-                              @RequestParam(name = "transaction-id", required = false) String transactionId,
-                              Model model) {
-        model.addAttribute("transaction", getTransaction(portfolio, transactionId));
+    public String getEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
+        model.addAttribute("transaction", getTransaction(id));
         model.addAttribute("securities", securities);
         model.addAttribute("portfolios", portfolios);
         return "transactions/edit-form";
     }
 
-    private TransactionModel getTransaction(String portfolio, String transactionId) {
-        if (portfolio != null && transactionId != null) {
-            return transactionFormsService.getById(portfolio, transactionId)
+    private TransactionModel getTransaction(Integer id) {
+        if (id != null) {
+            return transactionFormsService.getById(id)
                     .orElseGet(TransactionModel::new);
         } else {
             TransactionModel transaction = new TransactionModel();
@@ -102,17 +100,15 @@ public class TransactionController {
     }
 
     @GetMapping("/delete")
-    public String delete(@RequestParam(name = "portfolio") String portfolio,
-                              @RequestParam(name = "transaction-id") String transactionId,
-                              Model model) {
-        doDelete(portfolio, transactionId);
+    public String delete(@RequestParam(name = "id") int id, Model model) {
+        doDelete(id);
         model.addAttribute("message", "Сделка удалена");
         model.addAttribute("backLink", "/transactions");
         return "success";
     }
 
-    protected void doDelete(String portfolio, String transactionId) {
-        transactionFormsService.delete(portfolio, transactionId);
+    protected void doDelete(int id) {
+        transactionFormsService.delete(id);
         fifoPositionsFactory.invalidateCache();
     }
 }

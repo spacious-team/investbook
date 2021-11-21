@@ -21,6 +21,7 @@ package ru.investbook.web.forms.service;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.ForeignExchangeRateConverter;
 import ru.investbook.entity.ForeignExchangeRateEntity;
 import ru.investbook.entity.ForeignExchangeRateEntityPk;
@@ -40,6 +41,7 @@ public class ForeignExchangeRateFormsService implements FormsService<ForeignExch
     private final ForeignExchangeRateRepository foreignExchangeRateRepository;
     private final ForeignExchangeRateConverter foreignExchangeRateConverter;
 
+    @Transactional(readOnly = true)
     public Optional<ForeignExchangeRateModel> getById(LocalDate date, String baseCurrency, String quoteCurrency) {
         ForeignExchangeRateEntityPk pk = new ForeignExchangeRateEntityPk();
         pk.setDate(date);
@@ -49,6 +51,7 @@ public class ForeignExchangeRateFormsService implements FormsService<ForeignExch
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ForeignExchangeRateModel> getAll() {
         return foreignExchangeRateRepository.findByOrderByPkDateDescPkCurrencyPairAsc()
                 .stream()
@@ -57,6 +60,7 @@ public class ForeignExchangeRateFormsService implements FormsService<ForeignExch
     }
 
     @Override
+    @Transactional
     public void save(ForeignExchangeRateModel m) {
         foreignExchangeRateRepository.saveAndFlush(
                 foreignExchangeRateConverter.toEntity(ForeignExchangeRate.builder()
@@ -76,6 +80,7 @@ public class ForeignExchangeRateFormsService implements FormsService<ForeignExch
         return m;
     }
 
+    @Transactional
     public void delete(LocalDate date, String baseCurrency, String quoteCurrency) {
         ForeignExchangeRateEntityPk pk = new ForeignExchangeRateEntityPk();
         pk.setDate(date);

@@ -23,8 +23,8 @@ import org.spacious_team.broker.pojo.Security;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.TransactionEntity;
-import ru.investbook.entity.TransactionEntityPK;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -33,20 +33,31 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public interface TransactionRepository extends JpaRepository<TransactionEntity, TransactionEntityPK> {
+@Transactional(readOnly = true)
+public interface TransactionRepository extends JpaRepository<TransactionEntity, Integer> {
 
     Optional<TransactionEntity> findFirstByOrderByTimestampAsc();
 
-    List<TransactionEntity> findByOrderByPkPortfolioAscTimestampDescSecurityIdAsc();
+    List<TransactionEntity> findByPortfolio(String portfolio);
+
+    List<TransactionEntity> findByTradeId(String tradeId);
+
+    Optional<TransactionEntity> findByPortfolioAndTradeId(String portfolio, String tradeId);
+
+    List<TransactionEntity> findByPortfolioInOrderByPortfolioAscTimestampDescSecurityIdAsc(
+            Collection<String> portfolios);
 
     /**
      * Returns stock market share and bonds ISINs
      */
-    @Query(nativeQuery = true, value = "SELECT distinct security FROM transaction " +
-            "WHERE portfolio = :#{#portfolio.id} " +
-            "AND length(security) = 12 " +
-            "AND timestamp between :from AND :to " +
-            "ORDER BY timestamp DESC")
+    @Query(nativeQuery = true, value = """
+            SELECT distinct security FROM transaction
+            WHERE portfolio = :#{#portfolio.id}
+                AND length(security) = 12
+                AND timestamp between :from AND :to
+            ORDER BY timestamp DESC
+            """)
+    @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     List<String> findDistinctSecurityByPortfolioAndTimestampBetweenOrderByTimestampDesc(
             @Param("portfolio") Portfolio portfolio,
             @Param("from") Instant fromDate,
@@ -55,15 +66,18 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Returns stock market share and bonds ISINs
      */
-    @Query(nativeQuery = true, value = "SELECT DISTINCT security FROM transaction as t1 " +
-            "JOIN transaction_cash_flow as t2 " +
-            "ON t1.id = t2.transaction_id " +
-            "AND t1.portfolio IN (:portfolios) " +
-            "AND length(security) = 12 " +
-            "AND t2.type = 1 " +
-            "AND t2.currency = :currency " +
-            "AND timestamp between :from AND :to " +
-            "ORDER BY t1.timestamp DESC")
+    @Query(nativeQuery = true, value = """
+            SELECT DISTINCT security FROM transaction as t1
+            JOIN transaction_cash_flow as t2
+                ON t1.id = t2.transaction_id
+                AND t1.portfolio IN (:portfolios)
+                AND length(security) = 12
+                AND t2.type = 1
+                AND t2.currency = :currency
+                AND timestamp between :from AND :to
+            ORDER BY t1.timestamp DESC
+            """)
+    @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     List<String> findDistinctSecurityByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
             @Param("portfolios") Collection<String> portfolios,
             @Param("currency") String currency,
@@ -73,14 +87,17 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Returns stock market share and bonds ISINs
      */
-    @Query(nativeQuery = true, value = "SELECT DISTINCT security FROM transaction as t1 " +
-            "JOIN transaction_cash_flow as t2 " +
-            "ON t1.id = t2.transaction_id " +
-            "AND length(security) = 12 " +
-            "AND t2.type = 1 " +
-            "AND t2.currency = :currency " +
-            "AND timestamp between :from AND :to " +
-            "ORDER BY t1.timestamp DESC")
+    @Query(nativeQuery = true, value = """
+            SELECT DISTINCT security FROM transaction as t1
+            JOIN transaction_cash_flow as t2
+                ON t1.id = t2.transaction_id
+                AND length(security) = 12
+                AND t2.type = 1
+                AND t2.currency = :currency
+                AND timestamp between :from AND :to
+            ORDER BY t1.timestamp DESC
+            """)
+    @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     List<String> findDistinctSecurityByCurrencyAndTimestampBetweenOrderByTimestampDesc(
             @Param("currency") String currency,
             @Param("from") Instant fromDate,
@@ -89,12 +106,15 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Returns derivatives market contracts
      */
-    @Query(nativeQuery = true, value = "SELECT distinct security FROM transaction " +
-            "WHERE portfolio IN (:portfolios) " +
-            "AND length(security) <> 12 " +
-            "AND security NOT LIKE '______\\_%' " +
-            "AND timestamp between :from AND :to " +
-            "ORDER BY timestamp DESC")
+    @Query(nativeQuery = true, value = """
+            SELECT distinct security FROM transaction
+            WHERE portfolio IN (:portfolios)
+                AND length(security) <> 12
+                AND security NOT LIKE '______\\_%'
+                AND timestamp between :from AND :to
+            ORDER BY timestamp DESC
+            """)
+    @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     List<String> findDistinctDerivativeByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
             @Param("portfolios") Collection<String> portfolios,
             @Param("from") Instant fromDate,
@@ -103,11 +123,14 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Returns derivatives market contracts
      */
-    @Query(nativeQuery = true, value = "SELECT distinct security FROM transaction " +
-            "WHERE length(security) <> 12 " +
-            "AND security NOT LIKE '______\\_%' " +
-            "AND timestamp between :from AND :to " +
-            "ORDER BY timestamp DESC")
+    @Query(nativeQuery = true, value = """
+            SELECT distinct security FROM transaction
+            WHERE length(security) <> 12
+                AND security NOT LIKE '______\\_%'
+                AND timestamp between :from AND :to
+            ORDER BY timestamp DESC
+            """)
+    @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     List<String> findDistinctDerivativeByTimestampBetweenOrderByTimestampDesc(
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
@@ -115,12 +138,15 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM, USDRUB_CNGD format)
      */
-    @Query(nativeQuery = true, value = "SELECT distinct security FROM transaction " +
-            "WHERE portfolio IN (:portfolios) " +
-            "AND length(security) <> 12 " +
-            "AND security LIKE '______\\_%' " +
-            "AND timestamp between :from AND :to " +
-            "ORDER BY timestamp DESC")
+    @Query(nativeQuery = true, value = """
+            SELECT distinct security FROM transaction
+            WHERE portfolio IN (:portfolios)
+                AND length(security) <> 12
+                AND security LIKE '______\\_%'
+                AND timestamp between :from AND :to
+            ORDER BY timestamp DESC
+            """)
+    @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     List<String> findDistinctFxContractByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
             @Param("portfolios") Collection<String> portfolios,
             @Param("from") Instant fromDate,
@@ -129,11 +155,14 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM, USDRUB_CNGD format)
      */
-    @Query(nativeQuery = true, value = "SELECT distinct security FROM transaction " +
-            "WHERE length(security) <> 12 " +
-            "AND security LIKE '______\\_%' " +
-            "AND timestamp between :from AND :to " +
-            "ORDER BY timestamp DESC")
+    @Query(nativeQuery = true, value = """
+            SELECT distinct security FROM transaction
+            WHERE length(security) <> 12
+                AND security LIKE '______\\_%'
+                AND timestamp between :from AND :to
+            ORDER BY timestamp DESC
+            """)
+    @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     List<String> findDistinctFxContractByTimestampBetweenOrderByTimestampDesc(
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
@@ -176,16 +205,19 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM, USDRUB_CNGD format)
      */
-    @Query(nativeQuery = true, value = "SELECT DISTINCT security FROM transaction as t1 " +
-            "JOIN transaction_cash_flow as t2 " +
-            "ON t1.id = t2.transaction_id " +
-            "AND t1.portfolio IN (:portfolios) " +
-            "AND length(security) <> 12 " +
-            "AND security LIKE '______\\_%' " +
-            "AND t2.type = 1 " +
-            "AND t2.currency = :currency " +
-            "AND timestamp between :from AND :to " +
-            "ORDER BY t1.timestamp DESC")
+    @Query(nativeQuery = true, value = """
+            SELECT DISTINCT security FROM transaction as t1
+            JOIN transaction_cash_flow as t2
+                ON t1.id = t2.transaction_id
+                AND t1.portfolio IN (:portfolios)
+                AND length(security) <> 12
+                AND security LIKE '______\\_%'
+                AND t2.type = 1
+                AND t2.currency = :currency
+                AND timestamp between :from AND :to
+            ORDER BY t1.timestamp DESC
+            """)
+    @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     List<String> findDistinctFxContractByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
             @Param("portfolios") Collection<String> portfolios,
             @Param("currency") String currency,
@@ -195,15 +227,18 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Returns foreign exchange market contracts (in USDRUB_TOD, USDRUB_TOM, USDRUB_CNGD format)
      */
-    @Query(nativeQuery = true, value = "SELECT DISTINCT security FROM transaction as t1 " +
-            "JOIN transaction_cash_flow as t2 " +
-            "ON t1.id = t2.transaction_id " +
-            "AND length(security) <> 12 " +
-            "AND security LIKE '______\\_%' " +
-            "AND t2.type = 1 " +
-            "AND t2.currency = :currency " +
-            "AND timestamp between :from AND :to " +
-            "ORDER BY t1.timestamp DESC")
+    @Query(nativeQuery = true, value = """
+            SELECT DISTINCT security FROM transaction as t1
+            JOIN transaction_cash_flow as t2
+                ON t1.id = t2.transaction_id
+                AND length(security) <> 12
+                AND security LIKE '______\\_%'
+                AND t2.type = 1
+                AND t2.currency = :currency
+                AND timestamp between :from AND :to
+            ORDER BY t1.timestamp DESC
+            """)
+    @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     List<String> findDistinctFxContractByCurrencyAndTimestampBetweenOrderByTimestampDesc(
             @Param("currency") String currency,
             @Param("from") Instant fromDate,
@@ -238,13 +273,13 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
                 .collect(Collectors.toList());
     }
 
-    List<TransactionEntity> findBySecurityIdAndPkPortfolioInAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+    List<TransactionEntity> findBySecurityIdAndPortfolioInAndTimestampBetweenOrderByTimestampAscTradeIdAsc(
             String isin,
             Collection<String> portfolio,
             Instant fromDate,
             Instant toDate);
 
-    List<TransactionEntity> findBySecurityIdAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+    List<TransactionEntity> findBySecurityIdAndTimestampBetweenOrderByTimestampAscTradeIdAsc(
             String isin,
             Instant fromDate,
             Instant toDate);
@@ -252,7 +287,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Return first security transaction
      */
-    Optional<TransactionEntity> findFirstBySecurityIdAndPkPortfolioAndTimestampBetweenOrderByTimestampAsc(
+    Optional<TransactionEntity> findFirstBySecurityIdAndPortfolioAndTimestampBetweenOrderByTimestampAsc(
             String isin,
             String portfolio,
             Instant fromDate,
@@ -261,7 +296,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Return last security transaction
      */
-    Optional<TransactionEntity> findFirstBySecurityIdAndPkPortfolioAndTimestampBetweenOrderByTimestampDesc(
+    Optional<TransactionEntity> findFirstBySecurityIdAndPortfolioAndTimestampBetweenOrderByTimestampDesc(
             String isin,
             String portfolio,
             Instant fromDate,
@@ -270,11 +305,13 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Return security total buy count
      */
-    @Query(nativeQuery = true, value = "SELECT sum(count) FROM transaction " +
-            "WHERE portfolio = :#{#portfolio.id} " +
-            "AND security = :#{#security.id} " +
-            "AND timestamp between :from AND :to " +
-            "AND count > 0")
+    @Query(nativeQuery = true, value = """
+            SELECT sum(count) FROM transaction
+            WHERE portfolio = :#{#portfolio.id}
+                AND security = :#{#security.id}
+                AND timestamp between :from AND :to
+                AND count > 0
+            """)
     Long findBySecurityIdAndPkPortfolioAndTimestampBetweenBuyCount(
             @Param("security") Security security,
             @Param("portfolio") Portfolio portfolio,
@@ -284,25 +321,31 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Return security total cell count
      */
-    @Query(nativeQuery = true, value = "SELECT abs(sum(count)) FROM transaction " +
-            "WHERE portfolio = :#{#portfolio.id} " +
-            "AND security = :#{#security.id} " +
-            "AND timestamp between :from AND :to " +
-            "AND count < 0")
+    @Query(nativeQuery = true, value = """
+            SELECT abs(sum(count)) FROM transaction
+            WHERE portfolio = :#{#portfolio.id}
+                AND security = :#{#security.id}
+                AND timestamp between :from AND :to
+                AND count < 0
+            """)
     Long findBySecurityIdAndPkPortfolioAndTimestampBetweenCellCount(
             @Param("security") Security security,
             @Param("portfolio") Portfolio portfolio,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
-    @Query("SELECT t FROM TransactionEntity t " +
-            "LEFT OUTER JOIN TransactionCashFlowEntity c " +
-            "ON t.pk.id = c.pk.transactionId AND t.pk.portfolio = c.pk.portfolio " +
-            "WHERE c.pk.type IS NULL AND t.pk.portfolio = :#{#portfolio.id} AND t.timestamp between :from AND :to")
-    Collection<TransactionEntity> findByPkPortfolioAndTimestampBetweenDepositAndWithdrawalTransactions(
+    @Query("""
+            SELECT t FROM TransactionEntity t
+            LEFT OUTER JOIN TransactionCashFlowEntity c
+                ON t.id = c.transactionId
+            WHERE c.cashFlowType IS NULL
+                AND t.portfolio = :#{#portfolio.id}
+                AND t.timestamp between :from AND :to
+            """)
+    Collection<TransactionEntity> findByPortfolioAndTimestampBetweenDepositAndWithdrawalTransactions(
             @Param("portfolio") Portfolio portfolio,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
-    int countByPkPortfolioIn(Set<String> portfolio);
+    int countByPortfolioIn(Set<String> portfolio);
 }

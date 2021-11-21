@@ -29,12 +29,13 @@ import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.TransactionCashFlowConverter;
 import ru.investbook.converter.TransactionConverter;
+import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
-import ru.investbook.entity.TransactionEntityPK;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
@@ -75,23 +76,28 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
             CashFlowType.DERIVATIVE_PRICE.getId(),
             CashFlowType.COMMISSION.getId());
 
-    public Optional<TransactionModel> getById(String portfolio, String transactionId) {
-        TransactionEntityPK pk = new TransactionEntityPK();
-        pk.setId(transactionId);
-        pk.setPortfolio(portfolio);
-        return transactionRepository.findById(pk)
+    @Transactional(readOnly = true)
+    public Optional<TransactionModel> getById(int id) {
+        return transactionRepository.findById(id)
                 .map(this::toTransactionModel);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TransactionModel> getAll() {
-        return transactionRepository.findByOrderByPkPortfolioAscTimestampDescSecurityIdAsc()
+        Set<String> activePortfolios = portfolioRepository.findByEnabledIsTrue()
+                .stream()
+                .map(PortfolioEntity::getId)
+                .collect(Collectors.toSet());
+        return transactionRepository
+                .findByPortfolioInOrderByPortfolioAscTimestampDescSecurityIdAsc(activePortfolios)
                 .stream()
                 .map(this::toTransactionModel)
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public void save(TransactionModel tr) {
         convertDerivativeSecurityId(tr);
         int direction = ((tr.getAction() == TransactionModel.Action.BUY) ? 1 : -1);
@@ -137,8 +143,10 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
             };
         }
 
-        AbstractTransaction transaction = builder.portfolio(tr.getPortfolio())
-                .transactionId(tr.getTransactionId())
+        AbstractTransaction transaction = builder
+                .id(tr.getId())
+                .tradeId(tr.getTradeId())
+                .portfolio(tr.getPortfolio())
                 .timestamp(tr.getDate().atStartOfDay(zoneId).toInstant())
                 .security(tr.getSecurityId())
                 .count(abs(tr.getCount()) * direction)
@@ -158,10 +166,14 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                               Transaction transaction,
                               Collection<TransactionCashFlow> cashFlows) {
         saveAndFlush(transactionModel.getPortfolio(), transactionModel.getSecurityId(), transactionModel.getSecurityName());
-        transactionRepository.saveAndFlush(transactionConverter.toEntity(transaction));
-        transactionCashFlowRepository.deleteByPkPortfolioAndPkTransactionId(transaction.getPortfolio(), transaction.getId());
-        cashFlows.forEach(cash -> transactionCashFlowRepository.save(transactionCashFlowConverter.toEntity(cash)));
+        TransactionEntity transactionEntity = transactionRepository.saveAndFlush(transactionConverter.toEntity(transaction));
+        transactionModel.setId(transactionEntity.getId()); // used by view
+        Optional.ofNullable(transactionEntity.getId()).ifPresent(transactionCashFlowRepository::deleteByTransactionId);
         transactionCashFlowRepository.flush();
+        cashFlows.stream()
+                .map(cash -> cash.toBuilder().transactionId(transactionEntity.getId()).build())
+                .map(transactionCashFlowConverter::toEntity)
+                .forEach(transactionCashFlowRepository::save);
     }
 
     private void saveAndFlush(String portfolio, String securityId, String securityName) {
@@ -177,8 +189,9 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
 
     private TransactionModel toTransactionModel(TransactionEntity e) {
         TransactionModel m = new TransactionModel();
-        m.setTransactionId(e.getPk().getId());
-        m.setPortfolio(e.getPk().getPortfolio());
+        m.setId(e.getId());
+        m.setTradeId(e.getTradeId());
+        m.setPortfolio(e.getPortfolio());
         int count = e.getCount();
         BigDecimal cnt = BigDecimal.valueOf(count);
         m.setAction(count >= 0 ? TransactionModel.Action.BUY : TransactionModel.Action.CELL);
@@ -188,9 +201,8 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()));
         m.setSecurityType(SecurityType.valueOf(getSecurityType(e.getSecurity().getId())));
         m.setCount(abs(count));
-        List<TransactionCashFlowEntity> cashFlows = transactionCashFlowRepository.findByPkPortfolioAndPkTransactionIdAndPkTypeIn(
-                e.getPk().getPortfolio(),
-                e.getPk().getId(),
+        List<TransactionCashFlowEntity> cashFlows = transactionCashFlowRepository.findByTransactionIdAndCashFlowTypeIn(
+                e.getId(),
                 cashFlowTypes);
         cashFlows.forEach(value -> {
             CashFlowType type = CashFlowType.valueOf(value.getCashFlowType().getId());
@@ -228,11 +240,9 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
         return m;
     }
 
-    public void delete(String portfolio, String transactionId) {
-        TransactionEntityPK pk = new TransactionEntityPK();
-        pk.setId(transactionId);
-        pk.setPortfolio(portfolio);
-        transactionRepository.deleteById(pk);
+    @Transactional
+    public void delete(int transactionId) {
+        transactionRepository.deleteById(transactionId);
         transactionRepository.flush();
     }
 }

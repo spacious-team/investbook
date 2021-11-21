@@ -23,7 +23,6 @@ import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionEntity;
-import ru.investbook.entity.TransactionEntityPK;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 
@@ -40,11 +39,10 @@ public class TransactionConverter implements EntityConverter<TransactionEntity, 
         SecurityEntity securityEntity = securityRepository.findById(transaction.getSecurity())
                 .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + transaction.getSecurity()));
 
-        TransactionEntityPK pk = new TransactionEntityPK();
-        pk.setId(transaction.getId());
-        pk.setPortfolio(transaction.getPortfolio());
         TransactionEntity entity = new TransactionEntity();
-        entity.setPk(pk);
+        entity.setId(transaction.getId());
+        entity.setTradeId(transaction.getTradeId());
+        entity.setPortfolio(transaction.getPortfolio());
         entity.setSecurity(securityEntity);
         entity.setTimestamp(transaction.getTimestamp());
         entity.setCount(transaction.getCount());
@@ -54,8 +52,9 @@ public class TransactionConverter implements EntityConverter<TransactionEntity, 
     @Override
     public Transaction fromEntity(TransactionEntity entity) {
         return Transaction.builder()
-                .id(entity.getPk().getId())
-                .portfolio(entity.getPk().getPortfolio())
+                .id(entity.getId())
+                .tradeId(entity.getTradeId())
+                .portfolio(entity.getPortfolio())
                 .security(entity.getSecurity().getId())
                 .timestamp(entity.getTimestamp())
                 .count(entity.getCount())

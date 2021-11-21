@@ -92,7 +92,7 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
         Security security = getSecurity(row);
         return SecurityTransaction.builder()
                 .timestamp(getReport().convertToInstant(row.getStringCellValue(DATE_TIME)))
-                .transactionId(String.valueOf(row.getLongCellValue(TRANSACTION))) // may be double numbers in future
+                .tradeId(String.valueOf(row.getLongCellValue(TRADE_ID))) // may be double numbers in future
                 .portfolio(getReport().getPortfolio())
                 .security(security.getId())
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
@@ -120,7 +120,7 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
 
     enum TransactionTableHeader implements TableColumnDescription {
         DATE_TIME(TableColumnImpl.of("дата", "исполнения"), TableColumnImpl.of("дата и время")),
-        TRANSACTION("номер сделки"),
+        TRADE_ID("номер сделки"),
         NAME("наименование"),
         ISIN("isin"),
         DIRECTION("покупка", "продажа"),

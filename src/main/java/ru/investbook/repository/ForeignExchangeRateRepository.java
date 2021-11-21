@@ -20,6 +20,7 @@ package ru.investbook.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.ForeignExchangeRateEntity;
 import ru.investbook.entity.ForeignExchangeRateEntityPk;
 
@@ -28,6 +29,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+@Transactional(readOnly = true)
 public interface ForeignExchangeRateRepository extends JpaRepository<ForeignExchangeRateEntity, ForeignExchangeRateEntityPk> {
 
     List<ForeignExchangeRateEntity> findByOrderByPkDateDescPkCurrencyPairAsc();
@@ -43,6 +45,7 @@ public interface ForeignExchangeRateRepository extends JpaRepository<ForeignExch
             FROM ForeignExchangeRateEntity t
             GROUP BY t.pk.currencyPair
     """)
+    @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     Collection<LocalDate> findByMaxPkDateGroupByPkCurrencyPair();
 
 }

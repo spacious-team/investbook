@@ -33,7 +33,7 @@
 </h2>
 <p th:text="'Счет: ' +  ${transaction.portfolio}"/>
 <p th:text="'Дата исполнения: ' + ${transaction.date}"/>
-<p th:text="'Номер сделки: ' +  ${transaction.transactionId}" th:if="${transaction.transactionId != null && transaction.transactionId != ''}"/>
+<p th:text="'Номер сделки: ' +  ${transaction.tradeId}" th:if="${transaction.tradeId != null && transaction.tradeId != ''}"/>
 <p th:text="'Инструмент: ' +  ${transaction.security}" />
 <p th:text="'Количество: ' + ${transaction.count}" />
 <p th:text="'Цена: ' + ${transaction.price} + ' ' + ${transaction.priceCurrency}" th:if="${transaction.price != null}" />
@@ -42,7 +42,7 @@
 <p th:text="'Стоимость шага: ' + ${transaction.priceTickValue} + ' ' + ${transaction.priceTickValueCurrency}" th:if="${transaction.priceTickValue != null}"/>
 <p th:text="'Комиссия: ' + ${transaction.commission} + ' ' + ${transaction.commissionCurrency}" th:if="${transaction.commission != null}" />
 <a href="/transactions/edit-form">Добавить еще</a><br>
-<a th:href="@{/transactions/delete(transaction-id=${transaction.transactionId}, portfolio=${transaction.portfolio})}">Удалить эту сделку</a><br>
+<a th:href="@{/transactions/delete(id=${transaction.id})}">Удалить эту сделку</a><br>
 <a href="/transactions">Посмотреть все сделки</a><br>
 <a href="/forms.html">На главную</a><br>
 

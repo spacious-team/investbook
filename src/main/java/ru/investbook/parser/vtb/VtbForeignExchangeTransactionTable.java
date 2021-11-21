@@ -73,7 +73,7 @@ public class VtbForeignExchangeTransactionTable extends SingleInitializableRepor
                 .negate();
         return ForeignExchangeTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE_TIME))
-                .transactionId(row.getStringCellValue(TRANSACTION))
+                .tradeId(row.getStringCellValue(TRADE_ID))
                 .portfolio(getReport().getPortfolio())
                 .security(row.getStringCellValue(INSTRUMENT))
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
@@ -85,7 +85,7 @@ public class VtbForeignExchangeTransactionTable extends SingleInitializableRepor
     }
 
     enum FxTransactionTableHeader implements TableColumnDescription {
-        TRANSACTION("№ сделки"),
+        TRADE_ID("№ сделки"),
         INSTRUMENT("Финансовый инструмент"),
         DATE_TIME("Дата и время заключения сделки"),
         DIRECTION("Вид сделки"),

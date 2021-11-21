@@ -50,7 +50,10 @@ public class TransactionModel {
     }
 
     @Nullable
-    private String transactionId;
+    private Integer id;
+
+    @Nullable
+    private String tradeId;
 
     @NotEmpty
     private String portfolio;
@@ -167,14 +170,14 @@ public class TransactionModel {
         return null;
     }
 
-    public String getTransactionId() {
-        if (!StringUtils.hasText(transactionId)) {
-            setTransactionId(createTransactionId());
+    public String getTradeId() {
+        if (!StringUtils.hasText(tradeId)) {
+            setTradeId(createTradeId());
         }
-        return transactionId;
+        return tradeId;
     }
 
-    private String createTransactionId() {
+    private String createTradeId() {
         if (portfolio == null || security == null || date == null || action == null) {
             return null;
         }

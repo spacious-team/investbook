@@ -92,8 +92,8 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         if (showOnlySummary(filter) || isManyPortfolioRequested(portfolios)) {
             Collection<ExcelTable> tables = new ArrayList<>();
             List<String> currencies = portfolios.isEmpty() ?
-                    transactionCashFlowRepository.findDistinctCurrencyByPkTypeIn(types) :
-                    transactionCashFlowRepository.findDistinctCurrencyByPkPortfolioAndPkTypeIn(portfolios, types);
+                    transactionCashFlowRepository.findDistinctCurrencyByCashFlowTypeIn(types) :
+                    transactionCashFlowRepository.findDistinctCurrencyByPortfolioInAndCashFlowTypeIn(portfolios, types);
             for (String currency : currencies) {
                 Table table = tableFactory.create(portfolios, currency);
                 String sheetName = "Портфель " + currency;
@@ -114,7 +114,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
 
     @Override
     protected Collection<ExcelTable> createExcelTables(Portfolio portfolio, String sheetName) {
-        List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPkPortfolioAndPkTypeIn(
+        List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPortfolioInAndCashFlowTypeIn(
                 singleton(portfolio.getId()), types);
         return currencies.stream()
                 .map(currency -> createExcelTables(portfolio, sheetName, currency))

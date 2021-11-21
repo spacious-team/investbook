@@ -25,6 +25,7 @@ import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 
@@ -38,21 +39,22 @@ public class UralsibBrokerReportFactory extends AbstractBrokerReportFactory {
     private final Pattern expectedFileNamePattern = Pattern.compile("^brok_rpt_.*\\.xls(x)?$");
 
     @Override
+    public boolean canCreate(String excelFileName, InputStream is) {
+        return excelFileName.toLowerCase().endsWith(".zip") ?
+                super.canCreate(zippedExpectedFileNamePattern, excelFileName, is) :
+                super.canCreate(expectedFileNamePattern, excelFileName, is);
+    }
+
+    @Override
     public BrokerReport create(String excelFileName, InputStream is) {
         BrokerReport brokerReport;
+        BiFunction<String, InputStream, BrokerReport> reportProvider;
         if (excelFileName.toLowerCase().endsWith(".zip")) {
-            brokerReport = create(
-                    zippedExpectedFileNamePattern,
-                    excelFileName,
-                    is,
-                    (fileName, istream) -> new UralsibBrokerReport(new ZipInputStream(istream)));
+            reportProvider = (fileName, istream) -> new UralsibBrokerReport(new ZipInputStream(istream));
         } else {
-            brokerReport = create(
-                    expectedFileNamePattern,
-                    excelFileName,
-                    is,
-                    UralsibBrokerReport::new);
+            reportProvider = UralsibBrokerReport::new;
         }
+        brokerReport = create(excelFileName, is, reportProvider);
         if (brokerReport != null) {
             log.info("Обнаружен отчет '{}' Уралсиб брокера", excelFileName);
             if (!excelFileName.contains("_invest_")) {

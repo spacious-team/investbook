@@ -31,6 +31,7 @@ import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.report.ClosedPosition;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.FifoPositionsFactory;
+import ru.investbook.report.FifoPositionsFilter;
 import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.report.OpenedPosition;
 import ru.investbook.report.PaidInterest;
@@ -104,8 +105,10 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
 
     private void getRowsForSecurity(Security security, Portfolio portfolio, Table openPositionsProfit,
                                     Table closedPositionsProfit, String toCurrency) {
-        FifoPositions positions = positionsFactory.get(portfolio, security, ViewFilter.get());
-        PaidInterest paidInterest = paidInterestFactory.get(portfolio, security, ViewFilter.get());
+        ViewFilter filter = ViewFilter.get();
+        FifoPositionsFilter pf = FifoPositionsFilter.of(portfolio, filter.getFromDate(), filter.getToDate());
+        FifoPositions positions = positionsFactory.get(security, pf);
+        PaidInterest paidInterest = paidInterestFactory.get(portfolio, security, filter.getFromDate(), filter.getToDate());
         openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(),
                 paidInterest, this::getOpenedPositionProfit, toCurrency));
         closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(),
@@ -206,10 +209,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             return null;
         }
         return transactionCashFlowRepository
-                .findByPkPortfolioAndPkTransactionIdAndPkType(
-                        transaction.getPortfolio(),
-                        transaction.getId(),
-                        type.getId())
+                .findByTransactionIdAndCashFlowType(transaction.getId(), type)
                 .map(cash -> {
                     BigDecimal value = cash.getValue()
                             .multiply(BigDecimal.valueOf(multiplier))
@@ -250,10 +250,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             return fallbackCurrency;
         }
         return transactionCashFlowRepository
-                .findByPkPortfolioAndPkTransactionIdAndPkType(
-                        transaction.getPortfolio(),
-                        transaction.getId(),
-                        CashFlowType.PRICE.getId())
+                .findByTransactionIdAndCashFlowType(transaction.getId(), CashFlowType.PRICE)
                 .map(TransactionCashFlowEntity::getCurrency)
                 .orElse(fallbackCurrency);
     }

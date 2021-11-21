@@ -31,11 +31,14 @@ import ru.investbook.service.moex.MoexIssClient;
 import ru.investbook.service.smartlab.SmartlabShareSectors;
 
 import java.time.Duration;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static java.lang.System.nanoTime;
+import static java.util.Collections.emptySet;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
@@ -55,22 +58,42 @@ public class SecuritySectorService {
     private final MoexIssClient moexIssClient;
 
     @Transactional
-    public void uploadAndUpdateSecuritySectors() {
+    public void uploadAndUpdateSecuritySectors(boolean forceUpdate) {
         try {
             long t0 = nanoTime();
-            Map<String, String> tickerToSector = getTickerToSectorIndex();
-            securityRepository.findAll()
-                    .stream()
-                    .map(entity -> getSecuritySector(tickerToSector, entity))
-                    .flatMap(Optional::stream)
-                    .map(securityDescriptionConverter::toEntity)
-                    .forEach(desc -> securityDescriptionRepository.
-                            createOrUpdateSector(desc.getSecurity(), desc.getSector()));
+            List<SecurityEntity> securities = securityRepository.findAll();
+            updateSecuritySectors(securities, forceUpdate);
             log.info("Справочник секторов экономики обновлен за {}", Duration.ofNanos(nanoTime() - t0));
         } catch (Exception e) {
             log.error("Ошибка обновления информации о секторах экономики", e);
             throw new RuntimeException("Ошибка обновления информации о секторах экономики", e);
         }
+    }
+
+    @Transactional
+    public void uploadAndUpdateSecuritySector(String securityId, boolean forceUpdate) {
+        try {
+            long t0 = nanoTime();
+            Collection<SecurityEntity> security = securityRepository.findById(securityId)
+                    .map(Collections::singleton)
+                    .orElse(emptySet());
+            updateSecuritySectors(security, forceUpdate);
+            log.info("Cектор экономики бумаги {} обновлен за {}", securityId, Duration.ofNanos(nanoTime() - t0));
+        } catch (Exception e) {
+            log.error("Ошибка обновления информации о секторе экономики бумаги {}", securityId, e);
+            throw new RuntimeException("Ошибка обновления информации о секторе экономики бумаги " + securityId, e);
+        }
+    }
+
+    private void updateSecuritySectors(Collection<SecurityEntity> securityEntiteStream, boolean forceUpdate) {
+        Map<String, String> tickerToSector = getTickerToSectorIndex();
+        securityEntiteStream.stream()
+                .filter(entity -> forceUpdate || !securityDescriptionRepository.existsById(entity.getId()))
+                .map(entity -> getSecuritySector(tickerToSector, entity))
+                .flatMap(Optional::stream)
+                .map(securityDescriptionConverter::toEntity)
+                .forEach(desc -> securityDescriptionRepository
+                        .createOrUpdateSector(desc.getSecurity(), desc.getSector()));
     }
 
     private Map<String, String> getTickerToSectorIndex() {
