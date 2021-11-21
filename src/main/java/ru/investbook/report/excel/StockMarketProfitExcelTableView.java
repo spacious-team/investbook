@@ -75,7 +75,7 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
 
     private List<String> getCurrencies(Portfolio portfolio) {
         return transactionCashFlowRepository
-                .findDistinctCurrencyByPkPortfolioAndPkType(portfolio.getId(), CashFlowType.PRICE);
+                .findDistinctCurrencyByPortfolioAndCashFlowType(portfolio.getId(), CashFlowType.PRICE);
     }
 
     @Override

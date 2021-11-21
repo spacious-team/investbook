@@ -65,7 +65,7 @@ class DerivativeExpirationTable extends SingleAbstractReportTable<DerivativeTran
         return DerivativeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .portfolio(getReport().getPortfolio())
-                .transactionId(String.valueOf(row.getLongCellValue(TRANSACTION)))
+                .tradeId(String.valueOf(row.getLongCellValue(TRADE_ID)))
                 .security(row.getStringCellValue(CONTRACT))
                 .count((isBuy ? 1 : -1) * count)
                 .valueInPoints(valueInPoints)
@@ -78,7 +78,7 @@ class DerivativeExpirationTable extends SingleAbstractReportTable<DerivativeTran
 
     enum ExpirationTableHeader implements TableColumnDescription {
         DATE_TIME("дата и время"),
-        TRANSACTION("номер сделки"),
+        TRADE_ID("номер сделки"),
         TYPE("вид контракта"),
         CONTRACT("контракт"),
         DIRECTION("покупка", "продажа"),

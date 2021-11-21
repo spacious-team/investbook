@@ -44,8 +44,8 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
     protected ForeignExchangeTransaction parseRow(TableRow row) {
         String dateTime = row.getStringCellValue(DATE_TIME); // 08.02.2019 23:37
         Instant transactionInstant = convertToInstant(dateTime);
-        String notUniqTransactionId = row.getStringCellValue(TRANSACTION);
-        String transactionId = notUniqTransactionId + dateTime.replaceAll("[.\\s:]", "");
+        String notUniqTradeId = row.getStringCellValue(TRADE_ID);
+        String tradeId = notUniqTradeId + dateTime.replaceAll("[.\\s:]", "");
         boolean isBuy = row.getStringCellValue(DIRECTION).trim().equalsIgnoreCase("К");
         BigDecimal value = row.getBigDecimalCellValue(VALUE);
         if (isBuy) {
@@ -55,7 +55,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
         String quoteCurrency = contract.substring(3, 6).toUpperCase(); // extracts RUB from USDRUB_TOM
         return ForeignExchangeTransaction.builder()
                 .timestamp(transactionInstant)
-                .transactionId(transactionId)
+                .tradeId(tradeId)
                 .portfolio(getReport().getPortfolio())
                 .security(contract)
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
@@ -67,7 +67,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
     }
 
     enum FxTransactionTableHeader implements TableColumnDescription {
-        TRANSACTION("номер сделки"),
+        TRADE_ID("номер сделки"),
         DATE_TIME("дата", "заключения сделки"), // учет по дате сделки, а не дате исполнения, чтобы учесть неисполненные сделки
         CONTRACT("инструмент"),
         DIRECTION("направление", "сделки"),

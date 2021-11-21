@@ -49,8 +49,8 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
 
     @Override
     protected SecurityTransaction parseRow(TableRow row) {
-        String transactionId = getTransactionId(row, TRANSACTION);
-        if (transactionId == null) return null;
+        String tradeId = getTradeId(row, TRADE_ID);
+        if (tradeId == null) return null;
 
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         BigDecimal value = row.getBigDecimalCellValue(VALUE);
@@ -93,13 +93,13 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                     commission = brokerCommission;
                     commissionCurrency = brokerCommissionCurrency;
                     log.warn("{}. Комиссия ТС включена в сумму сделки {}, т.к. они оба в одной валюте: {}",
-                            msg, transactionId, valueCurrency);
+                            msg, tradeId, valueCurrency);
                 } else if(brokerCommissionCurrency.equals(valueCurrency)) {
                     value = value.subtract(brokerCommission);
                     commission = marketCommission;
                     commissionCurrency = marketCommissionCurrency;
                     log.warn("{}. Комиссия брокера включена в сумму сделки {}, т.к. они оба в одной валюте: {}",
-                            msg, transactionId, valueCurrency);
+                            msg, tradeId, valueCurrency);
                 } else {
                     throw new RuntimeException(msg, e);
                 }
@@ -107,7 +107,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
         }
         return SecurityTransaction.builder()
                 .timestamp(timestamp)
-                .transactionId(transactionId)
+                .tradeId(tradeId)
                 .portfolio(getReport().getPortfolio())
                 .security(row.getStringCellValue(ISIN))
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
@@ -119,7 +119,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                 .build();
     }
 
-    static String getTransactionId(TableRow row, TableColumnDescription column) {
+    static String getTradeId(TableRow row, TableColumnDescription column) {
         try {
             // some numbers (doubles) represented by string type cells
             return String.valueOf(row.getLongCellValue(column));
@@ -150,7 +150,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
 
     enum TransactionTableHeader implements TableColumnDescription {
         DATE_TIME("дата", "поставки"),
-        TRANSACTION("номер сделки"),
+        TRADE_ID("номер сделки"),
         ISIN("isin"),
         DIRECTION("вид", "сделки"),
         COUNT("количество", "цб"),

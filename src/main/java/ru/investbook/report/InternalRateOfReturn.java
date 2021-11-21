@@ -114,8 +114,7 @@ public class InternalRateOfReturn {
     private String getTransactionCurrency(FifoPositions positions) {
         return positions.getTransactions()
                 .stream()
-                .map(t -> transactionCashFlowRepository
-                        .findByPkPortfolioAndPkTransactionIdAndPkType(t.getPortfolio(), t.getId(), PRICE.getId()))
+                .map(t -> transactionCashFlowRepository.findByTransactionIdAndCashFlowType(t.getId(), PRICE))
                 .flatMap(Optional::stream)
                 .map(TransactionCashFlowEntity::getCurrency)
                 .findAny()
@@ -149,7 +148,7 @@ public class InternalRateOfReturn {
     private Optional<BigDecimal> getTransactionValue(Transaction t, String toCurrency) {
         BigDecimal value = null;
         if (t.getId() != null) { // bond redemption, accounted by other way, skipping
-            value = transactionCashFlowRepository.findByPkPortfolioAndPkTransactionId(t.getPortfolio(), t.getId())
+            value = transactionCashFlowRepository.findByTransactionId(t.getId())
                     .stream()
                     .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);

@@ -209,10 +209,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             return null;
         }
         return transactionCashFlowRepository
-                .findByPkPortfolioAndPkTransactionIdAndPkType(
-                        transaction.getPortfolio(),
-                        transaction.getId(),
-                        type.getId())
+                .findByTransactionIdAndCashFlowType(transaction.getId(), type)
                 .map(cash -> {
                     BigDecimal value = cash.getValue()
                             .multiply(BigDecimal.valueOf(multiplier))
@@ -253,10 +250,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             return fallbackCurrency;
         }
         return transactionCashFlowRepository
-                .findByPkPortfolioAndPkTransactionIdAndPkType(
-                        transaction.getPortfolio(),
-                        transaction.getId(),
-                        CashFlowType.PRICE.getId())
+                .findByTransactionIdAndCashFlowType(transaction.getId(), CashFlowType.PRICE)
                 .map(TransactionCashFlowEntity::getCurrency)
                 .orElse(fallbackCurrency);
     }

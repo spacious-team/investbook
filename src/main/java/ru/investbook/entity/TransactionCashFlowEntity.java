@@ -18,15 +18,16 @@
 
 package ru.investbook.entity;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -35,21 +36,27 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "transaction_cash_flow")
 @Data
-@EqualsAndHashCode(of = "pk")
-@JsonSerialize(using = TransactionCashFlowEntitySerializer.class)
+@EqualsAndHashCode(of = "id")
 public class TransactionCashFlowEntity {
-    @EmbeddedId
-    private TransactionCashFlowEntityPK pk;
+    @Id
+    @GenericGenerator(name = "UseExistingOrGenerateIdGenerator", strategy = "ru.investbook.entity.UseExistingOrGenerateIdGenerator")
+    @GeneratedValue(generator = "UseExistingOrGenerateIdGenerator")
+    @Column(name = "id")
+    private Integer id;
+
+    @Basic(optional = false)
+    @Column(name = "transaction_id")
+    private int transactionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "type", referencedColumnName = "id", nullable = false)
     private CashFlowTypeEntity cashFlowType;
 
-    @Basic
+    @Basic(optional = false)
     @Column(name = "value")
     private BigDecimal value;
 
-    @Basic
+    @Basic(optional = false)
     @Column(name = "currency")
     private String currency = "RUR";
 

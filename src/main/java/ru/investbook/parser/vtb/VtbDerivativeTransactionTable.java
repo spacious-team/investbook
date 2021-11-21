@@ -52,7 +52,7 @@ public class VtbDerivativeTransactionTable extends SingleAbstractReportTable<Der
                 .negate();
         return DerivativeTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE_TIME))
-                .transactionId(row.getStringCellValue(TRANSACTION))
+                .tradeId(row.getStringCellValue(TRADE_ID))
                 .portfolio(getReport().getPortfolio())
                 .security(row.getStringCellValue(CONTRACT))
                 .count((isBuy ? 1 : -1) * count)
@@ -64,7 +64,7 @@ public class VtbDerivativeTransactionTable extends SingleAbstractReportTable<Der
 
     enum VtbDerivativeTransactionTableHeader implements TableColumnDescription {
         DATE_TIME("Дата и время заключения сделки"),
-        TRANSACTION("№ сделки"),
+        TRADE_ID("№ сделки"),
         CONTRACT("Фьючерсный контракт", "опцион, код"),
         DIRECTION("Вид сделки"),
         COUNT("Количество"),

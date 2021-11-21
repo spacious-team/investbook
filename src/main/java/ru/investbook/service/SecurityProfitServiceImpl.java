@@ -159,7 +159,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
             return Optional.empty();
         }
         return transactionCashFlowRepository
-                .findByPkPortfolioAndPkTransactionIdAndPkType(t.getPortfolio(), t.getId(), type.getId())
+                .findByTransactionIdAndCashFlowType(t.getId(), type)
                 .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency));
     }
 

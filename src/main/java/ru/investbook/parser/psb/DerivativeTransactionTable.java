@@ -78,7 +78,7 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
                 .negate();
         return DerivativeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
-                .transactionId(String.valueOf(row.getLongCellValue(TRANSACTION))) // double numbers
+                .tradeId(String.valueOf(row.getLongCellValue(TRADE_ID))) // double numbers
                 .portfolio(getReport().getPortfolio())
                 .security(row.getStringCellValue(CONTRACT))
                 .count((isBuy ? 1 : -1) * count)
@@ -92,7 +92,7 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
 
     enum FortsTableHeader implements TableColumnDescription {
         DATE_TIME("дата включения в клиринг"),
-        TRANSACTION("№"),
+        TRADE_ID("№"),
         TYPE("вид контракта"),
         CONTRACT("контракт"),
         DIRECTION("покупка", "продажа"),

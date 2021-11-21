@@ -140,10 +140,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
             return null;
         }
         return transactionCashFlowRepository
-                .findByPkPortfolioAndPkTransactionIdAndPkType(
-                        transaction.getPortfolio(),
-                        transaction.getId(),
-                        type.getId())
+                .findByTransactionIdAndCashFlowType(transaction.getId(), type)
                 .map(cash -> cash.getValue()
                         .multiply(BigDecimal.valueOf(multiplier))
                         .abs()

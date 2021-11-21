@@ -55,7 +55,7 @@ public class SberTrSecurityTransactionTable extends AbstractReportTable<Security
         return SecurityTransaction.builder()
                 .portfolio(row.getStringCellValue(PORTFOLIO))
                 .timestamp(row.getInstantCellValue(DATE_TIME))
-                .transactionId(String.valueOf(row.getLongCellValue(TRANSACTION))) // may be double numbers in future
+                .tradeId(String.valueOf(row.getLongCellValue(TRADE_ID))) // may be double numbers in future
                 .security(getSecurityId(row.getStringCellValue(NAME_AND_ISIN), row.getStringCellValue(SECTION)))
                 .count(row.getIntCellValue(COUNT) * (isBuy ? 1 : -1))
                 .value(value)
@@ -69,7 +69,7 @@ public class SberTrSecurityTransactionTable extends AbstractReportTable<Security
 
     public enum SberTransactionTableHeader implements TableColumnDescription {
         PORTFOLIO("Номер договора"),
-        TRANSACTION("Номер сделки"),
+        TRADE_ID("Номер сделки"),
         DATE_TIME("Дата расчётов"),
         NAME_AND_ISIN("Код финансового инструмента"),
         SECURITY_TYPE("Тип финансового инструмента"),

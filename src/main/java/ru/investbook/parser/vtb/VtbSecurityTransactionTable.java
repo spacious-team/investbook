@@ -71,7 +71,7 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
 
         return SecurityTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE))
-                .transactionId(row.getStringCellValue(TRANSACTION))
+                .tradeId(row.getStringCellValue(TRADE_ID))
                 .portfolio(getReport().getPortfolio())
                 .security(security.getId())
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
@@ -91,7 +91,7 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
     @RequiredArgsConstructor
     enum VtbSecurityTransactionTableHeader implements TableColumnDescription {
         DATE("плановая дата поставки"),
-        TRANSACTION("№ сделки"),
+        TRADE_ID("№ сделки"),
         NAME_AND_ISIN("наименование", "isin"),
         DIRECTION("вид сделки"),
         COUNT("количество"),

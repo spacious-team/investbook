@@ -25,6 +25,7 @@ import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.PortfolioPropertyConverter;
 import ru.investbook.entity.PortfolioPropertyEntity;
@@ -59,12 +60,14 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
     private final PortfolioConverter portfolioConverter;
     private final Collection<String> properties = Set.of(TOTAL_ASSETS_RUB.name(), TOTAL_ASSETS_USD.name(), CASH.name());
 
+    @Transactional(readOnly = true)
     public Optional<PortfolioPropertyModel> getById(Integer id) {
         return portfolioPropertyRepository.findById(id)
                 .map(this::toModel);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PortfolioPropertyModel> getAll() {
         return portfolioPropertyRepository
                 .findByPortfolioInAndPropertyInOrderByTimestampDesc(
@@ -76,6 +79,7 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
     }
 
     @Override
+    @Transactional
     public void save(PortfolioPropertyModel m) {
         saveAndFlush(m.getPortfolio());
         PortfolioProperty.PortfolioPropertyBuilder builder = PortfolioProperty.builder()
@@ -105,7 +109,7 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
 
         PortfolioPropertyEntity entity = portfolioPropertyConverter.toEntity(builder.build());
         entity = portfolioPropertyRepository.save(entity);
-        m.setId(entity.getId());
+        m.setId(entity.getId()); // used in view
         portfolioPropertyRepository.flush();
     }
 
@@ -166,6 +170,7 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
         }
     }
 
+    @Transactional
     public void delete(Integer id) {
         portfolioPropertyRepository.deleteById(id);
         portfolioPropertyRepository.flush();

@@ -125,6 +125,10 @@
     указывайте положительные значения.
 </p>
 
+<p class="hint">
+    Для "Вариационной маржи" поле count является информационным и опциональным.
+</p>
+
 <script type="text/javascript">
 
     selectType()
@@ -145,7 +149,7 @@
                 document.getElementById('tax-br').display = ''
                 break
             case "DERIVATIVE_PROFIT":
-                hide('count')
+                display('count')
                 setMin('count', 0)
                 hide('tax')
                 hide('tax-currency')
@@ -195,8 +199,6 @@
         let type = e.options[e.selectedIndex].value
         switch (type) {
             case "DERIVATIVE_PROFIT":
-                setZeroCount('count')
-                // no break
             case "AMORTIZATION":
             case "REDEMPTION":
                 erase('tax')

@@ -125,12 +125,12 @@ public class FifoPositionsFactory {
     public LinkedList<Transaction> getTransactions(String isin, FifoPositionsFilter filter) {
         List<TransactionEntity> entities = filter.getPortfolios().isEmpty() ?
                 transactionRepository
-                        .findBySecurityIdAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+                        .findBySecurityIdAndTimestampBetweenOrderByTimestampAscTradeIdAsc(
                                 isin,
                                 filter.getFromDate(),
                                 filter.getToDate()) :
                 transactionRepository
-                        .findBySecurityIdAndPkPortfolioInAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+                        .findBySecurityIdAndPortfolioInAndTimestampBetweenOrderByTimestampAscTradeIdAsc(
                                 isin,
                                 filter.getPortfolios(),
                                 filter.getFromDate(),

@@ -25,7 +25,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.TransactionEntity;
-import ru.investbook.entity.TransactionEntityPK;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -35,11 +34,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Transactional(readOnly = true)
-public interface TransactionRepository extends JpaRepository<TransactionEntity, TransactionEntityPK> {
+public interface TransactionRepository extends JpaRepository<TransactionEntity, Integer> {
 
     Optional<TransactionEntity> findFirstByOrderByTimestampAsc();
 
-    List<TransactionEntity> findByPkPortfolioInOrderByPkPortfolioAscTimestampDescSecurityIdAsc(
+    List<TransactionEntity> findByPortfolio(String portfolio);
+
+    List<TransactionEntity> findByTradeId(String tradeId);
+
+    Optional<TransactionEntity> findByPortfolioAndTradeId(String portfolio, String tradeId);
+
+    List<TransactionEntity> findByPortfolioInOrderByPortfolioAscTimestampDescSecurityIdAsc(
             Collection<String> portfolios);
 
     /**
@@ -268,13 +273,13 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
                 .collect(Collectors.toList());
     }
 
-    List<TransactionEntity> findBySecurityIdAndPkPortfolioInAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+    List<TransactionEntity> findBySecurityIdAndPortfolioInAndTimestampBetweenOrderByTimestampAscTradeIdAsc(
             String isin,
             Collection<String> portfolio,
             Instant fromDate,
             Instant toDate);
 
-    List<TransactionEntity> findBySecurityIdAndTimestampBetweenOrderByTimestampAscPkIdAsc(
+    List<TransactionEntity> findBySecurityIdAndTimestampBetweenOrderByTimestampAscTradeIdAsc(
             String isin,
             Instant fromDate,
             Instant toDate);
@@ -282,7 +287,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Return first security transaction
      */
-    Optional<TransactionEntity> findFirstBySecurityIdAndPkPortfolioAndTimestampBetweenOrderByTimestampAsc(
+    Optional<TransactionEntity> findFirstBySecurityIdAndPortfolioAndTimestampBetweenOrderByTimestampAsc(
             String isin,
             String portfolio,
             Instant fromDate,
@@ -291,7 +296,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     /**
      * Return last security transaction
      */
-    Optional<TransactionEntity> findFirstBySecurityIdAndPkPortfolioAndTimestampBetweenOrderByTimestampDesc(
+    Optional<TransactionEntity> findFirstBySecurityIdAndPortfolioAndTimestampBetweenOrderByTimestampDesc(
             String isin,
             String portfolio,
             Instant fromDate,
@@ -332,16 +337,15 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     @Query("""
             SELECT t FROM TransactionEntity t
             LEFT OUTER JOIN TransactionCashFlowEntity c
-                ON t.pk.id = c.pk.transactionId
-                AND t.pk.portfolio = c.pk.portfolio
-            WHERE c.pk.type IS NULL
-                AND t.pk.portfolio = :#{#portfolio.id}
+                ON t.id = c.transactionId
+            WHERE c.cashFlowType IS NULL
+                AND t.portfolio = :#{#portfolio.id}
                 AND t.timestamp between :from AND :to
             """)
-    Collection<TransactionEntity> findByPkPortfolioAndTimestampBetweenDepositAndWithdrawalTransactions(
+    Collection<TransactionEntity> findByPortfolioAndTimestampBetweenDepositAndWithdrawalTransactions(
             @Param("portfolio") Portfolio portfolio,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
-    int countByPkPortfolioIn(Set<String> portfolio);
+    int countByPortfolioIn(Set<String> portfolio);
 }

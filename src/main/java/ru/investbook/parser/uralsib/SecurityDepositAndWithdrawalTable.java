@@ -50,7 +50,7 @@ public class SecurityDepositAndWithdrawalTable extends SingleAbstractReportTable
         }
         return SecurityTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
-                .transactionId(row.getStringCellValue(ID))
+                .tradeId(row.getStringCellValue(ID))
                 .portfolio(getReport().getPortfolio())
                 .security(getSecurity(row).getId())
                 .count(row.getIntCellValue(COUNT))

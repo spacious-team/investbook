@@ -33,11 +33,11 @@
 </h2>
 <p th:text="'Счет: ' +  ${transaction.portfolio}"/>
 <p th:text="'Дата исполнения: ' + ${transaction.date}"/>
-<p th:text="'Номер сделки: ' +  ${transaction.transactionId}" th:if="${transaction.transactionId != null && transaction.transactionId != ''}"/>
+<p th:text="'Номер сделки: ' +  ${transaction.tradeId}" th:if="${transaction.tradeId != null && transaction.tradeId != ''}"/>
 <p th:text="'Инструмент: ' +  ${transaction.security}" />
 <p th:text="'Количество: ' + ${transaction.count}" />
 <a href="/security-deposit/edit-form">Добавить еще</a><br>
-<a th:href="@{/security-deposit/delete(transaction-id=${transaction.transactionId}, portfolio=${transaction.portfolio})}">Удалить эту запись</a><br>
+<a th:href="@{/security-deposit/delete(id=${transaction.id})}">Удалить эту запись</a><br>
 <a href="/security-deposit">Посмотреть все записи</a><br>
 <a href="/forms.html">На главную</a><br>
 
