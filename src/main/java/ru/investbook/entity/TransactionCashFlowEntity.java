@@ -49,7 +49,7 @@ public class TransactionCashFlowEntity {
     private int transactionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type", referencedColumnName = "id", insertable = false, updatable = false, nullable = false)
+    @JoinColumn(name = "type", referencedColumnName = "id", nullable = false)
     private CashFlowTypeEntity cashFlowType;
 
     @Basic(optional = false)

@@ -62,7 +62,7 @@ public class TransactionRestController extends AbstractRestController<Integer, T
 
     @GetMapping
     @Operation(summary = "Отобразить по фильтру", description = "Отображает сделки по счетам")
-    protected List<Transaction> get(@RequestParam(value = "portfolio", required = false)
+    public List<Transaction> get(@RequestParam(value = "portfolio", required = false)
                                         @Parameter(description = "Идентификатор счета брокера")
                                                 String portfolio,
                                     @RequestParam(value = "trade-id", required = false)

@@ -23,7 +23,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.TransactionCashFlowEntity;
-import ru.investbook.entity.TransactionCashFlowEntityPK;
 
 import java.util.Collection;
 import java.util.List;
@@ -31,34 +30,50 @@ import java.util.Optional;
 import java.util.Set;
 
 @Transactional(readOnly = true)
-public interface TransactionCashFlowRepository extends JpaRepository<TransactionCashFlowEntity, TransactionCashFlowEntityPK> {
+public interface TransactionCashFlowRepository extends JpaRepository<TransactionCashFlowEntity, Integer> {
 
-    List<TransactionCashFlowEntity> findByPkPortfolioAndPkTransactionId(String portfolio,
-                                                                        String transactionId);
+    List<TransactionCashFlowEntity> findByTransactionId(int transactionId);
 
-    Optional<TransactionCashFlowEntity> findByPkPortfolioAndPkTransactionIdAndPkType(String portfolio,
-                                                                                     String transactionId,
-                                                                                     int cashFlowType);
+    @Query(nativeQuery = true, value = """
+            SELECT * FROM transaction_cash_flow
+            WHERE transaction_id = :transactionId AND type = :#{#cashFlowType.id}
+            """)
+    Optional<TransactionCashFlowEntity> findByTransactionIdAndCashFlowType(int transactionId,
+                                                                           CashFlowType cashFlowType);
 
-    List<TransactionCashFlowEntity> findByPkPortfolioAndPkTransactionIdAndPkTypeIn(String portfolio,
-                                                                                   String transactionId,
-                                                                                   Set<Integer> cashFlowTypes);
+    @Query(nativeQuery = true, value = """
+            SELECT * FROM transaction_cash_flow
+            WHERE transaction_id = :transactionId AND type in (:#{#cashFlowTypes})
+            """)
+    List<TransactionCashFlowEntity> findByTransactionIdAndCashFlowTypeIn(int transactionId,
+                                                                         Set<Integer> cashFlowTypes);
 
-    @Query(value = "SELECT distinct t.currency FROM TransactionCashFlowEntity t " +
-            "WHERE t.pk.portfolio = :portfolio AND t.pk.type = :#{#cashFlowType.id}")
+    @Query(nativeQuery = true, value = """
+            SELECT distinct c.currency
+            FROM transaction t JOIN transaction_cash_flow c
+                ON t.id = c.transaction_id
+            WHERE t.portfolio = :portfolio AND c.type = :#{#cashFlowType.id}
+            """)
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
-    List<String> findDistinctCurrencyByPkPortfolioAndPkType(String portfolio, CashFlowType cashFlowType);
+    List<String> findDistinctCurrencyByPortfolioAndCashFlowType(String portfolio, CashFlowType cashFlowType);
 
-    @Query(value = "SELECT distinct t.currency FROM TransactionCashFlowEntity t " +
-            "WHERE t.pk.portfolio IN (:portfolios) AND t.pk.type in (:#{#cashFlowTypes})")
+    @Query(nativeQuery = true, value = """
+            SELECT distinct c.currency
+            FROM transaction t JOIN transaction_cash_flow c
+                ON t.id = c.transaction_id
+            WHERE t.portfolio IN (:portfolios) AND c.type in (:#{#cashFlowTypes})
+            """)
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
-    List<String> findDistinctCurrencyByPkPortfolioAndPkTypeIn(Collection<String> portfolios, Set<Integer> cashFlowTypes);
+    List<String> findDistinctCurrencyByPortfolioInAndCashFlowTypeIn(Collection<String> portfolios,
+                                                                    Set<Integer> cashFlowTypes);
 
-    @Query(value = "SELECT distinct t.currency FROM TransactionCashFlowEntity t " +
-            "WHERE t.pk.type in (:#{#cashFlowTypes})")
+    @Query(nativeQuery = true, value = """
+            SELECT distinct currency FROM transaction_cash_flow
+            WHERE type in (:#{#cashFlowTypes})
+            """)
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
-    List<String> findDistinctCurrencyByPkTypeIn(Set<Integer> cashFlowTypes);
+    List<String> findDistinctCurrencyByCashFlowTypeIn(Set<Integer> cashFlowTypes);
 
     @Transactional
-    void deleteByPkPortfolioAndPkTransactionId(String portfolio, String transactionId);
+    void deleteByTransactionId(int transactionId);
 }
