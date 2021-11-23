@@ -30,9 +30,11 @@ import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.web.ControllerHelper;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -69,13 +71,17 @@ public class AssetsAndCashService {
         Collection<PortfolioPropertyEntity> assets = new ArrayList<>(2);
         getTotalAssets(portfolio, PortfolioPropertyType.TOTAL_ASSETS_RUB).ifPresent(assets::add);
         getTotalAssets(portfolio, PortfolioPropertyType.TOTAL_ASSETS_USD).ifPresent(assets::add);
+        // groups by date
+        TreeMap<Instant, List<PortfolioPropertyEntity>> assetsGroupedByDate = assets.stream()
+                .collect(groupingBy(PortfolioPropertyEntity::getTimestamp, TreeMap::new, toList()));
         // finds last day assets
-        Map<String, BigDecimal> values = assets.stream()
-                .collect(groupingBy(PortfolioPropertyEntity::getTimestamp, TreeMap::new, toList())) // groups by date
-                .lastEntry() // finds last date assets
-                .getValue()
-                .stream()
-                .collect(toMap(AssetsAndCashService::getCurrency, AssetsAndCashService::parseTotalAssetsIfCan));
+        Map<String, BigDecimal> values = Optional.ofNullable(assetsGroupedByDate.lastEntry()) // finds last date assets
+                .map(Map.Entry::getValue)
+                .map(Collection::stream)
+                .map(stream -> stream.collect(toMap(
+                        AssetsAndCashService::getCurrency,
+                        AssetsAndCashService::parseTotalAssetsIfCan)))
+                .orElseGet(Collections::emptyMap);
         return convertToRubAndSum(values);
     }
 
