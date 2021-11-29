@@ -73,6 +73,7 @@
             <option value="BOND">Облигация</option>
             <option value="DERIVATIVE">Фьючерс, опцион</option>
             <option value="CURRENCY">Валюта</option>
+            <option value="ASSET">Произвольный актив</option>
         </select>
     </label>
     <br>
@@ -148,7 +149,7 @@
         let e = document.getElementById('security-type');
         let type = e.options[e.selectedIndex].value
 
-        // for type = SHARE and CURRENCY
+        // for type = SHARE, CURRENCY and ASSET
         hide('price')
         hide('accrued-interest')
         display('currency')
@@ -203,6 +204,7 @@
         let type = e.options[e.selectedIndex].value
         switch (type) {
             case "SHARE":
+            case "ASSET":
                 erase('price')
                 erase('accrued-interest')
                 break

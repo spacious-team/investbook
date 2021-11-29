@@ -67,7 +67,7 @@ import static ru.investbook.report.excel.PortfolioStatusExcelTableHeader.*;
 @Slf4j
 public class PortfolioStatusExcelTableFactory implements TableFactory {
     static final BigDecimal minCash = BigDecimal.valueOf(0.01);
-    private static final String STOCK_GROSS_PROFIT_FORMULA = getStockOrBondGrossProfitFormula();
+    private static final String STOCK_OR_BOND_GROSS_PROFIT_FORMULA = getStockOrBondGrossProfitFormula();
     private static final String PROFIT_FORMULA = getProfitFormula();
     private static final String PROFIT_PROPORTION_FORMULA = getProfitProportionFormula();
     private static final String INVESTMENT_PROPORTION_FORMULA = getInvestmentProportionFormula();
@@ -256,7 +256,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             row.put(COUNT, count);
             if (count == 0) {
                 row.put(GROSS_PROFIT, "=" + securityProfitService.getGrossProfit(portfolios, security, positions, toCurrency) +
-                        ((securityType == STOCK_OR_BOND) ? ("+" + AMORTIZATION.getCellAddr()) : ""));
+                        ((securityType == BOND || securityType == STOCK_OR_BOND) ? ("+" + AMORTIZATION.getCellAddr()) : ""));
             } else {
                 row.put(AVERAGE_PRICE, securityProfitService.getPurchaseCost(security, positions, toCurrency)
                         .abs()
@@ -272,21 +272,25 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     row.put(LAST_ACCRUED_INTEREST, quote.getAccruedInterest());
                 }
 
-                if (securityType == STOCK_OR_BOND || securityType == CURRENCY_PAIR) {
-                    row.put(GROSS_PROFIT, STOCK_GROSS_PROFIT_FORMULA);
-                } else if (securityType == DERIVATIVE) {
+                if (securityType == DERIVATIVE) {
                     row.put(GROSS_PROFIT, securityProfitService.getGrossProfit(portfolios, security, positions, toCurrency));
+                } else {
+                    row.put(GROSS_PROFIT, STOCK_OR_BOND_GROSS_PROFIT_FORMULA);
                 }
-                if (securityType == STOCK_OR_BOND) {
+                if (securityType != DERIVATIVE && securityType != CURRENCY_PAIR) {
                     row.put(INVESTMENT_PROPORTION, INVESTMENT_PROPORTION_FORMULA);
                     row.put(PROPORTION, PROPORTION_FORMULA);
                 }
             }
             row.put(COMMISSION, securityProfitService.getTotal(positions.getTransactions(), CashFlowType.COMMISSION, toCurrency).abs());
-            if (securityType == STOCK_OR_BOND) {
+            if (securityType == BOND || securityType == STOCK_OR_BOND) {
                 row.put(COUPON, securityProfitService.sumPaymentsForType(portfolios, security, CashFlowType.COUPON, toCurrency));
                 row.put(AMORTIZATION, securityProfitService.sumPaymentsForType(portfolios, security, CashFlowType.AMORTIZATION, toCurrency));
+            }
+            if (securityType == STOCK || securityType == STOCK_OR_BOND) {
                 row.put(DIVIDEND, securityProfitService.sumPaymentsForType(portfolios, security, CashFlowType.DIVIDEND, toCurrency));
+            }
+            if (securityType != DERIVATIVE && securityType != CURRENCY_PAIR) {
                 row.put(TAX, securityProfitService.sumPaymentsForType(portfolios, security, CashFlowType.TAX, toCurrency).abs());
             }
             row.put(PROFIT, PROFIT_FORMULA);

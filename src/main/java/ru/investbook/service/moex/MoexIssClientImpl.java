@@ -97,8 +97,9 @@ public class MoexIssClientImpl implements MoexIssClient {
     @Override
     public Optional<String> getSecId(String isinOrContractName) {
         SecurityType securityType = getSecurityType(isinOrContractName);
-        if (securityType == DERIVATIVE) {
-            // Moex couldn't find futures contract (too many records). Try evaluate contract name
+        if (!securityType.isStockOrBond() && securityType != CURRENCY_PAIR) {
+            // Try to check futures:
+            // Moex couldn't find futures contract (too many records). Try to evaluate contract name
             Optional<String> secid = moexDerivativeCodeService.getFuturesCode(isinOrContractName);
             if (secid.isPresent()) {
                 return secid;
@@ -176,7 +177,7 @@ public class MoexIssClientImpl implements MoexIssClient {
     public boolean isDerivativeAndExpired(String shortnameOrSecid) {
         try {
             SecurityType securityType = getSecurityType(shortnameOrSecid);
-            if (securityType == DERIVATIVE) {
+            if (!securityType.isStockOrBond() && securityType != CURRENCY_PAIR) {
                 int currentYear = getCurrentYear();
                 int year;
                 // only current plus 2 years contracts may have quotes

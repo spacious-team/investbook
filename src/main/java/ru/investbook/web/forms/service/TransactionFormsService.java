@@ -107,7 +107,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
 
         if (tr.getPrice() != null) {
             builder = switch (tr.getSecurityType()) {
-                case SHARE, BOND -> SecurityTransaction.builder()
+                case SHARE, BOND, ASSET -> SecurityTransaction.builder()
                         .value(tr.getPrice().multiply(multiplier))
                         .valueCurrency(tr.getPriceCurrency())
                         .accruedInterest(ofNullable(tr.getAccruedInterest())

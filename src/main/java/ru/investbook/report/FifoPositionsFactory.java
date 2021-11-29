@@ -101,7 +101,7 @@ public class FifoPositionsFactory {
         } else {
             transactions = getTransactions(isinOrContract, filter);
         }
-        Deque<SecurityEventCashFlow> redemption = (type == SecurityType.STOCK_OR_BOND) ?
+        Deque<SecurityEventCashFlow> redemption = (type == SecurityType.BOND || type == SecurityType.STOCK_OR_BOND) ?
                 getRedemption(isinOrContract, filter) :
                 new ArrayDeque<>(0);
         return new FifoPositions(transactions, redemption);
