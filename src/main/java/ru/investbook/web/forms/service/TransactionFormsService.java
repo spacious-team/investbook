@@ -37,10 +37,8 @@ import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.repository.PortfolioRepository;
-import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
-import ru.investbook.service.moex.MoexDerivativeCodeService;
 import ru.investbook.web.forms.model.SecurityType;
 import ru.investbook.web.forms.model.TransactionModel;
 
@@ -64,12 +62,11 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final TransactionRepository transactionRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
-    private final SecurityRepository securityRepository;
     private final PortfolioRepository portfolioRepository;
     private final TransactionCashFlowConverter transactionCashFlowConverter;
     private final TransactionConverter transactionConverter;
     private final PortfolioConverter portfolioConverter;
-    private final MoexDerivativeCodeService moexDerivativeCodeService;
+    private final SecurityRepositoryHelper securityRepositoryHelper;
     private final Set<Integer> cashFlowTypes = Set.of(CashFlowType.PRICE.getId(),
             CashFlowType.ACCRUED_INTEREST.getId(),
             CashFlowType.DERIVATIVE_QUOTE.getId(),
@@ -99,7 +96,10 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
     @Override
     @Transactional
     public void save(TransactionModel tr) {
-        convertDerivativeSecurityId(tr);
+        String savedSecurityId = securityRepositoryHelper
+                .saveAndFlush(tr.getSecurityId(), tr.getSecurityName(), tr.getSecurityType());
+        tr.setSecurity(savedSecurityId, tr.getSecurityName());
+
         int direction = ((tr.getAction() == TransactionModel.Action.BUY) ? 1 : -1);
         BigDecimal multiplier = BigDecimal.valueOf(-direction * tr.getCount());
 
@@ -155,17 +155,10 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
         saveAndFlush(tr, transaction.getTransaction(), transaction.getTransactionCashFlows());
     }
 
-    private void convertDerivativeSecurityId(TransactionModel model) {
-        if (model.getSecurityType() == DERIVATIVE) {
-            String securityId = moexDerivativeCodeService.convertDerivativeSecurityId(model.getSecurityId());
-            model.setSecurity(securityId);
-        }
-    }
-
     private void saveAndFlush(TransactionModel transactionModel,
                               Transaction transaction,
                               Collection<TransactionCashFlow> cashFlows) {
-        saveAndFlush(transactionModel.getPortfolio(), transactionModel.getSecurityId(), transactionModel.getSecurityName());
+        saveAndFlush(transactionModel.getPortfolio());
         TransactionEntity transactionEntity = transactionRepository.saveAndFlush(transactionConverter.toEntity(transaction));
         transactionModel.setId(transactionEntity.getId()); // used by view
         Optional.ofNullable(transactionEntity.getId()).ifPresent(transactionCashFlowRepository::deleteByTransactionId);
@@ -176,15 +169,13 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 .forEach(transactionCashFlowRepository::save);
     }
 
-    private void saveAndFlush(String portfolio, String securityId, String securityName) {
+    private void saveAndFlush(String portfolio) {
         if (!portfolioRepository.existsById(portfolio)) {
             portfolioRepository.saveAndFlush(
                     portfolioConverter.toEntity(Portfolio.builder()
                             .id(portfolio)
                             .build()));
         }
-        securityRepository.createOrUpdate(securityId, securityName);
-        securityRepository.flush();
     }
 
     private TransactionModel toTransactionModel(TransactionEntity e) {

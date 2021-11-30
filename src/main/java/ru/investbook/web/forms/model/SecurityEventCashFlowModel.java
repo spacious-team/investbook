@@ -99,4 +99,13 @@ public class SecurityEventCashFlowModel {
     public String getSecurityDisplayName() {
         return SecurityHelper.getSecurityDisplayName(security);
     }
+
+    public SecurityType getSecurityType() {
+        return switch(type) {
+            case DIVIDEND -> SecurityType.SHARE;
+            case ACCRUED_INTEREST, AMORTIZATION, REDEMPTION, COUPON -> SecurityType.BOND;
+            case DERIVATIVE_PROFIT, DERIVATIVE_PRICE, DERIVATIVE_QUOTE -> SecurityType.DERIVATIVE;
+            default -> throw new IllegalArgumentException("Can't get security type by security event type: " + type);
+        };
+    }
 }

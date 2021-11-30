@@ -24,6 +24,9 @@ import java.util.Objects;
 
 class SecurityHelper {
 
+    /**
+     * For stock or bond "Name (ISIN)", for derivatives - securityId
+     */
     static String getSecurityDescription(String securityId, String securityName) {
         Objects.requireNonNull(securityId, "Необходимо предоставить ISIN акции, облигации или наименование контракта");
         if (StringUtils.hasText(securityName)) {
@@ -54,12 +57,15 @@ class SecurityHelper {
         return null;
     }
 
+    /**
+     * For stock or bond "Name" without ISIN
+     */
     static String getSecurityDisplayName(String securityDescription) {
         String name = SecurityHelper.getSecurityName(securityDescription);
         return (name == null) ? securityDescription : name;
     }
 
-    static boolean isSecurityDescriptionHasIsin(String securityDescription) {
+    private static boolean isSecurityDescriptionHasIsin(String securityDescription) {
         int len = securityDescription.length();
         return (len >= 15) && securityDescription.charAt(len - 14) == '(' && securityDescription.charAt(len - 1) == ')';
     }

@@ -30,8 +30,6 @@ import ru.investbook.converter.SecurityEventCashFlowConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
-import ru.investbook.repository.SecurityRepository;
-import ru.investbook.service.moex.MoexDerivativeCodeService;
 import ru.investbook.web.forms.model.SecurityEventCashFlowModel;
 
 import java.time.ZoneId;
@@ -47,11 +45,10 @@ import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
 public class SecurityEventCashFlowFormsService implements FormsService<SecurityEventCashFlowModel> {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
-    private final SecurityRepository securityRepository;
     private final PortfolioRepository portfolioRepository;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
     private final PortfolioConverter portfolioConverter;
-    private final MoexDerivativeCodeService moexDerivativeCodeService;
+    private final SecurityRepositoryHelper securityRepositoryHelper;
 
     @Transactional(readOnly = true)
     public Optional<SecurityEventCashFlowModel> getById(Integer id) {
@@ -74,8 +71,10 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
     @Override
     @Transactional
     public void save(SecurityEventCashFlowModel e) {
-        convertDerivativeSecurityId(e);
-        saveAndFlush(e.getPortfolio(), e.getSecurityId(), e.getSecurityName());
+        saveAndFlush(e.getPortfolio());
+        String savedSecurityId = securityRepositoryHelper
+                .saveAndFlush(e.getSecurityId(), e.getSecurityName(), e.getSecurityType());
+        e.setSecurity(savedSecurityId, e.getSecurityName());
         SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .portfolio(e.getPortfolio())
                 .timestamp(e.getDate().atStartOfDay(zoneId).toInstant())
@@ -104,23 +103,13 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
         securityEventCashFlowRepository.flush();
     }
 
-    private void convertDerivativeSecurityId(SecurityEventCashFlowModel model) {
-        String security = model.getSecurity();
-        if (moexDerivativeCodeService.isFuturesCode(security)) {
-            security = moexDerivativeCodeService.convertDerivativeSecurityId(security);
-            model.setSecurity(security);
-        }
-    }
-
-    private void saveAndFlush(String portfolio, String securityId, String securityName) {
+    private void saveAndFlush(String portfolio) {
         if (!portfolioRepository.existsById(portfolio)) {
             portfolioRepository.saveAndFlush(
                     portfolioConverter.toEntity(Portfolio.builder()
                             .id(portfolio)
                             .build()));
         }
-        securityRepository.createOrUpdate(securityId, securityName);
-        securityRepository.flush();
     }
 
     private SecurityEventCashFlowModel toSecurityEventModel(SecurityEventCashFlowEntity e) {
