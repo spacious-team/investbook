@@ -26,14 +26,12 @@ import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityDescriptionRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.forms.model.SecurityDescriptionModel;
-import ru.investbook.web.forms.model.SecurityType;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 
 
 @Component
@@ -61,11 +59,7 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
     @Override
     @Transactional
     public void save(SecurityDescriptionModel m) {
-        SecurityType securityType = SecurityType.valueOf(getSecurityType(m.getSecurityId()));
-        String savedSecurityId = securityRepositoryHelper
-                .saveAndFlush(m.getSecurityId(), m.getSecurityName(), securityType);
-        m.setSecurity(savedSecurityId, m.getSecurityName());
-
+        securityRepositoryHelper.saveAndFlushSecurity(m);
         saveAndFlushSecurityDescription(m.getSecurityId(), m.getSector());
     }
 

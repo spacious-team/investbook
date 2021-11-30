@@ -96,10 +96,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
     @Override
     @Transactional
     public void save(TransactionModel tr) {
-        String savedSecurityId = securityRepositoryHelper
-                .saveAndFlush(tr.getSecurityId(), tr.getSecurityName(), tr.getSecurityType());
-        tr.setSecurity(savedSecurityId, tr.getSecurityName());
-
+        securityRepositoryHelper.saveAndFlushSecurity(tr);
         int direction = ((tr.getAction() == TransactionModel.Action.BUY) ? 1 : -1);
         BigDecimal multiplier = BigDecimal.valueOf(-direction * tr.getCount());
 

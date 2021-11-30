@@ -72,9 +72,7 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
     @Transactional
     public void save(SecurityEventCashFlowModel e) {
         saveAndFlush(e.getPortfolio());
-        String savedSecurityId = securityRepositoryHelper
-                .saveAndFlush(e.getSecurityId(), e.getSecurityName(), e.getSecurityType());
-        e.setSecurity(savedSecurityId, e.getSecurityName());
+        securityRepositoryHelper.saveAndFlushSecurity(e);
         SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .portfolio(e.getPortfolio())
                 .timestamp(e.getDate().atStartOfDay(zoneId).toInstant())

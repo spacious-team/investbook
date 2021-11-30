@@ -61,10 +61,7 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
     @Override
     @Transactional
     public void save(SecurityQuoteModel e) {
-        String savedSecurityId = securityRepositoryHelper
-                .saveAndFlush(e.getSecurityId(), e.getSecurityName(), e.getSecurityType());
-        e.setSecurity(savedSecurityId, e.getSecurityName());
-
+        securityRepositoryHelper.saveAndFlushSecurity(e);
         SecurityQuoteEntity entity = securityQuoteRepository.saveAndFlush(
                 securityQuoteConverter.toEntity(SecurityQuote.builder()
                         .id(e.getId())
