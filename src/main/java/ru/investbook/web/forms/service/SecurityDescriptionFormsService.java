@@ -26,12 +26,14 @@ import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityDescriptionRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.forms.model.SecurityDescriptionModel;
+import ru.investbook.web.forms.model.SecurityType;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 
 
 @Component
@@ -59,8 +61,8 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
     @Override
     @Transactional
     public void save(SecurityDescriptionModel m) {
-        securityRepositoryHelper.saveAndFlushSecurity(m);
-        saveAndFlushSecurityDescription(m.getSecurityId(), m.getSector());
+        String savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(m);
+        saveAndFlushSecurityDescription(savedSecurityId, m.getSector());
     }
 
     private void saveAndFlushSecurityDescription(String securityId, String sector) {
@@ -71,8 +73,10 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
     private SecurityDescriptionModel toModel(SecurityDescriptionEntity e) {
         SecurityDescriptionModel m = new SecurityDescriptionModel();
         SecurityEntity security = securityRepository.findById(e.getSecurity()).orElseThrow();
+        m.setSecurityId(security.getId());
         m.setSecurity(ofNullable(security.getIsin()).orElse(security.getId()),
-                ofNullable(security.getName()).orElse(security.getTicker()));
+                ofNullable(security.getName()).orElse(security.getTicker()),
+                SecurityType.valueOf(getSecurityType(security.getId())));
         m.setSector(e.getSector());
         return m;
     }

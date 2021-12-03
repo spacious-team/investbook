@@ -18,50 +18,57 @@
 
 package ru.investbook.web.forms.model;
 
-import org.springframework.util.StringUtils;
-
-import java.util.Objects;
+import org.springframework.util.Assert;
 
 class SecurityHelper {
 
     /**
-     * For stock or bond "Name (ISIN)", for derivatives - securityId
+     * For stock or bond "Name (ISIN)", for derivatives - securityId, for asset - securityName
      */
-    static String getSecurityDescription(String securityId, String securityName) {
-        Objects.requireNonNull(securityId, "Необходимо предоставить ISIN акции, облигации или наименование контракта");
-        if (StringUtils.hasText(securityName)) {
-            return securityName + " (" + securityId + ")";
-        } else {
-            return securityId;
-        }
+    static String getSecurityDescription(String securityId, String securityName, SecurityType securityType) {
+        return switch (securityType) {
+            case SHARE, BOND -> securityName + " (" + securityId + ")";
+            case DERIVATIVE, CURRENCY -> securityId;
+            case ASSET -> securityName;
+        };
     }
 
     /**
-     * Returns ISIN from template "Name (ISIN)"
+     * Returns ISIN from template "Name (ISIN)" for stock and bond, securityId for derivative, null for asset
      */
-    static String getSecurityId(String securityDescription) {
-        if (SecurityHelper.isSecurityDescriptionHasIsin(securityDescription)) {
-            int len = securityDescription.length();
-            return securityDescription.substring(len - 13, len - 1);
-        }
-        return securityDescription;
+    static String getSecurityId(String securityDescription, SecurityType securityType) {
+        return switch (securityType) {
+            case SHARE, BOND -> {
+                Assert.isTrue(isSecurityDescriptionHasIsin(securityDescription),
+                        "Не задан ISIN: " + securityDescription);
+                int len = securityDescription.length();
+                yield securityDescription.substring(len - 13, len - 1);
+            }
+            case DERIVATIVE, CURRENCY -> securityDescription;
+            case ASSET -> null;
+        };
     }
 
     /**
-     * Returns Name from template "Name (ISIN)"
+     * Returns Name from template "Name (ISIN)" for stock and bond, null for derivative, securityName for asset
      */
-    static String getSecurityName(String securityDescription) {
-        if (SecurityHelper.isSecurityDescriptionHasIsin(securityDescription)) {
-            return securityDescription.substring(0, securityDescription.length() - 14).trim();
-        }
-        return null;
+    static String getSecurityName(String securityDescription, SecurityType securityType) {
+        return switch (securityType) {
+            case SHARE, BOND -> {
+                Assert.isTrue(isSecurityDescriptionHasIsin(securityDescription),
+                        "Не задан ISIN: " + securityDescription);
+                yield securityDescription.substring(0, securityDescription.length() - 14).trim();
+            }
+            case DERIVATIVE, CURRENCY -> null;
+            case ASSET -> securityDescription;
+        };
     }
 
     /**
      * For stock or bond "Name" without ISIN
      */
-    static String getSecurityDisplayName(String securityDescription) {
-        String name = SecurityHelper.getSecurityName(securityDescription);
+    static String getSecurityDisplayName(String securityDescription, SecurityType securityType) {
+        String name = SecurityHelper.getSecurityName(securityDescription, securityType);
         return (name == null) ? securityDescription : name;
     }
 

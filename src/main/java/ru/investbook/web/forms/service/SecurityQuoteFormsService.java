@@ -61,11 +61,11 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
     @Override
     @Transactional
     public void save(SecurityQuoteModel e) {
-        securityRepositoryHelper.saveAndFlushSecurity(e);
+        String savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(e);
         SecurityQuoteEntity entity = securityQuoteRepository.saveAndFlush(
                 securityQuoteConverter.toEntity(SecurityQuote.builder()
                         .id(e.getId())
-                        .security(e.getSecurityId())
+                        .security(savedSecurityId)
                         .timestamp(e.getTimestamp())
                         .quote(e.getQuote())
                         .price(e.getPrice())
@@ -78,19 +78,18 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
     private SecurityQuoteModel toSecurityQuoteModel(SecurityQuoteEntity e) {
         SecurityQuoteModel m = new SecurityQuoteModel();
         m.setId(e.getId());
-        m.setSecurity(
-                ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),
-                ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()));
         m.setTimestamp(e.getTimestamp());
         m.setQuote(e.getQuote());
         m.setPrice(e.getPrice());
         m.setAccruedInterest(e.getAccruedInterest());
         m.setCurrency(e.getCurrency());
-        if (e.getAccruedInterest() == null) {
-            m.setSecurityType(SecurityType.valueOf(getSecurityType(e.getSecurity().getId())));
-        } else {
-            m.setSecurityType(SecurityType.BOND);
-        }
+        SecurityType securityType = e.getAccruedInterest() == null ?
+            SecurityType.valueOf(getSecurityType(e.getSecurity().getId())) :
+            SecurityType.BOND;
+        m.setSecurity(
+                ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),
+                ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()),
+                securityType);
         return m;
     }
 

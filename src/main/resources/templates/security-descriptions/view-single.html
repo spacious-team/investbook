@@ -27,8 +27,9 @@
 <body>
 
 <h1>Сохранена информация</h1>
-<p th:text="'Идентификатор: ' +  ${securityDescription.getSecurityId()}"/>
+<p th:text="'Идентификатор: ' +  ${securityDescription.getSecurityId()}" th:if="${securityDescription.getSecurityId() != null}"/>
 <p th:text="'Инструмент: ' +  ${securityDescription.getSecurityDisplayName()}"/>
+<p th:text="'Тип: ' +  ${securityDescription.getSecurityType().getDescription()}"/>
 <p th:text="'Сектор экономики: ' + ${securityDescription.sector}" th:if="${securityDescription.sector != null}"></p>
 <a href="/security-descriptions/edit-form">Добавить еще</a><br>
 <a th:href="@{/security-descriptions/delete(security-id=${securityDescription.getSecurityId})}" class="delete">Удалить этот инструмент (только если нет сделок)</a><br>

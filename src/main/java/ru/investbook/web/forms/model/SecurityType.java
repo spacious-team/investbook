@@ -30,4 +30,14 @@ public enum SecurityType {
             case ASSET -> ASSET;
         };
     }
+
+    public String getDescription() {
+        return switch (this) {
+            case SHARE -> "акция";
+            case BOND -> "облигация";
+            case DERIVATIVE -> "срочный контракт";
+            case CURRENCY -> "валютная пара";
+            case ASSET -> "произвольный актив";
+        };
+    }
 }

@@ -20,6 +20,7 @@ package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
 import ru.investbook.web.forms.model.SecurityDescriptionModel;
@@ -28,47 +29,68 @@ import ru.investbook.web.forms.model.SecurityQuoteModel;
 import ru.investbook.web.forms.model.SecurityType;
 import ru.investbook.web.forms.model.TransactionModel;
 
-import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
+import javax.xml.bind.DatatypeConverter;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import static ru.investbook.web.forms.model.SecurityType.ASSET;
 import static ru.investbook.web.forms.model.SecurityType.DERIVATIVE;
 
 
 @Service
 @RequiredArgsConstructor
 public class SecurityRepositoryHelper {
+    private static final MessageDigest md; // not thread safe
     private final SecurityRepository securityRepository;
     private final MoexDerivativeCodeService moexDerivativeCodeService;
 
-    /**
-     * Generate securityId if needed, save security to DB, update securityId for model if needed
-     */
-    public void saveAndFlushSecurity(SecurityDescriptionModel model) {
-        SecurityType securityType = SecurityType.valueOf(getSecurityType(model.getSecurityId()));
-        String savedSecurityId = saveAndFlush(model.getSecurityId(), model.getSecurityName(), securityType);
-        model.setSecurity(savedSecurityId, model.getSecurityName());
+    static {
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     * @return saved security id
      */
-    public void saveAndFlushSecurity(SecurityEventCashFlowModel model) {
+    public String saveAndFlushSecurity(SecurityDescriptionModel model) {
         String savedSecurityId = saveAndFlush(model.getSecurityId(), model.getSecurityName(), model.getSecurityType());
-        model.setSecurity(savedSecurityId, model.getSecurityName());
+        model.setSecurity(savedSecurityId, model.getSecurityName(), model.getSecurityType());
+        return savedSecurityId;
     }
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     * @return saved security id
      */
-    public void saveAndFlushSecurity(SecurityQuoteModel model) {
+    public String saveAndFlushSecurity(SecurityEventCashFlowModel model) {
         String savedSecurityId = saveAndFlush(model.getSecurityId(), model.getSecurityName(), model.getSecurityType());
-        model.setSecurity(savedSecurityId, model.getSecurityName());
+        model.setSecurity(savedSecurityId, model.getSecurityName(), model.getSecurityType());
+        return savedSecurityId;
     }
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     * @return saved security id
      */
-    public void saveAndFlushSecurity(TransactionModel model) {
+    public String saveAndFlushSecurity(SecurityQuoteModel model) {
         String savedSecurityId = saveAndFlush(model.getSecurityId(), model.getSecurityName(), model.getSecurityType());
-        model.setSecurity(savedSecurityId, model.getSecurityName());
+        model.setSecurity(savedSecurityId, model.getSecurityName(), model.getSecurityType());
+        return savedSecurityId;
+    }
+
+    /**
+     * Generate securityId if needed, save security to DB, update securityId for model if needed
+     * @return saved security id
+     */
+    public String saveAndFlushSecurity(TransactionModel model) {
+        String savedSecurityId = saveAndFlush(model.getSecurityId(), model.getSecurityName(), model.getSecurityType());
+        model.setSecurity(savedSecurityId, model.getSecurityName(), model.getSecurityType());
+        return savedSecurityId;
     }
 
     /**
@@ -78,8 +100,25 @@ public class SecurityRepositoryHelper {
         String newSecurityId = (securityType == DERIVATIVE) ?
                 moexDerivativeCodeService.convertDerivativeSecurityId(securityId) :
                 securityId;
+        if (securityType == ASSET) {
+            newSecurityId = securityRepository.findByName(securityName)
+                    .map(SecurityEntity::getId)
+                    .orElseGet(() -> generateSecurityIdForNewAsset(securityName));
+        }
         securityRepository.createOrUpdate(newSecurityId, securityName);
         securityRepository.flush();
         return newSecurityId;
+    }
+
+    private String generateSecurityIdForNewAsset(String securityName) {
+        synchronized (SecurityRepositoryHelper.class) {
+            try {
+                md.update(securityName.getBytes(StandardCharsets.UTF_8));
+                return org.spacious_team.broker.pojo.SecurityType.ASSET_PREFIX +
+                        DatatypeConverter.printHexBinary(md.digest()).toLowerCase().substring(0, 12);
+            } finally {
+                md.reset();
+            }
+        }
     }
 }

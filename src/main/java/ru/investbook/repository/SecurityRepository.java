@@ -22,6 +22,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.SecurityEntity;
 
+import java.util.Optional;
+
 @Transactional(readOnly = true)
 public interface SecurityRepository extends JpaRepository<SecurityEntity, String> {
 
@@ -36,4 +38,6 @@ public interface SecurityRepository extends JpaRepository<SecurityEntity, String
                     save(entity);
                 });
     }
+
+    Optional<SecurityEntity> findByName(String name);
 }

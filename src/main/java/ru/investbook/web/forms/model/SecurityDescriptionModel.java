@@ -19,12 +19,17 @@
 package ru.investbook.web.forms.model;
 
 import lombok.Data;
+import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 @Data
 public class SecurityDescriptionModel {
 
+    @Nullable
+    private String securityId;
     /**
      * In "name (isin)" or "contract-name" format
      */
@@ -34,25 +39,34 @@ public class SecurityDescriptionModel {
     @NotEmpty
     private String sector;
 
-    public void setSecurity(String securityId, String securityName) {
-        this.security = SecurityHelper.getSecurityDescription(securityId, securityName);
+    @NotNull
+    private SecurityType securityType;
+
+    public void setSecurity(String securityId, String securityName, SecurityType securityType) {
+        this.security = SecurityHelper.getSecurityDescription(securityId, securityName, securityType);
+        this.securityType = securityType;
     }
 
     public String getSecurityDisplayName() {
-        return SecurityHelper.getSecurityDisplayName(security);
+        return SecurityHelper.getSecurityDisplayName(security, securityType);
     }
 
     /**
-     * Returns ISIN (stock market) or contract name (derivatives and forex market)
+     * Returns ISIN (stock market) or contract name (derivatives and forex market) or null for new security
      */
     public String getSecurityId() {
-        return SecurityHelper.getSecurityId(security);
+        if (StringUtils.hasLength(securityId)) {
+            return securityId; // если сектор существующей бумаги
+        } else if (StringUtils.hasLength(security) && securityType != null) {
+            return SecurityHelper.getSecurityId(security, securityType); // получили параметры новой бумаги с формы
+        }
+        return null; // передаем новую ценную бумагу на форму
     }
 
     /**
      * Returns security name (stock market) or null (derivatives and forex market)
      */
     public String getSecurityName() {
-        return SecurityHelper.getSecurityName(security);
+        return SecurityHelper.getSecurityName(security, securityType);
     }
 }

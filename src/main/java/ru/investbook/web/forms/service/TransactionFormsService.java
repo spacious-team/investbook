@@ -49,6 +49,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
@@ -96,7 +97,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
     @Override
     @Transactional
     public void save(TransactionModel tr) {
-        securityRepositoryHelper.saveAndFlushSecurity(tr);
+        String savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(tr);
         int direction = ((tr.getAction() == TransactionModel.Action.BUY) ? 1 : -1);
         BigDecimal multiplier = BigDecimal.valueOf(-direction * tr.getCount());
 
@@ -145,7 +146,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 .tradeId(tr.getTradeId())
                 .portfolio(tr.getPortfolio())
                 .timestamp(tr.getDate().atStartOfDay(zoneId).toInstant())
-                .security(tr.getSecurityId())
+                .security(savedSecurityId)
                 .count(abs(tr.getCount()) * direction)
                 .build();
 
@@ -184,10 +185,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
         BigDecimal cnt = BigDecimal.valueOf(count);
         m.setAction(count >= 0 ? TransactionModel.Action.BUY : TransactionModel.Action.CELL);
         m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
-        m.setSecurity(
-                ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),
-                ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()));
-        m.setSecurityType(SecurityType.valueOf(getSecurityType(e.getSecurity().getId())));
+        AtomicReference<SecurityType> securityType = new AtomicReference<>(SecurityType.valueOf(getSecurityType(e.getSecurity().getId())));
         m.setCount(abs(count));
         List<TransactionCashFlowEntity> cashFlows = transactionCashFlowRepository.findByTransactionIdAndCashFlowTypeIn(
                 e.getId(),
@@ -199,12 +197,12 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                     m.setPrice(value.getValue().divide(cnt, 6, RoundingMode.HALF_UP).abs());
                     m.setPriceCurrency(value.getCurrency());
                     if (type == CashFlowType.DERIVATIVE_QUOTE) {
-                        m.setSecurityType(DERIVATIVE);
+                        securityType.set(DERIVATIVE);
                     }
                 }
                 case ACCRUED_INTEREST -> {
                     m.setAccruedInterest(value.getValue().divide(cnt, 6, RoundingMode.HALF_UP).abs());
-                    m.setSecurityType(SecurityType.BOND);
+                    securityType.set(SecurityType.BOND);
                 }
                 case COMMISSION -> {
                     m.setCommission(value.getValue().abs());
@@ -212,6 +210,10 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 }
             }
         });
+        m.setSecurity(
+                ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),
+                ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()),
+                securityType.get());
         if (m.getSecurityType() == DERIVATIVE &&
                 m.getPrice() != null && m.getPrice().floatValue() > 0.000001) {
             cashFlows.stream()

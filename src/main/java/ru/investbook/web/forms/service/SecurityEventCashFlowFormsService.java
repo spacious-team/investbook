@@ -72,11 +72,11 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
     @Transactional
     public void save(SecurityEventCashFlowModel e) {
         saveAndFlush(e.getPortfolio());
-        securityRepositoryHelper.saveAndFlushSecurity(e);
+        String savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(e);
         SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .portfolio(e.getPortfolio())
                 .timestamp(e.getDate().atStartOfDay(zoneId).toInstant())
-                .security(e.getSecurityId())
+                .security(savedSecurityId)
                 .count(e.getCount());
         SecurityEventCashFlowEntity entity = securityEventCashFlowRepository.save(
                 securityEventCashFlowConverter.toEntity(builder
@@ -115,12 +115,13 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
         m.setId(e.getId());
         m.setPortfolio(e.getPortfolio().getId());
         m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
-        m.setSecurity(
-                ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),
-                ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()));
         m.setCount(e.getCount());
         CashFlowType type = CashFlowType.valueOf(e.getCashFlowType().getId());
         m.setType(type);
+        m.setSecurity(
+                ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),
+                ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()),
+                m.getSecurityType());
         m.setValue(type == DERIVATIVE_PROFIT ? e.getValue() :  e.getValue().abs());
         m.setValueCurrency(e.getCurrency());
 

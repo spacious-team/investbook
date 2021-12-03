@@ -131,26 +131,27 @@ public class TransactionModel {
         this.commissionCurrency = commissionCurrency.toUpperCase();
     }
 
-    public void setSecurity(String securityId, String securityName) {
-        this.security = SecurityHelper.getSecurityDescription(securityId, securityName);
+    public void setSecurity(String securityId, String securityName, SecurityType securityType) {
+        this.security = SecurityHelper.getSecurityDescription(securityId, securityName, securityType);
+        this.securityType = securityType;
     }
 
     public String getSecurityDisplayName() {
-        return SecurityHelper.getSecurityDisplayName(security);
+        return SecurityHelper.getSecurityDisplayName(security, securityType);
     }
 
     /**
      * Returns ISIN (stock market) or contract name (derivatives and forex market)
      */
     public String getSecurityId() {
-        return SecurityHelper.getSecurityId(security);
+        return SecurityHelper.getSecurityId(security, securityType);
     }
 
     /**
      * Returns security name (stock market) or null (derivatives and forex market)
      */
     public String getSecurityName() {
-        return SecurityHelper.getSecurityName(security);
+        return SecurityHelper.getSecurityName(security, securityType);
     }
 
     public String getTradeId() {
