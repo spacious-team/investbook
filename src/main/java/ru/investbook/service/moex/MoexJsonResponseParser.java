@@ -18,6 +18,8 @@
 
 package ru.investbook.service.moex;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,6 +30,7 @@ import java.util.Optional;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
 
+@Slf4j
 public class MoexJsonResponseParser {
 
     @SuppressWarnings("unchecked")
@@ -47,7 +50,8 @@ public class MoexJsonResponseParser {
             }
             return unmodifiableList(namedItems);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Can't parse Moex ISS response");
+            log.info("Can't parse Moex ISS response: {}", indicesResponse, e);
+            return null;
         }
     }
 }
