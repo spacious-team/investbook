@@ -26,6 +26,7 @@ import org.springframework.util.StringUtils;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import javax.xml.bind.DatatypeConverter;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -107,7 +108,7 @@ public class TransactionModel {
      * May be null for security deposit and withdrawal
      */
     @Nullable
-    @Positive
+    @PositiveOrZero
     private BigDecimal commission;
 
     @NotEmpty
