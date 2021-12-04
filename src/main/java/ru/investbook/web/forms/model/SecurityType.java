@@ -33,11 +33,11 @@ public enum SecurityType {
 
     public String getDescription() {
         return switch (this) {
-            case SHARE -> "акция";
-            case BOND -> "облигация";
-            case DERIVATIVE -> "срочный контракт";
-            case CURRENCY -> "валютная пара";
-            case ASSET -> "произвольный актив";
+            case SHARE -> "Акция";
+            case BOND -> "Облигация";
+            case DERIVATIVE -> "Срочный контракт";
+            case CURRENCY -> "Валютная пара";
+            case ASSET -> "Произвольный актив";
         };
     }
 }

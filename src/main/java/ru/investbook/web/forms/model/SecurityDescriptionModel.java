@@ -43,6 +43,7 @@ public class SecurityDescriptionModel {
     private SecurityType securityType;
 
     public void setSecurity(String securityId, String securityName, SecurityType securityType) {
+        this.securityId = securityId;
         this.security = SecurityHelper.getSecurityDescription(securityId, securityName, securityType);
         this.securityType = securityType;
     }

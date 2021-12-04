@@ -73,7 +73,6 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
     private SecurityDescriptionModel toModel(SecurityDescriptionEntity e) {
         SecurityDescriptionModel m = new SecurityDescriptionModel();
         SecurityEntity security = securityRepository.findById(e.getSecurity()).orElseThrow();
-        m.setSecurityId(security.getId());
         m.setSecurity(ofNullable(security.getIsin()).orElse(security.getId()),
                 ofNullable(security.getName()).orElse(security.getTicker()),
                 SecurityType.valueOf(getSecurityType(security.getId())));

@@ -82,6 +82,10 @@
     <a href="http://iss.moex.com/iss/securities?securities.columns=secid,name,isin,emitent_inn&group_by=group&group_by_filter=stock_shares">
         МосБиржи</a> при продолжении ввода, если существует совпадение.
 </p>
+<p class="hint">
+    Произвольный актив - это недвижимость, криптовалюта, инвестиционные монеты и другие активы которые имеют цену и
+    могут торговаться для извлечения прибыли.
+</p>
 
 <script type="text/javascript">
 
@@ -96,13 +100,12 @@
             type = document.getElementById('hidden-security-type').value
         }
 
-        // SHARE, BOND
-        setPattern('security', '^.*\\s+\\([A-Z0-9]+\\)\\s*$')
-
         switch (type) {
-            case "DERIVATIVE":
-            case "CURRENCY":
-            case "ASSET":
+            case "SHARE":
+            case "BOND":
+                setPattern('security', '^.*\\s+\\([A-Z0-9]+\\)\\s*$')
+                break
+            default:
                 removePattern('security')
                 break
         }
