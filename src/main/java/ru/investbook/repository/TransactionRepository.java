@@ -64,14 +64,14 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             @Param("to") Instant toDate);
 
     /**
-     * Returns stock market share and bonds ISINs
+     * Returns stock market share, bonds ISINs and assets
      */
     @Query(nativeQuery = true, value = """
             SELECT DISTINCT security FROM transaction as t1
             JOIN transaction_cash_flow as t2
                 ON t1.id = t2.transaction_id
                 AND t1.portfolio IN (:portfolios)
-                AND length(security) = 12
+                AND (length(security) = 12 OR security LIKE 'ASSET:%')
                 AND t2.type = 1
                 AND t2.currency = :currency
                 AND timestamp between :from AND :to
@@ -85,13 +85,13 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             @Param("to") Instant toDate);
 
     /**
-     * Returns stock market share and bonds ISINs
+     * Returns stock market share, bonds ISINs and assets
      */
     @Query(nativeQuery = true, value = """
             SELECT DISTINCT security FROM transaction as t1
             JOIN transaction_cash_flow as t2
                 ON t1.id = t2.transaction_id
-                AND length(security) = 12
+                AND (length(security) = 12 OR security LIKE 'ASSET:%')
                 AND t2.type = 1
                 AND t2.currency = :currency
                 AND timestamp between :from AND :to
@@ -111,6 +111,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             WHERE portfolio IN (:portfolios)
                 AND length(security) <> 12
                 AND security NOT LIKE '______\\_%'
+                AND security NOT LIKE 'ASSET:%'
                 AND timestamp between :from AND :to
             ORDER BY timestamp DESC
             """)
@@ -127,6 +128,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             SELECT distinct security FROM transaction
             WHERE length(security) <> 12
                 AND security NOT LIKE '______\\_%'
+                AND security NOT LIKE 'ASSET:%'
                 AND timestamp between :from AND :to
             ORDER BY timestamp DESC
             """)

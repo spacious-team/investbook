@@ -65,6 +65,7 @@
             <option value="BOND">Облигация</option>
             <option value="DERIVATIVE">Фьючерс, опцион</option>
             <option value="CURRENCY">Валюта</option>
+            <option value="ASSET">Произвольный актив</option>
         </select>
     </label>
     <br/>
@@ -158,6 +159,11 @@
 </p>
 
 <p class="hint">
+    Произвольный актив - это недвижимость, криптовалюта, инвестиционные монеты и другие активы которые имеют цену и
+    могут торговаться для извлечения прибыли.
+</p>
+
+<p class="hint">
     Номер сделки: если планируется в будущем загрузить отчет брокера, то использование
     номера сделки в системе учета брокера исключит дублирование данных. Если отчет брокера загружать не планируется
     можно не заполнять.
@@ -175,7 +181,7 @@
         let e = document.getElementById('security-type');
         let type = e.options[e.selectedIndex].value
 
-        // for type = SHARE and CURRENCY
+        // for type = SHARE, CURRENCY and ASSET
         hide('accrued-interest')
         hide('price-tick')
         hide('price-tick-value')
@@ -194,6 +200,7 @@
                 setPntPriceCurrency()
                 // no break
             case "CURRENCY":
+            case "ASSET":
                 removePattern('security')
                 break
         }
@@ -257,6 +264,7 @@
         let type = e.options[e.selectedIndex].value
         switch (type) {
             case "SHARE":
+            case "ASSET":
             case "CURRENCY":
                 erase('accrued-interest')
             // no break
