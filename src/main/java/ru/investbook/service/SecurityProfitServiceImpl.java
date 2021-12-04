@@ -86,7 +86,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
     public BigDecimal getGrossProfit(Collection<String> portfolios, Security security, FifoPositions positions, String toCurrency) {
         SecurityType securityType = getSecurityType(security);
         return switch (securityType) {
-            case STOCK_OR_BOND -> getPurchaseCost(security, positions, toCurrency)
+            case STOCK, BOND, STOCK_OR_BOND, ASSET -> getPurchaseCost(security, positions, toCurrency)
                     .add(getPurchaseAccruedInterest(security, positions, toCurrency));
             case DERIVATIVE -> sumPaymentsForType(portfolios, security, CashFlowType.DERIVATIVE_PROFIT, toCurrency);
             case CURRENCY_PAIR -> getPurchaseCost(security, positions, toCurrency);
@@ -97,7 +97,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
     public BigDecimal getPurchaseCost(Security security, FifoPositions positions, String toCurrency) {
         SecurityType securityType = getSecurityType(security);
         return switch (securityType) {
-            case STOCK_OR_BOND -> getStockOrBondPurchaseCost(positions, toCurrency);
+            case STOCK, BOND, STOCK_OR_BOND, ASSET -> getStockOrBondPurchaseCost(positions, toCurrency);
             case DERIVATIVE -> getTotal(positions.getTransactions(), CashFlowType.DERIVATIVE_PRICE, toCurrency);
             case CURRENCY_PAIR -> getTotal(positions.getTransactions(), CashFlowType.PRICE, toCurrency);
         };

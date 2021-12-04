@@ -37,10 +37,8 @@ import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.repository.PortfolioRepository;
-import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
-import ru.investbook.service.moex.MoexDerivativeCodeService;
 import ru.investbook.web.forms.model.SecurityType;
 import ru.investbook.web.forms.model.TransactionModel;
 
@@ -51,6 +49,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
@@ -64,12 +63,11 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final TransactionRepository transactionRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
-    private final SecurityRepository securityRepository;
     private final PortfolioRepository portfolioRepository;
     private final TransactionCashFlowConverter transactionCashFlowConverter;
     private final TransactionConverter transactionConverter;
     private final PortfolioConverter portfolioConverter;
-    private final MoexDerivativeCodeService moexDerivativeCodeService;
+    private final SecurityRepositoryHelper securityRepositoryHelper;
     private final Set<Integer> cashFlowTypes = Set.of(CashFlowType.PRICE.getId(),
             CashFlowType.ACCRUED_INTEREST.getId(),
             CashFlowType.DERIVATIVE_QUOTE.getId(),
@@ -99,7 +97,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
     @Override
     @Transactional
     public void save(TransactionModel tr) {
-        convertDerivativeSecurityId(tr);
+        String savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(tr);
         int direction = ((tr.getAction() == TransactionModel.Action.BUY) ? 1 : -1);
         BigDecimal multiplier = BigDecimal.valueOf(-direction * tr.getCount());
 
@@ -107,7 +105,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
 
         if (tr.getPrice() != null) {
             builder = switch (tr.getSecurityType()) {
-                case SHARE, BOND -> SecurityTransaction.builder()
+                case SHARE, BOND, ASSET -> SecurityTransaction.builder()
                         .value(tr.getPrice().multiply(multiplier))
                         .valueCurrency(tr.getPriceCurrency())
                         .accruedInterest(ofNullable(tr.getAccruedInterest())
@@ -148,24 +146,17 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 .tradeId(tr.getTradeId())
                 .portfolio(tr.getPortfolio())
                 .timestamp(tr.getDate().atStartOfDay(zoneId).toInstant())
-                .security(tr.getSecurityId())
+                .security(savedSecurityId)
                 .count(abs(tr.getCount()) * direction)
                 .build();
 
         saveAndFlush(tr, transaction.getTransaction(), transaction.getTransactionCashFlows());
     }
 
-    private void convertDerivativeSecurityId(TransactionModel model) {
-        if (model.getSecurityType() == DERIVATIVE) {
-            String securityId = moexDerivativeCodeService.convertDerivativeSecurityId(model.getSecurityId());
-            model.setSecurity(securityId);
-        }
-    }
-
     private void saveAndFlush(TransactionModel transactionModel,
                               Transaction transaction,
                               Collection<TransactionCashFlow> cashFlows) {
-        saveAndFlush(transactionModel.getPortfolio(), transactionModel.getSecurityId(), transactionModel.getSecurityName());
+        saveAndFlush(transactionModel.getPortfolio());
         TransactionEntity transactionEntity = transactionRepository.saveAndFlush(transactionConverter.toEntity(transaction));
         transactionModel.setId(transactionEntity.getId()); // used by view
         Optional.ofNullable(transactionEntity.getId()).ifPresent(transactionCashFlowRepository::deleteByTransactionId);
@@ -176,15 +167,13 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 .forEach(transactionCashFlowRepository::save);
     }
 
-    private void saveAndFlush(String portfolio, String securityId, String securityName) {
+    private void saveAndFlush(String portfolio) {
         if (!portfolioRepository.existsById(portfolio)) {
             portfolioRepository.saveAndFlush(
                     portfolioConverter.toEntity(Portfolio.builder()
                             .id(portfolio)
                             .build()));
         }
-        securityRepository.createOrUpdate(securityId, securityName);
-        securityRepository.flush();
     }
 
     private TransactionModel toTransactionModel(TransactionEntity e) {
@@ -196,10 +185,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
         BigDecimal cnt = BigDecimal.valueOf(count);
         m.setAction(count >= 0 ? TransactionModel.Action.BUY : TransactionModel.Action.CELL);
         m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
-        m.setSecurity(
-                ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),
-                ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()));
-        m.setSecurityType(SecurityType.valueOf(getSecurityType(e.getSecurity().getId())));
+        AtomicReference<SecurityType> securityType = new AtomicReference<>(SecurityType.valueOf(getSecurityType(e.getSecurity().getId())));
         m.setCount(abs(count));
         List<TransactionCashFlowEntity> cashFlows = transactionCashFlowRepository.findByTransactionIdAndCashFlowTypeIn(
                 e.getId(),
@@ -211,12 +197,12 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                     m.setPrice(value.getValue().divide(cnt, 6, RoundingMode.HALF_UP).abs());
                     m.setPriceCurrency(value.getCurrency());
                     if (type == CashFlowType.DERIVATIVE_QUOTE) {
-                        m.setSecurityType(DERIVATIVE);
+                        securityType.set(DERIVATIVE);
                     }
                 }
                 case ACCRUED_INTEREST -> {
                     m.setAccruedInterest(value.getValue().divide(cnt, 6, RoundingMode.HALF_UP).abs());
-                    m.setSecurityType(SecurityType.BOND);
+                    securityType.set(SecurityType.BOND);
                 }
                 case COMMISSION -> {
                     m.setCommission(value.getValue().abs());
@@ -224,6 +210,10 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 }
             }
         });
+        m.setSecurity(
+                ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),
+                ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()),
+                securityType.get());
         if (m.getSecurityType() == DERIVATIVE &&
                 m.getPrice() != null && m.getPrice().floatValue() > 0.000001) {
             cashFlows.stream()

@@ -98,7 +98,8 @@ public class MoexIssClientImpl implements MoexIssClient {
     public Optional<String> getSecId(String isinOrContractName) {
         SecurityType securityType = getSecurityType(isinOrContractName);
         if (securityType == DERIVATIVE) {
-            // Moex couldn't find futures contract (too many records). Try evaluate contract name
+            // Try to check futures:
+            // Moex couldn't find futures contract (too many records). Try to evaluate contract name
             Optional<String> secid = moexDerivativeCodeService.getFuturesCode(isinOrContractName);
             if (secid.isPresent()) {
                 return secid;

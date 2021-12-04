@@ -21,20 +21,18 @@ package ru.investbook.web.forms.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityDescriptionEntity;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityDescriptionRepository;
 import ru.investbook.repository.SecurityRepository;
-import ru.investbook.service.moex.MoexDerivativeCodeService;
 import ru.investbook.web.forms.model.SecurityDescriptionModel;
+import ru.investbook.web.forms.model.SecurityType;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static org.spacious_team.broker.pojo.SecurityType.DERIVATIVE;
 import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 
 
@@ -43,8 +41,7 @@ import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 public class SecurityDescriptionFormsService implements FormsService<SecurityDescriptionModel> {
     private final SecurityDescriptionRepository securityDescriptionRepository;
     private final SecurityRepository securityRepository;
-    private final SecurityConverter securityConverter;
-    private final MoexDerivativeCodeService moexDerivativeCodeService;
+    private final SecurityRepositoryHelper securityRepositoryHelper;
 
     @Transactional(readOnly = true)
     public Optional<SecurityDescriptionModel> getById(String security) {
@@ -64,21 +61,8 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
     @Override
     @Transactional
     public void save(SecurityDescriptionModel m) {
-        convertDerivativeSecurityId(m);
-        saveAndFlushSecurity(m.getSecurityId(), m.getSecurityName());
-        saveAndFlushSecurityDescription(m.getSecurityId(), m.getSector());
-    }
-
-    private void convertDerivativeSecurityId(SecurityDescriptionModel model) {
-        if (getSecurityType(model.getSecurityId()) == DERIVATIVE) {
-            String securityId = moexDerivativeCodeService.convertDerivativeSecurityId(model.getSecurityId());
-            model.setSecurity(securityId);
-        }
-    }
-
-    private void saveAndFlushSecurity(String securityId, String securityName) {
-        securityRepository.createOrUpdate(securityId, securityName);
-        securityRepository.flush();
+        String savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(m);
+        saveAndFlushSecurityDescription(savedSecurityId, m.getSector());
     }
 
     private void saveAndFlushSecurityDescription(String securityId, String sector) {
@@ -90,7 +74,8 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
         SecurityDescriptionModel m = new SecurityDescriptionModel();
         SecurityEntity security = securityRepository.findById(e.getSecurity()).orElseThrow();
         m.setSecurity(ofNullable(security.getIsin()).orElse(security.getId()),
-                ofNullable(security.getName()).orElse(security.getTicker()));
+                ofNullable(security.getName()).orElse(security.getTicker()),
+                SecurityType.valueOf(getSecurityType(security.getId())));
         m.setSector(e.getSector());
         return m;
     }

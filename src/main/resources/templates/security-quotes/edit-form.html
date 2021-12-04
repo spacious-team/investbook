@@ -73,6 +73,7 @@
             <option value="BOND">Облигация</option>
             <option value="DERIVATIVE">Фьючерс, опцион</option>
             <option value="CURRENCY">Валюта</option>
+            <option value="ASSET">Произвольный актив</option>
         </select>
     </label>
     <br>
@@ -131,6 +132,10 @@
     наименование контракта, например "Si-3.22M170322CA80000" (или в кратком коде "Si80000BC2"), придерживаясь одного
     из вариантов для всех сделок. Для валютных сделок также указывается наименование контракта, например "USDRUB_TOM".
 </p>
+<p class="hint">
+    Произвольный актив - это недвижимость, криптовалюта, инвестиционные монеты и другие активы которые имеют цену и
+    могут торговаться для извлечения прибыли.
+</p>
 
 <p class="hint">
     Котировка: для облигации в процентах (%), для срочных контрактов - в пунктах.
@@ -148,7 +153,7 @@
         let e = document.getElementById('security-type');
         let type = e.options[e.selectedIndex].value
 
-        // for type = SHARE and CURRENCY
+        // for type = SHARE, CURRENCY and ASSET
         hide('price')
         hide('accrued-interest')
         display('currency')
@@ -167,6 +172,9 @@
             case "CURRENCY":
                 removePattern('security')
                 hide('currency')
+                break
+            case "ASSET":
+                removePattern('security')
                 break
         }
     }
@@ -203,6 +211,7 @@
         let type = e.options[e.selectedIndex].value
         switch (type) {
             case "SHARE":
+            case "ASSET":
                 erase('price')
                 erase('accrued-interest')
                 break

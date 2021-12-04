@@ -19,13 +19,25 @@
 package ru.investbook.web.forms.model;
 
 public enum SecurityType {
-    SHARE, BOND, DERIVATIVE, CURRENCY;
+    SHARE, BOND, DERIVATIVE, CURRENCY, ASSET;
 
     public static SecurityType valueOf(org.spacious_team.broker.pojo.SecurityType type) {
         return switch (type) {
-            case STOCK_OR_BOND -> SHARE;
+            case STOCK, STOCK_OR_BOND -> SHARE;
+            case BOND -> BOND;
             case DERIVATIVE -> DERIVATIVE;
             case CURRENCY_PAIR -> CURRENCY;
+            case ASSET -> ASSET;
+        };
+    }
+
+    public String getDescription() {
+        return switch (this) {
+            case SHARE -> "Акция";
+            case BOND -> "Облигация";
+            case DERIVATIVE -> "Срочный контракт";
+            case CURRENCY -> "Валютная пара";
+            case ASSET -> "Произвольный актив";
         };
     }
 }

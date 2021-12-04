@@ -26,15 +26,13 @@ import org.springframework.util.StringUtils;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import javax.xml.bind.DatatypeConverter;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-
-import static ru.investbook.web.forms.model.SecurityType.BOND;
-import static ru.investbook.web.forms.model.SecurityType.SHARE;
 
 @Data
 public class TransactionModel {
@@ -110,7 +108,7 @@ public class TransactionModel {
      * May be null for security deposit and withdrawal
      */
     @Nullable
-    @Positive
+    @PositiveOrZero
     private BigDecimal commission;
 
     @NotEmpty
@@ -134,40 +132,27 @@ public class TransactionModel {
         this.commissionCurrency = commissionCurrency.toUpperCase();
     }
 
-    public void setSecurity(String securityId, String securityName) {
-        this.security = SecurityHelper.getSecurityDescription(securityId, securityName);
+    public void setSecurity(String securityId, String securityName, SecurityType securityType) {
+        this.security = SecurityHelper.getSecurityDescription(securityId, securityName, securityType);
+        this.securityType = securityType;
     }
 
     public String getSecurityDisplayName() {
-        return SecurityHelper.getSecurityDisplayName(security);
+        return SecurityHelper.getSecurityDisplayName(security, securityType);
     }
 
     /**
      * Returns ISIN (stock market) or contract name (derivatives and forex market)
      */
     public String getSecurityId() {
-        if (securityType == SHARE || securityType == BOND) {
-            String id = SecurityHelper.getSecurityId(security);
-            if (id == null || id.equals(security)) {
-                throw new RuntimeException("В скобках должен быть указан ISIN инструмента: " + security);
-            }
-            return id;
-        }
-        return security;
+        return SecurityHelper.getSecurityId(security, securityType);
     }
 
     /**
      * Returns security name (stock market) or null (derivatives and forex market)
      */
     public String getSecurityName() {
-        if (securityType == SHARE || securityType == BOND) {
-            String name = SecurityHelper.getSecurityName(security);
-            if (name == null) {
-                throw new RuntimeException("В скобках должен быть указан ISIN инструмента: " + security);
-            }
-            return name;
-        }
-        return null;
+        return SecurityHelper.getSecurityName(security, securityType);
     }
 
     public String getTradeId() {

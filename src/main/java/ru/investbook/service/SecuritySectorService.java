@@ -85,9 +85,9 @@ public class SecuritySectorService {
         }
     }
 
-    private void updateSecuritySectors(Collection<SecurityEntity> securityEntiteStream, boolean forceUpdate) {
+    private void updateSecuritySectors(Collection<SecurityEntity> securityEntitiesStream, boolean forceUpdate) {
         Map<String, String> tickerToSector = getTickerToSectorIndex();
-        securityEntiteStream.stream()
+        securityEntitiesStream.stream()
                 .filter(entity -> forceUpdate || !securityDescriptionRepository.existsById(entity.getId()))
                 .map(entity -> getSecuritySector(tickerToSector, entity))
                 .flatMap(Optional::stream)

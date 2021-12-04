@@ -21,12 +21,14 @@ package ru.investbook.web;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
+import ru.investbook.web.forms.model.SecurityType;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Optional.ofNullable;
+import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
+import static ru.investbook.web.forms.model.SecurityHelper.getSecurityDescription;
 
 public class ControllerHelper {
 
@@ -56,11 +58,11 @@ public class ControllerHelper {
     public static Set<String> getSecuritiesDescriptions(SecurityRepository securityRepository) {
         return securityRepository.findAll()
                 .stream()
-                .map(e -> ofNullable(e.getName())
-                        .map(v -> v + " (" + e.getId() + ")")
-                        .orElse(e.getId()))
+                .map(e -> getSecurityDescription(
+                        e.getId(),
+                        e.getName(),
+                        SecurityType.valueOf(getSecurityType(e.getId()))))
                 .sorted()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
-
 }
