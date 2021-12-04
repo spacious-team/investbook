@@ -20,12 +20,12 @@ package ru.investbook.web.forms.model;
 
 import org.springframework.util.Assert;
 
-class SecurityHelper {
+public class SecurityHelper {
 
     /**
      * For stock or bond "Name (ISIN)", for derivatives - securityId, for asset - securityName
      */
-    static String getSecurityDescription(String securityId, String securityName, SecurityType securityType) {
+    public static String getSecurityDescription(String securityId, String securityName, SecurityType securityType) {
         return switch (securityType) {
             case SHARE, BOND -> securityName + " (" + securityId + ")";
             case DERIVATIVE, CURRENCY -> securityId;
