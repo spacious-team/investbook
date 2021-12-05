@@ -138,7 +138,8 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
 
     @Override
     public BigDecimal getPurchaseAccruedInterest(Security security, FifoPositions positions, String toCurrency) {
-        if (getSecurityType(security) == STOCK_OR_BOND) {
+        SecurityType securityType = SecurityType.getSecurityType(security);
+        if (securityType == BOND || securityType == STOCK_OR_BOND) {
             return getTotal(positions.getTransactions(), CashFlowType.ACCRUED_INTEREST, toCurrency);
         }
         return BigDecimal.ZERO;
