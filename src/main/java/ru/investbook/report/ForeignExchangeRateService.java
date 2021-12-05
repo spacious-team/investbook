@@ -265,7 +265,7 @@ public class ForeignExchangeRateService {
     private static SecurityQuoteBuilder convertQuoteToCurrency(SecurityQuote quote, Supplier<BigDecimal> exchangeRateSupplier) {
         BigDecimal exchangeRate = exchangeRateSupplier.get();
         BigDecimal accruedInterest = quote.getAccruedInterest();
-        SecurityType type = getSecurityType(quote.getSecurity());
+        SecurityType type = quote.getSecurityType();
         boolean nonCurrencyQuote = (type == BOND) ||
                 ((type == STOCK_OR_BOND) && (accruedInterest != null)) ||
                 (type == DERIVATIVE);

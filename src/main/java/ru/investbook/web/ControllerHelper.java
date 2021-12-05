@@ -27,7 +27,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 import static ru.investbook.web.forms.model.SecurityHelper.getSecurityDescription;
 
 public class ControllerHelper {
@@ -61,7 +60,7 @@ public class ControllerHelper {
                 .map(e -> getSecurityDescription(
                         e.getId(),
                         e.getName(),
-                        SecurityType.valueOf(getSecurityType(e.getId()))))
+                        SecurityType.valueOf(e.getType())))
                 .sorted()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }

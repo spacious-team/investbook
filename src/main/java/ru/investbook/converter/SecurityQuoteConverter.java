@@ -52,6 +52,7 @@ public class SecurityQuoteConverter implements EntityConverter<SecurityQuoteEnti
         return SecurityQuote.builder()
                 .id(entity.getId())
                 .security(entity.getSecurity().getId())
+                .securityType(entity.getSecurity().getType())
                 .timestamp(entity.getTimestamp())
                 .quote(entity.getQuote())
                 .price(entity.getPrice())

@@ -42,6 +42,7 @@ import static ru.investbook.web.forms.model.SecurityType.DERIVATIVE;
 @RequiredArgsConstructor
 public class SecurityRepositoryHelper {
     private static final MessageDigest md; // not thread safe
+    private static final String ASSET_PREFIX = "ASSET:";
     private final SecurityRepository securityRepository;
     private final MoexDerivativeCodeService moexDerivativeCodeService;
 
@@ -114,8 +115,7 @@ public class SecurityRepositoryHelper {
         synchronized (SecurityRepositoryHelper.class) {
             try {
                 md.update(securityName.getBytes(StandardCharsets.UTF_8));
-                return org.spacious_team.broker.pojo.SecurityType.ASSET_PREFIX +
-                        DatatypeConverter.printHexBinary(md.digest()).toLowerCase().substring(0, 12);
+                return ASSET_PREFIX + DatatypeConverter.printHexBinary(md.digest()).toLowerCase().substring(0, 12);
             } finally {
                 md.reset();
             }

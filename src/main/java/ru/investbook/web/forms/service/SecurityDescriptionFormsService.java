@@ -33,7 +33,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 
 
 @Component
@@ -75,7 +74,7 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
         SecurityEntity security = securityRepository.findById(e.getSecurity()).orElseThrow();
         m.setSecurity(ofNullable(security.getIsin()).orElse(security.getId()),
                 ofNullable(security.getName()).orElse(security.getTicker()),
-                SecurityType.valueOf(getSecurityType(security.getId())));
+                SecurityType.valueOf(security.getType()));
         m.setSector(e.getSector());
         return m;
     }

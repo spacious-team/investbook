@@ -21,6 +21,7 @@ package ru.investbook.report.excel;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.report.ClosedPosition;
@@ -62,7 +63,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
         Table openPositionsProfit = new Table();
         Table closedPositionsProfit = new Table();
         for (String currencyPair : currencyPairs) {
-            FifoPositions positions = positionsFactory.get(currencyPair, positionsFilter);
+            FifoPositions positions = positionsFactory.get(currencyPair, SecurityType.CURRENCY_PAIR, positionsFilter);
             openPositionsProfit.addAll(getPositionProfit(currencyPair, positions.getOpenedPositions(),
                     this::getOpenedPositionProfit));
             closedPositionsProfit.addAll(getPositionProfit(currencyPair, positions.getClosedPositions(),

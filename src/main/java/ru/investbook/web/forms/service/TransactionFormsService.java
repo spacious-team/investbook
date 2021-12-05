@@ -54,7 +54,6 @@ import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
 import static java.util.Optional.ofNullable;
-import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 import static ru.investbook.web.forms.model.SecurityType.DERIVATIVE;
 
 @Component
@@ -185,7 +184,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
         BigDecimal cnt = BigDecimal.valueOf(count);
         m.setAction(count >= 0 ? TransactionModel.Action.BUY : TransactionModel.Action.CELL);
         m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
-        AtomicReference<SecurityType> securityType = new AtomicReference<>(SecurityType.valueOf(getSecurityType(e.getSecurity().getId())));
+        AtomicReference<SecurityType> securityType = new AtomicReference<>(SecurityType.valueOf(e.getSecurity().getType()));
         m.setCount(abs(count));
         List<TransactionCashFlowEntity> cashFlows = transactionCashFlowRepository.findByTransactionIdAndCashFlowTypeIn(
                 e.getId(),

@@ -24,7 +24,6 @@ import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
-import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Service;
 import ru.investbook.converter.PortfolioPropertyConverter;
@@ -53,7 +52,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.spacious_team.broker.pojo.SecurityType.*;
+import static org.spacious_team.broker.pojo.SecurityType.CURRENCY_PAIR;
+import static org.spacious_team.broker.pojo.SecurityType.getCurrencyPair;
 import static org.springframework.util.StringUtils.hasLength;
 
 @Service
@@ -84,8 +84,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
 
     @Override
     public BigDecimal getGrossProfit(Collection<String> portfolios, Security security, FifoPositions positions, String toCurrency) {
-        SecurityType securityType = getSecurityType(security);
-        return switch (securityType) {
+        return switch (security.getType()) {
             case STOCK, BOND, STOCK_OR_BOND, ASSET -> getPurchaseCost(security, positions, toCurrency)
                     .add(getPurchaseAccruedInterest(security, positions, toCurrency));
             case DERIVATIVE -> sumPaymentsForType(portfolios, security, CashFlowType.DERIVATIVE_PROFIT, toCurrency);
@@ -95,8 +94,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
 
     @Override
     public BigDecimal getPurchaseCost(Security security, FifoPositions positions, String toCurrency) {
-        SecurityType securityType = getSecurityType(security);
-        return switch (securityType) {
+        return switch (security.getType()) {
             case STOCK, BOND, STOCK_OR_BOND, ASSET -> getStockOrBondPurchaseCost(positions, toCurrency);
             case DERIVATIVE -> getTotal(positions.getTransactions(), CashFlowType.DERIVATIVE_PRICE, toCurrency);
             case CURRENCY_PAIR -> getTotal(positions.getTransactions(), CashFlowType.PRICE, toCurrency);
@@ -138,8 +136,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
 
     @Override
     public BigDecimal getPurchaseAccruedInterest(Security security, FifoPositions positions, String toCurrency) {
-        SecurityType securityType = SecurityType.getSecurityType(security);
-        if (securityType == BOND || securityType == STOCK_OR_BOND) {
+        if (security.getType().isBond()) {
             return getTotal(positions.getTransactions(), CashFlowType.ACCRUED_INTEREST, toCurrency);
         }
         return BigDecimal.ZERO;
@@ -215,7 +212,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
 
     @Override
     public SecurityQuote getSecurityQuote(Security security, String toCurrency, Instant to) {
-        if (getSecurityType(security) == CURRENCY_PAIR) {
+        if (security.getType() == CURRENCY_PAIR) {
             String baseCurrency = getCurrencyPair(security.getId()).substring(0, 3);
             LocalDate toDate = LocalDate.ofInstant(to, ZoneId.systemDefault());
             BigDecimal lastPrice = toDate.isBefore(LocalDate.now()) ?
@@ -223,6 +220,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                     foreignExchangeRateService.getExchangeRate(baseCurrency, toCurrency);
             return SecurityQuote.builder()
                     .security(security.getId())
+                    .securityType(security.getType())
                     .timestamp(to)
                     .quote(lastPrice)
                     .currency(toCurrency)

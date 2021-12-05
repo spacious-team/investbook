@@ -61,33 +61,32 @@ public class FifoPositionsFactory {
     }
 
     public FifoPositions get(Security security, FifoPositionsFilter filter) {
-        return get(security.getId(), filter);
+        return get(security.getId(), security.getType(), filter);
     }
 
-    public FifoPositions get(String isinOrContract, FifoPositionsFilter filter) {
+    public FifoPositions get(String isinOrContract, SecurityType securityType, FifoPositionsFilter filter) {
         String key = filter.getPortfolios().stream().sorted().collect(Collectors.joining(","));
         return positionsCache
                 .computeIfAbsent(
                         key.isEmpty() ? ALL_PORTFOLIO_KEY : key,
                         k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(
-                        getCacheKey(isinOrContract, filter),
-                        k -> create(isinOrContract, filter));
+                        getCacheKey(isinOrContract, securityType, filter),
+                        k -> create(isinOrContract, securityType, filter));
     }
 
     public void invalidateCache() {
         positionsCache.clear();
     }
 
-    private String getCacheKey(String isinOrContract, FifoPositionsFilter filter) {
-        String key = (SecurityType.getSecurityType(isinOrContract) == SecurityType.CURRENCY_PAIR) ?
+    private String getCacheKey(String isinOrContract, SecurityType securityType, FifoPositionsFilter filter) {
+        String key = (securityType == SecurityType.CURRENCY_PAIR) ?
                 getCurrencyPair(isinOrContract) :
                 isinOrContract;
         return key + filter.getFromDate().toString() + filter.getToDate().toString();
     }
 
-    private FifoPositions create(String isinOrContract, FifoPositionsFilter filter) {
-        SecurityType type = SecurityType.getSecurityType(isinOrContract);
+    private FifoPositions create(String isinOrContract, SecurityType type, FifoPositionsFilter filter) {
         LinkedList<Transaction> transactions;
         if (type == SecurityType.CURRENCY_PAIR) {
             String currencyPair = getCurrencyPair(isinOrContract);
@@ -101,7 +100,7 @@ public class FifoPositionsFactory {
         } else {
             transactions = getTransactions(isinOrContract, filter);
         }
-        Deque<SecurityEventCashFlow> redemption = (type == SecurityType.BOND || type == SecurityType.STOCK_OR_BOND) ?
+        Deque<SecurityEventCashFlow> redemption = type.isBond() ?
                 getRedemption(isinOrContract, filter) :
                 new ArrayDeque<>(0);
         return new FifoPositions(transactions, redemption);

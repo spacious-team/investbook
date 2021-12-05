@@ -46,7 +46,6 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toCollection;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static org.spacious_team.broker.pojo.SecurityType.DERIVATIVE;
-import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 
 @Component
 @RequiredArgsConstructor
@@ -77,7 +76,7 @@ public class InternalRateOfReturn {
             Collection<String> portfolios, Security security, SecurityQuote quote, Instant fromDate, Instant toDate) {
 
         try {
-            if (getSecurityType(security.getId()) == DERIVATIVE) {
+            if (security.getType() == DERIVATIVE) {
                 return null;
             }
             FifoPositionsFilter pf = FifoPositionsFilter.of(portfolios, fromDate, toDate);

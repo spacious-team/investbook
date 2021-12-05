@@ -42,8 +42,6 @@ import static java.util.Collections.emptySet;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
-import static org.spacious_team.broker.pojo.SecurityType.STOCK_OR_BOND;
-import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 
 @Service
 @RequiredArgsConstructor
@@ -118,12 +116,12 @@ public class SecuritySectorService {
                         .map(tickerToSector::get))
                 .or(() -> ofNullable(security.getIsin())
                         .or(() -> ofNullable(security.getId()))
-                        .flatMap(moexIssClient::getSecId) // for shares moex secId returns ticker
+                        .flatMap(securityId -> moexIssClient.getSecId(securityId, security.getType())) // for shares moex secId returns ticker
                         .map(t -> t.endsWith("-RM") ? t.substring(0, t.length() - 2) : t)
                         .map(String::toUpperCase)
                         .map(tickerToSector::get))
                 .or(() -> ofNullable(security.getId())
-                        .filter(id -> getSecurityType(id) == STOCK_OR_BOND)
+                        .filter(id -> security.getType().isStockOrBond())
                         .map($ -> UNKNOWN_SECTOR))
                 .orElse(null);
         if (sector == null) {

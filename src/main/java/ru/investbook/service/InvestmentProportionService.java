@@ -41,8 +41,6 @@ import static java.lang.System.nanoTime;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.reducing;
-import static org.spacious_team.broker.pojo.SecurityType.STOCK_OR_BOND;
-import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 
 @Service
@@ -61,7 +59,7 @@ public class InvestmentProportionService {
             long t0 = nanoTime();
             Map<String, Float> result = securityRepository.findAll()
                     .stream()
-                    .filter(security -> getSecurityType(security.getId()) == STOCK_OR_BOND)
+                    .filter(security -> security.getType().isStockOrBond())
                     .map(securityConverter::fromEntity)
                     .map(security -> getSecurityToInvestment(security, filter))
                     .filter(v -> v.investment().floatValue() > 1)
