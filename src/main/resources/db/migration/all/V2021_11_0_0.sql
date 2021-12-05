@@ -25,13 +25,21 @@ CREATE TABLE IF NOT EXISTS `security_type` (
 INSERT INTO `security_type` (`id`, `name`)
 VALUES (0, 'Акция, ETF'),
        (1, 'Облигация'),
-       (2, 'Акция или облигация (до выплаты купона, амортизации точно не известно)'),
+       (2, 'Акция или облигация'),
        (3, 'Срочный контракт'),
        (4, 'Валютная пара'),
        (5, 'Произвольный актив');
 
 ALTER TABLE `security`
-    ADD COLUMN `type` INT(2) UNSIGNED NOT NULL COMMENT 'Тип ценной бумаги' AFTER `id`;
+    ADD COLUMN `type` INT(2) UNSIGNED COMMENT 'Тип ценной бумаги' AFTER `id`;
+
+UPDATE `security` SET `type` = 2 WHERE length(id) = 12;
+UPDATE `security` SET `type` = 4 WHERE id LIKE '______\_%';
+UPDATE `security` SET `type` = 5 WHERE id LIKE 'ASSET:%';
+UPDATE `security` SET `type` = 3
+WHERE length(id) <> 12
+  AND id NOT LIKE '______\_%'
+  AND id NOT LIKE 'ASSET:%';
 
 ALTER TABLE `security` ADD KEY `security_type_ix` (`type`);
 ALTER TABLE `security` ADD CONSTRAINT `security_type_fkey`

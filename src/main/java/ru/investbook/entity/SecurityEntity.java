@@ -40,7 +40,7 @@ public class SecurityEntity {
 
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.ORDINAL)
-    SecurityType type;
+    private SecurityType type;
 
     @Column(name = "isin")
     private String isin;
