@@ -63,8 +63,7 @@ class InvestbookApplicationTest {
         mvc.perform(get("http://localhost/actuator/" + actuatorPath))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$." + jsonPath).value(expected))
-        ;
+                .andExpect(jsonPath("$." + jsonPath).value(expected));
     }
 
 }
