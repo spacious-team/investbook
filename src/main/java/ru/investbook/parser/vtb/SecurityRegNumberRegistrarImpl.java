@@ -19,18 +19,21 @@
 package ru.investbook.parser.vtb;
 
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.Security;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
-public class SecurityRegNumberToIsinConverterImpl implements SecurityRegNumberToIsinConverter {
+public class SecurityRegNumberRegistrarImpl implements SecurityRegNumberRegistrar {
     private final VtbSecuritiesTable vtbSecuritiesTable;
     private final VtbSecurityFlowTable vtbSecurityFlowTable;
 
     @Override
-    public String convertToIsin(String registrationNumber) {
-        if (registrationNumber == null) return null;
+    public Optional<Security> getSecurityByRegistrationNumber(String registrationNumber) {
+        if (registrationNumber == null) return Optional.empty();
         registrationNumber = registrationNumber.toUpperCase();
-        String isin = vtbSecurityFlowTable.getSecurityRegNumberToIsin().get(registrationNumber);
-        if (isin == null) vtbSecuritiesTable.getSecurityRegNumberToIsin().get(registrationNumber);
-        return (isin != null) ? isin.toUpperCase() : null;
+        Security security = vtbSecurityFlowTable.getRegNumberToSecurity().get(registrationNumber);
+        if (security == null) vtbSecuritiesTable.getRegNumberToSecurity().get(registrationNumber);
+        return Optional.ofNullable(security);
     }
 }

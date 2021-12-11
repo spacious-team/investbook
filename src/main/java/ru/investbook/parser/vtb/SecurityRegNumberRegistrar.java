@@ -18,11 +18,12 @@
 
 package ru.investbook.parser.vtb;
 
-public interface SecurityRegNumberToIsinConverter {
+import org.spacious_team.broker.pojo.Security;
 
-    /**
-     * @return isin or null if not found
-     */
-    String convertToIsin(String registrationNumber);
+import java.util.Optional;
+
+public interface SecurityRegNumberRegistrar {
+
+    Optional<Security> getSecurityByRegistrationNumber(String registrationNumber);
 
 }

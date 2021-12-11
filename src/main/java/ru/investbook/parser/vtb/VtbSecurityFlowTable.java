@@ -35,8 +35,8 @@ import static ru.investbook.parser.vtb.VtbSecurityFlowTable.VtbSecurityFlowTable
 
 public class VtbSecurityFlowTable extends SingleAbstractReportTable<Security> {
 
-    // security registration number -> isin
-    private final Map<String, String> securityRegNumberToIsin = new HashMap<>();
+    // security registration number -> security
+    private final Map<String, Security> regNumberToSecurity = new HashMap<>();
 
     protected VtbSecurityFlowTable(SingleBrokerReport report) {
         super(report, VtbSecurityDepositAndWithdrawalTable.TABLE_NAME, null, VtbSecurityFlowTableHeader.class);
@@ -47,14 +47,14 @@ public class VtbSecurityFlowTable extends SingleAbstractReportTable<Security> {
         String description = row.getStringCellValue(NAME_REGNUMBER_ISIN);
         Security security = VtbReportHelper.getSecurity(description);
         String registrationNumber = description.split(",")[1].toUpperCase().trim();
-        securityRegNumberToIsin.put(registrationNumber, security.getIsin());
+        regNumberToSecurity.put(registrationNumber, security);
         getReport().getSecurityRegistrar().declareStockOrBond(security.getIsin(), security::toBuilder);
         return security;
     }
 
-    public Map<String, String> getSecurityRegNumberToIsin() {
+    public Map<String, Security> getRegNumberToSecurity() {
         initializeIfNeed();
-        return securityRegNumberToIsin;
+        return regNumberToSecurity;
     }
 
     @Getter
