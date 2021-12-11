@@ -18,10 +18,12 @@
 
 package ru.investbook.parser.psb;
 
+import org.mockito.Mock;
 import org.spacious_team.broker.pojo.Security;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
+import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,6 +33,9 @@ import static org.testng.Assert.assertEquals;
 @Ignore
 public class PortfolioSecuritiesTableTest {
 
+    @Mock
+    SecurityRegistrar securityRegistrar;
+
     @DataProvider(name = "isin")
     Object[][] getData() {
         return new Object[][] {{"E:\\1.xlsx", "RU000A0ZZDQ8", "RU000A0JV7J9" }};
@@ -38,7 +43,7 @@ public class PortfolioSecuritiesTableTest {
 
     @Test(dataProvider = "isin")
     void testIsin(String report, String firstIsin, String lastIsin) throws IOException {
-        List<Security> data = new SecuritiesTable(new PsbBrokerReport(report)).getData();
+        List<Security> data = new SecuritiesTable(new PsbBrokerReport(report, securityRegistrar)).getData();
         assertEquals(data.get(0).getId(), firstIsin);
         assertEquals(data.get(data.size() - 1).getId(), lastIsin);
     }

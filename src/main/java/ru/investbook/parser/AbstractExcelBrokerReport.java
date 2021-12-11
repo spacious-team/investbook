@@ -28,6 +28,10 @@ import java.io.InputStream;
 
 public abstract class AbstractExcelBrokerReport extends AbstractBrokerReport {
 
+    public AbstractExcelBrokerReport(SecurityRegistrar securityRegistrar) {
+        super(securityRegistrar);
+    }
+
     public static Workbook getWorkBook(String excelFileName, InputStream is) {
         try {
             is = new CloseIgnoringInputStream(is); // HSSFWorkbook() constructor close is

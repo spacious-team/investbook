@@ -18,10 +18,12 @@
 
 package ru.investbook.parser.psb;
 
+import org.mockito.Mock;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
+import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -32,6 +34,9 @@ import static org.testng.Assert.assertEquals;
 @Ignore
 public class CashFlowTableTest {
 
+    @Mock
+    SecurityRegistrar securityRegistrar;
+
     @DataProvider(name = "cash")
     Object[][] getData() {
         return new Object[][]{{"E:\\1.xlsx", BigDecimal.valueOf(400 - 760.77)},
@@ -40,7 +45,7 @@ public class CashFlowTableTest {
 
     @Test(dataProvider = "cash")
     void testIsin(String reportFile, BigDecimal expectedCashIn) throws IOException {
-        PsbBrokerReport report = new PsbBrokerReport(reportFile);
+        PsbBrokerReport report = new PsbBrokerReport(reportFile, securityRegistrar);
         List<EventCashFlow> data = new CashFlowTable(report).getData();
         BigDecimal sum = BigDecimal.ZERO;
         for (EventCashFlow r : data) {

@@ -24,6 +24,7 @@ import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.api.TableCellAddress;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
 import ru.investbook.parser.AbstractExcelBrokerReport;
+import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +44,8 @@ public class VtbBrokerReport extends AbstractExcelBrokerReport {
 
     private final Workbook book;
 
-    public VtbBrokerReport(String excelFileName, InputStream is) {
+    public VtbBrokerReport(String excelFileName, InputStream is, SecurityRegistrar securityRegistrar) {
+        super(securityRegistrar);
         this.book = getWorkBook(excelFileName, is);
         ReportPage reportPage = new ExcelSheet(book.getSheetAt(0));
         Path path = Paths.get(excelFileName);

@@ -21,6 +21,7 @@ package ru.investbook.parser.psb;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
@@ -45,8 +46,13 @@ public class DividendTable extends SingleAbstractReportTable<SecurityEventCashFl
 
     @Override
     protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
+        String isin = row.getStringCellValue(ISIN);
+        String securityId = getReport().getSecurityRegistrar().declareStock(isin, () -> Security.builder()
+                .id(isin)
+                .isin(isin)
+                .name(row.getStringCellValue(STOCK_NAME)));
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
-                .security(row.getStringCellValue(ISIN))
+                .security(securityId)
                 .portfolio(getReport().getPortfolio())
                 .count(row.getIntCellValue(COUNT))
                 .eventType(CashFlowType.DIVIDEND)
@@ -67,6 +73,7 @@ public class DividendTable extends SingleAbstractReportTable<SecurityEventCashFl
 
     enum DividendTableHeader implements TableColumnDescription {
         DATE("дата"),
+        STOCK_NAME("наименование"),
         ISIN("isin"),
         COUNT("кол-во"),
         VALUE("сумма", "дивидендов"),

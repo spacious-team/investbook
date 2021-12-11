@@ -35,4 +35,9 @@ public interface SingleBrokerReport extends BrokerReport {
     ZoneId getReportZoneId();
 
     Instant convertToInstant(String value);
+
+    /**
+     * Registrar where new securities will be registered
+     */
+    SecurityRegistrar getSecurityRegistrar();
 }

@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.vtb;
 
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
@@ -61,14 +62,18 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
         }
 
         String portfolio = getReport().getPortfolio();
-        String isin = row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",")[2].trim();
+        String description = row.getStringCellValue(NAME_REGNUMBER_ISIN);
+        Security security = VtbReportHelper.getSecurity(description);
         Instant timestamp = row.getInstantCellValue(DATE);
-        String tradeId = generateTradeId(portfolio, timestamp, isin);
+        String tradeId = generateTradeId(portfolio, timestamp, security.getIsin());
+        String securityId = getReport().getSecurityRegistrar().declareStockOrBond(security.getIsin(), security::toBuilder);
+
+
         return SecurityTransaction.builder()
                         .tradeId(tradeId)
                         .timestamp(timestamp)
                         .portfolio(portfolio)
-                        .security(isin)
+                        .security(securityId)
                         .count(row.getIntCellValue(COUNT))
                         .build();
     }

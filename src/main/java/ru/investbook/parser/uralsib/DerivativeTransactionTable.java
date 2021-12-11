@@ -74,11 +74,13 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .add(row.getBigDecimalCellValueOrDefault(CLEARING_COMMISSION, BigDecimal.ZERO))
                 .negate();
+        String code = row.getStringCellValue(CONTRACT);
+        String securityId = getReport().getSecurityRegistrar().declareDerivative(code);
         return DerivativeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .tradeId(tradeId)
                 .portfolio(getReport().getPortfolio())
-                .security(row.getStringCellValue(CONTRACT))
+                .security(securityId)
                 .count((isBuy ? 1 : -1) * count)
                 .valueInPoints(valueInPoints)
                 .value(value)

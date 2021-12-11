@@ -53,7 +53,8 @@ public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
         String description = row.getStringCellValue(NAME_REGNUMBER_ISIN);
         Security security = VtbReportHelper.getSecurity(description);
         String registrationNumber = description.split(",")[1].toUpperCase().trim();
-        securityRegNumberToIsin.put(registrationNumber, security.getId());
+        securityRegNumberToIsin.put(registrationNumber, security.getIsin());
+        getReport().getSecurityRegistrar().declareStockOrBond(security.getIsin(), security::toBuilder);
         return security;
     }
 

@@ -19,6 +19,8 @@
 package ru.investbook.parser.sber;
 
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.SecurityType;
+
 
 @Slf4j
 public class SecurityHelper {
@@ -49,5 +51,21 @@ public class SecurityHelper {
     public static String getSecurityName(String nameAndIsin) {
         int start = nameAndIsin.indexOf('(');
         return (start == -1) ? null : nameAndIsin.substring(0, start).trim();
+    }
+
+    public static SecurityType getSecurityType(String section, String securityType) {
+        if ("Фондовый рынок".equalsIgnoreCase(section)) {
+            if (securityType == null) return SecurityType.STOCK_OR_BOND;
+            return switch (securityType.toLowerCase()) {
+                case "акция", "пай", "депозитарная расписка" -> SecurityType.STOCK;
+                case "облигация" -> SecurityType.BOND;
+                default -> SecurityType.STOCK_OR_BOND;
+            };
+        } else if (section.toLowerCase().contains("срочный")) { // предположение
+            return SecurityType.DERIVATIVE;
+        } else if (section.toLowerCase().contains("валютный")) { // предположение
+            return SecurityType.CURRENCY_PAIR;
+        }
+        return SecurityType.ASSET;
     }
 }

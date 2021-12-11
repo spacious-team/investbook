@@ -51,15 +51,16 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
                 .value(row.getBigDecimalCellValue(VALUE))
                 .currency(UralsibBrokerReport.convertToCurrency(row.getStringCellValue(CURRENCY)))
                 .eventType(CashFlowType.DERIVATIVE_PROFIT)
-                .security(getContract(row))
+                .security(getSecurityId(row))
                 .build();
     }
 
-    private String getContract(TableRow row) {
+    private String getSecurityId(TableRow row) {
         String description = row.getStringCellValueOrDefault(DESCRIPTION, "");
         Matcher matcher = contractPattern.matcher(description);
         if (matcher.find()) {
-            return matcher.group(1);
+            String code = matcher.group(1);
+            return getReport().getSecurityRegistrar().declareDerivative(code);
         }
         throw new RuntimeException("Не могу найти наименование контракта в отчете брокера по событию:" + description);
     }

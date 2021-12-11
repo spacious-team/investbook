@@ -19,18 +19,21 @@
 package ru.investbook.parser.sber.cash_security;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.AbstractBrokerReportFactory;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.springframework.stereotype.Component;
+import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.InputStream;
 import java.util.regex.Pattern;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class SberCashAndSecurityBrokerReportFactory extends AbstractBrokerReportFactory {
-
+    private final SecurityRegistrar securityRegistrar;
     @Getter
     private final String brokerName = "Сбербанк Онлайн (деньги)";
     private final Pattern expectedFileNamePattern = Pattern.compile("^Зачисления[_-]и[_-]Списания[_-].*");
@@ -42,7 +45,8 @@ public class SberCashAndSecurityBrokerReportFactory extends AbstractBrokerReport
 
     @Override
     public BrokerReport create(String excelFileName, InputStream is) {
-        BrokerReport brokerReport = create(excelFileName, is, SberCashAndSecurityBrokerReportAdapter::new);
+        BrokerReport brokerReport = create(excelFileName, is,
+                (fileName, stream) -> new SberCashAndSecurityBrokerReportAdapter(fileName, stream, securityRegistrar));
         if (brokerReport != null) {
             log.info("Обнаружен отчет зачислений и списаний '{}' СберБанк брокера", excelFileName);
         }

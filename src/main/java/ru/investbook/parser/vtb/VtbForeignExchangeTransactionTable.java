@@ -71,11 +71,13 @@ public class VtbForeignExchangeTransactionTable extends SingleInitializableRepor
         BigDecimal commission = row.getBigDecimalCellValue(MARKET_COMMISSION)
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .negate();
+        String instrument = row.getStringCellValue(INSTRUMENT);
+        String securityId = getReport().getSecurityRegistrar().declareCurrencyPair(instrument);
         return ForeignExchangeTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .tradeId(row.getStringCellValue(TRADE_ID))
                 .portfolio(getReport().getPortfolio())
-                .security(row.getStringCellValue(INSTRUMENT))
+                .security(securityId)
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)
                 .commission(commission)

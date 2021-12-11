@@ -21,6 +21,7 @@ package ru.investbook.parser.vtb;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.util.StringUtils;
 
@@ -79,6 +80,10 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
                         .orElseThrow(() -> new IllegalArgumentException("Не удалось определить количество погашенных облигаций " + isin));
                 default -> throw new UnsupportedOperationException();
             };
+            String securityId = getReport().getSecurityRegistrar().declareBond(isin, () -> Security.builder()
+                    .id(isin)
+                    .isin(isin)
+                    .name(isin)); // never called, if SecuritiesTable.getData() called first
             SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                     .portfolio(getReport().getPortfolio())
                     .eventType(eventType)
@@ -86,7 +91,7 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
                     .value(value)
                     .currency(event.getCurrency())
                     .count(count)
-                    .security(isin);
+                    .security(securityId);
             Collection<SecurityEventCashFlow> data = new ArrayList<>();
             data.add(builder.build());
             if (tax.abs().compareTo(minValue) >= 0) {

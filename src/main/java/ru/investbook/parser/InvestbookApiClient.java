@@ -29,6 +29,7 @@ import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
@@ -81,20 +82,9 @@ public class InvestbookApiClient {
                 "Не могу сохранить Портфель " + portfolio);
     }
 
-    public boolean addSecurity(String security) {
-        return addSecurity(security, null);
-    }
-
-    public boolean addSecurity(String security, String name) {
-        return addSecurity(Security.builder()
-                .id(security)
-                .name(name)
-                .build());
-    }
-
-    public boolean addSecurity(Security security) {
+    public void addSecurity(Security security) {
         Security _security = convertDerivativeSecurityId(security);
-        return handlePost(
+        handlePost(
                 () -> securityRestController.post(_security),
                 "Не могу добавить ЦБ " + security + " в список");
     }
@@ -105,13 +95,13 @@ public class InvestbookApiClient {
         if (!Objects.equals(id, newId)) {
             security = security.toBuilder()
                     .id(newId)
+                    .type(SecurityType.DERIVATIVE)
                     .build();
         }
         return security;
     }
 
     public void addTransaction(AbstractTransaction transaction) {
-        addSecurity(transaction.getSecurity());
         boolean isAdded = addTransaction(transaction.getTransaction());
         if (isAdded) {
             Integer transactionId = Optional.ofNullable(transaction.getId())

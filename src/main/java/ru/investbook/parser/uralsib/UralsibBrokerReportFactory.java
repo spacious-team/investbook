@@ -19,10 +19,12 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.AbstractBrokerReportFactory;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.springframework.stereotype.Component;
+import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.InputStream;
 import java.util.function.BiFunction;
@@ -31,7 +33,9 @@ import java.util.zip.ZipInputStream;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class UralsibBrokerReportFactory extends AbstractBrokerReportFactory {
+    private final SecurityRegistrar securityRegistrar;
 
     @Getter
     private final String brokerName = "Уралсиб";
@@ -50,9 +54,9 @@ public class UralsibBrokerReportFactory extends AbstractBrokerReportFactory {
         BrokerReport brokerReport;
         BiFunction<String, InputStream, BrokerReport> reportProvider;
         if (excelFileName.toLowerCase().endsWith(".zip")) {
-            reportProvider = (fileName, istream) -> new UralsibBrokerReport(new ZipInputStream(istream));
+            reportProvider = (fileName, stream) -> new UralsibBrokerReport(new ZipInputStream(stream), securityRegistrar);
         } else {
-            reportProvider = UralsibBrokerReport::new;
+            reportProvider = (fileName, stream) ->  new UralsibBrokerReport(fileName, stream, securityRegistrar);
         }
         brokerReport = create(excelFileName, is, reportProvider);
         if (brokerReport != null) {

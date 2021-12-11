@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.psb;
 
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
@@ -65,8 +66,12 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
                         " Не могу привести валюту купона к валюте цены, не реализовано.");
             }
         }
+        String securityId = getReport().getSecurityRegistrar().declareStockOrBond(isin, () -> Security.builder()
+                .id(isin)
+                .isin(isin)
+                .name(row.getStringCellValue(NAME)));
         return SecurityQuote.builder()
-                .security(isin)
+                .security(securityId)
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .price(price)

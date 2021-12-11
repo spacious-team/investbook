@@ -19,6 +19,7 @@
 package ru.investbook.parser.psb;
 
 import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
@@ -33,8 +34,11 @@ public class DerivativesTable extends SingleAbstractReportTable<Security> {
 
     @Override
     protected Security parseRow(TableRow row) {
+        String contract = row.getStringCellValue(CONTRACT);
+        String securityId = getReport().getSecurityRegistrar().declareDerivative(contract);
         return Security.builder()
-                .id(row.getStringCellValue(CONTRACT))
+                .id(securityId)
+                .type(SecurityType.DERIVATIVE)
                 .build();
     }
 }
