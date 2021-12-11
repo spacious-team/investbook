@@ -70,7 +70,7 @@ public class ReportParserService {
             reportTables.getCouponAmortizationRedemptionTable()
                     .getData()
                     .stream()
-                    .filter(c -> api.addSecurity(c.getSecurity())) // required for amortization
+                    .peek(c -> api.addSecurity(c.getSecurity())) // required for amortization
                     .forEach(api::addSecurityEventCashFlow);
             reportTables.getDividendTable()
                     .getData()
@@ -81,7 +81,7 @@ public class ReportParserService {
             reportTables.getDerivativeCashFlowTable()
                     .getData()
                     .stream()
-                    .filter(c -> api.addSecurity(c.getSecurity()))
+                    .peek(c -> api.addSecurity(c.getSecurity()))
                     .map(ReportParserService::setDerivativeCashFlowDefaults)
                     .forEach(api::addSecurityEventCashFlow);
             reportTables.getForeignExchangeTransactionTable()
