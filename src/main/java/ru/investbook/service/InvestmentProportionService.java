@@ -21,7 +21,7 @@ package ru.investbook.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
-import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityDescriptionEntity;
@@ -41,8 +41,6 @@ import static java.lang.System.nanoTime;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.reducing;
-import static org.spacious_team.broker.pojo.SecurityType.STOCK_OR_BOND;
-import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 
 @Service
@@ -61,7 +59,7 @@ public class InvestmentProportionService {
             long t0 = nanoTime();
             Map<String, Float> result = securityRepository.findAll()
                     .stream()
-                    .filter(security -> getSecurityType(security.getId()) == STOCK_OR_BOND)
+                    .filter(security -> security.getType().isStockOrBond())
                     .map(securityConverter::fromEntity)
                     .map(security -> getSecurityToInvestment(security, filter))
                     .filter(v -> v.investment().floatValue() > 1)
@@ -80,7 +78,7 @@ public class InvestmentProportionService {
         FifoPositions positions = fifoPositionsFactory.get(security, FifoPositionsFilter.of(filter));
         int openedPositions = positions.getCurrentOpenedPositionsCount();
         BigDecimal investmentRub = ofNullable(securityProfitService.getSecurityQuote(security, RUB, filter.getToDate()))
-                .map(SecurityQuote::getDirtyPriceInCurrency)
+                .map(quote -> quote.getDirtyPriceInCurrency(security.getType() == SecurityType.DERIVATIVE))
                 .map(quote -> quote.multiply(BigDecimal.valueOf(openedPositions)))
                 .orElseGet(() -> securityProfitService.getPurchaseCost(security, positions, RUB)
                         .add(securityProfitService.getPurchaseAccruedInterest(security, positions, RUB)));

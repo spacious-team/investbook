@@ -33,7 +33,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 import static org.springframework.util.StringUtils.hasLength;
 
 @Service
@@ -84,7 +83,7 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
         m.setAccruedInterest(e.getAccruedInterest());
         m.setCurrency(e.getCurrency());
         SecurityType securityType = e.getAccruedInterest() == null ?
-            SecurityType.valueOf(getSecurityType(e.getSecurity().getId())) :
+            SecurityType.valueOf(e.getSecurity().getType()) :
             SecurityType.BOND;
         m.setSecurity(
                 ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),

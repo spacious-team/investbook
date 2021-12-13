@@ -27,6 +27,7 @@ import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.sber.SecurityHelper;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -40,9 +41,11 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Se
     static final String FIRST_LINE = "Номер договора";
     @Getter
     private final Collection<Security> securities = new ArrayList<>();
+    private final SberSecurityDepositBrokerReport report;
 
     protected SberSecurityDepsitAndWithdrawalTable(SberSecurityDepositBrokerReport report) {
         super(report, "Движение ЦБ", FIRST_LINE, null, SberSecurityDepositAndWithdrawalTableHeader.class);
+        this.report = report;
     }
 
     @Override
@@ -64,7 +67,12 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Se
         }
         String portfolio = row.getStringCellValue(PORTFOLIO);
         Instant instant = row.getInstantCellValue(DATE_TIME);
-        String securityId = getSecurityId(row.getStringCellValue(CODE), row.getStringCellValue(SECTION));
+        String section = row.getStringCellValue(SECTION);
+        String codeId = getSecurityId(row.getStringCellValue(CODE), section);
+        String securityId = report.getSecurityRegistrar().declareStockOrBond(codeId, () -> Security.builder()
+                .id(codeId)
+                .name(row.getStringCellValueOrDefault(NAME, null))
+                .type(SecurityHelper.getSecurityType(section, null)));
         return SecurityTransaction.builder()
                 .tradeId(generateTradeId(portfolio, instant, securityId))
                 .timestamp(instant)

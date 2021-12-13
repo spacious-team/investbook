@@ -25,6 +25,7 @@ import org.spacious_team.table_wrapper.api.TableCell;
 import org.spacious_team.table_wrapper.api.TableCellAddress;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
 import ru.investbook.parser.AbstractExcelBrokerReport;
+import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +44,8 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
     private static final String REPORT_DATE_MARKER = "за период";
     private final Workbook book;
 
-    public UralsibBrokerReport(ZipInputStream zis) {
+    public UralsibBrokerReport(ZipInputStream zis, SecurityRegistrar securityRegistrar) {
+        super(securityRegistrar);
         try {
             ZipEntry zipEntry = zis.getNextEntry();
             Path path = Paths.get(zipEntry.getName());
@@ -59,7 +61,8 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
         }
     }
 
-    public UralsibBrokerReport(String excelFileName, InputStream is) {
+    public UralsibBrokerReport(String excelFileName, InputStream is, SecurityRegistrar securityRegistrar) {
+        super(securityRegistrar);
         this.book = getWorkBook(excelFileName, is);
         ReportPage reportPage = new ExcelSheet(book.getSheetAt(0));
         Path path = Paths.get(excelFileName);

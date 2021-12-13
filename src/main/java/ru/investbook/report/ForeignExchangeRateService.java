@@ -251,24 +251,25 @@ public class ForeignExchangeRateService {
      * Конвертирует котировку из заданной валюты в целевую валюту по последнему известному курсу или
      * курсу по-умолчанию, если официальный курс не известен.
      */
-    public SecurityQuote convertQuoteToCurrency(SecurityQuote quote, String toCurrency) {
+    public SecurityQuote convertQuoteToCurrency(SecurityQuote quote, String toCurrency, SecurityType securityType) {
         String fromCurrency = quote.getCurrency();
         if (fromCurrency == null || fromCurrency.equalsIgnoreCase(toCurrency)) {
             return quote;
         } else {
-            return convertQuoteToCurrency(quote, () -> getExchangeRate(fromCurrency, toCurrency))
+            return convertQuoteToCurrency(quote, () -> getExchangeRate(fromCurrency, toCurrency), securityType)
                     .currency(toCurrency)
                     .build();
         }
     }
 
-    private static SecurityQuoteBuilder convertQuoteToCurrency(SecurityQuote quote, Supplier<BigDecimal> exchangeRateSupplier) {
+    private static SecurityQuoteBuilder convertQuoteToCurrency(SecurityQuote quote,
+                                                               Supplier<BigDecimal> exchangeRateSupplier,
+                                                               SecurityType securityType) {
         BigDecimal exchangeRate = exchangeRateSupplier.get();
         BigDecimal accruedInterest = quote.getAccruedInterest();
-        SecurityType type = getSecurityType(quote.getSecurity());
-        boolean nonCurrencyQuote = (type == BOND) ||
-                ((type == STOCK_OR_BOND) && (accruedInterest != null)) ||
-                (type == DERIVATIVE);
+        boolean nonCurrencyQuote = (securityType == BOND) ||
+                ((securityType == STOCK_OR_BOND) && (accruedInterest != null)) ||
+                (securityType == DERIVATIVE);
         return quote.toBuilder()
                 .quote(nonCurrencyQuote ? quote.getQuote() : quote.getQuote().multiply(exchangeRate))
                 .price((quote.getPrice() == null) ? null : quote.getPrice().multiply(exchangeRate))

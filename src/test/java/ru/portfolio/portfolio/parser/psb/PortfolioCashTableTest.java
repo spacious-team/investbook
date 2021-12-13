@@ -18,9 +18,11 @@
 
 package ru.investbook.parser.psb;
 
+import org.mockito.Mock;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
+import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -30,6 +32,9 @@ import static org.testng.Assert.assertEquals;
 @Ignore
 public class PortfolioCashTableTest {
 
+    @Mock
+    SecurityRegistrar securityRegistrar;
+
     @DataProvider(name = "cash_in")
     Object[][] getData() {
         return new Object[][] {{"E:\\1.xlsx", BigDecimal.valueOf(350.37)}};
@@ -37,6 +42,7 @@ public class PortfolioCashTableTest {
 
     @Test(dataProvider = "cash_in")
     void testIsin(String report, BigDecimal expectedCash) throws IOException {
-        assertEquals(new CashTable(new PsbBrokerReport(report)).getData().get(0).getValue(), expectedCash);
+        PsbBrokerReport psbBrokerReport = new PsbBrokerReport(report, securityRegistrar);
+        assertEquals(new CashTable(psbBrokerReport).getData().get(0).getValue(), expectedCash);
     }
 }

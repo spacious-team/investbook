@@ -60,8 +60,8 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
 
     public Table create(Portfolio portfolio) {
         Table profit = new Table();
-        for (String isin : getSecuritiesIsin(portfolio)) {
-            Optional<SecurityEntity> securityEntity = securityRepository.findById(isin);
+        for (String code : getDerivativeCodes(portfolio)) {
+            Optional<SecurityEntity> securityEntity = securityRepository.findById(code);
             if (securityEntity.isPresent()) {
                 Security contract = securityConverter.fromEntity(securityEntity.get());
                 DerivativeEvents derivativeEvents = derivativeEventsFactory.getDerivativeEvents(
@@ -76,7 +76,7 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
         return profit;
     }
 
-    private Collection<String> getSecuritiesIsin(Portfolio portfolio) {
+    private Collection<String> getDerivativeCodes(Portfolio portfolio) {
         return transactionRepository.findDistinctDerivativeByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
                 singleton(portfolio.getId()),
                 ViewFilter.get().getFromDate(),

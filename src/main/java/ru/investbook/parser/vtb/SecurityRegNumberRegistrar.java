@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,28 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser;
+package ru.investbook.parser.vtb;
 
-import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.spacious_team.broker.pojo.Security;
 
-import java.time.Instant;
-import java.time.ZoneId;
+import java.util.Optional;
 
-/**
- * Broker report containing single portfolio information
- */
-public interface SingleBrokerReport extends BrokerReport {
+public interface SecurityRegNumberRegistrar {
 
-    String getPortfolio();
+    Optional<Security> getSecurityByRegistrationNumber(String registrationNumber);
 
-    Instant getReportEndDateTime();
-
-    ZoneId getReportZoneId();
-
-    Instant convertToInstant(String value);
-
-    /**
-     * Registrar where new securities will be registered
-     */
-    SecurityRegistrar getSecurityRegistrar();
 }

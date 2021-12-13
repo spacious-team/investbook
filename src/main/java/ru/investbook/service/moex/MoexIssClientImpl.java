@@ -95,8 +95,7 @@ public class MoexIssClientImpl implements MoexIssClient {
     private final Map<String, Optional<String>> optionUnderlingFutures = new ConcurrentHashMap<>();
 
     @Override
-    public Optional<String> getSecId(String isinOrContractName) {
-        SecurityType securityType = getSecurityType(isinOrContractName);
+    public Optional<String> getSecId(String isinOrContractName, SecurityType securityType) {
         if (securityType == DERIVATIVE) {
             // Try to check futures:
             // Moex couldn't find futures contract (too many records). Try to evaluate contract name
@@ -174,9 +173,8 @@ public class MoexIssClientImpl implements MoexIssClient {
         return quote;
     }
 
-    public boolean isDerivativeAndExpired(String shortnameOrSecid) {
+    public boolean isDerivativeAndExpired(String shortnameOrSecid, SecurityType securityType) {
         try {
-            SecurityType securityType = getSecurityType(shortnameOrSecid);
             if (securityType == DERIVATIVE) {
                 int currentYear = getCurrentYear();
                 int year;

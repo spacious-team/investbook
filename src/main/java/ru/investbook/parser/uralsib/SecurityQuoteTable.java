@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.uralsib;
 
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityQuote.SecurityQuoteBuilder;
 import org.spacious_team.table_wrapper.api.TableRow;
@@ -68,8 +69,13 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
                 .orElseThrow(() -> new IllegalArgumentException("Не смогли вычислить валюту облигации " + isin + ", " +
                         "цена и НКД могут быть в разных валютах"));
 
+        String securityId = getReport().getSecurityRegistrar().declareStockOrBond(isin, () -> Security.builder()
+                .id(isin)
+                .isin(isin)
+                .name(row.getStringCellValue(NAME)));
+
         return builder
-                .security(isin)
+                .security(securityId)
                 .timestamp(getReport().getReportEndDateTime())
                 .build();
     }

@@ -53,7 +53,7 @@ public class VtbReportTables extends AbstractReportTables<SingleBrokerReport> {
                 securitiesTable,
                 securityFlowTable,
                 WrappingReportTable.of(report, securityTransactionTable.getSecurities()));
-        SecurityRegNumberToIsinConverter securityRegNumberToIsinConverter = new SecurityRegNumberToIsinConverterImpl(
+        SecurityRegNumberRegistrar securityRegNumberRegistrar = new SecurityRegNumberRegistrarImpl(
                 securitiesTable, securityFlowTable);
         this.cashFlowEventTable = new CashFlowEventTable(report);
         VtbSecurityDepositAndWithdrawalTable securityDepositAndWithdrawalTable =
@@ -62,7 +62,7 @@ public class VtbReportTables extends AbstractReportTables<SingleBrokerReport> {
                 securityTransactionTable,
                 securityDepositAndWithdrawalTable);
         this.couponAmortizationRedemptionTable = new VtbCouponAmortizationRedemptionTable(
-                cashFlowEventTable, securityRegNumberToIsinConverter, securityDepositAndWithdrawalTable);
+                cashFlowEventTable, securityRegNumberRegistrar, securityDepositAndWithdrawalTable);
     }
 
     @Override

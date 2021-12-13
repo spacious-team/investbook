@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.vtb;
 
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
@@ -60,8 +61,11 @@ public class VtbSecurityQuoteTable extends SingleAbstractReportTable<SecurityQuo
         String currency = ofNullable(row.getStringCellValueOrDefault(CURRENCY, null))
                 .map(VtbBrokerReport::convertToCurrency)
                 .orElse(null);
+        String description = row.getStringCellValue(NAME_REGNUMBER_ISIN);
+        Security security = VtbReportHelper.getSecurity(description);
+        String securityId = getReport().getSecurityRegistrar().declareStockOrBond(security.getIsin(), security::toBuilder);
         return SecurityQuote.builder()
-                .security(row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",")[2].trim())
+                .security(securityId)
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .price(price)

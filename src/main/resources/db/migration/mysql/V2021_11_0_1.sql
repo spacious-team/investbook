@@ -16,28 +16,4 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser;
-
-import org.spacious_team.broker.report_parser.api.BrokerReport;
-
-import java.time.Instant;
-import java.time.ZoneId;
-
-/**
- * Broker report containing single portfolio information
- */
-public interface SingleBrokerReport extends BrokerReport {
-
-    String getPortfolio();
-
-    Instant getReportEndDateTime();
-
-    ZoneId getReportZoneId();
-
-    Instant convertToInstant(String value);
-
-    /**
-     * Registrar where new securities will be registered
-     */
-    SecurityRegistrar getSecurityRegistrar();
-}
+ALTER TABLE `security` CHANGE COLUMN `type` `type` INT(2) UNSIGNED NOT NULL COMMENT 'Тип ценной бумаги' AFTER `id`;

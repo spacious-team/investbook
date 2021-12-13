@@ -37,6 +37,8 @@ import java.time.format.DateTimeFormatter;
 public abstract class AbstractBrokerReport implements SingleBrokerReport {
 
     protected static final int LAST_TRADE_HOUR = 19;
+    @Getter
+    private final SecurityRegistrar securityRegistrar;
     @Setter(AccessLevel.PROTECTED)
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     @Setter(AccessLevel.PROTECTED)

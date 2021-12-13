@@ -21,6 +21,7 @@ package ru.investbook.parser.vtb;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.util.StringUtils;
 
@@ -29,6 +30,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,15 +48,15 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
             Pattern.compile("\\b([\\w]+).\\s+размер куп"),
             Pattern.compile("\\b([\\w]+),\\s+частичное досроч")
     };
-    private final SecurityRegNumberToIsinConverter regNumberToIsinConverter;
+    private final SecurityRegNumberRegistrar securityRegNumberRegistrar;
     private final VtbSecurityDepositAndWithdrawalTable vtbSecurityDepositAndWithdrawalTable;
     private final Collection<EventCashFlow> externalBondPayments = new ArrayList<>();
 
     protected VtbCouponAmortizationRedemptionTable(CashFlowEventTable cashFlowEventTable,
-                                                   SecurityRegNumberToIsinConverter regNumberToIsinConverter,
+                                                   SecurityRegNumberRegistrar securityRegNumberRegistrar,
                                                    VtbSecurityDepositAndWithdrawalTable vtbSecurityDepositAndWithdrawalTable) {
         super(cashFlowEventTable);
-        this.regNumberToIsinConverter = regNumberToIsinConverter;
+        this.securityRegNumberRegistrar = securityRegNumberRegistrar;
         this.vtbSecurityDepositAndWithdrawalTable = vtbSecurityDepositAndWithdrawalTable;
     }
 
@@ -69,16 +71,17 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
         BigDecimal value = event.getValue()
                 .add(tax.abs());
         try {
-            String isin = getIsin(lowercaseDescription, regNumberToIsinConverter);
+            Security security = getSecurity(lowercaseDescription);
             int count = switch (eventType) {
                 case COUPON -> value.divide(getCouponPerOneBond(lowercaseDescription), 2, RoundingMode.HALF_UP)
                         .intValueExact();
                 case AMORTIZATION -> value.divide(getAmortizationPerOneBond(lowercaseDescription), 2, RoundingMode.HALF_UP)
                         .intValueExact();
-                case REDEMPTION -> vtbSecurityDepositAndWithdrawalTable.getBondRedemptionCount(isin)
-                        .orElseThrow(() -> new IllegalArgumentException("Не удалось определить количество погашенных облигаций " + isin));
+                case REDEMPTION -> vtbSecurityDepositAndWithdrawalTable.getBondRedemptionCount(security.getIsin())
+                        .orElseThrow(() -> new IllegalArgumentException("Не удалось определить количество погашенных облигаций " + security.getIsin()));
                 default -> throw new UnsupportedOperationException();
             };
+            String securityId = getReport().getSecurityRegistrar().declareBond(security.getIsin(), security::toBuilder);
             SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                     .portfolio(getReport().getPortfolio())
                     .eventType(eventType)
@@ -86,7 +89,7 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
                     .value(value)
                     .currency(event.getCurrency())
                     .count(count)
-                    .security(isin);
+                    .security(securityId);
             Collection<SecurityEventCashFlow> data = new ArrayList<>();
             data.add(builder.build());
             if (tax.abs().compareTo(minValue) >= 0) {
@@ -103,18 +106,18 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
         }
     }
 
-    private static String getIsin(String description, SecurityRegNumberToIsinConverter regNumberToIsinConverter) {
-        String isin;
+    private Security getSecurity(String description) {
         for (Pattern pattern : registrationNumberPatterns) {
             Matcher matcher = pattern.matcher(description);
             if (matcher.find()) {
                 String regNumber = matcher.group(1);
-                if ((isin = regNumberToIsinConverter.convertToIsin(regNumber)) != null) {
-                    return isin;
+                Optional<Security> security = securityRegNumberRegistrar.getSecurityByRegistrationNumber(regNumber);
+                if (security.isPresent()) {
+                    return security.get();
                 }
             }
         }
-        throw new IllegalArgumentException("Не смог выделить ISIN облигации по ресгитрационному номеру: " + description);
+        throw new IllegalArgumentException("Не смог выделить ISIN облигации по региcтрационному номеру: " + description);
     }
 
     private static BigDecimal getCouponPerOneBond(String description) {

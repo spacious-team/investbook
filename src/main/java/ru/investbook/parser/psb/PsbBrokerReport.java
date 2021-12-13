@@ -24,6 +24,7 @@ import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.api.TableCellAddress;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
 import ru.investbook.parser.AbstractExcelBrokerReport;
+import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,15 +42,16 @@ public class PsbBrokerReport extends AbstractExcelBrokerReport {
 
     private final Workbook book;
 
-    public PsbBrokerReport(String excelFileName) throws IOException {
-        this(Paths.get(excelFileName));
+    public PsbBrokerReport(String excelFileName, SecurityRegistrar securityRegistrar) throws IOException {
+        this(Paths.get(excelFileName), securityRegistrar);
     }
 
-    public PsbBrokerReport(Path report) throws IOException {
-        this(report.getFileName().toString(), Files.newInputStream(report));
+    public PsbBrokerReport(Path report, SecurityRegistrar securityRegistrar) throws IOException {
+        this(report.getFileName().toString(), Files.newInputStream(report), securityRegistrar);
     }
 
-    public PsbBrokerReport(String excelFileName, InputStream is) {
+    public PsbBrokerReport(String excelFileName, InputStream is, SecurityRegistrar securityRegistrar) {
+        super(securityRegistrar);
         this.book = getWorkBook(excelFileName, is);
         ReportPage reportPage = new ExcelSheet(book.getSheetAt(0));
         checkReportFormat(excelFileName, reportPage);

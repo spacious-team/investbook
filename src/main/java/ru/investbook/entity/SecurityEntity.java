@@ -20,9 +20,12 @@ package ru.investbook.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.spacious_team.broker.pojo.SecurityType;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -34,6 +37,10 @@ public class SecurityEntity {
     @Id
     @Column(name = "id")
     private String id;
+
+    @Column(name = "type", nullable = false)
+    @Enumerated(EnumType.ORDINAL)
+    private SecurityType type;
 
     @Column(name = "isin")
     private String isin;

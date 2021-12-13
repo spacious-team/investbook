@@ -26,15 +26,14 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTables;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 
-public class SberTrReportTables extends AbstractReportTables<BrokerReport> {
+public class SberTrReportTables extends AbstractReportTables<SberTrBrokerReport> {
 
-    protected SberTrReportTables(BrokerReport report) {
+    protected SberTrReportTables(SberTrBrokerReport report) {
         super(report);
     }
 
