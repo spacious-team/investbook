@@ -43,6 +43,7 @@ import java.time.ZoneId;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 @RequestMapping("/security-quotes")
@@ -97,11 +98,14 @@ public class SecurityQuoteController {
 
     public String updateQuoteFromMoexIssApi() throws InterruptedException, ExecutionException {
         long t0 = System.nanoTime();
-        new ForkJoinPool(4 * Runtime.getRuntime().availableProcessors())
-                .submit(() -> securityRepository.findAll()
+        ForkJoinPool pool = new ForkJoinPool(4 * Runtime.getRuntime().availableProcessors());
+        pool.submit(() -> securityRepository.findAll()
                         .parallelStream()
                         .forEach(moexIssSecurityQuoteService::updateQuote))
                 .get();
+        do {
+            pool.shutdown();
+        } while (!pool.awaitTermination(100, TimeUnit.MILLISECONDS));
         String message = securityQuoteRepository.findFirstByOrderByTimestampDesc()
                 .map(SecurityQuoteEntity::getTimestamp)
                 .map(instant -> LocalDate.ofInstant(instant, ZoneId.systemDefault()))

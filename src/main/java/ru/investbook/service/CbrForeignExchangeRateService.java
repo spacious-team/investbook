@@ -46,6 +46,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -72,11 +73,14 @@ public class CbrForeignExchangeRateService {
     public void updateFrom(LocalDate fromDate) {
         long t0 = System.nanoTime();
         String formattedFromDate = fromDate.format(dateTimeFormatter);
-        new ForkJoinPool(currencyParamValues.size())
-                .submit(() -> currencyParamValues.entrySet()
+        ForkJoinPool pool = new ForkJoinPool(currencyParamValues.size());
+        pool.submit(() -> currencyParamValues.entrySet()
                         .parallelStream()
                         .forEach(e -> updateCurrencyRate(formattedFromDate, e)))
                 .get();
+        do {
+            pool.shutdown();
+        } while (!pool.awaitTermination(100, TimeUnit.MILLISECONDS));
         log.info("Курсы валют обновлены за {}", Duration.ofNanos(System.nanoTime() - t0));
     }
 
