@@ -256,7 +256,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 quote = securityProfitService.getSecurityQuote(security, toCurrency, filter.getToDate());
 
                 if (quote != null) {
-                    row.put(LAST_PRICE, quote.getCleanPriceInCurrency());
+                    row.put(LAST_PRICE, quote.getCleanPriceInCurrency(securityType == DERIVATIVE));
                     row.put(LAST_ACCRUED_INTEREST, quote.getAccruedInterest());
                 }
 

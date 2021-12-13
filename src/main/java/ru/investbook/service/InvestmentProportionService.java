@@ -21,7 +21,7 @@ package ru.investbook.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
-import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityDescriptionEntity;
@@ -78,7 +78,7 @@ public class InvestmentProportionService {
         FifoPositions positions = fifoPositionsFactory.get(security, FifoPositionsFilter.of(filter));
         int openedPositions = positions.getCurrentOpenedPositionsCount();
         BigDecimal investmentRub = ofNullable(securityProfitService.getSecurityQuote(security, RUB, filter.getToDate()))
-                .map(SecurityQuote::getDirtyPriceInCurrency)
+                .map(quote -> quote.getDirtyPriceInCurrency(security.getType() == SecurityType.DERIVATIVE))
                 .map(quote -> quote.multiply(BigDecimal.valueOf(openedPositions)))
                 .orElseGet(() -> securityProfitService.getPurchaseCost(security, positions, RUB)
                         .add(securityProfitService.getPurchaseAccruedInterest(security, positions, RUB)));

@@ -220,7 +220,6 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                     foreignExchangeRateService.getExchangeRate(baseCurrency, toCurrency);
             return SecurityQuote.builder()
                     .security(security.getId())
-                    .securityType(security.getType())
                     .timestamp(to)
                     .quote(lastPrice)
                     .currency(toCurrency)
@@ -229,7 +228,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
         return securityQuoteRepository
                 .findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(security.getId(), to)
                 .map(securityQuoteConverter::fromEntity)
-                .map(_quote -> foreignExchangeRateService.convertQuoteToCurrency(_quote, toCurrency))
+                .map(_quote -> foreignExchangeRateService.convertQuoteToCurrency(_quote, toCurrency, security.getType()))
                 .map(_quote -> hasLength(_quote.getCurrency()) ? _quote : _quote.toBuilder()
                         .currency(toCurrency) // Не известно точно в какой валюте котируется инструмент,
                         .build())             // делаем предположение, что в валюте сделки
