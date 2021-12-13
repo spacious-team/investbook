@@ -23,6 +23,8 @@ import org.spacious_team.broker.pojo.Security;
 
 import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
+
 @RequiredArgsConstructor
 public class SecurityRegNumberRegistrarImpl implements SecurityRegNumberRegistrar {
     private final VtbSecuritiesTable vtbSecuritiesTable;
@@ -30,10 +32,10 @@ public class SecurityRegNumberRegistrarImpl implements SecurityRegNumberRegistra
 
     @Override
     public Optional<Security> getSecurityByRegistrationNumber(String registrationNumber) {
-        if (registrationNumber == null) return Optional.empty();
-        registrationNumber = registrationNumber.toUpperCase();
-        Security security = vtbSecurityFlowTable.getRegNumberToSecurity().get(registrationNumber);
-        if (security == null) vtbSecuritiesTable.getRegNumberToSecurity().get(registrationNumber);
-        return Optional.ofNullable(security);
+        return ofNullable(registrationNumber)
+                .map(String::toUpperCase)
+                .map(regNumber ->
+                        ofNullable(vtbSecurityFlowTable.getRegNumberToSecurity().get(regNumber))
+                                .orElseGet(() -> vtbSecuritiesTable.getRegNumberToSecurity().get(regNumber)));
     }
 }

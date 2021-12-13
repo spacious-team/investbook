@@ -80,7 +80,7 @@ public class CbrForeignExchangeRateService {
                 .get();
         do {
             pool.shutdown();
-        } while (!pool.awaitTermination(100, TimeUnit.MILLISECONDS));
+        } while (!pool.awaitTermination(500, TimeUnit.MILLISECONDS));
         log.info("Курсы валют обновлены за {}", Duration.ofNanos(System.nanoTime() - t0));
     }
 

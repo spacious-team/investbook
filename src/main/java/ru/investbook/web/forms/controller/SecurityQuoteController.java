@@ -105,7 +105,7 @@ public class SecurityQuoteController {
                 .get();
         do {
             pool.shutdown();
-        } while (!pool.awaitTermination(100, TimeUnit.MILLISECONDS));
+        } while (!pool.awaitTermination(500, TimeUnit.MILLISECONDS));
         String message = securityQuoteRepository.findFirstByOrderByTimestampDesc()
                 .map(SecurityQuoteEntity::getTimestamp)
                 .map(instant -> LocalDate.ofInstant(instant, ZoneId.systemDefault()))
