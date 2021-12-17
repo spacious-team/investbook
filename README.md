@@ -45,7 +45,7 @@
   <img src="https://user-images.githubusercontent.com/11336712/102415878-fee16600-4009-11eb-87c5-ed4ac6629941.png" width="32%"/>
   <img src="https://user-images.githubusercontent.com/11336712/102419341-9a75d500-4010-11eb-817a-a9b322237dd2.png" width="32%"/>
 - [портфель](src/main/asciidoc/portfolio-status.adoc) ценных бумаг с информацией о текущей позиции, усредненной цене
-  покупок и доходности ценных бумаг с учетом хеджирующих позиций на срочном рынке и усредненной цены покупки валюты;  
+  покупок и доходности ценных бумаг (ЧИСТВНДОХ/XIRR) с учетом хеджирующих позиций на срочном рынке и усредненной цены покупки валюты;  
   ![portfolio](https://user-images.githubusercontent.com/11336712/104820094-af2dce80-5843-11eb-8083-6521ea537334.png)
 - доля ценной бумаги в [портфеле](src/main/asciidoc/portfolio-status.adoc);  
   ![current-proportion](https://user-images.githubusercontent.com/11336712/88717010-8cd6b600-d128-11ea-901f-2b3fcee96f07.png)
@@ -67,7 +67,7 @@
   ![foreign-market](https://user-images.githubusercontent.com/11336712/84881751-fa59e600-b096-11ea-8b83-19d1c1229d73.png)
 - [ввод и вывод](src/main/asciidoc/securities-deposit-and-withdrawal.adoc) ценных бумаг с/на другие счета, конвертация, сплит акций (AAPL, TSLA и др.);  
   <img src="https://user-images.githubusercontent.com/11336712/87883425-f3185600-ca0f-11ea-9677-4689aa6a4ee5.png" width="40%"/>
-- [доходность](src/main/asciidoc/cash-flow.adoc) портфеля, пополнения, списания, переводы с/на другие счета, текущий остаток денежных средств;  
+- [доходность](src/main/asciidoc/cash-flow.adoc) портфеля (ЧИСТВНДОХ/XIRR), пополнения, списания, переводы с/на другие счета, текущий остаток денежных средств;  
   ![cash-in](https://user-images.githubusercontent.com/11336712/100395491-3172f100-3052-11eb-9652-cd5730ac2e6f.png)
 - [налоговая](src/main/asciidoc/tax.adoc) нагрузка, в том числе
   [обязательства](src/main/asciidoc/stock-market-profit.adoc#tax-liability) самостоятельной уплаты налога для иностранных бумаг;  
