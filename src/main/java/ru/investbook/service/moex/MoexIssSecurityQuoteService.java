@@ -42,16 +42,17 @@ public class MoexIssSecurityQuoteService {
     private final SecurityQuoteRepository securityQuoteRepository;
 
     public void updateQuote(SecurityEntity security) {
-        updateQuote(security.getId(), security.getType());
-    }
-
-    public void updateQuote(String securityId, SecurityType securityType) {
+        Integer securityId = security.getId();
+        SecurityType securityType = security.getType();
         if (securityType == CURRENCY_PAIR) {
             return; // currency pair quote derived from foreign exchange rate, use CbrForeignExchangeRateService
-        } else if (moexClient.isDerivativeAndExpired(securityId, securityType)) {
+        } else if (moexClient.isDerivativeAndExpired(security.getTicker(), securityType)) {
             return;
         }
-        moexClient.getSecId(securityId, securityType)
+        String isinOrContractName = Optional.ofNullable(security.getIsin())
+                .or(() -> Optional.ofNullable(security.getTicker()))
+                .orElseThrow();
+        moexClient.getSecId(isinOrContractName, securityType)
                 .flatMap(this::getSecurityQuote)
                 .ifPresentOrElse(
                         quote -> saveQuote(securityId, quote),
@@ -63,7 +64,7 @@ public class MoexIssSecurityQuoteService {
                 .flatMap(market -> moexClient.getQuote(moexSecId, market));
     }
 
-    private void saveQuote(String securityId, SecurityQuote quote) {
+    private void saveQuote(Integer securityId, SecurityQuote quote) {
         try {
             quote = quote.toBuilder()
                     .security(securityId)

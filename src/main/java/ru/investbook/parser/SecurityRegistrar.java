@@ -11,22 +11,22 @@ public interface SecurityRegistrar {
      *
      * @return security ID
      */
-    String declareStock(String isin, Supplier<SecurityBuilder> supplier);
+    int declareStock(String isin, Supplier<SecurityBuilder> supplier);
 
-    String declareBond(String isin, Supplier<SecurityBuilder> supplier);
+    int declareBond(String isin, Supplier<SecurityBuilder> supplier);
 
-    String declareStockOrBond(String isin, Supplier<SecurityBuilder> supplier);
+    int declareStockOrBond(String isin, Supplier<SecurityBuilder> supplier);
 
-    String declareDerivative(String code);
+    int declareDerivative(String code);
 
     /**
      * @param contract in USDRUB_TOM form
      * @return security ID
      */
-    String declareCurrencyPair(String contract);
+    int declareCurrencyPair(String contract);
 
     /**
      * @return security ID
      */
-    String declareAsset(String assetName, Supplier<SecurityBuilder> supplier);
+    int declareAsset(String assetName, Supplier<SecurityBuilder> supplier);
 }

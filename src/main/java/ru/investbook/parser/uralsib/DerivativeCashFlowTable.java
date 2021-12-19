@@ -55,7 +55,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
                 .build();
     }
 
-    private String getSecurityId(TableRow row) {
+    private int getSecurityId(TableRow row) {
         String description = row.getStringCellValueOrDefault(DESCRIPTION, "");
         Matcher matcher = contractPattern.matcher(description);
         if (matcher.find()) {

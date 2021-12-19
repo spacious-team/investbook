@@ -35,7 +35,6 @@ class VtbReportHelper {
         }
         String isin = parts[2].toUpperCase().trim();
         return Security.builder()
-                .id(isin)
                 .isin(isin)
                 .ticker(ticker)
                 .name(name)

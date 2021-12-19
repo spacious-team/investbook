@@ -69,7 +69,7 @@ public class SecuritySectorService {
     }
 
     @Transactional
-    public void uploadAndUpdateSecuritySector(String securityId, boolean forceUpdate) {
+    public void uploadAndUpdateSecuritySector(Integer securityId, boolean forceUpdate) {
         try {
             long t0 = nanoTime();
             Collection<SecurityEntity> security = securityRepository.findById(securityId)
@@ -115,8 +115,7 @@ public class SecuritySectorService {
                         .map(String::toUpperCase)
                         .map(tickerToSector::get))
                 .or(() -> ofNullable(security.getIsin())
-                        .or(() -> ofNullable(security.getId()))
-                        .flatMap(securityId -> moexIssClient.getSecId(securityId, security.getType())) // for shares moex secId returns ticker
+                        .flatMap(isin -> moexIssClient.getSecId(isin, security.getType())) // for shares moex secId returns ticker
                         .map(t -> t.endsWith("-RM") ? t.substring(0, t.length() - 2) : t)
                         .map(String::toUpperCase)
                         .map(tickerToSector::get))

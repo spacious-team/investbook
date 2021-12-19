@@ -21,7 +21,6 @@ package ru.investbook.report.excel;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
-import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.report.ClosedPosition;
@@ -33,6 +32,7 @@ import ru.investbook.report.Position;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
 import ru.investbook.report.ViewFilter;
+import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
 
@@ -48,7 +48,7 @@ import static ru.investbook.report.excel.ForeignMarketProfitExcelTableHeader.*;
 @Component
 @RequiredArgsConstructor
 public class ForeignMarketProfitExcelTableFactory implements TableFactory {
-    // isin -> security price currency
+    private final SecurityRepository securityRepository;
     private final TransactionRepository transactionRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final FifoPositionsFactory positionsFactory;
@@ -63,7 +63,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
         Table openPositionsProfit = new Table();
         Table closedPositionsProfit = new Table();
         for (String currencyPair : currencyPairs) {
-            FifoPositions positions = positionsFactory.get(currencyPair, SecurityType.CURRENCY_PAIR, positionsFilter);
+            FifoPositions positions = positionsFactory.getForCurrencyPair(currencyPair, positionsFilter);
             openPositionsProfit.addAll(getPositionProfit(currencyPair, positions.getOpenedPositions(),
                     this::getOpenedPositionProfit));
             closedPositionsProfit.addAll(getPositionProfit(currencyPair, positions.getClosedPositions(),
@@ -79,10 +79,12 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
      * Returns currency pairs, for example USDRUB, EURRUB
      */
     private Collection<String> getCurrencyPairs(Portfolio portfolio) {
-        return transactionRepository.findDistinctFxCurrencyPairByPortfolioInAndTimestampBetween(
-                singleton(portfolio.getId()),
-                ViewFilter.get().getFromDate(),
-                ViewFilter.get().getToDate());
+        Collection<Integer> fxContracts = transactionRepository
+                .findDistinctFxContractByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
+                        singleton(portfolio.getId()),
+                        ViewFilter.get().getFromDate(),
+                        ViewFilter.get().getToDate());
+        return securityRepository.findDistinctCurrencyPair(fxContracts);
     }
 
     private <T extends Position> Table getPositionProfit(String currencyPair,

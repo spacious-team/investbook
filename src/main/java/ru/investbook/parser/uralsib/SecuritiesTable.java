@@ -48,7 +48,6 @@ public class SecuritiesTable extends SingleAbstractReportTable<ReportSecurityInf
     protected ReportSecurityInformation parseRow(TableRow row) {
         String isin = row.getStringCellValue(ISIN);
         SecurityBuilder security = Security.builder()
-                .id(isin)
                 .isin(isin)
                 .name(row.getStringCellValue(NAME))
                 .type(SecurityType.STOCK_OR_BOND);

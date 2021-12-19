@@ -42,9 +42,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static java.lang.Character.isLetterOrDigit;
 import static java.lang.Double.parseDouble;
@@ -125,7 +125,7 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
             Security security = info.getSecurity();
             if (contains(descriptionLowercase, info.getCfi()) ||   // dividend
                     (security != null && (contains(descriptionLowercase, security.getName()) ||  // coupon, amortization, redemption
-                            contains(descriptionLowercase, security.getId())))) { // for future report changes
+                            contains(descriptionLowercase, security.getIsin())))) { // for future report changes
                 return security;
             }
         }
@@ -166,9 +166,9 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("Не найдено количество на начало периода отчета для ЦБ " + security));
         Collection<SecurityTransaction> transactions = securityTransactions.stream()
-                .filter(t -> t.getSecurity().equals(security.getId()))
+                .filter(t -> Objects.equals(t.getSecurity(), security.getId()))
                 .sorted(Comparator.comparing(SecurityTransaction::getTimestamp))
-                .collect(Collectors.toList());
+                .toList();
         int prevCount = 0;
         for (SecurityTransaction transaction : transactions) {
             if (transaction.getTimestamp().isBefore(atInstant)) {

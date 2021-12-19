@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -90,15 +89,11 @@ public class InvestbookApiClient {
     }
 
     private Security convertDerivativeSecurityId(Security security) {
-        String id = security.getId();
-        String newId = moexDerivativeCodeService.convertDerivativeSecurityId(id);
-        if (!Objects.equals(id, newId)) {
-            security = security.toBuilder()
-                    .id(newId)
-                    .type(SecurityType.DERIVATIVE)
-                    .build();
-        }
-        return security;
+        return security.getType() == SecurityType.DERIVATIVE ?
+                security.toBuilder()
+                        .ticker(moexDerivativeCodeService.convertDerivativeCode(security.getTicker()))
+                        .build() :
+                security;
     }
 
     public void addTransaction(AbstractTransaction transaction) {

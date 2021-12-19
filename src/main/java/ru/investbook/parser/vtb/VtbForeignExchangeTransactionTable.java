@@ -72,7 +72,7 @@ public class VtbForeignExchangeTransactionTable extends SingleInitializableRepor
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .negate();
         String instrument = row.getStringCellValue(INSTRUMENT);
-        String securityId = getReport().getSecurityRegistrar().declareCurrencyPair(instrument);
+        int securityId = getReport().getSecurityRegistrar().declareCurrencyPair(instrument);
         return ForeignExchangeTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .tradeId(row.getStringCellValue(TRADE_ID))

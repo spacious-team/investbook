@@ -75,7 +75,7 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
                 .add(row.getBigDecimalCellValueOrDefault(CLEARING_COMMISSION, BigDecimal.ZERO))
                 .negate();
         String code = row.getStringCellValue(CONTRACT);
-        String securityId = getReport().getSecurityRegistrar().declareDerivative(code);
+        int securityId = getReport().getSecurityRegistrar().declareDerivative(code);
         return DerivativeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .tradeId(tradeId)

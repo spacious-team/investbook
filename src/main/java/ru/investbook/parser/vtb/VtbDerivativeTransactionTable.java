@@ -51,7 +51,7 @@ public class VtbDerivativeTransactionTable extends SingleAbstractReportTable<Der
                 .add(row.getBigDecimalCellValue(BROKER_TRANSACTION_COMMISSION))
                 .negate();
         String contract = row.getStringCellValue(CONTRACT);
-        String securityId = getReport().getSecurityRegistrar().declareDerivative(contract);
+        int securityId = getReport().getSecurityRegistrar().declareDerivative(contract);
         return DerivativeTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .tradeId(row.getStringCellValue(TRADE_ID))

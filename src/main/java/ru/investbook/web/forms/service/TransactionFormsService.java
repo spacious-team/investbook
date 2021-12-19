@@ -34,6 +34,7 @@ import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.TransactionCashFlowConverter;
 import ru.investbook.converter.TransactionConverter;
 import ru.investbook.entity.PortfolioEntity;
+import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.repository.PortfolioRepository;
@@ -96,7 +97,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
     @Override
     @Transactional
     public void save(TransactionModel tr) {
-        String savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(tr);
+        int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(tr);
         int direction = ((tr.getAction() == TransactionModel.Action.BUY) ? 1 : -1);
         BigDecimal multiplier = BigDecimal.valueOf(-direction * tr.getCount());
 
@@ -184,7 +185,8 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
         BigDecimal cnt = BigDecimal.valueOf(count);
         m.setAction(count >= 0 ? TransactionModel.Action.BUY : TransactionModel.Action.CELL);
         m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
-        AtomicReference<SecurityType> securityType = new AtomicReference<>(SecurityType.valueOf(e.getSecurity().getType()));
+        SecurityEntity securityEntity = e.getSecurity();
+        AtomicReference<SecurityType> securityType = new AtomicReference<>(SecurityType.valueOf(securityEntity.getType()));
         m.setCount(abs(count));
         List<TransactionCashFlowEntity> cashFlows = transactionCashFlowRepository.findByTransactionIdAndCashFlowTypeIn(
                 e.getId(),
@@ -210,8 +212,9 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
             }
         });
         m.setSecurity(
-                ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),
-                ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()),
+                securityEntity.getId(),
+                securityEntity.getIsin(),
+                ofNullable(securityEntity.getName()).orElse(securityEntity.getTicker()),
                 securityType.get());
         if (m.getSecurityType() == DERIVATIVE &&
                 m.getPrice() != null && m.getPrice().floatValue() > 0.000001) {

@@ -23,6 +23,7 @@ import org.spacious_team.broker.pojo.SecurityQuote;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.SecurityQuoteConverter;
+import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityQuoteEntity;
 import ru.investbook.repository.SecurityQuoteRepository;
 import ru.investbook.web.forms.model.SecurityQuoteModel;
@@ -60,7 +61,7 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
     @Override
     @Transactional
     public void save(SecurityQuoteModel e) {
-        String savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(e);
+        int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(e);
         SecurityQuoteEntity entity = securityQuoteRepository.saveAndFlush(
                 securityQuoteConverter.toEntity(SecurityQuote.builder()
                         .id(e.getId())
@@ -82,12 +83,14 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
         m.setPrice(e.getPrice());
         m.setAccruedInterest(e.getAccruedInterest());
         m.setCurrency(e.getCurrency());
+        SecurityEntity securityEntity = e.getSecurity();
         SecurityType securityType = e.getAccruedInterest() == null ?
-            SecurityType.valueOf(e.getSecurity().getType()) :
+            SecurityType.valueOf(securityEntity.getType()) :
             SecurityType.BOND;
         m.setSecurity(
-                ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),
-                ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()),
+                securityEntity.getId(),
+                securityEntity.getIsin(),
+                ofNullable(securityEntity.getName()).orElse(securityEntity.getTicker()),
                 securityType);
         return m;
     }

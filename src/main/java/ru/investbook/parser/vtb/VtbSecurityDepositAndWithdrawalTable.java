@@ -66,8 +66,7 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
         Security security = VtbReportHelper.getSecurity(description);
         Instant timestamp = row.getInstantCellValue(DATE);
         String tradeId = generateTradeId(portfolio, timestamp, security.getIsin());
-        String securityId = getReport().getSecurityRegistrar().declareStockOrBond(security.getIsin(), security::toBuilder);
-
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(security.getIsin(), security::toBuilder);
 
         return SecurityTransaction.builder()
                         .tradeId(tradeId)

@@ -25,7 +25,6 @@ import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
-import ru.investbook.entity.SecurityEntity;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
 import ru.investbook.report.ViewFilter;
@@ -40,6 +39,7 @@ import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -139,8 +139,10 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
     }
 
     private String getSecurityName(SecurityEventCashFlow cash) {
-       return securityRepository.findById(cash.getSecurity())
-                .map(SecurityEntity::getName)
-                .orElse(cash.getSecurity());
+        return securityRepository.findById(cash.getSecurity())
+                .flatMap(security -> Optional.ofNullable(security.getName())
+                        .or(() -> Optional.ofNullable(security.getTicker()))
+                        .or(() -> Optional.ofNullable(security.getIsin())))
+                .orElse("<неизвестно>");
     }
 }

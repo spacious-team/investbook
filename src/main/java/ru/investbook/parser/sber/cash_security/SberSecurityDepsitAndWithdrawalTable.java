@@ -33,7 +33,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static ru.investbook.parser.sber.SecurityHelper.getSecurityId;
 import static ru.investbook.parser.sber.cash_security.SberSecurityDepsitAndWithdrawalTable.SberSecurityDepositAndWithdrawalTableHeader.*;
 
 @Slf4j
@@ -67,22 +66,23 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Se
         }
         String portfolio = row.getStringCellValue(PORTFOLIO);
         Instant instant = row.getInstantCellValue(DATE_TIME);
-        String section = row.getStringCellValue(SECTION);
-        String codeId = getSecurityId(row.getStringCellValue(CODE), section);
-        String securityId = report.getSecurityRegistrar().declareStockOrBond(codeId, () -> Security.builder()
-                .id(codeId)
-                .name(row.getStringCellValueOrDefault(NAME, null))
-                .type(SecurityHelper.getSecurityType(section, null)));
+        Security security = SecurityHelper.getSecurity(
+                row.getStringCellValue(CODE),
+                row.getStringCellValueOrDefault(NAME, null),
+                row.getStringCellValue(SECTION),
+                null,
+                report.getSecurityRegistrar());
+
         return SecurityTransaction.builder()
-                .tradeId(generateTradeId(portfolio, instant, securityId))
+                .tradeId(generateTradeId(portfolio, instant, security.getId()))
                 .timestamp(instant)
                 .portfolio(portfolio)
-                .security(securityId)
+                .security(security.getId())
                 .count(count)
                 .build();
     }
 
-    private static String generateTradeId(String portfolio, Instant instant, String securityId) {
+    private static String generateTradeId(String portfolio, Instant instant, Integer securityId) {
         String id = instant.getEpochSecond() + securityId + portfolio;
         return id.substring(0, Math.min(32, id.length()));
     }

@@ -39,6 +39,9 @@ public class SecurityQuoteModel {
     @Nullable
     private Integer id;
 
+    @Nullable
+    private Integer securityId;
+
     /**
      * In "name (isin)" or "contract-name" format
      */
@@ -64,26 +67,23 @@ public class SecurityQuoteModel {
 
     private String currency;
 
-    public void setSecurity(String securityId, String securityName, SecurityType securityType) {
-        this.security = SecurityHelper.getSecurityDescription(securityId, securityName, securityType);
+    public void setSecurity(Integer securityId, String isin, String securityName, SecurityType securityType) {
+        this.securityId = securityId;
+        this.security = SecurityHelper.getSecurityDescription(isin, securityName, securityType);
         this.securityType = securityType;
     }
 
     /**
-     * Returns ISIN (stock market) or contract name (derivatives and forex market)
-     */
-    public String getSecurityId() {
-        return SecurityHelper.getSecurityId(security, securityType);
-    }
-
-    /**
-     * Returns security name (stock market) or null (derivatives and forex market)
+     * Returns Name from template "Name (ISIN)" for stock and bond, code for derivative, securityName for asset
      */
     public String getSecurityName() {
         return SecurityHelper.getSecurityName(security, securityType);
     }
 
-    public String getSecurityDisplayName() {
-        return SecurityHelper.getSecurityDisplayName(security, securityType);
+    /**
+     * Returns ISIN if description in "Name (ISIN)" format, null otherwise
+     */
+    public String getSecurityIsin() {
+        return SecurityHelper.getSecurityIsin(security);
     }
 }

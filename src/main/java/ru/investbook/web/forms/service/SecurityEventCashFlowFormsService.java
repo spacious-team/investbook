@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
+import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
@@ -72,7 +73,7 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
     @Transactional
     public void save(SecurityEventCashFlowModel e) {
         saveAndFlush(e.getPortfolio());
-        String savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(e);
+        int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(e);
         SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .portfolio(e.getPortfolio())
                 .timestamp(e.getDate().atStartOfDay(zoneId).toInstant())
@@ -118,9 +119,11 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
         m.setCount(e.getCount());
         CashFlowType type = CashFlowType.valueOf(e.getCashFlowType().getId());
         m.setType(type);
+        SecurityEntity securityEntity = e.getSecurity();
         m.setSecurity(
-                ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),
-                ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()),
+                securityEntity.getId(),
+                securityEntity.getIsin(),
+                ofNullable(securityEntity.getName()).orElse(securityEntity.getTicker()),
                 m.getSecurityType());
         m.setValue(type == DERIVATIVE_PROFIT ? e.getValue() :  e.getValue().abs());
         m.setValueCurrency(e.getCurrency());

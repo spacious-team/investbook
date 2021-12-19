@@ -35,7 +35,7 @@ public class DerivativesTable extends SingleAbstractReportTable<Security> {
     @Override
     protected Security parseRow(TableRow row) {
         String contract = row.getStringCellValue(CONTRACT);
-        String securityId = getReport().getSecurityRegistrar().declareDerivative(contract);
+        int securityId = getReport().getSecurityRegistrar().declareDerivative(contract);
         return Security.builder()
                 .id(securityId)
                 .type(SecurityType.DERIVATIVE)

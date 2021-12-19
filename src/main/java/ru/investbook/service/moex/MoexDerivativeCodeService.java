@@ -296,10 +296,10 @@ public class MoexDerivativeCodeService {
     /**
      * Convert derivative codes before storing to DB if need
      */
-    public String convertDerivativeSecurityId(String securityId) {
-        return isFuturesCode(securityId) ?
-                getFuturesShortname(securityId).orElse(securityId) :
-                securityId;
+    public String convertDerivativeCode(String code) {
+        return isFuturesCode(code) ?
+                getFuturesShortname(code).orElse(code) :
+                code;
     }
 
     /**

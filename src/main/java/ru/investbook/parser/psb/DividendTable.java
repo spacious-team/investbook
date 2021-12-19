@@ -47,8 +47,7 @@ public class DividendTable extends SingleAbstractReportTable<SecurityEventCashFl
     @Override
     protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
         String isin = row.getStringCellValue(ISIN);
-        String securityId = getReport().getSecurityRegistrar().declareStock(isin, () -> Security.builder()
-                .id(isin)
+        int securityId = getReport().getSecurityRegistrar().declareStock(isin, () -> Security.builder()
                 .isin(isin)
                 .name(row.getStringCellValue(STOCK_NAME)));
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
