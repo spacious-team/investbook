@@ -46,9 +46,10 @@ public class VtbSecurityFlowTable extends SingleAbstractReportTable<Security> {
     protected Security parseRow(TableRow row) {
         String description = row.getStringCellValue(NAME_REGNUMBER_ISIN);
         Security security = VtbReportHelper.getSecurity(description);
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(security.getIsin(), security::toBuilder);
+        security = Security.builder().id(securityId).build();
         String registrationNumber = description.split(",")[1].toUpperCase().trim();
         regNumberToSecurity.put(registrationNumber, security);
-        getReport().getSecurityRegistrar().declareStockOrBond(security.getIsin(), security::toBuilder);
         return security;
     }
 

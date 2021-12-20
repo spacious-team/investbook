@@ -22,14 +22,17 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
+import ru.investbook.service.moex.MoexDerivativeCodeService;
 
 import static ru.investbook.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.CONTRACT;
 
 public class DerivativesTable extends SingleAbstractReportTable<Security> {
+    private final MoexDerivativeCodeService moexDerivativeCodeService;
 
-    public DerivativesTable(PsbBrokerReport report) {
+    public DerivativesTable(PsbBrokerReport report, MoexDerivativeCodeService moexDerivativeCodeService) {
         super(report, DerivativeCashFlowTable.TABLE2_NAME, DerivativeCashFlowTable.TABLE_END_TEXT,
                 DerivativeCashFlowTable.ContractCountTableHeader.class);
+        this.moexDerivativeCodeService = moexDerivativeCodeService;
     }
 
     @Override
@@ -39,6 +42,7 @@ public class DerivativesTable extends SingleAbstractReportTable<Security> {
         return Security.builder()
                 .id(securityId)
                 .type(SecurityType.DERIVATIVE)
+                .ticker(moexDerivativeCodeService.convertDerivativeCode(contract))
                 .build();
     }
 }

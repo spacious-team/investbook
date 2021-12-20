@@ -31,6 +31,7 @@ import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.WrappingReportTable;
+import ru.investbook.service.moex.MoexDerivativeCodeService;
 
 public class PsbReportTables extends AbstractReportTables<PsbBrokerReport> {
 
@@ -40,12 +41,12 @@ public class PsbReportTables extends AbstractReportTables<PsbBrokerReport> {
     @Getter
     private final ReportTable<Security> securitiesTable;
 
-    protected PsbReportTables(PsbBrokerReport report) {
+    protected PsbReportTables(PsbBrokerReport report, MoexDerivativeCodeService moexDerivativeCodeService) {
         super(report);
         this.securityTransactionTable = new SecurityTransactionTable(report);
         this.securitiesTable = WrappingReportTable.of(
                 new SecuritiesTable(report),
-                new DerivativesTable(report),
+                new DerivativesTable(report, moexDerivativeCodeService),
                 WrappingReportTable.of(report, securityTransactionTable.getSecurities()));
     }
 

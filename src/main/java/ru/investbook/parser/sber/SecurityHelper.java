@@ -31,27 +31,28 @@ public class SecurityHelper {
         String securityId = getSecurityId(code, section);
         SecurityType securityType = getSecurityType(section, type);
         Security.SecurityBuilder security = Security.builder().type(securityType);
+        int id = -1;
         switch (securityType) {
             case STOCK, BOND, STOCK_OR_BOND -> {
                 security
                         .isin(securityId)
                         .name(securityName);
-                securityRegistrar.declareStockOrBond(securityId, () -> security);
+                id = securityRegistrar.declareStockOrBond(securityId, () -> security);
             }
             case DERIVATIVE -> {
                 security.ticker(securityId);
-                securityRegistrar.declareDerivative(securityId);
+                id = securityRegistrar.declareDerivative(securityId);
             }
             case CURRENCY_PAIR -> {
                 security.ticker(securityId);
-                securityRegistrar.declareCurrencyPair(securityId);
+                id = securityRegistrar.declareCurrencyPair(securityId);
             }
             case ASSET -> {
                 security.name(securityId);
-                securityRegistrar.declareAsset(securityId, () -> security);
+                id = securityRegistrar.declareAsset(securityId, () -> security);
             }
         }
-        return security.build();
+        return security.id(id).build();
     }
 
     /**
