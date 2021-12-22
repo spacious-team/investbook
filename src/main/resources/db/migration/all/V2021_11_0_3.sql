@@ -69,6 +69,10 @@ ALTER TABLE `transaction` ADD KEY `transaction_security_ix` (`security_id`);
 ALTER TABLE `transaction` ADD CONSTRAINT `transaction_security_fkey`
     FOREIGN KEY (`security_id`) REFERENCES `security` (`security_id`) ON UPDATE CASCADE ON DELETE RESTRICT;
 
+ALTER TABLE `security` ADD UNIQUE KEY `security_isin_uniq_ix` (`isin`);
+ALTER TABLE `security` ADD UNIQUE KEY `security_ticker_uniq_ix` (`ticker`);
+ALTER TABLE `security` ADD UNIQUE KEY `security_name_uniq_ix` (`name`); -- for uniq asset
+
 -- preserve ISIN and contract codes
 UPDATE `security` SET `isin` = `id` WHERE `type` IN (0, 1, 2);
 UPDATE `security` SET `ticker` = `id` WHERE `type` IN (3, 4);
