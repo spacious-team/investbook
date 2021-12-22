@@ -88,7 +88,6 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
             SecurityType.valueOf(securityEntity.getType()) :
             SecurityType.BOND;
         m.setSecurity(
-                securityEntity.getId(),
                 securityEntity.getIsin(),
                 ofNullable(securityEntity.getName()).orElse(securityEntity.getTicker()),
                 securityType);

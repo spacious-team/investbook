@@ -71,7 +71,6 @@
     <br/>
     <label>
         Инструмент
-        <input type="hidden" th:field="*{securityId}"/>
         <input type="text" th:field="*{security}" list="securities" class="security" id="security" required autocomplete="on"/>
     </label>
     <a id="find-securities" onclick="uploadSecurities('security', 'securities', this)">

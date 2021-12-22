@@ -21,8 +21,6 @@ package ru.investbook.web.forms.service;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
-import org.spacious_team.broker.pojo.Transaction;
-import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction.AbstractTransactionBuilder;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
@@ -46,7 +44,6 @@ import ru.investbook.web.forms.model.TransactionModel;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.ZoneId;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -150,19 +147,22 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 .count(abs(tr.getCount()) * direction)
                 .build();
 
-        saveAndFlush(tr, transaction.getTransaction(), transaction.getTransactionCashFlows());
+        saveAndFlush(tr, transaction);
     }
 
     private void saveAndFlush(TransactionModel transactionModel,
-                              Transaction transaction,
-                              Collection<TransactionCashFlow> cashFlows) {
+                              AbstractTransaction transaction) {
         saveAndFlush(transactionModel.getPortfolio());
-        TransactionEntity transactionEntity = transactionRepository.saveAndFlush(transactionConverter.toEntity(transaction));
+        TransactionEntity transactionEntity = transactionRepository.saveAndFlush(
+                transactionConverter.toEntity(transaction.getTransaction()));
         transactionModel.setId(transactionEntity.getId()); // used by view
         Optional.ofNullable(transactionEntity.getId()).ifPresent(transactionCashFlowRepository::deleteByTransactionId);
         transactionCashFlowRepository.flush();
-        cashFlows.stream()
-                .map(cash -> cash.toBuilder().transactionId(transactionEntity.getId()).build())
+        transaction.toBuilder()
+                .id(transactionEntity.getId())
+                .build()
+                .getTransactionCashFlows()
+                .stream()
                 .map(transactionCashFlowConverter::toEntity)
                 .forEach(transactionCashFlowRepository::save);
     }
@@ -212,7 +212,6 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
             }
         });
         m.setSecurity(
-                securityEntity.getId(),
                 securityEntity.getIsin(),
                 ofNullable(securityEntity.getName()).orElse(securityEntity.getTicker()),
                 securityType.get());

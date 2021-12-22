@@ -63,9 +63,6 @@ public class TransactionModel {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date = LocalDate.now();
 
-    @Nullable
-    private Integer securityId;
-
     /**
      * In "name (isin)" or "contract-name" format
      */
@@ -135,8 +132,7 @@ public class TransactionModel {
         this.commissionCurrency = commissionCurrency.toUpperCase();
     }
 
-    public void setSecurity(Integer securityId, String isin, String securityName, SecurityType securityType) {
-        this.securityId = securityId;
+    public void setSecurity(String isin, String securityName, SecurityType securityType) {
         this.security = SecurityHelper.getSecurityDescription(isin, securityName, securityType);
         this.securityType = securityType;
     }

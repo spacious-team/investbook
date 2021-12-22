@@ -121,7 +121,6 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
         m.setType(type);
         SecurityEntity securityEntity = e.getSecurity();
         m.setSecurity(
-                securityEntity.getId(),
                 securityEntity.getIsin(),
                 ofNullable(securityEntity.getName()).orElse(securityEntity.getTicker()),
                 m.getSecurityType());
@@ -131,7 +130,7 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
         if (m.getType() != CashFlowType.TAX) {
             securityEventCashFlowRepository.findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampAndCount(
                     m.getPortfolio(),
-                    m.getSecurityId(),
+                    securityEntity.getId(),
                     CashFlowType.TAX.getId(),
                     e.getTimestamp(),
                     m.getCount())

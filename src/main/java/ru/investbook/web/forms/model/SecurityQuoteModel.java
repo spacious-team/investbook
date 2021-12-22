@@ -39,9 +39,6 @@ public class SecurityQuoteModel {
     @Nullable
     private Integer id;
 
-    @Nullable
-    private Integer securityId;
-
     /**
      * In "name (isin)" or "contract-name" format
      */
@@ -67,8 +64,7 @@ public class SecurityQuoteModel {
 
     private String currency;
 
-    public void setSecurity(Integer securityId, String isin, String securityName, SecurityType securityType) {
-        this.securityId = securityId;
+    public void setSecurity(String isin, String securityName, SecurityType securityType) {
         this.security = SecurityHelper.getSecurityDescription(isin, securityName, securityType);
         this.securityType = securityType;
     }

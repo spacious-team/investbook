@@ -53,9 +53,7 @@ public class SecurityRepositoryHelper {
      * @return saved security id
      */
     public int saveAndFlushSecurity(SecurityEventCashFlowModel m) {
-        int savedSecurityId = saveAndFlush(m.getSecurityId(), m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
-        m.setSecurityId(savedSecurityId);
-        return savedSecurityId;
+        return saveAndFlush(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
     }
 
     /**
@@ -63,9 +61,7 @@ public class SecurityRepositoryHelper {
      * @return saved security id
      */
     public int saveAndFlushSecurity(SecurityQuoteModel m) {
-        int savedSecurityId = saveAndFlush(m.getSecurityId(), m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
-        m.setSecurityId(savedSecurityId);
-        return savedSecurityId;
+        return saveAndFlush(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
     }
 
     /**
@@ -73,9 +69,7 @@ public class SecurityRepositoryHelper {
      * @return saved security id
      */
     public int saveAndFlushSecurity(TransactionModel m) {
-        int savedSecurityId = saveAndFlush(m.getSecurityId(), m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
-        m.setSecurityId(savedSecurityId);
-        return savedSecurityId;
+        return saveAndFlush(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
     }
 
     /**
@@ -85,6 +79,20 @@ public class SecurityRepositoryHelper {
         SecurityEntity security = Optional.ofNullable(securityId)
                 .flatMap(securityRepository::findById)
                 .orElseGet(SecurityEntity::new);
+        return saveAndFlush(security, isin, securityName, securityType);
+    }
+
+    private int saveAndFlush(String isin, String securityName, SecurityType securityType) {
+        Optional<SecurityEntity> optionalSecurity = switch (securityType) {
+            case SHARE, BOND -> securityRepository.findByIsin(isin);
+            case DERIVATIVE, CURRENCY -> securityRepository.findByTicker(securityName);
+            case ASSET -> securityRepository.findByName(securityName);
+        };
+        SecurityEntity security = optionalSecurity.orElseGet(SecurityEntity::new);
+        return saveAndFlush(security, isin, securityName, securityType);
+    }
+
+    private int saveAndFlush(SecurityEntity security, String isin, String securityName, SecurityType securityType) {
         security.setType(securityType.toDbType());
         switch (securityType) {
             case SHARE, BOND -> {
