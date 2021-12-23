@@ -106,7 +106,7 @@
     valueElement.value = Math.abs(valueElement.value)
 
     function setDescription(selectElement) {
-        if (selectElement.options[typeElement.selectedIndex].value === "TAX_IIS_A") {
+        if (selectElement.options[selectElement.selectedIndex].value === "TAX_IIS_A") {
             let descriptionElement = document.getElementById('description');
             if (descriptionElement.value === "") {
                 // вручную выбран "возврат ИИС", но не еще указан комментарий
@@ -125,6 +125,12 @@
     }
 
 </script>
+
+<p class="hint">
+    Если возврат налога или комиссии выполнен на брокерский счет, то используйте соответствующий тип в выпадающем списке.
+    Если возврат налога или комиссии выполнен на банковский счет, то такое движение аналогично снятию денежных средств с
+    брокерского счета, для корректного учета доходности используйте тип "Снятие".
+</p>
 
 </body>
 </html>
