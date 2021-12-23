@@ -31,7 +31,6 @@ import ru.investbook.parser.sber.SecurityHelper;
 
 import java.math.BigDecimal;
 
-import static ru.investbook.parser.sber.SecurityHelper.getSecurityId;
 import static ru.investbook.parser.sber.SecurityHelper.getSecurityName;
 import static ru.investbook.parser.sber.transaction.SberTrSecurityTransactionTable.SberTransactionTableHeader.*;
 
@@ -57,19 +56,18 @@ public class SberTrSecurityTransactionTable extends AbstractReportTable<Security
         }
         String currency = row.getStringCellValue(CURRENCY);
         String nameAndIsin = row.getStringCellValue(NAME_AND_ISIN);
-        String section = row.getStringCellValue(SECTION);
-        String codeId = getSecurityId(nameAndIsin, section);
-
-        String securityId = report.getSecurityRegistrar().declareStockOrBond(codeId, () -> Security.builder()
-                .id(codeId)
-                .name(getSecurityName(nameAndIsin))
-                .type(SecurityHelper.getSecurityType(section, row.getStringCellValue(SECURITY_TYPE))));
+        Security security = SecurityHelper.getSecurity(
+                nameAndIsin,
+                getSecurityName(nameAndIsin),
+                row.getStringCellValue(SECTION),
+                row.getStringCellValue(SECURITY_TYPE),
+                report.getSecurityRegistrar());
 
         return SecurityTransaction.builder()
                 .portfolio(row.getStringCellValue(PORTFOLIO))
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .tradeId(String.valueOf(row.getLongCellValue(TRADE_ID))) // may be double numbers in future
-                .security(securityId)
+                .security(security.getId())
                 .count(row.getIntCellValue(COUNT) * (isBuy ? 1 : -1))
                 .value(value)
                 .accruedInterest(accruedInterest)

@@ -19,15 +19,45 @@
 package ru.investbook.parser.sber;
 
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
+import ru.investbook.parser.SecurityRegistrar;
 
 
 @Slf4j
 public class SecurityHelper {
 
+    public static Security getSecurity(String code, String securityName, String section, String type, SecurityRegistrar securityRegistrar) {
+        String securityId = getSecurityId(code, section);
+        SecurityType securityType = getSecurityType(section, type);
+        Security.SecurityBuilder security = Security.builder().type(securityType);
+        int id = -1;
+        switch (securityType) {
+            case STOCK, BOND, STOCK_OR_BOND -> {
+                security
+                        .isin(securityId)
+                        .name(securityName);
+                id = securityRegistrar.declareStockOrBond(securityId, () -> security);
+            }
+            case DERIVATIVE -> {
+                security.ticker(securityId);
+                id = securityRegistrar.declareDerivative(securityId);
+            }
+            case CURRENCY_PAIR -> {
+                security.ticker(securityId);
+                id = securityRegistrar.declareCurrencyPair(securityId);
+            }
+            case ASSET -> {
+                security.name(securityId);
+                id = securityRegistrar.declareAsset(securityId, () -> security);
+            }
+        }
+        return security.id(id).build();
+    }
+
     /**
      * @param nameAndIsin in format "<name>\s*(<isin>)"
-     * @return isin
+     * @return isin for stock or bond, nameAndIsin for others
      */
     public static String getSecurityId(String nameAndIsin, String section) {
         int start = nameAndIsin.indexOf('(') + 1;

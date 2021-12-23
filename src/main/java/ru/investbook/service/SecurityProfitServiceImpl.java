@@ -38,6 +38,7 @@ import ru.investbook.report.ViewFilter;
 import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityQuoteRepository;
+import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 
 import java.math.BigDecimal;
@@ -53,13 +54,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.spacious_team.broker.pojo.SecurityType.CURRENCY_PAIR;
-import static org.spacious_team.broker.pojo.SecurityType.getCurrencyPair;
 import static org.springframework.util.StringUtils.hasLength;
 
 @Service
 @RequiredArgsConstructor
 public class SecurityProfitServiceImpl implements SecurityProfitService {
 
+    private final SecurityRepository securityRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityQuoteRepository securityQuoteRepository;
@@ -193,7 +194,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
 
     private List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
                                                                                Security security,
-                                                                              CashFlowType cashFlowType) {
+                                                                               CashFlowType cashFlowType) {
         return portfolios.isEmpty() ?
                 securityEventCashFlowRepository
                         .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
@@ -213,7 +214,8 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
     @Override
     public SecurityQuote getSecurityQuote(Security security, String toCurrency, Instant to) {
         if (security.getType() == CURRENCY_PAIR) {
-            String baseCurrency = getCurrencyPair(security.getId()).substring(0, 3);
+            String currencyPair = securityRepository.findCurrencyPair(security.getId()).orElseThrow();
+            String baseCurrency = currencyPair.substring(0, 3);
             LocalDate toDate = LocalDate.ofInstant(to, ZoneId.systemDefault());
             BigDecimal lastPrice = toDate.isBefore(LocalDate.now()) ?
                     foreignExchangeRateService.getExchangeRateOrDefault(baseCurrency, toCurrency, toDate) :

@@ -60,7 +60,7 @@ public class SecurityDescriptionController {
     }
 
     @GetMapping("update")
-    public String updateFromSmartLab(@RequestParam(name = "security-id", required = false) String securityId,
+    public String updateFromSmartLab(@RequestParam(name = "security-id", required = false) Integer securityId,
                                      @RequestParam(name = "force", defaultValue = "false") boolean forceUpdate,
                                      Model model) {
         if (securityId == null) {
@@ -79,14 +79,14 @@ public class SecurityDescriptionController {
     }
 
     @GetMapping("/edit-form")
-    public String getEditForm(@RequestParam(name = "security-id", required = false) String securityId,
+    public String getEditForm(@RequestParam(name = "security-id", required = false) Integer securityId,
                               Model model) {
         model.addAttribute("securityDescription", getSecurityDescription(securityId));
         model.addAttribute("securities", securities);
         return "security-descriptions/edit-form";
     }
 
-    private SecurityDescriptionModel getSecurityDescription(String securityId) {
+    private SecurityDescriptionModel getSecurityDescription(Integer securityId) {
         return Optional.ofNullable(securityId)
                 .flatMap(securityDescriptionFormsService::getById)
                 .orElseGet(SecurityDescriptionModel::new);
@@ -99,7 +99,7 @@ public class SecurityDescriptionController {
     }
 
     @GetMapping("/delete")
-    public String delete(@RequestParam(name = "security-id") String securityId, Model model) {
+    public String delete(@RequestParam(name = "security-id") Integer securityId, Model model) {
         try {
             securityDescriptionFormsService.delete(securityId);
             model.addAttribute("message", "Инструмент удален");

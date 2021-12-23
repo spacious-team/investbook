@@ -56,7 +56,7 @@
     <tr th:each="quote : ${quotes}">
         <td><a th:href="@{/security-quotes/edit-form(id=${quote.id})}" th:text="${quote.id}"/></td>
         <td th:text="${quote.timestamp}" class="date-time"/>
-        <td th:text="${quote.getSecurityDisplayName}"/>
+        <td th:text="${quote.getSecurityName}"/>
         <td th:text="${(quote.quote != null) ? quote.quote.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}"
             class="value"/>
         <td th:text="${(quote.price != null) ? quote.price.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}"

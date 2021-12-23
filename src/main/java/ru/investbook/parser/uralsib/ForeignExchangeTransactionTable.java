@@ -75,7 +75,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .negate();
 
-        String securityId = getReport().getSecurityRegistrar().declareCurrencyPair(instrument);
+        int securityId = getReport().getSecurityRegistrar().declareCurrencyPair(instrument);
         return ForeignExchangeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .tradeId(tradeId)

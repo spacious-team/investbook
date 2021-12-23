@@ -20,12 +20,14 @@ package ru.investbook.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.GenericGenerator;
 import org.spacious_team.broker.pojo.SecurityType;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -35,8 +37,10 @@ import javax.persistence.Table;
 @EqualsAndHashCode(of = "id")
 public class SecurityEntity {
     @Id
+    @GenericGenerator(name = "UseExistingOrGenerateIdGenerator", strategy = "ru.investbook.entity.UseExistingOrGenerateIdGenerator")
+    @GeneratedValue(generator = "UseExistingOrGenerateIdGenerator")
     @Column(name = "id")
-    private String id;
+    private Integer id;
 
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.ORDINAL)

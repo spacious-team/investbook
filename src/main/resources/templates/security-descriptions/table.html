@@ -46,7 +46,7 @@
         <th></th>
     </tr>
     <tr th:each="description : ${securityDescriptions}">
-        <td><a th:href="@{/security-descriptions/edit-form(security-id=${description.getSecurityId})}" th:text="${description.getSecurityDisplayName}"/></td>
+        <td><a th:href="@{/security-descriptions/edit-form(security-id=${description.getSecurityId})}" th:text="${description.getSecurityName}"/></td>
         <td th:text="${description.getSector}"/>
         <td class="table-row-control">
             <a th:href="@{/security-descriptions/update(security-id=${description.getSecurityId}, force=true)}"

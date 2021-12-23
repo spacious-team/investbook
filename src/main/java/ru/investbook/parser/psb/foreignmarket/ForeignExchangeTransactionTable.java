@@ -52,7 +52,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
             value = value.negate();
         }
         String contract = row.getStringCellValue(CONTRACT);
-        String securityId = getReport().getSecurityRegistrar().declareCurrencyPair(contract);
+        int securityId = getReport().getSecurityRegistrar().declareCurrencyPair(contract);
         String quoteCurrency = contract.substring(3, 6).toUpperCase(); // extracts RUB from USDRUB_TOM
         return ForeignExchangeTransaction.builder()
                 .timestamp(transactionInstant)

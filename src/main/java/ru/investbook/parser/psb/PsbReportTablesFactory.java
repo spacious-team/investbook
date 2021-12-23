@@ -18,13 +18,18 @@
 
 package ru.investbook.parser.psb;
 
+import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.ReportTables;
 import org.spacious_team.broker.report_parser.api.ReportTablesFactory;
 import org.springframework.stereotype.Component;
+import ru.investbook.service.moex.MoexDerivativeCodeService;
 
 @Component
+@RequiredArgsConstructor
 public class PsbReportTablesFactory implements ReportTablesFactory {
+    private final MoexDerivativeCodeService moexDerivativeCodeService;
+
     @Override
     public boolean canCreate(BrokerReport brokerReport) {
         return (brokerReport instanceof PsbBrokerReport);
@@ -32,6 +37,6 @@ public class PsbReportTablesFactory implements ReportTablesFactory {
 
     @Override
     public ReportTables create(BrokerReport brokerReport) {
-        return new PsbReportTables((PsbBrokerReport) brokerReport);
+        return new PsbReportTables((PsbBrokerReport) brokerReport, moexDerivativeCodeService);
     }
 }

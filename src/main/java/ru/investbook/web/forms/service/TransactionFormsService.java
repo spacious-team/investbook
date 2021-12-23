@@ -21,8 +21,6 @@ package ru.investbook.web.forms.service;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
-import org.spacious_team.broker.pojo.Transaction;
-import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction.AbstractTransactionBuilder;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
@@ -34,6 +32,7 @@ import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.TransactionCashFlowConverter;
 import ru.investbook.converter.TransactionConverter;
 import ru.investbook.entity.PortfolioEntity;
+import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.repository.PortfolioRepository;
@@ -45,7 +44,6 @@ import ru.investbook.web.forms.model.TransactionModel;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.ZoneId;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -96,7 +94,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
     @Override
     @Transactional
     public void save(TransactionModel tr) {
-        String savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(tr);
+        int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(tr);
         int direction = ((tr.getAction() == TransactionModel.Action.BUY) ? 1 : -1);
         BigDecimal multiplier = BigDecimal.valueOf(-direction * tr.getCount());
 
@@ -149,19 +147,22 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 .count(abs(tr.getCount()) * direction)
                 .build();
 
-        saveAndFlush(tr, transaction.getTransaction(), transaction.getTransactionCashFlows());
+        saveAndFlush(tr, transaction);
     }
 
     private void saveAndFlush(TransactionModel transactionModel,
-                              Transaction transaction,
-                              Collection<TransactionCashFlow> cashFlows) {
+                              AbstractTransaction transaction) {
         saveAndFlush(transactionModel.getPortfolio());
-        TransactionEntity transactionEntity = transactionRepository.saveAndFlush(transactionConverter.toEntity(transaction));
+        TransactionEntity transactionEntity = transactionRepository.saveAndFlush(
+                transactionConverter.toEntity(transaction.getTransaction()));
         transactionModel.setId(transactionEntity.getId()); // used by view
         Optional.ofNullable(transactionEntity.getId()).ifPresent(transactionCashFlowRepository::deleteByTransactionId);
         transactionCashFlowRepository.flush();
-        cashFlows.stream()
-                .map(cash -> cash.toBuilder().transactionId(transactionEntity.getId()).build())
+        transaction.toBuilder()
+                .id(transactionEntity.getId())
+                .build()
+                .getTransactionCashFlows()
+                .stream()
                 .map(transactionCashFlowConverter::toEntity)
                 .forEach(transactionCashFlowRepository::save);
     }
@@ -184,7 +185,8 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
         BigDecimal cnt = BigDecimal.valueOf(count);
         m.setAction(count >= 0 ? TransactionModel.Action.BUY : TransactionModel.Action.CELL);
         m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
-        AtomicReference<SecurityType> securityType = new AtomicReference<>(SecurityType.valueOf(e.getSecurity().getType()));
+        SecurityEntity securityEntity = e.getSecurity();
+        AtomicReference<SecurityType> securityType = new AtomicReference<>(SecurityType.valueOf(securityEntity.getType()));
         m.setCount(abs(count));
         List<TransactionCashFlowEntity> cashFlows = transactionCashFlowRepository.findByTransactionIdAndCashFlowTypeIn(
                 e.getId(),
@@ -210,8 +212,8 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
             }
         });
         m.setSecurity(
-                ofNullable(e.getSecurity().getIsin()).orElse(e.getSecurity().getId()),
-                ofNullable(e.getSecurity().getName()).orElse(e.getSecurity().getTicker()),
+                securityEntity.getIsin(),
+                ofNullable(securityEntity.getName()).orElse(securityEntity.getTicker()),
                 securityType.get());
         if (m.getSecurityType() == DERIVATIVE &&
                 m.getPrice() != null && m.getPrice().floatValue() > 0.000001) {

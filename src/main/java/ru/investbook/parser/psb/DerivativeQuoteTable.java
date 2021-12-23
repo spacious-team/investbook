@@ -48,7 +48,7 @@ public class DerivativeQuoteTable extends SingleAbstractReportTable<SecurityQuot
                 .divide(tickValue, 2, RoundingMode.HALF_UP);
 
         String contract = row.getStringCellValue(CONTRACT);
-        String securityId = getReport().getSecurityRegistrar().declareDerivative(contract);
+        int securityId = getReport().getSecurityRegistrar().declareDerivative(contract);
         return SecurityQuote.builder()
                 .security(securityId)
                 .timestamp(getReport().getReportEndDateTime())

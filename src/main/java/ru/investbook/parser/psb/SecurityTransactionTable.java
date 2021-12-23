@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.Security.SecurityBuilder;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
@@ -108,11 +109,11 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
     private Security getSecurity(TableRow row) {
         String isin = row.getStringCellValue(ISIN);
         SecurityBuilder builder = Security.builder()
-                .id(isin)
                 .isin(isin)
-                .name(row.getStringCellValue(NAME));
-        getReport().getSecurityRegistrar().declareStockOrBond(isin, () -> builder);
-        Security security = builder.build();
+                .name(row.getStringCellValue(NAME))
+                .type(SecurityType.STOCK_OR_BOND);
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(isin, () -> builder);
+        Security security = builder.id(securityId).build();
         securities.add(security);
         return security;
     }
@@ -140,11 +141,12 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
 
         @Getter
         private final TableColumn column;
-        TransactionTableHeader(String ... words) {
+
+        TransactionTableHeader(String... words) {
             this.column = TableColumnImpl.of(words);
         }
 
-        TransactionTableHeader(TableColumn ... columns) {
+        TransactionTableHeader(TableColumn... columns) {
             this.column = AnyOfTableColumn.of(columns);
         }
     }

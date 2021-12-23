@@ -37,7 +37,7 @@ import javax.persistence.Table;
 public class SecurityDescriptionEntity {
     @Id
     @Column(name = "security")
-    private String security;
+    private int security;
 
     @Column(name = "sector")
     private String sector;

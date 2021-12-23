@@ -21,6 +21,7 @@ package ru.investbook.parser.psb;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.Security.SecurityBuilder;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
@@ -47,14 +48,12 @@ public class SecuritiesTable extends SingleAbstractReportTable<Security> {
             return null;
         }
         String isin = row.getStringCellValue(ISIN);
-        Security security = Security.builder()
-                .id(isin)
+        SecurityBuilder security = Security.builder()
                 .isin(isin)
                 .name(row.getStringCellValue(NAME))
-                .type(SecurityType.STOCK_OR_BOND)
-                .build();
-        getReport().getSecurityRegistrar().declareStockOrBond(isin, security::toBuilder);
-        return security;
+                .type(SecurityType.STOCK_OR_BOND);
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(isin, () -> security);
+        return security.id(securityId).build();
     }
 
     enum SecuritiesTableHeader implements TableColumnDescription {

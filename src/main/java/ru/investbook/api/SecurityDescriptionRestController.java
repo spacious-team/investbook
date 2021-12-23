@@ -42,7 +42,7 @@ import java.util.Optional;
 @RestController
 @Tag(name = "Информация по инструментам", description = "Сектор экономики, эмитент")
 @RequestMapping("/api/v1/security-descriptions")
-public class SecurityDescriptionRestController extends AbstractRestController<String, SecurityDescription, SecurityDescriptionEntity> {
+public class SecurityDescriptionRestController extends AbstractRestController<Integer, SecurityDescription, SecurityDescriptionEntity> {
     private final SecurityDescriptionRepository repository;
 
     public SecurityDescriptionRestController(SecurityDescriptionRepository repository, SecurityDescriptionConverter converter) {
@@ -63,8 +63,9 @@ public class SecurityDescriptionRestController extends AbstractRestController<St
     @Operation(summary = "Отобразить один",
             description = "Отобразить информацию по инструменту")
     public ResponseEntity<SecurityDescription> get(@PathVariable("id")
-                                        @Parameter(description = "Идентификатор", example = "ISIN, BR-2.21, USDRUB_TOM")
-                                                String id) {
+                                                   @Parameter(description = "Идентификатор",
+                                                           example = "123", required = true)
+                                                           Integer id) {
         return super.get(id);
     }
 
@@ -80,8 +81,8 @@ public class SecurityDescriptionRestController extends AbstractRestController<St
     @PutMapping("{id}")
     @Operation(summary = "Обновить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре")
     public ResponseEntity<Void> put(@PathVariable("id")
-                                    @Parameter(description = "Идентификатор", example = "ISIN, BR-2.21, USDRUB_TOM")
-                                            String id,
+                                    @Parameter(description = "Идентификатор", example = "123", required = true)
+                                            Integer id,
                                     @Valid @RequestBody SecurityDescription security) {
         return super.put(id, security);
     }
@@ -90,23 +91,23 @@ public class SecurityDescriptionRestController extends AbstractRestController<St
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = "Удалить информацию по инструменту")
     public void delete(@PathVariable("id")
-                       @Parameter(description = "Идентификатор", example = "ISIN, BR-2.21, USDRUB_TOM")
-                               String id) {
+                       @Parameter(description = "Идентификатор", example = "123", required = true)
+                               Integer id) {
         super.delete(id);
     }
 
     @Override
-    protected Optional<SecurityDescriptionEntity> getById(String isin) {
+    protected Optional<SecurityDescriptionEntity> getById(Integer isin) {
         return repository.findById(isin);
     }
 
     @Override
-    protected String getId(SecurityDescription object) {
+    protected Integer getId(SecurityDescription object) {
         return object.getSecurity();
     }
 
     @Override
-    protected SecurityDescription updateId(String id, SecurityDescription object) {
+    protected SecurityDescription updateId(Integer id, SecurityDescription object) {
         return object.toBuilder().security(id).build();
     }
 

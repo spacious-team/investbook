@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -90,28 +89,22 @@ public class InvestbookApiClient {
     }
 
     private Security convertDerivativeSecurityId(Security security) {
-        String id = security.getId();
-        String newId = moexDerivativeCodeService.convertDerivativeSecurityId(id);
-        if (!Objects.equals(id, newId)) {
-            security = security.toBuilder()
-                    .id(newId)
-                    .type(SecurityType.DERIVATIVE)
-                    .build();
-        }
-        return security;
+        return security.getType() == SecurityType.DERIVATIVE ?
+                security.toBuilder()
+                        .ticker(moexDerivativeCodeService.convertDerivativeCode(security.getTicker()))
+                        .build() :
+                security;
     }
 
     public void addTransaction(AbstractTransaction transaction) {
         boolean isAdded = addTransaction(transaction.getTransaction());
         if (isAdded) {
-            Integer transactionId = Optional.ofNullable(transaction.getId())
+            Optional.ofNullable(transaction.getId())
                     .or(() -> getSavedTransactionId(transaction))
-                    .orElse(null);
-            if (transactionId == null) {
-                log.warn("Не могу добавить транзакцию в БД, не задан внутренний идентификатор записи: {}", transaction);
-                return;
-            }
-            addCashTransactionFlows(transaction, transactionId);
+                    .ifPresentOrElse(
+                            transactionId -> addCashTransactionFlows(transaction, transactionId),
+                            () -> log.warn("Не могу добавить транзакцию в БД, " +
+                                    "не задан внутренний идентификатор записи: {}", transaction));
         }
     }
 
@@ -123,9 +116,10 @@ public class InvestbookApiClient {
     }
 
     private void addCashTransactionFlows(AbstractTransaction transaction, int transactionId) {
-        transaction.getTransactionCashFlows()
-                .stream()
-                .map(cash -> cash.toBuilder().transactionId(transactionId).build())
+        transaction.toBuilder()
+                .id(transactionId)
+                .build()
+                .getTransactionCashFlows()
                 .forEach(this::addTransactionCashFlow);
     }
 

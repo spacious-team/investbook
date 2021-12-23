@@ -20,7 +20,6 @@ package ru.investbook.parser.sber.cash_security;
 
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
-import org.spacious_team.broker.pojo.Security.SecurityBuilder;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.sber.SecurityHelper;
@@ -40,14 +39,11 @@ public class SberSecuritySecuritiesTable extends AbstractReportTable<Security> {
 
     @Override
     protected Security parseRow(TableRow row) {
-        String code = row.getStringCellValue(CODE);
-        String section = row.getStringCellValue(SECTION);
-        String codeId = SecurityHelper.getSecurityId(code, section);
-        SecurityBuilder security = Security.builder()
-                .id(codeId)
-                .name(row.getStringCellValueOrDefault(NAME, null))
-                .type(SecurityHelper.getSecurityType(section, null));
-        report.getSecurityRegistrar().declareStockOrBond(codeId, () -> security);
-        return security.build();
+        return SecurityHelper.getSecurity(
+                row.getStringCellValue(CODE),
+                row.getStringCellValueOrDefault(NAME, null),
+                row.getStringCellValue(SECTION),
+                null,
+                report.getSecurityRegistrar());
     }
 }

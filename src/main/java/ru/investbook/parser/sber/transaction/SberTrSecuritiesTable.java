@@ -20,13 +20,11 @@ package ru.investbook.parser.sber.transaction;
 
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
-import org.spacious_team.broker.pojo.Security.SecurityBuilder;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.sber.SecurityHelper;
 import ru.investbook.parser.sber.transaction.SberTrSecurityTransactionTable.SberTransactionTableHeader;
 
-import static ru.investbook.parser.sber.SecurityHelper.getSecurityId;
 import static ru.investbook.parser.sber.SecurityHelper.getSecurityName;
 import static ru.investbook.parser.sber.transaction.SberTrSecurityTransactionTable.SberTransactionTableHeader.*;
 
@@ -43,13 +41,11 @@ public class SberTrSecuritiesTable extends AbstractReportTable<Security> {
     @Override
     protected Security parseRow(TableRow row) {
         String nameAndIsin = row.getStringCellValue(NAME_AND_ISIN);
-        String section = row.getStringCellValue(SECTION);
-        String codeId = getSecurityId(nameAndIsin, section);
-        SecurityBuilder security = Security.builder()
-                .id(codeId)
-                .name(getSecurityName(nameAndIsin))
-                .type(SecurityHelper.getSecurityType(section, row.getStringCellValue(SECURITY_TYPE)));
-        report.getSecurityRegistrar().declareStockOrBond(codeId, () -> security);
-        return security.build();
+        return SecurityHelper.getSecurity(
+                nameAndIsin,
+                getSecurityName(nameAndIsin),
+                row.getStringCellValue(SECTION),
+                row.getStringCellValue(SECURITY_TYPE),
+                report.getSecurityRegistrar());
     }
 }

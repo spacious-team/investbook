@@ -23,34 +23,17 @@ import org.springframework.util.Assert;
 public class SecurityHelper {
 
     /**
-     * For stock or bond "Name (ISIN)", for derivatives - securityId, for asset - securityName
+     * For stock or bond "Name (ISIN)", for derivatives - code, for asset - securityName
      */
-    public static String getSecurityDescription(String securityId, String securityName, SecurityType securityType) {
+    public static String getSecurityDescription(String isin, String securityName, SecurityType securityType) {
         return switch (securityType) {
-            case SHARE, BOND -> securityName + " (" + securityId + ")";
-            case DERIVATIVE, CURRENCY -> securityId;
-            case ASSET -> securityName;
+            case SHARE, BOND -> securityName + " (" + isin + ")";
+            case DERIVATIVE, CURRENCY, ASSET -> securityName;
         };
     }
 
     /**
-     * Returns ISIN from template "Name (ISIN)" for stock and bond, securityId for derivative, null for asset
-     */
-    static String getSecurityId(String securityDescription, SecurityType securityType) {
-        return switch (securityType) {
-            case SHARE, BOND -> {
-                Assert.isTrue(isSecurityDescriptionHasIsin(securityDescription),
-                        "Не задан ISIN: " + securityDescription);
-                int len = securityDescription.length();
-                yield securityDescription.substring(len - 13, len - 1);
-            }
-            case DERIVATIVE, CURRENCY -> securityDescription;
-            case ASSET -> null;
-        };
-    }
-
-    /**
-     * Returns Name from template "Name (ISIN)" for stock and bond, null for derivative, securityName for asset
+     * Returns Name from template "Name (ISIN)" for stock and bond, code for derivative, securityName for asset
      */
     static String getSecurityName(String securityDescription, SecurityType securityType) {
         return switch (securityType) {
@@ -59,17 +42,18 @@ public class SecurityHelper {
                         "Не задан ISIN: " + securityDescription);
                 yield securityDescription.substring(0, securityDescription.length() - 14).trim();
             }
-            case DERIVATIVE, CURRENCY -> null;
-            case ASSET -> securityDescription;
+            case DERIVATIVE, CURRENCY, ASSET -> securityDescription;
         };
     }
 
     /**
-     * For stock or bond "Name" without ISIN
+     * Returns ISIN if description in "Name (ISIN)" format, null otherwise
      */
-    static String getSecurityDisplayName(String securityDescription, SecurityType securityType) {
-        String name = SecurityHelper.getSecurityName(securityDescription, securityType);
-        return (name == null) ? securityDescription : name;
+    static String getSecurityIsin(String securityDescription) {
+        int len = securityDescription.length();
+        return  isSecurityDescriptionHasIsin(securityDescription) ?
+                securityDescription.substring(len - 13, len - 1) :
+                null;
     }
 
     private static boolean isSecurityDescriptionHasIsin(String securityDescription) {

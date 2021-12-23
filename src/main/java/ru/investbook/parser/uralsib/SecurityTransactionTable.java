@@ -107,8 +107,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
             }
         }
         String isin = row.getStringCellValue(ISIN);
-        String securityId = getReport().getSecurityRegistrar().declareStockOrBond(isin, () -> Security.builder()
-                .id(isin)
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(isin, () -> Security.builder()
                 .isin(isin)); // TODO  set .name() also
 
         return SecurityTransaction.builder()

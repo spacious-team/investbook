@@ -175,7 +175,7 @@ public class MoexIssClientImpl implements MoexIssClient {
 
     public boolean isDerivativeAndExpired(String shortnameOrSecid, SecurityType securityType) {
         try {
-            if (securityType == DERIVATIVE) {
+            if (securityType == DERIVATIVE && shortnameOrSecid != null) {
                 int currentYear = getCurrentYear();
                 int year;
                 // only current plus 2 years contracts may have quotes

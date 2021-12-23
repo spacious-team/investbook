@@ -46,70 +46,61 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
 
     @Cacheable(cacheNames = "declareStock", key = "#isin")
     @Override
-    public String declareStock(String isin, Supplier<SecurityBuilder> supplier) {
+    public int declareStock(String isin, Supplier<SecurityBuilder> supplier) {
         return declareIsinSecurity(isin, STOCK, supplier);
     }
 
     @Cacheable(cacheNames = "declareBond", key = "#isin")
     @Override
-    public String declareBond(String isin, Supplier<SecurityBuilder> supplier) {
+    public int declareBond(String isin, Supplier<SecurityBuilder> supplier) {
         return declareIsinSecurity(isin, BOND, supplier);
     }
 
     @Cacheable(cacheNames = "declareStockOrBond", key = "#isin")
     @Override
-    public String declareStockOrBond(String isin, Supplier<SecurityBuilder> supplier) {
+    public int declareStockOrBond(String isin, Supplier<SecurityBuilder> supplier) {
         return declareIsinSecurity(isin, STOCK_OR_BOND, supplier);
     }
 
-    private String declareIsinSecurity(String isin, SecurityType defaultType, Supplier<SecurityBuilder> supplier) {
-        if (repository.findById(isin).isEmpty()) {
-            return Optional.of(supplier.get())
-                    .map(builder -> buildSecurity(builder, defaultType))
-                    .map(converter::toEntity)
-                    .map(this::saveFlushAndGetId)
-                    .orElseThrow();
-        }
-        return isin;
+    private int declareIsinSecurity(String isin, SecurityType defaultType, Supplier<SecurityBuilder> supplier) {
+        return repository.findByIsin(isin)
+                .or(() -> Optional.of(supplier.get())
+                        .map(builder -> buildSecurity(builder, defaultType))
+                        .map(security -> saveAndFlush(security, () -> repository.findByIsin(isin))))
+                .map(SecurityEntity::getId)
+                .orElseThrow(() -> new RuntimeException("Не смог сохранить ЦБ с ISIN = " + isin));
     }
 
     @Cacheable(cacheNames = "declareDerivative", key = "#code")
     @Override
-    public String declareDerivative(String code) {
-        String shortNameIfCan = derivativeCodeService.convertDerivativeSecurityId(code);
-        if (repository.findById(shortNameIfCan).isEmpty()) {
-            return Optional.of(Security.builder().id(shortNameIfCan).type(DERIVATIVE).build())
-                    .map(converter::toEntity)
-                    .map(this::saveFlushAndGetId)
-                    .orElseThrow();
-        }
-        return shortNameIfCan;
+    public int declareDerivative(String code) {
+        String shortNameIfCan = derivativeCodeService.convertDerivativeCode(code);
+        return repository.findByTicker(shortNameIfCan)
+                .or(() -> Optional.of(Security.builder().ticker(shortNameIfCan).type(DERIVATIVE).build())
+                        .map(security -> saveAndFlush(security, () -> repository.findByTicker(shortNameIfCan))))
+                .map(SecurityEntity::getId)
+                .orElseThrow(() -> new RuntimeException("Не смог сохранить срочный контракт " + code));
     }
 
     @Cacheable(cacheNames = "declareCurrencyPair", key = "#contract")
     @Override
-    public String declareCurrencyPair(String contract) {
-        if (repository.findById(contract).isEmpty()) {
-            return Optional.of(Security.builder().id(contract).type(CURRENCY_PAIR).build())
-                    .map(converter::toEntity)
-                    .map(this::saveFlushAndGetId)
-                    .orElseThrow();
-        }
-        return contract;
+    public int declareCurrencyPair(String contract) {
+        return repository.findByTicker(contract)
+                .or(() -> Optional.of(Security.builder().ticker(contract).type(CURRENCY_PAIR).build())
+                        .map(security -> saveAndFlush(security, () -> repository.findByTicker(contract))))
+                .map(SecurityEntity::getId)
+                .orElseThrow(() -> new RuntimeException("Не смог сохранить контракт валютного рынка " + contract));
     }
 
     @Cacheable(cacheNames = "declareAsset", key = "#assetName")
     @Override
-    public String declareAsset(String assetName, Supplier<SecurityBuilder> supplier) {
-        Optional<SecurityEntity> entity = repository.findByName(assetName);
-        if (entity.isEmpty()) {
-            return Optional.of(supplier.get())
-                    .map(builder -> buildSecurity(builder, ASSET))
-                    .map(converter::toEntity)
-                    .map(this::saveFlushAndGetId)
-                    .orElseThrow();
-        }
-        return entity.get().getId();
+    public int declareAsset(String assetName, Supplier<SecurityBuilder> supplier) {
+        return repository.findByName(assetName)
+                .or(() -> Optional.of(supplier.get())
+                        .map(builder -> buildSecurity(builder, ASSET))
+                        .map(security -> saveAndFlush(security, () -> repository.findByName(assetName))))
+                .map(SecurityEntity::getId)
+                .orElseThrow(() -> new RuntimeException("Не смог сохранить произвольный актив " + assetName));
     }
 
     private Security buildSecurity(SecurityBuilder builder, SecurityType defaultType) {
@@ -120,13 +111,14 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
         return security;
     }
 
-    private String saveFlushAndGetId(SecurityEntity security) {
+    private SecurityEntity saveAndFlush(Security security, Supplier<Optional<SecurityEntity>> supplier) {
         try {
-            return repository.saveAndFlush(security).getId();
+            return repository.saveAndFlush(converter.toEntity(security));
         } catch (Exception e) {
             if (isUniqIndexViolationException(e)) {
                 log.trace("Дублирование вызвано исключением", e);
-                return security.getId();
+                return supplier.get()
+                        .orElseThrow(() -> new RuntimeException("Не смог сохранить ценную бумагу в БД: " + security, e));
             }
             throw new RuntimeException("Не смог сохранить ценную бумагу в БД: " + security, e);
         }

@@ -40,4 +40,14 @@ public enum SecurityType {
             case ASSET -> "Произвольный актив";
         };
     }
+
+    public org.spacious_team.broker.pojo.SecurityType toDbType() {
+        return switch (this) {
+            case SHARE -> org.spacious_team.broker.pojo.SecurityType.STOCK;
+            case BOND -> org.spacious_team.broker.pojo.SecurityType.BOND;
+            case DERIVATIVE -> org.spacious_team.broker.pojo.SecurityType.DERIVATIVE;
+            case CURRENCY -> org.spacious_team.broker.pojo.SecurityType.CURRENCY_PAIR;
+            case ASSET -> org.spacious_team.broker.pojo.SecurityType.ASSET;
+        };
+    }
 }

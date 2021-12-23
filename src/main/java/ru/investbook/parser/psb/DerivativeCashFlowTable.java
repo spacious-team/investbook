@@ -97,7 +97,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
                 if (count == null) {
                     throw new IllegalArgumentException("Открытых контрактов не найдено");
                 }
-                String securityId = getReport().getSecurityRegistrar().declareDerivative(contract);
+                int securityId = getReport().getSecurityRegistrar().declareDerivative(contract);
                 return builder.eventType(CashFlowType.DERIVATIVE_PROFIT)
                         .security(securityId)
                         .count(count)
