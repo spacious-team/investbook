@@ -78,12 +78,12 @@ public class UralsibReportTables extends AbstractReportTables<UralsibBrokerRepor
         data.addAll(new CashFlowTable(report).getData());
         data.addAll(couponAmortizationRedemptionTable.getEventCashFlows());
         data.addAll(dividendTable.getEventCashFlows());
-        return new WrappingReportTable<>(report, data);
+        return WrappingReportTable.of(report, data);
     }
 
     @Override
     public ReportTable<Security> getSecuritiesTable() {
-        return new WrappingReportTable<>(report, portfolioSecuritiesTable.getData()
+        return WrappingReportTable.of(report, portfolioSecuritiesTable.getData()
                 .stream()
                 .map(ReportSecurityInformation::getSecurity)
                 .collect(Collectors.toList()));
