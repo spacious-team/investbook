@@ -21,14 +21,15 @@ package ru.investbook.web.forms.model;
 import org.springframework.util.Assert;
 
 public class SecurityHelper {
+    public static String NULL_SECURITY_NAME = "<unknown>";
 
     /**
      * For stock or bond "Name (ISIN)", for derivatives - code, for asset - securityName
      */
     public static String getSecurityDescription(String isin, String securityName, SecurityType securityType) {
         return switch (securityType) {
-            case SHARE, BOND -> securityName + " (" + isin + ")";
-            case DERIVATIVE, CURRENCY, ASSET -> securityName;
+            case SHARE, BOND -> (securityName == null ? isin : securityName) + " (" + isin + ")";
+            case DERIVATIVE, CURRENCY, ASSET -> securityName == null ? NULL_SECURITY_NAME : securityName;
         };
     }
 

@@ -20,15 +20,18 @@ package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
 import ru.investbook.web.forms.model.SecurityDescriptionModel;
 import ru.investbook.web.forms.model.SecurityEventCashFlowModel;
+import ru.investbook.web.forms.model.SecurityHelper;
 import ru.investbook.web.forms.model.SecurityQuoteModel;
 import ru.investbook.web.forms.model.SecurityType;
 import ru.investbook.web.forms.model.TransactionModel;
 
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -93,6 +96,11 @@ public class SecurityRepositoryHelper {
     }
 
     private int saveAndFlush(SecurityEntity security, String isin, String securityName, SecurityType securityType) {
+        if (Objects.equals(securityName, SecurityHelper.NULL_SECURITY_NAME)) {
+            Assert.isTrue(securityType == SecurityType.SHARE || securityType == SecurityType.BOND,
+                    "Наименование актива не задано");
+            securityName = null;
+        }
         security.setType(securityType.toDbType());
         switch (securityType) {
             case SHARE, BOND -> {
