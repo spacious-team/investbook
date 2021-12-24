@@ -59,7 +59,7 @@ public class SecurityHelper {
      * @param nameAndIsin in format "<name>\s*(<isin>)"
      * @return isin for stock or bond, nameAndIsin for others
      */
-    public static String getSecurityId(String nameAndIsin, String section) {
+    private static String getSecurityId(String nameAndIsin, String section) {
         int start = nameAndIsin.indexOf('(') + 1;
         int end = nameAndIsin.indexOf(')');
         String id = nameAndIsin.substring(start, (end == -1) ? nameAndIsin.length() : end);
@@ -69,18 +69,17 @@ public class SecurityHelper {
                         "отредактируйте ISIN через API", id);
                 id = id.substring(0, 12);
             } else {
-                log.warn("Код инструмента '{}' фондового рынка менее 12 символов, дополняю справа знаками '_', " +
+                log.warn("Код инструмента '{}' фондового рынка менее 12 символов, дополняю справа знаками '0', " +
                         "отредактируйте ISIN через API", id);
-                id += "_".repeat(12 - id.length());
+                id += "0".repeat(12 - id.length());
             }
-
         }
         return id;
     }
 
     public static String getSecurityName(String nameAndIsin) {
         int start = nameAndIsin.indexOf('(');
-        return (start == -1) ? null : nameAndIsin.substring(0, start).trim();
+        return (start == -1) ? nameAndIsin : nameAndIsin.substring(0, start).trim();
     }
 
     public static SecurityType getSecurityType(String section, String securityType) {
