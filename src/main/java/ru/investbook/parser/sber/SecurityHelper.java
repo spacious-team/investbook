@@ -23,9 +23,13 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import ru.investbook.parser.SecurityRegistrar;
 
+import java.util.regex.Pattern;
+
 
 @Slf4j
 public class SecurityHelper {
+
+    private static Pattern isinReplacePattern = Pattern.compile("[^A-Z0-9]");
 
     public static Security getSecurity(String code, String securityName, String section, String type, SecurityRegistrar securityRegistrar) {
         String securityId = getSecurityId(code, section);
@@ -64,6 +68,7 @@ public class SecurityHelper {
         int end = nameAndIsin.indexOf(')');
         String id = nameAndIsin.substring(start, (end == -1) ? nameAndIsin.length() : end);
         if (id.length() != 12 && "Фондовый рынок".equalsIgnoreCase(section)) {
+            id = isinReplacePattern.matcher(id.toUpperCase()).replaceAll("");
             if (id.length() > 12) {
                 log.warn("Код инструмента '{}' фондового рынка более 12 символов, обрезаю, " +
                         "отредактируйте ISIN через API", id);
