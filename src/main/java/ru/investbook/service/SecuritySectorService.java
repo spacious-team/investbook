@@ -21,6 +21,7 @@ package ru.investbook.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.SecurityDescription;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.SecurityDescriptionConverter;
@@ -36,12 +37,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.lang.System.nanoTime;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
+import static org.spacious_team.broker.pojo.SecurityType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +58,7 @@ public class SecuritySectorService {
     private final SecurityDescriptionConverter securityDescriptionConverter;
     private final SmartlabShareSectors smartlabShareSectors;
     private final MoexIssClient moexIssClient;
+    private final Set<SecurityType> stockAndBonds = Set.of(STOCK, BOND, STOCK_OR_BOND);
 
     @Transactional
     public void uploadAndUpdateSecuritySectors(boolean forceUpdate) {
@@ -83,9 +88,26 @@ public class SecuritySectorService {
         }
     }
 
-    private void updateSecuritySectors(Collection<SecurityEntity> securityEntitiesStream, boolean forceUpdate) {
-        Map<String, String> tickerToSector = getTickerToSectorIndex();
-        securityEntitiesStream.stream()
+    @Transactional
+    public void setDefaultSecuritySectors() {
+        try {
+            long t0 = nanoTime();
+            Collection<SecurityEntity> securities = securityRepository.findByTypeIn(stockAndBonds);
+            updateSecuritySectors(securities, false, emptyMap());
+            log.info("Сектора по умолчанию для новых ценных бумаг установлены за {}", Duration.ofNanos(nanoTime() - t0));
+        } catch (Exception e) {
+            log.warn("Ошибка установки для новых ЦБ секторов по умолчанию", e);
+        }
+    }
+
+    private void updateSecuritySectors(Collection<SecurityEntity> securityEntities, boolean forceUpdate) {
+        updateSecuritySectors(securityEntities, forceUpdate, getTickerToSectorIndex());
+    }
+
+    private void updateSecuritySectors(Collection<SecurityEntity> securityEntities,
+                                       boolean forceUpdate,
+                                       Map<String, String> tickerToSector) {
+        securityEntities.stream()
                 .filter(entity -> forceUpdate || !securityDescriptionRepository.existsById(entity.getId()))
                 .map(entity -> getSecuritySector(tickerToSector, entity))
                 .flatMap(Optional::stream)
@@ -104,7 +126,7 @@ public class SecuritySectorService {
                 .collect(toMap(TickerAndSector::ticker, TickerAndSector::sector));
     }
 
-    private static record TickerAndSector(String ticker, String sector) {
+    private record TickerAndSector(String ticker, String sector) {
     }
 
     private Optional<SecurityDescription> getSecuritySector(Map<String, String> tickerToSector, SecurityEntity security) {

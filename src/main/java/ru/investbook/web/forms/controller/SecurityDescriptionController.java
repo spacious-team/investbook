@@ -47,6 +47,7 @@ public class SecurityDescriptionController {
     private final SecuritySectorService securitySectorService;
     private final SecurityRepository securityRepository;
     private volatile Collection<String> securities;
+    private volatile long securitiesCount = 0;
 
     @PostConstruct
     public void start() {
@@ -55,8 +56,17 @@ public class SecurityDescriptionController {
 
     @GetMapping
     public String get(Model model) {
+        setDefaultSecuritySectors();
         model.addAttribute("securityDescriptions", securityDescriptionFormsService.getAll());
         return "security-descriptions/table";
+    }
+
+    private void setDefaultSecuritySectors() {
+        long count = securityRepository.count();
+        if (count != securitiesCount) {
+            securitySectorService.setDefaultSecuritySectors();
+            securitiesCount = count;
+        }
     }
 
     @GetMapping("update")
@@ -66,6 +76,7 @@ public class SecurityDescriptionController {
         if (securityId == null) {
             String message = updateSectorsFromSmartLab(forceUpdate);
             model.addAttribute("message", message);
+            model.addAttribute("backLink", "/security-descriptions");
             return "success";
         } else {
             securitySectorService.uploadAndUpdateSecuritySector(securityId, forceUpdate);

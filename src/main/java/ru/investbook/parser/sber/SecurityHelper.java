@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class SecurityHelper {
 
-    private static Pattern isinReplacePattern = Pattern.compile("[^A-Z0-9]");
+    private static final Pattern isinReplacePattern = Pattern.compile("[^A-Z0-9]");
 
     public static Security getSecurity(String code, String securityName, String section, String type, SecurityRegistrar securityRegistrar) {
         String securityId = getSecurityId(code, section);
