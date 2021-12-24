@@ -40,6 +40,8 @@ public interface SecurityRepository extends JpaRepository<SecurityEntity, Intege
 
     Collection<SecurityEntity> findByType(SecurityType securityType);
 
+    Collection<SecurityEntity> findByTypeIn(Collection<SecurityType> securityType);
+
     /**
      * @return in USDRUB format
      */
