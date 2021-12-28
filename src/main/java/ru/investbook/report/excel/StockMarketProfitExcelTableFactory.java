@@ -148,7 +148,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         row.put(COUNT, Math.abs(position.getCount()) * Integer.signum(transaction.getCount()));
         String openPrice = getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount(), toCurrency);
         if (openPrice == null && (position instanceof ClosedPosition)) {
-            // ЦБ введены, а не куплены, принимаем цену покупки = цене продажи, чтобы не было финфнсового результата
+            // ЦБ введены, а не куплены, принимаем цену покупки = цене продажи, чтобы не было финансового результата
             Transaction closeTransaction = ((ClosedPosition) position).getCloseTransaction();
             openPrice = getTransactionCashFlow(closeTransaction, CashFlowType.PRICE, 1d / closeTransaction.getCount(), toCurrency);
         }
@@ -176,8 +176,9 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                     " не может быть закрыта событием типа " + position.getClosingEvent());
         };
         if (closeAmount == null) {
-            // ЦБ выведены со счета, а не прданы, принимаем цену продажи = цене покупки, чтобы не было фин. результата
-            closeAmount = getTransactionCashFlow(position.getOpenTransaction(), CashFlowType.PRICE, multiplier, toCurrency);
+            // ЦБ выведены со счета, а не проданы, принимаем цену продажи = цене покупки, чтобы не было финансового результата
+            double withdrawalMultiplier = Math.abs(1d * position.getCount() / position.getOpenTransaction().getCount());
+            closeAmount = getTransactionCashFlow(position.getOpenTransaction(), CashFlowType.PRICE, withdrawalMultiplier, toCurrency);
         }
         row.put(CLOSE_AMOUNT, closeAmount);
         row.put(CLOSE_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier, toCurrency));
