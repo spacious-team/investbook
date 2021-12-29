@@ -137,7 +137,7 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
             record.put(POSITION, totalContractCount);
         }
         Table.Record total = new Table.Record();
-        total.put(CONTRACT, contract.getId());
+        total.put(CONTRACT, contract.getTicker());
         total.put(DIRECTION, "Итого");
         total.put(COUNT, totalContractCount);
         total.put(COMMISSION, totalCommission);
