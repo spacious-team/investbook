@@ -22,6 +22,7 @@ import lombok.Getter;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.ReportPage;
+import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,10 +39,10 @@ public class SberCashAndSecurityBrokerReportAdapter implements BrokerReport {
 
     private final Workbook book;
 
-    public SberCashAndSecurityBrokerReportAdapter(String excelFileName, InputStream is) {
+    public SberCashAndSecurityBrokerReportAdapter(String excelFileName, InputStream is, SecurityRegistrar securityRegistrar) {
         this.book = getWorkBook(excelFileName, is);
         this.cashReport = new SberCashBrokerReport(excelFileName, book);
-        this.securityDepositReport = new SberSecurityDepositBrokerReport(excelFileName, book);
+        this.securityDepositReport = new SberSecurityDepositBrokerReport(excelFileName, book, securityRegistrar);
     }
 
     @Override

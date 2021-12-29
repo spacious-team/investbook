@@ -21,6 +21,8 @@ package ru.investbook.parser.psb;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.Security.SecurityBuilder;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
@@ -42,11 +44,16 @@ public class SecuritiesTable extends SingleAbstractReportTable<Security> {
 
     @Override
     protected Security parseRow(TableRow row) {
-        return row.rowContains(INVALID_TEXT) ? null :
-                Security.builder()
-                        .id(row.getStringCellValue(ISIN))
-                        .name(row.getStringCellValue(NAME))
-                        .build();
+        if (row.rowContains(INVALID_TEXT)) {
+            return null;
+        }
+        String isin = row.getStringCellValue(ISIN);
+        SecurityBuilder security = Security.builder()
+                .isin(isin)
+                .name(row.getStringCellValue(NAME))
+                .type(SecurityType.STOCK_OR_BOND);
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(isin, () -> security);
+        return security.id(securityId).build();
     }
 
     enum SecuritiesTableHeader implements TableColumnDescription {
@@ -63,6 +70,7 @@ public class SecuritiesTable extends SingleAbstractReportTable<Security> {
 
         @Getter
         private final TableColumn column;
+
         SecuritiesTableHeader(String... words) {
             this.column = TableColumnImpl.of(words);
         }

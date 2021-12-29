@@ -65,7 +65,7 @@
             <span th:text="' (' + ${e.taxId} + ')'" th:if="${e.taxId != null}"/>
         </td>
         <td th:text="${e.date}"/>
-        <td th:text="${e.getSecurityDisplayName}"/>
+        <td th:text="${e.getSecurityName}"/>
         <td th:switch="${e.type.name}">
             <span th:case="DIVIDEND">Дивиденд</span>
             <span th:case="COUPON">Купон</span>

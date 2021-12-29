@@ -29,6 +29,7 @@ import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
@@ -52,7 +53,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -81,47 +81,30 @@ public class InvestbookApiClient {
                 "Не могу сохранить Портфель " + portfolio);
     }
 
-    public boolean addSecurity(String security) {
-        return addSecurity(security, null);
-    }
-
-    public boolean addSecurity(String security, String name) {
-        return addSecurity(Security.builder()
-                .id(security)
-                .name(name)
-                .build());
-    }
-
-    public boolean addSecurity(Security security) {
+    public void addSecurity(Security security) {
         Security _security = convertDerivativeSecurityId(security);
-        return handlePost(
+        handlePost(
                 () -> securityRestController.post(_security),
                 "Не могу добавить ЦБ " + security + " в список");
     }
 
     private Security convertDerivativeSecurityId(Security security) {
-        String id = security.getId();
-        String newId = moexDerivativeCodeService.convertDerivativeSecurityId(id);
-        if (!Objects.equals(id, newId)) {
-            security = security.toBuilder()
-                    .id(newId)
-                    .build();
-        }
-        return security;
+        return security.getType() == SecurityType.DERIVATIVE ?
+                security.toBuilder()
+                        .ticker(moexDerivativeCodeService.convertDerivativeCode(security.getTicker()))
+                        .build() :
+                security;
     }
 
     public void addTransaction(AbstractTransaction transaction) {
-        addSecurity(transaction.getSecurity());
         boolean isAdded = addTransaction(transaction.getTransaction());
         if (isAdded) {
-            Integer transactionId = Optional.ofNullable(transaction.getId())
+            Optional.ofNullable(transaction.getId())
                     .or(() -> getSavedTransactionId(transaction))
-                    .orElse(null);
-            if (transactionId == null) {
-                log.warn("Не могу добавить транзакцию в БД, не задан внутренний идентификатор записи: {}", transaction);
-                return;
-            }
-            addCashTransactionFlows(transaction, transactionId);
+                    .ifPresentOrElse(
+                            transactionId -> addCashTransactionFlows(transaction, transactionId),
+                            () -> log.warn("Не могу добавить транзакцию в БД, " +
+                                    "не задан внутренний идентификатор записи: {}", transaction));
         }
     }
 
@@ -133,9 +116,10 @@ public class InvestbookApiClient {
     }
 
     private void addCashTransactionFlows(AbstractTransaction transaction, int transactionId) {
-        transaction.getTransactionCashFlows()
-                .stream()
-                .map(cash -> cash.toBuilder().transactionId(transactionId).build())
+        transaction.toBuilder()
+                .id(transactionId)
+                .build()
+                .getTransactionCashFlows()
                 .forEach(this::addTransactionCashFlow);
     }
 

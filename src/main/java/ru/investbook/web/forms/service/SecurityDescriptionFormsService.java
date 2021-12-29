@@ -33,7 +33,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 
 
 @Component
@@ -44,7 +43,7 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
     private final SecurityRepositoryHelper securityRepositoryHelper;
 
     @Transactional(readOnly = true)
-    public Optional<SecurityDescriptionModel> getById(String security) {
+    public Optional<SecurityDescriptionModel> getById(Integer security) {
         return securityDescriptionRepository.findById(security)
                 .map(this::toModel);
     }
@@ -61,27 +60,23 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
     @Override
     @Transactional
     public void save(SecurityDescriptionModel m) {
-        String savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(m);
-        saveAndFlushSecurityDescription(savedSecurityId, m.getSector());
-    }
-
-    private void saveAndFlushSecurityDescription(String securityId, String sector) {
-        securityDescriptionRepository.createOrUpdateSector(securityId, sector);
-        securityDescriptionRepository.flush();
+        int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(m);
+        securityDescriptionRepository.createOrUpdateSector(savedSecurityId, m.getSector());
     }
 
     private SecurityDescriptionModel toModel(SecurityDescriptionEntity e) {
         SecurityDescriptionModel m = new SecurityDescriptionModel();
         SecurityEntity security = securityRepository.findById(e.getSecurity()).orElseThrow();
-        m.setSecurity(ofNullable(security.getIsin()).orElse(security.getId()),
+        m.setSecurity(security.getId(),
+                security.getIsin(),
                 ofNullable(security.getName()).orElse(security.getTicker()),
-                SecurityType.valueOf(getSecurityType(security.getId())));
+                SecurityType.valueOf(security.getType()));
         m.setSector(e.getSector());
         return m;
     }
 
     @Transactional
-    public void delete(String securityId) {
+    public void delete(Integer securityId) {
         securityRepository.deleteById(securityId);
         securityRepository.flush();
     }

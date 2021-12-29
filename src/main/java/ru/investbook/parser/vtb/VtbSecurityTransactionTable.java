@@ -68,12 +68,13 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
 
         Security security = VtbReportHelper.getSecurity(row.getStringCellValue(NAME_AND_ISIN));
         securities.add(security);
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(security.getIsin(), security::toBuilder);
 
         return SecurityTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE))
                 .tradeId(row.getStringCellValue(TRADE_ID))
                 .portfolio(getReport().getPortfolio())
-                .security(security.getId())
+                .security(securityId)
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)
                 .accruedInterest(accruedInterest)

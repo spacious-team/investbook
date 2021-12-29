@@ -27,7 +27,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
+import static java.util.Optional.ofNullable;
 import static ru.investbook.web.forms.model.SecurityHelper.getSecurityDescription;
 
 public class ControllerHelper {
@@ -59,9 +59,9 @@ public class ControllerHelper {
         return securityRepository.findAll()
                 .stream()
                 .map(e -> getSecurityDescription(
-                        e.getId(),
-                        e.getName(),
-                        SecurityType.valueOf(getSecurityType(e.getId()))))
+                        e.getIsin(),
+                        ofNullable(e.getName()).orElse(e.getTicker()),
+                        SecurityType.valueOf(e.getType())))
                 .sorted()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }

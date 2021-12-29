@@ -20,7 +20,6 @@ package ru.investbook.web.forms.model;
 
 import lombok.Data;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -29,7 +28,7 @@ import javax.validation.constraints.NotNull;
 public class SecurityDescriptionModel {
 
     @Nullable
-    private String securityId;
+    private Integer securityId;
     /**
      * In "name (isin)" or "contract-name" format
      */
@@ -42,32 +41,23 @@ public class SecurityDescriptionModel {
     @NotNull
     private SecurityType securityType;
 
-    public void setSecurity(String securityId, String securityName, SecurityType securityType) {
+    public void setSecurity(Integer securityId, String securityIsin, String securityName, SecurityType securityType) {
         this.securityId = securityId;
-        this.security = SecurityHelper.getSecurityDescription(securityId, securityName, securityType);
+        this.security = SecurityHelper.getSecurityDescription(securityIsin, securityName, securityType);
         this.securityType = securityType;
     }
 
-    public String getSecurityDisplayName() {
-        return SecurityHelper.getSecurityDisplayName(security, securityType);
-    }
-
     /**
-     * Returns ISIN (stock market) or contract name (derivatives and forex market) or null for new security
-     */
-    public String getSecurityId() {
-        if (StringUtils.hasLength(securityId)) {
-            return securityId; // если сектор существующей бумаги
-        } else if (StringUtils.hasLength(security) && securityType != null) {
-            return SecurityHelper.getSecurityId(security, securityType); // получили параметры новой бумаги с формы
-        }
-        return null; // передаем новую ценную бумагу на форму
-    }
-
-    /**
-     * Returns security name (stock market) or null (derivatives and forex market)
+     * Returns Name from template "Name (ISIN)" for stock and bond, code for derivative, securityName for asset
      */
     public String getSecurityName() {
         return SecurityHelper.getSecurityName(security, securityType);
+    }
+
+    /**
+     * Returns ISIN if description in "Name (ISIN)" format, null otherwise
+     */
+    public String getSecurityIsin() {
+        return SecurityHelper.getSecurityIsin(security);
     }
 }

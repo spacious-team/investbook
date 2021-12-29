@@ -50,6 +50,7 @@ import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -76,27 +77,28 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     }
 
     public Table create(Portfolio portfolio, String forCurrency) {
-        Collection<String> securitiesIsin = getSecuritiesIsin(portfolio, forCurrency);
-        return create(portfolio, securitiesIsin, forCurrency);
+        Collection<Security> securities = getSecurities(portfolio, forCurrency);
+        return create(portfolio, securities, forCurrency);
     }
 
-    private Collection<String> getSecuritiesIsin(Portfolio portfolio, String currency) {
+    private Collection<Security> getSecurities(Portfolio portfolio, String currency) {
         return transactionRepository.findDistinctSecurityByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
-                singleton(portfolio.getId()),
-                currency,
-                ViewFilter.get().getFromDate(),
-                ViewFilter.get().getToDate());
+                        singleton(portfolio.getId()),
+                        currency,
+                        ViewFilter.get().getFromDate(),
+                        ViewFilter.get().getToDate())
+                .stream()
+                .map(securityRepository::findById)
+                .flatMap(Optional::stream)
+                .map(securityConverter::fromEntity)
+                .toList();
     }
 
-    public Table create(Portfolio portfolio, Collection<String> securitiesIsin, String toCurrency) {
+    public Table create(Portfolio portfolio, Collection<Security> securities, String toCurrency) {
         Table openPositionsProfit = new Table();
         Table closedPositionsProfit = new Table();
-        for (String isin : securitiesIsin) {
-            securityRepository.findById(isin)
-                    .map(securityConverter::fromEntity)
-                    .ifPresent(security ->
-                            getRowsForSecurity(security, portfolio, openPositionsProfit, closedPositionsProfit, toCurrency));
-        }
+        securities.forEach(security ->
+                getRowsForSecurity(security, portfolio, openPositionsProfit, closedPositionsProfit, toCurrency));
         Table profit = new Table();
         profit.addAll(openPositionsProfit);
         profit.addAll(closedPositionsProfit);
@@ -131,7 +133,8 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                 record.put(SECURITY,
                         ofNullable(security.getName())
                                 .or(() -> ofNullable(security.getTicker()))
-                                .orElse(security.getId()));
+                                .or(() -> ofNullable(security.getIsin()))
+                                .orElse("<неизвестно>"));
                 rows.add(record);
             }
         }
@@ -145,7 +148,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         row.put(COUNT, Math.abs(position.getCount()) * Integer.signum(transaction.getCount()));
         String openPrice = getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount(), toCurrency);
         if (openPrice == null && (position instanceof ClosedPosition)) {
-            // ЦБ введены, а не куплены, принимаем цену покупки = цене продажи, чтобы не было финфнсового результата
+            // ЦБ введены, а не куплены, принимаем цену покупки = цене продажи, чтобы не было финансового результата
             Transaction closeTransaction = ((ClosedPosition) position).getCloseTransaction();
             openPrice = getTransactionCashFlow(closeTransaction, CashFlowType.PRICE, 1d / closeTransaction.getCount(), toCurrency);
         }
@@ -173,8 +176,9 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                     " не может быть закрыта событием типа " + position.getClosingEvent());
         };
         if (closeAmount == null) {
-            // ЦБ выведены со счета, а не прданы, принимаем цену продажи = цене покупки, чтобы не было фин. результата
-            closeAmount = getTransactionCashFlow(position.getOpenTransaction(), CashFlowType.PRICE, multiplier, toCurrency);
+            // ЦБ выведены со счета, а не проданы, принимаем цену продажи = цене покупки, чтобы не было финансового результата
+            double withdrawalMultiplier = Math.abs(1d * position.getCount() / position.getOpenTransaction().getCount());
+            closeAmount = getTransactionCashFlow(position.getOpenTransaction(), CashFlowType.PRICE, withdrawalMultiplier, toCurrency);
         }
         row.put(CLOSE_AMOUNT, closeAmount);
         row.put(CLOSE_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier, toCurrency));
@@ -220,18 +224,18 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                 .orElse(null);
     }
 
-    private String getRedemptionCashFlow(String portfolio, String isin, double multiplier, String toCurrency) {
+    private String getRedemptionCashFlow(String portfolio, Integer securityId, double multiplier, String toCurrency) {
         List<SecurityEventCashFlowEntity> cashFlows = securityEventCashFlowRepository
                 .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         singleton(portfolio),
-                        isin,
+                        securityId,
                         CashFlowType.REDEMPTION.getId(),
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate());
         if (cashFlows.isEmpty()) {
             return null;
         } else if (cashFlows.size() > 1) {
-            throw new IllegalArgumentException("По ЦБ может быть не более одного события погашения, по бумаге " + isin +
+            throw new IllegalArgumentException("По ЦБ может быть не более одного события погашения, по бумаге " + securityId +
                     " найдено " + cashFlows.size() + " событий погашения");
         }
         SecurityEventCashFlowEntity redemptionEntity = cashFlows.get(0);

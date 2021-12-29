@@ -18,26 +18,71 @@
 
 package ru.investbook.repository;
 
+import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.SecurityEntity;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Transactional(readOnly = true)
-public interface SecurityRepository extends JpaRepository<SecurityEntity, String> {
+public interface SecurityRepository extends JpaRepository<SecurityEntity, Integer> {
 
-    @Transactional
-    default void createOrUpdate(String securityId, String securityName) {
-        findById(securityId).ifPresentOrElse(
-                security -> security.setName(securityName),
-                () -> {
-                    SecurityEntity entity = new SecurityEntity();
-                    entity.setId(securityId);
-                    entity.setName(securityName);
-                    save(entity);
-                });
-    }
+    Optional<SecurityEntity> findByIsin(String isin);
+
+    Optional<SecurityEntity> findByTicker(String ticker);
 
     Optional<SecurityEntity> findByName(String name);
+
+    Collection<SecurityEntity> findByType(SecurityType securityType);
+
+    Collection<SecurityEntity> findByTypeIn(Collection<SecurityType> securityType);
+
+    /**
+     * @return in USDRUB format
+     */
+    default Optional<String> findCurrencyPair(Integer securityId) {
+        return findById(securityId)
+                .filter(security -> security.getType() == SecurityType.CURRENCY_PAIR)
+                .map(SecurityEntity::getTicker)
+                .map(SecurityType::getCurrencyPair);
+    }
+
+    /**
+     * @param securityIds can hold different contracts (USDRUB_TOD, USDRUB_TOM, etc.) of same currency pair (USDRUB)
+     * @return only (any) security id for currency pair
+     */
+    default Collection<Integer> findDistinctContractForCurrencyPair(Collection<Integer> securityIds) {
+        return findDistinctCurrencyPair(securityIds)
+                .stream()
+                .map(this::findFirstByCurrencyPair)
+                .flatMap(Optional::stream)
+                .map(SecurityEntity::getId)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Returns foreign exchange market currency pairs (in USDRUB format)
+     */
+    default List<String> findDistinctCurrencyPair(Collection<Integer> securityIds) {
+        return securityIds.stream()
+                .map(this::findCurrencyPair)
+                .flatMap(Optional::stream)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * @param currencyPair in USDRUB format
+     */
+    @Query(nativeQuery = true, value = """
+            SELECT * from security
+            WHERE ticker LIKE CONCAT(:currencyPair, '\\_%')
+            LIMIT 1
+            """)
+    Optional<SecurityEntity> findFirstByCurrencyPair(String currencyPair);
 }

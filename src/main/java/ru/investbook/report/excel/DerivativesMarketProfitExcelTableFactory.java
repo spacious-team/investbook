@@ -49,7 +49,7 @@ import static ru.investbook.report.excel.DerivativesMarketProfitExcelTableHeader
 @RequiredArgsConstructor
 public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
     private static final String TAX_FORMULA = "=IF((" + DERIVATIVE_PROFIT_TOTAL.getCellAddr() + "-" + COMMISSION.getCellAddr() + ")<=0," +
-            "0,0.13*(" + DERIVATIVE_PROFIT_TOTAL.getCellAddr() + "-" + COMMISSION.getCellAddr() +"))";
+            "0,0.13*(" + DERIVATIVE_PROFIT_TOTAL.getCellAddr() + "-" + COMMISSION.getCellAddr() + "))";
     private static final String PROFIT_FORMULA = "=" + DERIVATIVE_PROFIT_TOTAL.getCellAddr()
             + "-" + COMMISSION.getCellAddr()
             + "-" + FORECAST_TAX.getCellAddr();
@@ -60,27 +60,28 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
 
     public Table create(Portfolio portfolio) {
         Table profit = new Table();
-        for (String isin : getSecuritiesIsin(portfolio)) {
-            Optional<SecurityEntity> securityEntity = securityRepository.findById(isin);
-            if (securityEntity.isPresent()) {
-                Security contract = securityConverter.fromEntity(securityEntity.get());
-                DerivativeEvents derivativeEvents = derivativeEventsFactory.getDerivativeEvents(
-                        portfolio,
-                        contract,
-                        ViewFilter.get());
+        for (SecurityEntity securityEntity : getDerivatives(portfolio)) {
+            Security contract = securityConverter.fromEntity(securityEntity);
+            DerivativeEvents derivativeEvents = derivativeEventsFactory.getDerivativeEvents(
+                    portfolio,
+                    contract,
+                    ViewFilter.get());
 
-                profit.addEmptyRecord();
-                profit.addAll(getContractProfit(contract, derivativeEvents));
-            }
+            profit.addEmptyRecord();
+            profit.addAll(getContractProfit(contract, derivativeEvents));
         }
         return profit;
     }
 
-    private Collection<String> getSecuritiesIsin(Portfolio portfolio) {
+    private Collection<SecurityEntity> getDerivatives(Portfolio portfolio) {
         return transactionRepository.findDistinctDerivativeByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
-                singleton(portfolio.getId()),
-                ViewFilter.get().getFromDate(),
-                ViewFilter.get().getToDate());
+                        singleton(portfolio.getId()),
+                        ViewFilter.get().getFromDate(),
+                        ViewFilter.get().getToDate())
+                .stream()
+                .map(securityRepository::findById)
+                .flatMap(Optional::stream)
+                .toList();
     }
 
     private Table getContractProfit(Security contract, DerivativeEvents derivativeEvents) {
@@ -136,7 +137,7 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
             record.put(POSITION, totalContractCount);
         }
         Table.Record total = new Table.Record();
-        total.put(CONTRACT, contract.getId());
+        total.put(CONTRACT, contract.getTicker());
         total.put(DIRECTION, "Итого");
         total.put(COUNT, totalContractCount);
         total.put(COMMISSION, totalCommission);

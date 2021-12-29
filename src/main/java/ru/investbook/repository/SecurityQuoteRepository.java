@@ -32,7 +32,7 @@ public interface SecurityQuoteRepository extends JpaRepository<SecurityQuoteEnti
     List<SecurityQuoteEntity> findByOrderByTimestampDescSecurityAsc();
 
     Optional<SecurityQuoteEntity> findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(
-            String isin,
+            Integer securityId,
             Instant date);
 
     Optional<SecurityQuoteEntity> findFirstByOrderByTimestampDesc();

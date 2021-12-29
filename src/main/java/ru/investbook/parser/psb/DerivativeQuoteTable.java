@@ -46,8 +46,11 @@ public class DerivativeQuoteTable extends SingleAbstractReportTable<SecurityQuot
         BigDecimal tick = row.getBigDecimalCellValue(PRICE_TICK);
         BigDecimal quote = price.multiply(tick)
                 .divide(tickValue, 2, RoundingMode.HALF_UP);
+
+        String contract = row.getStringCellValue(CONTRACT);
+        int securityId = getReport().getSecurityRegistrar().declareDerivative(contract);
         return SecurityQuote.builder()
-                .security(row.getStringCellValue(CONTRACT))
+                .security(securityId)
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .price(price)

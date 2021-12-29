@@ -47,6 +47,7 @@ public class SecurityDescriptionController {
     private final SecuritySectorService securitySectorService;
     private final SecurityRepository securityRepository;
     private volatile Collection<String> securities;
+    private volatile long securitiesCount = 0;
 
     @PostConstruct
     public void start() {
@@ -55,17 +56,27 @@ public class SecurityDescriptionController {
 
     @GetMapping
     public String get(Model model) {
+        setDefaultSecuritySectors();
         model.addAttribute("securityDescriptions", securityDescriptionFormsService.getAll());
         return "security-descriptions/table";
     }
 
+    private void setDefaultSecuritySectors() {
+        long count = securityRepository.count();
+        if (count != securitiesCount) {
+            securitySectorService.setDefaultSecuritySectors();
+            securitiesCount = count;
+        }
+    }
+
     @GetMapping("update")
-    public String updateFromSmartLab(@RequestParam(name = "security-id", required = false) String securityId,
+    public String updateFromSmartLab(@RequestParam(name = "security-id", required = false) Integer securityId,
                                      @RequestParam(name = "force", defaultValue = "false") boolean forceUpdate,
                                      Model model) {
         if (securityId == null) {
             String message = updateSectorsFromSmartLab(forceUpdate);
             model.addAttribute("message", message);
+            model.addAttribute("backLink", "/security-descriptions");
             return "success";
         } else {
             securitySectorService.uploadAndUpdateSecuritySector(securityId, forceUpdate);
@@ -79,14 +90,14 @@ public class SecurityDescriptionController {
     }
 
     @GetMapping("/edit-form")
-    public String getEditForm(@RequestParam(name = "security-id", required = false) String securityId,
+    public String getEditForm(@RequestParam(name = "security-id", required = false) Integer securityId,
                               Model model) {
         model.addAttribute("securityDescription", getSecurityDescription(securityId));
         model.addAttribute("securities", securities);
         return "security-descriptions/edit-form";
     }
 
-    private SecurityDescriptionModel getSecurityDescription(String securityId) {
+    private SecurityDescriptionModel getSecurityDescription(Integer securityId) {
         return Optional.ofNullable(securityId)
                 .flatMap(securityDescriptionFormsService::getById)
                 .orElseGet(SecurityDescriptionModel::new);
@@ -99,7 +110,7 @@ public class SecurityDescriptionController {
     }
 
     @GetMapping("/delete")
-    public String delete(@RequestParam(name = "security-id") String securityId, Model model) {
+    public String delete(@RequestParam(name = "security-id") Integer securityId, Model model) {
         try {
             securityDescriptionFormsService.delete(securityId);
             model.addAttribute("message", "Инструмент удален");

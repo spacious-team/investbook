@@ -125,7 +125,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
      * see {@link AbstractRestController#delete(Object)}
      */
     @Override
-    @DeleteMapping("{id}}")
+    @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = """
             Удалить информацию об об объемах движения ДС по сделке. Сама сделка не удаляется, ее нужно удалить своим API
             """)

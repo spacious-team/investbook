@@ -27,12 +27,12 @@ import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.sber.SecurityHelper;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static ru.investbook.parser.sber.SecurityHelper.getSecurityId;
 import static ru.investbook.parser.sber.cash_security.SberSecurityDepsitAndWithdrawalTable.SberSecurityDepositAndWithdrawalTableHeader.*;
 
 @Slf4j
@@ -40,9 +40,11 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Se
     static final String FIRST_LINE = "Номер договора";
     @Getter
     private final Collection<Security> securities = new ArrayList<>();
+    private final SberSecurityDepositBrokerReport report;
 
     protected SberSecurityDepsitAndWithdrawalTable(SberSecurityDepositBrokerReport report) {
         super(report, "Движение ЦБ", FIRST_LINE, null, SberSecurityDepositAndWithdrawalTableHeader.class);
+        this.report = report;
     }
 
     @Override
@@ -64,17 +66,23 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Se
         }
         String portfolio = row.getStringCellValue(PORTFOLIO);
         Instant instant = row.getInstantCellValue(DATE_TIME);
-        String securityId = getSecurityId(row.getStringCellValue(CODE), row.getStringCellValue(SECTION));
+        Security security = SecurityHelper.getSecurity(
+                row.getStringCellValue(CODE),
+                row.getStringCellValueOrDefault(NAME, null),
+                row.getStringCellValue(SECTION),
+                null,
+                report.getSecurityRegistrar());
+
         return SecurityTransaction.builder()
-                .tradeId(generateTradeId(portfolio, instant, securityId))
+                .tradeId(generateTradeId(portfolio, instant, security.getId()))
                 .timestamp(instant)
                 .portfolio(portfolio)
-                .security(securityId)
+                .security(security.getId())
                 .count(count)
                 .build();
     }
 
-    private static String generateTradeId(String portfolio, Instant instant, String securityId) {
+    private static String generateTradeId(String portfolio, Instant instant, Integer securityId) {
         String id = instant.getEpochSecond() + securityId + portfolio;
         return id.substring(0, Math.min(32, id.length()));
     }

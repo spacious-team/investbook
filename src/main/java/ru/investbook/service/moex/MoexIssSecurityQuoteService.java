@@ -21,6 +21,7 @@ package ru.investbook.service.moex;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
 import ru.investbook.converter.SecurityQuoteConverter;
 import ru.investbook.entity.SecurityEntity;
@@ -29,7 +30,6 @@ import ru.investbook.repository.SecurityQuoteRepository;
 import java.util.Optional;
 
 import static org.spacious_team.broker.pojo.SecurityType.CURRENCY_PAIR;
-import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 import static ru.investbook.repository.RepositoryHelper.isUniqIndexViolationException;
 
 @Service
@@ -42,16 +42,17 @@ public class MoexIssSecurityQuoteService {
     private final SecurityQuoteRepository securityQuoteRepository;
 
     public void updateQuote(SecurityEntity security) {
-        updateQuote(security.getId());
-    }
-
-    public void updateQuote(String securityId) {
-        if (getSecurityType(securityId) == CURRENCY_PAIR) {
+        Integer securityId = security.getId();
+        SecurityType securityType = security.getType();
+        if (securityType == CURRENCY_PAIR) {
             return; // currency pair quote derived from foreign exchange rate, use CbrForeignExchangeRateService
-        } else if (moexClient.isDerivativeAndExpired(securityId)) {
+        } else if (moexClient.isDerivativeAndExpired(security.getTicker(), securityType)) {
             return;
         }
-        moexClient.getSecId(securityId)
+        String isinOrContractName = Optional.ofNullable(security.getIsin())
+                .or(() -> Optional.ofNullable(security.getTicker()))
+                .orElseThrow();
+        moexClient.getSecId(isinOrContractName, securityType)
                 .flatMap(this::getSecurityQuote)
                 .ifPresentOrElse(
                         quote -> saveQuote(securityId, quote),
@@ -63,7 +64,7 @@ public class MoexIssSecurityQuoteService {
                 .flatMap(market -> moexClient.getQuote(moexSecId, market));
     }
 
-    private void saveQuote(String securityId, SecurityQuote quote) {
+    private void saveQuote(Integer securityId, SecurityQuote quote) {
         try {
             quote = quote.toBuilder()
                     .security(securityId)

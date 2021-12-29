@@ -21,7 +21,6 @@ package ru.investbook.parser.sber.cash_security;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.sber.SecurityHelper;
 import ru.investbook.parser.sber.cash_security.SberSecurityDepsitAndWithdrawalTable.SberSecurityDepositAndWithdrawalTableHeader;
@@ -31,17 +30,20 @@ import static ru.investbook.parser.sber.cash_security.SberSecurityDepsitAndWithd
 
 @Slf4j
 public class SberSecuritySecuritiesTable extends AbstractReportTable<Security> {
+    private final SberSecurityDepositBrokerReport report;
 
-    protected SberSecuritySecuritiesTable(BrokerReport report) {
+    protected SberSecuritySecuritiesTable(SberSecurityDepositBrokerReport report) {
         super(report, "Движение ЦБ", FIRST_LINE, null, SberSecurityDepositAndWithdrawalTableHeader.class);
+        this.report = report;
     }
 
     @Override
     protected Security parseRow(TableRow row) {
-        String code = row.getStringCellValue(CODE);
-        return Security.builder()
-                .id(SecurityHelper.getSecurityId(code, row.getStringCellValue(SECTION)))
-                .name(row.getStringCellValueOrDefault(NAME, null))
-                .build();
+        return SecurityHelper.getSecurity(
+                row.getStringCellValue(CODE),
+                row.getStringCellValueOrDefault(NAME, null),
+                row.getStringCellValue(SECTION),
+                null,
+                report.getSecurityRegistrar());
     }
 }

@@ -129,8 +129,7 @@ public abstract class ExcelTableView {
                     }
                     Cell cell = row.createCell(header.ordinal());
                     try {
-                        if (value instanceof String) {
-                            String string = (String) value;
+                        if (value instanceof String string) {
                             if (string.startsWith("=")) {
                                 string = string.substring(1)
                                         .replace(ROW_NUM_PLACE_HOLDER, String.valueOf(rowNum + 1));

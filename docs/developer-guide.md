@@ -1,5 +1,5 @@
 ![java-version](https://img.shields.io/badge/Java-17-brightgreen?style=flat-square)
-![spring-boot-version](https://img.shields.io/badge/SpringBoot-2.5.6-brightgreen?style=flat-square)
+![spring-boot-version](https://img.shields.io/badge/SpringBoot-2.6.2-brightgreen?style=flat-square)
 
 ### Инструкция для начинающих
 Если вы начинающий разработчик воспользуйтесь этой [инструкцией](https://github.com/spacious-team/investbook/files/5398264/github.docx).
@@ -33,7 +33,7 @@ mvn spring-boot:run
 ```
 
 ### Сборка релиза
-Релиз состоит из двух файлов: zip-архива и msi-установщика. Msi-утсановщик собрается только на Windows.
+Релиз состоит из двух файлов: zip-архива и msi-установщика. Msi-установщик собирается только на Windows.
 Поэтому если вы работаете под Windows, необходимо установить `Wix` со страницы [проекта](https://wixtoolset.org/releases/)
 (_WiX Toolset Visual Studio Extension_ устанавливать не нужно).
 

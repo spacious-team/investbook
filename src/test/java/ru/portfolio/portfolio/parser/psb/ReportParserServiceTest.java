@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.psb;
 
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -26,6 +27,7 @@ import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 import ru.investbook.InvestbookApplication;
 import ru.investbook.parser.ReportParserService;
+import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -33,6 +35,9 @@ import java.nio.file.Paths;
 @Ignore
 @SpringBootTest(classes = InvestbookApplication.class)
 public class ReportParserServiceTest extends AbstractTestNGSpringContextTests {
+
+    @Mock
+    SecurityRegistrar securityRegistrar;
 
     @Autowired
     private ReportParserService reportParserService;
@@ -47,8 +52,8 @@ public class ReportParserServiceTest extends AbstractTestNGSpringContextTests {
 
     @Test(dataProvider = "report")
     void testParse(String report) throws IOException {
-        PsbBrokerReport brokerReport = new PsbBrokerReport(Paths.get(report));
-        PsbReportTables reportTableFactory = new PsbReportTables(brokerReport);
+        PsbBrokerReport brokerReport = new PsbBrokerReport(Paths.get(report), securityRegistrar);
+        PsbReportTables reportTableFactory = new PsbReportTables(brokerReport, null);
         reportParserService.parse(reportTableFactory);
     }
 

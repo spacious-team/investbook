@@ -20,25 +20,28 @@ package ru.investbook.parser.sber.transaction;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.sber.SecurityHelper;
 
 import java.math.BigDecimal;
 
-import static ru.investbook.parser.sber.SecurityHelper.getSecurityId;
+import static ru.investbook.parser.sber.SecurityHelper.getSecurityName;
 import static ru.investbook.parser.sber.transaction.SberTrSecurityTransactionTable.SberTransactionTableHeader.*;
 
 @Slf4j
 public class SberTrSecurityTransactionTable extends AbstractReportTable<SecurityTransaction> {
     private static final String FIRST_LINE = "Номер договора";
+    private final SberTrBrokerReport report;
 
-    protected SberTrSecurityTransactionTable(BrokerReport report) {
+    protected SberTrSecurityTransactionTable(SberTrBrokerReport report) {
         super(report, "Сделки", FIRST_LINE, null, SberTransactionTableHeader.class);
+        this.report = report;
     }
 
     @Override
@@ -52,11 +55,19 @@ public class SberTrSecurityTransactionTable extends AbstractReportTable<Security
             accruedInterest = accruedInterest.negate();
         }
         String currency = row.getStringCellValue(CURRENCY);
+        String nameAndIsin = row.getStringCellValue(NAME_AND_ISIN);
+        Security security = SecurityHelper.getSecurity(
+                nameAndIsin,
+                getSecurityName(nameAndIsin),
+                row.getStringCellValue(SECTION),
+                row.getStringCellValue(SECURITY_TYPE),
+                report.getSecurityRegistrar());
+
         return SecurityTransaction.builder()
                 .portfolio(row.getStringCellValue(PORTFOLIO))
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .tradeId(String.valueOf(row.getLongCellValue(TRADE_ID))) // may be double numbers in future
-                .security(getSecurityId(row.getStringCellValue(NAME_AND_ISIN), row.getStringCellValue(SECTION)))
+                .security(security.getId())
                 .count(row.getIntCellValue(COUNT) * (isBuy ? 1 : -1))
                 .value(value)
                 .accruedInterest(accruedInterest)

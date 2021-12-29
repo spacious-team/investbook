@@ -42,7 +42,7 @@ import java.util.Optional;
 @RestController
 @Tag(name = "Инструменты", description = "Акции, облигации, деривативы и валютные пары")
 @RequestMapping("/api/v1/securities")
-public class SecurityRestController extends AbstractRestController<String, Security, SecurityEntity> {
+public class SecurityRestController extends AbstractRestController<Integer, Security, SecurityEntity> {
     private final SecurityRepository repository;
 
     public SecurityRestController(SecurityRepository repository, SecurityConverter converter) {
@@ -63,8 +63,8 @@ public class SecurityRestController extends AbstractRestController<String, Secur
     @Operation(summary = "Отобразить один",
             description = "Отобразить биржевой инструмент по идентификатору (ISIN,  коду дериватива, вылютной пары)")
     public ResponseEntity<Security> get(@PathVariable("id")
-                                        @Parameter(description = "Идентификатор", example = "ISIN, BR-2.21, USDRUB_TOM")
-                                                String id) {
+                                        @Parameter(description = "Идентификатор", example = "123", required = true)
+                                                Integer id) {
         return super.get(id);
     }
 
@@ -80,8 +80,8 @@ public class SecurityRestController extends AbstractRestController<String, Secur
     @PutMapping("{id}")
     @Operation(summary = "Обновить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре")
     public ResponseEntity<Void> put(@PathVariable("id")
-                                    @Parameter(description = "Идентификатор", example = "ISIN, BR-2.21, USDRUB_TOM")
-                                            String id,
+                                    @Parameter(description = "Идентификатор", example = "123", required = true)
+                                            Integer id,
                                     @Valid @RequestBody Security security) {
         return super.put(id, security);
     }
@@ -90,23 +90,23 @@ public class SecurityRestController extends AbstractRestController<String, Secur
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = "Удалить сведения о биржевом инструменте и всех его сделках по всем счетам")
     public void delete(@PathVariable("id")
-                       @Parameter(description = "Идентификатор", example = "ISIN, BR-2.21, USDRUB_TOM")
-                               String id) {
+                       @Parameter(description = "Идентификатор", example = "123", required = true)
+                               Integer id) {
         super.delete(id);
     }
 
     @Override
-    protected Optional<SecurityEntity> getById(String isin) {
+    protected Optional<SecurityEntity> getById(Integer isin) {
         return repository.findById(isin);
     }
 
     @Override
-    protected String getId(Security object) {
+    protected Integer getId(Security object) {
         return object.getId();
     }
 
     @Override
-    protected Security updateId(String id, Security object) {
+    protected Security updateId(Integer id, Security object) {
         return object.toBuilder().id(id).build();
     }
 

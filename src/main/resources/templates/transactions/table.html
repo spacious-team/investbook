@@ -61,7 +61,7 @@
                th:text="${tr.tradeId}"/>
         </td>
         <td th:text="${tr.date}"/>
-        <td th:text="${tr.getSecurityDisplayName}"/>
+        <td th:text="${tr.getSecurityName}"/>
         <td th:switch="${tr.action.name}">
             <span th:case="BUY">Покупка</span>
             <span th:case="CELL">Продажа</span>

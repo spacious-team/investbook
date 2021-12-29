@@ -68,7 +68,7 @@ public class FifoPositions {
 
     private void processRedemptions(Deque<SecurityEventCashFlow> redemptions) {
         if (!redemptions.isEmpty() && (redemptions.peek() != null)) {
-            String security = redemptions.peek().getSecurity();
+            int security = redemptions.peek().getSecurity();
             updateSecuritiesPastPositions(redemptions.stream()
                     .map(FifoPositions::convertToTransaction)
                     .collect(Collectors.toCollection(LinkedList::new)));

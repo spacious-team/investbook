@@ -38,8 +38,8 @@ public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
 
     static final String TABLE_NAME = "Отчет об остатках ценных бумаг";
     static final String TABLE_FOOTER = "ИТОГО:";
-    // security registration number -> isin
-    private final Map<String, String> securityRegNumberToIsin = new HashMap<>();
+    // security registration number -> Security
+    private final Map<String, Security> regNumberToSecurity = new HashMap<>();
 
     protected VtbSecuritiesTable(SingleBrokerReport report) {
         super(report, TABLE_NAME, TABLE_FOOTER, VtbSecuritiesTableHeader.class);
@@ -52,14 +52,16 @@ public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
         }
         String description = row.getStringCellValue(NAME_REGNUMBER_ISIN);
         Security security = VtbReportHelper.getSecurity(description);
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(security.getIsin(), security::toBuilder);
+        security = Security.builder().id(securityId).build();
         String registrationNumber = description.split(",")[1].toUpperCase().trim();
-        securityRegNumberToIsin.put(registrationNumber, security.getId());
+        regNumberToSecurity.put(registrationNumber, security);
         return security;
     }
 
-    public Map<String, String> getSecurityRegNumberToIsin() {
+    public Map<String, Security> getRegNumberToSecurity() {
         initializeIfNeed();
-        return securityRegNumberToIsin;
+        return regNumberToSecurity;
     }
 
     @Getter

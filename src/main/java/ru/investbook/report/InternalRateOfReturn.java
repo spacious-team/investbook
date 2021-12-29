@@ -24,6 +24,7 @@ import org.decampo.xirr.NewtonRaphson;
 import org.decampo.xirr.Xirr;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
@@ -46,7 +47,6 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toCollection;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static org.spacious_team.broker.pojo.SecurityType.DERIVATIVE;
-import static org.spacious_team.broker.pojo.SecurityType.getSecurityType;
 
 @Component
 @RequiredArgsConstructor
@@ -77,13 +77,14 @@ public class InternalRateOfReturn {
             Collection<String> portfolios, Security security, SecurityQuote quote, Instant fromDate, Instant toDate) {
 
         try {
-            if (getSecurityType(security.getId()) == DERIVATIVE) {
+            boolean isDerivative = (security.getType() == DERIVATIVE);
+            if (isDerivative) {
                 return null;
             }
             FifoPositionsFilter pf = FifoPositionsFilter.of(portfolios, fromDate, toDate);
             FifoPositions positions = positionsFactory.get(security, pf);
             int count = positions.getCurrentOpenedPositionsCount();
-            if (count != 0 && (quote == null || quote.getDirtyPriceInCurrency() == null)) {
+            if (count != 0 && (quote == null || quote.getDirtyPriceInCurrency(isDerivative) == null)) {
                 return null;
             }
 
@@ -99,7 +100,7 @@ public class InternalRateOfReturn {
                     .map(cash -> castToXirrTransaction(cash, toCurrency))
                     .collect(toCollection(() -> transactions));
 
-            castToXirrTransaction(quote, toCurrency, count)
+            castToXirrTransaction(quote, toCurrency, count, security.getType())
                     .ifPresent(transactions::add);
 
             return xirrBuilder
@@ -136,9 +137,10 @@ public class InternalRateOfReturn {
     }
 
     private Optional<org.decampo.xirr.Transaction> castToXirrTransaction(SecurityQuote quote,
-                                                                         String toCurrency, int positionCount) {
+                                                                         String toCurrency, int positionCount,
+                                                                         SecurityType securityType) {
         return ofNullable(quote)
-                .map(SecurityQuote::getDirtyPriceInCurrency)
+                .map(_quote -> _quote.getDirtyPriceInCurrency(securityType == DERIVATIVE))
                 .map(dirtyPrice -> convertToCurrency(dirtyPrice, quote.getCurrency(), toCurrency))
                 .map(dirtyPrice -> new org.decampo.xirr.Transaction(
                         positionCount * dirtyPrice.doubleValue(),

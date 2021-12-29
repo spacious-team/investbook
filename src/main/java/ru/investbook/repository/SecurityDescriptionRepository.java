@@ -25,10 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.SecurityDescriptionEntity;
 
 @Transactional(readOnly = true)
-public interface SecurityDescriptionRepository extends JpaRepository<SecurityDescriptionEntity, String> {
+public interface SecurityDescriptionRepository extends JpaRepository<SecurityDescriptionEntity, Integer> {
 
     @Transactional
-    default void createOrUpdateSector(String securityId, String sector) {
+    default void createOrUpdateSector(int securityId, String sector) {
         if (existsById(securityId)) {
             updateSector(securityId, sector);
         } else {
@@ -39,15 +39,15 @@ public interface SecurityDescriptionRepository extends JpaRepository<SecurityDes
     @Transactional
     @Modifying
     @Query("UPDATE SecurityDescriptionEntity SET sector = :sector WHERE security = :securityId")
-    void updateSector(String securityId, String sector);
+    void updateSector(int securityId, String sector);
 
     @Transactional
-    default void createSectorIfNotExists(String securityId, String sector) {
+    default void createSectorIfNotExists(int securityId, String sector) {
         if (!existsById(securityId)) {
             var entity = new SecurityDescriptionEntity();
             entity.setSecurity(securityId);
             entity.setSector(sector);
-            save(entity);
+            saveAndFlush(entity);
         }
     }
 }

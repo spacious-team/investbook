@@ -19,22 +19,30 @@
 package ru.investbook.parser.psb;
 
 import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
+import ru.investbook.service.moex.MoexDerivativeCodeService;
 
 import static ru.investbook.parser.psb.DerivativeCashFlowTable.ContractCountTableHeader.CONTRACT;
 
 public class DerivativesTable extends SingleAbstractReportTable<Security> {
+    private final MoexDerivativeCodeService moexDerivativeCodeService;
 
-    public DerivativesTable(PsbBrokerReport report) {
+    public DerivativesTable(PsbBrokerReport report, MoexDerivativeCodeService moexDerivativeCodeService) {
         super(report, DerivativeCashFlowTable.TABLE2_NAME, DerivativeCashFlowTable.TABLE_END_TEXT,
                 DerivativeCashFlowTable.ContractCountTableHeader.class);
+        this.moexDerivativeCodeService = moexDerivativeCodeService;
     }
 
     @Override
     protected Security parseRow(TableRow row) {
+        String contract = row.getStringCellValue(CONTRACT);
+        int securityId = getReport().getSecurityRegistrar().declareDerivative(contract);
         return Security.builder()
-                .id(row.getStringCellValue(CONTRACT))
+                .id(securityId)
+                .type(SecurityType.DERIVATIVE)
+                .ticker(moexDerivativeCodeService.convertDerivativeCode(contract))
                 .build();
     }
 }

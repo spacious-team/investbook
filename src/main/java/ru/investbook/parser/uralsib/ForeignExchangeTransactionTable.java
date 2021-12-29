@@ -75,11 +75,12 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .negate();
 
+        int securityId = getReport().getSecurityRegistrar().declareCurrencyPair(instrument);
         return ForeignExchangeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .tradeId(tradeId)
                 .portfolio(getReport().getPortfolio())
-                .security(instrument)
+                .security(securityId)
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)
                 .commission(commission)

@@ -19,12 +19,13 @@
 package ru.investbook.service.moex;
 
 import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.pojo.SecurityType;
 
 import java.util.Optional;
 
 public interface MoexIssClient {
 
-    Optional<String> getSecId(String isinOrContractName);
+    Optional<String> getSecId(String isinOrContractName, SecurityType securityType);
 
     Optional<String> getIsin(String secId);
 
@@ -37,7 +38,7 @@ public interface MoexIssClient {
      *
      * @return true if Moex hasn't quotes
      */
-    boolean isDerivativeAndExpired(String shortnameOrSecid);
+    boolean isDerivativeAndExpired(String shortnameOrSecid, SecurityType securityType);
 
     /**
      * @param contract option's code (moex secid) in {@code Si65000BC9}, {@code Si65000BC9D}, {@code RI180000BD1} or

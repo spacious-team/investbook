@@ -175,6 +175,8 @@
 
 <script type="text/javascript">
 
+    let prevPriceCurrency = null
+
     selectType()
 
     function selectType() {
@@ -243,7 +245,6 @@
         }
     }
 
-    let prevPriceCurrency
     function setPntPriceCurrency() {
         let e = document.getElementById('price-currency')
         prevPriceCurrency = e.value

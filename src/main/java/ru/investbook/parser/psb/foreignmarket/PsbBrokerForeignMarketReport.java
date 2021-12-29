@@ -25,6 +25,7 @@ import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.xml.XmlReportPage;
 import org.xml.sax.InputSource;
 import ru.investbook.parser.AbstractBrokerReport;
+import ru.investbook.parser.SecurityRegistrar;
 import ru.investbook.parser.psb.PsbBrokerReport;
 
 import java.io.ByteArrayInputStream;
@@ -45,7 +46,8 @@ public class PsbBrokerForeignMarketReport extends AbstractBrokerReport {
     private static final String PORTFOLIO_MARKER = "Договор №:";
     private static final String REPORT_DATE_MARKER = "ОТЧЕТ БРОКЕРА";
 
-    public PsbBrokerForeignMarketReport(String excelFileName, InputStream is) {
+    public PsbBrokerForeignMarketReport(String excelFileName, InputStream is, SecurityRegistrar securityRegistrar) {
+        super(securityRegistrar);
         Workbook book = getWorkbook(is);
         ReportPage reportPage = new XmlReportPage(book.getWorksheetAt(0));
         PsbBrokerReport.checkReportFormat(excelFileName, reportPage);

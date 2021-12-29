@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,13 +16,4 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.vtb;
-
-public interface SecurityRegNumberToIsinConverter {
-
-    /**
-     * @return isin or null if not found
-     */
-    String convertToIsin(String registrationNumber);
-
-}
+ALTER TABLE `security` ALTER COLUMN `type` SET NOT NULL;

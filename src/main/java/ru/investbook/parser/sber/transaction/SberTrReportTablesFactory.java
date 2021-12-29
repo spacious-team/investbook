@@ -33,6 +33,6 @@ public class SberTrReportTablesFactory implements ReportTablesFactory {
 
     @Override
     public ReportTables create(BrokerReport brokerReport) {
-        return new SberTrReportTables(brokerReport);
+        return new SberTrReportTables((SberTrBrokerReport) brokerReport);
     }
 }

@@ -74,7 +74,7 @@ public class PaidInterestFactory {
     }
 
     private Map<Position, List<SecurityEventCashFlow>> getPositionWithPayments(String portfolio,
-                                                                               String isin,
+                                                                               Integer securityId,
                                                                                FifoPositions positions,
                                                                                CashFlowType event,
                                                                                Instant fromDate,
@@ -82,7 +82,7 @@ public class PaidInterestFactory {
         List<SecurityEventCashFlowEntity> eventCashFlowEntities = securityEventCashFlowRepository
                 .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         singleton(portfolio),
-                        isin,
+                        securityId,
                         event.getId(),
                         fromDate,
                         toDate);

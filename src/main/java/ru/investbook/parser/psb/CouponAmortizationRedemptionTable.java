@@ -21,6 +21,7 @@ package ru.investbook.parser.psb;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
@@ -64,8 +65,13 @@ public class CouponAmortizationRedemptionTable extends SingleAbstractReportTable
                 row.getBigDecimalCellValue(VALUE));
         BigDecimal tax = row.getBigDecimalCellValue(TAX).negate();
 
+        String isin = row.getStringCellValue(ISIN);
+        int securityId = getReport().getSecurityRegistrar().declareBond(isin, () -> Security.builder()
+                .isin(isin)
+                .name(row.getStringCellValue(BOND_NAME)));
+
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
-                .security(row.getStringCellValue(ISIN))
+                .security(securityId)
                 .portfolio(getReport().getPortfolio())
                 .count(row.getIntCellValue(COUNT))
                 .eventType(event)
@@ -83,6 +89,7 @@ public class CouponAmortizationRedemptionTable extends SingleAbstractReportTable
     enum CouponAndAmortizationTableHeader implements TableColumnDescription {
         DATE("дата"),
         TYPE("вид операции"),
+        BOND_NAME("наименование"),
         ISIN("isin"),
         COUNT("кол-во"),
         COUPON("нкд"),

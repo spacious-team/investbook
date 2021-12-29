@@ -97,8 +97,9 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
                 if (count == null) {
                     throw new IllegalArgumentException("Открытых контрактов не найдено");
                 }
+                int securityId = getReport().getSecurityRegistrar().declareDerivative(contract);
                 return builder.eventType(CashFlowType.DERIVATIVE_PROFIT)
-                        .security(contract)
+                        .security(securityId)
                         .count(count)
                         .build();
             case "биржевой сбор":
@@ -123,6 +124,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
 
         @Getter
         private final TableColumn column;
+
         ContractCountTableHeader(String... words) {
             this.column = TableColumnImpl.of(words);
         }
@@ -137,6 +139,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
 
         @Getter
         private final TableColumn column;
+
         DerivativeCashFlowTableHeader(String... words) {
             this.column = TableColumnImpl.of(words);
         }

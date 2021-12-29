@@ -154,7 +154,8 @@ public class MoexDerivativeCodeService {
      * @return true for futures in format {@code SiM1}
      */
     public boolean isFuturesCode(String contract) {
-        return contract.length() == 4 &&
+        return contract != null &&
+                contract.length() == 4 &&
                 shortnameToCodes.containsValue(contract.substring(0, 2)) &&
                 getFuturesMonth(contract.charAt(2)) != -1 &&
                 isDigit(contract.charAt(3));
@@ -165,6 +166,7 @@ public class MoexDerivativeCodeService {
      */
     public boolean isFuturesShortname(String contract) {
         try {
+            if (contract == null) return false;
             int dotIdx = contract.length() - 3;
             if (contract.charAt(dotIdx) != '.') {
                 return false;
@@ -196,6 +198,7 @@ public class MoexDerivativeCodeService {
      * @return true for option in format {@code BR10BF0} and {@code BR-10BF0}
      */
     public boolean isOptionCode(String contract) {
+        if (contract == null) return false;
         int length = contract.length();
         if (length > 5) {
             int yearIdx = length;
@@ -217,6 +220,7 @@ public class MoexDerivativeCodeService {
      * and {@code BR-7.16M270616CA 50}
      */
     public boolean isOptionShortname(String contract) {
+        if (contract == null) return false;
         int dashIdx = contract.indexOf('-');
         if (dashIdx == -1) {
             return false;
@@ -251,6 +255,7 @@ public class MoexDerivativeCodeService {
      */
     public Optional<String> getFuturesCode(String contract) {
         try {
+            if (contract == null) return empty();
             int dashIdx = contract.indexOf('-');
             if (dashIdx == -1) {
                 return isFuturesCode(contract) ? Optional.of(contract) : empty();
@@ -296,10 +301,10 @@ public class MoexDerivativeCodeService {
     /**
      * Convert derivative codes before storing to DB if need
      */
-    public String convertDerivativeSecurityId(String securityId) {
-        return isFuturesCode(securityId) ?
-                getFuturesShortname(securityId).orElse(securityId) :
-                securityId;
+    public String convertDerivativeCode(String code) {
+        return isFuturesCode(code) ?
+                getFuturesShortname(code).orElse(code) :
+                code;
     }
 
     /**

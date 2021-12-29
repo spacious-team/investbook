@@ -62,11 +62,13 @@ class DerivativeExpirationTable extends SingleAbstractReportTable<DerivativeTran
         BigDecimal commission = row.getBigDecimalCellValue(MARKET_COMMISSION)
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .negate();
+        String contract = row.getStringCellValue(CONTRACT);
+        int securityId = getReport().getSecurityRegistrar().declareDerivative(contract);
         return DerivativeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .portfolio(getReport().getPortfolio())
                 .tradeId(String.valueOf(row.getLongCellValue(TRADE_ID)))
-                .security(row.getStringCellValue(CONTRACT))
+                .security(securityId)
                 .count((isBuy ? 1 : -1) * count)
                 .valueInPoints(valueInPoints)
                 .value(value)

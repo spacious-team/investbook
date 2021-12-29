@@ -47,8 +47,10 @@ public class DerivativeQuoteTable extends SingleAbstractReportTable<SecurityQuot
         if (quote == null || quote.compareTo(minValue) < 0) {
             return null;
         }
+        String code = row.getStringCellValue(CONTRACT);
+        int securityId = getReport().getSecurityRegistrar().declareDerivative(code);
         return SecurityQuote.builder()
-                .security(row.getStringCellValue(CONTRACT))
+                .security(securityId)
                 .timestamp(getReport().getReportEndDateTime())
                 .quote(quote)
                 .build();

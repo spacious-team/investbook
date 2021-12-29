@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.vtb;
 
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
@@ -25,8 +26,10 @@ import ru.investbook.parser.SingleBrokerReport;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static ru.investbook.parser.vtb.VtbSecurityFlowTable.VtbSecurityFlowTableHeader.*;
 
@@ -35,6 +38,7 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
     static final String TABLE_NAME = "Движение ценных бумаг";
 
     private final Map<String, Integer> bondRedemptions = new HashMap<>(1);
+    private final Set<String> generatedTradeIds = new HashSet<>();
 
     protected VtbSecurityDepositAndWithdrawalTable(SingleBrokerReport report) {
         super(report, TABLE_NAME, null, VtbSecurityFlowTable.VtbSecurityFlowTableHeader.class);
@@ -61,21 +65,31 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
         }
 
         String portfolio = getReport().getPortfolio();
-        String isin = row.getStringCellValue(NAME_REGNUMBER_ISIN).split(",")[2].trim();
+        String description = row.getStringCellValue(NAME_REGNUMBER_ISIN);
+        Security security = VtbReportHelper.getSecurity(description);
         Instant timestamp = row.getInstantCellValue(DATE);
-        String tradeId = generateTradeId(portfolio, timestamp, isin);
+        String tradeId = generateTradeId(portfolio, timestamp, security.getIsin());
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(security.getIsin(), security::toBuilder);
+
         return SecurityTransaction.builder()
                         .tradeId(tradeId)
                         .timestamp(timestamp)
                         .portfolio(portfolio)
-                        .security(isin)
+                        .security(securityId)
                         .count(row.getIntCellValue(COUNT))
                         .build();
     }
 
-    private static String generateTradeId(String portfolio, Instant instant, String isin) {
-        String id = instant.getEpochSecond() + isin + portfolio;
-        return id.substring(0, Math.min(32, id.length()));
+    private String generateTradeId(String portfolio, Instant instant, String isin) {
+        long epochSecond = instant.getEpochSecond();
+        for (int i = 0; i < 1000; i++) { // gh-395: maybe multiple deposit/withdrawal during day for same ISIN (for ex. share split)
+            String id = (epochSecond + i) + isin + portfolio;
+            String tradeId = id.substring(0, Math.min(32, id.length()));
+            if (generatedTradeIds.add(tradeId)) {
+                return tradeId;
+            }
+        }
+        throw new RuntimeException("Can't generate trade id");
     }
 
     public Optional<Integer> getBondRedemptionCount(String isin) {

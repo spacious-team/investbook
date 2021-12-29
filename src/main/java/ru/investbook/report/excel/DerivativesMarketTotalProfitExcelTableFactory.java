@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.SecurityConverter;
@@ -99,7 +100,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
             return emptyList();
         }
         ViewFilter filter = ViewFilter.get();
-        Collection<String> contracts = portfolios.isEmpty() ?
+        Collection<Integer> contracts = portfolios.isEmpty() ?
                 transactionRepository.findDistinctDerivativeByTimestampBetweenOrderByTimestampDesc(
                         filter.getFromDate(),
                         filter.getToDate()) :
@@ -109,6 +110,9 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
                         filter.getToDate());
 
         return contracts.stream()
+                .map(securityRepository::findById)
+                .flatMap(Optional::stream)
+                .map(SecurityEntity::getTicker)
                 .map(moexDerivativeCodeService::getContractGroup)
                 .flatMap(Optional::stream)
                 .sorted()
@@ -116,7 +120,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     }
 
     private Set<Security> getContracts(String contractGroup) {
-        return securityRepository.findAll()
+        return securityRepository.findByType(SecurityType.DERIVATIVE)
                 .stream()
                 .filter(security -> belongsToContractGroup(security, contractGroup))
                 .map(securityConverter::fromEntity)
@@ -124,7 +128,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     }
 
     private boolean belongsToContractGroup(SecurityEntity security, String expectedGroup) {
-        return moexDerivativeCodeService.getContractGroup(security.getId())
+        return moexDerivativeCodeService.getContractGroup(security.getTicker())
                 .map(expectedGroup::equals)
                 .orElse(false);
     }
@@ -155,7 +159,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
                     .filter(count -> count < 0)
                     .sum()));
 
-            Map<String, Integer> contractToOpenedPositions = transactions.stream()
+            Map<Integer, Integer> contractToOpenedPositions = transactions.stream()
                     .collect(groupingBy(Transaction::getSecurity, summingInt(Transaction::getCount)));
             int openedPositions = contractToOpenedPositions.values().stream().mapToInt(Math::abs).sum();
 

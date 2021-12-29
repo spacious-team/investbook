@@ -46,7 +46,7 @@
         <th></th>
     </tr>
     <tr th:each="description : ${securityDescriptions}">
-        <td><a th:href="@{/security-descriptions/edit-form(security-id=${description.getSecurityId})}" th:text="${description.getSecurityDisplayName}"/></td>
+        <td><a th:href="@{/security-descriptions/edit-form(security-id=${description.getSecurityId})}" th:text="${description.getSecurityName}"/></td>
         <td th:text="${description.getSector}"/>
         <td class="table-row-control">
             <a th:href="@{/security-descriptions/update(security-id=${description.getSecurityId}, force=true)}"
@@ -60,7 +60,7 @@
 </table>
 
 <p class="hint">
-    Используемые инструменты срочного и валютного рынков не отображаются.
+    При желании для инструментов срочного и валютного рынков, а также для произвольных активов "сектор" может быть задан вручную.
 </p>
 <p class="hint">
     Сектора экономики выгружаются со страницы <a href="https://smart-lab.ru/forum/sectors">https://smart-lab.ru/forum/sectors</a>

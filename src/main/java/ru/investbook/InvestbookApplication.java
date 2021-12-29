@@ -22,12 +22,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 @SpringBootApplication
 @Component
+@EnableCaching
 @RequiredArgsConstructor
 public class InvestbookApplication {
 

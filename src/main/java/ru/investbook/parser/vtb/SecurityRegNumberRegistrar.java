@@ -16,18 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook;
+package ru.investbook.parser.vtb;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.testng.annotations.Ignore;
+import org.spacious_team.broker.pojo.Security;
 
-@Ignore
-@SpringBootTest
-class PortfolioApplicationTests {
+import java.util.Optional;
 
-    @Test
-    void contextLoads() {
-    }
+public interface SecurityRegNumberRegistrar {
+
+    Optional<Security> getSecurityByRegistrationNumber(String registrationNumber);
 
 }

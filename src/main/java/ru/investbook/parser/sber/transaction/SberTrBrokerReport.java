@@ -20,10 +20,12 @@ package ru.investbook.parser.sber.transaction;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
+import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.InputStream;
 
@@ -31,7 +33,10 @@ import static ru.investbook.parser.AbstractExcelBrokerReport.getWorkBook;
 
 @EqualsAndHashCode(of = "toString")
 @ToString(of = "toString", includeFieldNames = false)
+@RequiredArgsConstructor
 public class SberTrBrokerReport implements BrokerReport {
+    @Getter
+    private final SecurityRegistrar securityRegistrar;
 
     @Getter
     private final ExcelSheet reportPage;
@@ -39,10 +44,11 @@ public class SberTrBrokerReport implements BrokerReport {
     private final Workbook book;
     private final String toString;
 
-    public SberTrBrokerReport(String excelFileName, InputStream is) {
+    public SberTrBrokerReport(String excelFileName, InputStream is, SecurityRegistrar securityRegistrar) {
         this.book = getWorkBook(excelFileName, is);
         this.reportPage = new ExcelSheet(book.getSheetAt(0));
         this.toString = excelFileName;
+        this.securityRegistrar = securityRegistrar;
         checkReportFormat(excelFileName, reportPage);
     }
 

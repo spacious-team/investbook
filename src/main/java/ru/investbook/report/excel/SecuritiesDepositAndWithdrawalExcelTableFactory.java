@@ -54,7 +54,8 @@ public class SecuritiesDepositAndWithdrawalExcelTableFactory implements TableFac
             SecurityEntity securityEntity = transactionEntity.getSecurity();
             record.put(SECURITY, ofNullable(securityEntity.getName())
                     .or(() -> ofNullable(securityEntity.getTicker()))
-                    .orElse(securityEntity.getId()));
+                    .or(() -> ofNullable(securityEntity.getIsin()))
+                    .orElse("<неизвестно>"));
         }
         return table;
     }
