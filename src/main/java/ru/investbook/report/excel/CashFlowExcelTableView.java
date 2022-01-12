@@ -79,7 +79,7 @@ public class CashFlowExcelTableView extends ExcelTableView {
         String _portfolio = portfolio
                 .orElseThrow(() -> new IllegalArgumentException("Ожидается портфель"))
                 .getId();
-        BigDecimal liquidationValueRub = assetsAndCashService.getTotalAssetsInRub(_portfolio);
+        BigDecimal liquidationValueRub = assetsAndCashService.getTotalAssetsInRub(_portfolio).orElse(BigDecimal.ZERO);
         total.put(DATE, "Итого:");
         total.put(CASH_RUB, "=SUM(" +
                 CASH_RUB.getRange(3, table.size() + 2) + ")+" +

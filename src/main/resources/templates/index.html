@@ -70,8 +70,8 @@
     <div class="row assets">
         <div class="cell">
             <p class="label">Активы</p>
-            <p class="value" th:if="${assets.isEmpty}" th:text="--" title="Ликвидная стоимости Активов не известна. Investbook не рассчитывает Активы по бумагам портфеля. Загрузите отчет брокера или, если брокер в отчете не предоставляет информацию об Активах, внесите данные через Формы."></p>
-            <p class="value" th:if="${assets.isPresent}" th:text="${T(java.lang.String).format('%,d', assets.get().intValue())} + '&ensp;P'" title="Investbook не рассчитывает Активы по бумагам портфеля"></p>
+            <p class="value" th:if="${assets.isEmpty}" th:text="--" title="Ликвидная стоимости Активов не известна, загрузите отчет брокера. Если брокер в отчете не предоставляет информацию об Активах, Investbook оценит стоимость Активов по текущей котировке или котировке покупки. Котировку можно выгрузить через Формы."></p>
+            <p class="value" th:if="${assets.isPresent}" th:text="${T(java.lang.String).format('%,d', assets.get().intValue())} + '&ensp;P'" title="Оценка стоимости активов (в порядке приоритета): брокера, по текущим котировкам, по самой свежей котировке сделок"></p>
             <p>
                 <a href="/portfolio">Детальная информация &#8250;</a>
             </p>

@@ -22,34 +22,46 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
+import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.report.ForeignExchangeRateService;
+import ru.investbook.report.ViewFilter;
 import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.ControllerHelper;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
+import static java.lang.System.nanoTime;
 import static java.util.stream.Collectors.*;
+import static org.spacious_team.broker.pojo.SecurityType.*;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AssetsAndCashService {
+    private final Set<SecurityType> stockBondAndAssetTypes = Set.of(STOCK, BOND, ASSET);
     private final PortfolioPropertyRepository portfolioPropertyRepository;
     private final ForeignExchangeRateService foreignExchangeRateService;
+    private final InvestmentProportionService investmentProportionService;
     private final PortfolioRepository portfolioRepository;
+    private final SecurityRepository securityRepository;
+    private final SecurityConverter securityConverter;
 
     public Set<String> getActivePortfolios() {
         return ControllerHelper.getActivePortfolios(portfolioRepository);
@@ -58,7 +70,8 @@ public class AssetsAndCashService {
     public Optional<BigDecimal> getAssets(Collection<String> portfolios) {
         Collection<BigDecimal> portfolioAssets = portfolios.stream()
                 .map(this::getTotalAssetsInRub)
-                .collect(toList());
+                .flatMap(Optional::stream)
+                .toList();
         if (portfolioAssets.isEmpty()) {
             return Optional.empty();
         }
@@ -67,7 +80,12 @@ public class AssetsAndCashService {
 
     }
 
-    public BigDecimal getTotalAssetsInRub(String portfolio) {
+    public Optional<BigDecimal> getTotalAssetsInRub(String portfolio) {
+        return getTotalAssetsByBrokerEstimationInRub(portfolio)
+                .or(() -> getTotalAssetsByCurrentOrLastTransactionQuoteEstimationInRub(portfolio));
+    }
+
+    private Optional<BigDecimal> getTotalAssetsByBrokerEstimationInRub(String portfolio) {
         Collection<PortfolioPropertyEntity> assets = new ArrayList<>(2);
         getTotalAssets(portfolio, PortfolioPropertyType.TOTAL_ASSETS_RUB).ifPresent(assets::add);
         getTotalAssets(portfolio, PortfolioPropertyType.TOTAL_ASSETS_USD).ifPresent(assets::add);
@@ -75,14 +93,13 @@ public class AssetsAndCashService {
         TreeMap<Instant, List<PortfolioPropertyEntity>> assetsGroupedByDate = assets.stream()
                 .collect(groupingBy(PortfolioPropertyEntity::getTimestamp, TreeMap::new, toList()));
         // finds last day assets
-        Map<String, BigDecimal> values = Optional.ofNullable(assetsGroupedByDate.lastEntry()) // finds last date assets
+        return Optional.ofNullable(assetsGroupedByDate.lastEntry()) // finds last date assets
                 .map(Map.Entry::getValue)
                 .map(Collection::stream)
                 .map(stream -> stream.collect(toMap(
                         AssetsAndCashService::getCurrency,
                         AssetsAndCashService::parseTotalAssetsIfCan)))
-                .orElseGet(Collections::emptyMap);
-        return convertToRubAndSum(values);
+                .map(this::convertToRubAndSum);
     }
 
     private Optional<PortfolioPropertyEntity> getTotalAssets(String portfolio, PortfolioPropertyType currency) {
@@ -106,6 +123,30 @@ public class AssetsAndCashService {
         }
     }
 
+    private Optional<BigDecimal> getTotalAssetsByCurrentOrLastTransactionQuoteEstimationInRub(String portfolio) {
+        try {
+            long t0 = nanoTime();
+            ViewFilter filter = ViewFilter.builder().portfolios(Set.of(portfolio)).build();
+            BigDecimal assetsInRub = securityRepository.findByTypeIn(stockBondAndAssetTypes)
+                    .stream()
+                    .map(securityConverter::fromEntity)
+                    .map(security -> investmentProportionService
+                            .getOpenedPositionsCostByCurrentOrLastTransactionQuoteInRub(security, filter))
+                    .flatMap(Optional::stream)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            assetsInRub = Objects.equals(assetsInRub, BigDecimal.ZERO) ? null : assetsInRub;
+            log.info("Оценена стоимость активов по котировкам за {}", Duration.ofNanos(nanoTime() - t0));
+            return Optional.ofNullable(assetsInRub)
+                    .map(openedPositionCost -> openedPositionCost.add(
+                            getTotalCash(Set.of(portfolio))
+                                    .orElse(BigDecimal.ZERO)));
+        } catch (Exception e) {
+            String message = "Ошибка оценки стоимости активов по котировкам";
+            log.error(message, e);
+            throw new RuntimeException(message, e);
+        }
+    }
+
     public Optional<BigDecimal> getTotalCash(Collection<String> portfolios) {
         Collection<BigDecimal> portfolioCashes = portfolios.stream()
                 .map(portfolio -> portfolioPropertyRepository.findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(
@@ -114,7 +155,7 @@ public class AssetsAndCashService {
                 .map(Optional::get)
                 .map(AssetsAndCashService::groupByCurrency)
                 .map(this::convertToRubAndSum)
-                .collect(toList());
+                .toList();
         if (portfolioCashes.isEmpty()) {
             return Optional.empty();
         }
