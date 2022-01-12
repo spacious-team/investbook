@@ -27,7 +27,6 @@ import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityDescriptionEntity;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.report.FifoPositionsFilter;
-import ru.investbook.report.ViewFilter;
 import ru.investbook.repository.SecurityDescriptionRepository;
 import ru.investbook.repository.SecurityRepository;
 
@@ -58,9 +57,10 @@ public class InvestmentProportionService {
     private final FifoPositionsFactory fifoPositionsFactory;
     private final SecurityProfitService securityProfitService;
 
-    public Map<String, Float> getSectorProportions(ViewFilter filter) {
+    public Map<String, Float> getSectorProportions(Set<String> portfolios) {
         try {
             long t0 = nanoTime();
+            FifoPositionsFilter filter = FifoPositionsFilter.of(portfolios);
             Map<String, Float> result = securityRepository.findByTypeIn(stockAndBondTypes)
                     .stream()
                     .map(securityConverter::fromEntity)
@@ -78,19 +78,19 @@ public class InvestmentProportionService {
         }
     }
 
-    private Optional<SecurityInvestment> getInvestmentAmount(Security security, ViewFilter filter) {
+    private Optional<SecurityInvestment> getInvestmentAmount(Security security, FifoPositionsFilter filter) {
         return getOpenedPositionsCostByCurrentOrLastTransactionQuoteInRub(security, filter)
                 .map(investmentRub -> new SecurityInvestment(security, investmentRub));
     }
 
     public Optional<BigDecimal> getOpenedPositionsCostByCurrentOrLastTransactionQuoteInRub(Security security,
-                                                                                            ViewFilter filter) {
+                                                                                           FifoPositionsFilter filter) {
         return ofNullable(securityProfitService.getSecurityQuote(security, RUB, filter.getToDate()))
                 .map(quote -> quote.getDirtyPriceInCurrency(security.getType() == SecurityType.DERIVATIVE))
                 .or(() -> securityProfitService.getSecurityQuoteFromLastTransaction(security, RUB))
                 .map(quote -> quote.multiply(
                         BigDecimal.valueOf(
-                                fifoPositionsFactory.get(security, FifoPositionsFilter.of(filter))
+                                fifoPositionsFactory.get(security, filter)
                                         .getCurrentOpenedPositionsCount())));
     }
 

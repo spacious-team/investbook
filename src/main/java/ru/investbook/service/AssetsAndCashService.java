@@ -26,8 +26,8 @@ import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.PortfolioPropertyEntity;
+import ru.investbook.report.FifoPositionsFilter;
 import ru.investbook.report.ForeignExchangeRateService;
-import ru.investbook.report.ViewFilter;
 import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
@@ -126,7 +126,7 @@ public class AssetsAndCashService {
     private Optional<BigDecimal> getTotalAssetsByCurrentOrLastTransactionQuoteEstimationInRub(String portfolio) {
         try {
             long t0 = nanoTime();
-            ViewFilter filter = ViewFilter.builder().portfolios(Set.of(portfolio)).build();
+            FifoPositionsFilter filter = FifoPositionsFilter.of(portfolio);
             BigDecimal assetsInRub = securityRepository.findByTypeIn(stockBondAndAssetTypes)
                     .stream()
                     .map(securityConverter::fromEntity)
