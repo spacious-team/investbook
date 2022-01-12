@@ -40,6 +40,7 @@ import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityQuoteRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
+import ru.investbook.repository.TransactionRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -49,6 +50,7 @@ import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -60,7 +62,9 @@ import static org.springframework.util.StringUtils.hasLength;
 @RequiredArgsConstructor
 public class SecurityProfitServiceImpl implements SecurityProfitService {
 
+    private final Set<Integer> priceAndAccruedInterestTypes = Set.of(CashFlowType.PRICE.getId(), CashFlowType.ACCRUED_INTEREST.getId());
     private final SecurityRepository securityRepository;
+    private final TransactionRepository transactionRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityQuoteRepository securityQuoteRepository;
@@ -235,6 +239,20 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                         .currency(toCurrency) // Не известно точно в какой валюте котируется инструмент,
                         .build())             // делаем предположение, что в валюте сделки
                 .orElse(null);
+    }
+
+    @Override
+    public Optional<BigDecimal> getSecurityQuoteFromLastTransaction(Security security, String toCurrency) {
+        return transactionRepository.findFirstBySecurityIdOrderByTimestampDesc(security.getId())
+                .map(t -> transactionCashFlowRepository
+                        .findByTransactionIdAndCashFlowTypeIn(t.getId(), priceAndAccruedInterestTypes)
+                        .stream()
+                        .map(cashFlow -> cashFlow.getValue()
+                                .divide(BigDecimal.valueOf(t.getCount()), 2, RoundingMode.HALF_UP)
+                                .multiply(foreignExchangeRateService.getExchangeRate(cashFlow.getCurrency(), toCurrency))
+                                .abs())
+                        .reduce(BigDecimal.ZERO, BigDecimal::add))
+                .map(value -> Objects.equals(value, BigDecimal.ZERO) ? null : value);
     }
 
     @Override

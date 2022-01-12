@@ -61,6 +61,11 @@ public interface SecurityProfitService {
     SecurityQuote getSecurityQuote(Security security, String toCurrency, Instant to);
 
     /**
+     * Возвращает котировку по последней сделке
+     */
+    Optional<BigDecimal> getSecurityQuoteFromLastTransaction(Security security, String toCurrency);
+
+    /**
      * Возвращает для портфеля последний известный остаток денежных средств соответствующей дате, не позже указанной.
      * Если портфель не указан, возвращает для всех портфелей сумму последних известных остатков денежных средств
      * соответствующих дате, не позже указанной.

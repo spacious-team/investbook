@@ -24,7 +24,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.investbook.report.ViewFilter;
 import ru.investbook.service.AssetsAndCashService;
 import ru.investbook.service.InvestmentProportionService;
 
@@ -47,10 +46,7 @@ public class PortfolioCompositionController {
     public String getPage(Model model) {
         try {
             Set<String> portfolios = assetsAndCashService.getActivePortfolios();
-            ViewFilter currentState = ViewFilter.builder()
-                    .portfolios(portfolios)
-                    .build();
-            Collection<Map<String, ?>> investmentProportion = investmentProportionService.getSectorProportions(currentState)
+            Collection<Map<String, ?>> investmentProportion = investmentProportionService.getSectorProportions(portfolios)
                     .entrySet()
                     .stream()
                     .map(e -> Map.of("sector", e.getKey(), "investment", ((Number) e.getValue()).intValue()))
