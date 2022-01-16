@@ -58,7 +58,7 @@ public class ForeignExchangeCashTable extends SingleInitializableReportTable<Por
                 cashes.add(PortfolioCash.builder()
                         .portfolio(getReport().getPortfolio())
                         .timestamp(getReport().getReportEndDateTime())
-                        .section("валютный рынок")
+                        .market("валютный рынок")
                         .value(cash)
                         .currency(currency.name())
                         .build());

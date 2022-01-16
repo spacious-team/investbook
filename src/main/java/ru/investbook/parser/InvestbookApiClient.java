@@ -25,7 +25,6 @@ import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
@@ -38,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import ru.investbook.api.EventCashFlowRestController;
 import ru.investbook.api.ForeignExchangeRateRestController;
+import ru.investbook.api.PortfolioCashRestController;
 import ru.investbook.api.PortfolioPropertyRestController;
 import ru.investbook.api.PortfolioRestController;
 import ru.investbook.api.SecurityEventCashFlowRestController;
@@ -47,17 +47,9 @@ import ru.investbook.api.TransactionCashFlowRestController;
 import ru.investbook.api.TransactionRestController;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
 
-import java.time.Instant;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
 import static ru.investbook.repository.RepositoryHelper.isUniqIndexViolationException;
 
 @Component
@@ -71,6 +63,7 @@ public class InvestbookApiClient {
     private final TransactionRestController transactionRestController;
     private final TransactionCashFlowRestController transactionCashFlowRestController;
     private final PortfolioPropertyRestController portfolioPropertyRestController;
+    private final PortfolioCashRestController portfolioCashRestController;
     private final SecurityQuoteRestController securityQuoteRestController;
     private final ForeignExchangeRateRestController foreignExchangeRateRestController;
     private final MoexDerivativeCodeService moexDerivativeCodeService;
@@ -147,27 +140,10 @@ public class InvestbookApiClient {
                 "Не могу добавить информацию о движении денежных средств " + securityEventCashFlow);
     }
 
-    // TODO replace by storing to new 'portfolio_cash' table
-    @Deprecated
-    public void addPortfolioCash(Collection<PortfolioCash> cash) {
-        try {
-            Map<Entry<String, Instant>, List<PortfolioCash>> groupedCash = cash.stream()
-                    .collect(
-                            groupingBy(
-                                    v -> new SimpleEntry<>(v.getPortfolio(), v.getTimestamp()),
-                                    toList()));
-            groupedCash.entrySet()
-                    .stream()
-                    .map(e -> PortfolioProperty.builder()
-                            .portfolio(e.getKey().getKey())
-                            .timestamp(e.getKey().getValue())
-                            .property(PortfolioPropertyType.CASH)
-                            .value(PortfolioCash.serialize(e.getValue()))
-                            .build())
-                    .forEach(this::addPortfolioProperty);
-        } catch (Exception e) {
-            log.warn("Не могу добавить информацию о наличных средствах {}", cash, e);
-        }
+    public void addPortfolioCash(PortfolioCash cash) {
+        handlePost(
+                () -> portfolioCashRestController.post(cash),
+                "Не могу добавить информацию об остатках денежных средств портфеля " + cash);
     }
 
     public void addPortfolioProperty(PortfolioProperty property) {

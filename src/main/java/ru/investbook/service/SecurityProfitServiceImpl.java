@@ -20,26 +20,22 @@ package ru.investbook.service;
 
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Service;
-import ru.investbook.converter.PortfolioPropertyConverter;
 import ru.investbook.converter.SecurityQuoteConverter;
-import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.ClosedPosition;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.report.OpenedPosition;
 import ru.investbook.report.ViewFilter;
-import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityQuoteRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
+import ru.investbook.repository.TransactionRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -49,9 +45,9 @@ import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.spacious_team.broker.pojo.SecurityType.CURRENCY_PAIR;
 import static org.springframework.util.StringUtils.hasLength;
@@ -60,13 +56,13 @@ import static org.springframework.util.StringUtils.hasLength;
 @RequiredArgsConstructor
 public class SecurityProfitServiceImpl implements SecurityProfitService {
 
+    private final Set<Integer> priceAndAccruedInterestTypes = Set.of(CashFlowType.PRICE.getId(), CashFlowType.ACCRUED_INTEREST.getId());
     private final SecurityRepository securityRepository;
+    private final TransactionRepository transactionRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityQuoteRepository securityQuoteRepository;
     private final SecurityQuoteConverter securityQuoteConverter;
-    private final PortfolioPropertyRepository portfolioPropertyRepository;
-    private final PortfolioPropertyConverter portfolioPropertyConverter;
     private final ForeignExchangeRateService foreignExchangeRateService;
 
     @Override
@@ -238,22 +234,17 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
     }
 
     @Override
-    public Collection<PortfolioProperty> getPortfolioCash(Collection<String> portfolios, Instant atInstant) {
-        List<PortfolioPropertyEntity> entities = portfolios.isEmpty() ?
-                portfolioPropertyRepository
-                        .findDistinctOnPortfolioIdByPropertyAndTimestampBetweenOrderByTimestampDesc(
-                                PortfolioPropertyType.CASH.name(),
-                                Instant.ofEpochSecond(0),
-                                atInstant) :
-                portfolioPropertyRepository
-                        .findDistinctOnPortfolioIdByPortfolioIdInAndPropertyAndTimestampBetweenOrderByTimestampDesc(
-                                portfolios,
-                                PortfolioPropertyType.CASH.name(),
-                                Instant.ofEpochSecond(0),
-                                atInstant);
-        return entities.stream()
-                .map(portfolioPropertyConverter::fromEntity)
-                .collect(Collectors.toList());
+    public Optional<BigDecimal> getSecurityQuoteFromLastTransaction(Security security, String toCurrency) {
+        return transactionRepository.findFirstBySecurityIdOrderByTimestampDesc(security.getId())
+                .map(t -> transactionCashFlowRepository
+                        .findByTransactionIdAndCashFlowTypeIn(t.getId(), priceAndAccruedInterestTypes)
+                        .stream()
+                        .map(cashFlow -> cashFlow.getValue()
+                                .divide(BigDecimal.valueOf(t.getCount()), 2, RoundingMode.HALF_UP)
+                                .multiply(foreignExchangeRateService.getExchangeRate(cashFlow.getCurrency(), toCurrency))
+                                .abs())
+                        .reduce(BigDecimal.ZERO, BigDecimal::add))
+                .map(value -> Objects.equals(value, BigDecimal.ZERO) ? null : value);
     }
 
     private BigDecimal convertToCurrency(BigDecimal value, String fromCurrency, String toCurrency) {

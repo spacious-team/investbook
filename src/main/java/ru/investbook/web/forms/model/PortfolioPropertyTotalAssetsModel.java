@@ -52,7 +52,6 @@ public class PortfolioPropertyTotalAssetsModel extends PortfolioPropertyModel {
             return switch (property) {
                 case TOTAL_ASSETS_RUB -> RUB;
                 case TOTAL_ASSETS_USD -> USD;
-                default -> throw new IllegalArgumentException();
             };
         }
     }

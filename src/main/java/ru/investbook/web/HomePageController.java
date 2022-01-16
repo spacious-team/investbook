@@ -48,8 +48,8 @@ public class HomePageController {
         Set<String> portfolios = assetsAndCashService.getActivePortfolios();
         model.addAttribute("transactionsCount", transactionRepository.countByPortfolioIn(portfolios));
         model.addAttribute("portfolios", portfolios);
-        model.addAttribute("assets", assetsAndCashService.getAssets(portfolios));
-        model.addAttribute("cashBalance", assetsAndCashService.getTotalCash(portfolios));
+        model.addAttribute("assets", assetsAndCashService.getTotalAssetsInRub(portfolios));
+        model.addAttribute("cashBalance", assetsAndCashService.getTotalCashInRub(portfolios));
         model.addAttribute("buildProperties", buildProperties);
         return "index";
     }

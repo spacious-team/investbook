@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,133 +18,29 @@
 
 package ru.investbook.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
-import org.springframework.stereotype.Service;
-import ru.investbook.entity.PortfolioPropertyEntity;
-import ru.investbook.report.ForeignExchangeRateService;
-import ru.investbook.repository.PortfolioPropertyRepository;
-import ru.investbook.repository.PortfolioRepository;
-import ru.investbook.web.ControllerHelper;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 
-import static java.util.stream.Collectors.*;
-import static ru.investbook.report.ForeignExchangeRateService.RUB;
+public interface AssetsAndCashService {
 
-@Service
-@RequiredArgsConstructor
-@Slf4j
-public class AssetsAndCashService {
-    private final PortfolioPropertyRepository portfolioPropertyRepository;
-    private final ForeignExchangeRateService foreignExchangeRateService;
-    private final PortfolioRepository portfolioRepository;
+    Set<String> getActivePortfolios();
 
-    public Set<String> getActivePortfolios() {
-        return ControllerHelper.getActivePortfolios(portfolioRepository);
-    }
+    Optional<BigDecimal> getTotalAssetsInRub(Collection<String> portfolios);
 
-    public Optional<BigDecimal> getAssets(Collection<String> portfolios) {
-        Collection<BigDecimal> portfolioAssets = portfolios.stream()
-                .map(this::getTotalAssetsInRub)
-                .collect(toList());
-        if (portfolioAssets.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(portfolioAssets.stream()
-                .reduce(BigDecimal.ZERO, BigDecimal::add));
+    Optional<BigDecimal> getTotalAssetsInRub(String portfolio);
 
-    }
-
-    public BigDecimal getTotalAssetsInRub(String portfolio) {
-        Collection<PortfolioPropertyEntity> assets = new ArrayList<>(2);
-        getTotalAssets(portfolio, PortfolioPropertyType.TOTAL_ASSETS_RUB).ifPresent(assets::add);
-        getTotalAssets(portfolio, PortfolioPropertyType.TOTAL_ASSETS_USD).ifPresent(assets::add);
-        // groups by date
-        TreeMap<Instant, List<PortfolioPropertyEntity>> assetsGroupedByDate = assets.stream()
-                .collect(groupingBy(PortfolioPropertyEntity::getTimestamp, TreeMap::new, toList()));
-        // finds last day assets
-        Map<String, BigDecimal> values = Optional.ofNullable(assetsGroupedByDate.lastEntry()) // finds last date assets
-                .map(Map.Entry::getValue)
-                .map(Collection::stream)
-                .map(stream -> stream.collect(toMap(
-                        AssetsAndCashService::getCurrency,
-                        AssetsAndCashService::parseTotalAssetsIfCan)))
-                .orElseGet(Collections::emptyMap);
-        return convertToRubAndSum(values);
-    }
-
-    private Optional<PortfolioPropertyEntity> getTotalAssets(String portfolio, PortfolioPropertyType currency) {
-        return portfolioPropertyRepository
-                .findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(portfolio, currency.name());
-    }
-
-    private static String getCurrency(PortfolioPropertyEntity entity) {
-        int length = entity.getProperty().length();
-        return entity.getProperty().substring(length - 3, length);
-    }
-
-    private static BigDecimal parseTotalAssetsIfCan(PortfolioPropertyEntity entity) {
-        try {
-            return BigDecimal.valueOf(
-                    Double.parseDouble(
-                            entity.getValue()));
-        } catch (Exception e) {
-            log.error("Значение должно содержать число, сохранено {}", entity);
-            return BigDecimal.ZERO;
-        }
-    }
-
-    public Optional<BigDecimal> getTotalCash(Collection<String> portfolios) {
-        Collection<BigDecimal> portfolioCashes = portfolios.stream()
-                .map(portfolio -> portfolioPropertyRepository.findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(
-                        portfolio, PortfolioPropertyType.CASH.name()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(AssetsAndCashService::groupByCurrency)
-                .map(this::convertToRubAndSum)
-                .collect(toList());
-        if (portfolioCashes.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(portfolioCashes.stream()
-                .reduce(BigDecimal.ZERO, BigDecimal::add));
-    }
+    Optional<BigDecimal> getTotalCashInRub(Collection<String> portfolios);
 
     /**
-     * Returns summed cash values
+     * Возвращает для портфеля последний известный остаток денежных средств соответствующей дате, не позже указанной.
+     * Если портфель не указан, возвращает для всех портфелей последние известные остатки денежных средств
+     * соответствующих дате, не позже указанной. Записи в результирующем списке отсортированы по времени от новых к старым.
      */
-    // currency -> value
-    private static Map<String, BigDecimal> groupByCurrency(PortfolioPropertyEntity e) {
-        try {
-            return PortfolioCash.deserialize(e.getValue())
-                    .stream()
-                    .collect(groupingBy(PortfolioCash::getCurrency,
-                            reducing(BigDecimal.ZERO, PortfolioCash::getValue, BigDecimal::add)));
-        } catch (Exception ex) {
-            log.warn("Ошибка при десериализации свойства: {}", e.getValue(), ex);
-            return Collections.emptyMap();
-        }
-    }
-
-    /**
-     * @param values map of currency -> value
-     */
-    private BigDecimal convertToRubAndSum(Map<String, BigDecimal> values) {
-        return values.entrySet()
-                .stream()
-                .map(e -> foreignExchangeRateService.convertValueToCurrency(e.getValue(), e.getKey(), RUB))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
+    List<PortfolioCash> getPortfolioCash(Collection<String> portfolios, Instant atInstant);
 }

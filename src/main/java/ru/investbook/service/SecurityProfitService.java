@@ -19,7 +19,6 @@
 package ru.investbook.service;
 
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.Transaction;
@@ -61,9 +60,7 @@ public interface SecurityProfitService {
     SecurityQuote getSecurityQuote(Security security, String toCurrency, Instant to);
 
     /**
-     * Возвращает для портфеля последний известный остаток денежных средств соответствующей дате, не позже указанной.
-     * Если портфель не указан, возвращает для всех портфелей сумму последних известных остатков денежных средств
-     * соответствующих дате, не позже указанной.
+     * Возвращает котировку по последней сделке
      */
-    Collection<PortfolioProperty> getPortfolioCash(Collection<String> portfolios, Instant atInstant);
+    Optional<BigDecimal> getSecurityQuoteFromLastTransaction(Security security, String toCurrency);
 }

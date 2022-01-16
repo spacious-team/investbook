@@ -25,22 +25,23 @@ import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityDescriptionEntity;
-import ru.investbook.report.FifoPositions;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.report.FifoPositionsFilter;
-import ru.investbook.report.ViewFilter;
 import ru.investbook.repository.SecurityDescriptionRepository;
 import ru.investbook.repository.SecurityRepository;
 
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.System.nanoTime;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.reducing;
+import static org.spacious_team.broker.pojo.SecurityType.*;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 
 @Service
@@ -48,20 +49,22 @@ import static ru.investbook.report.ForeignExchangeRateService.RUB;
 @Slf4j
 public class InvestmentProportionService {
 
+    private final Set<SecurityType> stockAndBondTypes = Set.of(STOCK, BOND, STOCK_OR_BOND);
     private final SecurityRepository securityRepository;
     private final SecurityConverter securityConverter;
     private final SecurityDescriptionRepository securityDescriptionRepository;
     private final FifoPositionsFactory fifoPositionsFactory;
     private final SecurityProfitService securityProfitService;
 
-    public Map<String, Float> getSectorProportions(ViewFilter filter) {
+    public Map<String, Float> getSectorProportions(Set<String> portfolios) {
         try {
             long t0 = nanoTime();
-            Map<String, Float> result = securityRepository.findAll()
+            FifoPositionsFilter filter = FifoPositionsFilter.of(portfolios);
+            Map<String, Float> result = securityRepository.findByTypeIn(stockAndBondTypes)
                     .stream()
-                    .filter(security -> security.getType().isStockOrBond())
                     .map(securityConverter::fromEntity)
-                    .map(security -> getSecurityToInvestment(security, filter))
+                    .map(security -> getInvestmentAmount(security, filter))
+                    .flatMap(Optional::stream)
                     .filter(v -> v.investment().floatValue() > 1)
                     .collect(Collectors.groupingBy(this::getEconomicSector,
                             mapping(SecurityInvestment::getInvestment, reducing(0f, Float::sum))));
@@ -74,15 +77,20 @@ public class InvestmentProportionService {
         }
     }
 
-    private SecurityInvestment getSecurityToInvestment(Security security, ViewFilter filter) {
-        FifoPositions positions = fifoPositionsFactory.get(security, FifoPositionsFilter.of(filter));
-        int openedPositions = positions.getCurrentOpenedPositionsCount();
-        BigDecimal investmentRub = ofNullable(securityProfitService.getSecurityQuote(security, RUB, filter.getToDate()))
+    private Optional<SecurityInvestment> getInvestmentAmount(Security security, FifoPositionsFilter filter) {
+        return getOpenedPositionsCostByCurrentOrLastTransactionQuoteInRub(security, filter)
+                .map(investmentRub -> new SecurityInvestment(security, investmentRub));
+    }
+
+    public Optional<BigDecimal> getOpenedPositionsCostByCurrentOrLastTransactionQuoteInRub(Security security,
+                                                                                           FifoPositionsFilter filter) {
+        return ofNullable(securityProfitService.getSecurityQuote(security, RUB, filter.getToDate()))
                 .map(quote -> quote.getDirtyPriceInCurrency(security.getType() == SecurityType.DERIVATIVE))
-                .map(quote -> quote.multiply(BigDecimal.valueOf(openedPositions)))
-                .orElseGet(() -> securityProfitService.getPurchaseCost(security, positions, RUB)
-                        .add(securityProfitService.getPurchaseAccruedInterest(security, positions, RUB)));
-        return new SecurityInvestment(security, investmentRub);
+                .or(() -> securityProfitService.getSecurityQuoteFromLastTransaction(security, RUB))
+                .map(quote -> quote.multiply(
+                        BigDecimal.valueOf(
+                                fifoPositionsFactory.get(security, filter)
+                                        .getCurrentOpenedPositionsCount())));
     }
 
     private String getEconomicSector(SecurityInvestment securityInvestment) {
@@ -91,7 +99,7 @@ public class InvestmentProportionService {
                 .orElse(SecuritySectorService.UNKNOWN_SECTOR);
     }
 
-    private static record SecurityInvestment(Security security, BigDecimal investment) {
+    private record SecurityInvestment(Security security, BigDecimal investment) {
         private float getInvestment() {
             return investment == null ? 0 : investment.floatValue();
         }

@@ -40,11 +40,6 @@ public interface PortfolioPropertyRepository extends JpaRepository<PortfolioProp
     Optional<PortfolioPropertyEntity> findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(String portfolio,
                                                                                             String property);
 
-    Optional<PortfolioPropertyEntity> findFirstByPortfolioIdAndPropertyAndTimestampBetweenOrderByTimestampDesc(String portfolio,
-                                                                                                               String property,
-                                                                                                               Instant startDate,
-                                                                                                               Instant endDate);
-
     @Query(nativeQuery = true, value = """
             SELECT *
             FROM portfolio_property AS t1
@@ -83,11 +78,11 @@ public interface PortfolioPropertyRepository extends JpaRepository<PortfolioProp
             @Param("from") Instant startDate,
             @Param("to") Instant endDate);
 
-    List<PortfolioPropertyEntity> findByPropertyInAndTimestampBetweenOrderByTimestampDesc(Collection<String> properties,
-                                                                                          Instant startDate,
-                                                                                          Instant endDate);
+    List<PortfolioPropertyEntity> findByPropertyInAndTimestampBetweenOrderByTimestampAsc(Collection<String> properties,
+                                                                                         Instant startDate,
+                                                                                         Instant endDate);
 
-    List<PortfolioPropertyEntity> findByPortfolioIdInAndPropertyInAndTimestampBetweenOrderByTimestampDesc(
+    List<PortfolioPropertyEntity> findByPortfolioIdInAndPropertyInAndTimestampBetweenOrderByTimestampAsc(
             Collection<String> portfolios,
             Collection<String> properties,
             Instant startDate,

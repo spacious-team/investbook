@@ -28,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2021.11</version>
+    <version>2022.1</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -47,7 +47,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>21.11</win.msi.version>
+        <win.msi.version>22.1</win.msi.version>
         <java.version>17</java.version>
         <!-- version 3.2.0 provided by Spring Boot 2.4.1 has bug, using version from Spring Boot 2.3.4
          TODO remove after fix -->
@@ -83,7 +83,7 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>2021.11</version>
+            <version>2022.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
@@ -143,7 +143,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>7.4.0</version>
+            <version>7.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -174,7 +174,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.2</version>
+            <version>1.6.3</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
