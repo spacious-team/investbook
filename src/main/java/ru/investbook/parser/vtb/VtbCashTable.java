@@ -62,7 +62,7 @@ public class VtbCashTable extends SingleAbstractReportTable<PortfolioCash> {
                     .portfolio(getReport().getPortfolio())
                     .timestamp(getReport().getReportEndDateTime())
                     .currency(VtbBrokerReport.convertToCurrency(row.getStringCellValue(VtbCashTableHeader.CURRENCY)))
-                    .section(section)
+                    .market(section)
                     .value(row.getBigDecimalCellValue(column))
                     .build());
         } catch (Exception e) {

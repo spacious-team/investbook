@@ -57,7 +57,9 @@ public class ReportParserService {
             reportTables.getPortfolioPropertyTable()
                     .getData()
                     .forEach(api::addPortfolioProperty);
-            api.addPortfolioCash(reportTables.getCashTable().getData());
+            reportTables.getCashTable()
+                    .getData()
+                    .forEach(api::addPortfolioCash);
             reportTables.getSecuritiesTable()
                     .getData()
                     .forEach(api::addSecurity);

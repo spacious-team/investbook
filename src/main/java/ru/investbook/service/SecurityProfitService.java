@@ -19,7 +19,7 @@
 package ru.investbook.service;
 
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.PortfolioProperty;
+import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.Transaction;
@@ -29,6 +29,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -65,10 +66,11 @@ public interface SecurityProfitService {
      */
     Optional<BigDecimal> getSecurityQuoteFromLastTransaction(Security security, String toCurrency);
 
+    // TODO move to AssetsAndCashService
     /**
      * Возвращает для портфеля последний известный остаток денежных средств соответствующей дате, не позже указанной.
-     * Если портфель не указан, возвращает для всех портфелей сумму последних известных остатков денежных средств
-     * соответствующих дате, не позже указанной.
+     * Если портфель не указан, возвращает для всех портфелей последние известные остатки денежных средств
+     * соответствующих дате, не позже указанной. Записи в результирующем списке отсортированы по времени от новых к старым.
      */
-    Collection<PortfolioProperty> getPortfolioCash(Collection<String> portfolios, Instant atInstant);
+    List<PortfolioCash> getPortfolioCash(Collection<String> portfolios, Instant atInstant);
 }

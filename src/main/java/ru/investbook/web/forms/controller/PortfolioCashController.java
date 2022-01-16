@@ -28,9 +28,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.web.ControllerHelper;
-import ru.investbook.web.forms.model.PortfolioPropertyModel;
-import ru.investbook.web.forms.model.PortfolioPropertyTotalAssetsModel;
-import ru.investbook.web.forms.service.PortfolioPropertyFormsService;
+import ru.investbook.web.forms.model.PortfolioCashModel;
+import ru.investbook.web.forms.service.PortfolioCashFormsService;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
@@ -38,10 +37,10 @@ import java.util.Collection;
 import java.util.function.Supplier;
 
 @Controller
-@RequestMapping("/portfolio-properties")
+@RequestMapping("/portfolio-cash")
 @RequiredArgsConstructor
-public class PortfolioPropertyController {
-    private final PortfolioPropertyFormsService portfolioPropertyFormsService;
+public class PortfolioCashController {
+    private final PortfolioCashFormsService portfolioCashFormsService;
     private final PortfolioRepository portfolioRepository;
     private volatile Collection<String> portfolios;
     private volatile String selectedPortfolio;
@@ -53,43 +52,43 @@ public class PortfolioPropertyController {
 
     @GetMapping
     public String get(Model model) {
-        model.addAttribute("properties", portfolioPropertyFormsService.getAll());
-        return "portfolio-properties/table";
+        model.addAttribute("cashObjects", portfolioCashFormsService.getAll());
+        return "portfolio-cash/table";
     }
 
-    @GetMapping("/edit-form/total-assets")
-    public String getTotalAssetsEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
-        PortfolioPropertyTotalAssetsModel property = (PortfolioPropertyTotalAssetsModel)
-                getPortfolioProperty(id, PortfolioPropertyTotalAssetsModel::new);
-        model.addAttribute("property", property);
+    @GetMapping("/edit-form")
+    public String getCashEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
+        PortfolioCashModel cash = getPortfolioCash(id, PortfolioCashModel::new);
+        model.addAttribute("cash", cash);
         model.addAttribute("portfolios", portfolios);
-        return "portfolio-properties/total-assets-edit-form";
+        return "portfolio-cash/edit-form";
+
     }
 
-    private PortfolioPropertyModel getPortfolioProperty(Integer id,
-                                                        Supplier<? extends PortfolioPropertyModel> newSupplier) {
+    private PortfolioCashModel getPortfolioCash(Integer id, Supplier<? extends PortfolioCashModel> newSupplier) {
         if (id != null) {
-            return portfolioPropertyFormsService.getById(id)
+            return portfolioCashFormsService.getById(id)
                     .orElseGet(newSupplier);
         } else {
-            PortfolioPropertyModel model = newSupplier.get();
+            PortfolioCashModel model = newSupplier.get();
             model.setPortfolio(selectedPortfolio);
             return model;
         }
     }
 
-    @PostMapping("/total-assets")
-    public String postCash(@Valid @ModelAttribute("property") PortfolioPropertyTotalAssetsModel property) {
-        selectedPortfolio = property.getPortfolio();
-        portfolioPropertyFormsService.save(property);
-        return "portfolio-properties/total-assets-view-single";
+    @PostMapping
+    public String postCash(@Valid @ModelAttribute("cash") PortfolioCashModel cash) {
+        selectedPortfolio = cash.getPortfolio();
+        portfolioCashFormsService.save(cash);
+        return "portfolio-cash/view-single";
     }
+
 
     @GetMapping("/delete")
     public String delete(@RequestParam(name = "id") Integer id, Model model) {
-        portfolioPropertyFormsService.delete(id);
+        portfolioCashFormsService.delete(id);
         model.addAttribute("message", "Запись удалена");
-        model.addAttribute("backLink", "/portfolio-properties");
+        model.addAttribute("backLink", "/portfolio-cash");
         return "success";
     }
 }

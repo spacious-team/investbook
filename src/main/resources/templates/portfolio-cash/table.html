@@ -20,7 +20,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Информация по счету</title>
+    <title>Информация о денежных остатках</title>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
     <style>
@@ -31,8 +31,8 @@
 </head>
 <body>
 
-<h1>Информация по счету</h1>
-<a href="/portfolio-properties/edit-form/total-assets">Добавить активы</a><br>
+<h1>Информация о денежных остатках</h1>
+<a href="/portfolio-cash/edit-form">Задать остаток денежных средства</a><br>
 <a href="/forms.html">На главную</a><br>
 
 <p class="hint">
@@ -44,18 +44,18 @@
         <th>Счет</th>
         <th>Номер записи</th>
         <th>Дата</th>
-        <th>Свойство</th>
+        <th>Рынок</th>
         <th class="value">Значение</th>
         <th></th>
     </tr>
-    <th:block th:each="property : ${properties}">
-        <tr th:if="${property instanceof T(ru.investbook.web.forms.model.PortfolioPropertyTotalAssetsModel)}">
-            <td th:text="${property.portfolio}"/>
-            <td><a th:href="@{/portfolio-properties/edit-form/total-assets(id=${property.id})}" th:text="${property.id}"/></td>
-            <td th:text="${property.date}"/>
-            <td>Активы</td>
-            <td th:text="${property.totalAssets.setScale(2, T(java.math.RoundingMode).HALF_UP)} + '&emsp;' + ${property.totalAssetsCurrency}" class="value"/>
-            <td class="table-row-control"><a th:href="@{/portfolio-properties/delete(id=${property.id})}" title="Удалить">&#x274c;</a></td>
+    <th:block th:each="cash : ${cashObjects}">
+        <tr>
+            <td th:text="${cash.portfolio}"/>
+            <td><a th:href="@{/portfolio-cash/edit-form(id=${cash.id})}" th:text="${cash.id}"/></td>
+            <td th:text="${cash.date}"/>
+            <td th:text="${cash.market}"/>
+            <td th:text="${cash.cash.setScale(2, T(java.math.RoundingMode).HALF_UP)} + '&emsp;' + ${cash.currency}" class="value"/>
+            <td class="table-row-control"><a th:href="@{/portfolio-cash/delete(id=${cash.id})}" title="Удалить">&#x274c;</a></td>
         </tr>
     </th:block>
 </table>

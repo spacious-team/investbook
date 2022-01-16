@@ -1,6 +1,6 @@
 <!--
   ~ InvestBook
-  ~ Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+  ~ Copyright (C) 2022  Vitalii Ananev <spacious-team@ya.ru>
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU Affero General Public License as
@@ -20,8 +20,8 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title th:if="${property.id == null}">Добавить свойство</title>
-    <title th:unless="${property.id == null}">Редактировать свойство</title>
+    <title th:if="${cash.id == null}">Задать денежный остаток</title>
+    <title th:unless="${cash.id == null}">Редактировать денежный остаток</title>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
     <style>
@@ -32,9 +32,9 @@
 </head>
 <body>
 
-<h1 th:if="${property.id == null}">Добавить свойство</h1>
-<h1 th:unless="${property.id == null}">Редактировать свойство</h1>
-<form action="#" th:action="@{/portfolio-properties/cash}" th:object="${property}" method="post">
+<h1 th:if="${cash.id == null}">Задать денежный остаток</h1>
+<h1 th:unless="${cash.id == null}">Редактировать денежный остаток</h1>
+<form action="#" th:action="@{/portfolio-cash}" th:object="${cash}" method="post">
     <label>
         <input type="hidden" th:field="*{id}"/>
     </label>
@@ -46,30 +46,19 @@
         Счет
         <input type="text" th:field="*{portfolio}" list="portfolios" required/>
     </label>
-    <br>
     <label>
-        Денежные средства, RUB
-        <input type="number" step="0.01" min="0" th:field="*{cashRub}" required/>
+        Рынок
+        <input type="text" th:field="*{market}" list="portfolios"/>
     </label>
     <br>
     <label>
-        Денежные средства, USD
-        <input type="number" step="0.01" min="0" th:field="*{cashUsd}" required/>
+        Денежные средства
+        <input type="number" step="0.01" min="0" th:field="*{cash}" required/>
     </label>
     <br>
     <label>
-        Денежные средства, EUR
-        <input type="number" step="0.01" min="0" th:field="*{cashEur}" required/>
-    </label>
-    <br>
-    <label>
-        Денежные средства, GBP
-        <input type="number" step="0.01" min="0" th:field="*{cashGbp}" required/>
-    </label>
-    <br>
-    <label>
-        Денежные средства, CHF
-        <input type="number" step="0.01" min="0" th:field="*{cashChf}" required/>
+        Валюта
+        <input type="text" th:field="*{currency}" value="RUB" list="currencies" required/>
     </label>
     <br>
     <input type="submit" value="Сохранить"/>
@@ -77,11 +66,18 @@
     <datalist id="portfolios">
         <option th:each="portfolio : ${portfolios}" th:text="${portfolio}"></option>
     </datalist>
+
+    <datalist id="currencies">
+        <option>RUB</option>
+        <option>USD</option>
+        <option>EUR</option>
+        <option>GBP</option>
+        <option>CHF</option>
+    </datalist>
 </form>
 
 <p class="hint">
-    Если Вашей валюты нет в списке, конвертируйте ее к USD по <a href="https://www.cbr.ru/currency_base/daily/">курсу</a>
-    на выбранную дату.
+    Рынок можно не указывать, если у вас единый счет для фондового, срочного, валютного рынков.
 </p>
 
 </body>
