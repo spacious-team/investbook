@@ -51,7 +51,7 @@ public class PortfolioCompositionController {
                     .stream()
                     .map(e -> Map.of("sector", e.getKey(), "investment", ((Number) e.getValue()).intValue()))
                     .collect(toList());
-            int cash = assetsAndCashService.getTotalCash(portfolios)
+            int cash = assetsAndCashService.getTotalCashInRub(portfolios)
                     .map(Number::intValue)
                     .orElse(0);
             investmentProportion.add(Map.of("sector", "Кеш", "investment", cash));

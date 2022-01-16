@@ -24,15 +24,13 @@ import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.EventCashFlowConverter;
-import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
 import ru.investbook.report.ViewFilter;
 import ru.investbook.repository.EventCashFlowRepository;
-import ru.investbook.repository.PortfolioPropertyRepository;
+import ru.investbook.service.SecurityProfitService;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -41,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ru.investbook.report.excel.CashFlowExcelTableHeader.*;
@@ -54,7 +53,7 @@ public class CashFlowExcelTableFactory implements TableFactory {
     private final EventCashFlowRepository eventCashFlowRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
-    private final PortfolioPropertyRepository portfolioPropertyRepository;
+    private final SecurityProfitService securityProfitService;
 
     @Override
     public Table create(Portfolio portfolio) {
@@ -129,30 +128,16 @@ public class CashFlowExcelTableFactory implements TableFactory {
 
     private Map<String, BigDecimal> getCashBalances(Portfolio portfolio) {
         try {
-            Instant atTime = Instant.ofEpochSecond(Math.min(
-                    ViewFilter.get().getToDate().getEpochSecond(),
-                    Instant.now().getEpochSecond()));
-            return getPortfolioCash(portfolio, atTime)
-                    .map(PortfolioCash::deserialize)
-                    .orElse(Collections.emptyList())
+            Instant now = Instant.now();
+            Instant toDate = ViewFilter.get().getToDate();
+            Instant atTime = toDate.isBefore(now) ?  toDate : now;
+            return securityProfitService.getPortfolioCash(Set.of(portfolio.getId()), atTime)
                     .stream()
                     .collect(Collectors.toMap(c -> c.getCurrency().toUpperCase(), PortfolioCash::getValue, BigDecimal::add));
         } catch (Exception e) {
-            log.warn("Ошибка при десериализации свойства CASH", e);
+            log.warn("Внутренняя ошибка", e);
             return Collections.emptyMap();
         }
     }
 
-    /**
-     * Возвращает последний известный остаток денежных средств соответствующей дате, не позже указанной.
-     */
-    private Optional<String> getPortfolioCash(Portfolio portfolio, Instant atInstant) {
-        return portfolioPropertyRepository
-                .findFirstByPortfolioIdAndPropertyAndTimestampBetweenOrderByTimestampDesc(
-                        portfolio.getId(),
-                        PortfolioPropertyType.CASH.name(),
-                        Instant.ofEpochSecond(0),
-                        atInstant)
-                .map(PortfolioPropertyEntity::getValue);
-    }
 }

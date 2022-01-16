@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
@@ -51,6 +50,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -168,28 +168,18 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 ViewFilter.get().getToDate().getEpochSecond(),
                 Instant.now().getEpochSecond()));
         row.put(SECURITY, "Остаток денежных средств, " + forCurrency.toLowerCase());
-        Collection<PortfolioProperty> portfolioCashes = securityProfitService.getPortfolioCash(portfolios, atTime);
+        Collection<PortfolioCash> portfolioCashes = securityProfitService.getPortfolioCash(portfolios, atTime);
         row.put(LAST_EVENT_DATE, portfolioCashes.stream()
-                .map(PortfolioProperty::getTimestamp)
+                .map(PortfolioCash::getTimestamp)
                 .reduce((t1, t2) -> t1.isAfter(t2) ? t1 : t2)
                 .orElse(null));
         BigDecimal portfolioCash = portfolioCashes.stream()
-                .map(portfolioProperty -> {
-                    try {
-                        return PortfolioCash.deserialize(portfolioProperty.getValue())
-                                .stream()
-                                .filter(cash -> forCurrency.equals(cash.getCurrency()))
-                                .map(PortfolioCash::getValue)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add);
-                    } catch (Exception e) {
-                        log.warn("Ошибка при десериализации свойства: {}", portfolioProperty.getValue(), e);
-                        return BigDecimal.ZERO;
-                    }
-                })
+                .filter(cash -> Objects.equals(forCurrency, cash.getCurrency()))
+                .map(PortfolioCash::getValue)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         row.put(LAST_PRICE, portfolioCash);
         if (ViewFilter.get().getFromDate().isBefore(instantOf2000_01_01) &&
-                portfolioCash != null && portfolioCash.compareTo(minCash) >= 1) { // fix div by zero in proportion column
+                portfolioCash.compareTo(minCash) >= 1) { // fix div by zero in proportion column
             // режим отображения по умолчанию, скорее всего отображаем портфель с начала открытия счета,
             // учитываем остаток денежных средств в Доле портфеля (%)
             row.put(PROPORTION, PROPORTION_FORMULA);

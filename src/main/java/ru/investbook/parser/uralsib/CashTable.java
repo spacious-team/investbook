@@ -44,7 +44,7 @@ public class CashTable extends SingleAbstractReportTable<PortfolioCash> {
         return PortfolioCash.builder()
                 .portfolio(getReport().getPortfolio())
                 .timestamp(getReport().getReportEndDateTime())
-                .section("all")
+                .market("all")
                 .value(row.getBigDecimalCellValue(VALUE))
                 .currency(UralsibBrokerReport.convertToCurrency(row.getStringCellValue(CURRENCY)))
                 .build();

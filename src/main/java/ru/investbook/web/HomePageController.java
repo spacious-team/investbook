@@ -49,7 +49,7 @@ public class HomePageController {
         model.addAttribute("transactionsCount", transactionRepository.countByPortfolioIn(portfolios));
         model.addAttribute("portfolios", portfolios);
         model.addAttribute("assets", assetsAndCashService.getAssets(portfolios));
-        model.addAttribute("cashBalance", assetsAndCashService.getTotalCash(portfolios));
+        model.addAttribute("cashBalance", assetsAndCashService.getTotalCashInRub(portfolios));
         model.addAttribute("buildProperties", buildProperties);
         return "index";
     }

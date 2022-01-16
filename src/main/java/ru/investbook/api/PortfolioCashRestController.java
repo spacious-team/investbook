@@ -21,7 +21,7 @@ package ru.investbook.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.spacious_team.broker.pojo.PortfolioProperty;
+import org.spacious_team.broker.pojo.PortfolioCash;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,42 +33,42 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
-import ru.investbook.entity.PortfolioPropertyEntity;
+import ru.investbook.entity.PortfolioCashEntity;
 
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@Tag(name = "Информация по счетам")
-@RequestMapping("/api/v1/portfolio-properties")
-public class PortfolioPropertyRestController extends AbstractRestController<Integer, PortfolioProperty, PortfolioPropertyEntity> {
+@Tag(name = "Информация по остатку денежных средств на счете")
+@RequestMapping("/api/v1/portfolio-cash")
+public class PortfolioCashRestController extends AbstractRestController<Integer, PortfolioCash, PortfolioCashEntity> {
 
-    public PortfolioPropertyRestController(JpaRepository<PortfolioPropertyEntity, Integer> repository,
-                                           EntityConverter<PortfolioPropertyEntity, PortfolioProperty> converter) {
+    public PortfolioCashRestController(JpaRepository<PortfolioCashEntity, Integer> repository,
+                                       EntityConverter<PortfolioCashEntity, PortfolioCash> converter) {
         super(repository, converter);
     }
 
     @Override
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отображает всю имеющуюся информацию обо всех счетах")
-    public List<PortfolioProperty> get() {
+    public List<PortfolioCash> get() {
         return super.get();
     }
 
     @Override
     @GetMapping("{id}")
     @Operation(summary = "Отобразить один", description = "Отображает информацию по идентификатору")
-    public ResponseEntity<PortfolioProperty> get(@PathVariable("id")
-                                                 @Parameter(description = "Внутренний идентификатор записи")
-                                                         Integer id) {
+    public ResponseEntity<PortfolioCash> get(@PathVariable("id")
+                                             @Parameter(description = "Внутренний идентификатор записи")
+                                                     Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Добавить информацию для конкретного счета")
-    public ResponseEntity<Void> post(@Valid @RequestBody PortfolioProperty property) {
+    public ResponseEntity<Void> post(@Valid @RequestBody PortfolioCash property) {
         return super.post(property);
     }
 
@@ -78,7 +78,7 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор записи")
                                             Integer id,
-                                    @Valid @RequestBody PortfolioProperty property) {
+                                    @Valid @RequestBody PortfolioCash property) {
         return super.put(id, property);
     }
 
@@ -92,22 +92,22 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     }
 
     @Override
-    protected Optional<PortfolioPropertyEntity> getById(Integer id) {
+    protected Optional<PortfolioCashEntity> getById(Integer id) {
         return repository.findById(id);
     }
 
     @Override
-    protected Integer getId(PortfolioProperty object) {
+    protected Integer getId(PortfolioCash object) {
         return object.getId();
     }
 
     @Override
-    protected PortfolioProperty updateId(Integer id, PortfolioProperty object) {
+    protected PortfolioCash updateId(Integer id, PortfolioCash object) {
         return object.toBuilder().id(id).build();
     }
 
     @Override
     protected String getLocation() {
-        return "/portfolio-properties";
+        return "/portfolio-cash";
     }
 }

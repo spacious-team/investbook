@@ -1,6 +1,6 @@
 <!--
   ~ InvestBook
-  ~ Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+  ~ Copyright (C) 2022  Vitalii Ananev <spacious-team@ya.ru>
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU Affero General Public License as
@@ -20,25 +20,22 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Сохранено свойство</title>
+    <title>Сохранен денежный остаток</title>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
 </head>
 <body>
 
-<h1>Сохранено свойство</h1>
+<h1>Сохранен денежный остаток</h1>
 
-<p th:text="'Счет: ' +  ${property.portfolio}"/>
-<p th:text="'Номер записи: ' +  ${property.id}"/>
-<p th:text="'Дата: ' + ${property.date}"/>
-<p th:text="${property.cashRub} + ' RUB'" th:if="${property.cashRub.floatValue() > 0.001}"/>
-<p th:text="${property.cashUsd} + ' USD'" th:if="${property.cashUsd.floatValue() > 0.001}"/>
-<p th:text="${property.cashEur} + ' EUR'" th:if="${property.cashEur.floatValue() > 0.001}"/>
-<p th:text="${property.cashGbp} + ' GBP'" th:if="${property.cashGbp.floatValue() > 0.001}"/>
-<p th:text="${property.cashChf} + ' CHF'" th:if="${property.cashChf.floatValue() > 0.001}"/>
-<a href="/portfolio-properties/edit-form/cash">Добавить еще</a><br>
-<a th:href="@{/portfolio-properties/delete(id=${property.id})}">Удалить эту запись</a><br>
-<a href="/portfolio-properties">Посмотреть все</a><br>
+<p th:text="'Счет: ' +  ${cash.portfolio}"/>
+<p th:text="'Номер записи: ' +  ${cash.id}"/>
+<p th:text="'Дата: ' + ${cash.date}"/>
+<p th:text="'Рынок: ' + ${cash.market}" th:if = "${cash.market != null && !cash.market.isEmpty()}"/>
+<p th:text="${cash.cash} + ' ' + ${cash.currency}"/>
+<a href="/portfolio-cash/edit-form">Добавить еще</a><br>
+<a th:href="@{/portfolio-cash/delete(id=${cash.id})}">Удалить эту запись</a><br>
+<a href="/portfolio-cash">Посмотреть все</a><br>
 <a href="/forms.html">На главную</a><br>
 
 </body>
