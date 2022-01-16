@@ -20,23 +20,17 @@ package ru.investbook.service;
 
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Service;
-import ru.investbook.converter.PortfolioCashConverter;
-import ru.investbook.converter.PortfolioPropertyConverter;
 import ru.investbook.converter.SecurityQuoteConverter;
-import ru.investbook.entity.PortfolioCashEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.ClosedPosition;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.report.OpenedPosition;
 import ru.investbook.report.ViewFilter;
-import ru.investbook.repository.PortfolioCashRepository;
-import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityQuoteRepository;
 import ru.investbook.repository.SecurityRepository;
@@ -63,17 +57,12 @@ import static org.springframework.util.StringUtils.hasLength;
 public class SecurityProfitServiceImpl implements SecurityProfitService {
 
     private final Set<Integer> priceAndAccruedInterestTypes = Set.of(CashFlowType.PRICE.getId(), CashFlowType.ACCRUED_INTEREST.getId());
-    private final Instant instantOf1970 = Instant.ofEpochSecond(0);
     private final SecurityRepository securityRepository;
     private final TransactionRepository transactionRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final SecurityQuoteRepository securityQuoteRepository;
     private final SecurityQuoteConverter securityQuoteConverter;
-    private final PortfolioPropertyRepository portfolioPropertyRepository;
-    private final PortfolioPropertyConverter portfolioPropertyConverter;
-    private final PortfolioCashRepository portfolioCashRepository;
-    private final PortfolioCashConverter portfolioCashConverter;
     private final ForeignExchangeRateService foreignExchangeRateService;
 
     @Override
@@ -256,21 +245,6 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                                 .abs())
                         .reduce(BigDecimal.ZERO, BigDecimal::add))
                 .map(value -> Objects.equals(value, BigDecimal.ZERO) ? null : value);
-    }
-
-    @Override
-    public List<PortfolioCash> getPortfolioCash(Collection<String> portfolios, Instant atInstant) {
-        List<PortfolioCashEntity> entities = portfolios.isEmpty() ?
-                portfolioCashRepository.findDistinctOnPortfolioByTimestampBetweenOrderByTimestampDesc(
-                        instantOf1970,
-                        atInstant) :
-                portfolioCashRepository.findDistinctOnPortfolioByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
-                        portfolios,
-                        instantOf1970,
-                        atInstant);
-        return entities.stream()
-                .map(portfolioCashConverter::fromEntity)
-                .toList();
     }
 
     private BigDecimal convertToCurrency(BigDecimal value, String fromCurrency, String toCurrency) {

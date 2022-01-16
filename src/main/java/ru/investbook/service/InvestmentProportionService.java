@@ -41,8 +41,7 @@ import static java.lang.System.nanoTime;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.reducing;
-import static org.spacious_team.broker.pojo.SecurityType.BOND;
-import static org.spacious_team.broker.pojo.SecurityType.STOCK;
+import static org.spacious_team.broker.pojo.SecurityType.*;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 
 @Service
@@ -50,7 +49,7 @@ import static ru.investbook.report.ForeignExchangeRateService.RUB;
 @Slf4j
 public class InvestmentProportionService {
 
-    private final Set<SecurityType> stockAndBondTypes = Set.of(STOCK, BOND);
+    private final Set<SecurityType> stockAndBondTypes = Set.of(STOCK, BOND, STOCK_OR_BOND);
     private final SecurityRepository securityRepository;
     private final SecurityConverter securityConverter;
     private final SecurityDescriptionRepository securityDescriptionRepository;
