@@ -30,7 +30,7 @@ import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
 import ru.investbook.report.ViewFilter;
 import ru.investbook.repository.EventCashFlowRepository;
-import ru.investbook.service.SecurityProfitService;
+import ru.investbook.service.AssetsAndCashService;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -53,7 +53,7 @@ public class CashFlowExcelTableFactory implements TableFactory {
     private final EventCashFlowRepository eventCashFlowRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
-    private final SecurityProfitService securityProfitService;
+    private final AssetsAndCashService assetsAndCashService;
 
     @Override
     public Table create(Portfolio portfolio) {
@@ -131,7 +131,7 @@ public class CashFlowExcelTableFactory implements TableFactory {
             Instant now = Instant.now();
             Instant toDate = ViewFilter.get().getToDate();
             Instant atTime = toDate.isBefore(now) ?  toDate : now;
-            return securityProfitService.getPortfolioCash(Set.of(portfolio.getId()), atTime)
+            return assetsAndCashService.getPortfolioCash(Set.of(portfolio.getId()), atTime)
                     .stream()
                     .collect(Collectors.toMap(c -> c.getCurrency().toUpperCase(), PortfolioCash::getValue, BigDecimal::add));
         } catch (Exception e) {

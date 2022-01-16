@@ -20,13 +20,17 @@ package ru.investbook.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
+import ru.investbook.converter.PortfolioCashConverter;
 import ru.investbook.converter.SecurityConverter;
+import ru.investbook.entity.PortfolioCashEntity;
 import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.report.FifoPositionsFilter;
 import ru.investbook.report.ForeignExchangeRateService;
+import ru.investbook.repository.PortfolioCashRepository;
 import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
@@ -55,13 +59,15 @@ import static ru.investbook.report.ForeignExchangeRateService.RUB;
 @Slf4j
 public class AssetsAndCashService {
     private final Set<SecurityType> stockBondAndAssetTypes = Set.of(STOCK, BOND, ASSET);
+    private final Instant instantOf1970 = Instant.ofEpochSecond(0);
     private final PortfolioPropertyRepository portfolioPropertyRepository;
     private final ForeignExchangeRateService foreignExchangeRateService;
     private final InvestmentProportionService investmentProportionService;
-    private final SecurityProfitService securityProfitService;
     private final PortfolioRepository portfolioRepository;
     private final SecurityRepository securityRepository;
     private final SecurityConverter securityConverter;
+    private final PortfolioCashRepository portfolioCashRepository;
+    private final PortfolioCashConverter portfolioCashConverter;
 
     public Set<String> getActivePortfolios() {
         return ControllerHelper.getActivePortfolios(portfolioRepository);
@@ -147,7 +153,7 @@ public class AssetsAndCashService {
     }
 
     public Optional<BigDecimal> getTotalCashInRub(Collection<String> portfolios) {
-        Collection<BigDecimal> portfolioCashes =  securityProfitService.getPortfolioCash(portfolios, Instant.now())
+        Collection<BigDecimal> portfolioCashes =  getPortfolioCash(portfolios, Instant.now())
                 .stream()
                 .map(cash -> foreignExchangeRateService.convertValueToCurrency(cash.getValue(), cash.getCurrency(), RUB))
                 .toList();
@@ -156,5 +162,24 @@ public class AssetsAndCashService {
         }
         return Optional.of(portfolioCashes.stream()
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
+    }
+
+    /**
+     * Возвращает для портфеля последний известный остаток денежных средств соответствующей дате, не позже указанной.
+     * Если портфель не указан, возвращает для всех портфелей последние известные остатки денежных средств
+     * соответствующих дате, не позже указанной. Записи в результирующем списке отсортированы по времени от новых к старым.
+     */
+    public List<PortfolioCash> getPortfolioCash(Collection<String> portfolios, Instant atInstant) {
+        List<PortfolioCashEntity> entities = portfolios.isEmpty() ?
+                portfolioCashRepository.findDistinctOnPortfolioByTimestampBetweenOrderByTimestampDesc(
+                        instantOf1970,
+                        atInstant) :
+                portfolioCashRepository.findDistinctOnPortfolioByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
+                        portfolios,
+                        instantOf1970,
+                        atInstant);
+        return entities.stream()
+                .map(portfolioCashConverter::fromEntity)
+                .toList();
     }
 }

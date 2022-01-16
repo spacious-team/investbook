@@ -41,6 +41,7 @@ import ru.investbook.report.TableFactory;
 import ru.investbook.report.ViewFilter;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionRepository;
+import ru.investbook.service.AssetsAndCashService;
 import ru.investbook.service.SecurityProfitService;
 
 import java.math.BigDecimal;
@@ -76,6 +77,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     protected final PortfolioPropertyConverter portfolioPropertyConverter;
     private final FifoPositionsFactory positionsFactory;
     private final SecurityProfitService securityProfitService;
+    private final AssetsAndCashService assetsAndCashService;
     private final InternalRateOfReturn internalRateOfReturn;
     private final Instant instantOf2000_01_01 = LocalDate.of(2000, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant();
     private final Set<Integer> paymentEvents = Set.of(
@@ -168,7 +170,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 ViewFilter.get().getToDate().getEpochSecond(),
                 Instant.now().getEpochSecond()));
         row.put(SECURITY, "Остаток денежных средств, " + forCurrency.toLowerCase());
-        Collection<PortfolioCash> portfolioCashes = securityProfitService.getPortfolioCash(portfolios, atTime);
+        Collection<PortfolioCash> portfolioCashes = assetsAndCashService.getPortfolioCash(portfolios, atTime);
         row.put(LAST_EVENT_DATE, portfolioCashes.stream()
                 .map(PortfolioCash::getTimestamp)
                 .reduce((t1, t2) -> t1.isAfter(t2) ? t1 : t2)
