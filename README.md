@@ -77,7 +77,8 @@
   <img src="https://user-images.githubusercontent.com/11336712/92284436-a1b61e80-ef0a-11ea-9eed-9a948089bcff.png" width="65%"/>
 
 ### Отличие от аналогов
-На примере https://intelinvest.ru и https://snowball-income.com Investbook имеет следующие преимущества:
+В сравнении с [Intelinvest](https://intelinvest.ru) и [Snowball Income](https://snowball-income.com)
+Investbook имеет следующие преимущества:
 
 1. Отсутствие ежемесячной подписки. Бесплатно. Всегда и безусловно.
 1. Дивидендные, купонные, налоговые выплаты учитываются по факту поступления. Это позволяет точно рассчитывать 
