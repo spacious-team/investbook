@@ -26,42 +26,32 @@ import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
-import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.ReportTables;
-import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 
 @Getter
 public class ReportTablesCachingWrapper implements ReportTables {
 
     private final BrokerReport report;
     private final ReportTable<PortfolioProperty> portfolioPropertyTable;
-    private final ReportTable<PortfolioCash> cashTable;
+    private final ReportTable<PortfolioCash> portfolioCashTable;
     private final ReportTable<EventCashFlow> cashFlowTable;
     private final ReportTable<Security> securitiesTable;
-    private final ReportTable<SecurityTransaction> securityTransactionTable;
-    private final ReportTable<DerivativeTransaction> derivativeTransactionTable;
-    private final ReportTable<ForeignExchangeTransaction> foreignExchangeTransactionTable;
-    private final ReportTable<SecurityEventCashFlow> couponAmortizationRedemptionTable;
-    private final ReportTable<SecurityEventCashFlow> dividendTable;
-    private final ReportTable<SecurityEventCashFlow> derivativeCashFlowTable;
+    private final ReportTable<AbstractTransaction> transactionTable;
+    private final ReportTable<SecurityEventCashFlow> securityEventCashFlowTable;
     private final ReportTable<SecurityQuote> securityQuoteTable;
     private final ReportTable<ForeignExchangeRate> foreignExchangeRateTable;
 
     public ReportTablesCachingWrapper(ReportTables wrappee) {
         this.report = wrappee.getReport();
         this.portfolioPropertyTable = wrappee.getPortfolioPropertyTable();
-        this.cashTable = wrappee.getCashTable();
+        this.portfolioCashTable = wrappee.getPortfolioCashTable();
         this.cashFlowTable = wrappee.getCashFlowTable();
         this.securitiesTable = wrappee.getSecuritiesTable();
-        this.securityTransactionTable = wrappee.getSecurityTransactionTable();
-        this.derivativeTransactionTable = wrappee.getDerivativeTransactionTable();
-        this.foreignExchangeTransactionTable = wrappee.getForeignExchangeTransactionTable();
-        this.couponAmortizationRedemptionTable = wrappee.getCouponAmortizationRedemptionTable();
-        this.dividendTable = wrappee.getDividendTable();
-        this.derivativeCashFlowTable = wrappee.getDerivativeCashFlowTable();
+        this.transactionTable = wrappee.getTransactionTable();
+        this.securityEventCashFlowTable = wrappee.getSecurityEventCashFlowTable();
         this.securityQuoteTable = wrappee.getSecurityQuoteTable();
         this.foreignExchangeRateTable = wrappee.getForeignExchangeRateTable();
     }

@@ -25,11 +25,9 @@ import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
-import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
-import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
+import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.ReportTables;
-import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -39,7 +37,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toCollection;
-import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
 
 @Service
 @Slf4j
@@ -57,7 +54,7 @@ public class ReportParserService {
             reportTables.getPortfolioPropertyTable()
                     .getData()
                     .forEach(api::addPortfolioProperty);
-            reportTables.getCashTable()
+            reportTables.getPortfolioCashTable()
                     .getData()
                     .forEach(api::addPortfolioCash);
             reportTables.getSecuritiesTable()
@@ -66,26 +63,12 @@ public class ReportParserService {
             reportTables.getCashFlowTable()
                     .getData()
                     .forEach(api::addEventCashFlow);
-            reportTables.getSecurityTransactionTable()
+            reportTables.getTransactionTable()
                     .getData()
                     .forEach(api::addTransaction);
-            reportTables.getCouponAmortizationRedemptionTable()
+            reportTables.getSecurityEventCashFlowTable()
                     .getData()
                     .forEach(api::addSecurityEventCashFlow);
-            reportTables.getDividendTable()
-                    .getData()
-                    .forEach(api::addSecurityEventCashFlow);
-            reportTables.getDerivativeTransactionTable()
-                    .getData()
-                    .forEach(api::addTransaction);
-            reportTables.getDerivativeCashFlowTable()
-                    .getData()
-                    .stream()
-                    .map(ReportParserService::setDerivativeCashFlowDefaults)
-                    .forEach(api::addSecurityEventCashFlow);
-            reportTables.getForeignExchangeTransactionTable()
-                    .getData()
-                    .forEach(api::addTransaction);
             reportTables.getSecurityQuoteTable()
                     .getData()
                     .forEach(api::addSecurityQuote);
@@ -103,16 +86,10 @@ public class ReportParserService {
         Set<String> portfolios = new HashSet<>();
 
         addPortfolios(portfolios, tables.getPortfolioPropertyTable(), PortfolioProperty::getPortfolio);
-        addPortfolios(portfolios, tables.getCashTable(), PortfolioCash::getPortfolio);
+        addPortfolios(portfolios, tables.getPortfolioCashTable(), PortfolioCash::getPortfolio);
         addPortfolios(portfolios, tables.getCashFlowTable(), EventCashFlow::getPortfolio);
-
-        addPortfolios(portfolios, tables.getSecurityTransactionTable(), SecurityTransaction::getPortfolio);
-        addPortfolios(portfolios, tables.getDerivativeTransactionTable(), DerivativeTransaction::getPortfolio);
-        addPortfolios(portfolios, tables.getForeignExchangeTransactionTable(), ForeignExchangeTransaction::getPortfolio);
-
-        addPortfolios(portfolios, tables.getCouponAmortizationRedemptionTable(), SecurityEventCashFlow::getPortfolio);
-        addPortfolios(portfolios, tables.getDividendTable(), SecurityEventCashFlow::getPortfolio);
-        addPortfolios(portfolios, tables.getDerivativeCashFlowTable(), SecurityEventCashFlow::getPortfolio);
+        addPortfolios(portfolios, tables.getTransactionTable(), AbstractTransaction::getPortfolio);
+        addPortfolios(portfolios, tables.getSecurityEventCashFlowTable(), SecurityEventCashFlow::getPortfolio);
 
         return portfolios.stream()
                 .map(portfolio -> Portfolio.builder().id(portfolio).build())
@@ -125,15 +102,5 @@ public class ReportParserService {
                 .stream()
                 .map(toPortfolio)
                 .collect(toCollection(() -> dest));
-    }
-
-    private static SecurityEventCashFlow setDerivativeCashFlowDefaults(SecurityEventCashFlow c) {
-        if (c.getCount() == null && c.getEventType() == DERIVATIVE_PROFIT) {
-            // count is optional for derivatives
-            c = c.toBuilder()
-                    .count(0)
-                    .build();
-        }
-        return c;
     }
 }
