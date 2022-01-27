@@ -28,38 +28,26 @@ import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTables;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
-import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
-import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.broker.report_parser.api.WrappingReportTable;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.parser.SecurityRegistrar;
 import ru.investbook.repository.SecurityRepository;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.stream.Collectors;
-
-import static org.spacious_team.broker.pojo.CashFlowType.*;
-
 public class InvestbookReportTables extends AbstractReportTables<BrokerReport> {
 
-    private final ReportTable<AbstractTransaction> transactionTable;
-    private final ReportTable<SecurityTransaction> depositAndWithdrawalTable;
-    private final ReportTable<SecurityEventCashFlow> securityEventCashFlowTable;
+    private final SecurityRegistrar securityRegistrar;
+    private final SecurityRepository securityRepository;
+    private final SecurityConverter securityConverter;
 
     protected InvestbookReportTables(BrokerReport report,
                                      SecurityRegistrar securityRegistrar,
                                      SecurityRepository securityRepository,
                                      SecurityConverter securityConverter) {
         super(report);
-        this.transactionTable = new InvestbookTransactionTable(
-                getReport(), securityRegistrar, securityRepository, securityConverter);
-        this.depositAndWithdrawalTable = new InvestbookSecurityDepositAndWithdrawalTable(
-                getReport(), securityRegistrar, securityRepository, securityConverter);
-        this.securityEventCashFlowTable = new InvestbookSecurityEventCashFowTable(
-                getReport(), securityRegistrar, securityRepository, securityConverter);
+        this.securityRegistrar = securityRegistrar;
+        this.securityRepository = securityRepository;
+        this.securityConverter = securityConverter;
     }
 
     @Override
@@ -68,8 +56,8 @@ public class InvestbookReportTables extends AbstractReportTables<BrokerReport> {
     }
 
     @Override
-    public ReportTable<PortfolioCash> getCashTable() {
-        return new InvestbookCashTable(getReport());
+    public ReportTable<PortfolioCash> getPortfolioCashTable() {
+        return new InvestbookPortfolioCashTable(getReport());
     }
 
     @Override
@@ -83,63 +71,18 @@ public class InvestbookReportTables extends AbstractReportTables<BrokerReport> {
     }
 
     @Override
-    public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
-        Collection<SecurityTransaction> data = transactionTable.getData()
-                .stream()
-                .filter(t -> t instanceof SecurityTransaction)
-                .map(t -> (SecurityTransaction) t)
-                .collect(Collectors.toCollection(ArrayList::new));
-        data.addAll(depositAndWithdrawalTable.getData());
-        return WrappingReportTable.of(getReport(), data);
+    public ReportTable<AbstractTransaction> getTransactionTable() {
+        return WrappingReportTable.of(
+                new InvestbookTransactionTable(
+                        getReport(), securityRegistrar, securityRepository, securityConverter),
+                new InvestbookSecurityDepositAndWithdrawalTable(
+                        getReport(), securityRegistrar, securityRepository, securityConverter));
     }
 
     @Override
-    public ReportTable<DerivativeTransaction> getDerivativeTransactionTable() {
-        Collection<DerivativeTransaction> data = transactionTable.getData()
-                .stream()
-                .filter(t -> t instanceof DerivativeTransaction)
-                .map(t -> (DerivativeTransaction) t)
-                .toList();
-        return WrappingReportTable.of(getReport(), data);
-    }
-
-    @Override
-    public ReportTable<ForeignExchangeTransaction> getForeignExchangeTransactionTable() {
-        Collection<ForeignExchangeTransaction> data = transactionTable.getData()
-                .stream()
-                .filter(t -> t instanceof ForeignExchangeTransaction)
-                .map(t -> (ForeignExchangeTransaction) t)
-                .toList();
-        return WrappingReportTable.of(getReport(), data);
-    }
-
-    @Override
-    public ReportTable<SecurityEventCashFlow> getCouponAmortizationRedemptionTable() {
-        Collection<SecurityEventCashFlow> data = securityEventCashFlowTable.getData()
-                .stream()
-                .filter(e -> e.getEventType() == COUPON || e.getEventType() == AMORTIZATION || e.getEventType() == REDEMPTION)
-                .toList();
-        // TODO include bond tax records
-        return WrappingReportTable.of(getReport(), data);
-    }
-
-    @Override
-    public ReportTable<SecurityEventCashFlow> getDividendTable() {
-        Collection<SecurityEventCashFlow> data = securityEventCashFlowTable.getData()
-                .stream()
-                .filter(e -> e.getEventType() == DIVIDEND)
-                .toList();
-        // TODO include stock tax records
-        return WrappingReportTable.of(getReport(), data);
-    }
-
-    @Override
-    public ReportTable<SecurityEventCashFlow> getDerivativeCashFlowTable() {
-        Collection<SecurityEventCashFlow> data = securityEventCashFlowTable.getData()
-                .stream()
-                .filter(e -> e.getEventType() == DERIVATIVE_PROFIT)
-                .toList();
-        return WrappingReportTable.of(getReport(), data);
+    public ReportTable<SecurityEventCashFlow> getSecurityEventCashFlowTable() {
+        return new InvestbookSecurityEventCashFowTable(
+                getReport(), securityRegistrar, securityRepository, securityConverter);
     }
 
     @Override

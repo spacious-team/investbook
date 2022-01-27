@@ -24,9 +24,9 @@ import org.spacious_team.table_wrapper.api.TableRow;
 
 import static ru.investbook.parser.investbook.AbstractInvestbookTable.InvestbookReportTableHeader.*;
 
-public class InvestbookCashTable extends AbstractInvestbookTable<PortfolioCash> {
+public class InvestbookPortfolioCashTable extends AbstractInvestbookTable<PortfolioCash> {
 
-    protected InvestbookCashTable(BrokerReport report) {
+    protected InvestbookPortfolioCashTable(BrokerReport report) {
         super(report);
     }
 
