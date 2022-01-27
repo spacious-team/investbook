@@ -71,7 +71,7 @@ public class InvestbookTransactionTable extends AbstractSecurityAwareInvestbookT
             case BOND -> SecurityTransaction.builder()
                     .value(value)
                     .valueCurrency(row.getStringCellValue(CURRENCY))
-                    .accruedInterest(row.getBigDecimalCellValue(ACCRUED_INTEREST));
+                    .accruedInterest(getOptionalAmount(row.getBigDecimalCellValue(ACCRUED_INTEREST), count, isBuy));
             case DERIVATIVE -> DerivativeTransaction.builder()
                     .valueInPoints(value)
                     .value(getOptionalAmount(
