@@ -34,6 +34,7 @@ import ru.investbook.parser.BrokerReportParserService;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -47,7 +48,7 @@ import static ru.investbook.web.ReportControllerHelper.getBrokerNames;
 @Slf4j
 public class BrokerFileReportController {
 
-    private final Collection<BrokerReportFactory> brokerReportFactories;
+    private final List<BrokerReportFactory> brokerReportFactories;
     private final BrokerReportParserService brokerReportParserService;
 
 

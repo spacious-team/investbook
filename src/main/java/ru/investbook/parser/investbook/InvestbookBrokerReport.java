@@ -29,6 +29,7 @@ import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.csv.CsvReportPage;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
+import org.springframework.util.Assert;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,6 +55,8 @@ public class InvestbookBrokerReport implements BrokerReport {
         } else {
             this.workbook = getWorkBook(fileName, is);
             this.reportPage = new ExcelSheet(workbook.getSheetAt(0));
+            Assert.isTrue(reportPage.getRow(0).getCell(0).getStringValue().toLowerCase().contains("событие"),
+                    "Не отчет в формате Investbook");
         }
     }
 

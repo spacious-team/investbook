@@ -22,11 +22,14 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.AbstractBrokerReportFactory;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 
 @Component
+@Order(Ordered.LOWEST_PRECEDENCE)
 @Slf4j
 public class InvestbookBrokerReportFactory extends AbstractBrokerReportFactory {
     @Getter

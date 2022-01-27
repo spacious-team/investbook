@@ -38,6 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -49,7 +50,7 @@ public class BrokerReportParserServiceImpl implements BrokerReportParserService 
 
     private final InvestbookProperties investbookProperties;
     private final ReportParserService reportParserService;
-    private final Collection<BrokerReportFactory> brokerReportFactories;
+    private final List<BrokerReportFactory> brokerReportFactories;
     private final Collection<ReportTablesFactory> reportTablesFactories;
 
 
