@@ -22,14 +22,22 @@ import org.springframework.util.Assert;
 
 public class SecurityHelper {
     public static String NULL_SECURITY_NAME = "<unknown>";
+    public static String NULL_SECURITY_ISIN = "XX0000000000";
 
     /**
      * For stock or bond "Name (ISIN)", for derivatives - code, for asset - securityName
      */
     public static String getSecurityDescription(String isin, String securityName, SecurityType securityType) {
         return switch (securityType) {
-            case SHARE, BOND -> (securityName == null ? isin : securityName) + " (" + isin + ")";
-            case DERIVATIVE, CURRENCY, ASSET -> securityName == null ? NULL_SECURITY_NAME : securityName;
+            case SHARE, BOND -> {
+                Assert.isTrue(isin != null || securityName != null, "Отсутствует и ISIN, и наименование ЦБ");
+                yield (securityName == null ? NULL_SECURITY_NAME : securityName) +
+                        " (" + (isin == null ? NULL_SECURITY_ISIN : isin) + ")";
+            }
+            case DERIVATIVE, CURRENCY, ASSET -> {
+                Assert.isTrue(securityName != null, "Отсутствует тикер контракта или наименование произвольного актива");
+                yield securityName;
+            }
         };
     }
 
