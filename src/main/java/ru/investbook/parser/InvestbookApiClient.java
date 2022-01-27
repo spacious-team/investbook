@@ -50,6 +50,7 @@ import ru.investbook.service.moex.MoexDerivativeCodeService;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
 import static ru.investbook.repository.RepositoryHelper.isUniqIndexViolationException;
 
 @Component
@@ -134,7 +135,10 @@ public class InvestbookApiClient {
                 "Не могу добавить информацию о движении денежных средств " + eventCashFlow);
     }
 
-    public void addSecurityEventCashFlow(SecurityEventCashFlow securityEventCashFlow) {
+    public void addSecurityEventCashFlow(SecurityEventCashFlow cf) {
+        SecurityEventCashFlow securityEventCashFlow = (cf.getCount() == null && cf.getEventType() == DERIVATIVE_PROFIT) ?
+                cf.toBuilder().count(0).build() : // count is optional for derivatives
+                cf;
         handlePost(
                 () -> securityEventCashFlowRestController.post(securityEventCashFlow),
                 "Не могу добавить информацию о движении денежных средств " + securityEventCashFlow);

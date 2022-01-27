@@ -20,6 +20,7 @@ package ru.investbook.parser.psb.foreignmarket;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
@@ -33,7 +34,7 @@ import java.time.Instant;
 import static ru.investbook.parser.psb.foreignmarket.ForeignExchangeTransactionTable.FxTransactionTableHeader.*;
 
 @Slf4j
-public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<ForeignExchangeTransaction> {
+public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<AbstractTransaction> {
     private static final String TABLE_NAME = "Информация о валютных сделках";
 
     public ForeignExchangeTransactionTable(PsbBrokerForeignMarketReport report) {
