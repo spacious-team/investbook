@@ -75,7 +75,7 @@ public class PortfolioCashFormsService implements FormsService<PortfolioCashMode
         PortfolioCash cash = PortfolioCash.builder()
                 .id(m.getId())
                 .portfolio(m.getPortfolio())
-                .market(StringUtils.hasLength(m.getMarket()) ? m.getMarket() : null)
+                .market(StringUtils.hasLength(m.getMarket()) ? m.getMarket() : "")
                 .timestamp(m.getDate().atStartOfDay(zoneId).toInstant())
                 .value(m.getCash())
                 .currency(m.getCurrency())
