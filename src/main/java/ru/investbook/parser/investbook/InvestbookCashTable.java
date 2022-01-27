@@ -41,6 +41,7 @@ public class InvestbookCashTable extends AbstractInvestbookTable<PortfolioCash> 
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .value(row.getBigDecimalCellValue(PRICE))
                 .currency(row.getStringCellValue(CURRENCY))
+                .market("")
                 .build();
     }
 }
