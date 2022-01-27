@@ -47,7 +47,6 @@ import ru.investbook.api.TransactionCashFlowRestController;
 import ru.investbook.api.TransactionRestController;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
 
-import javax.validation.Valid;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -70,20 +69,20 @@ public class InvestbookApiClient {
     private final ForeignExchangeRateRestController foreignExchangeRateRestController;
     private final MoexDerivativeCodeService moexDerivativeCodeService;
 
-    public boolean addPortfolio(@Valid Portfolio portfolio) {
+    public boolean addPortfolio(Portfolio portfolio) {
         return handlePost(
                 () -> portfolioRestController.post(portfolio),
                 "Не могу сохранить Портфель " + portfolio);
     }
 
-    public void addSecurity(@Valid Security security) {
+    public void addSecurity(Security security) {
         Security _security = convertDerivativeSecurityId(security);
         handlePost(
                 () -> securityRestController.post(_security),
                 "Не могу добавить ЦБ " + security + " в список");
     }
 
-    private Security convertDerivativeSecurityId(@Valid Security security) {
+    private Security convertDerivativeSecurityId(Security security) {
         return security.getType() == SecurityType.DERIVATIVE ?
                 security.toBuilder()
                         .ticker(moexDerivativeCodeService.convertDerivativeCode(security.getTicker()))
@@ -91,7 +90,7 @@ public class InvestbookApiClient {
                 security;
     }
 
-    public void addTransaction(@Valid AbstractTransaction transaction) {
+    public void addTransaction(AbstractTransaction transaction) {
         boolean isAdded = addTransaction(transaction.getTransaction());
         if (isAdded) {
             Optional.ofNullable(transaction.getId())
@@ -124,19 +123,19 @@ public class InvestbookApiClient {
                 "Не могу добавить транзакцию " + transaction);
     }
 
-    public void addTransactionCashFlow(@Valid TransactionCashFlow transactionCashFlow) {
+    public void addTransactionCashFlow(TransactionCashFlow transactionCashFlow) {
         handlePost(
                 () -> transactionCashFlowRestController.post(transactionCashFlow),
                 "Не могу добавить информацию о передвижении средств " + transactionCashFlow);
     }
 
-    public void addEventCashFlow(@Valid EventCashFlow eventCashFlow) {
+    public void addEventCashFlow(EventCashFlow eventCashFlow) {
         handlePost(
                 () -> eventCashFlowRestController.post(eventCashFlow),
                 "Не могу добавить информацию о движении денежных средств " + eventCashFlow);
     }
 
-    public void addSecurityEventCashFlow(@Valid SecurityEventCashFlow cf) {
+    public void addSecurityEventCashFlow(SecurityEventCashFlow cf) {
         SecurityEventCashFlow securityEventCashFlow = (cf.getCount() == null && cf.getEventType() == DERIVATIVE_PROFIT) ?
                 cf.toBuilder().count(0).build() : // count is optional for derivatives
                 cf;
@@ -145,25 +144,25 @@ public class InvestbookApiClient {
                 "Не могу добавить информацию о движении денежных средств " + securityEventCashFlow);
     }
 
-    public void addPortfolioCash(@Valid PortfolioCash cash) {
+    public void addPortfolioCash(PortfolioCash cash) {
         handlePost(
                 () -> portfolioCashRestController.post(cash),
                 "Не могу добавить информацию об остатках денежных средств портфеля " + cash);
     }
 
-    public void addPortfolioProperty(@Valid PortfolioProperty property) {
+    public void addPortfolioProperty(PortfolioProperty property) {
         handlePost(
                 () -> portfolioPropertyRestController.post(property),
                 "Не могу добавить информацию о свойствах портфеля " + property);
     }
 
-    public void addSecurityQuote(@Valid SecurityQuote securityQuote) {
+    public void addSecurityQuote(SecurityQuote securityQuote) {
         handlePost(
                 () -> securityQuoteRestController.post(securityQuote),
                 "Не могу добавить информацию о котировке финансового инструмента " + securityQuote);
     }
 
-    public void addForeignExchangeRate(@Valid ForeignExchangeRate exchangeRate) {
+    public void addForeignExchangeRate(ForeignExchangeRate exchangeRate) {
         handlePost(
                 () -> foreignExchangeRateRestController.post(exchangeRate),
                 "Не могу добавить информацию о курсе валюты " + exchangeRate);
