@@ -74,7 +74,7 @@
             <dependency>
                 <groupId>com.github.spacious-team</groupId>
                 <artifactId>table-wrapper-api</artifactId>
-                <version>2021.6.1</version>
+                <version>022d9b4413</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -98,7 +98,7 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-csv-impl</artifactId>
-            <version>e6a017bf3a</version>
+            <version>4a4b5ac991</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
