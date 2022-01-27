@@ -72,14 +72,14 @@ public class InvestbookApiClient {
     public boolean addPortfolio(Portfolio portfolio) {
         return handlePost(
                 () -> portfolioRestController.post(portfolio),
-                "Не могу сохранить Портфель " + portfolio);
+                () -> "Не могу сохранить Портфель " + portfolio);
     }
 
     public void addSecurity(Security security) {
         Security _security = convertDerivativeSecurityId(security);
         handlePost(
                 () -> securityRestController.post(_security),
-                "Не могу добавить ЦБ " + security + " в список");
+                () -> "Не могу добавить ЦБ " + security + " в список");
     }
 
     private Security convertDerivativeSecurityId(Security security) {
@@ -120,19 +120,19 @@ public class InvestbookApiClient {
     private boolean addTransaction(Transaction transaction) {
         return handlePost(
                 () -> transactionRestController.post(transaction),
-                "Не могу добавить транзакцию " + transaction);
+                () -> "Не могу добавить транзакцию " + transaction);
     }
 
     public void addTransactionCashFlow(TransactionCashFlow transactionCashFlow) {
         handlePost(
                 () -> transactionCashFlowRestController.post(transactionCashFlow),
-                "Не могу добавить информацию о передвижении средств " + transactionCashFlow);
+                () -> "Не могу добавить информацию о передвижении средств " + transactionCashFlow);
     }
 
     public void addEventCashFlow(EventCashFlow eventCashFlow) {
         handlePost(
                 () -> eventCashFlowRestController.post(eventCashFlow),
-                "Не могу добавить информацию о движении денежных средств " + eventCashFlow);
+                () -> "Не могу добавить информацию о движении денежных средств " + eventCashFlow);
     }
 
     public void addSecurityEventCashFlow(SecurityEventCashFlow cf) {
@@ -141,50 +141,50 @@ public class InvestbookApiClient {
                 cf;
         handlePost(
                 () -> securityEventCashFlowRestController.post(securityEventCashFlow),
-                "Не могу добавить информацию о движении денежных средств " + securityEventCashFlow);
+                () -> "Не могу добавить информацию о движении денежных средств " + securityEventCashFlow);
     }
 
     public void addPortfolioCash(PortfolioCash cash) {
         handlePost(
                 () -> portfolioCashRestController.post(cash),
-                "Не могу добавить информацию об остатках денежных средств портфеля " + cash);
+                () -> "Не могу добавить информацию об остатках денежных средств портфеля " + cash);
     }
 
     public void addPortfolioProperty(PortfolioProperty property) {
         handlePost(
                 () -> portfolioPropertyRestController.post(property),
-                "Не могу добавить информацию о свойствах портфеля " + property);
+                () -> "Не могу добавить информацию о свойствах портфеля " + property);
     }
 
     public void addSecurityQuote(SecurityQuote securityQuote) {
         handlePost(
                 () -> securityQuoteRestController.post(securityQuote),
-                "Не могу добавить информацию о котировке финансового инструмента " + securityQuote);
+                () -> "Не могу добавить информацию о котировке финансового инструмента " + securityQuote);
     }
 
     public void addForeignExchangeRate(ForeignExchangeRate exchangeRate) {
         handlePost(
                 () -> foreignExchangeRateRestController.post(exchangeRate),
-                "Не могу добавить информацию о курсе валюты " + exchangeRate);
+                () -> "Не могу добавить информацию о курсе валюты " + exchangeRate);
     }
 
     /**
      * @return true if new row was added or it was already exists in DB, false - or error
      */
-    private boolean handlePost(Supplier<ResponseEntity<?>> postAction, String error) {
+    private boolean handlePost(Supplier<ResponseEntity<?>> postAction, Supplier<String> error) {
         try {
             HttpStatus status = postAction.get().getStatusCode();
             if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                log.warn(error);
+                log.warn(error.get());
                 return false;
             }
         } catch (Exception e) {
             if (isUniqIndexViolationException(e)) {
-                log.debug("Дублирование информации: {}", error);
+                log.debug("Дублирование информации: {}", error.get());
                 log.trace("Дублирование вызвано исключением", e);
                 return true; // same as above status == HttpStatus.CONFLICT
             } else {
-                log.warn(error, e);
+                log.warn(error.get(), e);
                 return false;
             }
         }
