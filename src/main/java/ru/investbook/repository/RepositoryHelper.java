@@ -22,6 +22,9 @@ import org.hibernate.exception.ConstraintViolationException;
 
 public class RepositoryHelper {
 
+    /**
+     * May return false positive result if NOT NULL column set by NULL
+     */
     public static boolean isUniqIndexViolationException(Throwable t) {
         do {
             if (t instanceof ConstraintViolationException) {
