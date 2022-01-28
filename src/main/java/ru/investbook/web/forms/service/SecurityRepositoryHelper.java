@@ -83,6 +83,7 @@ public class SecurityRepositoryHelper {
     private int saveAndFlush(Integer securityId, String isin, String securityName, SecurityType securityType) {
         SecurityEntity security = ofNullable(securityId)
                 .flatMap(securityRepository::findById)
+                .or(() -> findSecurity(isin, securityName, securityType))
                 .orElseGet(SecurityEntity::new);
         return saveAndFlush(security, isin, securityName, securityType);
     }
