@@ -34,6 +34,7 @@ import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.web.forms.model.SecurityEventCashFlowModel;
 
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -76,7 +77,7 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
         int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(e);
         SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .portfolio(e.getPortfolio())
-                .timestamp(e.getDate().atStartOfDay(zoneId).toInstant())
+                .timestamp(e.getDate().atTime(e.getTime()).atZone(zoneId).toInstant())
                 .security(savedSecurityId)
                 .count(e.getCount());
         SecurityEventCashFlowEntity entity = securityEventCashFlowRepository.save(
@@ -115,7 +116,9 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
         SecurityEventCashFlowModel m = new SecurityEventCashFlowModel();
         m.setId(e.getId());
         m.setPortfolio(e.getPortfolio().getId());
-        m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
+        ZonedDateTime zonedDateTime = e.getTimestamp().atZone(zoneId);
+        m.setDate(zonedDateTime.toLocalDate());
+        m.setTime(zonedDateTime.toLocalTime());
         m.setCount(e.getCount());
         CashFlowType type = CashFlowType.valueOf(e.getCashFlowType().getId());
         m.setType(type);

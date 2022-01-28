@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 public class TransactionModel {
@@ -62,6 +63,10 @@ public class TransactionModel {
     @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date = LocalDate.now();
+
+    @NotNull
+    @DateTimeFormat(pattern = "HH:mm:ss")
+    private LocalTime time = LocalTime.NOON;
 
     /**
      * In "name (isin)" or "contract-name" format

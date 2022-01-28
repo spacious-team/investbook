@@ -44,6 +44,7 @@ import ru.investbook.web.forms.model.TransactionModel;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -142,7 +143,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 .id(tr.getId())
                 .tradeId(tr.getTradeId())
                 .portfolio(tr.getPortfolio())
-                .timestamp(tr.getDate().atStartOfDay(zoneId).toInstant())
+                .timestamp(tr.getDate().atTime(tr.getTime()).atZone(zoneId).toInstant())
                 .security(savedSecurityId)
                 .count(abs(tr.getCount()) * direction)
                 .build();
@@ -184,7 +185,9 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
         int count = e.getCount();
         BigDecimal cnt = BigDecimal.valueOf(count);
         m.setAction(count >= 0 ? TransactionModel.Action.BUY : TransactionModel.Action.CELL);
-        m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
+        ZonedDateTime zonedDateTime = e.getTimestamp().atZone(zoneId);
+        m.setDate(zonedDateTime.toLocalDate());
+        m.setTime(zonedDateTime.toLocalTime());
         SecurityEntity securityEntity = e.getSecurity();
         AtomicReference<SecurityType> securityType = new AtomicReference<>(SecurityType.valueOf(securityEntity.getType()));
         m.setCount(abs(count));

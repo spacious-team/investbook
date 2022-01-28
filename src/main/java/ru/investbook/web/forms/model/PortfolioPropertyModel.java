@@ -25,6 +25,7 @@ import org.springframework.lang.Nullable;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 public abstract class PortfolioPropertyModel {
@@ -39,4 +40,7 @@ public abstract class PortfolioPropertyModel {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date = LocalDate.now();
 
+    @NotNull
+    @DateTimeFormat(pattern = "HH:mm:ss")
+    private LocalTime time = LocalTime.NOON;
 }
