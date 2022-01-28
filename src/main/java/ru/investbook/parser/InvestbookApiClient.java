@@ -72,6 +72,7 @@ public class InvestbookApiClient {
     private final SecurityQuoteRestController securityQuoteRestController;
     private final ForeignExchangeRateRestController foreignExchangeRateRestController;
     private final MoexDerivativeCodeService moexDerivativeCodeService;
+    private final Validator validator;
 
     public boolean addPortfolio(Portfolio portfolio) {
         return handlePost(
@@ -147,7 +148,7 @@ public class InvestbookApiClient {
     public void addSecurityEventCashFlow(SecurityEventCashFlow cf) {
         if (cf.getCount() == null && cf.getEventType() == DERIVATIVE_PROFIT) {
             cf.toBuilder().count(0).build(); // count is optional for derivatives
-        };
+        }
         handlePost(
                 cf,
                 securityEventCashFlowRestController::post,
@@ -187,11 +188,15 @@ public class InvestbookApiClient {
      */
     private <T> boolean handlePost(T object, Function<T, ResponseEntity<?>> saver, String errorPrefix) {
         try {
+            validate(object);
             HttpStatus status = saver.apply(object).getStatusCode();
             if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                 log.warn(errorPrefix + " " + object);
                 return false;
             }
+        } catch (ConstraintViolationException e) {
+            log.warn("{} {}: {}", errorPrefix, object, e.getMessage());
+            return false;
         } catch (Exception e) {
             if (isUniqIndexViolationException(e)) {
                 log.debug("Дублирование информации: {} {}", errorPrefix, object);
@@ -203,5 +208,19 @@ public class InvestbookApiClient {
             }
         }
         return true;
+    }
+
+    private <T> void validate(T object) {
+        Set<ConstraintViolation<T>> violations = validator.validate(object);
+        if (!violations.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            violations.forEach(violation -> sb
+                    .append("поле '")
+                    .append(violation.getPropertyPath())
+                    .append("' ")
+                    .append(violation.getMessage())
+                    .append("; "));
+            throw new ConstraintViolationException(sb.toString(), violations);
+        }
     }
 }
