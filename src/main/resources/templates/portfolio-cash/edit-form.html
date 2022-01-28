@@ -37,6 +37,7 @@
 <form action="#" th:action="@{/portfolio-cash}" th:object="${cash}" method="post">
     <label>
         <input type="hidden" th:field="*{id}"/>
+        <input type="hidden" th:field="*{time}" id="time"/>
     </label>
     <label>
         Дата

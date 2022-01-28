@@ -35,6 +35,7 @@ import ru.investbook.web.forms.model.PortfolioPropertyTotalAssetsModel;
 
 import java.math.BigDecimal;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -79,7 +80,7 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
         PortfolioProperty.PortfolioPropertyBuilder builder = PortfolioProperty.builder()
                 .id(m.getId())
                 .portfolio(m.getPortfolio())
-                .timestamp(m.getDate().atStartOfDay(zoneId).toInstant());
+                .timestamp(m.getDate().atTime(m.getTime()).atZone(zoneId).toInstant());
 
         if (m instanceof PortfolioPropertyTotalAssetsModel a) {
             builder.property(a.getTotalAssetsCurrency().toPortfolioProperty())
@@ -111,7 +112,9 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
         };
         m.setId(e.getId());
         m.setPortfolio(e.getPortfolio().getId());
-        m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
+        ZonedDateTime zonedDateTime = e.getTimestamp().atZone(zoneId);
+        m.setDate(zonedDateTime.toLocalDate());
+        m.setTime(zonedDateTime.toLocalTime());
         return switch (type) {
             case TOTAL_ASSETS_RUB, TOTAL_ASSETS_USD -> {
                 PortfolioPropertyTotalAssetsModel a = (PortfolioPropertyTotalAssetsModel) m;

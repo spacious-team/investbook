@@ -28,6 +28,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 public class SecurityEventCashFlowModel {
@@ -44,6 +45,10 @@ public class SecurityEventCashFlowModel {
     @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date = LocalDate.now();
+
+    @NotNull
+    @DateTimeFormat(pattern = "HH:mm:ss")
+    private LocalTime time = LocalTime.NOON;
 
     /**
      * In "name (isin)" or "contract-name" format

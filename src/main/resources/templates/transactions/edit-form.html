@@ -42,6 +42,7 @@
 <form action="#" th:action="@{/transactions}" th:object="${transaction}" method="post">
     <label>
         <input type="hidden" th:field="*{id}"/>
+        <input type="hidden" th:field="*{time}" id="time"/>
     </label>
     <label>
         Дата исполнения

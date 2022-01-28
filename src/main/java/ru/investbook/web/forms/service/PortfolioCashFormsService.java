@@ -34,6 +34,7 @@ import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.web.forms.model.PortfolioCashModel;
 
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -76,7 +77,7 @@ public class PortfolioCashFormsService implements FormsService<PortfolioCashMode
                 .id(m.getId())
                 .portfolio(m.getPortfolio())
                 .market(StringUtils.hasLength(m.getMarket()) ? m.getMarket() : "")
-                .timestamp(m.getDate().atStartOfDay(zoneId).toInstant())
+                .timestamp(m.getDate().atTime(m.getTime()).atZone(zoneId).toInstant())
                 .value(m.getCash())
                 .currency(m.getCurrency())
                 .build();
@@ -101,7 +102,9 @@ public class PortfolioCashFormsService implements FormsService<PortfolioCashMode
         m.setId(e.getId());
         m.setPortfolio(e.getPortfolio());
         m.setMarket(e.getMarket());
-        m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
+        ZonedDateTime zonedDateTime = e.getTimestamp().atZone(zoneId);
+        m.setDate(zonedDateTime.toLocalDate());
+        m.setTime(zonedDateTime.toLocalTime());
         m.setCash(e.getValue());
         m.setCurrency(e.getCurrency());
         return m;
