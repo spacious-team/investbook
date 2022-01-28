@@ -50,7 +50,7 @@ public class PortfolioCashEntity {
     private Instant timestamp;
 
     @Basic
-    @Column(name = "market")
+    @Column(name = "market", nullable = false)
     private String market;
 
     @Basic

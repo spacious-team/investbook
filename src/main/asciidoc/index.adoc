@@ -13,6 +13,11 @@
 корректно, даже если загружать отчеты раз в год (последний отчет должен охватить весь период, который не вошел
 в предпоследний отчет; допустимо перекрытие отчетов по времени - дублей не будет).
 
+== Ручное внесение сделок
+. С использованием <<investbook-forms.adoc#,Форм>>
+. С использованием <<investbook-input-format.adoc#,excel или csv>> файла
+. С использованием <<investbook-api.adoc#,API>> приложения
+
 == Описание отчета Investbook
 . <<portfolio-analysis.adoc#,Таблица "Обзор">>
 . <<portfolio-status.adoc#,Таблица "Портфель">>
@@ -30,15 +35,11 @@
 == Учет налогов
 . <<taxes-doc.adoc#,Документация по учету налогов>>
 
-== Ручное внесение сделок
-. C использованием <<investbook-forms.adoc#,Форм>>
-. С использованием <<investbook-api.adoc#,API>> приложения
-
 == Решение проблем
 . Самостоятельное <<troubleshooting.adoc#,исправление проблем>>
 . Обратиться за помощью в https://t.me/investbook_support[техническую поддержку]
 
-==== Контакты
+=== Контакты
 - Телеграм чат https://t.me/investbook_support[технической поддержки];
 - Обсуждение на форуме https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=380178[banki.ru];
 - Страница приложения на https://smart-lab.ru/trading-software/Investbook[smart-lab.ru] и

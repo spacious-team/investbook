@@ -74,7 +74,7 @@
             <dependency>
                 <groupId>com.github.spacious-team</groupId>
                 <artifactId>table-wrapper-api</artifactId>
-                <version>2021.6.1</version>
+                <version>022d9b4413</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -83,17 +83,22 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>5399d4514f</version>
+            <version>ee4a87f127</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-excel-impl</artifactId>
-            <version>2021.4</version>
+            <version>e7f6bc6b74</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-xml-impl</artifactId>
-            <version>2021.4</version>
+            <version>c1bfeef31d</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.spacious-team</groupId>
+            <artifactId>table-wrapper-csv-impl</artifactId>
+            <version>d319bc129b</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -194,6 +199,11 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.github.albfernandez</groupId>
+            <artifactId>juniversalchardet</artifactId>
+            <version>2.4.0</version>
         </dependency>
     </dependencies>
 

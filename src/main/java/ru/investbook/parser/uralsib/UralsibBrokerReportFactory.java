@@ -23,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.AbstractBrokerReportFactory;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.springframework.core.PriorityOrdered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import ru.investbook.parser.SecurityRegistrar;
 
@@ -32,6 +34,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 
 @Component
+@Order(PriorityOrdered.HIGHEST_PRECEDENCE)
 @Slf4j
 @RequiredArgsConstructor
 public class UralsibBrokerReportFactory extends AbstractBrokerReportFactory {

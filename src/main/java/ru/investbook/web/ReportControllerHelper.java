@@ -36,7 +36,7 @@ class ReportControllerHelper {
                 .map(BrokerReportFactory::getBrokerName)
                 .map(String::toLowerCase)
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
     }
 
     static ResponseEntity<String> errorPage(String title, Collection<Exception> exceptions) {
