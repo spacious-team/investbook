@@ -98,7 +98,7 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-csv-impl</artifactId>
-            <version>4a4b5ac991</version>
+            <version>d319bc129b</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
