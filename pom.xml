@@ -74,7 +74,7 @@
             <dependency>
                 <groupId>com.github.spacious-team</groupId>
                 <artifactId>table-wrapper-api</artifactId>
-                <version>022d9b4413</version>
+                <version>2022.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -83,22 +83,22 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>aeb6c143b6</version>
+            <version>2022.2</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-excel-impl</artifactId>
-            <version>e7f6bc6b74</version>
+            <version>2022.2</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-xml-impl</artifactId>
-            <version>c1bfeef31d</version>
+            <version>2022.2</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-csv-impl</artifactId>
-            <version>d319bc129b</version>
+            <version>2022.2</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
