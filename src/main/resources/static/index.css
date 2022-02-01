@@ -135,13 +135,13 @@ a:hover {
     margin: 80px 100px;
 }
 
-.assets a {
+.assets a.assets-detail {
     color: rgba(238, 238, 238, 0.5);
     text-decoration: none;
     transition-duration: 0.2s;
 }
 
-.assets a:hover {
+.assets a.assets-detail:hover {
     color: #EEE;
     transition-duration: 0.2s;
 }

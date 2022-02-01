@@ -33,6 +33,7 @@ import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.web.forms.model.EventCashFlowModel;
 
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -70,7 +71,7 @@ public class EventCashFlowFormsService implements FormsService<EventCashFlowMode
                 eventCashFlowConverter.toEntity(EventCashFlow.builder()
                         .id(e.getId())
                         .portfolio(e.getPortfolio())
-                        .timestamp(e.getDate().atStartOfDay(zoneId).toInstant())
+                        .timestamp(e.getDate().atTime(e.getTime()).atZone(zoneId).toInstant())
                         .eventType(e.getType())
                         .value(e.getValue())
                         .currency(e.getValueCurrency())
@@ -94,7 +95,9 @@ public class EventCashFlowFormsService implements FormsService<EventCashFlowMode
         EventCashFlowModel m = new EventCashFlowModel();
         m.setId(e.getId());
         m.setPortfolio(e.getPortfolio().getId());
-        m.setDate(e.getTimestamp().atZone(zoneId).toLocalDate());
+        ZonedDateTime zonedDateTime = e.getTimestamp().atZone(zoneId);
+        m.setDate(zonedDateTime.toLocalDate());
+        m.setTime(zonedDateTime.toLocalTime());
         m.setType(type);
         m.setValue(e.getValue());
         m.setValueCurrency(e.getCurrency());

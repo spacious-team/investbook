@@ -29,6 +29,7 @@ import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import static java.time.ZoneId.systemDefault;
 import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
@@ -50,7 +51,7 @@ public class SecurityQuoteModel {
 
     @NotNull
     @DateTimeFormat(iso = DATE_TIME)
-    private Instant timestamp = LocalDate.now().atTime(12, 0).atZone(systemDefault()).toInstant();
+    private Instant timestamp = LocalDate.now().atTime(LocalTime.NOON).atZone(systemDefault()).toInstant();
 
     @NotNull
     @Positive

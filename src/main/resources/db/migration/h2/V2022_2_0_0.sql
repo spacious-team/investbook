@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,21 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.repository;
+-- UNIQ index requires NOT NULL column
+UPDATE `portfolio_cash` SET `market` = '' WHERE `market` IS NULL;
+ALTER TABLE `portfolio_cash` ALTER COLUMN `market` SET NOT NULL;
+ALTER TABLE `portfolio_cash` ALTER COLUMN `market` SET DEFAULT '';
 
-import org.hibernate.exception.ConstraintViolationException;
-
-public class RepositoryHelper {
-
-    /**
-     * May return false positive result if NOT NULL column set by NULL
-     */
-    public static boolean isUniqIndexViolationException(Throwable t) {
-        do {
-            if (t instanceof ConstraintViolationException) {
-                return true;
-            }
-        } while ((t = t.getCause()) != null);
-        return false;
-    }
-}
+ALTER INDEX `cash_portfolio_ix` RENAME TO `portfolio_cash_portfolio_ix`;
+ALTER TABLE `portfolio_cash` RENAME CONSTRAINT `cash_portfolio_market_timestamp_currency_uniq_ix`
+    TO `portfolio_cash_portfolio_market_timestamp_currency_uniq_ix`;
+ALTER TABLE `portfolio_cash` RENAME CONSTRAINT `cash_portfolio_fkey` TO `portfolio_cash_portfolio_fkey`;

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.sber.cash_security;
+package ru.investbook.parser.investbook;
 
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
@@ -27,42 +27,62 @@ import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTables;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
+import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.ReportTable;
+import org.spacious_team.broker.report_parser.api.WrappingReportTable;
+import ru.investbook.converter.SecurityConverter;
+import ru.investbook.parser.SecurityRegistrar;
+import ru.investbook.repository.SecurityRepository;
 
-public class SberCashAndSecurityReportTables extends AbstractReportTables<SberCashAndSecurityBrokerReportAdapter> {
+public class InvestbookReportTables extends AbstractReportTables<BrokerReport> {
 
-    protected SberCashAndSecurityReportTables(SberCashAndSecurityBrokerReportAdapter report) {
+    private final SecurityRegistrar securityRegistrar;
+    private final SecurityRepository securityRepository;
+    private final SecurityConverter securityConverter;
+
+    protected InvestbookReportTables(BrokerReport report,
+                                     SecurityRegistrar securityRegistrar,
+                                     SecurityRepository securityRepository,
+                                     SecurityConverter securityConverter) {
         super(report);
+        this.securityRegistrar = securityRegistrar;
+        this.securityRepository = securityRepository;
+        this.securityConverter = securityConverter;
     }
 
     @Override
     public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
-        return emptyTable();
+        return new InvestbookPortfolioPropertyTable(getReport());
     }
 
     @Override
     public ReportTable<PortfolioCash> getPortfolioCashTable() {
-        return emptyTable();
+        return new InvestbookPortfolioCashTable(getReport());
     }
 
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
-        return new SberCashFlowTable(report.getCashReport());
+        return new InvestbookCashFlowTable(getReport());
     }
 
     @Override
     public ReportTable<Security> getSecuritiesTable() {
-        return new SberSecuritySecuritiesTable(report.getSecurityDepositReport());
+        return emptyTable();
     }
 
     @Override
     public ReportTable<AbstractTransaction> getTransactionTable() {
-        return new SberSecurityDepsitAndWithdrawalTable(report.getSecurityDepositReport());
+        return WrappingReportTable.of(
+                new InvestbookTransactionTable(
+                        getReport(), securityRegistrar, securityRepository, securityConverter),
+                new InvestbookSecurityDepositAndWithdrawalTable(
+                        getReport(), securityRegistrar, securityRepository, securityConverter));
     }
 
     @Override
     public ReportTable<SecurityEventCashFlow> getSecurityEventCashFlowTable() {
-        return emptyTable();
+        return new InvestbookSecurityEventCashFowTable(
+                getReport(), securityRegistrar, securityRepository, securityConverter);
     }
 
     @Override

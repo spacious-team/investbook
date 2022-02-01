@@ -26,10 +26,8 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTables;
-import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
-import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
+import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
-import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 
 public class PsbForeignMarketReportTables extends AbstractReportTables<PsbBrokerForeignMarketReport> {
 
@@ -44,7 +42,7 @@ public class PsbForeignMarketReportTables extends AbstractReportTables<PsbBroker
     }
 
     @Override
-    public ReportTable<PortfolioCash> getCashTable() {
+    public ReportTable<PortfolioCash> getPortfolioCashTable() {
         return new ForeignExchangeCashTable(report);
     }
 
@@ -59,32 +57,12 @@ public class PsbForeignMarketReportTables extends AbstractReportTables<PsbBroker
     }
     
     @Override
-    public ReportTable<SecurityTransaction> getSecurityTransactionTable() {
-        return emptyTable();
-    }
-
-    @Override
-    public ReportTable<DerivativeTransaction> getDerivativeTransactionTable() {
-        return emptyTable();
-    }
-
-    @Override
-    public ReportTable<ForeignExchangeTransaction> getForeignExchangeTransactionTable() {
+    public ReportTable<AbstractTransaction> getTransactionTable() {
         return new ForeignExchangeTransactionTable(report);
     }
 
     @Override
-    public ReportTable<SecurityEventCashFlow> getCouponAmortizationRedemptionTable() {
-        return emptyTable();
-    }
-    
-    @Override
-    public ReportTable<SecurityEventCashFlow> getDividendTable() {
-        return emptyTable();
-    }
-    
-    @Override
-    public ReportTable<SecurityEventCashFlow> getDerivativeCashFlowTable() {
+    public ReportTable<SecurityEventCashFlow> getSecurityEventCashFlowTable() {
         return emptyTable();
     }
 

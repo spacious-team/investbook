@@ -47,9 +47,14 @@ import ru.investbook.api.TransactionCashFlowRestController;
 import ru.investbook.api.TransactionRestController;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validator;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.Set;
+import java.util.function.Function;
 
+import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
 import static ru.investbook.repository.RepositoryHelper.isUniqIndexViolationException;
 
 @Component
@@ -67,18 +72,21 @@ public class InvestbookApiClient {
     private final SecurityQuoteRestController securityQuoteRestController;
     private final ForeignExchangeRateRestController foreignExchangeRateRestController;
     private final MoexDerivativeCodeService moexDerivativeCodeService;
+    private final Validator validator;
 
     public boolean addPortfolio(Portfolio portfolio) {
         return handlePost(
-                () -> portfolioRestController.post(portfolio),
-                "Не могу сохранить Портфель " + portfolio);
+                portfolio,
+                portfolioRestController::post,
+                "Не могу сохранить Портфель");
     }
 
     public void addSecurity(Security security) {
-        Security _security = convertDerivativeSecurityId(security);
+        security = convertDerivativeSecurityId(security);
         handlePost(
-                () -> securityRestController.post(_security),
-                "Не могу добавить ЦБ " + security + " в список");
+                security,
+                securityRestController::post,
+                "Не могу добавить ЦБ ");
     }
 
     private Security convertDerivativeSecurityId(Security security) {
@@ -116,74 +124,103 @@ public class InvestbookApiClient {
                 .forEach(this::addTransactionCashFlow);
     }
 
-    protected boolean addTransaction(Transaction transaction) {
+    private boolean addTransaction(Transaction transaction) {
         return handlePost(
-                () -> transactionRestController.post(transaction),
-                "Не могу добавить транзакцию " + transaction);
+                transaction,
+                transactionRestController::post,
+                "Не могу добавить транзакцию");
     }
 
     public void addTransactionCashFlow(TransactionCashFlow transactionCashFlow) {
         handlePost(
-                () -> transactionCashFlowRestController.post(transactionCashFlow),
-                "Не могу добавить информацию о передвижении средств " + transactionCashFlow);
+                transactionCashFlow,
+                transactionCashFlowRestController::post,
+                "Не могу добавить информацию о передвижении средств");
     }
 
     public void addEventCashFlow(EventCashFlow eventCashFlow) {
         handlePost(
-                () -> eventCashFlowRestController.post(eventCashFlow),
-                "Не могу добавить информацию о движении денежных средств " + eventCashFlow);
+                eventCashFlow,
+                eventCashFlowRestController::post,
+                "Не могу добавить информацию о движении денежных средств");
     }
 
-    public void addSecurityEventCashFlow(SecurityEventCashFlow securityEventCashFlow) {
+    public void addSecurityEventCashFlow(SecurityEventCashFlow cf) {
+        if (cf.getCount() == null && cf.getEventType() == DERIVATIVE_PROFIT) {
+            cf.toBuilder().count(0).build(); // count is optional for derivatives
+        }
         handlePost(
-                () -> securityEventCashFlowRestController.post(securityEventCashFlow),
-                "Не могу добавить информацию о движении денежных средств " + securityEventCashFlow);
+                cf,
+                securityEventCashFlowRestController::post,
+                "Не могу добавить информацию о движении денежных средств");
     }
 
     public void addPortfolioCash(PortfolioCash cash) {
         handlePost(
-                () -> portfolioCashRestController.post(cash),
-                "Не могу добавить информацию об остатках денежных средств портфеля " + cash);
+                cash,
+                portfolioCashRestController::post,
+                "Не могу добавить информацию об остатках денежных средств портфеля");
     }
 
     public void addPortfolioProperty(PortfolioProperty property) {
         handlePost(
-                () -> portfolioPropertyRestController.post(property),
-                "Не могу добавить информацию о свойствах портфеля " + property);
+                property,
+                portfolioPropertyRestController::post,
+                "Не могу добавить информацию о свойствах портфеля");
     }
 
     public void addSecurityQuote(SecurityQuote securityQuote) {
         handlePost(
-                () -> securityQuoteRestController.post(securityQuote),
-                "Не могу добавить информацию о котировке финансового инструмента " + securityQuote);
+                securityQuote,
+                securityQuoteRestController::post,
+                "Не могу добавить информацию о котировке финансового инструмента");
     }
 
     public void addForeignExchangeRate(ForeignExchangeRate exchangeRate) {
         handlePost(
-                () -> foreignExchangeRateRestController.post(exchangeRate),
-                "Не могу добавить информацию о курсе валюты " + exchangeRate);
+                exchangeRate,
+                foreignExchangeRateRestController::post,
+                "Не могу добавить информацию о курсе валюты");
     }
 
     /**
      * @return true if new row was added or it was already exists in DB, false - or error
      */
-    private boolean handlePost(Supplier<ResponseEntity<?>> postAction, String error) {
+    private <T> boolean handlePost(T object, Function<T, ResponseEntity<?>> saver, String errorPrefix) {
         try {
-            HttpStatus status = postAction.get().getStatusCode();
+            validate(object);
+            HttpStatus status = saver.apply(object).getStatusCode();
             if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                log.warn(error);
+                log.warn(errorPrefix + " " + object);
                 return false;
             }
+        } catch (ConstraintViolationException e) {
+            log.warn("{} {}: {}", errorPrefix, object, e.getMessage());
+            return false;
         } catch (Exception e) {
             if (isUniqIndexViolationException(e)) {
-                log.debug("Дублирование информации: {}", error);
+                log.debug("Дублирование информации: {} {}", errorPrefix, object);
                 log.trace("Дублирование вызвано исключением", e);
                 return true; // same as above status == HttpStatus.CONFLICT
             } else {
-                log.warn(error, e);
+                log.warn("{} {}", errorPrefix, object, e);
                 return false;
             }
         }
         return true;
+    }
+
+    private <T> void validate(T object) {
+        Set<ConstraintViolation<T>> violations = validator.validate(object);
+        if (!violations.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            violations.forEach(violation -> sb
+                    .append("поле '")
+                    .append(violation.getPropertyPath())
+                    .append("' ")
+                    .append(violation.getMessage())
+                    .append("; "));
+            throw new ConstraintViolationException(sb.toString(), violations);
+        }
     }
 }

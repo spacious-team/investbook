@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
+import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
@@ -36,7 +37,7 @@ import java.util.Collection;
 import static ru.investbook.parser.sber.cash_security.SberSecurityDepsitAndWithdrawalTable.SberSecurityDepositAndWithdrawalTableHeader.*;
 
 @Slf4j
-public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<SecurityTransaction> {
+public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<AbstractTransaction> {
     static final String FIRST_LINE = "Номер договора";
     @Getter
     private final Collection<Security> securities = new ArrayList<>();

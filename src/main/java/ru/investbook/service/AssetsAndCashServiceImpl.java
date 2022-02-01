@@ -143,7 +143,7 @@ public class AssetsAndCashServiceImpl implements AssetsAndCashService {
                     .flatMap(Optional::stream)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             assetsInRub = Objects.equals(assetsInRub, BigDecimal.ZERO) ? null : assetsInRub;
-            log.info("Оценена стоимость активов по котировкам за {}", Duration.ofNanos(nanoTime() - t0));
+            log.debug("Оценена стоимость активов по котировкам за {}", Duration.ofNanos(nanoTime() - t0));
             return Optional.ofNullable(assetsInRub)
                     .map(openedPositionCost -> openedPositionCost.add(
                             getTotalCashInRub(Set.of(portfolio))

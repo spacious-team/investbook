@@ -34,6 +34,8 @@ import ru.investbook.web.forms.model.TransactionModel;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
+
 
 @Service
 @RequiredArgsConstructor
@@ -79,38 +81,62 @@ public class SecurityRepositoryHelper {
      * @return securityId from DB
      */
     private int saveAndFlush(Integer securityId, String isin, String securityName, SecurityType securityType) {
-        SecurityEntity security = Optional.ofNullable(securityId)
+        SecurityEntity security = ofNullable(securityId)
                 .flatMap(securityRepository::findById)
+                .or(() -> findSecurity(isin, securityName, securityType))
                 .orElseGet(SecurityEntity::new);
         return saveAndFlush(security, isin, securityName, securityType);
     }
 
     private int saveAndFlush(String isin, String securityName, SecurityType securityType) {
-        Optional<SecurityEntity> optionalSecurity = switch (securityType) {
-            case SHARE, BOND -> securityRepository.findByIsin(isin);
-            case DERIVATIVE, CURRENCY -> securityRepository.findByTicker(securityName);
-            case ASSET -> securityRepository.findByName(securityName);
-        };
-        SecurityEntity security = optionalSecurity.orElseGet(SecurityEntity::new);
+        SecurityEntity security = findSecurity(isin, securityName, securityType)
+                .orElseGet(SecurityEntity::new);
         return saveAndFlush(security, isin, securityName, securityType);
     }
 
     private int saveAndFlush(SecurityEntity security, String isin, String securityName, SecurityType securityType) {
-        if (Objects.equals(securityName, SecurityHelper.NULL_SECURITY_NAME)) {
-            Assert.isTrue(securityType == SecurityType.SHARE || securityType == SecurityType.BOND,
-                    "Наименование актива не задано");
-            securityName = null;
-        }
+        isin = Objects.equals(isin, SecurityHelper.NULL_SECURITY_ISIN) ? null : isin;
+        securityName = Objects.equals(securityName, SecurityHelper.NULL_SECURITY_NAME) ? null : securityName;
         security.setType(securityType.toDbType());
         switch (securityType) {
             case SHARE, BOND -> {
+                Assert.isTrue(isin != null || securityName != null, "Отсутствует и ISIN, и наименование ЦБ");
                 security.setIsin(isin);
                 security.setName(securityName);
             }
-            case DERIVATIVE, CURRENCY -> security.setTicker(moexDerivativeCodeService.convertDerivativeCode(securityName));
-            case ASSET -> security.setName(securityName);
+            case DERIVATIVE, CURRENCY -> {
+                Assert.isTrue(securityName != null, "Отсутствует тикер контракта");
+                security.setTicker(moexDerivativeCodeService.convertDerivativeCode(securityName));
+            }
+            case ASSET -> {
+                Assert.isTrue(securityName != null, "Отсутствует наименование произвольного актива");
+                security.setName(securityName);
+            }
         }
         security = securityRepository.saveAndFlush(security);
         return security.getId();
+    }
+
+    private Optional<SecurityEntity> findSecurity(String isin, String securityName, SecurityType securityType) {
+        isin = Objects.equals(isin, SecurityHelper.NULL_SECURITY_ISIN) ? null : isin;
+        securityName = Objects.equals(securityName, SecurityHelper.NULL_SECURITY_NAME) ? null : securityName;
+
+        return switch (securityType) {
+            case SHARE, BOND -> {
+                Assert.isTrue(isin != null || securityName != null, "Отсутствует и ISIN, и наименование ЦБ");
+                String name = securityName;
+                yield ofNullable(isin).flatMap(securityRepository::findByIsin)
+                        .or(() -> ofNullable(name).flatMap(securityRepository::findByTicker))
+                        .or(() -> ofNullable(name).flatMap(securityRepository::findByName));
+            }
+            case DERIVATIVE, CURRENCY -> {
+                Assert.isTrue(securityName != null, "Отсутствует тикер контракта");
+                yield securityRepository.findByTicker(securityName);
+            }
+            case ASSET -> {
+                Assert.isTrue(securityName != null, "Отсутствует наименование произвольного актива");
+                yield securityRepository.findByName(securityName);
+            }
+        };
     }
 }

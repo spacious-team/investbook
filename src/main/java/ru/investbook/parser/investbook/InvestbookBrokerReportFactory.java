@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,43 +16,35 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.sber.transaction;
+package ru.investbook.parser.investbook;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.AbstractBrokerReportFactory;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
-import org.springframework.core.PriorityOrdered;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.InputStream;
-import java.util.regex.Pattern;
 
 @Component
-@Order(PriorityOrdered.HIGHEST_PRECEDENCE)
+@Order(Ordered.LOWEST_PRECEDENCE)
 @Slf4j
-@RequiredArgsConstructor
-public class SberTrBrokerReportFactory extends AbstractBrokerReportFactory {
-    private final SecurityRegistrar securityRegistrar;
-
+public class InvestbookBrokerReportFactory extends AbstractBrokerReportFactory {
     @Getter
-    private final String brokerName = "Сбербанк Онлайн (сделки)";
-    private final Pattern expectedFileNamePattern = Pattern.compile("^Сделки[_-].*");
+    private final String brokerName = "Investbook";
 
     @Override
-    public boolean canCreate(String excelFileName, InputStream is) {
-        return super.canCreate(expectedFileNamePattern, excelFileName, is);
+    public boolean canCreate(String fileName, InputStream is) {
+        return fileName.endsWith(".csv") || fileName.endsWith(".xls") || fileName.endsWith(".xlsx");
     }
 
     @Override
-    public BrokerReport create(String excelFileName, InputStream is) {
-        BrokerReport brokerReport = create(excelFileName, is,
-                (fileName, stream) -> new SberTrBrokerReport(fileName, stream, securityRegistrar));
+    public BrokerReport create(String fileName, InputStream is) {
+        BrokerReport brokerReport = create(fileName, is, InvestbookBrokerReport::new);
         if (brokerReport != null) {
-            log.info("Обнаружен отчет сделок '{}' Сбербанк брокера", excelFileName);
+            log.info("Обнаружен отчет '{}' в формате Investbook", fileName);
         }
         return brokerReport;
     }
