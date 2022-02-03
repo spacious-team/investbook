@@ -18,17 +18,54 @@
 
 package ru.investbook.openformat;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.openformat.v1_0_0.PortfolioOpenFormatV1_0_0;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.Duration;
+
+import static ru.investbook.web.HttpAttachResponseHelper.sendErrorPage;
+import static ru.investbook.web.HttpAttachResponseHelper.sendSuccessHeader;
+
 @RestController
 @RequestMapping("/portfolio-open-format")
+@RequiredArgsConstructor
+@Slf4j
 public class PortfolioOpenFormatRestController {
+    private final ObjectMapper objectMapper;
 
     @GetMapping
     public PortfolioOpenFormatV1_0_0 get() {
+        return getPortfolioObject();
+    }
+
+    @GetMapping("download")
+    public void getJsonFile(HttpServletResponse response) throws IOException {
+        try {
+            long t0 = System.nanoTime();
+            String fileName = "portfolio.json";
+            PortfolioOpenFormatV1_0_0 object = getPortfolioObject();
+            sendSuccessHeader(response, fileName, "application/json");
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(10240);
+            objectMapper.writeValue(outputStream, object);
+            outputStream.writeTo(response.getOutputStream());
+            log.info("Файл '{}' в формате 'Portfolio Open Format' сформирован за {}",
+                    fileName, Duration.ofNanos(System.nanoTime() - t0));
+        } catch (Exception e) {
+            log.error("Ошибка сборки отчета", e);
+            sendErrorPage(response, e);
+        }
+        response.flushBuffer();
+    }
+
+    private PortfolioOpenFormatV1_0_0 getPortfolioObject() {
         return PortfolioOpenFormatV1_0_0.builder()
                 .build();
     }
