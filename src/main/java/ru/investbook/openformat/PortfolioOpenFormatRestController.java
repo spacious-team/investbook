@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.investbook.openformat.v1_0_0.PortfolioOpenFormatService;
 import ru.investbook.openformat.v1_0_0.PortfolioOpenFormatV1_0_0;
 
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +41,7 @@ import static ru.investbook.web.HttpAttachResponseHelper.sendSuccessHeader;
 @Slf4j
 public class PortfolioOpenFormatRestController {
     private final ObjectMapper objectMapper;
+    private final PortfolioOpenFormatService portfolioOpenFormatService;
 
     @GetMapping
     public PortfolioOpenFormatV1_0_0 get() {
@@ -66,7 +68,6 @@ public class PortfolioOpenFormatRestController {
     }
 
     private PortfolioOpenFormatV1_0_0 getPortfolioObject() {
-        return PortfolioOpenFormatV1_0_0.builder()
-                .build();
+        return portfolioOpenFormatService.generate();
     }
 }

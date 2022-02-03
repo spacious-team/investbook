@@ -23,53 +23,41 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
-import org.springframework.lang.Nullable;
+import ru.investbook.entity.SecurityEntity;
 
 import javax.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.Collections;
 
 @Jacksonized
 @Builder
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PortfolioOpenFormatV1_0_0 {
+class AssetPof {
 
     @NotNull
-    @Builder.Default
-    @JsonProperty("version")
-    String version = "1.0.0";
+    @JsonProperty("id")
+    int id;
 
     @NotNull
-    @Builder.Default
-    @JsonProperty("generated-by")
-    String generatedBy = "investbook";
+    @JsonProperty("type")
+    String type;
 
-    @NotNull
-    @Builder.Default
-    @JsonProperty("generated")
-    long generated = System.currentTimeMillis() / 1000;
+    @JsonProperty("symbol")
+    String symbol;
 
-    @NotNull
-    @JsonProperty("end")
-    long end;
+    @JsonProperty("name")
+    String name;
 
-    @Nullable
-    @JsonProperty("start")
-    Long start;
+    @JsonProperty("isin")
+    String isin;
 
-    @NotNull
-    @Builder.Default
-    @JsonProperty("accounts")
-    Collection<AccountPof> accounts = Collections.emptySet();
 
-    @NotNull
-    @Builder.Default
-    @JsonProperty("cash-balances")
-    Collection<CashBalancesPof> cashBalances = Collections.emptySet();
-
-    @NotNull
-    @Builder.Default
-    @JsonProperty("assets")
-    Collection<AssetPof> assets = Collections.emptySet();
+    public static AssetPof of(SecurityEntity security) {
+        return AssetPof.builder()
+                .id(security.getId())
+                .type(SecurityTypeHelper.toPofType(security.getType()))
+                .symbol(security.getTicker())
+                .name(security.getName())
+                .isin(security.getIsin())
+                .build();
+    }
 }

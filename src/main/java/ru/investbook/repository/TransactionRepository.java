@@ -37,6 +37,8 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
 
     Optional<TransactionEntity> findFirstByOrderByTimestampAsc();
 
+    Optional<TransactionEntity> findFirstByOrderByTimestampDesc();
+
     Optional<TransactionEntity> findFirstBySecurityIdOrderByTimestampDesc(Integer securityId);
 
     List<TransactionEntity> findByPortfolio(String portfolio);
