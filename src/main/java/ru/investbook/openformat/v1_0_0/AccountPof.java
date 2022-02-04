@@ -18,6 +18,7 @@
 
 package ru.investbook.openformat.v1_0_0;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
@@ -37,6 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Builder
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AccountPof {
 
     private static final ThreadLocal<AtomicInteger> idGenerator = ThreadLocal.withInitial(AtomicInteger::new);

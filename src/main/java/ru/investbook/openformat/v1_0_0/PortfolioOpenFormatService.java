@@ -21,7 +21,12 @@ package ru.investbook.openformat.v1_0_0;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityType;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.stereotype.Service;
+import ru.investbook.api.PortfolioCashRestController;
+import ru.investbook.api.PortfolioPropertyRestController;
+import ru.investbook.api.SecurityDescriptionRestController;
+import ru.investbook.api.SecurityQuoteRestController;
 import ru.investbook.entity.EventCashFlowEntity;
 import ru.investbook.entity.PortfolioCashEntity;
 import ru.investbook.entity.PortfolioEntity;
@@ -57,6 +62,7 @@ import static org.spacious_team.broker.pojo.SecurityType.DERIVATIVE;
 @Service
 @RequiredArgsConstructor
 public class PortfolioOpenFormatService {
+    private final BuildProperties buildProperties;
     private final AssetsAndCashService assetsAndCashService;
     private final PortfolioRepository portfolioRepository;
     private final SecurityRepository securityRepository;
@@ -66,6 +72,10 @@ public class PortfolioOpenFormatService {
     private final EventCashFlowRepository eventCashFlowRepository;
     private final PortfolioPropertyRepository portfolioPropertyRepository;
     private final PortfolioCashRepository portfolioCashRepository;
+    private final SecurityDescriptionRestController securityDescriptionRestController;
+    private final PortfolioPropertyRestController portfolioPropertyRestController;
+    private final PortfolioCashRestController portfolioCashRestController;
+    private final SecurityQuoteRestController securityQuoteRestController;
 
     public PortfolioOpenFormatV1_0_0 generate() {
         return PortfolioOpenFormatV1_0_0.builder()
@@ -77,6 +87,7 @@ public class PortfolioOpenFormatService {
                 .transfer(getTradesAndTransfers().transfers)
                 .payments(getPayments())
                 .cashFlows(getCashFlows())
+                .vndInvestbook(getVndInvestbook())
                 .build();
     }
 
@@ -191,5 +202,15 @@ public class PortfolioOpenFormatService {
                 .stream()
                 .map(CashFlowPof::of)
                 .toList();
+    }
+
+    private VndInvestbookPof getVndInvestbook() {
+        return VndInvestbookPof.builder()
+                .version(buildProperties.getVersion())
+                .portfolioCash(portfolioCashRestController.get())
+                .portfolioProperties(portfolioPropertyRestController.get())
+                .securityDescriptions(securityDescriptionRestController.get())
+                .securityQuotes(securityQuoteRestController.get())
+                .build();
     }
 }

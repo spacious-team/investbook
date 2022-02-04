@@ -18,6 +18,7 @@
 
 package ru.investbook.openformat.v1_0_0;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
@@ -39,6 +40,7 @@ import static org.spacious_team.broker.pojo.CashFlowType.*;
 @Builder
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TradePof {
 
     @NotNull
@@ -151,6 +153,6 @@ public class TradePof {
     }
 
     private static BigDecimal divide(TransactionCashFlowEntity e, int count) {
-        return e.getValue().divide(BigDecimal.valueOf(Math.abs(count)), 6, HALF_UP);
+        return e.getValue().divide(BigDecimal.valueOf(Math.abs(count)), 4, HALF_UP);
     }
 }
