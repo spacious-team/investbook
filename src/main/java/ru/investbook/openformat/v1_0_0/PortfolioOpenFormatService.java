@@ -19,6 +19,7 @@
 package ru.investbook.openformat.v1_0_0;
 
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
 import ru.investbook.entity.EventCashFlowEntity;
@@ -44,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -73,6 +75,7 @@ public class PortfolioOpenFormatService {
                 .assets(getAssets())
                 .trades(getTradesAndTransfers().trades)
                 .transfer(getTradesAndTransfers().transfers)
+                .payments(getPayments())
                 .build();
     }
 
@@ -160,5 +163,25 @@ public class PortfolioOpenFormatService {
                         transactionCashFlow.stream()
                                 .noneMatch(e -> e.getCashFlowType().getId() == PRICE.getId() ||
                                         e.getCashFlowType().getId() == DERIVATIVE_PRICE.getId()));
+    }
+
+    private Collection<PaymentPof> getPayments() {
+        return securityEventCashFlowRepository.findAll()
+                .stream()
+                .filter(e -> e.getCashFlowType().getId() != CashFlowType.TAX.getId())
+                .map(e -> PaymentPof.of(e, getPaymentTax(e)))
+                .toList();
+    }
+
+    private Optional<SecurityEventCashFlowEntity> getPaymentTax(SecurityEventCashFlowEntity cashFlow) {
+        if (cashFlow.getCashFlowType().getId() != CashFlowType.TAX.getId()) {
+            return securityEventCashFlowRepository.findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampAndCount(
+                            cashFlow.getPortfolio().getId(),
+                            cashFlow.getSecurity().getId(),
+                            CashFlowType.TAX.getId(),
+                            cashFlow.getTimestamp(),
+                            cashFlow.getCount());
+        }
+        return Optional.empty();
     }
 }

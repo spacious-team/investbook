@@ -18,8 +18,31 @@
 
 package ru.investbook.openformat.v1_0_0;
 
-public enum AccountType {
-    investment,
-    bank,
-    savings
+import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.CashFlowType;
+
+@RequiredArgsConstructor
+public enum PaymentTypePof {
+    DIVIDEND("dividend"),
+    COUPON("coupon"),
+    BOND_AMORTIZATION("bond-amortization"),
+    VARIATION_MARGIN("variation-margin"),
+    FEE("fee"),
+    INTEREST("interest"),
+    OTHER("other");
+
+    @JsonValue
+    private final String value;
+
+    static PaymentTypePof valueOf(CashFlowType type) {
+        return switch (type) {
+            case DIVIDEND -> DIVIDEND;
+            case COUPON -> COUPON;
+            case AMORTIZATION -> BOND_AMORTIZATION;
+            case DERIVATIVE_PROFIT -> VARIATION_MARGIN;
+            case COMMISSION -> FEE;
+            default -> OTHER;
+        };
+    }
 }

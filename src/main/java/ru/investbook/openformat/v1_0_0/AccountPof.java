@@ -51,7 +51,7 @@ public class AccountPof {
 
     @NotNull
     @JsonProperty("type")
-    AccountType type;
+    AccountTypePof type;
 
     @NotNull
     @JsonProperty("valuation")
@@ -76,7 +76,7 @@ public class AccountPof {
         return AccountPof.builder()
                 .id(id)
                 .accountNumber(portfolio.getId())
-                .type(AccountType.investment)
+                .type(AccountTypePof.investment)
                 .valuation(valuationInRub)
                 .valuationCurrency("RUB")
                 .build();
