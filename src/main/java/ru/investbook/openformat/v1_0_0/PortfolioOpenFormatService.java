@@ -19,6 +19,7 @@
 package ru.investbook.openformat.v1_0_0;
 
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
 import ru.investbook.entity.EventCashFlowEntity;
 import ru.investbook.entity.PortfolioCashEntity;
@@ -39,15 +40,17 @@ import ru.investbook.service.AssetsAndCashService;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PRICE;
 import static org.spacious_team.broker.pojo.CashFlowType.PRICE;
+import static org.spacious_team.broker.pojo.SecurityType.CURRENCY_PAIR;
+import static org.spacious_team.broker.pojo.SecurityType.DERIVATIVE;
 
 @Service
 @RequiredArgsConstructor
@@ -68,7 +71,8 @@ public class PortfolioOpenFormatService {
                 .accounts(getAccounts())
                 .cashBalances(getCashBalances())
                 .assets(getAssets())
-                .trades(getTrades())
+                .trades(getTradesAndTransfers().trades)
+                .transfer(getTradesAndTransfers().transfers)
                 .build();
     }
 
@@ -127,28 +131,34 @@ public class PortfolioOpenFormatService {
         return CashBalancesPof.of(AccountPof.getAccountId(portfolio.getId()), latestCashBalances);
     }
 
-    private Collection<TradePof> getTrades() {
-        return transactionRepository.findAll()
-                .stream()
-                .map(this::getTrade)
-                .flatMap(Optional::stream)
-                .toList();
-    }
-
-    private Optional<TradePof> getTrade(TransactionEntity transaction) {
-        List<TransactionCashFlowEntity> transactionCashFlow =
-                transactionCashFlowRepository.findByTransactionId(transaction.getId());
-        if (isDepositOrWithdrawal(transactionCashFlow)) {
-            return Optional.empty(); // security deposit or withdrawal
+    private record TradesAndTransfers(Collection<TradePof> trades, Collection<TransferPof> transfers) {
+        TradesAndTransfers() {
+            this(new ArrayList<>(10240), new ArrayList<>(10240));
         }
-        return Optional.of(
-                TradePof.of(transaction, transactionCashFlow));
     }
 
-    private boolean isDepositOrWithdrawal(List<TransactionCashFlowEntity> transactionCashFlow) {
-        return transactionCashFlow.isEmpty() ||
-                transactionCashFlow.stream()
-                        .noneMatch(e -> e.getCashFlowType().getId() == PRICE.getId() ||
-                                e.getCashFlowType().getId() == DERIVATIVE_PRICE.getId());
+    private TradesAndTransfers getTradesAndTransfers() {
+        TradesAndTransfers result = new TradesAndTransfers();
+        for (TransactionEntity transaction : transactionRepository.findAll()) {
+            List<TransactionCashFlowEntity> cashFlow =
+                    transactionCashFlowRepository.findByTransactionId(transaction.getId());
+            if (isDepositOrWithdrawal(transaction, cashFlow)) {
+                result.transfers.add(TransferPof.of(transaction));
+            } else {
+                result.trades.add(TradePof.of(transaction, cashFlow));
+            }
+        }
+        return result;
+    }
+
+    private static boolean isDepositOrWithdrawal(TransactionEntity transaction,
+                                                 List<TransactionCashFlowEntity> transactionCashFlow) {
+        SecurityType type = transaction.getSecurity().getType();
+        return type != DERIVATIVE &&
+                type != CURRENCY_PAIR &&
+                (transactionCashFlow.isEmpty() ||
+                        transactionCashFlow.stream()
+                                .noneMatch(e -> e.getCashFlowType().getId() == PRICE.getId() ||
+                                        e.getCashFlowType().getId() == DERIVATIVE_PRICE.getId()));
     }
 }
