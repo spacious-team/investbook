@@ -24,11 +24,14 @@ import org.spacious_team.broker.pojo.CashFlowType;
 
 @RequiredArgsConstructor
 public enum PaymentTypePof {
+    CASH("cash"),
     DIVIDEND("dividend"),
     COUPON("coupon"),
     BOND_AMORTIZATION("bond-amortization"),
+    BOND_REDEMPTION("bond-redemption"),
     VARIATION_MARGIN("variation-margin"),
     FEE("fee"),
+    TAX("tax"),
     INTEREST("interest"),
     OTHER("other");
 
@@ -37,11 +40,14 @@ public enum PaymentTypePof {
 
     static PaymentTypePof valueOf(CashFlowType type) {
         return switch (type) {
+            case CASH -> CASH;
             case DIVIDEND -> DIVIDEND;
             case COUPON -> COUPON;
             case AMORTIZATION -> BOND_AMORTIZATION;
+            case REDEMPTION -> BOND_REDEMPTION;
             case DERIVATIVE_PROFIT -> VARIATION_MARGIN;
             case COMMISSION -> FEE;
+            case TAX -> TAX;
             default -> OTHER;
         };
     }

@@ -87,4 +87,9 @@ public class PortfolioOpenFormatV1_0_0 {
     @Builder.Default
     @JsonProperty("payments")
     Collection<PaymentPof> payments = Collections.emptySet();
+
+    @NotNull
+    @Builder.Default
+    @JsonProperty("cash-flows")
+    Collection<CashFlowPof> cashFlows = Collections.emptySet();
 }

@@ -76,6 +76,7 @@ public class PortfolioOpenFormatService {
                 .trades(getTradesAndTransfers().trades)
                 .transfer(getTradesAndTransfers().transfers)
                 .payments(getPayments())
+                .cashFlows(getCashFlows())
                 .build();
     }
 
@@ -183,5 +184,12 @@ public class PortfolioOpenFormatService {
                             cashFlow.getCount());
         }
         return Optional.empty();
+    }
+
+    private Collection<CashFlowPof> getCashFlows() {
+        return eventCashFlowRepository.findAll()
+                .stream()
+                .map(CashFlowPof::of)
+                .toList();
     }
 }
