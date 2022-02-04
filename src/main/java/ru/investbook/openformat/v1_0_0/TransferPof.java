@@ -57,9 +57,12 @@ public class TransferPof {
     @JsonProperty("withdrawal-asset")
     Integer withdrawalAsset;
 
+    /**
+     * Поддерживаются дробные акции
+     */
     @Nullable
     @JsonProperty("withdrawal")
-    Integer withdrawal;
+    BigDecimal withdrawal;
 
     @Nullable
     @JsonProperty("deposit-account")
@@ -69,9 +72,12 @@ public class TransferPof {
     @JsonProperty("deposit-asset")
     Integer depositAsset;
 
+    /**
+     * Поддерживаются дробные акции
+     */
     @Nullable
     @JsonProperty("deposit")
-    Integer deposit;
+    BigDecimal deposit;
 
     @Nullable
     @JsonProperty("fee-account")
@@ -99,12 +105,12 @@ public class TransferPof {
             builder
                     .depositAccount(AccountPof.getAccountId(transaction.getPortfolio()))
                     .depositAsset(transaction.getSecurity().getId())
-                    .deposit(count);
+                    .deposit(BigDecimal.valueOf(count));
         } else {
             builder
                     .withdrawalAccount(AccountPof.getAccountId(transaction.getPortfolio()))
                     .withdrawalAsset(transaction.getSecurity().getId())
-                    .withdrawal(count);
+                    .withdrawal(BigDecimal.valueOf(count));
         }
         return builder.build();
     }

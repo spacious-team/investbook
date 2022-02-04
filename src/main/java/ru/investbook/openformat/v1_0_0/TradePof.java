@@ -72,11 +72,12 @@ public class TradePof {
     int asset;
 
     /**
-     * Если '+' то это покупка, если '-' то это продажа
+     * Если '+', то это покупка, если '-', то это продажа
+     * Поддерживаются дробные акции
      */
     @NotNull
     @JsonProperty("count")
-    int count;
+    BigDecimal count;
 
     /**
      * В валюте сделки, для облигации - без НКД, для деривативов в валюте - опционально
@@ -124,7 +125,7 @@ public class TradePof {
                 .settlement(transaction.getTimestamp().getEpochSecond())
                 .account(AccountPof.getAccountId(transaction.getPortfolio()))
                 .asset(transaction.getSecurity().getId())
-                .count(count);
+                .count(BigDecimal.valueOf(count));
         transactionCashFlows.stream()
                 .filter(e -> e.getCashFlowType().getId() == PRICE.getId() ||
                         e.getCashFlowType().getId() == DERIVATIVE_PRICE.getId())
