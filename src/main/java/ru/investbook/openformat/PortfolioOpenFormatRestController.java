@@ -56,7 +56,7 @@ public class PortfolioOpenFormatRestController {
             PortfolioOpenFormatV1_0_0 object = getPortfolioObject();
             sendSuccessHeader(response, fileName, "application/json");
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream(10240);
-            objectMapper.writeValue(outputStream, object);
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, object);
             outputStream.writeTo(response.getOutputStream());
             log.info("Файл '{}' в формате 'Portfolio Open Format' сформирован за {}",
                     fileName, Duration.ofNanos(System.nanoTime() - t0));

@@ -25,6 +25,7 @@ import ru.investbook.entity.PortfolioCashEntity;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
+import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.repository.EventCashFlowRepository;
 import ru.investbook.repository.PortfolioCashRepository;
@@ -32,15 +33,21 @@ import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityRepository;
+import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.service.AssetsAndCashService;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PRICE;
+import static org.spacious_team.broker.pojo.CashFlowType.PRICE;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +56,7 @@ public class PortfolioOpenFormatService {
     private final PortfolioRepository portfolioRepository;
     private final SecurityRepository securityRepository;
     private final TransactionRepository transactionRepository;
+    private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final EventCashFlowRepository eventCashFlowRepository;
     private final PortfolioPropertyRepository portfolioPropertyRepository;
@@ -60,6 +68,7 @@ public class PortfolioOpenFormatService {
                 .accounts(getAccounts())
                 .cashBalances(getCashBalances())
                 .assets(getAssets())
+                .trades(getTrades())
                 .build();
     }
 
@@ -112,9 +121,34 @@ public class PortfolioOpenFormatService {
     private CashBalancesPof getCashBalances(PortfolioEntity portfolio) {
         List<PortfolioCashEntity> latestCashBalances = portfolioCashRepository
                 .findDistinctOnPortfolioByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
-                Set.of(portfolio.getId()),
-                Instant.EPOCH,
-                Instant.now());
+                        Set.of(portfolio.getId()),
+                        Instant.EPOCH,
+                        Instant.now());
         return CashBalancesPof.of(AccountPof.getAccountId(portfolio.getId()), latestCashBalances);
+    }
+
+    private Collection<TradePof> getTrades() {
+        return transactionRepository.findAll()
+                .stream()
+                .map(this::getTrade)
+                .flatMap(Optional::stream)
+                .toList();
+    }
+
+    private Optional<TradePof> getTrade(TransactionEntity transaction) {
+        List<TransactionCashFlowEntity> transactionCashFlow =
+                transactionCashFlowRepository.findByTransactionId(transaction.getId());
+        if (isDepositOrWithdrawal(transactionCashFlow)) {
+            return Optional.empty(); // security deposit or withdrawal
+        }
+        return Optional.of(
+                TradePof.of(transaction, transactionCashFlow));
+    }
+
+    private boolean isDepositOrWithdrawal(List<TransactionCashFlowEntity> transactionCashFlow) {
+        return transactionCashFlow.isEmpty() ||
+                transactionCashFlow.stream()
+                        .noneMatch(e -> e.getCashFlowType().getId() == PRICE.getId() ||
+                                e.getCashFlowType().getId() == DERIVATIVE_PRICE.getId());
     }
 }
