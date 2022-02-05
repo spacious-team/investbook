@@ -21,19 +21,26 @@ package ru.investbook.openformat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import ru.investbook.openformat.v1_0_0.PortfolioOpenFormatService;
 import ru.investbook.openformat.v1_0_0.PortfolioOpenFormatV1_0_0;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Duration;
+import java.util.Collections;
 
 import static ru.investbook.web.HttpAttachResponseHelper.sendErrorPage;
 import static ru.investbook.web.HttpAttachResponseHelper.sendSuccessHeader;
+import static ru.investbook.web.ReportControllerHelper.errorPage;
 
 @RestController
 @RequestMapping("/portfolio-open-format")
@@ -43,17 +50,12 @@ public class PortfolioOpenFormatRestController {
     private final ObjectMapper objectMapper;
     private final PortfolioOpenFormatService portfolioOpenFormatService;
 
-    @GetMapping
-    public PortfolioOpenFormatV1_0_0 get() {
-        return getPortfolioObject();
-    }
-
     @GetMapping("download")
-    public void getJsonFile(HttpServletResponse response) throws IOException {
+    public void download(HttpServletResponse response) throws IOException {
         try {
             long t0 = System.nanoTime();
             String fileName = "portfolio.json";
-            PortfolioOpenFormatV1_0_0 object = getPortfolioObject();
+            PortfolioOpenFormatV1_0_0 object = portfolioOpenFormatService.generate();
             sendSuccessHeader(response, fileName, "application/json");
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream(10240);
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, object);
@@ -67,7 +69,20 @@ public class PortfolioOpenFormatRestController {
         response.flushBuffer();
     }
 
-    private PortfolioOpenFormatV1_0_0 getPortfolioObject() {
-        return portfolioOpenFormatService.generate();
+    @PostMapping("upload")
+    public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file) {
+        try (InputStream inputStream = file.getInputStream()) { // creates new input stream
+            PortfolioOpenFormatV1_0_0 object = objectMapper.readValue(inputStream, PortfolioOpenFormatV1_0_0.class);
+            return ok();
+        } catch (Exception e) {
+            return errorPage("Возможно это не файл в формате \"Open Portfolio Format\"", Collections.emptyList());
+        }
+    }
+
+    private ResponseEntity<String> ok() {
+        return ResponseEntity.ok("""
+                Файл загружен <a href="/">[ok]</a>
+                <script type="text/javascript">document.location.href="/"</script>
+                """);
     }
 }
