@@ -165,7 +165,7 @@ public class TradePof {
     }
 
     private static BigDecimal divide(TransactionCashFlowEntity e, int count) {
-        return e.getValue().divide(BigDecimal.valueOf(Math.abs(count)), 4, HALF_UP);
+        return e.getValue().divide(BigDecimal.valueOf(Math.abs(count)), 6, HALF_UP);
     }
 
     Optional<Transaction> toTransaction(Map<Integer, String> accountToPortfolioId) {
