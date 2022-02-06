@@ -44,6 +44,10 @@ public class TransferPof {
     @JsonProperty("transfer-id")
     String transferId;
 
+    @NotNull
+    @JsonProperty("account")
+    int account;
+
     /**
      * Если значение null, то значение поля settlement обязательно
      */
@@ -51,35 +55,16 @@ public class TransferPof {
     @JsonProperty("timestamp")
     long timestamp;
 
-    @Nullable
-    @JsonProperty("withdrawal-account")
-    Integer withdrawalAccount;
-
-    @Nullable
-    @JsonProperty("withdrawal-asset")
-    Integer withdrawalAsset;
+    @NotNull
+    @JsonProperty("asset")
+    int asset;
 
     /**
      * Поддерживаются дробные акции
      */
-    @Nullable
-    @JsonProperty("withdrawal")
-    BigDecimal withdrawal;
-
-    @Nullable
-    @JsonProperty("deposit-account")
-    Integer depositAccount;
-
-    @Nullable
-    @JsonProperty("deposit-asset")
-    Integer depositAsset;
-
-    /**
-     * Поддерживаются дробные акции
-     */
-    @Nullable
-    @JsonProperty("deposit")
-    BigDecimal deposit;
+    @NotNull
+    @JsonProperty("count")
+    BigDecimal count;
 
     @Nullable
     @JsonProperty("fee-account")
@@ -98,22 +83,13 @@ public class TransferPof {
     String description;
 
     static TransferPof of(TransactionEntity transaction) {
-        int count = transaction.getCount();
-        TransferPof.TransferPofBuilder builder = TransferPof.builder()
+        return TransferPof.builder()
                 .id(transaction.getId())
                 .transferId(transaction.getTradeId())
-                .timestamp(transaction.getTimestamp().getEpochSecond());
-        if (count >= 0) {
-            builder
-                    .depositAccount(AccountPof.getAccountId(transaction.getPortfolio()))
-                    .depositAsset(transaction.getSecurity().getId())
-                    .deposit(BigDecimal.valueOf(count));
-        } else {
-            builder
-                    .withdrawalAccount(AccountPof.getAccountId(transaction.getPortfolio()))
-                    .withdrawalAsset(transaction.getSecurity().getId())
-                    .withdrawal(BigDecimal.valueOf(count));
-        }
-        return builder.build();
+                .account(AccountPof.getAccountId(transaction.getPortfolio()))
+                .timestamp(transaction.getTimestamp().getEpochSecond())
+                .asset(transaction.getSecurity().getId())
+                .count(BigDecimal.valueOf(transaction.getCount()))
+                .build();
     }
 }
