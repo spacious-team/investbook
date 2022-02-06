@@ -49,11 +49,8 @@ import ru.investbook.api.TransactionCashFlowRestController;
 import ru.investbook.api.TransactionRestController;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
@@ -75,7 +72,7 @@ public class InvestbookApiClient {
     private final SecurityQuoteRestController securityQuoteRestController;
     private final ForeignExchangeRateRestController foreignExchangeRateRestController;
     private final MoexDerivativeCodeService moexDerivativeCodeService;
-    private final Validator validator;
+    private final ValidatorService validator;
 
     public boolean addPortfolio(Portfolio portfolio) {
         return handlePost(
@@ -198,7 +195,7 @@ public class InvestbookApiClient {
      */
     private <T> boolean handlePost(T object, Function<T, ResponseEntity<?>> saver, String errorPrefix) {
         try {
-            validate(object);
+            validator.validate(object);
             HttpStatus status = saver.apply(object).getStatusCode();
             if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                 log.warn(errorPrefix + " " + object);
@@ -218,19 +215,5 @@ public class InvestbookApiClient {
             }
         }
         return true;
-    }
-
-    private <T> void validate(T object) {
-        Set<ConstraintViolation<T>> violations = validator.validate(object);
-        if (!violations.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            violations.forEach(violation -> sb
-                    .append("поле '")
-                    .append(violation.getPropertyPath())
-                    .append("' ")
-                    .append(violation.getMessage())
-                    .append("; "));
-            throw new ConstraintViolationException(sb.toString(), violations);
-        }
     }
 }

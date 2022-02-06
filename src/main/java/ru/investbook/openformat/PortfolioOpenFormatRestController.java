@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.investbook.openformat.v1_1_0.PortfolioOpenFormatBuilder;
 import ru.investbook.openformat.v1_1_0.PortfolioOpenFormatPersister;
 import ru.investbook.openformat.v1_1_0.PortfolioOpenFormatV1_1_0;
+import ru.investbook.parser.ValidatorService;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
@@ -51,6 +52,7 @@ public class PortfolioOpenFormatRestController {
     private final ObjectMapper objectMapper;
     private final PortfolioOpenFormatBuilder portfolioOpenFormatFactory;
     private final PortfolioOpenFormatPersister portfolioOpenFormatPersister;
+    private final ValidatorService validator;
 
     @GetMapping("download")
     public void download(HttpServletResponse response) throws IOException {
@@ -58,6 +60,7 @@ public class PortfolioOpenFormatRestController {
             long t0 = System.nanoTime();
             String fileName = "portfolio.json";
             PortfolioOpenFormatV1_1_0 object = portfolioOpenFormatFactory.create();
+            validate(object);
             sendSuccessHeader(response, fileName, "application/json");
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream(10240);
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, object);
@@ -75,6 +78,7 @@ public class PortfolioOpenFormatRestController {
     public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file) {
         try (InputStream inputStream = file.getInputStream()) { // creates new input stream
             PortfolioOpenFormatV1_1_0 object = objectMapper.readValue(inputStream, PortfolioOpenFormatV1_1_0.class);
+            validate(object);
             portfolioOpenFormatPersister.persist(object);
             return ok();
         } catch (Exception e) {
@@ -87,5 +91,13 @@ public class PortfolioOpenFormatRestController {
                 Файл загружен <a href="/">[ok]</a>
                 <script type="text/javascript">document.location.href="/"</script>
                 """);
+    }
+
+    private void validate(PortfolioOpenFormatV1_1_0 object) {
+        try {
+            validator.validate(object);
+        } catch (Exception e) {
+            log.warn("Найдены ошибки в данных формата 'Open Portfolio Format'", e);
+        }
     }
 }
