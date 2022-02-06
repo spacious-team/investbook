@@ -24,15 +24,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
+import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.Security;
 import ru.investbook.entity.SecurityEntity;
 
 import javax.validation.constraints.NotNull;
+import java.util.Optional;
 
 @Jacksonized
 @Builder
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Slf4j
 class AssetPof {
 
     @NotNull
@@ -53,7 +57,7 @@ class AssetPof {
     String isin;
 
 
-    public static AssetPof of(SecurityEntity security) {
+    static AssetPof of(SecurityEntity security) {
         return AssetPof.builder()
                 .id(security.getId())
                 .type(SecurityTypeHelper.toPofType(security.getType()))
@@ -61,5 +65,20 @@ class AssetPof {
                 .name(security.getName())
                 .isin(security.getIsin())
                 .build();
+    }
+
+    Optional<Security> toSecurity() {
+        try {
+            return Optional.of(Security.builder()
+                    .id(id)
+                    .type(SecurityTypeHelper.getSecurityType(type))
+                    .ticker(symbol)
+                    .name(name)
+                    .isin(isin)
+                    .build());
+        } catch (Exception e) {
+            log.error("Не могу распарсить {}", this, e);
+            return Optional.empty();
+        }
     }
 }

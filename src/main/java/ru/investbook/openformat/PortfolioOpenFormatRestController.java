@@ -28,7 +28,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import ru.investbook.openformat.v1_0_0.PortfolioOpenFormatService;
+import ru.investbook.openformat.v1_0_0.PortfolioOpenFormatBuilder;
+import ru.investbook.openformat.v1_0_0.PortfolioOpenFormatPersister;
 import ru.investbook.openformat.v1_0_0.PortfolioOpenFormatV1_0_0;
 
 import javax.servlet.http.HttpServletResponse;
@@ -48,14 +49,15 @@ import static ru.investbook.web.ReportControllerHelper.errorPage;
 @Slf4j
 public class PortfolioOpenFormatRestController {
     private final ObjectMapper objectMapper;
-    private final PortfolioOpenFormatService portfolioOpenFormatService;
+    private final PortfolioOpenFormatBuilder portfolioOpenFormatFactory;
+    private final PortfolioOpenFormatPersister portfolioOpenFormatPersister;
 
     @GetMapping("download")
     public void download(HttpServletResponse response) throws IOException {
         try {
             long t0 = System.nanoTime();
             String fileName = "portfolio.json";
-            PortfolioOpenFormatV1_0_0 object = portfolioOpenFormatService.generate();
+            PortfolioOpenFormatV1_0_0 object = portfolioOpenFormatFactory.create();
             sendSuccessHeader(response, fileName, "application/json");
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream(10240);
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, object);
@@ -73,6 +75,7 @@ public class PortfolioOpenFormatRestController {
     public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file) {
         try (InputStream inputStream = file.getInputStream()) { // creates new input stream
             PortfolioOpenFormatV1_0_0 object = objectMapper.readValue(inputStream, PortfolioOpenFormatV1_0_0.class);
+            portfolioOpenFormatPersister.persist(object);
             return ok();
         } catch (Exception e) {
             return errorPage("Возможно это не файл в формате \"Open Portfolio Format\"", Collections.emptyList());

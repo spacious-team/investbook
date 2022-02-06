@@ -51,4 +51,17 @@ public enum PaymentTypePof {
             default -> OTHER;
         };
     }
+
+    CashFlowType toCashFlowType() {
+        return switch (this) {
+            case CASH -> CashFlowType.CASH;
+            case DIVIDEND, INTEREST, OTHER -> CashFlowType.DIVIDEND;
+            case COUPON -> CashFlowType.COUPON;
+            case BOND_AMORTIZATION -> CashFlowType.AMORTIZATION;
+            case BOND_REDEMPTION -> CashFlowType.REDEMPTION;
+            case VARIATION_MARGIN -> CashFlowType.DERIVATIVE_PROFIT;
+            case FEE -> CashFlowType.COMMISSION;
+            case TAX -> CashFlowType.TAX;
+        };
+    }
 }

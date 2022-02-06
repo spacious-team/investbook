@@ -24,17 +24,29 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
+import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.lang.Nullable;
 import ru.investbook.entity.TransactionEntity;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.spacious_team.broker.pojo.CashFlowType.COMMISSION;
 
 @Jacksonized
 @Builder
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Slf4j
 public class TransferPof {
     @NotNull
     @JsonProperty("id")
@@ -91,5 +103,44 @@ public class TransferPof {
                 .asset(transaction.getSecurity().getId())
                 .count(BigDecimal.valueOf(transaction.getCount()))
                 .build();
+    }
+
+    Optional<Transaction> toTransaction(Map<Integer, String> accountToPortfolioId) {
+        try {
+            return Optional.of(Transaction.builder()
+                    .id(id)
+                    .tradeId(transferId)
+                    .portfolio(Optional.of(accountToPortfolioId.get(account)).orElseThrow())
+                    .timestamp(Instant.ofEpochSecond(timestamp))
+                    .security(asset)
+                    .count(count.intValueExact())
+                    .build());
+        } catch (Exception e) {
+            log.error("Не могу распарсить {}", this, e);
+            return Optional.empty();
+        }
+    }
+
+    Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId) {
+        try {
+            if (fee != null) {
+                return Set.of(
+                        SecurityEventCashFlow.builder()
+                                .portfolio(Optional.of(accountToPortfolioId.get(account)).orElseThrow())
+                                .timestamp(Instant.ofEpochSecond(timestamp))
+                                .security(asset)
+                                .count(count.intValueExact())
+                                .eventType(COMMISSION)
+                                .value(fee.negate())
+                                .currency(feeCurrency)
+                                .build());
+            } else {
+                return Collections.emptySet();
+            }
+
+        } catch (Exception e) {
+            log.error("Не могу распарсить {}", this, e);
+            return Collections.emptyList();
+        }
     }
 }

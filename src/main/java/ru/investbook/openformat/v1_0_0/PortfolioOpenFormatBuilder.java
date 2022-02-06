@@ -61,7 +61,7 @@ import static org.spacious_team.broker.pojo.SecurityType.DERIVATIVE;
 
 @Service
 @RequiredArgsConstructor
-public class PortfolioOpenFormatService {
+public class PortfolioOpenFormatBuilder {
     private final BuildProperties buildProperties;
     private final AssetsAndCashService assetsAndCashService;
     private final PortfolioRepository portfolioRepository;
@@ -77,7 +77,7 @@ public class PortfolioOpenFormatService {
     private final PortfolioCashRestController portfolioCashRestController;
     private final SecurityQuoteRestController securityQuoteRestController;
 
-    public PortfolioOpenFormatV1_0_0 generate() {
+    public PortfolioOpenFormatV1_0_0 create() {
         return PortfolioOpenFormatV1_0_0.builder()
                 .end(getLatestEventTimestamp())
                 .accounts(getAccounts())

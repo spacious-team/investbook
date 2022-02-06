@@ -24,6 +24,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
+import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.Portfolio;
 import ru.investbook.entity.PortfolioEntity;
 
 import javax.validation.constraints.NotEmpty;
@@ -32,6 +34,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Jacksonized
@@ -39,6 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Slf4j
 public class AccountPof {
 
     private static final ThreadLocal<AtomicInteger> idGenerator = ThreadLocal.withInitial(AtomicInteger::new);
@@ -82,5 +86,16 @@ public class AccountPof {
                 .valuation(valuationInRub)
                 .valuationCurrency("RUB")
                 .build();
+    }
+
+    Optional<Portfolio> toPortfolio() {
+        try {
+            return Optional.of(Portfolio.builder()
+                    .id(Objects.requireNonNull(accountNumber))
+                    .build());
+        } catch (Exception e) {
+            log.error("Не могу распарсить {}", this, e);
+            return Optional.empty();
+        }
     }
 }

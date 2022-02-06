@@ -24,20 +24,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
+import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.lang.Nullable;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Jacksonized
 @Builder
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Slf4j
 public class PaymentPof {
 
     @NotNull
@@ -60,9 +68,12 @@ public class PaymentPof {
     @JsonProperty("type")
     PaymentTypePof type;
 
+    /**
+     * Поддерживаются дробные акции
+     */
     @NotNull
     @JsonProperty("count")
-    int count;
+    BigDecimal count;
 
     @NotNull
     @JsonProperty("timestamp")
@@ -94,12 +105,39 @@ public class PaymentPof {
                 .account(AccountPof.getAccountId(cashFlow.getPortfolio().getId()))
                 .asset(cashFlow.getSecurity().getId())
                 .type(PaymentTypePof.valueOf(CashFlowType.valueOf(cashFlow.getCashFlowType().getId())))
-                .count(cashFlow.getCount() == null ? 0 : cashFlow.getCount()) // опциональное для деривативов
+                .count(cashFlow.getCount() == null ? BigDecimal.ZERO : BigDecimal.valueOf(cashFlow.getCount())) // опциональное для деривативов
                 .timestamp(cashFlow.getTimestamp().getEpochSecond())
                 .amount(cashFlow.getValue())
                 .currency(cashFlow.getCurrency())
                 .tax(tax.map(SecurityEventCashFlowEntity::getValue).orElse(null))
                 .taxCurrency(tax.map(SecurityEventCashFlowEntity::getCurrency).orElse(null))
                 .build();
+    }
+
+    Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId) {
+        try {
+        SecurityEventCashFlow cashFlow = SecurityEventCashFlow.builder()
+                .id(id)
+                .portfolio(Optional.of(accountToPortfolioId.get(account)).orElseThrow())
+                .security(asset)
+                .eventType(type.toCashFlowType())
+                .count(count.intValueExact())
+                .timestamp(Instant.ofEpochSecond(timestamp))
+                .value(amount)
+                .currency(currency)
+                .build();
+        if (tax != null && tax.floatValue() > 0.0001) {
+            return Set.of(cashFlow,
+                    cashFlow.toBuilder()
+                            .value(tax)
+                            .currency(taxCurrency)
+                            .build());
+        } else {
+            return Set.of(cashFlow);
+        }
+        } catch (Exception e) {
+            log.error("Не могу распарсить {}", this, e);
+            return Collections.emptySet();
+        }
     }
 }

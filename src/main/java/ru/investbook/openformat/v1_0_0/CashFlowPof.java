@@ -24,19 +24,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
+import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.EventCashFlow;
 import org.springframework.lang.Nullable;
 import ru.investbook.entity.EventCashFlowEntity;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Map;
+import java.util.Optional;
 
 @Jacksonized
 @Builder
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Slf4j
 public class CashFlowPof {
 
     @NotNull
@@ -79,6 +85,24 @@ public class CashFlowPof {
                 .amount(cashFlow.getValue())
                 .currency(cashFlow.getCurrency())
                 .type(PaymentTypePof.valueOf(CashFlowType.valueOf(cashFlow.getCashFlowType().getId())))
+                .description(cashFlow.getDescription())
                 .build();
+    }
+
+    Optional<EventCashFlow> toEventCashFlow(Map<Integer, String> accountToPortfolioId) {
+        try {
+            return Optional.of(EventCashFlow.builder()
+                    .id(id)
+                    .portfolio(Optional.of(accountToPortfolioId.get(account)).orElseThrow())
+                    .timestamp(Instant.ofEpochSecond(timestamp))
+                    .value(amount)
+                    .currency(currency)
+                    .eventType(type.toCashFlowType())
+                    .description(description)
+                    .build());
+        } catch (Exception e) {
+            log.error("Не могу распарсить {}", this, e);
+            return Optional.empty();
+        }
     }
 }

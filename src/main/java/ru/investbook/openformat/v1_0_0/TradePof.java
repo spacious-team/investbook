@@ -24,6 +24,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
+import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.SecurityType;
+import org.spacious_team.broker.pojo.Transaction;
+import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.springframework.lang.Nullable;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
@@ -31,16 +35,24 @@ import ru.investbook.entity.TransactionEntity;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import static java.math.RoundingMode.HALF_UP;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
+import static org.spacious_team.broker.pojo.SecurityType.DERIVATIVE;
 
 @Jacksonized
 @Builder
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Slf4j
 public class TradePof {
 
     @NotNull
@@ -74,7 +86,7 @@ public class TradePof {
     int asset;
 
     /**
-     * Если '+', то это покупка, если '-', то это продажа
+     * Если '+', то это покупка, если '-', то это продажа.
      * Поддерживаются дробные акции
      */
     @NotNull
@@ -154,5 +166,69 @@ public class TradePof {
 
     private static BigDecimal divide(TransactionCashFlowEntity e, int count) {
         return e.getValue().divide(BigDecimal.valueOf(Math.abs(count)), 4, HALF_UP);
+    }
+
+    Optional<Transaction> toTransaction(Map<Integer, String> accountToPortfolioId) {
+        try {
+        long ts = Objects.requireNonNull((timestamp != null) ? timestamp : settlement);
+        return Optional.of(Transaction.builder()
+                .id(id)
+                .tradeId(tradeId)
+                .portfolio(Optional.of(accountToPortfolioId.get(account)).orElseThrow())
+                .security(asset)
+                .count(count.intValueExact())
+                .timestamp(Instant.ofEpochSecond(ts))
+                .build());
+        } catch (Exception e) {
+            log.error("Не могу распарсить {}", this, e);
+            return Optional.empty();
+        }
+    }
+
+    Collection<TransactionCashFlow> getTransactionCashFlow(Map<Integer, SecurityType> assetTypes) {
+        try {
+        Collection<TransactionCashFlow> result = new ArrayList<>(3);
+        SecurityType securityType = Objects.requireNonNull(assetTypes.get(asset));
+        if (price != null) { // для деривативов - опциональное
+            result.add(
+                    TransactionCashFlow.builder()
+                            .transactionId(id)
+                            .eventType((securityType == DERIVATIVE) ? DERIVATIVE_PRICE : PRICE)
+                            .value(price.multiply(count).negate())
+                            .currency(currency)
+                            .build());
+        }
+        if (accruedInterest != null) {
+            result.add(
+                    TransactionCashFlow.builder()
+                            .transactionId(id)
+                            .eventType(ACCRUED_INTEREST)
+                            .value(accruedInterest.multiply(count).negate())
+                            .currency(currency)
+                            .build());
+        }
+        if (quote != null && securityType == DERIVATIVE) {
+            result.add(
+                    TransactionCashFlow.builder()
+                            .transactionId(id)
+                            .eventType(DERIVATIVE_QUOTE)
+                            .value(quote.multiply(count).negate())
+                            .currency("PNT")
+                            .build());
+        }
+        if (fee != null) {
+            result.add(
+                    TransactionCashFlow.builder()
+                            .transactionId(id)
+                            .eventType(COMMISSION)
+                            .value(fee.negate())
+                            .currency(feeCurrency)
+                            .build());
+        }
+        return result;
+        } catch (Exception e) {
+            log.error("Не могу распарсить {}", this, e);
+            return Collections.emptyList();
+        }
     }
 }

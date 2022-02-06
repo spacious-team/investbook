@@ -26,6 +26,7 @@ import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityDescription;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityType;
@@ -40,6 +41,7 @@ import ru.investbook.api.ForeignExchangeRateRestController;
 import ru.investbook.api.PortfolioCashRestController;
 import ru.investbook.api.PortfolioPropertyRestController;
 import ru.investbook.api.PortfolioRestController;
+import ru.investbook.api.SecurityDescriptionRestController;
 import ru.investbook.api.SecurityEventCashFlowRestController;
 import ru.investbook.api.SecurityQuoteRestController;
 import ru.investbook.api.SecurityRestController;
@@ -63,6 +65,7 @@ import static ru.investbook.repository.RepositoryHelper.isUniqIndexViolationExce
 public class InvestbookApiClient {
     private final PortfolioRestController portfolioRestController;
     private final SecurityRestController securityRestController;
+    private final SecurityDescriptionRestController securityDescriptionRestController;
     private final SecurityEventCashFlowRestController securityEventCashFlowRestController;
     private final EventCashFlowRestController eventCashFlowRestController;
     private final TransactionRestController transactionRestController;
@@ -97,6 +100,13 @@ public class InvestbookApiClient {
                 security;
     }
 
+    public void addSecurityDescription(SecurityDescription securityDescription) {
+        handlePost(
+                securityDescription,
+                securityDescriptionRestController::post,
+                "Не могу добавить метаинформацию о ЦБ ");
+    }
+
     public void addTransaction(AbstractTransaction transaction) {
         boolean isAdded = addTransaction(transaction.getTransaction());
         if (isAdded) {
@@ -124,7 +134,7 @@ public class InvestbookApiClient {
                 .forEach(this::addTransactionCashFlow);
     }
 
-    private boolean addTransaction(Transaction transaction) {
+    public boolean addTransaction(Transaction transaction) {
         return handlePost(
                 transaction,
                 transactionRestController::post,
