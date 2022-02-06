@@ -92,7 +92,6 @@ public class CashFlowPof {
     Optional<EventCashFlow> toEventCashFlow(Map<Integer, String> accountToPortfolioId) {
         try {
             return Optional.of(EventCashFlow.builder()
-                    .id(id)
                     .portfolio(Optional.of(accountToPortfolioId.get(account)).orElseThrow())
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .value(amount)

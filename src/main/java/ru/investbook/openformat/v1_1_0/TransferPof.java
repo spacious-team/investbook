@@ -112,7 +112,6 @@ public class TransferPof {
         try {
             String tradeId = (transferId == null) ? timestamp + "" + asset + "" + account : transferId;
             return Optional.of(Transaction.builder()
-                    .id(id)
                     .tradeId(tradeId.endsWith(String.valueOf(account)) ? tradeId : tradeId + account)
                     .portfolio(Optional.of(accountToPortfolioId.get(account)).orElseThrow())
                     .timestamp(Instant.ofEpochSecond(timestamp))

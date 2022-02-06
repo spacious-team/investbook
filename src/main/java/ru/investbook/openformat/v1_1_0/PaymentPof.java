@@ -109,32 +109,32 @@ public class PaymentPof {
                 .timestamp(cashFlow.getTimestamp().getEpochSecond())
                 .amount(cashFlow.getValue())
                 .currency(cashFlow.getCurrency())
-                .tax(tax.map(SecurityEventCashFlowEntity::getValue).orElse(null))
+                .tax(tax.map(SecurityEventCashFlowEntity::getValue).map(BigDecimal::negate).orElse(null))
                 .taxCurrency(tax.map(SecurityEventCashFlowEntity::getCurrency).orElse(null))
                 .build();
     }
 
     Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId) {
         try {
-        SecurityEventCashFlow cashFlow = SecurityEventCashFlow.builder()
-                .id(id)
-                .portfolio(Optional.of(accountToPortfolioId.get(account)).orElseThrow())
-                .security(asset)
-                .eventType(type.toCashFlowType())
-                .count(count.intValueExact())
-                .timestamp(Instant.ofEpochSecond(timestamp))
-                .value(amount)
-                .currency(currency)
-                .build();
-        if (tax != null && tax.floatValue() > 0.0001) {
-            return Set.of(cashFlow,
-                    cashFlow.toBuilder()
-                            .value(tax)
-                            .currency(taxCurrency)
-                            .build());
-        } else {
-            return Set.of(cashFlow);
-        }
+            SecurityEventCashFlow cashFlow = SecurityEventCashFlow.builder()
+                    .portfolio(Optional.of(accountToPortfolioId.get(account)).orElseThrow())
+                    .security(asset)
+                    .eventType(type.toCashFlowType())
+                    .count(count.intValueExact())
+                    .timestamp(Instant.ofEpochSecond(timestamp))
+                    .value(amount)
+                    .currency(currency)
+                    .build();
+            if (tax != null && Math.abs(tax.floatValue()) > 0.0001) {
+                return Set.of(cashFlow,
+                        cashFlow.toBuilder()
+                                .eventType(CashFlowType.TAX)
+                                .value(tax.negate())
+                                .currency(taxCurrency)
+                                .build());
+            } else {
+                return Set.of(cashFlow);
+            }
         } catch (Exception e) {
             log.error("Не могу распарсить {}", this, e);
             return Collections.emptySet();
