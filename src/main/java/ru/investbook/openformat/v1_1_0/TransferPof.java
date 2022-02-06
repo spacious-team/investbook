@@ -52,6 +52,9 @@ public class TransferPof {
     @JsonProperty("id")
     int id;
 
+    /**
+     * Если описывается сплит акций, то может иметь одинаковое значение для нескольких объектов.
+     */
     @Nullable
     @JsonProperty("transfer-id")
     String transferId;
@@ -109,7 +112,7 @@ public class TransferPof {
         try {
             return Optional.of(Transaction.builder()
                     .id(id)
-                    .tradeId(transferId)
+                    .tradeId((transferId == null || transferId.endsWith(String.valueOf(account))) ? transferId : transferId + account)
                     .portfolio(Optional.of(accountToPortfolioId.get(account)).orElseThrow())
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .security(asset)
