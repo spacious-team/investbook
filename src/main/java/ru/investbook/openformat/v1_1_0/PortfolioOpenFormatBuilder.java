@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.openformat.v1_0_0;
+package ru.investbook.openformat.v1_1_0;
 
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
@@ -77,8 +77,8 @@ public class PortfolioOpenFormatBuilder {
     private final PortfolioCashRestController portfolioCashRestController;
     private final SecurityQuoteRestController securityQuoteRestController;
 
-    public PortfolioOpenFormatV1_0_0 create() {
-        return PortfolioOpenFormatV1_0_0.builder()
+    public PortfolioOpenFormatV1_1_0 create() {
+        return PortfolioOpenFormatV1_1_0.builder()
                 .end(getLatestEventTimestamp())
                 .accounts(getAccounts())
                 .cashBalances(getCashBalances())

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.openformat.v1_0_0;
+package ru.investbook.openformat.v1_1_0;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -24,10 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
-import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.SecurityDescription;
-import org.spacious_team.broker.pojo.SecurityQuote;
+import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
@@ -38,34 +35,67 @@ import java.util.Collections;
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class VndInvestbookPof {
+public class PortfolioOpenFormatV1_1_0 {
 
     @NotNull
     @Builder.Default
     @JsonProperty("version")
-    String version;
+    String version = "1.1.0";
 
     @NotNull
     @Builder.Default
-    @JsonIgnoreProperties(value = {"id"})
-    @JsonProperty("portfolio-cash")
-    Collection<PortfolioCash> portfolioCash = Collections.emptySet();
+    @JsonProperty("generated-by")
+    String generatedBy = "investbook";
 
     @NotNull
     @Builder.Default
-    @JsonIgnoreProperties(value = {"id"})
-    @JsonProperty("portfolio-properties")
-    Collection<PortfolioProperty> portfolioProperties = Collections.emptySet();
+    @JsonProperty("generated")
+    long generated = System.currentTimeMillis() / 1000;
+
+    @NotNull
+    @JsonProperty("end")
+    long end;
+
+    @Nullable
+    @JsonProperty("start")
+    Long start;
 
     @NotNull
     @Builder.Default
-    @JsonIgnoreProperties(value = {"issuer"})
-    @JsonProperty("security-descriptions")
-    Collection<SecurityDescription> securityDescriptions = Collections.emptySet();
+    @JsonProperty("accounts")
+    Collection<AccountPof> accounts = Collections.emptySet();
 
     @NotNull
     @Builder.Default
-    @JsonIgnoreProperties(value = {"id"})
-    @JsonProperty("security-quotes")
-    Collection<SecurityQuote> securityQuotes = Collections.emptySet();
+    @JsonProperty("cash-balances")
+    Collection<CashBalancesPof> cashBalances = Collections.emptySet();
+
+    @NotNull
+    @Builder.Default
+    @JsonProperty("assets")
+    Collection<AssetPof> assets = Collections.emptySet();
+
+    @NotNull
+    @Builder.Default
+    @JsonProperty("trades")
+    Collection<TradePof> trades = Collections.emptySet();
+
+    @NotNull
+    @Builder.Default
+    @JsonProperty("transfers")
+    Collection<TransferPof> transfer = Collections.emptySet();
+
+    @NotNull
+    @Builder.Default
+    @JsonProperty("payments")
+    Collection<PaymentPof> payments = Collections.emptySet();
+
+    @NotNull
+    @Builder.Default
+    @JsonProperty("cash-flows")
+    Collection<CashFlowPof> cashFlows = Collections.emptySet();
+
+    @Nullable
+    @JsonProperty("vnd-investbook")
+    VndInvestbookPof vndInvestbook;
 }

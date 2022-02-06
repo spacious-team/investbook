@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.openformat.v1_0_0;
+package ru.investbook.openformat.v1_1_0;
 
 public enum AccountTypePof {
     investment,

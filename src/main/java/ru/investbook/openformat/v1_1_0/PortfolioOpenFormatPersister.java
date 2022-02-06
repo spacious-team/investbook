@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.openformat.v1_0_0;
+package ru.investbook.openformat.v1_1_0;
 
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.Security;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class PortfolioOpenFormatPersister {
     private final InvestbookApiClient api;
 
-    public void persist(PortfolioOpenFormatV1_0_0 object) {
+    public void persist(PortfolioOpenFormatV1_1_0 object) {
 
         object.getAccounts()
                 .stream()
