@@ -68,7 +68,7 @@ public class PortfolioOpenFormatRestController {
             log.info("Файл '{}' в формате 'Portfolio Open Format' сформирован за {}",
                     fileName, Duration.ofNanos(System.nanoTime() - t0));
         } catch (Exception e) {
-            log.error("Ошибка сборки отчета", e);
+            log.error("Ошибка генерации файла бэкапа", e);
             sendErrorPage(response, e);
         }
         response.flushBuffer();
@@ -77,11 +77,14 @@ public class PortfolioOpenFormatRestController {
     @PostMapping("upload")
     public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file) {
         try (InputStream inputStream = file.getInputStream()) { // creates new input stream
+            long t0 = System.nanoTime();
             PortfolioOpenFormatV1_1_0 object = objectMapper.readValue(inputStream, PortfolioOpenFormatV1_1_0.class);
             validate(object);
             portfolioOpenFormatPersister.persist(object);
+            log.info("Выполнено восстановление данных из бэкапа за {}", Duration.ofNanos(System.nanoTime() - t0));
             return ok();
         } catch (Exception e) {
+            log.error("Ошибка восстановления данных из бэкапа");
             return errorPage("Возможно это не файл в формате \"Open Portfolio Format\"", Collections.emptyList());
         }
     }

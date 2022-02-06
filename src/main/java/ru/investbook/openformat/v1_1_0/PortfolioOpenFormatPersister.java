@@ -19,15 +19,22 @@
 package ru.investbook.openformat.v1_1_0;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
 import ru.investbook.parser.InvestbookApiClient;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+
+import static java.util.concurrent.Executors.newWorkStealingPool;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +42,7 @@ public class PortfolioOpenFormatPersister {
     private final InvestbookApiClient api;
 
     public void persist(PortfolioOpenFormatV1_1_0 object) {
+        Collection<Runnable> tasks = new ArrayList<>();
 
         object.getAccounts()
                 .stream()
@@ -43,7 +51,7 @@ public class PortfolioOpenFormatPersister {
                 .forEach(api::addPortfolio);
 
         Collection<Security> securities = object.getAssets()
-                .stream()
+                .parallelStream()
                 .map(AssetPof::toSecurity)
                 .flatMap(Optional::stream)
                 .toList();
@@ -55,48 +63,66 @@ public class PortfolioOpenFormatPersister {
         Map<Integer, SecurityType> assetTypes = securities.stream()
                 .collect(Collectors.toMap(Security::getId, Security::getType));
 
-        object.getTrades()
-                .stream()
-                .map(t -> t.toTransaction(accountToPortfolioId))
-                .flatMap(Optional::stream)
-                .forEach(api::addTransaction);
+        tasks.add(() -> {
+            object.getTrades()
+                    .parallelStream()
+                    .map(t -> t.toTransaction(accountToPortfolioId))
+                    .flatMap(Optional::stream)
+                    .forEach(api::addTransaction);
 
-        object.getTrades()
-                .stream()
-                .map(t -> t.getTransactionCashFlow(assetTypes))
-                .flatMap(Collection::stream)
-                .forEach(api::addTransactionCashFlow);
+            object.getTrades()
+                    .parallelStream()
+                    .map(t -> t.getTransactionCashFlow(assetTypes))
+                    .flatMap(Collection::stream)
+                    .forEach(api::addTransactionCashFlow);
+        });
 
-        object.getTransfer()
-                .stream()
-                .map(t -> t.toTransaction(accountToPortfolioId))
-                .flatMap(Optional::stream)
-                .forEach(api::addTransaction);
+        tasks.add(() ->
+                object.getTransfer()
+                        .parallelStream()
+                        .map(t -> t.toTransaction(accountToPortfolioId))
+                        .flatMap(Optional::stream)
+                        .forEach(api::addTransaction));
 
-        object.getTransfer()
-                .stream()
+        tasks.add(() -> object.getTransfer()
+                .parallelStream()
                 .map(t -> t.getSecurityEventCashFlow(accountToPortfolioId))
                 .flatMap(Collection::stream)
-                .forEach(api::addSecurityEventCashFlow);
+                .forEach(api::addSecurityEventCashFlow));
 
-        object.getPayments()
-                .stream()
+        tasks.add(() -> object.getPayments()
+                .parallelStream()
                 .map(t -> t.getSecurityEventCashFlow(accountToPortfolioId))
                 .flatMap(Collection::stream)
-                .forEach(api::addSecurityEventCashFlow);
+                .forEach(api::addSecurityEventCashFlow));
 
-        object.getCashFlows()
-                .stream()
+        tasks.add(() -> object.getCashFlows()
+                .parallelStream()
                 .map(c -> c.toEventCashFlow(accountToPortfolioId))
                 .flatMap(Optional::stream)
-                .forEach(api::addEventCashFlow);
+                .forEach(api::addEventCashFlow));
 
         VndInvestbookPof vndInvestbook = object.getVndInvestbook();
         if (vndInvestbook != null) {
-            vndInvestbook.getPortfolioCash().forEach(api::addPortfolioCash);
-            vndInvestbook.getPortfolioProperties().forEach(api::addPortfolioProperty);
-            vndInvestbook.getSecurityDescriptions().forEach(api::addSecurityDescription);
-            vndInvestbook.getSecurityQuotes().forEach(api::addSecurityQuote);
+            tasks.add(() -> vndInvestbook.getPortfolioCash().forEach(api::addPortfolioCash));
+            tasks.add(() -> vndInvestbook.getPortfolioProperties().forEach(api::addPortfolioProperty));
+            tasks.add(() -> vndInvestbook.getSecurityDescriptions().forEach(api::addSecurityDescription));
+            tasks.add(() -> vndInvestbook.getSecurityQuotes().forEach(api::addSecurityQuote));
+        }
+
+        runTasks(tasks);
+    }
+
+    @SneakyThrows
+    private void runTasks(Collection<Runnable> tasks) {
+        ExecutorService executorService = newWorkStealingPool(4 * Runtime.getRuntime().availableProcessors());
+        try {
+            Collection<Callable<Object>> callables = tasks.stream()
+                    .map(Executors::callable)
+                    .toList();
+            executorService.invokeAll(callables);
+        } finally {
+            executorService.shutdown();
         }
     }
 }
