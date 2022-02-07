@@ -26,6 +26,7 @@ import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Portfolio;
+import org.springframework.lang.Nullable;
 import ru.investbook.entity.PortfolioEntity;
 
 import javax.validation.constraints.NotEmpty;
@@ -52,6 +53,7 @@ public class AccountPof {
     @JsonProperty("id")
     int id;
 
+    @Nullable
     @JsonProperty("account-number")
     String accountNumber;
 

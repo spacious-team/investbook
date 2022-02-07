@@ -100,6 +100,10 @@ public class TradePof {
     @JsonProperty("price")
     BigDecimal price;
 
+    @Nullable
+    @JsonProperty("accrued-interest")
+    BigDecimal accruedInterest;
+
     /**
      * Котировка. Для облигации в процентах, для деривативов в пунктах
      */
@@ -108,10 +112,6 @@ public class TradePof {
     BigDecimal quote;
 
     @Nullable
-    @JsonProperty("accrued-interest")
-    BigDecimal accruedInterest;
-
-    @NotEmpty
     @JsonProperty("currency")
     String currency;
 

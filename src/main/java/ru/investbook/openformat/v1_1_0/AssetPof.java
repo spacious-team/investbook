@@ -26,6 +26,7 @@ import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
+import org.springframework.lang.Nullable;
 import ru.investbook.entity.SecurityEntity;
 
 import javax.validation.constraints.NotNull;
@@ -47,12 +48,15 @@ class AssetPof {
     @JsonProperty("type")
     String type;
 
+    @Nullable
     @JsonProperty("symbol")
     String symbol;
 
+    @Nullable
     @JsonProperty("name")
     String name;
 
+    @Nullable
     @JsonProperty("isin")
     String isin;
 
