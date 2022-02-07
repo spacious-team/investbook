@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-class ReportControllerHelper {
+public class ReportControllerHelper {
 
    static List<String> getBrokerNames(Collection<BrokerReportFactory> brokerReportFactories) {
         return brokerReportFactories.stream()
@@ -39,7 +39,7 @@ class ReportControllerHelper {
                 .toList();
     }
 
-    static ResponseEntity<String> errorPage(String title, Collection<Exception> exceptions) {
+    public static ResponseEntity<String> errorPage(String title, Collection<Exception> exceptions) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(exceptions.stream()
                         .map(e -> {
@@ -52,12 +52,12 @@ class ReportControllerHelper {
 
     private static Collector<CharSequence, ?, String> errorMessageBuilder(String title) {
         return Collectors.joining("</br></br> - ", """
-                <b>Ошибка загрузки отчетов</b> <a href="/">[на главную]</a><br><br>
+                <b>Ошибка загрузки</b> <a href="/">[на главную]</a><br><br>
                 """ + title + """
                 <br>
                 <span style="font-size: smaller; color: gray;">Вы можете
                 <a href="https://github.com/spacious-team/investbook/issues/new?labels=bug&template=bug_report.md">сообщить</a>
-                об ошибке разработчикам  или связаться с <a href="https://t.me/investbook_support">технической поддержкой</a> 
+                об ошибке разработчикам  или связаться с <a href="https://t.me/investbook_support">технической поддержкой</a>
                 </span>
                 <br><br> -
                 """, "");

@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.forms.model.ArchivedPortfolioModel;
 
 import javax.validation.Valid;
@@ -39,6 +40,7 @@ import static ru.investbook.web.ControllerHelper.getPortfolios;
 @RequiredArgsConstructor
 public class PortfolioController {
     private final PortfolioRepository portfolioRepository;
+    private final SecurityRepository securityRepository;
 
     @GetMapping("/archive")
     public String get(Model model, @ModelAttribute("archive") ArchivedPortfolioModel archive) {
@@ -55,6 +57,29 @@ public class PortfolioController {
                     var isEnabled = !archive.getPortfolios().contains(portfolio);
                     portfolioRepository.setEnabledForPortfolio(portfolio, isEnabled);
                 });
+        return "success";
+    }
+
+    @GetMapping("/delete-all")
+    public String deleteAllWarning(Model model) {
+        model.addAttribute("title", "Внимание!");
+        model.addAttribute("message", """
+                Вы пытаетесь удалить все данные (сделки, выплаты, движения денежных средств и т.д.) для всех счетов.
+                Эта операция не обратима. Если вы все же настаиваете на удалении, то рекомендуем прежде скачать
+                <a href="/portfolio-open-format/download">бэкап</a> данных.
+                <br><br>
+                Для подтверждения удаления всех данных нажмите на ссылку
+                <a href="/portfolios/delete-all-accepted">[подтверждаю]</a>.
+                """);
+        return "success";
+    }
+
+    @GetMapping("/delete-all-accepted")
+    public String deleteAllAccepted(Model model) {
+        portfolioRepository.deleteAll();
+        securityRepository.deleteAll();
+        model.addAttribute("message", "Информация по всем счетам удалена");
+        model.addAttribute("backLink", "/forms.html");
         return "success";
     }
 }

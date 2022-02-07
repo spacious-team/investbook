@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -21,7 +21,6 @@ package ru.investbook.web;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.http.ContentDisposition;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,19 +35,16 @@ import ru.investbook.web.model.ViewFilterModel;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Stream;
 
 import static java.time.ZoneId.systemDefault;
-import static java.util.stream.Collectors.joining;
 import static ru.investbook.web.ControllerHelper.getActivePortfolios;
 import static ru.investbook.web.ControllerHelper.getPortfolios;
+import static ru.investbook.web.HttpAttachResponseHelper.sendErrorPage;
+import static ru.investbook.web.HttpAttachResponseHelper.sendSuccessHeader;
 
 @Controller
 @RequestMapping("/portfolio")
@@ -98,7 +94,7 @@ public class InvestbookReportController {
             expectedFileSize = outputStream.size();
         }
         String fileName = getReportName(viewFilter);
-        sendSuccessHeader(response, fileName);
+        sendSuccessHeader(response, fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         outputStream.writeTo(response.getOutputStream());
         return fileName;
     }
@@ -111,41 +107,5 @@ public class InvestbookReportController {
             toDate = maxToDate;
         }
         return REPORT_NAME + " с " + dateFormatter.format(fromDate) + " по " + dateFormatter.format(toDate) + ".xlsx";
-    }
-
-    private void sendSuccessHeader(HttpServletResponse response, String fileName) {
-        ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
-                .filename(fileName, StandardCharsets.UTF_8)
-                .build();
-        response.setHeader("Content-disposition", contentDisposition.toString());
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    }
-
-    private void sendErrorPage(HttpServletResponse response, Exception e) throws IOException {
-        sendErrorHttpHeader(response);
-        String httpBody = getErrorHttpBody(e);
-        response.getWriter().write(httpBody);
-    }
-
-    private String getErrorHttpBody(Exception exception) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        exception.printStackTrace(pw);
-        return Stream.of(sw.toString().split("\n"))
-                .collect(joining("</br>", """
-                        <b>Ошибка сборки отчета</b></br></br> <a href="/">[назад]</a>
-                        <br/>
-                        <span style="font-size: smaller; color: gray;">
-                            Вы можете <a href="https://github.com/spacious-team/investbook/issues">сообщить</a>
-                            об ошибке разработчикам или связаться с
-                            <a href="https://t.me/investbook_support">технической поддержкой</a> 
-                        </span>
-                        </br></br> - 
-                        """, ""));
-    }
-
-    private void sendErrorHttpHeader(HttpServletResponse response) {
-        response.setContentType("text/html; charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 }

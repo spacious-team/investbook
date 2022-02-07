@@ -26,6 +26,7 @@ import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityDescription;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityType;
@@ -40,6 +41,7 @@ import ru.investbook.api.ForeignExchangeRateRestController;
 import ru.investbook.api.PortfolioCashRestController;
 import ru.investbook.api.PortfolioPropertyRestController;
 import ru.investbook.api.PortfolioRestController;
+import ru.investbook.api.SecurityDescriptionRestController;
 import ru.investbook.api.SecurityEventCashFlowRestController;
 import ru.investbook.api.SecurityQuoteRestController;
 import ru.investbook.api.SecurityRestController;
@@ -47,11 +49,8 @@ import ru.investbook.api.TransactionCashFlowRestController;
 import ru.investbook.api.TransactionRestController;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
@@ -63,6 +62,7 @@ import static ru.investbook.repository.RepositoryHelper.isUniqIndexViolationExce
 public class InvestbookApiClient {
     private final PortfolioRestController portfolioRestController;
     private final SecurityRestController securityRestController;
+    private final SecurityDescriptionRestController securityDescriptionRestController;
     private final SecurityEventCashFlowRestController securityEventCashFlowRestController;
     private final EventCashFlowRestController eventCashFlowRestController;
     private final TransactionRestController transactionRestController;
@@ -72,7 +72,7 @@ public class InvestbookApiClient {
     private final SecurityQuoteRestController securityQuoteRestController;
     private final ForeignExchangeRateRestController foreignExchangeRateRestController;
     private final MoexDerivativeCodeService moexDerivativeCodeService;
-    private final Validator validator;
+    private final ValidatorService validator;
 
     public boolean addPortfolio(Portfolio portfolio) {
         return handlePost(
@@ -95,6 +95,13 @@ public class InvestbookApiClient {
                         .ticker(moexDerivativeCodeService.convertDerivativeCode(security.getTicker()))
                         .build() :
                 security;
+    }
+
+    public void addSecurityDescription(SecurityDescription securityDescription) {
+        handlePost(
+                securityDescription,
+                securityDescriptionRestController::post,
+                "Не могу добавить метаинформацию о ЦБ ");
     }
 
     public void addTransaction(AbstractTransaction transaction) {
@@ -124,7 +131,7 @@ public class InvestbookApiClient {
                 .forEach(this::addTransactionCashFlow);
     }
 
-    private boolean addTransaction(Transaction transaction) {
+    public boolean addTransaction(Transaction transaction) {
         return handlePost(
                 transaction,
                 transactionRestController::post,
@@ -188,7 +195,7 @@ public class InvestbookApiClient {
      */
     private <T> boolean handlePost(T object, Function<T, ResponseEntity<?>> saver, String errorPrefix) {
         try {
-            validate(object);
+            validator.validate(object);
             HttpStatus status = saver.apply(object).getStatusCode();
             if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                 log.warn(errorPrefix + " " + object);
@@ -208,19 +215,5 @@ public class InvestbookApiClient {
             }
         }
         return true;
-    }
-
-    private <T> void validate(T object) {
-        Set<ConstraintViolation<T>> violations = validator.validate(object);
-        if (!violations.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            violations.forEach(violation -> sb
-                    .append("поле '")
-                    .append(violation.getPropertyPath())
-                    .append("' ")
-                    .append(violation.getMessage())
-                    .append("; "));
-            throw new ConstraintViolationException(sb.toString(), violations);
-        }
     }
 }

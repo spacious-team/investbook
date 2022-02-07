@@ -59,7 +59,6 @@ import static ru.investbook.report.ForeignExchangeRateService.RUB;
 @Slf4j
 public class AssetsAndCashServiceImpl implements AssetsAndCashService {
     private final Set<SecurityType> stockBondAndAssetTypes = Set.of(STOCK, BOND, ASSET);
-    private final Instant instantOf1970 = Instant.ofEpochSecond(0);
     private final PortfolioPropertyRepository portfolioPropertyRepository;
     private final ForeignExchangeRateService foreignExchangeRateService;
     private final InvestmentProportionService investmentProportionService;
@@ -172,11 +171,11 @@ public class AssetsAndCashServiceImpl implements AssetsAndCashService {
     public List<PortfolioCash> getPortfolioCash(Collection<String> portfolios, Instant atInstant) {
         List<PortfolioCashEntity> entities = portfolios.isEmpty() ?
                 portfolioCashRepository.findDistinctOnPortfolioByTimestampBetweenOrderByTimestampDesc(
-                        instantOf1970,
+                        Instant.EPOCH,
                         atInstant) :
                 portfolioCashRepository.findDistinctOnPortfolioByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
                         portfolios,
-                        instantOf1970,
+                        Instant.EPOCH,
                         atInstant);
         return entities.stream()
                 .map(portfolioCashConverter::fromEntity)
