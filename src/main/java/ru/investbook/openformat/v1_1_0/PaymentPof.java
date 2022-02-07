@@ -37,6 +37,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -117,7 +118,7 @@ public class PaymentPof {
     Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId) {
         try {
             SecurityEventCashFlow cashFlow = SecurityEventCashFlow.builder()
-                    .portfolio(Optional.of(accountToPortfolioId.get(account)).orElseThrow())
+                    .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
                     .security(asset)
                     .eventType(type.toCashFlowType())
                     .count(count.intValueExact())

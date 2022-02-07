@@ -26,8 +26,10 @@ import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.SecurityType;
-import org.spacious_team.broker.pojo.Transaction;
-import org.spacious_team.broker.pojo.TransactionCashFlow;
+import org.spacious_team.broker.report_parser.api.AbstractTransaction;
+import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
+import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
+import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.springframework.lang.Nullable;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
@@ -36,16 +38,13 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import static java.math.RoundingMode.HALF_UP;
+import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
-import static org.spacious_team.broker.pojo.SecurityType.DERIVATIVE;
 
 @Jacksonized
 @Builder
@@ -168,67 +167,37 @@ public class TradePof {
         return e.getValue().divide(BigDecimal.valueOf(Math.abs(count)), 6, HALF_UP);
     }
 
-    Optional<Transaction> toTransaction(Map<Integer, String> accountToPortfolioId) {
+    Optional<AbstractTransaction> toTransaction(Map<Integer, String> accountToPortfolioId,
+                                                Map<Integer, SecurityType> assetTypes) {
         try {
-        long ts = Objects.requireNonNull((timestamp != null) ? timestamp : settlement);
-        return Optional.of(Transaction.builder()
-                .id(id)
-                .tradeId(tradeId)
-                .portfolio(Optional.of(accountToPortfolioId.get(account)).orElseThrow())
-                .security(asset)
-                .count(count.intValueExact())
-                .timestamp(Instant.ofEpochSecond(ts))
-                .build());
+            SecurityType securityType = requireNonNull(assetTypes.get(asset));
+            AbstractTransaction.AbstractTransactionBuilder<?, ?> builder = switch (securityType) {
+                case STOCK, BOND, STOCK_OR_BOND, ASSET -> SecurityTransaction.builder()
+                        .value(requireNonNull(price).multiply(count).negate())
+                        .accruedInterest((accruedInterest == null) ? null : accruedInterest.multiply(count).negate())
+                        .valueCurrency(requireNonNull(currency));
+                case DERIVATIVE -> DerivativeTransaction.builder()
+                        .valueInPoints(requireNonNull(quote).multiply(count).negate())
+                        .value((price == null) ? null : price.multiply(count).negate()) // для деривативов - опциональное
+                        .valueCurrency(currency); // для деривативов - опциональное
+                case CURRENCY_PAIR -> ForeignExchangeTransaction.builder()
+                        .value(requireNonNull(price).multiply(count).negate())
+                        .valueCurrency(requireNonNull(currency));
+            };
+
+            long ts = requireNonNull((timestamp != null) ? timestamp : settlement);
+            return Optional.of(builder
+                    .tradeId(tradeId)
+                    .portfolio(requireNonNull(accountToPortfolioId.get(account)))
+                    .security(asset)
+                    .count(count.intValueExact())
+                    .timestamp(Instant.ofEpochSecond(ts))
+                    .commission((fee == null) ? null : fee.negate())
+                    .commissionCurrency(feeCurrency)
+                    .build());
         } catch (Exception e) {
             log.error("Не могу распарсить {}", this, e);
             return Optional.empty();
-        }
-    }
-
-    Collection<TransactionCashFlow> getTransactionCashFlow(Map<Integer, SecurityType> assetTypes) {
-        try {
-        Collection<TransactionCashFlow> result = new ArrayList<>(3);
-        SecurityType securityType = Objects.requireNonNull(assetTypes.get(asset));
-        if (price != null) { // для деривативов - опциональное
-            result.add(
-                    TransactionCashFlow.builder()
-                            .transactionId(id)
-                            .eventType((securityType == DERIVATIVE) ? DERIVATIVE_PRICE : PRICE)
-                            .value(price.multiply(count).negate())
-                            .currency(currency)
-                            .build());
-        }
-        if (accruedInterest != null) {
-            result.add(
-                    TransactionCashFlow.builder()
-                            .transactionId(id)
-                            .eventType(ACCRUED_INTEREST)
-                            .value(accruedInterest.multiply(count).negate())
-                            .currency(currency)
-                            .build());
-        }
-        if (quote != null && securityType == DERIVATIVE) {
-            result.add(
-                    TransactionCashFlow.builder()
-                            .transactionId(id)
-                            .eventType(DERIVATIVE_QUOTE)
-                            .value(quote.multiply(count).negate())
-                            .currency("PNT")
-                            .build());
-        }
-        if (fee != null) {
-            result.add(
-                    TransactionCashFlow.builder()
-                            .transactionId(id)
-                            .eventType(COMMISSION)
-                            .value(fee.negate())
-                            .currency(feeCurrency)
-                            .build());
-        }
-        return result;
-        } catch (Exception e) {
-            log.error("Не могу распарсить {}", this, e);
-            return Collections.emptyList();
         }
     }
 }

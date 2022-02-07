@@ -36,6 +36,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -110,10 +111,10 @@ public class TransferPof {
 
     Optional<Transaction> toTransaction(Map<Integer, String> accountToPortfolioId) {
         try {
-            String tradeId = (transferId == null) ? timestamp + "" + asset + "" + account : transferId;
+            String tradeId = (transferId == null) ? timestamp + ":" + asset + ":" + account : transferId;
             return Optional.of(Transaction.builder()
                     .tradeId(tradeId.endsWith(String.valueOf(account)) ? tradeId : tradeId + account)
-                    .portfolio(Optional.of(accountToPortfolioId.get(account)).orElseThrow())
+                    .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .security(asset)
                     .count(count.intValueExact())
@@ -129,7 +130,7 @@ public class TransferPof {
             if (fee != null) {
                 return Set.of(
                         SecurityEventCashFlow.builder()
-                                .portfolio(Optional.of(accountToPortfolioId.get(account)).orElseThrow())
+                                .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
                                 .timestamp(Instant.ofEpochSecond(timestamp))
                                 .security(asset)
                                 .count(count.intValueExact())
@@ -140,7 +141,6 @@ public class TransferPof {
             } else {
                 return Collections.emptySet();
             }
-
         } catch (Exception e) {
             log.error("Не могу распарсить {}", this, e);
             return Collections.emptyList();

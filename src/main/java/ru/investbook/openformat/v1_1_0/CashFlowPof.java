@@ -35,6 +35,7 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Jacksonized
@@ -92,7 +93,7 @@ public class CashFlowPof {
     Optional<EventCashFlow> toEventCashFlow(Map<Integer, String> accountToPortfolioId) {
         try {
             return Optional.of(EventCashFlow.builder()
-                    .portfolio(Optional.of(accountToPortfolioId.get(account)).orElseThrow())
+                    .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .value(amount)
                     .currency(currency)

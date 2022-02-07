@@ -59,30 +59,23 @@ public class PortfolioOpenFormatPersister {
 
         Map<Integer, String> accountToPortfolioId = object.getAccounts()
                 .stream()
-                .collect(Collectors.toMap(AccountPof::getId, AccountPof::getAccountNumber));
+                .collect(Collectors.toMap(
+                        AccountPof::getId,
+                        a -> Optional.ofNullable(a.getAccountNumber()).orElse(String.valueOf(a.getId()))));
         Map<Integer, SecurityType> assetTypes = securities.stream()
                 .collect(Collectors.toMap(Security::getId, Security::getType));
 
-        tasks.add(() -> {
-            object.getTrades()
-                    .parallelStream()
-                    .map(t -> t.toTransaction(accountToPortfolioId))
-                    .flatMap(Optional::stream)
-                    .forEach(api::addTransaction);
+        tasks.add(() -> object.getTrades()
+                .parallelStream()
+                .map(t -> t.toTransaction(accountToPortfolioId, assetTypes))
+                .flatMap(Optional::stream)
+                .forEach(api::addTransaction));
 
-            object.getTrades()
-                    .parallelStream()
-                    .map(t -> t.getTransactionCashFlow(assetTypes))
-                    .flatMap(Collection::stream)
-                    .forEach(api::addTransactionCashFlow);
-        });
-
-        tasks.add(() ->
-                object.getTransfer()
-                        .parallelStream()
-                        .map(t -> t.toTransaction(accountToPortfolioId))
-                        .flatMap(Optional::stream)
-                        .forEach(api::addTransaction));
+        tasks.add(() -> object.getTransfer()
+                .parallelStream()
+                .map(t -> t.toTransaction(accountToPortfolioId))
+                .flatMap(Optional::stream)
+                .forEach(api::addTransaction));
 
         tasks.add(() -> object.getTransfer()
                 .parallelStream()

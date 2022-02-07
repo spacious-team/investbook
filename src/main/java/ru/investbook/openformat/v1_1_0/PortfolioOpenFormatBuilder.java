@@ -78,17 +78,21 @@ public class PortfolioOpenFormatBuilder {
     private final SecurityQuoteRestController securityQuoteRestController;
 
     public PortfolioOpenFormatV1_1_0 create() {
-        return PortfolioOpenFormatV1_1_0.builder()
-                .end(getLatestEventTimestamp())
-                .accounts(getAccounts())
-                .cashBalances(getCashBalances())
-                .assets(getAssets())
-                .trades(getTradesAndTransfers().trades)
-                .transfer(getTradesAndTransfers().transfers)
-                .payments(getPayments())
-                .cashFlows(getCashFlows())
-                .vndInvestbook(getVndInvestbook())
-                .build();
+        try {
+            return PortfolioOpenFormatV1_1_0.builder()
+                    .end(getLatestEventTimestamp())
+                    .accounts(getAccounts())
+                    .cashBalances(getCashBalances())
+                    .assets(getAssets())
+                    .trades(getTradesAndTransfers().trades)
+                    .transfer(getTradesAndTransfers().transfers)
+                    .payments(getPayments())
+                    .cashFlows(getCashFlows())
+                    .vndInvestbook(getVndInvestbook())
+                    .build();
+        } finally {
+            AccountPof.resetAccountIdGenerator(); // release mem
+        }
     }
 
     private long getLatestEventTimestamp() {
