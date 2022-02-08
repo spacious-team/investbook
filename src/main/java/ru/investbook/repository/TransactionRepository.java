@@ -283,7 +283,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
                 AND timestamp between :from AND :to
                 AND count > 0
             """)
-    Long findBySecurityIdAndPkPortfolioAndTimestampBetweenBuyCount(
+    Long findBySecurityIdAndPortfolioAndTimestampBetweenBuyCount(
             @Param("security") Security security,
             @Param("portfolio") Portfolio portfolio,
             @Param("from") Instant fromDate,
@@ -299,7 +299,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
                 AND timestamp between :from AND :to
                 AND count < 0
             """)
-    Long findBySecurityIdAndPkPortfolioAndTimestampBetweenCellCount(
+    Long findBySecurityIdAndPortfolioAndTimestampBetweenCellCount(
             @Param("security") Security security,
             @Param("portfolio") Portfolio portfolio,
             @Param("from") Instant fromDate,
@@ -315,6 +315,21 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             """)
     Collection<TransactionEntity> findByPortfolioAndTimestampBetweenDepositAndWithdrawalTransactions(
             @Param("portfolio") Portfolio portfolio,
+            @Param("from") Instant fromDate,
+            @Param("to") Instant toDate);
+
+    @Query("""
+            SELECT t FROM TransactionEntity t
+            LEFT OUTER JOIN TransactionCashFlowEntity c
+                ON t.id = c.transactionId
+            WHERE c.cashFlowType IS NULL
+                AND t.portfolio = :portfolio
+                AND t.security.id = :security
+                AND t.timestamp between :from AND :to
+            """)
+    Collection<TransactionEntity> findByPortfolioAndSecurityIdAndTimestampBetweenDepositAndWithdrawalTransactions(
+            @Param("portfolio") String portfolio,
+            @Param("security") int security,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
