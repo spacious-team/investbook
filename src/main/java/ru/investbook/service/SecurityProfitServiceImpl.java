@@ -26,6 +26,7 @@ import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Service;
 import ru.investbook.converter.SecurityQuoteConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
+import ru.investbook.entity.TransactionEntity;
 import ru.investbook.report.ClosedPosition;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.ForeignExchangeRateService;
@@ -41,6 +42,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Deque;
@@ -49,6 +51,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.lang.Math.signum;
 import static org.spacious_team.broker.pojo.SecurityType.CURRENCY_PAIR;
 import static org.springframework.util.StringUtils.hasLength;
 
@@ -56,6 +59,7 @@ import static org.springframework.util.StringUtils.hasLength;
 @RequiredArgsConstructor
 public class SecurityProfitServiceImpl implements SecurityProfitService {
 
+    private final ZoneId zoneId = ZoneId.systemDefault();
     private final Set<Integer> priceAndAccruedInterestTypes = Set.of(CashFlowType.PRICE.getId(), CashFlowType.ACCRUED_INTEREST.getId());
     private final SecurityRepository securityRepository;
     private final TransactionRepository transactionRepository;
@@ -100,7 +104,8 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
 
     /**
      * Разница цен продаж и покупок. Не учитывается цена покупки, если ЦБ выведена со счета, не учитывается цена
-     * продажи, если ЦБ введена на счет
+     * продажи, если ЦБ введена на счет (исключение - ввод/вывод бумаг в рамках сплита акции,
+     * в этом случае цены открытия позиции учитываются).
      */
     private BigDecimal getStockOrBondPurchaseCost(FifoPositions positions, String toCurrency) {
         BigDecimal purchaseCost = positions.getOpenedPositions()
@@ -117,12 +122,15 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                     .map(value -> value.multiply(getClosedAmountMultiplier(closedPosition)))
                     .orElse(null);
             if (openPrice != null && closePrice != null) {
-                // если ценная бумага не вводилась и не выводилась со счета, а была куплена и продана
+                // Если ценная бумага не вводилась и не выводилась со счета, а была куплена и продана
                 // (есть цены покупки и продажи)
                 purchaseCost = purchaseCost.add(openPrice).add(closePrice);
             } else if (openPrice != null && closedPosition.getClosingEvent() == CashFlowType.REDEMPTION) {
-                // Событие погашение не имеет цену закрытия (событие CashFlowType.PRICE), учитываем цену открытия,
+                // Событие погашения не имеет цену закрытия (нет события CashFlowType.PRICE), учитываем цену открытия,
                 // цена закрытия будет учтена ниже из объектов 'SecurityEventCashFlow'
+                purchaseCost = purchaseCost.add(openPrice);
+            } else if (openPrice != null && isStockSplit(closedPosition.getCloseTransaction())) {
+                // Сплит акций, акции не выводятся, нужно учитывать цену покупки
                 purchaseCost = purchaseCost.add(openPrice);
             }
         }
@@ -131,6 +139,23 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                 .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency))
                 .map(BigDecimal::abs)
                 .reduce(purchaseCost, BigDecimal::add);
+    }
+
+    private boolean isStockSplit(Transaction transaction) {
+        if (!transactionCashFlowRepository.isDepositOrWithdrawal(transaction.getId())) {
+            return false;
+        }
+        LocalDate transactionDay = LocalDate.ofInstant(transaction.getTimestamp(), zoneId);
+        Collection<TransactionEntity> depositAndWithdrawalDuringTheDay =
+                transactionRepository.findByPortfolioAndSecurityIdAndTimestampBetweenDepositAndWithdrawalTransactions(
+                        transaction.getPortfolio(),
+                        transaction.getSecurity(),
+                        transactionDay.atStartOfDay(zoneId).toInstant(),
+                        transactionDay.atTime(LocalTime.MAX).atZone(zoneId).toInstant());
+        long oppositeDepositOrWithdrawalEventsDuringTheDay = depositAndWithdrawalDuringTheDay.stream()
+                .filter(t -> signum(t.getCount()) != signum(transaction.getCount()))
+                .count();
+        return oppositeDepositOrWithdrawalEventsDuringTheDay > 0;
     }
 
     @Override

@@ -32,6 +32,12 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public interface TransactionCashFlowRepository extends JpaRepository<TransactionCashFlowEntity, Integer> {
 
+    default boolean isDepositOrWithdrawal(int transactionId) {
+        return countByTransactionId(transactionId) == 0;
+    }
+
+    int countByTransactionId(int transactionId);
+
     List<TransactionCashFlowEntity> findByTransactionId(int transactionId);
 
     @Query(nativeQuery = true, value = """
