@@ -107,8 +107,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                 .stream()
                 .map(openPosition -> getTransactionValue(openPosition.getOpenTransaction(), CashFlowType.PRICE, toCurrency)
                         .map(value -> value.multiply(getOpenAmountMultiplier(openPosition))))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .reduce(BigDecimal.ZERO, BigDecimal::add); // если ценная бумага не вводилась на счет, а была куплена (есть цена покупки)
         for (ClosedPosition closedPosition : positions.getClosedPositions()) {
             BigDecimal openPrice = getTransactionValue(closedPosition.getOpenTransaction(), CashFlowType.PRICE, toCurrency)
@@ -116,12 +115,15 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                     .orElse(null);
             BigDecimal closePrice = getTransactionValue(closedPosition.getCloseTransaction(), CashFlowType.PRICE, toCurrency)
                     .map(value -> value.multiply(getClosedAmountMultiplier(closedPosition)))
-                    // redemption closing price will be taken into account later
-                    .orElseGet(() -> (closedPosition.getClosingEvent() == CashFlowType.REDEMPTION) ? BigDecimal.ZERO : null);
+                    .orElse(null);
             if (openPrice != null && closePrice != null) {
                 // если ценная бумага не вводилась и не выводилась со счета, а была куплена и продана
                 // (есть цены покупки и продажи)
                 purchaseCost = purchaseCost.add(openPrice).add(closePrice);
+            } else if (openPrice != null && closedPosition.getClosingEvent() == CashFlowType.REDEMPTION) {
+                // Событие погашение не имеет цену закрытия (событие CashFlowType.PRICE), учитываем цену открытия,
+                // цена закрытия будет учтена ниже из объектов 'SecurityEventCashFlow'
+                purchaseCost = purchaseCost.add(openPrice);
             }
         }
         return positions.getRedemptions()
