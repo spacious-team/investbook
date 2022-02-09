@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
+import ru.investbook.web.forms.model.SplitModel;
 import ru.investbook.web.forms.model.TransactionModel;
 import ru.investbook.web.forms.service.TransactionFormsService;
 
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/security-deposit")
-public class SecurityDepositController extends TransactionController{
+public class SecurityDepositController extends TransactionController {
 
     public SecurityDepositController(TransactionFormsService transactionFormsService,
                                      PortfolioRepository portfolioRepository, SecurityRepository securityRepository,
@@ -63,6 +64,14 @@ public class SecurityDepositController extends TransactionController{
         return "security-deposit/edit-form";
     }
 
+    @GetMapping("/create-split-form")
+    public String getCreateSplitForm(Model model) {
+        model.addAttribute("split", new SplitModel());
+        model.addAttribute("securities", securities);
+        model.addAttribute("portfolios", portfolios);
+        return "security-deposit/create-split-form";
+    }
+
     /**
      * Saves transaction to storage
      *
@@ -73,6 +82,14 @@ public class SecurityDepositController extends TransactionController{
     public String postTransaction(@Valid @ModelAttribute("transaction") TransactionModel transaction) {
         super.postTransaction(transaction);
         return "security-deposit/view-single";
+    }
+
+    @PostMapping("split")
+    public String postSplit(@Valid @ModelAttribute("split") SplitModel splitModel) {
+        selectedPortfolio = splitModel.getPortfolio();
+        transactionFormsService.save(splitModel);
+        fifoPositionsFactory.invalidateCache();
+        return "security-deposit/view-split";
     }
 
     @GetMapping("/delete")

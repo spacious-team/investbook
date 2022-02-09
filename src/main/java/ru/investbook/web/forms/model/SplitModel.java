@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -19,39 +19,50 @@
 package ru.investbook.web.forms.model;
 
 import lombok.Data;
-import org.springframework.lang.Nullable;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
+/**
+ * Only for new split events
+ */
 @Data
-public class SecurityDescriptionModel {
-
-    @Nullable
-    private Integer securityId;
-    /**
-     * In "name (isin)" or "contract-name" format
-     */
-    @NotEmpty
-    private String security = "Наименование (XX0000000000)";
+public class SplitModel {
 
     @NotEmpty
-    private String sector;
+    private String portfolio;
 
     @NotNull
-    private SecurityType securityType;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate date = LocalDate.now();
 
-    public void setSecurity(Integer securityId, String securityIsin, String securityName, SecurityType securityType) {
-        this.securityId = securityId;
-        this.security = SecurityHelper.getSecurityDescription(securityIsin, securityName, securityType);
-        this.securityType = securityType;
-    }
+    @NotNull
+    @DateTimeFormat(pattern = "HH:mm")
+    private LocalTime time = LocalTime.NOON;
+
+    /**
+     * In "name (isin)" format
+     */
+    @NotEmpty
+    private String security;
+
+    @NotNull
+    @Positive
+    private int withdrawalCount;
+
+    @NotNull
+    @Positive
+    private int depositCount;
 
     /**
      * Returns Name from template "Name (ISIN)" for stock and bond, code for derivative, securityName for asset
      */
     public String getSecurityName() {
-        return SecurityHelper.getSecurityName(security, securityType);
+        return SecurityHelper.getSecurityName(security, SecurityType.SHARE);
     }
 
     /**
@@ -59,5 +70,12 @@ public class SecurityDescriptionModel {
      */
     public String getSecurityIsin() {
         return SecurityHelper.getSecurityIsin(security);
+    }
+
+    public String getTradeId() {
+        String tradeId = getSecurityIsin() +
+                date.toEpochDay() +
+                portfolio.replaceAll(" ", "");
+        return tradeId.substring(0, Math.min(32, tradeId.length()));
     }
 }

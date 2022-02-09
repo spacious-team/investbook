@@ -29,6 +29,7 @@ import ru.investbook.web.forms.model.SecurityEventCashFlowModel;
 import ru.investbook.web.forms.model.SecurityHelper;
 import ru.investbook.web.forms.model.SecurityQuoteModel;
 import ru.investbook.web.forms.model.SecurityType;
+import ru.investbook.web.forms.model.SplitModel;
 import ru.investbook.web.forms.model.TransactionModel;
 
 import java.util.Objects;
@@ -75,6 +76,14 @@ public class SecurityRepositoryHelper {
      */
     public int saveAndFlushSecurity(TransactionModel m) {
         return saveAndFlush(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
+    }
+
+    /**
+     * Generate securityId if needed, save security to DB, update securityId for model if needed
+     * @return saved security id
+     */
+    public int saveAndFlushSecurity(SplitModel m) {
+        return saveAndFlush(m.getSecurityIsin(), m.getSecurityName(), SecurityType.SHARE);
     }
 
     /**

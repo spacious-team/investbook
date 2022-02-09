@@ -20,8 +20,7 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title th:if="${transaction.id == null}">Новая запись</title>
-    <title th:unless="${transaction.id == null}">Редактировать запись</title>
+    <title>Добавить сплит акции</title>
     <script type="text/javascript" src="/moex.js"></script>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
@@ -30,40 +29,33 @@
         form {
             width: 750px
         }
-        .action {
-            width: 140px;
+        #time {
+            width: 86px;
         }
-        #security {
-            width: 405px;
+        #portfolio {
+            width: 137px;
         }
     </style>
 </head>
 <body>
 
-<h1 th:if="${transaction.id == null}">Новая запись</h1>
-<h1 th:unless="${transaction.id == null}">Редактировать запись</h1>
-<form action="#" th:action="@{/security-deposit}" th:object="${transaction}" method="post">
+<h1>Добавить сплит акции</h1>
+<form action="#" th:action="@{/security-deposit/split}" th:object="${split}" method="post">
     <label>
-        <input type="hidden" th:field="*{id}"/>
+        Дата
+        <input type="date" th:field="*{date}" required/>
     </label>
     <label>
-        Дата исполнения
-        <input type="date" th:field="*{date}" required/>
+        Время
+        <input type="time" th:field="*{time}" required/>
     </label>
     <label>
         Счет
         <input type="text" th:field="*{portfolio}" list="portfolios" class="portfolio" required/>
     </label>
     <label>
-        Операция
-        <select th:field="*{action}" class="action" required>
-            <option value="BUY" selected>Зачислено</option>
-            <option value="CELL">Списано</option>
-        </select>
-    </label>
-    <label>
-        Количество, шт
-        <input type="number" min="1" th:field="*{count}" required/>
+        Списано, шт
+        <input type="number" min="1" th:field="*{withdrawalCount}" required/>
     </label>
     <br/>
     <label>
@@ -77,8 +69,8 @@
         </svg>
     </a>
     <label>
-        Номер записи
-        <input type="text" th:field="*{tradeId}" placeholder="<не знаю>"/>
+        Зачислено, шт
+        <input type="number" min="1" th:field="*{depositCount}" required/>
     </label>
     <br/>
     <input type="hidden" id="securityType" name="securityType" value="SHARE"/>
@@ -93,13 +85,18 @@
 </form>
 
 <p class="hint">
-    Дата исполнения - это дата поставки бумаги.
+    Дата - это дата поставки бумаги.
 </p>
 
 <p class="hint">
-    Инструмент: для акций, облигаций, ETF и других инструментов, имеющих ISIN, после наименования инструмента необходимо
-    в скобках указать ISIN, например "Яндекс (NL0009805522)". Если в выпадающем списке не появляется бумага с ISIN,
-    то наберите часть наименования и нажмите на символ "Лупы". Бумага и ISIN подгрузятся с
+    Время сплита позволяет разделять сделки, совершенные в тот же торговый день до и после сплита.
+    Время указывать в вашей временной зоне.
+</p>
+
+<p class="hint">
+    Инструмент: После наименования инструмента необходимо в скобках указать ISIN, например "Яндекс (NL0009805522)".
+    Если в выпадающем списке не появляется бумага с ISIN, то наберите часть наименования и нажмите на символ "Лупы".
+    Бумага и ISIN подгрузятся с
     <a href="http://iss.moex.com/iss/securities?securities.columns=secid,name,isin,emitent_inn&group_by=group&group_by_filter=stock_shares">
         МосБиржи</a> при продолжении ввода, если существует совпадение. Если ISIN не известен, то можете указать
     "XX0000000000" (используется латинская "X"), например "Яндекс (XX0000000000)".
