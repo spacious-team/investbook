@@ -83,6 +83,10 @@ public interface FifoPositionsFilter {
         return of(singleton(portfolio.getId()), from, to);
     }
 
+    static FifoPositionsFilter of(String portfolio, Instant from, Instant to) {
+        return of(singleton(portfolio), from, to);
+    }
+
     static FifoPositionsFilter of(Collection<String> portfolios, Instant from, Instant to) {
          return new FifoPositionsFilter() {
             @Override

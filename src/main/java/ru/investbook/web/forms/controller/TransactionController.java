@@ -46,10 +46,10 @@ public class TransactionController {
     protected final TransactionFormsService transactionFormsService;
     private final PortfolioRepository portfolioRepository;
     private final SecurityRepository securityRepository;
-    private final FifoPositionsFactory fifoPositionsFactory;
-    private volatile Collection<String> securities;
-    private volatile Collection<String> portfolios;
-    private volatile String selectedPortfolio;
+    protected final FifoPositionsFactory fifoPositionsFactory;
+    protected volatile Collection<String> securities;
+    protected volatile Collection<String> portfolios;
+    protected volatile String selectedPortfolio;
 
     @PostConstruct
     public void start() {
