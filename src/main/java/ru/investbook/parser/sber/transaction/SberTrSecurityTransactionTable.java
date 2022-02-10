@@ -73,7 +73,8 @@ public class SberTrSecurityTransactionTable extends AbstractReportTable<Abstract
                 .value(value)
                 .accruedInterest(accruedInterest)
                 .commission(row.getBigDecimalCellValue(MARKET_COMMISSION)
-                        .add(row.getBigDecimalCellValue(BROKER_COMMISSION)))
+                        .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
+                        .negate())
                 .valueCurrency(currency)
                 .commissionCurrency(currency)
                 .build();
@@ -97,6 +98,7 @@ public class SberTrSecurityTransactionTable extends AbstractReportTable<Abstract
 
         @Getter
         private final TableColumn column;
+
         SberTransactionTableHeader(String words) {
             this.column = TableColumnImpl.of(words);
         }
