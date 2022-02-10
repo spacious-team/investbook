@@ -38,7 +38,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
-import java.util.Collections;
+import java.util.Set;
 
 import static ru.investbook.web.HttpAttachResponseHelper.sendErrorPage;
 import static ru.investbook.web.HttpAttachResponseHelper.sendSuccessHeader;
@@ -84,8 +84,8 @@ public class PortfolioOpenFormatRestController {
             log.info("Выполнено восстановление данных из бэкапа за {}", Duration.ofNanos(System.nanoTime() - t0));
             return ok();
         } catch (Exception e) {
-            log.error("Ошибка восстановления данных из бэкапа");
-            return errorPage("Возможно это не файл в формате \"Open Portfolio Format\"", Collections.emptyList());
+            log.error("Ошибка восстановления данных из бэкапа", e);
+            return errorPage("Возможно это не файл в формате \"Open Portfolio Format\"", Set.of(e));
         }
     }
 
