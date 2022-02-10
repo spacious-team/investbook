@@ -27,6 +27,7 @@ import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.lang.Nullable;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 
@@ -115,12 +116,18 @@ public class PaymentPof {
                 .build();
     }
 
-    Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId) {
+    Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId,
+                                                               Map<Integer, SecurityType> assetTypes) {
         try {
+            SecurityType securityType = Objects.requireNonNull(assetTypes.get(asset));
+            CashFlowType eventType = type.toCashFlowType();
+            if (securityType == SecurityType.BOND && eventType == CashFlowType.DIVIDEND) {
+                eventType = CashFlowType.COUPON; // izi-invest.ru fix: не различает дивиденды и купоны (type = other)
+            }
             SecurityEventCashFlow cashFlow = SecurityEventCashFlow.builder()
                     .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
                     .security(asset)
-                    .eventType(type.toCashFlowType())
+                    .eventType(eventType)
                     .count(count.intValueExact())
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .value(amount)
