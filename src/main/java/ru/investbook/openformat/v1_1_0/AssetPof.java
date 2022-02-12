@@ -32,6 +32,8 @@ import ru.investbook.entity.SecurityEntity;
 import javax.validation.constraints.NotNull;
 import java.util.Optional;
 
+import static ru.investbook.openformat.OpenFormatHelper.getValidIsinOrNull;
+
 @Jacksonized
 @Builder
 @Value
@@ -78,11 +80,12 @@ class AssetPof {
                     .type(SecurityTypeHelper.getSecurityType(type))
                     .ticker(symbol)
                     .name(name)
-                    .isin(isin)
+                    .isin(getValidIsinOrNull(isin))
                     .build());
         } catch (Exception e) {
             log.error("Не могу распарсить {}", this, e);
             return Optional.empty();
         }
     }
+
 }

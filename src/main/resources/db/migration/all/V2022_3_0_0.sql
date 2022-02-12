@@ -16,26 +16,4 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.openformat;
-
-import org.springframework.util.StringUtils;
-
-import java.util.Objects;
-import java.util.regex.Pattern;
-
-public class OpenFormatHelper {
-
-    private static final Pattern isinPattern = Pattern.compile("^[A-Z]{2}[A-Z0-9]{9}[0-9]$");
-
-    public static String getValidCurrencyOrNull(String currency) {
-        if (currency == null) return null;
-        currency = currency.toUpperCase();
-        return Objects.equals(currency, "RUR") ? "RUB" : currency;
-    }
-
-    public static String getValidIsinOrNull(String isin) {
-        return StringUtils.hasLength(isin) && isinPattern.matcher(isin).matches() ?
-                isin :
-                null;
-    }
-}
+UPDATE `security` SET `isin` = null WHERE `isin` NOT REGEXP '^[A-Z]{2}[A-Z0-9]{9}[0-9]';
