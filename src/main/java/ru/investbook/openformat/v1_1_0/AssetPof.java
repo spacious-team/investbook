@@ -27,12 +27,12 @@ import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
 import ru.investbook.entity.SecurityEntity;
 
 import javax.validation.constraints.NotNull;
 import java.util.Optional;
-import java.util.regex.Pattern;
+
+import static ru.investbook.openformat.OpenFormatHelper.getValidIsinOrNull;
 
 @Jacksonized
 @Builder
@@ -41,8 +41,6 @@ import java.util.regex.Pattern;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Slf4j
 class AssetPof {
-
-    private static final Pattern isinPattern = Pattern.compile("^[A-Z]{2}[A-Z0-9]{9}[0-9]$");
 
     @NotNull
     @JsonProperty("id")
@@ -82,7 +80,7 @@ class AssetPof {
                     .type(SecurityTypeHelper.getSecurityType(type))
                     .ticker(symbol)
                     .name(name)
-                    .isin(getValidIsinOrNull())
+                    .isin(getValidIsinOrNull(isin))
                     .build());
         } catch (Exception e) {
             log.error("Не могу распарсить {}", this, e);
@@ -90,9 +88,4 @@ class AssetPof {
         }
     }
 
-    private String getValidIsinOrNull() {
-        return StringUtils.hasLength(isin) && isinPattern.matcher(isin).matches() ?
-                isin :
-                null;
-    }
 }

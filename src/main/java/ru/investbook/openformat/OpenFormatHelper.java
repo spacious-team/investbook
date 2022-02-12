@@ -18,9 +18,14 @@
 
 package ru.investbook.openformat;
 
+import org.springframework.util.StringUtils;
+
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class OpenFormatHelper {
+
+    private static final Pattern isinPattern = Pattern.compile("^[A-Z]{2}[A-Z0-9]{9}[0-9]$");
 
     public static String getValidCurrencyOrNull(String currency) {
         if (currency == null) return null;
@@ -28,4 +33,9 @@ public class OpenFormatHelper {
         return Objects.equals(currency, "RUR") ? "RUB" : currency;
     }
 
+    public static String getValidIsinOrNull(String isin) {
+        return StringUtils.hasLength(isin) && isinPattern.matcher(isin).matches() ?
+                isin :
+                null;
+    }
 }
