@@ -21,6 +21,7 @@ package ru.investbook.parser.sber;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
+import org.springframework.util.StringUtils;
 import ru.investbook.parser.SecurityRegistrar;
 
 import java.util.regex.Pattern;
@@ -29,7 +30,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class SecurityHelper {
 
-    private static final Pattern isinReplacePattern = Pattern.compile("[^A-Z0-9]");
+    private static final Pattern isinPattern = Pattern.compile("^[A-Z]{2}[A-Z0-9]{9}[0-9]$");
 
     public static Security getSecurity(String code, String securityName, String section, String type, SecurityRegistrar securityRegistrar) {
         String securityId = getSecurityId(code, section);
@@ -41,7 +42,9 @@ public class SecurityHelper {
                 security
                         .isin(securityId)
                         .name(securityName);
-                id = securityRegistrar.declareStockOrBond(securityId, () -> security);
+                id = securityId != null ?
+                        securityRegistrar.declareStockOrBond(securityId, () -> security) :
+                        securityRegistrar.declareStockOrBondByName(securityName, () -> security);
             }
             case DERIVATIVE -> {
                 security.ticker(securityId);
@@ -67,19 +70,16 @@ public class SecurityHelper {
         int start = nameAndIsin.indexOf('(') + 1;
         int end = nameAndIsin.indexOf(')');
         String id = nameAndIsin.substring(start, (end == -1) ? nameAndIsin.length() : end);
-        if (id.length() != 12 && "Фондовый рынок".equalsIgnoreCase(section)) {
-            id = isinReplacePattern.matcher(id.toUpperCase()).replaceAll("");
-            if (id.length() > 12) {
-                log.warn("Код инструмента '{}' фондового рынка более 12 символов, обрезаю, " +
-                        "отредактируйте ISIN через API", id);
-                id = id.substring(0, 12);
-            } else {
-                log.warn("Код инструмента '{}' фондового рынка менее 12 символов, дополняю справа знаками '0', " +
-                        "отредактируйте ISIN через API", id);
-                id += "0".repeat(12 - id.length());
-            }
+        if ("Фондовый рынок".equalsIgnoreCase(section)) {
+            return getValidIsinOrNull(id);
         }
         return id;
+    }
+
+    private static String getValidIsinOrNull(String isin) {
+        return StringUtils.hasLength(isin) && isinPattern.matcher(isin).matches() ?
+                isin :
+                null;
     }
 
     public static String getSecurityName(String nameAndIsin) {
