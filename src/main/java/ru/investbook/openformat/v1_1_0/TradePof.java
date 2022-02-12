@@ -185,7 +185,7 @@ public class TradePof {
                         .valueCurrency(requireNonNull(currency));
             };
 
-            long ts = requireNonNull((timestamp != null) ? timestamp : settlement);
+            long ts = requireNonNull((settlement != null) ? settlement : timestamp);
             return Optional.of(builder
                     .tradeId(tradeId)
                     .portfolio(requireNonNull(accountToPortfolioId.get(account)))
