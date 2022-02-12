@@ -157,9 +157,10 @@ public class TradePof {
         transactionCashFlows.stream()
                 .filter(e -> e.getCashFlowType().getId() == COMMISSION.getId())
                 .findAny()
-                .ifPresent(e -> builder
+                .ifPresentOrElse(e -> builder
                         .fee(e.getValue().negate())
-                        .feeCurrency(e.getCurrency()));
+                        .feeCurrency(e.getCurrency()),
+                        () -> builder.fee(BigDecimal.ZERO).feeCurrency("RUB"));
         return builder.build();
     }
 
