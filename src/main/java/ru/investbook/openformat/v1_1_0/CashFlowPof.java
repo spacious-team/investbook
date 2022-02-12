@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
+
 @Jacksonized
 @Builder
 @Value
@@ -100,7 +102,7 @@ public class CashFlowPof {
                     .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .value(amount)
-                    .currency(currency)
+                    .currency(getValidCurrencyOrNull(currency))
                     .eventType(eventType)
                     .description(description)
                     .build());

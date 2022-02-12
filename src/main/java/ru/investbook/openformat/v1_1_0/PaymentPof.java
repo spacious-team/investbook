@@ -42,6 +42,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
+
 @Jacksonized
 @Builder
 @Value
@@ -131,14 +133,14 @@ public class PaymentPof {
                     .count(count.intValueExact())
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .value(amount)
-                    .currency(currency)
+                    .currency(getValidCurrencyOrNull(currency))
                     .build();
             if (tax != null && Math.abs(tax.floatValue()) > 0.0001) {
                 return Set.of(cashFlow,
                         cashFlow.toBuilder()
                                 .eventType(CashFlowType.TAX)
                                 .value(tax.negate())
-                                .currency(taxCurrency)
+                                .currency(getValidCurrencyOrNull(taxCurrency))
                                 .build());
             } else {
                 return Set.of(cashFlow);
