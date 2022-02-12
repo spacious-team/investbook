@@ -225,6 +225,7 @@ public class ForeignExchangeRateService {
     private static BigDecimal getDefaultExchangeRate(String currency) {
         BigDecimal exchangeRate;
         exchangeRate = switch (currency) {
+            case "RUR" -> BigDecimal.ONE;
             case "EUR" -> BigDecimal.valueOf(90);
             case "GBP" -> BigDecimal.valueOf(100);
             default -> BigDecimal.valueOf(80);

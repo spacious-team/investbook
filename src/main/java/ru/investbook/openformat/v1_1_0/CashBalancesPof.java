@@ -42,8 +42,8 @@ import java.util.stream.Collectors;
 public class CashBalancesPof {
 
     @NotNull
-    @JsonProperty("id")
-    int id;
+    @JsonProperty("account")
+    int account;
 
     @NotNull
     @Builder.Default
@@ -64,7 +64,7 @@ public class CashBalancesPof {
 
     static CashBalancesPof of(int account, Collection<PortfolioCashEntity> cashBalances) {
         return CashBalancesPof.builder()
-                .id(account)
+                .account(account)
                 .cash(getCashBalances(cashBalances))
                 .build();
     }

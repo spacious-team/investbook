@@ -44,7 +44,7 @@
             по <span th:text="${portfolios.size()}"></span> счетам
         </span>
         </div>
-        <a href="/portfolios/archive" class="cell">
+        <a href="/portfolio-open-format/index.html" class="cell">
             <p>Счета</p>
             <span class="portfolios"
                   th:text="${T(java.lang.String).join(', ', T(java.util.List).copyOf(portfolios).subList(0, T(java.lang.Math).min(3, portfolios.size())))}"></span><span

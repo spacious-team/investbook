@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
+
 @Jacksonized
 @Builder
 @Value
@@ -92,12 +94,16 @@ public class CashFlowPof {
 
     Optional<EventCashFlow> toEventCashFlow(Map<Integer, String> accountToPortfolioId) {
         try {
+            CashFlowType eventType = type.toCashFlowType();
+            if (eventType == CashFlowType.DIVIDEND && description != null && description.contains("купон")) {
+                eventType = CashFlowType.COUPON; // izi-invest.ru fix: не различает дивиденды и купоны
+            }
             return Optional.of(EventCashFlow.builder()
                     .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .value(amount)
-                    .currency(currency)
-                    .eventType(type.toCashFlowType())
+                    .currency(getValidCurrencyOrNull(currency))
+                    .eventType(eventType)
                     .description(description)
                     .build());
         } catch (Exception e) {

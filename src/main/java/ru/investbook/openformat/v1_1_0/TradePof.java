@@ -45,6 +45,7 @@ import java.util.Optional;
 import static java.math.RoundingMode.HALF_UP;
 import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
+import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 
 @Jacksonized
 @Builder
@@ -157,9 +158,10 @@ public class TradePof {
         transactionCashFlows.stream()
                 .filter(e -> e.getCashFlowType().getId() == COMMISSION.getId())
                 .findAny()
-                .ifPresent(e -> builder
+                .ifPresentOrElse(e -> builder
                         .fee(e.getValue().negate())
-                        .feeCurrency(e.getCurrency()));
+                        .feeCurrency(e.getCurrency()),
+                        () -> builder.fee(BigDecimal.ZERO).feeCurrency("RUB"));
         return builder.build();
     }
 
@@ -175,17 +177,17 @@ public class TradePof {
                 case STOCK, BOND, STOCK_OR_BOND, ASSET -> SecurityTransaction.builder()
                         .value(requireNonNull(price).multiply(count).negate())
                         .accruedInterest((accruedInterest == null) ? null : accruedInterest.multiply(count).negate())
-                        .valueCurrency(requireNonNull(currency));
+                        .valueCurrency(getValidCurrencyOrNull(requireNonNull(currency)));
                 case DERIVATIVE -> DerivativeTransaction.builder()
                         .valueInPoints(requireNonNull(quote).multiply(count).negate())
                         .value((price == null) ? null : price.multiply(count).negate()) // для деривативов - опциональное
-                        .valueCurrency(currency); // для деривативов - опциональное
+                        .valueCurrency(getValidCurrencyOrNull(currency)); // для деривативов - опциональное
                 case CURRENCY_PAIR -> ForeignExchangeTransaction.builder()
                         .value(requireNonNull(price).multiply(count).negate())
-                        .valueCurrency(requireNonNull(currency));
+                        .valueCurrency(getValidCurrencyOrNull(requireNonNull(currency)));
             };
 
-            long ts = requireNonNull((timestamp != null) ? timestamp : settlement);
+            long ts = requireNonNull((settlement != null) ? settlement : timestamp);
             return Optional.of(builder
                     .tradeId(tradeId)
                     .portfolio(requireNonNull(accountToPortfolioId.get(account)))
@@ -193,7 +195,7 @@ public class TradePof {
                     .count(count.intValueExact())
                     .timestamp(Instant.ofEpochSecond(ts))
                     .commission((fee == null) ? null : fee.negate())
-                    .commissionCurrency(feeCurrency)
+                    .commissionCurrency(getValidCurrencyOrNull(feeCurrency))
                     .build());
         } catch (Exception e) {
             log.error("Не могу распарсить {}", this, e);

@@ -92,8 +92,10 @@ public class AccountPof {
 
     Optional<Portfolio> toPortfolio() {
         try {
+            String portfolioId = Optional.ofNullable(accountNumber)
+                    .orElse(String.valueOf(id));
             return Optional.of(Portfolio.builder()
-                    .id(Objects.requireNonNull(accountNumber))
+                    .id(portfolioId)
                     .build());
         } catch (Exception e) {
             log.error("Не могу распарсить {}", this, e);

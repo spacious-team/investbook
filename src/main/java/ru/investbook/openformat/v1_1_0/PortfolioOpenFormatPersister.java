@@ -85,7 +85,7 @@ public class PortfolioOpenFormatPersister {
 
         tasks.add(() -> object.getPayments()
                 .parallelStream()
-                .map(t -> t.getSecurityEventCashFlow(accountToPortfolioId))
+                .map(t -> t.getSecurityEventCashFlow(accountToPortfolioId, assetTypes))
                 .flatMap(Collection::stream)
                 .forEach(api::addSecurityEventCashFlow));
 
