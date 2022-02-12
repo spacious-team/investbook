@@ -42,9 +42,9 @@ public class SecurityHelper {
                 security
                         .isin(securityId)
                         .name(securityName);
-                id = securityId != null ?
-                        securityRegistrar.declareStockOrBond(securityId, () -> security) :
-                        securityRegistrar.declareStockOrBondByName(securityName, () -> security);
+                id = (securityId == null) ?
+                        securityRegistrar.declareStockOrBondByName(securityName, () -> security) :
+                        securityRegistrar.declareStockOrBond(securityId, () -> security);
             }
             case DERIVATIVE -> {
                 security.ticker(securityId);
