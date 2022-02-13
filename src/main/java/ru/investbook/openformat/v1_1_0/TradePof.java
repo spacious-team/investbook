@@ -48,7 +48,7 @@ import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 
 @Jacksonized
-@Builder
+@Builder(toBuilder = true)
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
