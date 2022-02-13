@@ -182,6 +182,8 @@ public class TradePof {
                 .count(BigDecimal.valueOf(count))
                 .price(divide(redemption))
                 .currency(getValidCurrencyOrNull(redemption.getCurrency()))
+                .fee(BigDecimal.ZERO)
+                .feeCurrency("RUB")
                 .build();
     }
 
