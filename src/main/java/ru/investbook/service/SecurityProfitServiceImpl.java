@@ -111,15 +111,15 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
         BigDecimal purchaseCost = positions.getOpenedPositions()
                 .stream()
                 .map(openPosition -> getTransactionValue(openPosition.getOpenTransaction(), CashFlowType.PRICE, toCurrency)
-                        .map(value -> value.multiply(getOpenAmountMultiplier(openPosition))))
+                        .map(value -> getOpenAmount(value, openPosition)))
                 .flatMap(Optional::stream)
                 .reduce(BigDecimal.ZERO, BigDecimal::add); // если ценная бумага не вводилась на счет, а была куплена (есть цена покупки)
         for (ClosedPosition closedPosition : positions.getClosedPositions()) {
             BigDecimal openPrice = getTransactionValue(closedPosition.getOpenTransaction(), CashFlowType.PRICE, toCurrency)
-                    .map(value -> value.multiply(getOpenAmountMultiplier(closedPosition)))
+                    .map(value -> getOpenAmount(value, closedPosition))
                     .orElse(null);
             BigDecimal closePrice = getTransactionValue(closedPosition.getCloseTransaction(), CashFlowType.PRICE, toCurrency)
-                    .map(value -> value.multiply(getClosedAmountMultiplier(closedPosition)))
+                    .map(value -> getClosedAmount(value, closedPosition))
                     .orElse(null);
             if (openPrice != null && closePrice != null) {
                 // Если ценная бумага не вводилась и не выводилась со счета, а была куплена и продана
@@ -185,24 +185,26 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                 .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency));
     }
 
-    private BigDecimal getOpenAmountMultiplier(OpenedPosition openedPosition) {
+    private BigDecimal getOpenAmount(BigDecimal openingValue, OpenedPosition openedPosition) {
         int positionCount = Math.abs(openedPosition.getCount());
         int transactionCount = Math.abs(openedPosition.getOpenTransaction().getCount());
         if (positionCount == transactionCount) {
-            return BigDecimal.ONE;
+            return openingValue;
         } else {
-            return BigDecimal.valueOf(positionCount)
+            return openingValue
+                    .multiply(BigDecimal.valueOf(positionCount))
                     .divide(BigDecimal.valueOf(transactionCount), 6, RoundingMode.HALF_UP);
         }
     }
 
-    private BigDecimal getClosedAmountMultiplier(ClosedPosition closedPosition) {
+    private BigDecimal getClosedAmount(BigDecimal closingValue, ClosedPosition closedPosition) {
         int positionCount = Math.abs(closedPosition.getCount());
         int transactionCount = Math.abs(closedPosition.getCloseTransaction().getCount());
         if (positionCount == transactionCount) {
-            return BigDecimal.ONE;
+            return closingValue;
         } else {
-            return BigDecimal.valueOf(positionCount)
+            return closingValue
+                    .multiply(BigDecimal.valueOf(positionCount))
                     .divide(BigDecimal.valueOf(transactionCount), 6, RoundingMode.HALF_UP);
         }
     }
