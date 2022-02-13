@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 import ru.investbook.entity.TransactionEntity;
 
 import javax.validation.constraints.NotNull;
@@ -112,9 +113,8 @@ public class TransferPof {
 
     Optional<Transaction> toTransaction(Map<Integer, String> accountToPortfolioId) {
         try {
-            String tradeId = (transferId == null) ? timestamp + ":" + asset + ":" + account : transferId;
             return Optional.of(Transaction.builder()
-                    .tradeId(tradeId.endsWith(String.valueOf(account)) ? tradeId : tradeId + account)
+                    .tradeId(getTradeId())
                     .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .security(asset)
@@ -124,6 +124,16 @@ public class TransferPof {
             log.error("Не могу распарсить {}", this, e);
             return Optional.empty();
         }
+    }
+
+    private String getTradeId() {
+        String tradeId;
+        if (StringUtils.hasLength(transferId)) {
+            tradeId = transferId.endsWith(String.valueOf(account)) ? transferId : transferId + account;
+        } else {
+            tradeId = timestamp + ":" + asset + ":" + account;
+        }
+        return tradeId;
     }
 
     Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId) {
