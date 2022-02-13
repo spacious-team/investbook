@@ -52,6 +52,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PRICE;
@@ -167,6 +168,7 @@ public class PortfolioOpenFormatBuilder {
                 result.trades.add(TradePof.of(transaction, cashFlow));
             }
         }
+        addBondRedemptionsTo(result.trades);
         return result;
     }
 
@@ -181,10 +183,23 @@ public class PortfolioOpenFormatBuilder {
                                         e.getCashFlowType().getId() == DERIVATIVE_PRICE.getId()));
     }
 
+    private void addBondRedemptionsTo(Collection<TradePof> trades) {
+        int _maxTradeId = trades.stream()
+                .mapToInt(TradePof::getId)
+                .max()
+                .orElse(0);
+        AtomicInteger maxTradeId = new AtomicInteger(_maxTradeId);
+        securityEventCashFlowRepository.findByCashFlowTypeId(CashFlowType.REDEMPTION.getId())
+                .stream()
+                .map(redemption -> TradePof.of(redemption, maxTradeId.incrementAndGet()))
+                .forEach(trades::add);
+    }
+
     private Collection<PaymentPof> getPayments() {
         return securityEventCashFlowRepository.findAll()
                 .stream()
-                .filter(e -> e.getCashFlowType().getId() != CashFlowType.TAX.getId())
+                .filter(e -> e.getCashFlowType().getId() != CashFlowType.TAX.getId() &&
+                        e.getCashFlowType().getId() != CashFlowType.REDEMPTION.getId()) // bond redemptions saved as trades
                 .map(e -> PaymentPof.of(e, getPaymentTax(e)))
                 .toList();
     }

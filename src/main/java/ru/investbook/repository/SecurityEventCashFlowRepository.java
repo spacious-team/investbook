@@ -37,6 +37,8 @@ public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityE
     List<SecurityEventCashFlowEntity> findByPortfolioInOrderByPortfolioIdAscTimestampDescSecurityIdAsc(
             Collection<PortfolioEntity> portfolios);
 
+    List<SecurityEventCashFlowEntity> findByCashFlowTypeId(int type);
+
     Optional<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampAndCount(
             String portfolio,
             Integer securityId,

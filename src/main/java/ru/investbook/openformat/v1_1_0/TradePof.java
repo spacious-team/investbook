@@ -31,6 +31,8 @@ import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
 
@@ -165,8 +167,30 @@ public class TradePof {
         return builder.build();
     }
 
+    static TradePof of(SecurityEventCashFlowEntity redemption, int id) {
+        Assert.isTrue(redemption.getCashFlowType().getId() == REDEMPTION.getId(),
+                () -> "ожидается событие погашения облигации: " + redemption);
+        long settlement = redemption.getTimestamp().getEpochSecond();
+        int account = AccountPof.getAccountId(redemption.getPortfolio().getId());
+        int count = -Math.abs(redemption.getCount());
+        return TradePof.builder()
+                .id(id)
+                .tradeId(settlement + ":" + redemption.getSecurity().getId() + ":" + account)
+                .settlement(settlement)
+                .account(account)
+                .asset(redemption.getSecurity().getId())
+                .count(BigDecimal.valueOf(count))
+                .price(divide(redemption))
+                .currency(getValidCurrencyOrNull(redemption.getCurrency()))
+                .build();
+    }
+
     private static BigDecimal divide(TransactionCashFlowEntity e, int count) {
         return e.getValue().divide(BigDecimal.valueOf(Math.abs(count)), 6, HALF_UP);
+    }
+
+    private static BigDecimal divide(SecurityEventCashFlowEntity e) {
+        return e.getValue().divide(BigDecimal.valueOf(Math.abs(e.getCount())), 6, HALF_UP);
     }
 
     Optional<AbstractTransaction> toTransaction(Map<Integer, String> accountToPortfolioId,
