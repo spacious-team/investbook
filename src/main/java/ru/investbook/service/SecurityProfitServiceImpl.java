@@ -115,23 +115,23 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                 .flatMap(Optional::stream)
                 .reduce(BigDecimal.ZERO, BigDecimal::add); // если ценная бумага не вводилась на счет, а была куплена (есть цена покупки)
         for (ClosedPosition closedPosition : positions.getClosedPositions()) {
-            BigDecimal openPrice = getTransactionValue(closedPosition.getOpenTransaction(), CashFlowType.PRICE, toCurrency)
+            BigDecimal openAmount = getTransactionValue(closedPosition.getOpenTransaction(), CashFlowType.PRICE, toCurrency)
                     .map(value -> getOpenAmount(value, closedPosition))
                     .orElse(null);
-            BigDecimal closePrice = getTransactionValue(closedPosition.getCloseTransaction(), CashFlowType.PRICE, toCurrency)
+            BigDecimal closeAmount = getTransactionValue(closedPosition.getCloseTransaction(), CashFlowType.PRICE, toCurrency)
                     .map(value -> getClosedAmount(value, closedPosition))
                     .orElse(null);
-            if (openPrice != null && closePrice != null) {
+            if (openAmount != null && closeAmount != null) {
                 // Если ценная бумага не вводилась и не выводилась со счета, а была куплена и продана
                 // (есть цены покупки и продажи)
-                purchaseCost = purchaseCost.add(openPrice).add(closePrice);
-            } else if (openPrice != null && closedPosition.getClosingEvent() == CashFlowType.REDEMPTION) {
+                purchaseCost = purchaseCost.add(openAmount).add(closeAmount);
+            } else if (openAmount != null && closedPosition.getClosingEvent() == CashFlowType.REDEMPTION) {
                 // Событие погашения не имеет цену закрытия (нет события CashFlowType.PRICE), учитываем цену открытия,
                 // цена закрытия будет учтена ниже из объектов 'SecurityEventCashFlow'
-                purchaseCost = purchaseCost.add(openPrice);
-            } else if (openPrice != null && isStockSplit(closedPosition.getCloseTransaction())) {
+                purchaseCost = purchaseCost.add(openAmount);
+            } else if (openAmount != null && isStockSplit(closedPosition.getCloseTransaction())) {
                 // Сплит акций, акции не выводятся, нужно учитывать цену покупки
-                purchaseCost = purchaseCost.add(openPrice);
+                purchaseCost = purchaseCost.add(openAmount);
             }
         }
         return positions.getRedemptions()
