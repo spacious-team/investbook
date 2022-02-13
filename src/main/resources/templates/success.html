@@ -26,7 +26,7 @@
 </head>
 <body>
     <h1 th:text="${title ?: 'Успешно'}"></h1>
-    <p th:if="${message != null}" th:text="${message}"></p>
+    <p th:if="${message != null}" th:utext="${message}"></p>
     <p>
         <a th:if="${backLink == null}" href="#" onclick="window.history.back()">[назад]</a>
         <a th:if="${backLink != null}" th:href="${backLink}">[назад]</a>

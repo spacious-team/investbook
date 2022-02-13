@@ -28,6 +28,7 @@ import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.TransactionCashFlowConverter;
 import ru.investbook.converter.TransactionConverter;
@@ -35,14 +36,19 @@ import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
+import ru.investbook.report.FifoPositions;
+import ru.investbook.report.FifoPositionsFactory;
+import ru.investbook.report.FifoPositionsFilter;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.web.forms.model.SecurityType;
+import ru.investbook.web.forms.model.SplitModel;
 import ru.investbook.web.forms.model.TransactionModel;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -66,6 +72,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
     private final TransactionConverter transactionConverter;
     private final PortfolioConverter portfolioConverter;
     private final SecurityRepositoryHelper securityRepositoryHelper;
+    private final FifoPositionsFactory fifoPositionsFactory;
     private final Set<Integer> cashFlowTypes = Set.of(CashFlowType.PRICE.getId(),
             CashFlowType.ACCRUED_INTEREST.getId(),
             CashFlowType.DERIVATIVE_QUOTE.getId(),
@@ -148,15 +155,18 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 .count(abs(tr.getCount()) * direction)
                 .build();
 
-        saveAndFlush(tr, transaction);
+        saveAndFlush(tr.getPortfolio());
+        int transactionId = saveAndFlush(transaction);
+        tr.setId(transactionId); // used by view
     }
 
-    private void saveAndFlush(TransactionModel transactionModel,
-                              AbstractTransaction transaction) {
-        saveAndFlush(transactionModel.getPortfolio());
+    /**
+     * @return saved transaction id
+     */
+    private int saveAndFlush(AbstractTransaction transaction) {
         TransactionEntity transactionEntity = transactionRepository.saveAndFlush(
                 transactionConverter.toEntity(transaction.getTransaction()));
-        transactionModel.setId(transactionEntity.getId()); // used by view
+
         Optional.ofNullable(transactionEntity.getId()).ifPresent(transactionCashFlowRepository::deleteByTransactionId);
         transactionCashFlowRepository.flush();
         transaction.toBuilder()
@@ -166,6 +176,7 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 .stream()
                 .map(transactionCashFlowConverter::toEntity)
                 .forEach(transactionCashFlowRepository::save);
+        return transactionEntity.getId();
     }
 
     private void saveAndFlush(String portfolio) {
@@ -175,6 +186,39 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                             .id(portfolio)
                             .build()));
         }
+    }
+
+    public void save(SplitModel split) {
+        int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(split);
+
+        Instant splitInstant = split.getDate().atTime(split.getTime()).atZone(zoneId).toInstant();
+        checkWithdrawalCount(split, savedSecurityId, splitInstant);
+
+        SecurityTransaction.SecurityTransactionBuilder<?, ?> builder = SecurityTransaction.builder()
+                .portfolio(split.getPortfolio())
+                .timestamp(splitInstant)
+                .security(savedSecurityId);
+
+        saveAndFlush(split.getPortfolio());
+        saveAndFlush(builder
+                .tradeId(split.getTradeId() + "w")
+                .count(-Math.abs(split.getWithdrawalCount()))
+                .build());
+        saveAndFlush(builder
+                .tradeId(split.getTradeId() + "d")
+                .count(Math.abs(split.getDepositCount()))
+                .build());
+    }
+
+    private void checkWithdrawalCount(SplitModel split, int savedSecurityId, Instant splitInstant) {
+        FifoPositions positions = fifoPositionsFactory.get(savedSecurityId,
+                org.spacious_team.broker.pojo.SecurityType.STOCK,
+                FifoPositionsFilter.of(split.getPortfolio(), Instant.EPOCH, splitInstant));
+        Assert.isTrue(positions.getCurrentOpenedPositionsCount() == Math.abs(split.getWithdrawalCount()),
+                () -> "На момент сплита " + split.getDate() + " в " + split.getTime() +
+                        " на счету '" + split.getPortfolio() + "' " +
+                        "находилось " + positions.getCurrentOpenedPositionsCount() + " акций " + split.getSecurity() +
+                        ", вы указали другое количество");
     }
 
     private TransactionModel toTransactionModel(TransactionEntity e) {

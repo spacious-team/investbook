@@ -33,6 +33,8 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public interface PortfolioPropertyRepository extends JpaRepository<PortfolioPropertyEntity, Integer> {
 
+    Optional<PortfolioPropertyEntity> findFirstByOrderByTimestampDesc();
+
     List<PortfolioPropertyEntity> findByPortfolioInAndPropertyInOrderByTimestampDesc(
             Collection<PortfolioEntity> portfolios,
             Collection<String> property);

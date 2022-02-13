@@ -32,8 +32,12 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public interface SecurityEventCashFlowRepository extends JpaRepository<SecurityEventCashFlowEntity, Integer> {
 
+    Optional<SecurityEventCashFlowEntity> findFirstByOrderByTimestampDesc();
+
     List<SecurityEventCashFlowEntity> findByPortfolioInOrderByPortfolioIdAscTimestampDescSecurityIdAsc(
             Collection<PortfolioEntity> portfolios);
+
+    List<SecurityEventCashFlowEntity> findByCashFlowTypeId(int type);
 
     Optional<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampAndCount(
             String portfolio,

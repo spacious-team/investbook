@@ -36,6 +36,7 @@
 . <<taxes-doc.adoc#,Документация по учету налогов>>
 
 == Решение проблем
+. Бэкап и восстановление link:/portfolio-open-format/index.html[данных]
 . Самостоятельное <<troubleshooting.adoc#,исправление проблем>>
 . Обратиться за помощью в https://t.me/investbook_support[техническую поддержку]
 

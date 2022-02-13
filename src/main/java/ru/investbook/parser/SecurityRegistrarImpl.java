@@ -62,6 +62,43 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
         return declareIsinSecurity(isin, STOCK_OR_BOND, supplier);
     }
 
+    @Cacheable(cacheNames = "declareStockByName", key = "#name")
+    @Override
+    public int declareStockByName(String name, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByName(name, STOCK, supplier);
+    }
+
+    @Cacheable(cacheNames = "declareBondByName", key = "#name")
+    @Override
+    public int declareBondByName(String name, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByName(name, BOND, supplier);
+    }
+
+    @Cacheable(cacheNames = "declareStockOrBondByName", key = "#name")
+    @Override
+    public int declareStockOrBondByName(String name, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByName(name, STOCK_OR_BOND, supplier);
+    }
+
+    @Cacheable(cacheNames = "declareDerivative", key = "#code")
+    @Override
+    public int declareDerivative(String code) {
+        String shortNameIfCan = derivativeCodeService.convertDerivativeCode(code);
+        return declareContractByTicker(shortNameIfCan, DERIVATIVE);
+    }
+
+    @Cacheable(cacheNames = "declareCurrencyPair", key = "#contract")
+    @Override
+    public int declareCurrencyPair(String contract) {
+        return declareContractByTicker(contract, CURRENCY_PAIR);
+    }
+
+    @Cacheable(cacheNames = "declareAsset", key = "#assetName")
+    @Override
+    public int declareAsset(String assetName, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByName(assetName, ASSET, supplier);
+    }
+
     private int declareIsinSecurity(String isin, SecurityType defaultType, Supplier<SecurityBuilder> supplier) {
         return repository.findByIsin(isin)
                 .or(() -> Optional.of(supplier.get())
@@ -71,36 +108,21 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
                 .orElseThrow(() -> new RuntimeException("Не смог сохранить ЦБ с ISIN = " + isin));
     }
 
-    @Cacheable(cacheNames = "declareDerivative", key = "#code")
-    @Override
-    public int declareDerivative(String code) {
-        String shortNameIfCan = derivativeCodeService.convertDerivativeCode(code);
-        return repository.findByTicker(shortNameIfCan)
-                .or(() -> Optional.of(Security.builder().ticker(shortNameIfCan).type(DERIVATIVE).build())
-                        .map(security -> saveAndFlush(security, () -> repository.findByTicker(shortNameIfCan))))
+    private Integer declareSecurityByName(String name, SecurityType defaultType, Supplier<SecurityBuilder> supplier) {
+        return repository.findByName(name)
+                .or(() -> Optional.of(supplier.get())
+                        .map(builder -> buildSecurity(builder, defaultType))
+                        .map(security -> saveAndFlush(security, () -> repository.findByName(name))))
                 .map(SecurityEntity::getId)
-                .orElseThrow(() -> new RuntimeException("Не смог сохранить срочный контракт " + code));
+                .orElseThrow(() -> new RuntimeException("Не смог сохранить актив с наименованием = " + name));
     }
 
-    @Cacheable(cacheNames = "declareCurrencyPair", key = "#contract")
-    @Override
-    public int declareCurrencyPair(String contract) {
+    private Integer declareContractByTicker(String contract, SecurityType contractType) {
         return repository.findByTicker(contract)
-                .or(() -> Optional.of(Security.builder().ticker(contract).type(CURRENCY_PAIR).build())
+                .or(() -> Optional.of(Security.builder().ticker(contract).type(contractType).build())
                         .map(security -> saveAndFlush(security, () -> repository.findByTicker(contract))))
                 .map(SecurityEntity::getId)
-                .orElseThrow(() -> new RuntimeException("Не смог сохранить контракт валютного рынка " + contract));
-    }
-
-    @Cacheable(cacheNames = "declareAsset", key = "#assetName")
-    @Override
-    public int declareAsset(String assetName, Supplier<SecurityBuilder> supplier) {
-        return repository.findByName(assetName)
-                .or(() -> Optional.of(supplier.get())
-                        .map(builder -> buildSecurity(builder, ASSET))
-                        .map(security -> saveAndFlush(security, () -> repository.findByName(assetName))))
-                .map(SecurityEntity::getId)
-                .orElseThrow(() -> new RuntimeException("Не смог сохранить произвольный актив " + assetName));
+                .orElseThrow(() -> new RuntimeException("Не смог сохранить контракт = " + contract));
     }
 
     private Security buildSecurity(SecurityBuilder builder, SecurityType defaultType) {

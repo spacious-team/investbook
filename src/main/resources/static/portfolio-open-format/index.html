@@ -1,0 +1,72 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2022  Vitalii Ananev <spacious-team@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Бэкап и восстановление данных</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
+    <link rel="stylesheet" href="/water-wrapper.css">
+</head>
+<body>
+<h1>Бэкап и восстановление данных</h1>
+<p class="hint">
+    Бэкап данных может пригодиться, если вы хотите защитить данные от сбоев вашего компьютера.
+</p>
+<p class="hint"> На этой странице вы можете: </p>
+<ol class="hint">
+    <li> Выполнить бэкап и восстановление данных.</li>
+    <li> Импортировать в Investbook портфель из другого приложения учета инвестиций, если оно
+        <a href="https://github.com/spacious-team/portfolio-open-format">поддерживает</a> "Portfolio Open Format"
+        (за инструкцией по получению файла в указанном формате обратитесь к документации или разработчикам этих приложений).
+    </li>
+    <li> Выполнить экспорт данных в формате "Portfolio Open Format" для переноса портфеля в другое приложение учета
+    инвестиций.
+    </li>
+</ol>
+<p>
+    <a href="/">Вернуться на главную страницу</a>
+</p>
+
+<br>
+<br>
+<p>
+    1. Для того чтобы получить файл для бэкапа или экспорта в другое приложение, нажмите на ссылку
+    <a href="/portfolio-open-format/download">экспортировать данные в "Portfolio Open Format"</a>.
+</p>
+<p>
+    2. Для того чтобы восстановить данные, <a href="/portfolios/delete-all">удалите информацию по всем счетам</a> и
+    загрузите ранее полученный по предыдущему пункту файл бэкапа.
+<p>
+<form action="/portfolio-open-format/upload" enctype="multipart/form-data" method="POST">
+    <label>
+        Бэкап файл
+        <input name="file" type="file"/>
+    </label>
+    <label>&nbsp;
+        <input type="submit" value="Восстановить данные"/>
+    </label>
+</form>
+<p class="hint">
+    В бэкап не включаются курсы валют ЦБ РФ и значения индекса S&P 500. После восстановления из бэкапа вы возможно
+    захотите выгрузить эти данные через страницу <a href="/forms.html">Форм</a>.
+</p>
+
+</body>
+</html>

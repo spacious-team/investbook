@@ -76,14 +76,14 @@ public class FifoPositionsFactory {
                 k -> create(currencyPair, filter));
     }
 
-    private FifoPositions get(Integer securityId, SecurityType securityType, FifoPositionsFilter filter) {
+    public FifoPositions get(int securityId, SecurityType securityType, FifoPositionsFilter filter) {
         if (securityType == CURRENCY_PAIR) {
             String currencyPair = securityRepository.findCurrencyPair(securityId)
                     .orElseThrow(() -> new IllegalArgumentException("Валютная пара не найдена по id = " + securityId));
             return getForCurrencyPair(currencyPair, filter);
         }
         return getPortfolioCache(filter).computeIfAbsent(
-                getCacheKey(securityId.toString(), filter),
+                getCacheKey(String.valueOf(securityId), filter),
                 k -> create(securityId, securityType, filter));
     }
 

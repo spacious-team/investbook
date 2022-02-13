@@ -27,9 +27,12 @@ import ru.investbook.entity.PortfolioCashEntity;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Transactional(readOnly = true)
 public interface PortfolioCashRepository extends JpaRepository<PortfolioCashEntity, Integer> {
+
+    Optional<PortfolioCashEntity> findFirstByOrderByTimestampDesc();
 
     List<PortfolioCashEntity> findByPortfolioIn(Collection<String> portfolios);
 
