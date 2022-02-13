@@ -146,7 +146,7 @@ public class TradePof {
                 .findAny()
                 .ifPresent(e -> builder
                         .price(divide(e, count).abs())
-                        .currency(e.getCurrency()));
+                        .currency(getValidCurrencyOrNull(e.getCurrency())));
         transactionCashFlows.stream()
                 .filter(e -> e.getCashFlowType().getId() == ACCRUED_INTEREST.getId())
                 .findAny()
@@ -160,7 +160,7 @@ public class TradePof {
                 .findAny()
                 .ifPresentOrElse(e -> builder
                         .fee(e.getValue().negate())
-                        .feeCurrency(e.getCurrency()),
+                        .feeCurrency(getValidCurrencyOrNull(e.getCurrency())),
                         () -> builder.fee(BigDecimal.ZERO).feeCurrency("RUB"));
         return builder.build();
     }

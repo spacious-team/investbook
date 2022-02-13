@@ -30,6 +30,7 @@ import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.lang.Nullable;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
+import ru.investbook.openformat.OpenFormatHelper;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -112,9 +113,11 @@ public class PaymentPof {
                 .count(cashFlow.getCount() == null ? BigDecimal.ZERO : BigDecimal.valueOf(cashFlow.getCount())) // опциональное для деривативов
                 .timestamp(cashFlow.getTimestamp().getEpochSecond())
                 .amount(cashFlow.getValue())
-                .currency(cashFlow.getCurrency())
+                .currency(getValidCurrencyOrNull(cashFlow.getCurrency()))
                 .tax(tax.map(SecurityEventCashFlowEntity::getValue).map(BigDecimal::negate).orElse(null))
-                .taxCurrency(tax.map(SecurityEventCashFlowEntity::getCurrency).orElse(null))
+                .taxCurrency(tax.map(SecurityEventCashFlowEntity::getCurrency)
+                        .map(OpenFormatHelper::getValidCurrencyOrNull)
+                        .orElse(null))
                 .build();
     }
 

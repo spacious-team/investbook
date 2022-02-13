@@ -86,7 +86,7 @@ public class CashFlowPof {
                 .account(AccountPof.getAccountId(cashFlow.getPortfolio().getId()))
                 .timestamp(cashFlow.getTimestamp().getEpochSecond())
                 .amount(cashFlow.getValue())
-                .currency(cashFlow.getCurrency())
+                .currency(getValidCurrencyOrNull(cashFlow.getCurrency()))
                 .type(PaymentTypePof.valueOf(CashFlowType.valueOf(cashFlow.getCashFlowType().getId())))
                 .description(cashFlow.getDescription())
                 .build();

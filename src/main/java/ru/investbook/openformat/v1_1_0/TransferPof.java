@@ -41,6 +41,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.spacious_team.broker.pojo.CashFlowType.COMMISSION;
+import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 
 @Jacksonized
 @Builder
@@ -136,7 +137,7 @@ public class TransferPof {
                                 .count(count.intValueExact())
                                 .eventType(COMMISSION)
                                 .value(fee.negate())
-                                .currency(feeCurrency)
+                                .currency(getValidCurrencyOrNull(feeCurrency))
                                 .build());
             } else {
                 return Collections.emptySet();
