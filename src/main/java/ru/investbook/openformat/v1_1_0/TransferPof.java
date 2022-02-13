@@ -41,9 +41,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.spacious_team.broker.pojo.CashFlowType.COMMISSION;
+import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 
 @Jacksonized
-@Builder
+@Builder(toBuilder = true)
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -54,7 +55,8 @@ public class TransferPof {
     int id;
 
     /**
-     * Если описывается сплит акций, то может иметь одинаковое значение для нескольких объектов.
+     * Если описывается сплит акций, то может иметь одинаковое значение для нескольких объектов, которое разрешается
+     * {@link PortfolioOpenFormatPersister}
      */
     @Nullable
     @JsonProperty("transfer-id")
@@ -111,9 +113,8 @@ public class TransferPof {
 
     Optional<Transaction> toTransaction(Map<Integer, String> accountToPortfolioId) {
         try {
-            String tradeId = (transferId == null) ? timestamp + ":" + asset + ":" + account : transferId;
             return Optional.of(Transaction.builder()
-                    .tradeId(tradeId.endsWith(String.valueOf(account)) ? tradeId : tradeId + account)
+                    .tradeId(transferId)
                     .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .security(asset)
@@ -136,7 +137,7 @@ public class TransferPof {
                                 .count(count.intValueExact())
                                 .eventType(COMMISSION)
                                 .value(fee.negate())
-                                .currency(feeCurrency)
+                                .currency(getValidCurrencyOrNull(feeCurrency))
                                 .build());
             } else {
                 return Collections.emptySet();

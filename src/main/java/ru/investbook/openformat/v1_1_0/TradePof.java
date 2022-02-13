@@ -31,6 +31,8 @@ import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
 
@@ -48,7 +50,7 @@ import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 
 @Jacksonized
-@Builder
+@Builder(toBuilder = true)
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -146,7 +148,7 @@ public class TradePof {
                 .findAny()
                 .ifPresent(e -> builder
                         .price(divide(e, count).abs())
-                        .currency(e.getCurrency()));
+                        .currency(getValidCurrencyOrNull(e.getCurrency())));
         transactionCashFlows.stream()
                 .filter(e -> e.getCashFlowType().getId() == ACCRUED_INTEREST.getId())
                 .findAny()
@@ -160,13 +162,35 @@ public class TradePof {
                 .findAny()
                 .ifPresentOrElse(e -> builder
                         .fee(e.getValue().negate())
-                        .feeCurrency(e.getCurrency()),
+                        .feeCurrency(getValidCurrencyOrNull(e.getCurrency())),
                         () -> builder.fee(BigDecimal.ZERO).feeCurrency("RUB"));
         return builder.build();
     }
 
+    static TradePof of(SecurityEventCashFlowEntity redemption, int id) {
+        Assert.isTrue(redemption.getCashFlowType().getId() == REDEMPTION.getId(),
+                () -> "ожидается событие погашения облигации: " + redemption);
+        long settlement = redemption.getTimestamp().getEpochSecond();
+        int account = AccountPof.getAccountId(redemption.getPortfolio().getId());
+        int count = -Math.abs(redemption.getCount());
+        return TradePof.builder()
+                .id(id)
+                .tradeId(settlement + ":" + redemption.getSecurity().getId() + ":" + account)
+                .settlement(settlement)
+                .account(account)
+                .asset(redemption.getSecurity().getId())
+                .count(BigDecimal.valueOf(count))
+                .price(divide(redemption))
+                .currency(getValidCurrencyOrNull(redemption.getCurrency()))
+                .build();
+    }
+
     private static BigDecimal divide(TransactionCashFlowEntity e, int count) {
         return e.getValue().divide(BigDecimal.valueOf(Math.abs(count)), 6, HALF_UP);
+    }
+
+    private static BigDecimal divide(SecurityEventCashFlowEntity e) {
+        return e.getValue().divide(BigDecimal.valueOf(Math.abs(e.getCount())), 6, HALF_UP);
     }
 
     Optional<AbstractTransaction> toTransaction(Map<Integer, String> accountToPortfolioId,

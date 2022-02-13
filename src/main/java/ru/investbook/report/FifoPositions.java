@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.Transaction;
+import org.springframework.util.Assert;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -69,12 +70,12 @@ public class FifoPositions {
     private void processRedemptions(Deque<SecurityEventCashFlow> redemptions) {
         if (!redemptions.isEmpty() && (redemptions.peek() != null)) {
             int security = redemptions.peek().getSecurity();
-            updateSecuritiesPastPositions(redemptions.stream()
-                    .map(FifoPositions::convertToTransaction)
-                    .collect(Collectors.toCollection(LinkedList::new)));
-            for (SecurityEventCashFlow  redemption : redemptions) {
-                closePositions(convertToTransaction(redemption), CashFlowType.REDEMPTION);
-            }
+            LinkedList<Transaction> redemptionTransactions = redemptions.stream()
+                    .map(FifoPositions::convertBondRedemptionToTransaction)
+                    .collect(Collectors.toCollection(LinkedList::new));
+            updateSecuritiesPastPositions(redemptionTransactions);
+            redemptionTransactions.forEach(
+                    redemption -> closePositions(redemption, CashFlowType.REDEMPTION));
             if (!this.openedPositions.isEmpty() || this.positionHistories.getLast().getOpenedPositions() != 0) {
                 log.error("Предоставлены не все транзакции по бумаге " +
                         security + ", в истории портфеля есть событие погашения номинала облигаций по " +
@@ -125,11 +126,9 @@ public class FifoPositions {
     /**
      * Converts bonds redemption event to transaction
      */
-    private static Transaction convertToTransaction(SecurityEventCashFlow redemption) {
-        if (redemption.getEventType() != CashFlowType.REDEMPTION) {
-            throw new IllegalArgumentException("Ожидается событие погашения номинала облигации, предоставлено событие "
-                    + redemption.getEventType());
-        }
+    private static Transaction convertBondRedemptionToTransaction(SecurityEventCashFlow redemption) {
+        Assert.isTrue(redemption.getEventType() == CashFlowType.REDEMPTION,
+            () -> "Ожидается событие погашения номинала облигации, предоставлено событие " + redemption.getEventType());
         return Transaction.builder()
                 .portfolio(redemption.getPortfolio())
                 .security(redemption.getSecurity())

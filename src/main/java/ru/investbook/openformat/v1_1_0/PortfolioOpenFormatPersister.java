@@ -23,12 +23,16 @@ import lombok.SneakyThrows;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import ru.investbook.parser.InvestbookApiClient;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,6 +43,7 @@ import static java.util.concurrent.Executors.newWorkStealingPool;
 @Service
 @RequiredArgsConstructor
 public class PortfolioOpenFormatPersister {
+    private static final int TRADE_ID_MAX_LENGTH = 32; // investbook storage limit
     private final InvestbookApiClient api;
 
     public void persist(PortfolioOpenFormatV1_1_0 object) {
@@ -65,13 +70,13 @@ public class PortfolioOpenFormatPersister {
         Map<Integer, SecurityType> assetTypes = securities.stream()
                 .collect(Collectors.toMap(Security::getId, Security::getType));
 
-        tasks.add(() -> object.getTrades()
+        tasks.add(() -> getTradesWithUniqTradeId(object.getTrades())
                 .parallelStream()
                 .map(t -> t.toTransaction(accountToPortfolioId, assetTypes))
                 .flatMap(Optional::stream)
                 .forEach(api::addTransaction));
 
-        tasks.add(() -> object.getTransfer()
+        tasks.add(() -> getTransfersWithUniqTransferId(object.getTransfer())
                 .parallelStream()
                 .map(t -> t.toTransaction(accountToPortfolioId))
                 .flatMap(Optional::stream)
@@ -117,5 +122,51 @@ public class PortfolioOpenFormatPersister {
         } finally {
             executorService.shutdown();
         }
+    }
+    private Collection<TradePof> getTradesWithUniqTradeId(Collection<TradePof> trades) {
+        Collection<TradePof> tradesWithUniqId = new ArrayList<>(trades.size());
+        Set<String> tradeIds = new HashSet<>(trades.size());
+        for (TradePof t : trades) {
+            String tradeId = StringUtils.hasText(t.getTradeId()) ?
+                    t.getTradeId() :
+                    t.getTimestamp() + ":" + t.getAsset() + ":" + t.getAccount();
+            String tid = getUniqId(tradeId, tradeIds);
+            if (!Objects.equals(t.getTradeId(), tid)) {
+                t = t.toBuilder().tradeId(tid).build();
+            }
+            tradesWithUniqId.add(t);
+        }
+        return tradesWithUniqId;
+    }
+
+    private Collection<TransferPof> getTransfersWithUniqTransferId(Collection<TransferPof> transfers) {
+        Collection<TransferPof> transfersWithUniqId = new ArrayList<>(transfers.size());
+        Set<String> transferIds = new HashSet<>(transfers.size());
+        for (TransferPof t : transfers) {
+            String transferId = StringUtils.hasText(t.getTransferId()) ?
+                    t.getTransferId() :
+                    t.getTimestamp() + ":" + t.getAsset() + ":" + t.getAccount();
+            String tid = getUniqId(transferId, transferIds);
+            if (!Objects.equals(t.getTransferId(), tid)) {
+                t = t.toBuilder().transferId(tid).build();
+            }
+            transfersWithUniqId.add(t);
+        }
+        return transfersWithUniqId;
+    }
+
+    private static String getUniqId(String id, Set<String> ids) {
+        int cnt = 1;
+        String tid = id.substring(0, Math.min(TRADE_ID_MAX_LENGTH, id.length()));
+        while (!ids.add(tid)) {
+            tid = concatWithLengthLimit(id, ++cnt);
+        }
+        return tid;
+    }
+
+    private static String concatWithLengthLimit(String value1, int value2) {
+        int value2Digits = (int) (Math.ceil(Math.log(value2) + 1e-6)); // 1e-6 for 3 digits value2, ex. 100, log(100) = 2
+        int value1AllowedLength = Math.min(TRADE_ID_MAX_LENGTH - value2Digits, value1.length());
+        return value1.substring(0, value1AllowedLength) + value2;
     }
 }

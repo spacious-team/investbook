@@ -34,6 +34,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
+
 @Jacksonized
 @Builder
 @Value
@@ -78,7 +80,7 @@ public class CashBalancesPof {
         return sumByCurrency.entrySet()
                 .stream()
                 .filter(e -> Math.abs(e.getValue().floatValue()) > 1e-4)
-                .map(e -> new CashPof(e.getValue(), e.getKey()))
+                .map(e -> new CashPof(e.getValue(), getValidCurrencyOrNull(e.getKey())))
                 .toList();
     }
 }
