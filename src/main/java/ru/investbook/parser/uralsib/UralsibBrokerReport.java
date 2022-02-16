@@ -36,6 +36,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static java.util.Objects.requireNonNull;
+
 @EqualsAndHashCode(callSuper = true)
 public class UralsibBrokerReport extends AbstractExcelBrokerReport {
     // "УРАЛСИБ Брокер" или "УРАЛСИБ Кэпитал - Финансовые услуги" (старый формат 2018 г)
@@ -47,7 +49,7 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
     public UralsibBrokerReport(ZipInputStream zis, SecurityRegistrar securityRegistrar) {
         super(securityRegistrar);
         try {
-            ZipEntry zipEntry = zis.getNextEntry();
+            ZipEntry zipEntry = requireNonNull(zis.getNextEntry());
             Path path = Paths.get(zipEntry.getName());
             this.book = getWorkBook(path.getFileName().toString(), zis);
             ReportPage reportPage = new ExcelSheet(book.getSheetAt(0));
@@ -83,7 +85,7 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
 
     private static String getPortfolio(ReportPage reportPage) {
         try {
-            TableCellAddress address = reportPage.find(PORTFOLIO_MARKER);
+            TableCellAddress address = reportPage.findByPrefix(PORTFOLIO_MARKER);
             for (TableCell cell : reportPage.getRow(address.getRow())) {
                 if (cell != null && cell.getColumnIndex() > address.getColumn()) {
                     Object value = cell.getValue();

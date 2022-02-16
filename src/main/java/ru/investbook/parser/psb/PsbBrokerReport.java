@@ -62,7 +62,7 @@ public class PsbBrokerReport extends AbstractExcelBrokerReport {
     }
 
     public static void checkReportFormat(String excelFileName, ReportPage reportPage) {
-        if (reportPage.find(UNIQ_TEXT, 3, 4) == TableCellAddress.NOT_FOUND) {
+        if (reportPage.findByPrefix(UNIQ_TEXT, 3, 4) == TableCellAddress.NOT_FOUND) {
             throw new RuntimeException("В файле " + excelFileName + " не содержится отчет брокера Промсвязьбанк");
         }
     }

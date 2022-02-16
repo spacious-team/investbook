@@ -51,7 +51,7 @@ public class ForeignExchangeRateTable extends SingleInitializableReportTable<For
     protected Collection<ForeignExchangeRate> parseTable() {
         try {
             SingleBrokerReport report = getReport();
-            TableCellAddress address = report.getReportPage().find(EXCHANGE_RATE);
+            TableCellAddress address = report.getReportPage().findByPrefix(EXCHANGE_RATE);
             if (address == TableCellAddress.NOT_FOUND) {
                 return emptyList();
             }

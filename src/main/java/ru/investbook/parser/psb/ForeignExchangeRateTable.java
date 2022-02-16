@@ -52,7 +52,7 @@ public class ForeignExchangeRateTable extends SingleInitializableReportTable<For
 
     protected Collection<ForeignExchangeRate> getExchangeRate(Table table) {
         try {
-            TableRow row = table.findRow(EXCHANGE_RATE_ROW);
+            TableRow row = table.findRowByPrefix(EXCHANGE_RATE_ROW);
             if (row == null) {
                 return emptyList();
             }
