@@ -47,7 +47,7 @@ public class ForeignExchangeCashTable extends SingleInitializableReportTable<Por
     @Override
     protected Collection<PortfolioCash> parseTable() {
         Table table = getSummaryTable();
-        TableRow row = table.findRow(ASSETS);
+        TableRow row = table.findRowByPrefix(ASSETS);
         if (row == null) {
             return emptyList();
         }

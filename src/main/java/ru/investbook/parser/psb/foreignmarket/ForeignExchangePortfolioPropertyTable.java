@@ -50,8 +50,8 @@ public class ForeignExchangePortfolioPropertyTable extends PortfolioPropertyTabl
     @Override
     protected Collection<PortfolioProperty> getTotalAssets(Table table) {
         try {
-            TableRow assetsRow = table.findRow(ASSETS);
-            TableRow exchangeRateRow = table.findRow(ForeignExchangeRateTable.EXCHANGE_RATE_ROW);
+            TableRow assetsRow = table.findRowByPrefix(ASSETS);
+            TableRow exchangeRateRow = table.findRowByPrefix(ForeignExchangeRateTable.EXCHANGE_RATE_ROW);
             if (assetsRow == null || exchangeRateRow == null) {
                 return emptyList();
             }
