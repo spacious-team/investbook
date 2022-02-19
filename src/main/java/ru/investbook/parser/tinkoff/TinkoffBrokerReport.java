@@ -31,14 +31,15 @@ import java.io.InputStream;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 @EqualsAndHashCode(callSuper = true)
 public class TinkoffBrokerReport extends AbstractExcelBrokerReport {
-    public static final String UNIQ_TEXT = "Тинькофф";
     private static final String PORTFOLIO_MARKER = "Инвестор:";
-    private static final String DATE_MARKER = "за период";
-    private static final BiPredicate<String, Object> containsPredicate = (cell, expected) -> cell.contains(expected.toString());
+    private static final Predicate<Object> tinkoffReportPredicate = (cell) ->
+            (cell instanceof String) && ((String) cell).contains("Тинькофф");
+    private static final Predicate<Object> dateMarkerPredicate = (cell) ->
+            (cell instanceof String) && ((String) cell).contains("за период");
 
     private final Workbook book;
 
@@ -54,7 +55,7 @@ public class TinkoffBrokerReport extends AbstractExcelBrokerReport {
     }
 
     public static void checkReportFormat(String excelFileName, ReportPage reportPage) {
-        if (reportPage.find(UNIQ_TEXT, 1, 2, containsPredicate) == TableCellAddress.NOT_FOUND) {
+        if (reportPage.find(0, 2, tinkoffReportPredicate) == TableCellAddress.NOT_FOUND) {
             throw new RuntimeException("В файле " + excelFileName + " не содержится отчет брокера Тинькофф");
         }
     }
@@ -74,15 +75,14 @@ public class TinkoffBrokerReport extends AbstractExcelBrokerReport {
 
     private Instant getReportEndDateTime(ReportPage reportPage) {
         try {
-            TableCellAddress address = reportPage.find(DATE_MARKER, 0, 10, containsPredicate);
+            TableCellAddress address = reportPage.find(0, 10, dateMarkerPredicate);
             String[] words = reportPage.getCell(address)
                     .getStringValue()
                     .split("-");
             String value = words[words.length - 1].trim();
             return convertToInstant(value).plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);
         } catch (Exception e) {
-            throw new IllegalArgumentException(
-                    "Не найдена дата отчета по заданному шаблону '" + DATE_MARKER);
+            throw new IllegalArgumentException("Не найдена дата отчета по заданному шаблону");
         }
     }
 
