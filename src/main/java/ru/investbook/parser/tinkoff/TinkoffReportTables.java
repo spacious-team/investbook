@@ -58,7 +58,7 @@ public class TinkoffReportTables extends AbstractReportTables<BrokerReport> {
 
     @Override
     public ReportTable<AbstractTransaction> getTransactionTable() {
-        return emptyTable();
+        return new TinkoffSecurityTransactionTable(report);
     }
 
     @Override
