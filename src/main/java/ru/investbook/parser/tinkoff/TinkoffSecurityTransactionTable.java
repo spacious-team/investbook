@@ -20,42 +20,123 @@ package ru.investbook.parser.tinkoff;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
+import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
+import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import org.springframework.util.Assert;
+import ru.investbook.parser.SingleAbstractReportTable;
 
-import java.util.regex.Pattern;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Objects;
+
+import static ru.investbook.parser.tinkoff.TinkoffSecurityTransactionTable.TransactionTableHeader.*;
+import static ru.investbook.parser.tinkoff.TinkoffSecurityTransactionTableHelper.getSecurityId;
+import static ru.investbook.parser.tinkoff.TinkoffSecurityTransactionTableHelper.getSecurityType;
 
 @Slf4j
-public class TinkoffSecurityTransactionTable extends AbstractReportTable<AbstractTransaction> {
+public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<AbstractTransaction> {
 
-    private static final Pattern lastRowPattern = Pattern.compile("[0-9]+\\.[0-9]+\\s+\\b");
+    private final SecurityCodeAndIsinTable codeAndIsin;
 
-    public TinkoffSecurityTransactionTable(BrokerReport report) {
+    public TinkoffSecurityTransactionTable(TinkoffBrokerReport report, SecurityCodeAndIsinTable codeAndIsin) {
         super(report,
                 (cell) -> cell.startsWith("1.1 Информация о совершенных и исполненных сделках"),
-                (cell) -> lastRowPattern.matcher(cell).lookingAt(),
+                (cell) -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
                 TransactionTableHeader.class);
+        this.codeAndIsin = codeAndIsin;
     }
 
     @Override
     protected AbstractTransaction parseRow(TableRow row) {
-        return super.parseRow(row);
+        long tradeId = row.getLongCellValueOrDefault(TRADE_ID, -1);
+        if (tradeId == -1) return null;
+
+        int securityId = getSecurityId(row, codeAndIsin, getReport().getSecurityRegistrar());
+        boolean isBuy = row.getStringCellValue(OPERATION).toLowerCase().contains("покупка");
+        int count = row.getIntCellValue(COUNT);
+        BigDecimal amount = row.getBigDecimalCellValue(AMOUNT).abs();
+
+        AbstractTransaction.AbstractTransactionBuilder<?, ?> builder = switch (getSecurityType(row)) {
+            case STOCK -> SecurityTransaction.builder()
+                    .timestamp(getStockAndBondTransactionInstant(row));
+            case BOND, STOCK_OR_BOND -> {
+                BigDecimal accruedInterest = row.getBigDecimalCellValue(ACCRUED_INTEREST).abs();
+                yield SecurityTransaction.builder()
+                        .timestamp(getStockAndBondTransactionInstant(row))
+                        .accruedInterest(isBuy ? accruedInterest.negate() : accruedInterest);
+            }
+            case DERIVATIVE -> {
+                BigDecimal valueInPoints = row.getBigDecimalCellValue(PRICE).abs()
+                        .multiply(BigDecimal.valueOf(count));
+                yield DerivativeTransaction.builder()
+                        .timestamp(getDerivativeAndCurrencyPairTransactionInstant(row))
+                        .valueInPoints(isBuy ? valueInPoints.negate() : valueInPoints);
+            }
+            case CURRENCY_PAIR -> ForeignExchangeTransaction.builder()
+                    .timestamp(getDerivativeAndCurrencyPairTransactionInstant(row));
+            case ASSET -> throw new IllegalArgumentException("Произвольный актив не поддерживается");
+        };
+
+        return builder
+                .tradeId(String.valueOf(tradeId))
+                .portfolio(getReport().getPortfolio())
+                .security(securityId)
+                .count(count)
+                .value(isBuy ? amount.negate() : amount)
+                .valueCurrency(row.getStringCellValue(CURRENCY))
+                .commission(getFee(row)) // converted to BROKER_FEE_CURRENCY
+                .commissionCurrency(row.getStringCellValue(BROKER_FEE_CURRENCY))
+                .build();
     }
 
-    enum TransactionTableHeader implements TableColumnDescription {
+    private Instant getStockAndBondTransactionInstant(TableRow row) {
+        return getReport().convertToInstant(row.getStringCellValue(SETTLEMENT_DATE));
+    }
+
+    private Instant getDerivativeAndCurrencyPairTransactionInstant(TableRow row) {
+        String dateTime = row.getStringCellValue(SETTLEMENT_DATE) + " " + row.getStringCellValue(TIME);
+        return getReport().convertToInstant(dateTime);
+    }
+
+    private BigDecimal getFee(TableRow row) {
+        BigDecimal fee = BigDecimal.ZERO;
+        String feeCurrency = row.getStringCellValue(BROKER_FEE_CURRENCY);
+        fee = addToFee(row, fee, feeCurrency, BROKER_FEE, BROKER_FEE_CURRENCY);
+        fee = addToFee(row, fee, feeCurrency, MARKET_FEE, MARKET_FEE_CURRENCY);
+        fee = addToFee(row, fee, feeCurrency, CLEARING_FEE, CLEARING_FEE_CURRENCY);
+        return fee;
+    }
+
+    private BigDecimal addToFee(TableRow row, BigDecimal totalFee, String feeCurrency,
+                                TransactionTableHeader feeComponent, TransactionTableHeader feeComponentCurrency) {
+        BigDecimal feeAddition = row.getBigDecimalCellValueOrDefault(feeComponent, BigDecimal.ZERO).abs();
+        if (Math.abs(feeAddition.floatValue()) > 1e-3) {
+            String feeAdditionCurrency = row.getStringCellValue(feeComponentCurrency);
+            // TODO convert feeAddition to feeCurrency
+            Assert.isTrue(Objects.equals(feeCurrency, feeAdditionCurrency),
+                    "Валюты комиссии брокера, биржи и клирингового центра различаются, не могу их сложить");
+            totalFee = totalFee.add(feeAddition);
+        }
+        return totalFee;
+    }
+
+    protected enum TransactionTableHeader implements TableColumnDescription {
         TRADE_ID("номер", "сделки"),
         TIME("время"),
-        DIRECTION("вид", "сделки"),
-        SHORTNAME("сокращен", "наименова"),
-        TICKER("код актива"),
+        TYPE("режим", "торгов"),
+        OPERATION("вид", "сделки"),
+        SHORT_NAME("сокращен", "наименова"),
+        CODE("код", "актива"),
+        PRICE("Цена", "за едини"),
         COUNT("количество"),
-        AMOUNT("сумма", "без", "НКД"),
-        ACCRUED_INTEREST("нкд"), // суммарно по всем бумагам
+        AMOUNT("сумма", "без", "нкд"),
+        ACCRUED_INTEREST("^нкд$"), // суммарно по всем бумагам
         CURRENCY("валюта", "расчетов"),
         BROKER_FEE("комис", "брокера"),
         BROKER_FEE_CURRENCY("валю", "комис"),

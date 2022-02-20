@@ -33,6 +33,6 @@ public class TinkoffReportTablesFactory implements ReportTablesFactory {
 
     @Override
     public ReportTables create(BrokerReport brokerReport) {
-        return new TinkoffReportTables(brokerReport);
+        return new TinkoffReportTables((TinkoffBrokerReport) brokerReport);
     }
 }

@@ -32,6 +32,7 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 @EqualsAndHashCode(callSuper = true)
 public class TinkoffBrokerReport extends AbstractExcelBrokerReport {
@@ -40,6 +41,7 @@ public class TinkoffBrokerReport extends AbstractExcelBrokerReport {
             (cell instanceof String) && ((String) cell).contains("Тинькофф");
     private static final Predicate<Object> dateMarkerPredicate = (cell) ->
             (cell instanceof String) && ((String) cell).contains("за период");
+    static final Pattern tablesLastRowPattern = Pattern.compile("[0-9]+\\.[0-9]+\\s+\\b");
 
     private final Workbook book;
 
