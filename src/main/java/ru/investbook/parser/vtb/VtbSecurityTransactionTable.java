@@ -68,7 +68,7 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
 
         Security security = VtbReportHelper.getSecurity(row.getStringCellValue(NAME_AND_ISIN));
         securities.add(security);
-        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(security.getIsin(), security::toBuilder);
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(security.getIsin(), security::toBuilder);
 
         return SecurityTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE))

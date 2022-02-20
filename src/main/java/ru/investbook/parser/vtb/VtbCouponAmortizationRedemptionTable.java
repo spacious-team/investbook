@@ -81,7 +81,7 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
                         .orElseThrow(() -> new IllegalArgumentException("Не удалось определить количество погашенных облигаций " + security.getIsin()));
                 default -> throw new UnsupportedOperationException();
             };
-            int securityId = getReport().getSecurityRegistrar().declareBond(security.getIsin(), security::toBuilder);
+            int securityId = getReport().getSecurityRegistrar().declareBondByIsin(security.getIsin(), security::toBuilder);
             SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                     .portfolio(getReport().getPortfolio())
                     .eventType(eventType)

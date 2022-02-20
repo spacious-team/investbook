@@ -44,22 +44,22 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
     private final SecurityConverter converter;
     private final MoexDerivativeCodeService derivativeCodeService;
 
-    @Cacheable(cacheNames = "declareStock", key = "#isin")
+    @Cacheable(cacheNames = "declareStockByIsin", key = "#isin")
     @Override
-    public int declareStock(String isin, Supplier<SecurityBuilder> supplier) {
-        return declareIsinSecurity(isin, STOCK, supplier);
+    public int declareStockByIsin(String isin, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByIsin(isin, STOCK, supplier);
     }
 
-    @Cacheable(cacheNames = "declareBond", key = "#isin")
+    @Cacheable(cacheNames = "declareBondByIsin", key = "#isin")
     @Override
-    public int declareBond(String isin, Supplier<SecurityBuilder> supplier) {
-        return declareIsinSecurity(isin, BOND, supplier);
+    public int declareBondByIsin(String isin, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByIsin(isin, BOND, supplier);
     }
 
-    @Cacheable(cacheNames = "declareStockOrBond", key = "#isin")
+    @Cacheable(cacheNames = "declareStockOrBondByIsin", key = "#isin")
     @Override
-    public int declareStockOrBond(String isin, Supplier<SecurityBuilder> supplier) {
-        return declareIsinSecurity(isin, STOCK_OR_BOND, supplier);
+    public int declareStockOrBondByIsin(String isin, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByIsin(isin, STOCK_OR_BOND, supplier);
     }
 
     @Cacheable(cacheNames = "declareStockByName", key = "#name")
@@ -78,6 +78,25 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
     @Override
     public int declareStockOrBondByName(String name, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByName(name, STOCK_OR_BOND, supplier);
+    }
+
+
+    @Cacheable(cacheNames = "declareStockByTicker", key = "#ticker")
+    @Override
+    public int declareStockByTicker(String ticker, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByTicker(ticker, STOCK, supplier);
+    }
+
+    @Cacheable(cacheNames = "declareBondByTicker", key = "#ticker")
+    @Override
+    public int declareBondByTicker(String ticker, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByTicker(ticker, BOND, supplier);
+    }
+
+    @Cacheable(cacheNames = "declareStockOrBondByTicker", key = "#ticker")
+    @Override
+    public int declareStockOrBondByTicker(String ticker, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByTicker(ticker, STOCK_OR_BOND, supplier);
     }
 
     @Cacheable(cacheNames = "declareDerivative", key = "#code")
@@ -99,7 +118,7 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
         return declareSecurityByName(assetName, ASSET, supplier);
     }
 
-    private int declareIsinSecurity(String isin, SecurityType defaultType, Supplier<SecurityBuilder> supplier) {
+    private int declareSecurityByIsin(String isin, SecurityType defaultType, Supplier<SecurityBuilder> supplier) {
         return repository.findByIsin(isin)
                 .or(() -> Optional.of(supplier.get())
                         .map(builder -> buildSecurity(builder, defaultType))
@@ -115,6 +134,15 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
                         .map(security -> saveAndFlush(security, () -> repository.findByName(name))))
                 .map(SecurityEntity::getId)
                 .orElseThrow(() -> new RuntimeException("Не смог сохранить актив с наименованием = " + name));
+    }
+
+    private Integer declareSecurityByTicker(String ticker, SecurityType defaultType, Supplier<SecurityBuilder> supplier) {
+        return repository.findByTicker(ticker)
+                .or(() -> Optional.of(supplier.get())
+                        .map(builder -> buildSecurity(builder, defaultType))
+                        .map(security -> saveAndFlush(security, () -> repository.findByTicker(ticker))))
+                .map(SecurityEntity::getId)
+                .orElseThrow(() -> new RuntimeException("Не смог сохранить актив с тикером = " + ticker));
     }
 
     private Integer declareContractByTicker(String contract, SecurityType contractType) {

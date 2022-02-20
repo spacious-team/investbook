@@ -51,7 +51,7 @@ public class SecuritiesTable extends SingleAbstractReportTable<ReportSecurityInf
                 .isin(isin)
                 .name(row.getStringCellValue(NAME))
                 .type(SecurityType.STOCK_OR_BOND);
-        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(isin, () -> security);
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(isin, () -> security);
         return ReportSecurityInformation.builder()
                 .security(security.id(securityId).build())
                 .cfi(row.getStringCellValue(CFI))
