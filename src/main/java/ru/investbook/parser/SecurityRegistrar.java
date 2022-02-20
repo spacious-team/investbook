@@ -23,6 +23,12 @@ public interface SecurityRegistrar {
 
     int declareStockOrBondByName(String name, Supplier<SecurityBuilder> supplier);
 
+    int declareStockByTicker(String ticker, Supplier<SecurityBuilder> supplier);
+
+    int declareBondByTicker(String ticker, Supplier<SecurityBuilder> supplier);
+
+    int declareStockOrBondByTicker(String ticker, Supplier<SecurityBuilder> supplier);
+
     int declareDerivative(String code);
 
     /**

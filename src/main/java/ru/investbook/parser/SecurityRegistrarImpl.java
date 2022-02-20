@@ -80,6 +80,25 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
         return declareSecurityByName(name, STOCK_OR_BOND, supplier);
     }
 
+
+    @Cacheable(cacheNames = "declareStockByTicker", key = "#ticker")
+    @Override
+    public int declareStockByTicker(String ticker, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByTicker(ticker, STOCK, supplier);
+    }
+
+    @Cacheable(cacheNames = "declareBondByTicker", key = "#ticker")
+    @Override
+    public int declareBondByTicker(String ticker, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByTicker(ticker, BOND, supplier);
+    }
+
+    @Cacheable(cacheNames = "declareStockOrBondByTicker", key = "#ticker")
+    @Override
+    public int declareStockOrBondByTicker(String ticker, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByTicker(ticker, STOCK_OR_BOND, supplier);
+    }
+
     @Cacheable(cacheNames = "declareDerivative", key = "#code")
     @Override
     public int declareDerivative(String code) {
@@ -115,6 +134,15 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
                         .map(security -> saveAndFlush(security, () -> repository.findByName(name))))
                 .map(SecurityEntity::getId)
                 .orElseThrow(() -> new RuntimeException("Не смог сохранить актив с наименованием = " + name));
+    }
+
+    private Integer declareSecurityByTicker(String ticker, SecurityType defaultType, Supplier<SecurityBuilder> supplier) {
+        return repository.findByTicker(ticker)
+                .or(() -> Optional.of(supplier.get())
+                        .map(builder -> buildSecurity(builder, defaultType))
+                        .map(security -> saveAndFlush(security, () -> repository.findByTicker(ticker))))
+                .map(SecurityEntity::getId)
+                .orElseThrow(() -> new RuntimeException("Не смог сохранить актив с тикером = " + ticker));
     }
 
     private Integer declareContractByTicker(String contract, SecurityType contractType) {
