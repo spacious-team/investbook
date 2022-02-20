@@ -44,7 +44,7 @@ public class SecurityHelper {
                         .name(securityName);
                 id = (securityId == null) ?
                         securityRegistrar.declareStockOrBondByName(securityName, () -> security) :
-                        securityRegistrar.declareStockOrBond(securityId, () -> security);
+                        securityRegistrar.declareStockOrBondByIsin(securityId, () -> security);
             }
             case DERIVATIVE -> {
                 security.ticker(securityId);

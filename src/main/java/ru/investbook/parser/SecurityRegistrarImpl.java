@@ -44,22 +44,22 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
     private final SecurityConverter converter;
     private final MoexDerivativeCodeService derivativeCodeService;
 
-    @Cacheable(cacheNames = "declareStock", key = "#isin")
+    @Cacheable(cacheNames = "declareStockByIsin", key = "#isin")
     @Override
-    public int declareStock(String isin, Supplier<SecurityBuilder> supplier) {
-        return declareIsinSecurity(isin, STOCK, supplier);
+    public int declareStockByIsin(String isin, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByIsin(isin, STOCK, supplier);
     }
 
-    @Cacheable(cacheNames = "declareBond", key = "#isin")
+    @Cacheable(cacheNames = "declareBondByIsin", key = "#isin")
     @Override
-    public int declareBond(String isin, Supplier<SecurityBuilder> supplier) {
-        return declareIsinSecurity(isin, BOND, supplier);
+    public int declareBondByIsin(String isin, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByIsin(isin, BOND, supplier);
     }
 
-    @Cacheable(cacheNames = "declareStockOrBond", key = "#isin")
+    @Cacheable(cacheNames = "declareStockOrBondByIsin", key = "#isin")
     @Override
-    public int declareStockOrBond(String isin, Supplier<SecurityBuilder> supplier) {
-        return declareIsinSecurity(isin, STOCK_OR_BOND, supplier);
+    public int declareStockOrBondByIsin(String isin, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByIsin(isin, STOCK_OR_BOND, supplier);
     }
 
     @Cacheable(cacheNames = "declareStockByName", key = "#name")
@@ -118,7 +118,7 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
         return declareSecurityByName(assetName, ASSET, supplier);
     }
 
-    private int declareIsinSecurity(String isin, SecurityType defaultType, Supplier<SecurityBuilder> supplier) {
+    private int declareSecurityByIsin(String isin, SecurityType defaultType, Supplier<SecurityBuilder> supplier) {
         return repository.findByIsin(isin)
                 .or(() -> Optional.of(supplier.get())
                         .map(builder -> buildSecurity(builder, defaultType))

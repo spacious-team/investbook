@@ -63,7 +63,7 @@ public class VtbSecurityQuoteTable extends SingleAbstractReportTable<SecurityQuo
                 .orElse(null);
         String description = row.getStringCellValue(NAME_REGNUMBER_ISIN);
         Security security = VtbReportHelper.getSecurity(description);
-        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(security.getIsin(), security::toBuilder);
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(security.getIsin(), security::toBuilder);
         return SecurityQuote.builder()
                 .security(securityId)
                 .timestamp(getReport().getReportEndDateTime())

@@ -11,11 +11,11 @@ public interface SecurityRegistrar {
      *
      * @return security ID
      */
-    int declareStock(String isin, Supplier<SecurityBuilder> supplier);
+    int declareStockByIsin(String isin, Supplier<SecurityBuilder> supplier);
 
-    int declareBond(String isin, Supplier<SecurityBuilder> supplier);
+    int declareBondByIsin(String isin, Supplier<SecurityBuilder> supplier);
 
-    int declareStockOrBond(String isin, Supplier<SecurityBuilder> supplier);
+    int declareStockOrBondByIsin(String isin, Supplier<SecurityBuilder> supplier);
 
     int declareStockByName(String name, Supplier<SecurityBuilder> supplier);
 

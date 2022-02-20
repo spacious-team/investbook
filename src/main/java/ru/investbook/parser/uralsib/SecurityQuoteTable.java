@@ -69,7 +69,7 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
                 .orElseThrow(() -> new IllegalArgumentException("Не смогли вычислить валюту облигации " + isin + ", " +
                         "цена и НКД могут быть в разных валютах"));
 
-        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(isin, () -> Security.builder()
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(isin, () -> Security.builder()
                 .isin(isin)
                 .name(row.getStringCellValue(NAME)));
 

@@ -52,7 +52,7 @@ public class SecuritiesTable extends SingleAbstractReportTable<Security> {
                 .isin(isin)
                 .name(row.getStringCellValue(NAME))
                 .type(SecurityType.STOCK_OR_BOND);
-        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(isin, () -> security);
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(isin, () -> security);
         return security.id(securityId).build();
     }
 

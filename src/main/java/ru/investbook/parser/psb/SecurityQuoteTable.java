@@ -66,7 +66,7 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
                         " Не могу привести валюту купона к валюте цены, не реализовано.");
             }
         }
-        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(isin, () -> Security.builder()
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(isin, () -> Security.builder()
                 .isin(isin)
                 .name(row.getStringCellValue(NAME)));
         return SecurityQuote.builder()
