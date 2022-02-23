@@ -74,7 +74,7 @@
             <dependency>
                 <groupId>com.github.spacious-team</groupId>
                 <artifactId>table-wrapper-api</artifactId>
-                <version>9268ef0edd</version>
+                <version>3c66877d60</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -83,7 +83,7 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>2022.3</version>
+            <version>5b1e532163</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
