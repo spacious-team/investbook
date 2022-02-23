@@ -23,6 +23,7 @@ import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.ReportTables;
 import org.spacious_team.broker.report_parser.api.ReportTablesFactory;
 import org.springframework.stereotype.Component;
+import ru.investbook.parser.TransactionValueAndFeeParser;
 import ru.investbook.report.ForeignExchangeRateService;
 
 @Component
@@ -30,6 +31,7 @@ import ru.investbook.report.ForeignExchangeRateService;
 public class UralsibReportTablesFactory implements ReportTablesFactory {
 
     private final ForeignExchangeRateService foreignExchangeRateService;
+    private final TransactionValueAndFeeParser transactionValueAndFeeParser;
 
     @Override
     public boolean canCreate(BrokerReport brokerReport) {
@@ -38,6 +40,7 @@ public class UralsibReportTablesFactory implements ReportTablesFactory {
 
     @Override
     public ReportTables create(BrokerReport brokerReport) {
-        return new UralsibReportTables((UralsibBrokerReport) brokerReport, foreignExchangeRateService);
+        return new UralsibReportTables(
+                (UralsibBrokerReport) brokerReport, foreignExchangeRateService, transactionValueAndFeeParser);
     }
 }

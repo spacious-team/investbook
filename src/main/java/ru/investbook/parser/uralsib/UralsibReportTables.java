@@ -28,6 +28,7 @@ import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.broker.report_parser.api.WrappingReportTable;
+import ru.investbook.parser.TransactionValueAndFeeParser;
 import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
 import ru.investbook.report.ForeignExchangeRateService;
 
@@ -50,7 +51,9 @@ public class UralsibReportTables extends AbstractReportTables<UralsibBrokerRepor
     @Getter
     private final ReportTable<SecurityQuote> securityQuoteTable;
 
-    public UralsibReportTables(UralsibBrokerReport report, ForeignExchangeRateService foreignExchangeRateService) {
+    public UralsibReportTables(UralsibBrokerReport report,
+                               ForeignExchangeRateService foreignExchangeRateService,
+                               TransactionValueAndFeeParser transactionValueAndFeeParser) {
         super(report);
         AssetsTable securityAssetsTable = new AssetsTable(report);
         this.portfolioCashTable = new CashTable(report);
@@ -58,7 +61,7 @@ public class UralsibReportTables extends AbstractReportTables<UralsibBrokerRepor
         this.portfolioPropertyTable = new PortfolioPropertyTable(securityAssetsTable, portfolioCashTable, foreignExchangeRateTable);
         this.portfolioSecuritiesTable = new SecuritiesTable(report);
         this.securityTransactionTable = WrappingReportTable.of(
-                new SecurityTransactionTable(report, foreignExchangeRateTable),
+                new SecurityTransactionTable(report, foreignExchangeRateTable, transactionValueAndFeeParser),
                 new SecurityDepositAndWithdrawalTable(report, portfolioSecuritiesTable));
         this.couponAmortizationRedemptionTable =
                 new CouponAmortizationRedemptionTable(report, portfolioSecuritiesTable, securityTransactionTable);
