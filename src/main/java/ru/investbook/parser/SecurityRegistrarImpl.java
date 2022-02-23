@@ -30,6 +30,7 @@ import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -43,6 +44,7 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
     private final SecurityRepository repository;
     private final SecurityConverter converter;
     private final MoexDerivativeCodeService derivativeCodeService;
+    private final ValidatorService validator;
 
     @Cacheable(cacheNames = "declareStockByIsin", key = "#isin")
     @Override
@@ -163,7 +165,10 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
 
     private SecurityEntity saveAndFlush(Security security, Supplier<Optional<SecurityEntity>> supplier) {
         try {
+            validator.validate(security);
             return repository.saveAndFlush(converter.toEntity(security));
+        } catch (ConstraintViolationException e) {
+            throw new RuntimeException("Не смог сохранить ценную бумагу в БД: " + security + ", " + e.getMessage());
         } catch (Exception e) {
             if (isUniqIndexViolationException(e)) {
                 log.trace("Дублирование вызвано исключением", e);

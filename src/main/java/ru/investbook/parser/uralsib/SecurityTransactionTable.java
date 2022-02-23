@@ -34,6 +34,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
 
+import static ru.investbook.parser.uralsib.SecurityRegistryHelper.declareStockOrBond;
 import static ru.investbook.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.*;
 
 @Slf4j
@@ -107,8 +108,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
             }
         }
         String isin = row.getStringCellValue(ISIN);
-        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(isin, () -> Security.builder()
-                .isin(isin)); // TODO  set .name() also
+        int securityId = declareStockOrBond(isin, null, getReport().getSecurityRegistrar()); // TODO  set .name() also
 
         return SecurityTransaction.builder()
                 .timestamp(timestamp)
