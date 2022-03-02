@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.Security.SecurityBuilder;
 import org.spacious_team.broker.pojo.SecurityType;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
@@ -46,75 +45,63 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
     private final MoexDerivativeCodeService derivativeCodeService;
     private final ValidatorService validator;
 
-    @Cacheable(cacheNames = "declareStockByIsin", key = "#isin")
     @Override
     public int declareStockByIsin(String isin, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByIsin(isin, STOCK, supplier);
     }
 
-    @Cacheable(cacheNames = "declareBondByIsin", key = "#isin")
     @Override
     public int declareBondByIsin(String isin, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByIsin(isin, BOND, supplier);
     }
 
-    @Cacheable(cacheNames = "declareStockOrBondByIsin", key = "#isin")
     @Override
     public int declareStockOrBondByIsin(String isin, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByIsin(isin, STOCK_OR_BOND, supplier);
     }
 
-    @Cacheable(cacheNames = "declareStockByName", key = "#name")
     @Override
     public int declareStockByName(String name, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByName(name, STOCK, supplier);
     }
 
-    @Cacheable(cacheNames = "declareBondByName", key = "#name")
     @Override
     public int declareBondByName(String name, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByName(name, BOND, supplier);
     }
 
-    @Cacheable(cacheNames = "declareStockOrBondByName", key = "#name")
     @Override
     public int declareStockOrBondByName(String name, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByName(name, STOCK_OR_BOND, supplier);
     }
 
 
-    @Cacheable(cacheNames = "declareStockByTicker", key = "#ticker")
     @Override
     public int declareStockByTicker(String ticker, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByTicker(ticker, STOCK, supplier);
     }
 
-    @Cacheable(cacheNames = "declareBondByTicker", key = "#ticker")
     @Override
     public int declareBondByTicker(String ticker, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByTicker(ticker, BOND, supplier);
     }
 
-    @Cacheable(cacheNames = "declareStockOrBondByTicker", key = "#ticker")
     @Override
     public int declareStockOrBondByTicker(String ticker, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByTicker(ticker, STOCK_OR_BOND, supplier);
     }
 
-    @Cacheable(cacheNames = "declareDerivative", key = "#code")
     @Override
     public int declareDerivative(String code) {
         String shortNameIfCan = derivativeCodeService.convertDerivativeCode(code);
         return declareContractByTicker(shortNameIfCan, DERIVATIVE);
     }
 
-    @Cacheable(cacheNames = "declareCurrencyPair", key = "#contract")
     @Override
     public int declareCurrencyPair(String contract) {
         return declareContractByTicker(contract, CURRENCY_PAIR);
     }
 
-    @Cacheable(cacheNames = "declareAsset", key = "#assetName")
     @Override
     public int declareAsset(String assetName, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByName(assetName, ASSET, supplier);

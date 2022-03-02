@@ -154,7 +154,7 @@ public class InvestbookApiClient {
 
     public void addSecurityEventCashFlow(SecurityEventCashFlow cf) {
         if (cf.getCount() == null && cf.getEventType() == DERIVATIVE_PROFIT) {
-            cf.toBuilder().count(0).build(); // count is optional for derivatives
+            cf = cf.toBuilder().count(0).build(); // count is optional for derivatives
         }
         handlePost(
                 cf,
