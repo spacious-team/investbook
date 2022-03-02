@@ -37,7 +37,7 @@ public class TransactionConverter implements EntityConverter<TransactionEntity, 
         portfolioRepository.findById(transaction.getPortfolio())
                 .orElseThrow(() -> new IllegalArgumentException("В справочнике не найден брокерский счет: " + transaction.getPortfolio()));
         SecurityEntity securityEntity = securityRepository.findById(transaction.getSecurity())
-                .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + transaction.getSecurity()));
+                .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ID не найдена: " + transaction.getSecurity()));
 
         TransactionEntity entity = new TransactionEntity();
         entity.setId(transaction.getId());

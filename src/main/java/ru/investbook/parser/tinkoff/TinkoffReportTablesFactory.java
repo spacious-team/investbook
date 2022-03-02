@@ -18,13 +18,17 @@
 
 package ru.investbook.parser.tinkoff;
 
+import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.ReportTables;
 import org.spacious_team.broker.report_parser.api.ReportTablesFactory;
 import org.springframework.stereotype.Component;
+import ru.investbook.parser.TransactionValueAndFeeParser;
 
 @Component
+@RequiredArgsConstructor
 public class TinkoffReportTablesFactory implements ReportTablesFactory {
+    private final TransactionValueAndFeeParser transactionValueAndFeeParser;
 
     @Override
     public boolean canCreate(BrokerReport brokerReport) {
@@ -33,6 +37,6 @@ public class TinkoffReportTablesFactory implements ReportTablesFactory {
 
     @Override
     public ReportTables create(BrokerReport brokerReport) {
-        return new TinkoffReportTables((TinkoffBrokerReport) brokerReport);
+        return new TinkoffReportTables((TinkoffBrokerReport) brokerReport, transactionValueAndFeeParser);
     }
 }

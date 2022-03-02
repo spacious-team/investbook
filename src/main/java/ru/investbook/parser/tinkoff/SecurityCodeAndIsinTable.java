@@ -41,14 +41,16 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         super(report,
                 (cell) -> cell.startsWith("4.1 Информация о ценных бумагах"),
                 (cell) -> tablesLastRowPattern.matcher(cell).lookingAt(),
-                SecurityAndCodeTableHeader.class);
+                SecurityAndCodeTableHeader.class); // TODO между наименованием страницы и заголовком может быть строка с указанием номера страницы 3/5
     }
 
     @Override
     protected Void parseRow(TableRow row) {
-        codeToIsin.put(
-                row.getStringCellValue(SecurityAndCodeTableHeader.CODE),
-                row.getStringCellValue(SecurityAndCodeTableHeader.ISIN));
+        String code = row.getStringCellValueOrDefault(SecurityAndCodeTableHeader.CODE, null);
+        if (code != null) { // exclude table's empty row
+            String isin = row.getStringCellValue(SecurityAndCodeTableHeader.ISIN);
+            codeToIsin.put(code, isin);
+        }
         return null;
     }
 

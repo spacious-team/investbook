@@ -65,7 +65,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
         }
         Instant timestamp = convertToInstant(row.getStringCellValue(DATE_TIME));
 
-        TransactionValueAndFeeParser.Result result = transactionValueAndFeeParser.parse(
+        TransactionValueAndFeeParser.Result valueAndFee = transactionValueAndFeeParser.parse(
                 transactionValueAndFeeParser.argumentsBuilder()
                         .row(row)
                         .portfolio(getReport().getPortfolio())
@@ -90,11 +90,11 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                 .portfolio(getReport().getPortfolio())
                 .security(securityId)
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
-                .value(result.value())
+                .value(valueAndFee.value())
                 .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)
-                .commission(result.fee().negate())
-                .valueCurrency(result.valueCurrency())
-                .commissionCurrency(result.feeCurrency())
+                .commission(valueAndFee.fee().negate())
+                .valueCurrency(valueAndFee.valueCurrency())
+                .commissionCurrency(valueAndFee.feeCurrency())
                 .build();
     }
 

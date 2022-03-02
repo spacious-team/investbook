@@ -28,11 +28,14 @@ import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTables;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
+import ru.investbook.parser.TransactionValueAndFeeParser;
 
 public class TinkoffReportTables extends AbstractReportTables<TinkoffBrokerReport> {
+    private final TransactionValueAndFeeParser transactionValueAndFeeParser;
     
-    protected TinkoffReportTables(TinkoffBrokerReport report) {
+    protected TinkoffReportTables(TinkoffBrokerReport report, TransactionValueAndFeeParser transactionValueAndFeeParser) {
         super(report);
+        this.transactionValueAndFeeParser = transactionValueAndFeeParser;
     }
 
     @Override
@@ -58,7 +61,7 @@ public class TinkoffReportTables extends AbstractReportTables<TinkoffBrokerRepor
     @Override
     public ReportTable<AbstractTransaction> getTransactionTable() {
         SecurityCodeAndIsinTable securityCodeAndIsinTable = new SecurityCodeAndIsinTable(report);
-        return new TinkoffSecurityTransactionTable(report, securityCodeAndIsinTable);
+        return new TinkoffSecurityTransactionTable(report, securityCodeAndIsinTable, transactionValueAndFeeParser);
     }
 
     @Override
