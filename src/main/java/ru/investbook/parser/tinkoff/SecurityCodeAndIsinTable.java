@@ -41,7 +41,7 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         super(report,
                 (cell) -> cell.startsWith("4.1 Информация о ценных бумагах"),
                 (cell) -> tablesLastRowPattern.matcher(cell).lookingAt(),
-                SecurityAndCodeTableHeader.class); // TODO между наименованием страницы и заголовком может быть строка с указанием номера страницы 3/5
+                SecurityAndCodeTableHeader.class);
     }
 
     @Override
