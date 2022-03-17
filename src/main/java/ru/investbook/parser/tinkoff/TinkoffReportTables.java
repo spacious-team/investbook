@@ -61,7 +61,7 @@ public class TinkoffReportTables extends AbstractReportTables<TinkoffBrokerRepor
     @Override
     public ReportTable<AbstractTransaction> getTransactionTable() {
         SecurityCodeAndIsinTable securityCodeAndIsinTable = new SecurityCodeAndIsinTable(report);
-        return new TinkoffSecurityTransactionTable(report, securityCodeAndIsinTable, transactionValueAndFeeParser);
+        return TinkoffSecurityTransactionTable.of(report, securityCodeAndIsinTable, transactionValueAndFeeParser);
     }
 
     @Override

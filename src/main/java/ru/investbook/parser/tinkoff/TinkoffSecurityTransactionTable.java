@@ -24,7 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
+import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
+import org.spacious_team.broker.report_parser.api.WrappingReportTable;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
@@ -46,11 +48,24 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
     private final SecurityCodeAndIsinTable codeAndIsin;
     private final TransactionValueAndFeeParser transactionValueAndFeeParser;
 
-    public TinkoffSecurityTransactionTable(TinkoffBrokerReport report,
-                                           SecurityCodeAndIsinTable codeAndIsin,
-                                           TransactionValueAndFeeParser transactionValueAndFeeParser) {
+    public static ReportTable<AbstractTransaction> of(TinkoffBrokerReport report,
+                                                      SecurityCodeAndIsinTable codeAndIsin,
+                                                      TransactionValueAndFeeParser transactionValueAndFeeParser) {
+        return WrappingReportTable.of(
+                new TinkoffSecurityTransactionTable(
+                        "1.1 Информация о совершенных и исполненных сделках",
+                        report, codeAndIsin, transactionValueAndFeeParser),
+                new TinkoffSecurityTransactionTable(
+                        "1.2 Информация о неисполненных сделках на конец отчетного периода",
+                        report, codeAndIsin, transactionValueAndFeeParser));
+    }
+
+    private TinkoffSecurityTransactionTable(String tableNamePrefix,
+                                            TinkoffBrokerReport report,
+                                            SecurityCodeAndIsinTable codeAndIsin,
+                                            TransactionValueAndFeeParser transactionValueAndFeeParser) {
         super(report,
-                (cell) -> cell.startsWith("1.1 Информация о совершенных и исполненных сделках"),
+                (cell) -> cell.startsWith(tableNamePrefix),
                 (cell) -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
                 TransactionTableHeader.class);
         this.codeAndIsin = codeAndIsin;
