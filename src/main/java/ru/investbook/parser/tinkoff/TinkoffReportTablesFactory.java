@@ -24,11 +24,13 @@ import org.spacious_team.broker.report_parser.api.ReportTables;
 import org.spacious_team.broker.report_parser.api.ReportTablesFactory;
 import org.springframework.stereotype.Component;
 import ru.investbook.parser.TransactionValueAndFeeParser;
+import ru.investbook.report.ForeignExchangeRateService;
 
 @Component
 @RequiredArgsConstructor
 public class TinkoffReportTablesFactory implements ReportTablesFactory {
     private final TransactionValueAndFeeParser transactionValueAndFeeParser;
+    private final ForeignExchangeRateService foreignExchangeRateService;
 
     @Override
     public boolean canCreate(BrokerReport brokerReport) {
@@ -37,6 +39,7 @@ public class TinkoffReportTablesFactory implements ReportTablesFactory {
 
     @Override
     public ReportTables create(BrokerReport brokerReport) {
-        return new TinkoffReportTables((TinkoffBrokerReport) brokerReport, transactionValueAndFeeParser);
+        return new TinkoffReportTables((TinkoffBrokerReport) brokerReport,
+                transactionValueAndFeeParser, foreignExchangeRateService);
     }
 }

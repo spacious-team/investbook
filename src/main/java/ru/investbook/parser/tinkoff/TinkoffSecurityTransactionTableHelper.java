@@ -37,14 +37,7 @@ class TinkoffSecurityTransactionTableHelper {
         String shortName = row.getStringCellValue(SHORT_NAME);
         SecurityType securityType = getSecurityType(row);
         Security security = getSecurity(code, codeAndIsin, shortName, securityType);
-        return switch (securityType) {
-            case STOCK -> registrar.declareStockByIsin(codeAndIsin.getIsin(code), security::toBuilder);
-            case BOND -> registrar.declareBondByIsin(codeAndIsin.getIsin(code), security::toBuilder);
-            case STOCK_OR_BOND -> registrar.declareStockOrBondByIsin(codeAndIsin.getIsin(code), security::toBuilder);
-            case DERIVATIVE -> registrar.declareDerivative(shortName);
-            case CURRENCY_PAIR -> registrar.declareCurrencyPair(shortName);
-            case ASSET -> throw new IllegalArgumentException("Тип ASSET не поддерживается");
-        };
+        return declareSecurity(security, registrar);
     }
 
     static SecurityType getSecurityType(TableRow row) {
@@ -54,7 +47,7 @@ class TinkoffSecurityTransactionTableHelper {
         }
 
         String type = row.getStringCellValueOrDefault(TYPE, "").toUpperCase();
-        if (Objects.equals(type, "SPBFUT") ||  Objects.equals(type, "SPBOPT")) { // SPBOPT - догадка
+        if (Objects.equals(type, "SPBFUT") || Objects.equals(type, "SPBOPT")) { // SPBOPT - догадка
             return SecurityType.DERIVATIVE;
         } else if (Objects.equals(type, "CNGD")) { // это может быть поставочный фьючерс, см. раздел 5 отчета Тинькофф
             return SecurityType.CURRENCY_PAIR;
@@ -68,10 +61,10 @@ class TinkoffSecurityTransactionTableHelper {
         return SecurityType.STOCK;
     }
 
-    private static Security getSecurity(String code,
-                                        SecurityCodeAndIsinTable codeAndIsin,
-                                        String shortName,
-                                        SecurityType securityType) {
+    static Security getSecurity(String code,
+                                SecurityCodeAndIsinTable codeAndIsin,
+                                String shortName,
+                                SecurityType securityType) {
         return switch (securityType) {
             case STOCK -> Security.builder()
                     .ticker(code)
@@ -84,8 +77,20 @@ class TinkoffSecurityTransactionTableHelper {
                     .name(shortName)
                     .type(securityType)
                     .build();
-            case DERIVATIVE, CURRENCY_PAIR -> Security.builder().ticker(shortName).build();
-            case ASSET  -> throw new IllegalArgumentException("Произвольный актив не поддерживается");
+            case DERIVATIVE -> Security.builder().ticker(shortName).type(SecurityType.DERIVATIVE).build();
+            case CURRENCY_PAIR -> Security.builder().ticker(shortName).type(SecurityType.CURRENCY_PAIR).build();
+            case ASSET -> throw new IllegalArgumentException("Произвольный актив не поддерживается");
+        };
+    }
+
+    static int declareSecurity(Security security, SecurityRegistrar registrar) {
+        return switch (security.getType()) {
+            case STOCK -> registrar.declareStockByIsin(security.getIsin(), security::toBuilder);
+            case BOND -> registrar.declareBondByIsin(security.getIsin(), security::toBuilder);
+            case STOCK_OR_BOND -> registrar.declareStockOrBondByIsin(security.getIsin(), security::toBuilder);
+            case DERIVATIVE -> registrar.declareDerivative(security.getTicker());
+            case CURRENCY_PAIR -> registrar.declareCurrencyPair(security.getTicker());
+            case ASSET -> throw new IllegalArgumentException("Тип ASSET не поддерживается");
         };
     }
 }

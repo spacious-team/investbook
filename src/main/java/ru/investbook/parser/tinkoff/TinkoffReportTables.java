@@ -18,34 +18,41 @@
 
 package ru.investbook.parser.tinkoff;
 
+import lombok.Getter;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
-import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTables;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
+import org.spacious_team.broker.report_parser.api.WrappingReportTable;
 import ru.investbook.parser.TransactionValueAndFeeParser;
+import ru.investbook.report.ForeignExchangeRateService;
 
 public class TinkoffReportTables extends AbstractReportTables<TinkoffBrokerReport> {
     private final TransactionValueAndFeeParser transactionValueAndFeeParser;
-    
-    protected TinkoffReportTables(TinkoffBrokerReport report, TransactionValueAndFeeParser transactionValueAndFeeParser) {
+    private final SecurityCodeAndIsinTable securityCodeAndIsinTable;
+    @Getter
+    private final ReportTable<SecurityQuote> securityQuoteTable;
+    @Getter
+    private final TinkoffCashTable portfolioCashTable;
+    @Getter
+    private final TinkoffPortfolioPropertyTable portfolioPropertyTable;
+
+    protected TinkoffReportTables(TinkoffBrokerReport report,
+                                  TransactionValueAndFeeParser transactionValueAndFeeParser,
+                                    ForeignExchangeRateService foreignExchangeRateService) {
         super(report);
         this.transactionValueAndFeeParser = transactionValueAndFeeParser;
-    }
-
-    @Override
-    public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
-        return emptyTable();
-    }
-
-    @Override
-    public ReportTable<PortfolioCash> getPortfolioCashTable() {
-        return emptyTable();
+        this.securityCodeAndIsinTable = new SecurityCodeAndIsinTable(this.report);
+        this.portfolioCashTable = new TinkoffCashTable(report);
+        TinkoffSecurityQuoteTable[] securityQuoteTables =
+                TinkoffSecurityQuoteTable.of(report, securityCodeAndIsinTable, foreignExchangeRateService);
+        this.securityQuoteTable = WrappingReportTable.of(securityQuoteTables);
+        this.portfolioPropertyTable = new TinkoffPortfolioPropertyTable(report, foreignExchangeRateService,
+                portfolioCashTable, securityQuoteTables);
     }
 
     @Override
@@ -60,17 +67,11 @@ public class TinkoffReportTables extends AbstractReportTables<TinkoffBrokerRepor
 
     @Override
     public ReportTable<AbstractTransaction> getTransactionTable() {
-        SecurityCodeAndIsinTable securityCodeAndIsinTable = new SecurityCodeAndIsinTable(report);
         return TinkoffSecurityTransactionTable.of(report, securityCodeAndIsinTable, transactionValueAndFeeParser);
     }
 
     @Override
     public ReportTable<SecurityEventCashFlow> getSecurityEventCashFlowTable() {
-        return emptyTable();
-    }
-
-    @Override
-    public ReportTable<SecurityQuote> getSecurityQuoteTable() {
         return emptyTable();
     }
 

@@ -25,17 +25,21 @@ import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
+import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static ru.investbook.parser.tinkoff.SecurityCodeAndIsinTable.SecurityAndCodeTableHeader.*;
 import static ru.investbook.parser.tinkoff.TinkoffBrokerReport.tablesLastRowPattern;
 
 public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
 
     private final Map<String, String> codeToIsin = new HashMap<>();
+    private final Map<String, BigDecimal> codeToFaceValue = new HashMap<>();
 
     protected SecurityCodeAndIsinTable(BrokerReport report) {
         super(report,
@@ -46,10 +50,13 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
 
     @Override
     protected Void parseRow(TableRow row) {
-        String code = row.getStringCellValueOrDefault(SecurityAndCodeTableHeader.CODE, null);
-        if (code != null) { // exclude table's empty row
-            String isin = row.getStringCellValue(SecurityAndCodeTableHeader.ISIN);
-            codeToIsin.put(code, isin);
+        String code = row.getStringCellValueOrDefault(CODE, null);
+        if (StringUtils.hasLength(code) && !code.contains("Код актива")) { // exclude table's empty row
+            codeToIsin.put(code, row.getStringCellValue(ISIN));
+            BigDecimal faceValue = row.getBigDecimalCellValueOrDefault(FACE_VALUE, null);
+            if (faceValue != null) {
+                codeToFaceValue.put(code, faceValue);
+            }
         }
         return null;
     }
@@ -60,9 +67,16 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         return Objects.requireNonNull(codeToIsin.get(code));
     }
 
+    @NotNull
+    public BigDecimal getFaceValue(String code) {
+        initializeIfNeed();
+        return Objects.requireNonNull(codeToFaceValue.get(code));
+    }
+
     protected enum SecurityAndCodeTableHeader implements TableColumnDescription {
         CODE("код", "актива"),
-        ISIN("isin");
+        ISIN("isin"),
+        FACE_VALUE("Номинал");
 
         @Getter
         private final TableColumn column;
