@@ -29,6 +29,8 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.SingleBrokerReport;
 
+import java.util.Collection;
+
 import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.parser.tinkoff.TinkoffCashFlowTable.CashFlowTableHeader.*;
 
@@ -47,7 +49,7 @@ public class TinkoffCashFlowTable extends SingleAbstractReportTable<EventCashFlo
 
     @Override
     protected EventCashFlow parseRow(TableRow row) {
-        String currency = getCurrency(row);
+        currency = TinkoffCashFlowTableHelper.getCurrency(row, currency);
         if (currency == null) {
             return null;
         }
@@ -83,17 +85,6 @@ public class TinkoffCashFlowTable extends SingleAbstractReportTable<EventCashFlo
         return null;
     }
 
-    private String getCurrency(TableRow row) {
-        boolean isCurrencyHeader = !hasLength(row.getStringCellValueOrDefault(DATE, null));
-        if (isCurrencyHeader) {
-            String _currency = row.getStringCellValueOrDefault(CURRENCY, null);
-            if (hasLength(_currency) && _currency.length() == 3) { // RUB, USD, ... (ISO format)
-                currency = _currency.toUpperCase();
-            }
-        }
-        return currency;
-    }
-
     private EventCashFlow.EventCashFlowBuilder getBuilder(TableRow row, String currency) {
         String description = row.getStringCellValueOrDefault(DESCRIPTION, null);
         return EventCashFlow.builder()
@@ -101,6 +92,16 @@ public class TinkoffCashFlowTable extends SingleAbstractReportTable<EventCashFlo
                 .timestamp(getReport().convertToInstant(row.getStringCellValue(DATE)))
                 .currency(currency)
                 .description(hasLength(description) ? description : null);
+    }
+
+    @Override
+    protected boolean checkEquality(EventCashFlow flow1, EventCashFlow flow2) {
+        return EventCashFlow.checkEquality(flow1, flow2);
+    }
+
+    @Override
+    protected Collection<EventCashFlow> mergeDuplicates(EventCashFlow old, EventCashFlow nw) {
+        return EventCashFlow.mergeDuplicates(old, nw);
     }
 
     /**

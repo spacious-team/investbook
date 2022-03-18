@@ -19,6 +19,7 @@
 package ru.investbook.parser.tinkoff;
 
 import lombok.Getter;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableColumn;
@@ -39,7 +40,9 @@ import static ru.investbook.parser.tinkoff.TinkoffBrokerReport.tablesLastRowPatt
 public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
 
     private final Map<String, String> codeToIsin = new HashMap<>();
+    private final Map<String, SecurityType> codeToType = new HashMap<>();
     private final Map<String, BigDecimal> codeToFaceValue = new HashMap<>();
+    private final Map<String, String> shortNameToCode = new HashMap<>();
 
     protected SecurityCodeAndIsinTable(BrokerReport report) {
         super(report,
@@ -53,9 +56,26 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         String code = row.getStringCellValueOrDefault(CODE, null);
         if (StringUtils.hasLength(code) && !code.contains("Код актива")) { // exclude table's empty row
             codeToIsin.put(code, row.getStringCellValue(ISIN));
+
+            String type = row.getStringCellValueOrDefault(TYPE, "").toLowerCase();
+            SecurityType securityType;
+            if (type.contains("акци") || type.contains("депозитарн")) {
+                securityType = SecurityType.STOCK;
+            } else if (type.contains("обл ") || type.contains("облигаци")) {
+                securityType = SecurityType.BOND;
+            } else {
+                securityType = SecurityType.STOCK_OR_BOND;
+            }
+            codeToType.put(code, securityType);
+
             BigDecimal faceValue = row.getBigDecimalCellValueOrDefault(FACE_VALUE, null);
             if (faceValue != null) {
                 codeToFaceValue.put(code, faceValue);
+            }
+
+            String shortName = row.getStringCellValueOrDefault(SHORT_NAME, null);
+            if (StringUtils.hasLength(shortName)) {
+                shortNameToCode.put(shortName, code);
             }
         }
         return null;
@@ -68,14 +88,28 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
     }
 
     @NotNull
+    public SecurityType getSecurityType(String code) {
+        initializeIfNeed();
+        return Objects.requireNonNull(codeToType.get(code));
+    }
+
+    @NotNull
     public BigDecimal getFaceValue(String code) {
         initializeIfNeed();
         return Objects.requireNonNull(codeToFaceValue.get(code));
     }
 
+    @NotNull
+    public String getCode(String shortName) {
+        initializeIfNeed();
+        return Objects.requireNonNull(shortNameToCode.get(shortName));
+    }
+
     protected enum SecurityAndCodeTableHeader implements TableColumnDescription {
+        SHORT_NAME("Сокращенное", "наименование"),
         CODE("код", "актива"),
         ISIN("isin"),
+        TYPE("^Тип$"),
         FACE_VALUE("Номинал");
 
         @Getter
