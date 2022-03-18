@@ -57,7 +57,7 @@ public class TinkoffCashTable extends SingleAbstractReportTable<PortfolioCash>  
     @RequiredArgsConstructor
     protected enum CashTableHeader implements TableColumnDescription {
         CURRENCY("Валюта"),
-        VALUE("Исходящий остаток", "на конец периода");
+        VALUE("Исходящий", "остаток", "на конец", "периода");
 
         @Getter
         private final TableColumn column;

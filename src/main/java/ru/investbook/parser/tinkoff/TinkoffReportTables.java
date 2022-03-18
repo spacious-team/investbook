@@ -57,7 +57,7 @@ public class TinkoffReportTables extends AbstractReportTables<TinkoffBrokerRepor
 
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
-        return emptyTable();
+        return new TinkoffCashFlowTable(report);
     }
 
     @Override
