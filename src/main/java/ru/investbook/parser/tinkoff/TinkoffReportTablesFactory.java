@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.parser.uralsib;
+package ru.investbook.parser.tinkoff;
 
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
@@ -28,19 +28,18 @@ import ru.investbook.report.ForeignExchangeRateService;
 
 @Component
 @RequiredArgsConstructor
-public class UralsibReportTablesFactory implements ReportTablesFactory {
-
-    private final ForeignExchangeRateService foreignExchangeRateService;
+public class TinkoffReportTablesFactory implements ReportTablesFactory {
     private final TransactionValueAndFeeParser transactionValueAndFeeParser;
+    private final ForeignExchangeRateService foreignExchangeRateService;
 
     @Override
     public boolean canCreate(BrokerReport brokerReport) {
-        return (brokerReport instanceof UralsibBrokerReport);
+        return brokerReport instanceof TinkoffBrokerReport;
     }
 
     @Override
     public ReportTables create(BrokerReport brokerReport) {
-        return new UralsibReportTables(
-                (UralsibBrokerReport) brokerReport, foreignExchangeRateService, transactionValueAndFeeParser);
+        return new TinkoffReportTables((TinkoffBrokerReport) brokerReport,
+                transactionValueAndFeeParser, foreignExchangeRateService);
     }
 }

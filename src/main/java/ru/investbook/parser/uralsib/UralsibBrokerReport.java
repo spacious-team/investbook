@@ -33,6 +33,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -41,9 +42,11 @@ import static java.util.Objects.requireNonNull;
 @EqualsAndHashCode(callSuper = true)
 public class UralsibBrokerReport extends AbstractExcelBrokerReport {
     // "УРАЛСИБ Брокер" или "УРАЛСИБ Кэпитал - Финансовые услуги" (старый формат 2018 г)
-    private static final String UNIQ_TEXT = "Брокер: ООО \"УРАЛСИБ";
     private static final String PORTFOLIO_MARKER = "Номер счета Клиента:";
-    private static final String REPORT_DATE_MARKER = "за период";
+    private static final Predicate<Object> uralsibReportPredicate = (cell) ->
+            (cell instanceof String) && ((String) cell).contains("УРАЛСИБ");
+    private static final Predicate<Object> dateMarkerPredicate = (cell) ->
+            (cell instanceof String) && ((String) cell).contains("за период");
     private final Workbook book;
 
     public UralsibBrokerReport(ZipInputStream zis, SecurityRegistrar securityRegistrar) {
@@ -76,9 +79,7 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
     }
 
     private static void checkReportFormat(Path path, ReportPage reportPage) {
-        if (reportPage.find(
-                UNIQ_TEXT, 0, 1, (cell, expectedText) -> cell.contains(expectedText.toString()))
-                == TableCellAddress.NOT_FOUND) {
+        if (reportPage.find(0, 1, uralsibReportPredicate) == TableCellAddress.NOT_FOUND) {
             throw new RuntimeException("В файле " + path + " не содержится отчет брокера Уралсиб");
         }
     }
@@ -107,8 +108,7 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
 
     private Instant getReportEndDateTime(ReportPage reportPage) {
         try {
-            TableCellAddress address = reportPage.find(REPORT_DATE_MARKER, 0, Integer.MAX_VALUE,
-                    (cell, value) -> cell.toLowerCase().contains(value.toString()));
+            TableCellAddress address = reportPage.find(0, dateMarkerPredicate);
             String[] words = reportPage.getCell(address)
                     .getStringValue()
                     .split(" ");

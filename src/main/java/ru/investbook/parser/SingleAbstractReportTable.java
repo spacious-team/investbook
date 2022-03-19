@@ -19,10 +19,10 @@
 package ru.investbook.parser;
 
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableColumnDescription;
 
 import java.time.Instant;
+import java.util.function.Predicate;
 
 /**
  * Report table reading information from {@link SingleBrokerReport}
@@ -39,15 +39,39 @@ public abstract class SingleAbstractReportTable<T>  extends AbstractReportTable<
         super(report, tableName, tableFooter, headerDescription, headersRowCount);
     }
 
-    public SingleAbstractReportTable(BrokerReport report, String providedTableName, String namelessTableFirstLine,
+    protected SingleAbstractReportTable(SingleBrokerReport report, Predicate<String> tableNameFinder,
+                                        Predicate<String> tableFooterFinder,
+                                        Class<? extends TableColumnDescription> headerDescription) {
+        super(report, tableNameFinder, tableFooterFinder, headerDescription);
+    }
+
+    protected SingleAbstractReportTable(SingleBrokerReport report, Predicate<String> tableNameFinder,
+                                        Predicate<String> tableFooterFinder,
+                                        Class<? extends TableColumnDescription> headerDescription, int headersRowCount) {
+        super(report, tableNameFinder, tableFooterFinder, headerDescription, headersRowCount);
+    }
+
+    public SingleAbstractReportTable(SingleBrokerReport report, String providedTableName, String namelessTableFirstLine,
                                      String tableFooter, Class<? extends TableColumnDescription> headerDescription) {
         super(report, providedTableName, namelessTableFirstLine, tableFooter, headerDescription);
     }
 
-    public SingleAbstractReportTable(BrokerReport report, String providedTableName, String namelessTableFirstLine,
+    public SingleAbstractReportTable(SingleBrokerReport report, String providedTableName, String namelessTableFirstLine,
                                      String tableFooter, Class<? extends TableColumnDescription> headerDescription,
                                      int headersRowCount) {
         super(report, providedTableName, namelessTableFirstLine, tableFooter, headerDescription, headersRowCount);
+    }
+
+    protected SingleAbstractReportTable(SingleBrokerReport report, String providedTableName,
+                                        Predicate<String> namelessTableFirstLineFinder, Predicate<String> tableFooterFinder,
+                                        Class<? extends TableColumnDescription> headerDescription) {
+        super(report, providedTableName, namelessTableFirstLineFinder, tableFooterFinder, headerDescription);
+    }
+
+    protected SingleAbstractReportTable(SingleBrokerReport report, String providedTableName,
+                                        Predicate<String> namelessTableFirstLineFinder, Predicate<String> tableFooterFinder,
+                                        Class<? extends TableColumnDescription> headerDescription, int headersRowCount) {
+        super(report, providedTableName, namelessTableFirstLineFinder, tableFooterFinder, headerDescription, headersRowCount);
     }
 
     @Override
