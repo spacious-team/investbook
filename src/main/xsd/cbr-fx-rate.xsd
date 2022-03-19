@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2022  Vitalii Ananev <spacious-team@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!-- Doc: http://www.cbr.ru/development/sxml/#highlight=%D0%BA%D0%BE%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8%7C%D0%B2%D0%B0%D0%BB%D1%8E%D1%82 -->
+<!-- SChema uploaded from: http://www.cbr.ru/StaticHtml/File/92172/ValCurs_dynamics.xsd -->
+
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="ValCurs">
+        <xs:annotation>
+            <xs:documentation>Динамика официального курса заданной валюты</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" name="Record">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="Nominal" type="xs:unsignedByte">
+                                <xs:annotation>
+                                    <xs:documentation>номинал. ед</xs:documentation>
+                                </xs:annotation>
+                            </xs:element>
+                            <xs:element name="Value" type="xs:string">
+                                <xs:annotation>
+                                    <xs:documentation>Значение</xs:documentation>
+                                </xs:annotation>
+                            </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="Date" type="xs:string" use="required">
+                            <xs:annotation>
+                                <xs:documentation>Дата установления курса</xs:documentation>
+                            </xs:annotation>
+                        </xs:attribute>
+                        <xs:attribute name="Id" type="xs:string" use="required">
+                            <xs:annotation>
+                                <xs:documentation>Внутренний уникальный код валюты</xs:documentation>
+                            </xs:annotation>
+                        </xs:attribute>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="ID" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation>Запрашиваемый код валюты (внутренний код из справочника)</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="DateRange1" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation>Запрашиваемая дата начала периода</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="DateRange2" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation>Запрашиваемая дата конца периода</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="name" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation>Имя документа</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
