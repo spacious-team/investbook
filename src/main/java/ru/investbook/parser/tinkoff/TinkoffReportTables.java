@@ -72,7 +72,9 @@ public class TinkoffReportTables extends AbstractReportTables<TinkoffBrokerRepor
 
     @Override
     public ReportTable<SecurityEventCashFlow> getSecurityEventCashFlowTable() {
-        return new TinkoffSecurityEventCashFlowTable(report, securityCodeAndIsinTable);
+        return WrappingReportTable.of(
+                new TinkoffSecurityEventCashFlowTable(report, securityCodeAndIsinTable),
+                new TinkoffDerivativeCashFlowTable(report));
     }
 
     @Override

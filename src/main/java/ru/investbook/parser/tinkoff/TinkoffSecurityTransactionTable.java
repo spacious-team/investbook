@@ -80,7 +80,7 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
 
         int securityId = getSecurityId(row, codeAndIsin, getReport().getSecurityRegistrar());
         boolean isBuy = row.getStringCellValue(OPERATION).toLowerCase().contains("покупка");
-        int count = row.getIntCellValue(COUNT);
+        int count = Math.abs(row.getIntCellValue(COUNT));
         BigDecimal amount = row.getBigDecimalCellValue(AMOUNT).abs();
         amount = isBuy ? amount.negate() : amount;
         count = isBuy ? count : -count;
@@ -96,8 +96,9 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
                         .accruedInterest(isBuy ? accruedInterest.negate() : accruedInterest);
             }
             case DERIVATIVE -> {
-                BigDecimal valueInPoints = row.getBigDecimalCellValue(PRICE).abs()
-                        .multiply(BigDecimal.valueOf(count));
+                BigDecimal valueInPoints = row.getBigDecimalCellValue(PRICE)
+                        .multiply(BigDecimal.valueOf(count))
+                        .abs();
                 yield DerivativeTransaction.builder()
                         .timestamp(timestamp = getDerivativeAndCurrencyPairTransactionInstant(row))
                         .valueInPoints(isBuy ? valueInPoints.negate() : valueInPoints);
