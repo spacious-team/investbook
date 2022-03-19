@@ -24,14 +24,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
+import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.PortfolioCash;
 import ru.investbook.entity.PortfolioCashEntity;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
@@ -41,6 +45,7 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Slf4j
 public class CashBalancesPof {
 
     @NotNull
@@ -82,5 +87,22 @@ public class CashBalancesPof {
                 .filter(e -> Math.abs(e.getValue().floatValue()) > 1e-4)
                 .map(e -> new CashPof(e.getValue(), getValidCurrencyOrNull(e.getKey())))
                 .toList();
+    }
+
+    Collection<PortfolioCash> toPortfolioCash(Map<Integer, String> accountToPortfolioId, Instant instant) {
+        try {
+            return cash.stream()
+                    .map(c -> PortfolioCash.builder()
+                            .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
+                            .market("all")
+                            .timestamp(instant)
+                            .value(c.getValue())
+                            .currency(c.getCurrency())
+                            .build())
+                    .toList();
+        } catch (Exception e) {
+            log.error("Не могу распарсить {}", this, e);
+            return Collections.emptySet();
+        }
     }
 }
