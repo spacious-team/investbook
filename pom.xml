@@ -300,9 +300,6 @@
                         <goals><goal>xjc</goal></goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <packageName>ru.investbook.service.cbr</packageName>
-                </configuration>
             </plugin>
         </plugins>
     </build>
