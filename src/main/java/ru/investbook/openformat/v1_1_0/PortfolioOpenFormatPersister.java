@@ -20,12 +20,14 @@ package ru.investbook.openformat.v1_1_0;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.investbook.parser.InvestbookApiClient;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -39,9 +41,11 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import static java.util.concurrent.Executors.newWorkStealingPool;
+import static ru.investbook.openformat.v1_1_0.PortfolioOpenFormatV1_1_0.GENERATED_BY_INVESTBOOK;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PortfolioOpenFormatPersister {
     private static final int TRADE_ID_MAX_LENGTH = 32; // investbook storage limit
     private final InvestbookApiClient api;
@@ -108,6 +112,10 @@ public class PortfolioOpenFormatPersister {
             tasks.add(() -> vndInvestbook.getSecurityQuotes().forEach(api::addSecurityQuote));
         }
 
+        if (!Objects.equals(object.getGeneratedBy(), GENERATED_BY_INVESTBOOK)) {
+            tasks.add(() -> persistTotalAssetsAndPortfolioCash(object, accountToPortfolioId));
+        }
+
         runTasks(tasks);
     }
 
@@ -123,6 +131,7 @@ public class PortfolioOpenFormatPersister {
             executorService.shutdown();
         }
     }
+
     private Collection<TradePof> getTradesWithUniqTradeId(Collection<TradePof> trades) {
         Collection<TradePof> tradesWithUniqId = new ArrayList<>(trades.size());
         Set<String> tradeIds = new HashSet<>(trades.size());
@@ -168,5 +177,24 @@ public class PortfolioOpenFormatPersister {
         int value2Digits = (int) (Math.ceil(Math.log(value2) + 1e-6)); // 1e-6 for 3 digits value2, ex. 100, log(100) = 2
         int value1AllowedLength = Math.min(TRADE_ID_MAX_LENGTH - value2Digits, value1.length());
         return value1.substring(0, value1AllowedLength) + value2;
+    }
+
+    private void persistTotalAssetsAndPortfolioCash(PortfolioOpenFormatV1_1_0 object,
+                                                    Map<Integer, String> accountToPortfolioId) {
+        try {
+            Instant end = Instant.ofEpochSecond(object.getEnd());
+            object.getCashBalances()
+                    .stream()
+                    .map(cash -> cash.toPortfolioCash(accountToPortfolioId, end))
+                    .flatMap(Collection::stream)
+                    .forEach(api::addPortfolioCash);
+            object.getAccounts()
+                    .stream()
+                    .map(a -> a.toTotalAssets(end))
+                    .flatMap(Optional::stream)
+                    .forEach(api::addPortfolioProperty);
+        } catch (Exception e) {
+            log.error("Не могу сохранить оценку активов или остаток денежных средств", e);
+        }
     }
 }
