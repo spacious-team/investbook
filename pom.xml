@@ -93,12 +93,12 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-xml-impl</artifactId>
-            <version>2022.2</version>
+            <version>a8c09ea146</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-csv-impl</artifactId>
-            <version>2022.2</version>
+            <version>76ddcfdce8</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

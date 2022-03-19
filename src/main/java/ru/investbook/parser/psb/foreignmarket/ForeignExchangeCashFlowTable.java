@@ -45,7 +45,7 @@ import static ru.investbook.parser.psb.foreignmarket.PsbBrokerForeignMarketRepor
 public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
 
     private static final String TABLE_NAME = "Информация об операциях с активами";
-    private static final String BROKER_COMMISSION = "Комиссия брокера";
+    private static final String BROKER_FEE = "Комиссия брокера";
     private final BigDecimal min = BigDecimal.valueOf(0.01);
 
     public ForeignExchangeCashFlowTable(PsbBrokerForeignMarketReport report) {
@@ -103,15 +103,15 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
 
     private Collection<EventCashFlow> getDailyBrokerCommission() {
         try {
-            Object value = getReport().getReportPage().getNextColumnValue(BROKER_COMMISSION);
+            Object value = getReport().getReportPage().getNextColumnValue(BROKER_FEE);
             double doubleValue = Double.parseDouble(String.valueOf(value));
             if (doubleValue > 0.01) {
-                BigDecimal brockerCommission = BigDecimal.valueOf(doubleValue).negate();
+                BigDecimal brokerFee = BigDecimal.valueOf(doubleValue).negate();
                 return singletonList(EventCashFlow.builder()
                         .portfolio(getReport().getPortfolio())
                         .eventType(CashFlowType.COMMISSION)
                         .timestamp(getReport().getReportEndDateTime())
-                        .value(brockerCommission)
+                        .value(brokerFee)
                         .currency("RUB")
                         .description("Комиссия на валютном рынке")
                         .build());
