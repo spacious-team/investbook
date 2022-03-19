@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.repository.ForeignExchangeRateRepository;
 import ru.investbook.repository.TransactionRepository;
-import ru.investbook.service.CbrForeignExchangeRateService;
+import ru.investbook.service.cbr.CbrForeignExchangeRateService;
 import ru.investbook.web.forms.model.ForeignExchangeRateModel;
 import ru.investbook.web.forms.service.ForeignExchangeRateFormsService;
 
