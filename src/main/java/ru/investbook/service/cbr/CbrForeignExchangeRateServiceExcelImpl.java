@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Vitalii Ananev <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.service;
+package ru.investbook.service.cbr;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CbrForeignExchangeRateService {
+public class CbrForeignExchangeRateServiceExcelImpl implements CbrForeignExchangeRateService {
     private static final String uri = "https://www.cbr.ru/Queries/UniDbQuery/DownloadExcel/98956?" +
             "VAL_NM_RQ={currency}&" +
             "FromDate={from-date}&" +
@@ -68,6 +68,7 @@ public class CbrForeignExchangeRateService {
     private final ForeignExchangeRateConverter foreignExchangeRateConverter;
     private final RestTemplate restTemplate;
 
+    @Override
     @Transactional
     @SneakyThrows
     public void updateFrom(LocalDate fromDate) {
