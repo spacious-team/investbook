@@ -60,16 +60,21 @@ public class CbrForeignExchangeRateServiceXmlImpl extends AbstractCbrForeignExch
     }
 
     private ValCurs getFxRates(LocalDate fromDate, String currencyId) throws JAXBException, IOException {
-        InputStream stream = uriBuilder.buildAndExpand(Map.of(
+        try (InputStream stream = getInputStream(fromDate, currencyId)) {
+            return (ValCurs) JAXBContext.newInstance(ValCurs.class)
+                    .createUnmarshaller()
+                    .unmarshal(stream);
+        }
+    }
+
+    private InputStream getInputStream(LocalDate fromDate, String currencyId) throws IOException {
+        return uriBuilder.buildAndExpand(Map.of(
                         "currency", currencyId,
                         "from-date", fromDate.format(requestDateFormatter),
                         "to-date", LocalDate.now().format(requestDateFormatter)))
                 .toUri()
                 .toURL()
                 .openStream();
-        return (ValCurs) JAXBContext.newInstance(ValCurs.class)
-                .createUnmarshaller()
-                .unmarshal(stream);
     }
 
     private ForeignExchangeRate getRate(ValCurs.Record record, String currencyPair) {
