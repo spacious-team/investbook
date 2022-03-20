@@ -38,9 +38,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static java.lang.System.nanoTime;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
@@ -93,7 +93,7 @@ public class SecuritySectorService {
         try {
             long t0 = nanoTime();
             Collection<SecurityEntity> securities = securityRepository.findByTypeIn(stockAndBonds);
-            updateSecuritySectors(securities, false, emptyMap());
+            updateSecuritySectors(securities, false, Suppliers.memorize(Collections::emptyMap));
             log.info("Сектора по умолчанию для новых ценных бумаг установлены за {}", Duration.ofNanos(nanoTime() - t0));
         } catch (Exception e) {
             log.warn("Ошибка установки для новых ЦБ секторов по умолчанию", e);
@@ -101,15 +101,15 @@ public class SecuritySectorService {
     }
 
     private void updateSecuritySectors(Collection<SecurityEntity> securityEntities, boolean forceUpdate) {
-        updateSecuritySectors(securityEntities, forceUpdate, getTickerToSectorIndex());
+        updateSecuritySectors(securityEntities, forceUpdate, Suppliers.memorize(this::getTickerToSectorIndex));
     }
 
     private void updateSecuritySectors(Collection<SecurityEntity> securityEntities,
                                        boolean forceUpdate,
-                                       Map<String, String> tickerToSector) {
+                                       Supplier<Map<String, String>> tickerToSector) {
         securityEntities.stream()
                 .filter(entity -> forceUpdate || !securityDescriptionRepository.existsById(entity.getId()))
-                .map(entity -> getSecuritySector(tickerToSector, entity))
+                .map(entity -> getSecuritySector(tickerToSector.get(), entity))
                 .flatMap(Optional::stream)
                 .map(securityDescriptionConverter::toEntity)
                 .forEach(desc -> securityDescriptionRepository
@@ -130,27 +130,29 @@ public class SecuritySectorService {
     }
 
     private Optional<SecurityDescription> getSecuritySector(Map<String, String> tickerToSector, SecurityEntity security) {
-        String sector = ofNullable(security.getTicker())
-                .map(String::toUpperCase)
-                .map(tickerToSector::get)
-                .or(() -> ofNullable(security.getName()) // may be ticker saved by broker in name?
-                        .map(String::toUpperCase)
-                        .map(tickerToSector::get))
-                .or(() -> ofNullable(security.getIsin())
-                        .flatMap(isin -> moexIssClient.getSecId(isin, security.getType())) // for shares moex secId returns ticker
-                        .map(t -> t.endsWith("-RM") ? t.substring(0, t.length() - 2) : t)
-                        .map(String::toUpperCase)
-                        .map(tickerToSector::get))
-                .or(() -> ofNullable(security.getId())
+        Optional<String> sector = empty();
+        if (!tickerToSector.isEmpty()) {
+            sector = ofNullable(security.getTicker())
+                    .map(String::toUpperCase)
+                    .map(tickerToSector::get)
+                    .or(() -> ofNullable(security.getName()) // may be ticker saved by broker in name?
+                            .map(String::toUpperCase)
+                            .map(tickerToSector::get))
+                    .or(() -> ofNullable(security.getIsin())
+                            .flatMap(isin -> moexIssClient.getSecId(isin, security.getType())) // for shares moex secId returns ticker
+                            .map(t -> t.endsWith("-RM") ? t.substring(0, t.length() - 2) : t)
+                            .map(String::toUpperCase)
+                            .map(tickerToSector::get));
+        }
+        sector = sector.or(() -> ofNullable(security.getId())
                         .filter(id -> security.getType().isStockOrBond())
-                        .map($ -> UNKNOWN_SECTOR))
-                .orElse(null);
-        if (sector == null) {
+                        .map($ -> UNKNOWN_SECTOR));
+        if (sector.isEmpty()) {
             return empty();
         }
         return Optional.of(SecurityDescription.builder()
                 .security(security.getId())
-                .sector(sector)
+                .sector(sector.get())
                 .build());
     }
 }

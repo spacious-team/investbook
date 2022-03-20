@@ -112,7 +112,7 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
                 .isin(isin)
                 .name(row.getStringCellValue(NAME))
                 .type(SecurityType.STOCK_OR_BOND);
-        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(isin, () -> builder);
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(isin, () -> builder);
         Security security = builder.id(securityId).build();
         securities.add(security);
         return security;

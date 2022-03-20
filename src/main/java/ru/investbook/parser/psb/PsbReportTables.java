@@ -60,7 +60,9 @@ public class PsbReportTables extends AbstractReportTables<PsbBrokerReport> {
 
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
-        return new CashFlowTable(report);
+        return WrappingReportTable.of(
+                new CashFlowTable(report),
+                new BrokerFeeTable(report));
     }
 
     @Override

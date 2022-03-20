@@ -20,7 +20,6 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
 import org.spacious_team.table_wrapper.api.RelativePositionTableColumn;
@@ -29,11 +28,12 @@ import org.spacious_team.table_wrapper.api.TableColumnDescription;
 import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
+import ru.investbook.parser.TransactionValueAndFeeParser;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Optional;
 
+import static ru.investbook.parser.uralsib.SecurityRegistryHelper.declareStockOrBond;
 import static ru.investbook.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.*;
 
 @Slf4j
@@ -41,11 +41,14 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
     private static final String TABLE_NAME = "Биржевые сделки с ценными бумагами в отчетном периоде";
     private final BigDecimal minValue = BigDecimal.valueOf(0.01);
     private final ForeignExchangeRateTable foreignExchangeRateTable;
+    private final TransactionValueAndFeeParser transactionValueAndFeeParser;
 
     public SecurityTransactionTable(UralsibBrokerReport report,
-                                    ForeignExchangeRateTable foreignExchangeRateTable) {
+                                    ForeignExchangeRateTable foreignExchangeRateTable,
+                                    TransactionValueAndFeeParser transactionValueAndFeeParser) {
         super(report, TABLE_NAME, "", TransactionTableHeader.class, 2);
         this.foreignExchangeRateTable = foreignExchangeRateTable;
+        this.transactionValueAndFeeParser = transactionValueAndFeeParser;
     }
 
     @Override
@@ -60,55 +63,26 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
             value = value.negate();
             accruedInterest = accruedInterest.negate();
         }
-        String valueCurrency = getCurrency(row, VALUE_CURRENCY, value, "RUB");
-        BigDecimal marketCommission = row.getBigDecimalCellValue(MARKET_COMMISSION).abs();
-        String marketCommissionCurrency = getCurrency(row, MARKET_COMMISSION_CURRENCY, marketCommission, valueCurrency);
-        BigDecimal brokerCommission = row.getBigDecimalCellValue(BROKER_COMMISSION).abs();
-        String brokerCommissionCurrency = getCurrency(row, BROKER_COMMISSION_CURRENCY, brokerCommission, valueCurrency);
         Instant timestamp = convertToInstant(row.getStringCellValue(DATE_TIME));
 
-        BigDecimal commission;
-        String commissionCurrency;
-        if (marketCommissionCurrency.equals(brokerCommissionCurrency)) {
-            commission = brokerCommission.add(marketCommission);
-            commissionCurrency = brokerCommissionCurrency;
-        } else if (marketCommission.compareTo(minValue) < 0 && brokerCommission.compareTo(minValue) < 0) {
-            commission = BigDecimal.ZERO;
-            commissionCurrency = brokerCommissionCurrency;
-        } else if (marketCommission.compareTo(minValue) < 0) {
-            commission = brokerCommission;
-            commissionCurrency = brokerCommissionCurrency;
-        } else if (brokerCommission.compareTo(minValue) < 0) {
-            commission = marketCommission;
-            commissionCurrency = marketCommissionCurrency;
-        } else {
-            try {
-                commission = marketCommission
-                        .add(getConvertedCommission(brokerCommission, brokerCommissionCurrency, marketCommissionCurrency, timestamp))
-                        .negate();
-                commissionCurrency = marketCommissionCurrency;
-            } catch (Exception e) {
-                String msg = "Не возможно просуммировать между собой комиссии ТС и брокера, валюты разные, обменный курс не известен";
-                if (marketCommissionCurrency.equals(valueCurrency)) {
-                    value = value.subtract(marketCommission);
-                    commission = brokerCommission;
-                    commissionCurrency = brokerCommissionCurrency;
-                    log.warn("{}. Комиссия ТС включена в сумму сделки {}, т.к. они оба в одной валюте: {}",
-                            msg, tradeId, valueCurrency);
-                } else if (brokerCommissionCurrency.equals(valueCurrency)) {
-                    value = value.subtract(brokerCommission);
-                    commission = marketCommission;
-                    commissionCurrency = marketCommissionCurrency;
-                    log.warn("{}. Комиссия брокера включена в сумму сделки {}, т.к. они оба в одной валюте: {}",
-                            msg, tradeId, valueCurrency);
-                } else {
-                    throw new RuntimeException(msg, e);
-                }
-            }
-        }
+        TransactionValueAndFeeParser.Result valueAndFee = transactionValueAndFeeParser.parse(
+                transactionValueAndFeeParser.argumentsBuilder()
+                        .row(row)
+                        .portfolio(getReport().getPortfolio())
+                        .tradeId(tradeId)
+                        .value(value)
+                        .valueCurrencyColumn(VALUE_CURRENCY)
+                        .transactionInstant(timestamp)
+                        .exchangeRateProvider(foreignExchangeRateTable::getExchangeRate)
+                        .brokerFeeColumn(BROKER_COMMISSION)
+                        .brokerFeeCurrencyColumn(BROKER_COMMISSION_CURRENCY)
+                        .marketFeeColumn(MARKET_COMMISSION)
+                        .marketFeeCurrencyColumn(MARKET_COMMISSION_CURRENCY)
+                        .build());
+
+
         String isin = row.getStringCellValue(ISIN);
-        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(isin, () -> Security.builder()
-                .isin(isin)); // TODO  set .name() also
+        int securityId = declareStockOrBond(isin, null, getReport().getSecurityRegistrar()); // TODO  set .name() also
 
         return SecurityTransaction.builder()
                 .timestamp(timestamp)
@@ -116,11 +90,11 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                 .portfolio(getReport().getPortfolio())
                 .security(securityId)
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
-                .value(value)
+                .value(valueAndFee.value())
                 .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)
-                .commission(commission.negate())
-                .valueCurrency(valueCurrency)
-                .commissionCurrency(commissionCurrency)
+                .commission(valueAndFee.fee().negate())
+                .valueCurrency(valueAndFee.valueCurrency())
+                .commissionCurrency(valueAndFee.feeCurrency())
                 .build();
     }
 
@@ -131,26 +105,6 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
         } catch (Exception e) {
             return null;
         }
-    }
-
-    private String getCurrency(TableRow row, TableColumnDescription currencyColumn,
-                               BigDecimal commission, String defaultCurrency) {
-        return Optional.ofNullable(
-                        row.getStringCellValueOrDefault(currencyColumn, null))
-                .or(() -> (commission.abs().compareTo(minValue) < 0) ?
-                        Optional.ofNullable(defaultCurrency) :
-                        Optional.empty())
-                .map(UralsibBrokerReport::convertToCurrency)
-                .orElseThrow(() -> new RuntimeException("No currency provided in column " + currencyColumn));
-    }
-
-    /**
-     * Returns commission converted from commissionCurrency to targetCurrency
-     */
-    private BigDecimal getConvertedCommission(BigDecimal commission, String commissionCurrency,
-                                              String targetCurrency, Instant timestamp) {
-        BigDecimal exchangeRate = foreignExchangeRateTable.getExchangeRate(commissionCurrency, targetCurrency, timestamp);
-        return commission.multiply(exchangeRate);
     }
 
     enum TransactionTableHeader implements TableColumnDescription {

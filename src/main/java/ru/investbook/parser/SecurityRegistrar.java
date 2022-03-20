@@ -11,17 +11,23 @@ public interface SecurityRegistrar {
      *
      * @return security ID
      */
-    int declareStock(String isin, Supplier<SecurityBuilder> supplier);
+    int declareStockByIsin(String isin, Supplier<SecurityBuilder> supplier);
 
-    int declareBond(String isin, Supplier<SecurityBuilder> supplier);
+    int declareBondByIsin(String isin, Supplier<SecurityBuilder> supplier);
 
-    int declareStockOrBond(String isin, Supplier<SecurityBuilder> supplier);
+    int declareStockOrBondByIsin(String isin, Supplier<SecurityBuilder> supplier);
 
     int declareStockByName(String name, Supplier<SecurityBuilder> supplier);
 
     int declareBondByName(String name, Supplier<SecurityBuilder> supplier);
 
     int declareStockOrBondByName(String name, Supplier<SecurityBuilder> supplier);
+
+    int declareStockByTicker(String ticker, Supplier<SecurityBuilder> supplier);
+
+    int declareBondByTicker(String ticker, Supplier<SecurityBuilder> supplier);
+
+    int declareStockOrBondByTicker(String ticker, Supplier<SecurityBuilder> supplier);
 
     int declareDerivative(String code);
 

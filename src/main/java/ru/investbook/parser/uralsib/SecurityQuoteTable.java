@@ -18,7 +18,7 @@
 
 package ru.investbook.parser.uralsib;
 
-import org.spacious_team.broker.pojo.Security;
+import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityQuote.SecurityQuoteBuilder;
 import org.spacious_team.table_wrapper.api.TableRow;
@@ -34,8 +34,10 @@ import static java.math.RoundingMode.HALF_UP;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static ru.investbook.parser.uralsib.SecuritiesTable.SecuritiesTableHeader.*;
+import static ru.investbook.parser.uralsib.SecurityRegistryHelper.declareStockOrBond;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 
+@Slf4j
 public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote> {
 
     private final BigDecimal minValue = BigDecimal.valueOf(0.01);
@@ -64,16 +66,15 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
         BigDecimal accruedInterest = row.getBigDecimalCellValue(ACCRUED_INTEREST); // в валюте для валютных облигаций
         String isin = row.getStringCellValue(ISIN);
 
-        SecurityQuoteBuilder builder = getShareQuote(quote, priceInRub, accruedInterest)
-                .or(() -> getBondQuote(quote, priceInRub, accruedInterest, amountInRub))
-                .orElseThrow(() -> new IllegalArgumentException("Не смогли вычислить валюту облигации " + isin + ", " +
-                        "цена и НКД могут быть в разных валютах"));
+        Optional<SecurityQuoteBuilder> builder = getShareQuote(quote, priceInRub, accruedInterest)
+                .or(() -> getBondQuote(quote, priceInRub, accruedInterest, amountInRub));
+        if (builder.isEmpty()) {
+            log.debug("Не смогли вычислить валюту облигации {}, цена и НКД могут быть в разных валютах", isin);
+            return null;
+        }
+        int securityId = declareStockOrBond(isin, row.getStringCellValue(NAME), getReport().getSecurityRegistrar());
 
-        int securityId = getReport().getSecurityRegistrar().declareStockOrBond(isin, () -> Security.builder()
-                .isin(isin)
-                .name(row.getStringCellValue(NAME)));
-
-        return builder
+        return builder.get()
                 .security(securityId)
                 .timestamp(getReport().getReportEndDateTime())
                 .build();

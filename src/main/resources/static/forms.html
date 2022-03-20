@@ -40,6 +40,14 @@
         a.delete:hover {
             color: #DE5C59;
         }
+
+        a.delete:hover::before {
+            content: "\2620";
+            color: #DE5C59;
+            display: inline-block;
+            position: absolute;
+            margin-left: -20px;
+        }
     </style>
 </head>
 <body>

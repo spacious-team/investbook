@@ -23,12 +23,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.3</version>
+        <version>2.6.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2022.3</version>
+    <version>2022.4</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -47,7 +47,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>22.3</win.msi.version>
+        <win.msi.version>22.4</win.msi.version>
         <java.version>17</java.version>
         <!-- version 3.2.0 provided by Spring Boot 2.4.1 has bug, using version from Spring Boot 2.3.4
          TODO remove after fix -->
@@ -74,7 +74,7 @@
             <dependency>
                 <groupId>com.github.spacious-team</groupId>
                 <artifactId>table-wrapper-api</artifactId>
-                <version>2022.2</version>
+                <version>2022.4</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -83,22 +83,22 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>2022.3</version>
+            <version>2022.4</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-excel-impl</artifactId>
-            <version>2022.2</version>
+            <version>2022.4</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-xml-impl</artifactId>
-            <version>2022.2</version>
+            <version>2022.4</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-csv-impl</artifactId>
-            <version>2022.2</version>
+            <version>2022.4</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -179,7 +179,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.3</version>
+            <version>1.6.6</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
@@ -289,6 +289,17 @@
                         <source-highlighter>coderay</source-highlighter>
                     </attributes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>2.5.0</version>
+                <executions>
+                    <execution>
+                        <id>xsd-to-java</id>
+                        <goals><goal>xjc</goal></goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -66,7 +66,7 @@ public class CouponAmortizationRedemptionTable extends SingleAbstractReportTable
         BigDecimal tax = row.getBigDecimalCellValue(TAX).negate();
 
         String isin = row.getStringCellValue(ISIN);
-        int securityId = getReport().getSecurityRegistrar().declareBond(isin, () -> Security.builder()
+        int securityId = getReport().getSecurityRegistrar().declareBondByIsin(isin, () -> Security.builder()
                 .isin(isin)
                 .name(row.getStringCellValue(BOND_NAME)));
 

@@ -23,13 +23,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.Security.SecurityBuilder;
 import org.spacious_team.broker.pojo.SecurityType;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -43,63 +43,71 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
     private final SecurityRepository repository;
     private final SecurityConverter converter;
     private final MoexDerivativeCodeService derivativeCodeService;
+    private final ValidatorService validator;
 
-    @Cacheable(cacheNames = "declareStock", key = "#isin")
     @Override
-    public int declareStock(String isin, Supplier<SecurityBuilder> supplier) {
-        return declareIsinSecurity(isin, STOCK, supplier);
+    public int declareStockByIsin(String isin, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByIsin(isin, STOCK, supplier);
     }
 
-    @Cacheable(cacheNames = "declareBond", key = "#isin")
     @Override
-    public int declareBond(String isin, Supplier<SecurityBuilder> supplier) {
-        return declareIsinSecurity(isin, BOND, supplier);
+    public int declareBondByIsin(String isin, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByIsin(isin, BOND, supplier);
     }
 
-    @Cacheable(cacheNames = "declareStockOrBond", key = "#isin")
     @Override
-    public int declareStockOrBond(String isin, Supplier<SecurityBuilder> supplier) {
-        return declareIsinSecurity(isin, STOCK_OR_BOND, supplier);
+    public int declareStockOrBondByIsin(String isin, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByIsin(isin, STOCK_OR_BOND, supplier);
     }
 
-    @Cacheable(cacheNames = "declareStockByName", key = "#name")
     @Override
     public int declareStockByName(String name, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByName(name, STOCK, supplier);
     }
 
-    @Cacheable(cacheNames = "declareBondByName", key = "#name")
     @Override
     public int declareBondByName(String name, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByName(name, BOND, supplier);
     }
 
-    @Cacheable(cacheNames = "declareStockOrBondByName", key = "#name")
     @Override
     public int declareStockOrBondByName(String name, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByName(name, STOCK_OR_BOND, supplier);
     }
 
-    @Cacheable(cacheNames = "declareDerivative", key = "#code")
+
+    @Override
+    public int declareStockByTicker(String ticker, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByTicker(ticker, STOCK, supplier);
+    }
+
+    @Override
+    public int declareBondByTicker(String ticker, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByTicker(ticker, BOND, supplier);
+    }
+
+    @Override
+    public int declareStockOrBondByTicker(String ticker, Supplier<SecurityBuilder> supplier) {
+        return declareSecurityByTicker(ticker, STOCK_OR_BOND, supplier);
+    }
+
     @Override
     public int declareDerivative(String code) {
         String shortNameIfCan = derivativeCodeService.convertDerivativeCode(code);
         return declareContractByTicker(shortNameIfCan, DERIVATIVE);
     }
 
-    @Cacheable(cacheNames = "declareCurrencyPair", key = "#contract")
     @Override
     public int declareCurrencyPair(String contract) {
         return declareContractByTicker(contract, CURRENCY_PAIR);
     }
 
-    @Cacheable(cacheNames = "declareAsset", key = "#assetName")
     @Override
     public int declareAsset(String assetName, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByName(assetName, ASSET, supplier);
     }
 
-    private int declareIsinSecurity(String isin, SecurityType defaultType, Supplier<SecurityBuilder> supplier) {
+    private int declareSecurityByIsin(String isin, SecurityType defaultType, Supplier<SecurityBuilder> supplier) {
         return repository.findByIsin(isin)
                 .or(() -> Optional.of(supplier.get())
                         .map(builder -> buildSecurity(builder, defaultType))
@@ -115,6 +123,15 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
                         .map(security -> saveAndFlush(security, () -> repository.findByName(name))))
                 .map(SecurityEntity::getId)
                 .orElseThrow(() -> new RuntimeException("Не смог сохранить актив с наименованием = " + name));
+    }
+
+    private Integer declareSecurityByTicker(String ticker, SecurityType defaultType, Supplier<SecurityBuilder> supplier) {
+        return repository.findByTicker(ticker)
+                .or(() -> Optional.of(supplier.get())
+                        .map(builder -> buildSecurity(builder, defaultType))
+                        .map(security -> saveAndFlush(security, () -> repository.findByTicker(ticker))))
+                .map(SecurityEntity::getId)
+                .orElseThrow(() -> new RuntimeException("Не смог сохранить актив с тикером = " + ticker));
     }
 
     private Integer declareContractByTicker(String contract, SecurityType contractType) {
@@ -135,7 +152,10 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
 
     private SecurityEntity saveAndFlush(Security security, Supplier<Optional<SecurityEntity>> supplier) {
         try {
+            validator.validate(security);
             return repository.saveAndFlush(converter.toEntity(security));
+        } catch (ConstraintViolationException e) {
+            throw new RuntimeException("Не смог сохранить ценную бумагу в БД: " + security + ", " + e.getMessage());
         } catch (Exception e) {
             if (isUniqIndexViolationException(e)) {
                 log.trace("Дублирование вызвано исключением", e);

@@ -105,8 +105,8 @@ public class PaidInterestFactory {
                                 payments.computeIfAbsent(position, p -> new ArrayList<>())
                                         .add(securityCash)));
             } catch (Exception e) {
-                log.error("{}, выплата будет отображена в отчете по фиктивной позиции покупки ЦБ от даты {}",
-                        e.getMessage(), PaidInterest.fictitiousPositionInstant, e);
+                log.warn("{}, выплата будет отображена в отчете по фиктивной позиции покупки ЦБ от даты {}",
+                        e.getMessage(), PaidInterest.fictitiousPositionInstant);
                 payments.computeIfAbsent(PaidInterest.getFictitiousPositionPayment(cash), key -> new ArrayList<>())
                         .add(cash);
             }
@@ -135,9 +135,8 @@ public class PaidInterestFactory {
             }
         }
         if (bookClosureDate == null) {
-            throw new IllegalArgumentException("История транзакций для ЦБ " + payment.getSecurity().getId() +
-                    ((payment.getSecurity().getName() != null) ? " (\"" + payment.getSecurity().getName() + "\") " : " ") +
-                    "не полная, не найден день в прошлом, " +
+            throw new IllegalArgumentException("История транзакций для ЦБ " + payment.getSecurity() +
+                    " не полная, не найден день в прошлом, " +
                     "в который количество открытых позиций равно " + payForSecurities +
                     ", по которым выполнена выплата купона/дивиденда");
         }

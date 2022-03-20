@@ -71,7 +71,7 @@ public class PortfolioPropertyTable extends SingleInitializableReportTable<Portf
 
     protected Collection<PortfolioProperty> getTotalAssets(Table table) {
         try {
-            TableRow row = table.findRow(ASSETS);
+            TableRow row = table.findRowByPrefix(ASSETS);
             if (row == null) {
                 return emptyList();
             }

@@ -28,6 +28,8 @@ import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTables;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
+import org.spacious_team.broker.report_parser.api.WrappingReportTable;
+import ru.investbook.parser.psb.BrokerFeeTable;
 
 public class PsbForeignMarketReportTables extends AbstractReportTables<PsbBrokerForeignMarketReport> {
 
@@ -48,7 +50,9 @@ public class PsbForeignMarketReportTables extends AbstractReportTables<PsbBroker
 
     @Override
     public ReportTable<EventCashFlow> getCashFlowTable() {
-        return new ForeignExchangeCashFlowTable(report);
+        return WrappingReportTable.of(
+                new ForeignExchangeCashFlowTable(report),
+                new BrokerFeeTable(report));
     }
     
     @Override

@@ -26,17 +26,25 @@ import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.PortfolioProperty;
+import org.spacious_team.broker.pojo.PortfolioProperty.PortfolioPropertyBuilder;
+import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.springframework.lang.Nullable;
 import ru.investbook.entity.PortfolioEntity;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_RUB;
+import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_USD;
+import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 
 @Jacksonized
 @Builder
@@ -101,5 +109,36 @@ public class AccountPof {
             log.error("Не могу распарсить {}", this, e);
             return Optional.empty();
         }
+    }
+
+    Optional<PortfolioProperty> toTotalAssets(Instant atInstant) {
+        try {
+            return getPortfolioPropertyType()
+                    .map(this::getPortfolioProperty)
+                    .map(p -> p.timestamp(atInstant))
+                    .map(PortfolioPropertyBuilder::build);
+        } catch (Exception e) {
+            log.error("Не могу распарсить {}", this, e);
+            return Optional.empty();
+        }
+    }
+
+    private Optional<PortfolioPropertyType> getPortfolioPropertyType() {
+        String currency = getValidCurrencyOrNull(valuationCurrency);
+        if ("RUB".equalsIgnoreCase(currency)) {
+            return Optional.of(TOTAL_ASSETS_RUB);
+        } else if ("USD".equalsIgnoreCase(currency)) {
+            return Optional.of(TOTAL_ASSETS_USD);
+        }
+        return Optional.empty();
+    }
+
+    private PortfolioPropertyBuilder getPortfolioProperty(PortfolioPropertyType type) {
+        String portfolioId = Optional.ofNullable(accountNumber)
+                .orElse(String.valueOf(id));
+        return PortfolioProperty.builder()
+                .portfolio(portfolioId)
+                .property(type)
+                .value(valuation.toString());
     }
 }

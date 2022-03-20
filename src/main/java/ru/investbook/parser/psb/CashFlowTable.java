@@ -67,12 +67,12 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
             return null; // cash in/out records has no description
         }
         String description = row.getStringCellValueOrDefault(DESCRIPTION, null);
+        BigDecimal value = row.getBigDecimalCellValue(VALUE);
         return EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .eventType(type)
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
-                .value(row.getBigDecimalCellValue(VALUE)
-                        .multiply(BigDecimal.valueOf(isPositive ? 1 : -1)))
+                .value(isPositive ? value : value.negate())
                 .currency(row.getStringCellValue(CURRENCY))
                 .description(StringUtils.hasLength(description) ? description : null)
                 .build();
