@@ -18,6 +18,7 @@
 
 package ru.investbook.service.cbr;
 
+import com.sun.xml.bind.v2.ContextFactory;
 import generated.ValCurs;
 import lombok.SneakyThrows;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
@@ -26,7 +27,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import ru.investbook.converter.ForeignExchangeRateConverter;
 import ru.investbook.repository.ForeignExchangeRateRepository;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +34,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.Map;
 
 @Service
@@ -61,7 +62,7 @@ public class CbrForeignExchangeRateServiceXmlImpl extends AbstractCbrForeignExch
 
     private ValCurs getFxRates(LocalDate fromDate, String currencyId) throws JAXBException, IOException {
         try (InputStream stream = getInputStream(fromDate, currencyId)) {
-            return (ValCurs) JAXBContext.newInstance(ValCurs.class)
+            return (ValCurs) ContextFactory.createContext(new Class[]{ValCurs.class}, Collections.emptyMap())
                     .createUnmarshaller()
                     .unmarshal(stream);
         }
