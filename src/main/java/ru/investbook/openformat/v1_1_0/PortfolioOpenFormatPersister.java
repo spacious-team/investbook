@@ -21,11 +21,11 @@ package ru.investbook.openformat.v1_1_0;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import ru.investbook.parser.InvestbookApiClient;
+import ru.investbook.parser.SecurityRegistrar;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -38,9 +38,9 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import static java.util.concurrent.Executors.newWorkStealingPool;
+import static java.util.stream.Collectors.toMap;
 import static ru.investbook.openformat.v1_1_0.PortfolioOpenFormatV1_1_0.GENERATED_BY_INVESTBOOK;
 
 @Service
@@ -49,6 +49,7 @@ import static ru.investbook.openformat.v1_1_0.PortfolioOpenFormatV1_1_0.GENERATE
 public class PortfolioOpenFormatPersister {
     private static final int TRADE_ID_MAX_LENGTH = 32; // investbook storage limit
     private final InvestbookApiClient api;
+    private final SecurityRegistrar securityRegistrar;
 
     public void persist(PortfolioOpenFormatV1_1_0 object) {
         Collection<Runnable> tasks = new ArrayList<>();
@@ -59,42 +60,42 @@ public class PortfolioOpenFormatPersister {
                 .flatMap(Optional::stream)
                 .forEach(api::addPortfolio);
 
-        Collection<Security> securities = object.getAssets()
+        Map<Integer, Integer> assetToSecurityId = object.getAssets()
                 .parallelStream()
-                .map(AssetPof::toSecurity)
+                .map(this::storeAndGetSecurityIdentifierMap)
                 .flatMap(Optional::stream)
-                .toList();
-        securities.forEach(api::addSecurity);
+                .collect(toMap(SecurityIdentifierMap::assetId, SecurityIdentifierMap::securityId));
 
         Map<Integer, String> accountToPortfolioId = object.getAccounts()
                 .stream()
-                .collect(Collectors.toMap(
+                .collect(toMap(
                         AccountPof::getId,
                         a -> Optional.ofNullable(a.getAccountNumber()).orElse(String.valueOf(a.getId()))));
-        Map<Integer, SecurityType> assetTypes = securities.stream()
-                .collect(Collectors.toMap(Security::getId, Security::getType));
+        Map<Integer, SecurityType> assetTypes = object.getAssets()
+                .stream()
+                .collect(toMap(AssetPof::getId, AssetPof::getSecurityType));
 
-        tasks.add(() -> getTradesWithUniqTradeId(object.getTrades())
+        tasks.add(() -> getTradesWithUniqTradeId(object.getTrades(), assetToSecurityId)
                 .parallelStream()
-                .map(t -> t.toTransaction(accountToPortfolioId, assetTypes))
+                .map(t -> t.toTransaction(accountToPortfolioId, assetToSecurityId, assetTypes))
                 .flatMap(Optional::stream)
                 .forEach(api::addTransaction));
 
-        tasks.add(() -> getTransfersWithUniqTransferId(object.getTransfer())
+        tasks.add(() -> getTransfersWithUniqTransferId(object.getTransfer(), assetToSecurityId)
                 .parallelStream()
-                .map(t -> t.toTransaction(accountToPortfolioId))
+                .map(t -> t.toTransaction(accountToPortfolioId, assetToSecurityId))
                 .flatMap(Optional::stream)
                 .forEach(api::addTransaction));
 
         tasks.add(() -> object.getTransfer()
                 .parallelStream()
-                .map(t -> t.getSecurityEventCashFlow(accountToPortfolioId))
+                .map(t -> t.getSecurityEventCashFlow(accountToPortfolioId, assetToSecurityId))
                 .flatMap(Collection::stream)
                 .forEach(api::addSecurityEventCashFlow));
 
         tasks.add(() -> object.getPayments()
                 .parallelStream()
-                .map(t -> t.getSecurityEventCashFlow(accountToPortfolioId, assetTypes))
+                .map(t -> t.getSecurityEventCashFlow(accountToPortfolioId, assetToSecurityId, assetTypes))
                 .flatMap(Collection::stream)
                 .forEach(api::addSecurityEventCashFlow));
 
@@ -132,13 +133,23 @@ public class PortfolioOpenFormatPersister {
         }
     }
 
-    private Collection<TradePof> getTradesWithUniqTradeId(Collection<TradePof> trades) {
+    private Optional<SecurityIdentifierMap> storeAndGetSecurityIdentifierMap(AssetPof asset) {
+        return asset.toSecurity()
+                .map(securityRegistrar::declareSecurity)
+                .map(securityId -> new SecurityIdentifierMap(asset.getId(), securityId));
+    }
+
+    private record SecurityIdentifierMap(int assetId, int securityId) {
+    }
+
+    private Collection<TradePof> getTradesWithUniqTradeId(Collection<TradePof> trades,
+                                                          Map<Integer, Integer> assetToSecurityId) {
         Collection<TradePof> tradesWithUniqId = new ArrayList<>(trades.size());
         Set<String> tradeIds = new HashSet<>(trades.size());
         for (TradePof t : trades) {
             String tradeId = StringUtils.hasText(t.getTradeId()) ?
                     t.getTradeId() :
-                    t.getTimestamp() + ":" + t.getAsset() + ":" + t.getAccount();
+                    t.getTimestamp() + ":" + t.getSecurityId(assetToSecurityId) + ":" + t.getAccount();
             String tid = getUniqId(tradeId, tradeIds);
             if (!Objects.equals(t.getTradeId(), tid)) {
                 t = t.toBuilder().tradeId(tid).build();
@@ -148,13 +159,14 @@ public class PortfolioOpenFormatPersister {
         return tradesWithUniqId;
     }
 
-    private Collection<TransferPof> getTransfersWithUniqTransferId(Collection<TransferPof> transfers) {
+    private Collection<TransferPof> getTransfersWithUniqTransferId(Collection<TransferPof> transfers,
+                                                                   Map<Integer, Integer> assetToSecurityId) {
         Collection<TransferPof> transfersWithUniqId = new ArrayList<>(transfers.size());
         Set<String> transferIds = new HashSet<>(transfers.size());
         for (TransferPof t : transfers) {
             String transferId = StringUtils.hasText(t.getTransferId()) ?
                     t.getTransferId() :
-                    t.getTimestamp() + ":" + t.getAsset() + ":" + t.getAccount();
+                    t.getTimestamp() + ":" + t.getSecurityId(assetToSecurityId) + ":" + t.getAccount();
             String tid = getUniqId(transferId, transferIds);
             if (!Objects.equals(t.getTransferId(), tid)) {
                 t = t.toBuilder().transferId(tid).build();
