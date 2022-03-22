@@ -218,7 +218,7 @@ public class TradePof {
                         .valueCurrency(getValidCurrencyOrNull(requireNonNull(currency)));
             };
 
-            long ts = requireNonNull((settlement != null) ? settlement : timestamp);
+            long ts = requireNonNull(getSettlementOrTimestamp());
             return Optional.of(builder
                     .tradeId(tradeId)
                     .portfolio(requireNonNull(accountToPortfolioId.get(account)))
@@ -232,6 +232,11 @@ public class TradePof {
             log.error("Не могу распарсить {}", this, e);
             return Optional.empty();
         }
+    }
+
+    @Nullable
+    Long getSettlementOrTimestamp() {
+        return (settlement != null) ? settlement : timestamp;
     }
 
     int getSecurityId(Map<Integer, Integer> assetToSecurityId) {

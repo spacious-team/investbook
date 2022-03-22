@@ -68,9 +68,6 @@ public class TransferPof {
     @JsonProperty("account")
     int account;
 
-    /**
-     * Если значение null, то значение поля settlement обязательно
-     */
     @NotNull
     @JsonProperty("timestamp")
     long timestamp;

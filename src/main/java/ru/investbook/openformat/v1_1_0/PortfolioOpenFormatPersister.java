@@ -149,7 +149,7 @@ public class PortfolioOpenFormatPersister {
         for (TradePof t : trades) {
             String tradeId = StringUtils.hasText(t.getTradeId()) ?
                     t.getTradeId() :
-                    t.getTimestamp() + ":" + t.getSecurityId(assetToSecurityId) + ":" + t.getAccount();
+                    t.getSettlementOrTimestamp() + ":" + t.getSecurityId(assetToSecurityId) + ":" + t.getAccount();
             String tid = getUniqId(tradeId, tradeIds);
             if (!Objects.equals(t.getTradeId(), tid)) {
                 t = t.toBuilder().tradeId(tid).build();
