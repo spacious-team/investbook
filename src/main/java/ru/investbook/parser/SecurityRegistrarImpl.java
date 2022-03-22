@@ -33,6 +33,7 @@ import javax.validation.ConstraintViolationException;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static java.util.Optional.ofNullable;
 import static org.spacious_team.broker.pojo.SecurityType.*;
 import static ru.investbook.repository.RepositoryHelper.isUniqIndexViolationException;
 
@@ -105,6 +106,21 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
     @Override
     public int declareAsset(String assetName, Supplier<SecurityBuilder> supplier) {
         return declareSecurityByName(assetName, ASSET, supplier);
+    }
+
+    @Override
+    public int declareSecurity(Security security) {
+        return switch (security.getType()) {
+            case STOCK, BOND, STOCK_OR_BOND -> ofNullable(security.getIsin())
+                    .map(isin -> declareSecurityByIsin(isin, security.getType(), security::toBuilder))
+                    .or(() -> ofNullable(security.getTicker())
+                            .map(ticker -> declareSecurityByTicker(ticker, security.getType(), security::toBuilder)))
+                    .or(() -> ofNullable(security.getName())
+                            .map(name -> declareSecurityByName(name, security.getType(), security::toBuilder)))
+                    .orElseThrow();
+            case DERIVATIVE, CURRENCY_PAIR -> declareContractByTicker(security.getTicker(), security.getType());
+            case ASSET -> declareAsset(security.getName(), security::toBuilder);
+        };
     }
 
     private int declareSecurityByIsin(String isin, SecurityType defaultType, Supplier<SecurityBuilder> supplier) {
