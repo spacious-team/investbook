@@ -22,31 +22,38 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.ControllerHelper;
 import ru.investbook.web.forms.model.EventCashFlowModel;
+import ru.investbook.web.forms.model.SecurityEventCashFlowModel;
 import ru.investbook.web.forms.service.EventCashFlowFormsService;
+import ru.investbook.web.forms.service.SecurityEventCashFlowFormsService;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/events")
 @RequiredArgsConstructor
 public class EventCashFlowController {
     private final EventCashFlowFormsService eventCashFlowFormsService;
+    private final SecurityEventCashFlowFormsService securityEventCashFlowFormsService;
     private final PortfolioRepository portfolioRepository;
+    private final SecurityRepository securityRepository;
+    private volatile Collection<String> securities;
     private volatile Collection<String> portfolios;
     private volatile String selectedPortfolio;
 
     @PostConstruct
     public void start() {
         portfolios = ControllerHelper.getPortfolios(portfolioRepository);
+        securities = ControllerHelper.getSecuritiesDescriptions(securityRepository);
     }
 
     @GetMapping
@@ -59,6 +66,7 @@ public class EventCashFlowController {
     public String getEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
         model.addAttribute("event", getEventCashFlow(id));
         model.addAttribute("portfolios", portfolios);
+        model.addAttribute("securities", securities);
         return "events/edit-form";
     }
 
@@ -74,8 +82,16 @@ public class EventCashFlowController {
     }
 
     @PostMapping
-    public String postEventCashFlow(@Valid @ModelAttribute("event") EventCashFlowModel event) {
+    public String postEventCashFlow(@Valid EventCashFlowModel event, Model model) {
         selectedPortfolio = event.getPortfolio();
+        if (event.getAttached() != null && event.isAttachedToSecurity()) {
+            SecurityEventCashFlowModel attachedToSecurityModel = event.getAttached().toSecurityEventCashFlowModel();
+            securityEventCashFlowFormsService.save(attachedToSecurityModel);
+            Optional.ofNullable(event.getId()).ifPresent(eventCashFlowFormsService::delete);
+            model.addAttribute("event", attachedToSecurityModel);
+            return "security-events/view-single";
+        }
+        model.addAttribute("event", event);
         eventCashFlowFormsService.save(event);
         return "events/view-single";
     }
