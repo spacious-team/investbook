@@ -80,19 +80,17 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
                 .timestamp(e.getDate().atTime(e.getTime()).atZone(zoneId).toInstant())
                 .security(savedSecurityId)
                 .count(e.getCount());
-        if (e.getValue() != null) { // проверка нужна для сохранения объекта полученного из EventCashFlowModel.getAttached().toSecurityEventCashFlowModel()
-            SecurityEventCashFlowEntity entity = securityEventCashFlowRepository.save(
-                    securityEventCashFlowConverter.toEntity(builder
-                            .id(e.getId())
-                            .eventType(e.getType())
-                            .value(e.getValue())
-                            .currency(e.getValueCurrency())
-                            .build()));
-            e.setId(entity.getId()); // used in view
-        }
+        SecurityEventCashFlowEntity entity = securityEventCashFlowRepository.save(
+                securityEventCashFlowConverter.toEntity(builder
+                        .id(e.getId())
+                        .eventType(e.getType())
+                        .value(e.getValue())
+                        .currency(e.getValueCurrency())
+                        .build()));
+        e.setId(entity.getId()); // used in view
         if (e.getTax() != null && e.getTax().floatValue() > 0.001) {
-            SecurityEventCashFlowEntity entity = securityEventCashFlowRepository.save(
-                    securityEventCashFlowConverter.toEntity(builder
+            entity = securityEventCashFlowRepository.save(securityEventCashFlowConverter.toEntity(
+                    builder
                             .id(e.getTaxId())
                             .eventType(CashFlowType.TAX)
                             .value(e.getTax().negate())

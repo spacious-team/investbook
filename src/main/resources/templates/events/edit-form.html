@@ -84,7 +84,7 @@
     <div id="security-attach-elements">
         <label>
             Привязать к бумаге
-            <input type="text" th:field="*{attached.security}" list="securities" class="security" id="security"/>
+            <input type="text" th:field="*{attachedSecurity.security}" list="securities" class="security" id="security"/>
         </label>
         <a id="find-securities" onclick="uploadSecurities('security', 'securities', this)">
             <svg viewBox="0 0 20 20">
@@ -93,7 +93,7 @@
         </a>
         <label>
             Количество, шт
-            <input type="number" min="1" th:field="*{attached.count}" class="input-width"/>
+            <input type="number" min="1" th:field="*{attachedSecurity.count}" class="input-width"/>
         </label>
         <br>
     </div>

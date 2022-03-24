@@ -22,7 +22,6 @@ import lombok.Data;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -30,7 +29,10 @@ import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Objects;
+
+import static java.util.Objects.requireNonNull;
+import static org.spacious_team.broker.pojo.CashFlowType.*;
+import static org.springframework.util.StringUtils.hasLength;
 
 @Data
 public class EventCashFlowModel {
@@ -68,7 +70,7 @@ public class EventCashFlowModel {
      * Используется для привязки выплаты к бумаге из того же или другого счета
      */
     @Nullable
-    private AttachToSecurity attached = new AttachToSecurity();
+    private AttachedSecurity attachedSecurity = new AttachedSecurity();
 
     public void setValueCurrency(String currency) {
         this.valueCurrency = currency.toUpperCase();
@@ -105,11 +107,14 @@ public class EventCashFlowModel {
     }
 
     public boolean isAttachedToSecurity() {
-        return attached != null && attached.isValid();
+        return attachedSecurity != null && attachedSecurity.isValid();
     }
 
     @Data
-    public class AttachToSecurity {
+    public class AttachedSecurity {
+
+        @Nullable
+        private Integer securityEventCashFlowId;
 
         /**
          * In "name (isin)" or "contract-name" format
@@ -122,30 +127,32 @@ public class EventCashFlowModel {
         private Integer count;
 
         public boolean isValid() {
-            return security != null && count != null && count > 0;
+            return hasLength(security) &&
+                    count != null && count > 0 &&
+                    (type == DIVIDEND || type == COUPON || type == AMORTIZATION || type == REDEMPTION || type == TAX);
         }
 
-        public SecurityEventCashFlowModel toSecurityEventCashFlowModel() {
-            Assert.isTrue(isValid(), "Не указана бумага или количество для привязки выплаты");
-            SecurityEventCashFlowModel m = new SecurityEventCashFlowModel();
-            m.setPortfolio(portfolio);
-            m.setDate(date);
-            m.setTime(time);
-            m.setSecurity(security);
-            m.setCount(Objects.requireNonNull(count));
-            if (type == CashFlowType.TAX) {
-                // Используется для определения типа бумаги (BOND или SHARE) в SecurityEventCashFlowModel.getSecurityType()
-                // Может не соответствовать действительности,
-                // но для текущего алгоритма тип бумаги не имеет значения BOND или SHARE, поэтому указываем DIVIDEND
-                m.setType(CashFlowType.DIVIDEND);
-                m.setTax(value.abs()); // требуется положительное значение по контракту SecurityEventCashFlowModel.value
-                m.setTaxCurrency(valueCurrency);
-            } else {
-                m.setType(type);
-                m.setValue(value);
-                m.setValueCurrency(valueCurrency);
-            }
-            return m;
+        /**
+         * Returns ISIN if description in "Name (ISIN)" format, null otherwise
+         */
+        public String getSecurityIsin() {
+            return SecurityHelper.getSecurityIsin(requireNonNull(security));
+        }
+
+        /**
+         * Returns Name from template "Name (ISIN)" for stock and bond, code for derivative, securityName for asset
+         */
+        public String getSecurityName() {
+            // Для Типа выплаты TAX может выдавать неверный тип бумаги,
+            // но для текущего алгоритма SecurityHelper.getSecurityName() типа достаточно
+            SecurityType securityType = switch(type) {
+                case DIVIDEND -> SecurityType.SHARE;
+                case ACCRUED_INTEREST, AMORTIZATION, REDEMPTION, COUPON -> SecurityType.BOND;
+                case DERIVATIVE_PROFIT, DERIVATIVE_PRICE, DERIVATIVE_QUOTE -> SecurityType.DERIVATIVE;
+                case TAX -> SecurityType.SHARE; // для TAX выдает не верный тип бумаги
+                default -> throw new IllegalArgumentException("Не смог получить тип ЦБ по типу выплаты: " + type);
+            };
+            return SecurityHelper.getSecurityName(security, securityType);
         }
     }
 }
