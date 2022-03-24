@@ -29,8 +29,10 @@
 <h1>Сохранено событие</h1>
 
 <p th:text="'Счет: ' +  ${event.portfolio}"/>
-<p th:text="'Номер записи: ' +  ${event.id}"/>
+<p th:text="'Номер записи: ' +  ${event.id != null ? event.id : event.attachedSecurity.securityEventCashFlowId}"/>
 <p th:text="'Дата: ' + ${event.date}"/>
+<p th:text="'Инструмент: ' +  ${event.attachedSecurity.security}" th:if="${event.attachedSecurity.security != null && event.attachedSecurity.security != ''}"/>
+<p th:text="'Количество: ' + ${event.attachedSecurity.count}" th:if="${event.attachedSecurity.count != null}"/>
 <p th:switch="${event.getStringType}">
     <span th:case="CASH_IN">Пополнение</span>
     <span th:case="CASH_OUT">Снятие</span>
@@ -48,7 +50,9 @@
 <br th:if="${event.description != null}">
 <p th:text="${event.description}" th:if="${event.description != null}"/>
 <a href="/events/edit-form">Добавить еще</a><br>
-<a th:href="@{/events/delete(id=${event.id})}">Удалить это событие</a><br>
+<a th:href="@{/events/delete(id=${event.id})}" th:if="${event.id != null}">Удалить это событие</a>
+<a th:href="@{/security-events/delete(id=${event.attachedSecurity.securityEventCashFlowId})}"
+   th:if="${event.attachedSecurity.securityEventCashFlowId != null}">Удалить это событие по бумаге</a><br>
 <a href="/events">Посмотреть все события</a><br>
 <a href="/forms.html">На главную</a><br>
 

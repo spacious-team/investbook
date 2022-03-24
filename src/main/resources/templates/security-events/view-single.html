@@ -29,11 +29,11 @@
 <h1>Сохранено событие</h1>
 
 <p th:text="'Счет: ' +  ${event.portfolio}"/>
-<p th:text="'Номер записи: ' +  ${event.id}"/>
+<p th:text="'Номер записи: ' +  ${event.id != null ? event.id : event.taxId}"/>
 <p th:text="'Дата: ' + ${event.date}"/>
 <p th:text="'Инструмент: ' +  ${event.security}"/>
 <p th:text="'Количество: ' + ${event.count}" th:if="${event.count != 0}"/>
-<p th:switch="${event.type.name}">
+<p th:switch="${event.type.name}" th:if="${event.value != null}">
     <span th:case="DIVIDEND">Дивиденд</span>
     <span th:case="COUPON">Купон</span>
     <span th:case="AMORTIZATION">Амортизация облигации</span>
@@ -43,7 +43,7 @@
 </p>
 <p th:text="'Налог: ' + ${event.tax} + ' ' + ${event.taxCurrency}" th:if="${event.tax != null}"/>
 <a href="/security-events/edit-form">Добавить еще</a><br>
-<a th:href="@{/security-events/delete(id=${event.id})}">Удалить это событие</a><br>
+<a th:href="@{/security-events/delete(id=${event.id != null ? event.id : event.taxId})}">Удалить это событие</a><br>
 <a href="/security-events">Посмотреть все события</a><br>
 <a href="/forms.html">На главную</a><br>
 

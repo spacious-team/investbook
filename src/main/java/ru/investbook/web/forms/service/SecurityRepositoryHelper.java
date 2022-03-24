@@ -24,6 +24,7 @@ import org.springframework.util.Assert;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
+import ru.investbook.web.forms.model.EventCashFlowModel;
 import ru.investbook.web.forms.model.SecurityDescriptionModel;
 import ru.investbook.web.forms.model.SecurityEventCashFlowModel;
 import ru.investbook.web.forms.model.SecurityHelper;
@@ -52,6 +53,16 @@ public class SecurityRepositoryHelper {
         int savedSecurityId = saveAndFlush(m.getSecurityId(), m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
         m.setSecurityId(savedSecurityId);
         return savedSecurityId;
+    }
+
+    /**
+     * Generate securityId if needed, save security to DB, update securityId for model if needed
+     * @return saved security id
+     */
+    public int saveAndFlushSecurity(EventCashFlowModel.AttachedSecurity s) {
+        // EventCashFlowModel.AttachToSecurity может содержать только SHARE или BOND.
+        // Тип SHARE захардкожен, тип может быть ошибочен, но для текущего алгоритма сохранения ЦБ этого типа достаточно
+        return saveAndFlush(s.getSecurityIsin(), s.getSecurityName(), SecurityType.SHARE);
     }
 
     /**

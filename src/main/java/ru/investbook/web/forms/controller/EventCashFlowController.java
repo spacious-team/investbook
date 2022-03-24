@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.ControllerHelper;
 import ru.investbook.web.forms.model.EventCashFlowModel;
 import ru.investbook.web.forms.service.EventCashFlowFormsService;
@@ -41,12 +42,15 @@ import java.util.Collection;
 public class EventCashFlowController {
     private final EventCashFlowFormsService eventCashFlowFormsService;
     private final PortfolioRepository portfolioRepository;
+    private final SecurityRepository securityRepository;
+    private volatile Collection<String> securities;
     private volatile Collection<String> portfolios;
     private volatile String selectedPortfolio;
 
     @PostConstruct
     public void start() {
         portfolios = ControllerHelper.getPortfolios(portfolioRepository);
+        securities = ControllerHelper.getSecuritiesDescriptions(securityRepository);
     }
 
     @GetMapping
@@ -59,6 +63,7 @@ public class EventCashFlowController {
     public String getEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
         model.addAttribute("event", getEventCashFlow(id));
         model.addAttribute("portfolios", portfolios);
+        model.addAttribute("securities", securities);
         return "events/edit-form";
     }
 
