@@ -28,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2022.4</version>
+    <version>2022.5-SNAPSHOT</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -47,7 +47,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>22.4</win.msi.version>
+        <win.msi.version>22.5</win.msi.version>
         <java.version>17</java.version>
         <!-- version 3.2.0 provided by Spring Boot 2.4.1 has bug, using version from Spring Boot 2.3.4
          TODO remove after fix -->
@@ -234,39 +234,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>zip</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptors>
-                                <descriptor>src/main/assembly/zip/zip.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>jpackage</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>jpackage</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptors>
-                                <descriptor>src/main/assembly/jpackage/dir.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.asciidoctor</groupId>
                 <artifactId>asciidoctor-maven-plugin</artifactId>
                 <version>2.0.0</version>
@@ -297,7 +264,9 @@
                 <executions>
                     <execution>
                         <id>xsd-to-java</id>
-                        <goals><goal>xjc</goal></goals>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -306,7 +275,38 @@
 
     <profiles>
         <profile>
-            <id>on-windows</id>
+            <id>zip</id>
+            <activation>
+                <property>
+                    <name>!no-zip</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>zip</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <appendAssemblyId>false</appendAssemblyId>
+                                    <descriptors>
+                                        <descriptor>src/main/assembly/zip/zip.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>jpackage</id>
             <activation>
                 <os>
                     <family>windows</family>
@@ -315,45 +315,66 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>jpackage</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <finalName>jpackage</finalName>
+                                    <appendAssemblyId>false</appendAssemblyId>
+                                    <descriptors>
+                                        <descriptor>src/main/assembly/jpackage/dir.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <!-- jpackage requires https://wixtoolset.org/releases/ (only Wix, Toolset not required) -->
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
                         <version>1.2.1</version>
-                        <configuration>
-                            <type>MSI</type>
-                            <name>Investbook</name>
-                            <appVersion>${win.msi.version}</appVersion>
-                            <vendor>Spacious Team</vendor>
-                            <description>${project.description}</description>
-                            <copyright>InvestBook, Copyright (C) 2020 Spacious Team (https://github.com/spacious-team)
-                            </copyright>
-                            <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
-                            <javaOptions>
-                                <javaOption>-Dloader.path=./app/extensions</javaOption>
-                                <javaOption>-Xms16m</javaOption>
-                                <javaOption>-XX:MinHeapFreeRatio=1</javaOption>
-                                <javaOption>-XX:MaxHeapFreeRatio=5</javaOption>
-                                <javaOption>-XX:G1PeriodicGCInterval=5000</javaOption>
-                                <javaOption>-XX:GCTimeRatio=1</javaOption>
-                                <javaOption>-XX:MaxGCPauseMillis=2000</javaOption>
-                                <javaOption>-Xverify:none</javaOption> <!-- reduce VM.native_memory Class by 6MB -->
-                                <javaOption>-XX:-TieredCompilation</javaOption> <!-- reduce VM.native_memory Code by 20MB -->
-                            </javaOptions>
-                            <arguments>
-                                <argument>--spring.config.additional-location=file:./app/</argument>
-                            </arguments>
-                            <input>${project.build.directory}/jpackage/jpackage/</input>
-                            <icon>${project.basedir}/src/main/assembly/jpackage/icon.ico</icon>
-                            <destination>${project.build.directory}/jpackage</destination>
-                        </configuration>
                         <executions>
                             <execution>
-                                <id>win</id>
+                                <id>windows installer</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jpackage</goal>
                                 </goals>
                                 <configuration>
+                                    <type>MSI</type>
+                                    <name>Investbook</name>
+                                    <appVersion>${win.msi.version}</appVersion>
+                                    <vendor>Spacious Team</vendor>
+                                    <description>${project.description}</description>
+                                    <copyright>InvestBook, Copyright (C) 2020 Spacious Team
+                                        (https://github.com/spacious-team)
+                                    </copyright>
+                                    <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
+                                    <javaOptions>
+                                        <javaOption>-Dloader.path=./app/extensions</javaOption>
+                                        <javaOption>-Xms16m</javaOption>
+                                        <javaOption>-XX:MinHeapFreeRatio=1</javaOption>
+                                        <javaOption>-XX:MaxHeapFreeRatio=5</javaOption>
+                                        <javaOption>-XX:G1PeriodicGCInterval=5000</javaOption>
+                                        <javaOption>-XX:GCTimeRatio=1</javaOption>
+                                        <javaOption>-XX:MaxGCPauseMillis=2000</javaOption>
+                                        <javaOption>-Xverify:none
+                                        </javaOption> <!-- reduce VM.native_memory Class by 6MB -->
+                                        <javaOption>-XX:-TieredCompilation
+                                        </javaOption> <!-- reduce VM.native_memory Code by 20MB -->
+                                    </javaOptions>
+                                    <arguments>
+                                        <argument>--spring.config.additional-location=file:./app/</argument>
+                                    </arguments>
+                                    <input>${project.build.directory}/jpackage/jpackage/</input>
+                                    <icon>${project.basedir}/src/main/assembly/jpackage/icon.ico</icon>
+                                    <destination>${project.build.directory}/jpackage</destination>
                                     <winDirChooser>true</winDirChooser>
                                     <winMenu>true</winMenu>
                                     <winMenuGroup>Investbook</winMenuGroup>
@@ -361,6 +382,39 @@
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>docker</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <layers>
+                                <enabled>true</enabled>
+                            </layers>
+                            <image>
+                                <name>spaciousteam/investbook:latest</name>
+                                <tags>
+                                    <tag>spaciousteam/investbook:${project.version}</tag>
+                                </tags>
+                                <publish>true</publish>
+                                <env>
+                                    <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
+                                </env>
+                            </image>
+                            <docker>
+                                <publishRegistry>
+                                    <url>https://index.docker.io/v2/</url>
+                                    <username>${env.DOCKER_ID}</username>
+                                    <password>${env.DOCKERHUB_TOKEN}</password>
+                                </publishRegistry>
+                            </docker>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

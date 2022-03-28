@@ -1,0 +1,30 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Publish To Docker Hub
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ develop ]
+  release:
+    types: [ released ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'liberica'
+          cache: maven
+      - name: Publish
+        run: mvn -P docker -D no-zip spring-boot:build-image
+        env:
+          DOCKER_ID: ${{ secrets.DOCKER_ID }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
