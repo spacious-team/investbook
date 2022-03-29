@@ -5,8 +5,6 @@ name: Publish To Docker Hub
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [ develop ]
   release:
     types: [ released ]
 
