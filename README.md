@@ -109,6 +109,7 @@ Investbook в сравнении с [Intelinvest](https://intelinvest.ru) и [Sn
 
 Можете обратиться к более подробной инструкции по установке и работе с приложением для операционных систем
 [windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md) и [linux](docs/install-on-linux.md).
+Investbook также может быть запущен в [docker](docs/run-by-docker.md).
 
 ### Работа с приложением
 Запустите приложение через ярлык на рабочем столе Windows, в браузере перейдите по адресу http://localhost
@@ -124,9 +125,10 @@ Investbook в сравнении с [Intelinvest](https://intelinvest.ru) и [Sn
 После загрузки отчета становится доступным аналитическая выгрузка в формате [excel файла](src/main/asciidoc/index.adoc). 
 
 ### Обновление приложения
-Процесс обновления на Windows не отличается от процесса первоначальной установки.
-Воспользуйтесь инструкцией для операционных систем [windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md)
-и [linux](docs/install-on-linux.md).
+Процесс обновления на Windows не отличается от процесса первоначальной установки. Воспользуйтесь инструкцией
+для операционных систем [windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md) или
+[linux](docs/install-on-linux.md). Или, если Investbook запускался в docker, воспользуйтесь
+[инструкцией](docs/run-by-docker.md).
 
 ### Документация
 Дополнительная информация может быть найдена в [документации](docs/documentation.md), также оффлайн документация всегда
