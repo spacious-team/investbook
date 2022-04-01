@@ -405,6 +405,7 @@
                                 <publish>true</publish>
                                 <env>
                                     <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
+                                    <BPE_LANG>C.UTF-8</BPE_LANG>
                                 </env>
                             </image>
                             <docker>

@@ -30,12 +30,12 @@ mkdir ~/investbook
 #### Запуск Investbook
 1. Если используется Windows, запустите powershell и запустите
    ```shell
-   docker run --rm -d -p 80:80 -v /c/users/<имя-windows-пользователя>/investbook:/home/cnb/investbook -e LANG=C.UTF-8 spaciousteam/investbook
+   docker run --rm -d -p 80:80 -v /c/users/<имя-windows-пользователя>/investbook:/home/cnb/investbook spaciousteam/investbook
    ```
    где вместо `<имя-windows-пользователя>` нужно подставить имя вашего пользователя в Windows.
 1. Если используется MaсOS или Linux, запустите в терминале
    ```shell
-   docker run --rm -d -p 80:80 -v ~/investbook:/home/cnb/investbook -e LANG=C.UTF-8 spaciousteam/investbook
+   docker run --rm -d -p 80:80 -v ~/investbook:/home/cnb/investbook spaciousteam/investbook
    ```
 Будет загружена и запущена последняя версия Investbook. Далее переходите в браузер и открывайте Investbook
 по адресу http://localhost
