@@ -11,7 +11,7 @@
 
 1. Скачайте пакет Docker Desktop с официального [сайта](https://docs.docker.com/desktop/windows/install/).
 2. Установите пакет и запустите Docker Desktop из списка приложений.
-3. Создайте в домашней директории папку "investbook" для хранения данных приложения.
+3. Если Docker Desktop предложит обновление по ссылке https://aka.ms/wsl2kernel, можете также скачать и установить его.
 
 ##### Установка на MacOS
 Требуется версия MacOS 10.15 или новее.
@@ -28,24 +28,23 @@ sudo usermod --append --groups docker $(whoami)
 mkdir ~/investbook
 ```
 #### Запуск Investbook
-Запустите консоль (cmd / powershell / terminal) и наберите команду:
-1. Если используется Windows
+1. Если используется Windows, запустите powershell и запустите
    ```shell
-   docker run --rm -p 80:80 -v /c/users/<имя-windows-пользователя>/investbook:/home/cnb/investbook spaciousteam/investbook
+   docker run --rm -d -p 80:80 -v /c/users/<имя-windows-пользователя>/investbook:/home/cnb/investbook spaciousteam/investbook
    ```
-   где `/c/users/<имя-windows-пользователя>/investbook` это путь в формате, понятной docker, к папке "investbook"
-   в каталоге вашего пользователя.
-1. Если используется MaсOS или Linux
+   где вместо `<имя-windows-пользователя>` нужно подставить имя вашего пользователя в Windows.
+1. Если используется MaсOS или Linux, запустите в терминале
    ```shell
-   docker run --rm -p 80:80 -v ~/investbook:/home/cnb/investbook spaciousteam/investbook
+   docker run --rm -d -p 80:80 -v ~/investbook:/home/cnb/investbook spaciousteam/investbook
    ```
 Будет загружена и запущена последняя версия Investbook. Далее переходите в браузер и открывайте Investbook
 по адресу http://localhost
 
 #### Обновление Investbook
-Удалите текущую версию
+Если Investbook запущен, остановите его. Для этого откройте http://localhost и сверху-справа нажмите кнопку выхода. 
+Запустите терминал и удалите текущую версию
 ```shell
 docker rmi spaciousteam/investbook:latest
 ```
-Далее для загрузки и запуска самой новой версии Investbook выполните команду из предыдущего раздела.
+Далее для загрузки и запуска новой версии Investbook выполните команду из предыдущего раздела.
 

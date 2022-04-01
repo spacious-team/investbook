@@ -56,7 +56,7 @@
                     <path style="stroke: #eee; stroke-width: 0.5;" d="M20,15a1,1,0,1,1-1-1A1,1,0,0,1,20,15Zm5-1.75v3.5A1.23,1.23,0,0,1,24,18v3.8A1.25,1.25,0,0,1,22.75,23H2.5A2.5,2.5,0,0,1,0,20.5V5.5A2.5,2.5,0,0,1,2.5,3H20.75A1.25,1.25,0,0,1,22,4.25V7h.75A1.25,1.25,0,0,1,24,8.25v3.8A1.23,1.23,0,0,1,25,13.25ZM1,5.5a1.46,1.46,0,0,0,.46,1.08A1.49,1.49,0,0,0,2.5,7H21V6H3V5H21V4.25A.25.25,0,0,0,20.75,4H2.5A1.5,1.5,0,0,0,1,5.5ZM23,18H19a3,3,0,1,1,0-6h4V8.25A.25.25,0,0,0,22.75,8H2.5A2.47,2.47,0,0,1,1,7.48v13A1.5,1.5,0,0,0,2.5,22H22.75a.25.25,0,0,0,.25-.25Zm1-4.75a.25.25,0,0,0-.25-.25H19a2,2,0,0,0-2,2.34A2.08,2.08,0,0,0,19.11,17h4.64a.25.25,0,0,0,.25-.25Z"/>
                 </svg>
                 <span th:if="${cashBalance.isEmpty}" th:text="---" title="Остаток денежных средств не известен. Investbook не рассчитывает остаток по сделкам. Загрузите отчет брокера или, если брокер в отчете не предоставляет информацию об остатке, внесите данные через Формы"></span>
-                <span th:if="${cashBalance.isPresent}" th:text="${T(java.lang.String).format('%,d', cashBalance.get().intValue())} + '&ensp;Р'" title="Investbook не рассчитывает остаток по сделкам"></span>
+                <span th:if="${cashBalance.isPresent}" th:text="${T(java.lang.String).format('%,d', cashBalance.get().intValue()).replace(',', ' ')} + '&ensp;Р'" title="Investbook не рассчитывает остаток по сделкам"></span>
             </a>
         </dev>
         <a href="/shutdown" class="cell exit" title="Если вы закончили работу, приложение можно остановить">
@@ -71,7 +71,7 @@
         <div class="cell">
             <p class="label">Активы</p>
             <a href="/portfolio-properties/edit-form/total-assets" class="value" th:if="${assets.isEmpty}" th:text="--" title="Ликвидная стоимости Активов не известна, загрузите отчет брокера или задайте оценку активов вручную. Если брокер в отчете не предоставляет информацию об Активах, Investbook оценит стоимость Активов по текущей котировке или котировке покупки. Котировку можно получить через Формы."></a>
-            <a href="/portfolio-properties" class="value" th:if="${assets.isPresent}" th:text="${T(java.lang.String).format('%,d', assets.get().intValue())} + '&ensp;P'" title="Оценка стоимости активов (в порядке приоритета): брокера, по текущим котировкам, по самой свежей котировке сделок"></a>
+            <a href="/portfolio-properties" class="value" th:if="${assets.isPresent}" th:text="${T(java.lang.String).format('%,d', assets.get().intValue()).replace(',', ' ')} + '&ensp;P'" title="Оценка стоимости активов (в порядке приоритета): брокера, по текущим котировкам, по самой свежей котировке сделок"></a>
             <p>
                 <a href="/portfolio" class="assets-detail">Детальная информация &#8250;</a>
             </p>
