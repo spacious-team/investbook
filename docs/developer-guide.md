@@ -1,4 +1,4 @@
-![java-version](https://img.shields.io/badge/Java-17-brightgreen?style=flat-square)
+![java-version](https://img.shields.io/badge/Java-18-brightgreen?style=flat-square)
 ![spring-boot-version](https://img.shields.io/badge/SpringBoot-2.6.6-brightgreen?style=flat-square)
 
 ### Инструкция для начинающих
