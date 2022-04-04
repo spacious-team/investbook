@@ -61,7 +61,7 @@
     <label>
         Инструмент
         <input type="text" th:field="*{security}" list="securities" class="security" id="security"
-               pattern="^.*\s+\([A-Z0-9]+\)\s*$" required autocomplete="on"/>
+               pattern="^.*(\s+\([A-Z0-9]+\)\s*)?$" required autocomplete="on"/>
     </label>
     <a id="find-securities" onclick="uploadSecurities('security', 'securities', this)">
         <svg viewBox="0 0 20 20">
@@ -94,12 +94,11 @@
 </p>
 
 <p class="hint">
-    Инструмент: После наименования инструмента необходимо в скобках указать ISIN, например "Яндекс (NL0009805522)".
-    Если в выпадающем списке не появляется бумага с ISIN, то наберите часть наименования и нажмите на символ "Лупы".
-    Бумага и ISIN подгрузятся с
+    Инструмент: указывается в формате "Яндекс (NL0009805522)", ISIN в скобках можно не указывать.
+    Если в выпадающем списке не появляется бумага, то наберите часть наименования и нажмите на символ "Лупы".
+    Бумага подгрузится с
     <a href="http://iss.moex.com/iss/securities?securities.columns=secid,name,isin,emitent_inn&group_by=group&group_by_filter=stock_shares">
-        МосБиржи</a> при продолжении ввода, если существует совпадение. Если ISIN не известен, то можете указать
-    "XX0000000000" (используется латинская "X"), например "Яндекс (XX0000000000)".
+        МосБиржи</a> при продолжении ввода, если существует совпадение.
 </p>
 
 </body>

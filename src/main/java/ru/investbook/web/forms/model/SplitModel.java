@@ -72,8 +72,8 @@ public class SplitModel {
         return SecurityHelper.getSecurityIsin(security);
     }
 
-    public String getTradeId() {
-        String tradeId = getSecurityIsin() +
+    public String getTradeId(int securityId) {
+        String tradeId = String.valueOf(securityId) +
                 date.toEpochDay() +
                 portfolio.replaceAll(" ", "");
         return tradeId.substring(0, Math.min(32, tradeId.length()));

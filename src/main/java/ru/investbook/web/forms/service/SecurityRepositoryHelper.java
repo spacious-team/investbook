@@ -19,8 +19,10 @@
 package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
@@ -37,6 +39,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static ru.investbook.entity.SecurityEntity.isinPattern;
 
 
 @Service
@@ -60,7 +63,7 @@ public class SecurityRepositoryHelper {
      * @return saved security id
      */
     public int saveAndFlushSecurity(EventCashFlowModel.AttachedSecurity s) {
-        // EventCashFlowModel.AttachToSecurity может содержать только SHARE или BOND.
+        // EventCashFlowModel. AttachToSecurity может содержать только SHARE или BOND.
         // Тип SHARE захардкожен, тип может быть ошибочен, но для текущего алгоритма сохранения ЦБ этого типа достаточно
         return saveAndFlush(s.getSecurityIsin(), s.getSecurityName(), SecurityType.SHARE);
     }
@@ -105,17 +108,21 @@ public class SecurityRepositoryHelper {
                 .flatMap(securityRepository::findById)
                 .or(() -> findSecurity(isin, securityName, securityType))
                 .orElseGet(SecurityEntity::new);
-        return saveAndFlush(security, isin, securityName, securityType);
+        return saveAndFlush(security, isin, securityName, securityType, true);
     }
 
     private int saveAndFlush(String isin, String securityName, SecurityType securityType) {
         SecurityEntity security = findSecurity(isin, securityName, securityType)
                 .orElseGet(SecurityEntity::new);
-        return saveAndFlush(security, isin, securityName, securityType);
+        return saveAndFlush(security, isin, securityName, securityType, false);
     }
 
-    private int saveAndFlush(SecurityEntity security, String isin, String securityName, SecurityType securityType) {
-        isin = Objects.equals(isin, SecurityHelper.NULL_SECURITY_ISIN) ? null : isin;
+    private int saveAndFlush(SecurityEntity security, String isin, String securityName,
+                             SecurityType securityType, boolean forceRewriteByEmptyIsin) {
+        isin = validateIsin(isin);
+        if (isin == null && !forceRewriteByEmptyIsin) {
+            isin = security.getIsin(); // optional isin not provided by forms, use isin from db
+        }
         securityName = Objects.equals(securityName, SecurityHelper.NULL_SECURITY_NAME) ? null : securityName;
         security.setType(securityType.toDbType());
         switch (securityType) {
@@ -138,7 +145,7 @@ public class SecurityRepositoryHelper {
     }
 
     private Optional<SecurityEntity> findSecurity(String isin, String securityName, SecurityType securityType) {
-        isin = Objects.equals(isin, SecurityHelper.NULL_SECURITY_ISIN) ? null : isin;
+        isin = validateIsin(isin);
         securityName = Objects.equals(securityName, SecurityHelper.NULL_SECURITY_NAME) ? null : securityName;
 
         return switch (securityType) {
@@ -158,5 +165,14 @@ public class SecurityRepositoryHelper {
                 yield securityRepository.findByName(securityName);
             }
         };
+    }
+
+    @Nullable
+    private String validateIsin(String isin) {
+        isin = StringUtils.hasLength(isin) ? isin : null;
+        if (isin != null && !isinPattern.matcher(isin).matches()) {
+            throw new IllegalArgumentException("Невалидный ISIN: " + isin);
+        }
+        return isin;
     }
 }
