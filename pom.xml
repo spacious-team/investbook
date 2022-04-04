@@ -28,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2022.5-SNAPSHOT</version>
+    <version>2022.5</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
