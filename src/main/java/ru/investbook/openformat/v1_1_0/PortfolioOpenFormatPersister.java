@@ -21,6 +21,8 @@ package ru.investbook.openformat.v1_1_0;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.SecurityDescription;
+import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -109,8 +111,10 @@ public class PortfolioOpenFormatPersister {
         if (vndInvestbook != null) {
             tasks.add(() -> vndInvestbook.getPortfolioCash().forEach(api::addPortfolioCash));
             tasks.add(() -> vndInvestbook.getPortfolioProperties().forEach(api::addPortfolioProperty));
-            tasks.add(() -> vndInvestbook.getSecurityDescriptions().forEach(api::addSecurityDescription));
-            tasks.add(() -> vndInvestbook.getSecurityQuotes().forEach(api::addSecurityQuote));
+            tasks.add(() -> vndInvestbook.getSecurityDescriptions()
+                    .forEach(security -> persistSecurityDescription(security, assetToSecurityId)));
+            tasks.add(() -> vndInvestbook.getSecurityQuotes()
+                    .forEach(quote -> persistSecurityQuote(quote, assetToSecurityId)));
         }
 
         if (!Objects.equals(object.getGeneratedBy(), GENERATED_BY_INVESTBOOK)) {
@@ -189,6 +193,26 @@ public class PortfolioOpenFormatPersister {
         int value2Digits = (int) (Math.ceil(Math.log(value2) + 1e-6)); // 1e-6 for 3 digits value2, ex. 100, log(100) = 2
         int value1AllowedLength = Math.min(TRADE_ID_MAX_LENGTH - value2Digits, value1.length());
         return value1.substring(0, value1AllowedLength) + value2;
+    }
+
+    private void persistSecurityDescription(SecurityDescription security, Map<Integer, Integer> assetToSecurityId) {
+        int assetId = security.getSecurity();
+        security = security.toBuilder()
+                .security(getSecurityId(assetToSecurityId, assetId))
+                .build();
+        api.addSecurityDescription(security);
+    }
+
+    private void persistSecurityQuote(SecurityQuote quote, Map<Integer, Integer> assetToSecurityId) {
+        int assetId = quote.getSecurity();
+        quote = quote.toBuilder()
+                .security(getSecurityId(assetToSecurityId, assetId))
+                .build();
+        api.addSecurityQuote(quote);
+    }
+
+    private static int getSecurityId(Map<Integer, Integer> assetToSecurityId, int asset) {
+        return Objects.requireNonNull(assetToSecurityId.get(asset));
     }
 
     private void persistTotalAssetsAndPortfolioCash(PortfolioOpenFormatV1_1_0 object,
