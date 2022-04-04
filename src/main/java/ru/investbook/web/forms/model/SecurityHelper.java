@@ -47,7 +47,7 @@ public class SecurityHelper {
         securityDescription = securityDescription.trim();
         return switch (securityType) {
             case SHARE, BOND -> isSecurityDescriptionHasIsin(securityDescription) ?
-                    securityDescription.substring(0, securityDescription.length() - 14) :
+                    securityDescription.substring(0, securityDescription.length() - 14).trim() :
                     securityDescription;
             case DERIVATIVE, CURRENCY, ASSET -> securityDescription;
         };
