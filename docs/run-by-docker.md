@@ -12,7 +12,7 @@
 
 1. Скачайте пакет "Docker Desktop" с официального [сайта](https://docs.docker.com/desktop/windows/install/).
 2. Установите пакет и запустите "Docker Desktop" из списка приложений.
-3. Если Docker Desktop предложит обновление по ссылке https://aka.ms/wsl2kernel, можете также скачать и установить его.
+3. Если "Docker Desktop" предложит обновление по ссылке https://aka.ms/wsl2kernel, можете также скачать и установить его.
 
 ##### Установка на MacOS
 Требуется версия MacOS 10.15 или новее.
