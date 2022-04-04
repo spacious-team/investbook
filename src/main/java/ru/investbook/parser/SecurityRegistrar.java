@@ -1,5 +1,6 @@
 package ru.investbook.parser;
 
+import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.Security.SecurityBuilder;
 
 import java.util.function.Supplier;
@@ -41,4 +42,6 @@ public interface SecurityRegistrar {
      * @return security ID
      */
     int declareAsset(String assetName, Supplier<SecurityBuilder> supplier);
+
+    int declareSecurity(Security security);
 }

@@ -21,7 +21,9 @@ package ru.investbook.openformat.v1_1_0;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +44,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.math.RoundingMode.HALF_UP;
@@ -84,6 +87,7 @@ public class TradePof {
     int account;
 
     @NotNull
+    @Getter(AccessLevel.NONE)
     @JsonProperty("asset")
     int asset;
 
@@ -196,6 +200,7 @@ public class TradePof {
     }
 
     Optional<AbstractTransaction> toTransaction(Map<Integer, String> accountToPortfolioId,
+                                                Map<Integer, Integer> assetToSecurityId,
                                                 Map<Integer, SecurityType> assetTypes) {
         try {
             SecurityType securityType = requireNonNull(assetTypes.get(asset));
@@ -213,11 +218,11 @@ public class TradePof {
                         .valueCurrency(getValidCurrencyOrNull(requireNonNull(currency)));
             };
 
-            long ts = requireNonNull((settlement != null) ? settlement : timestamp);
+            long ts = requireNonNull(getSettlementOrTimestamp());
             return Optional.of(builder
                     .tradeId(tradeId)
                     .portfolio(requireNonNull(accountToPortfolioId.get(account)))
-                    .security(asset)
+                    .security(getSecurityId(assetToSecurityId))
                     .count(count.intValueExact())
                     .timestamp(Instant.ofEpochSecond(ts))
                     .commission((fee == null) ? null : fee.negate())
@@ -227,5 +232,14 @@ public class TradePof {
             log.error("Не могу распарсить {}", this, e);
             return Optional.empty();
         }
+    }
+
+    @Nullable
+    Long getSettlementOrTimestamp() {
+        return (settlement != null) ? settlement : timestamp;
+    }
+
+    int getSecurityId(Map<Integer, Integer> assetToSecurityId) {
+        return Objects.requireNonNull(assetToSecurityId.get(asset));
     }
 }

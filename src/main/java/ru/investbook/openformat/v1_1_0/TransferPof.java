@@ -21,7 +21,9 @@ package ru.investbook.openformat.v1_1_0;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
@@ -66,15 +68,13 @@ public class TransferPof {
     @JsonProperty("account")
     int account;
 
-    /**
-     * Если значение null, то значение поля settlement обязательно
-     */
     @NotNull
     @JsonProperty("timestamp")
     long timestamp;
 
     @NotNull
     @JsonProperty("asset")
+    @Getter(AccessLevel.NONE)
     int asset;
 
     /**
@@ -111,13 +111,14 @@ public class TransferPof {
                 .build();
     }
 
-    Optional<Transaction> toTransaction(Map<Integer, String> accountToPortfolioId) {
+    Optional<Transaction> toTransaction(Map<Integer, String> accountToPortfolioId,
+                                        Map<Integer, Integer> assetToSecurityId) {
         try {
             return Optional.of(Transaction.builder()
                     .tradeId(transferId)
                     .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
                     .timestamp(Instant.ofEpochSecond(timestamp))
-                    .security(asset)
+                    .security(getSecurityId(assetToSecurityId))
                     .count(count.intValueExact())
                     .build());
         } catch (Exception e) {
@@ -126,14 +127,15 @@ public class TransferPof {
         }
     }
 
-    Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId) {
+    Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId,
+                                                               Map<Integer, Integer> assetToSecurityId) {
         try {
             if (fee != null) {
                 return Set.of(
                         SecurityEventCashFlow.builder()
                                 .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
                                 .timestamp(Instant.ofEpochSecond(timestamp))
-                                .security(asset)
+                                .security(getSecurityId(assetToSecurityId))
                                 .count(count.intValueExact())
                                 .eventType(COMMISSION)
                                 .value(fee.negate())
@@ -146,5 +148,9 @@ public class TransferPof {
             log.error("Не могу распарсить {}", this, e);
             return Collections.emptyList();
         }
+    }
+
+    int getSecurityId(Map<Integer, Integer> assetToSecurityId) {
+        return Objects.requireNonNull(assetToSecurityId.get(asset));
     }
 }

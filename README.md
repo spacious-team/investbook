@@ -1,5 +1,5 @@
 ![java-version](https://img.shields.io/badge/Java-17-brightgreen?style=flat-square)
-![spring-boot-version](https://img.shields.io/badge/SpringBoot-2.6.4-brightgreen?style=flat-square)
+![spring-boot-version](https://img.shields.io/badge/SpringBoot-2.6.6-brightgreen?style=flat-square)
 
 <img src="https://user-images.githubusercontent.com/11336712/85948992-b1d6de00-b95c-11ea-8edc-4d5e7dfc8210.png" width="100%"/>
 
@@ -109,6 +109,7 @@ Investbook в сравнении с [Intelinvest](https://intelinvest.ru) и [Sn
 
 Можете обратиться к более подробной инструкции по установке и работе с приложением для операционных систем
 [windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md) и [linux](docs/install-on-linux.md).
+Investbook также может быть запущен в [docker](docs/run-by-docker.md).
 
 ### Работа с приложением
 Запустите приложение через ярлык на рабочем столе Windows, в браузере перейдите по адресу http://localhost
@@ -124,9 +125,10 @@ Investbook в сравнении с [Intelinvest](https://intelinvest.ru) и [Sn
 После загрузки отчета становится доступным аналитическая выгрузка в формате [excel файла](src/main/asciidoc/index.adoc). 
 
 ### Обновление приложения
-Процесс обновления на Windows не отличается от процесса первоначальной установки.
-Воспользуйтесь инструкцией для операционных систем [windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md)
-и [linux](docs/install-on-linux.md).
+Процесс обновления на Windows не отличается от процесса первоначальной установки. Воспользуйтесь инструкцией
+для операционных систем [windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md) или
+[linux](docs/install-on-linux.md). Или, если Investbook запускался в docker, воспользуйтесь
+[инструкцией](docs/run-by-docker.md).
 
 ### Документация
 Дополнительная информация может быть найдена в [документации](docs/documentation.md), также оффлайн документация всегда

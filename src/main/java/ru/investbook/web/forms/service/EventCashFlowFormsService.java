@@ -22,14 +22,18 @@ import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.converter.SecurityEventCashFlowConverter;
 import ru.investbook.entity.EventCashFlowEntity;
+import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.repository.EventCashFlowRepository;
 import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.web.forms.model.EventCashFlowModel;
 
 import java.time.ZoneId;
@@ -38,14 +42,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
+
 @Service
 @RequiredArgsConstructor
 public class EventCashFlowFormsService implements FormsService<EventCashFlowModel> {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final EventCashFlowRepository eventCashFlowRepository;
+    private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final PortfolioRepository portfolioRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
+    private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
     private final PortfolioConverter portfolioConverter;
+    private final SecurityRepositoryHelper securityRepositoryHelper;
 
     @Transactional(readOnly = true)
     public Optional<EventCashFlowModel> getById(Integer id) {
@@ -67,6 +76,33 @@ public class EventCashFlowFormsService implements FormsService<EventCashFlowMode
     @Transactional
     public void save(EventCashFlowModel e) {
         saveAndFlush(e.getPortfolio());
+        if (e.isAttachedToSecurity()) {
+            saveSecurityEventCashFlow(e);
+        } else {
+            saveEventCashFlow(e);
+        }
+    }
+
+    private void saveSecurityEventCashFlow(EventCashFlowModel e) {
+        int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(requireNonNull(e.getAttachedSecurity()));
+        SecurityEventCashFlowEntity entity = securityEventCashFlowRepository.save(
+                securityEventCashFlowConverter.toEntity(SecurityEventCashFlow.builder()
+                        // no id(), it is always the new object
+                        .portfolio(e.getPortfolio())
+                        .timestamp(e.getDate().atTime(e.getTime()).atZone(zoneId).toInstant())
+                        .security(savedSecurityId)
+                        .count(e.getAttachedSecurity().getCount())
+                        .eventType(e.getType())
+                        .value(e.getValue())
+                        .currency(e.getValueCurrency())
+                        .build()));
+        Optional.ofNullable(e.getId()).ifPresent(this::delete);
+        e.setId(null);
+        requireNonNull(e.getAttachedSecurity()).setSecurityEventCashFlowId(entity.getId()); // used in view
+        securityEventCashFlowRepository.flush();
+    }
+
+    private void saveEventCashFlow(EventCashFlowModel e) {
         EventCashFlowEntity entity = eventCashFlowRepository.save(
                 eventCashFlowConverter.toEntity(EventCashFlow.builder()
                         .id(e.getId())

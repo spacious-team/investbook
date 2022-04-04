@@ -21,7 +21,9 @@ package ru.investbook.openformat.v1_1_0;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
@@ -66,6 +68,7 @@ public class PaymentPof {
     int account;
 
     @NotNull
+    @Getter(AccessLevel.NONE)
     @JsonProperty("asset")
     int asset;
 
@@ -122,6 +125,7 @@ public class PaymentPof {
     }
 
     Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId,
+                                                               Map<Integer, Integer> assetToSecurityId,
                                                                Map<Integer, SecurityType> assetTypes) {
         try {
             SecurityType securityType = Objects.requireNonNull(assetTypes.get(asset));
@@ -131,7 +135,7 @@ public class PaymentPof {
             }
             SecurityEventCashFlow cashFlow = SecurityEventCashFlow.builder()
                     .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
-                    .security(asset)
+                    .security(getSecurityId(assetToSecurityId))
                     .eventType(eventType)
                     .count(count.intValueExact())
                     .timestamp(Instant.ofEpochSecond(timestamp))
@@ -152,5 +156,9 @@ public class PaymentPof {
             log.error("Не могу распарсить {}", this, e);
             return Collections.emptySet();
         }
+    }
+
+    int getSecurityId(Map<Integer, Integer> assetToSecurityId) {
+        return Objects.requireNonNull(assetToSecurityId.get(asset));
     }
 }

@@ -33,7 +33,7 @@ public class SecurityDescriptionModel {
      * In "name (isin)" or "contract-name" format
      */
     @NotEmpty
-    private String security = "Наименование (XX0000000000)";
+    private String security = "Наименование (RU0000000000)";
 
     @NotEmpty
     private String sector;
