@@ -67,7 +67,9 @@ public class InvestbookReportController {
 
     @GetMapping
     public void buildInvestbookReportByGet(HttpServletResponse response) throws IOException {
-        buildInvestbookReport(new ViewFilterModel(), response);
+        ViewFilterModel viewFilter = new ViewFilterModel();
+        viewFilter.setPortfolios(getActivePortfolios(portfolioRepository));
+        buildInvestbookReport(viewFilter, response);
     }
 
     @PostMapping
