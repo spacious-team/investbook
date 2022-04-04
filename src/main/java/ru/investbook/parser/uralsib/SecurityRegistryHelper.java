@@ -22,10 +22,9 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import ru.investbook.parser.SecurityRegistrar;
 
-import java.util.regex.Pattern;
+import static ru.investbook.entity.SecurityEntity.isinPattern;
 
 class SecurityRegistryHelper {
-    private static final Pattern isinPattern = Pattern.compile("^[A-Z]{2}[A-Z0-9]{9}[0-9]$");
 
     static int declareStockOrBond(String isin, String name, SecurityRegistrar registrar) {
         Security security = getStockOrBond(isin, name);

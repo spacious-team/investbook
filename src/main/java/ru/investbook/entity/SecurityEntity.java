@@ -30,12 +30,16 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.regex.Pattern;
 
 @Entity
 @Table(name = "security")
 @Data
 @EqualsAndHashCode(of = "id")
 public class SecurityEntity {
+
+    public static final Pattern isinPattern = Pattern.compile("^[A-Z]{2}[A-Z0-9]{9}[0-9]$");
+
     @Id
     @GenericGenerator(name = "UseExistingOrGenerateIdGenerator", strategy = "ru.investbook.entity.UseExistingOrGenerateIdGenerator")
     @GeneratedValue(generator = "UseExistingOrGenerateIdGenerator")

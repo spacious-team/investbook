@@ -22,7 +22,6 @@ import org.springframework.util.Assert;
 
 public class SecurityHelper {
     public static String NULL_SECURITY_NAME = "<unknown>";
-    public static String NULL_SECURITY_ISIN = "XX0000000000";
 
     /**
      * For stock or bond "Name (ISIN)", for derivatives - code, for asset - securityName
@@ -32,7 +31,7 @@ public class SecurityHelper {
             case SHARE, BOND -> {
                 Assert.isTrue(isin != null || securityName != null, "Отсутствует и ISIN, и наименование ЦБ");
                 yield (securityName == null ? NULL_SECURITY_NAME : securityName) +
-                        " (" + (isin == null ? NULL_SECURITY_ISIN : isin) + ")";
+                        (isin == null ? "" : " (" + isin + ")");
             }
             case DERIVATIVE, CURRENCY, ASSET -> {
                 Assert.isTrue(securityName != null, "Отсутствует тикер контракта или наименование произвольного актива");
@@ -45,12 +44,11 @@ public class SecurityHelper {
      * Returns Name from template "Name (ISIN)" for stock and bond, code for derivative, securityName for asset
      */
     static String getSecurityName(String securityDescription, SecurityType securityType) {
+        securityDescription = securityDescription.trim();
         return switch (securityType) {
-            case SHARE, BOND -> {
-                Assert.isTrue(isSecurityDescriptionHasIsin(securityDescription),
-                        "Не задан ISIN: " + securityDescription);
-                yield securityDescription.substring(0, securityDescription.length() - 14).trim();
-            }
+            case SHARE, BOND -> isSecurityDescriptionHasIsin(securityDescription) ?
+                    securityDescription.substring(0, securityDescription.length() - 14) :
+                    securityDescription;
             case DERIVATIVE, CURRENCY, ASSET -> securityDescription;
         };
     }
@@ -59,13 +57,15 @@ public class SecurityHelper {
      * Returns ISIN if description in "Name (ISIN)" format, null otherwise
      */
     static String getSecurityIsin(String securityDescription) {
+        securityDescription = securityDescription.trim();
         int len = securityDescription.length();
-        return  isSecurityDescriptionHasIsin(securityDescription) ?
+        return isSecurityDescriptionHasIsin(securityDescription) ?
                 securityDescription.substring(len - 13, len - 1) :
                 null;
     }
 
     private static boolean isSecurityDescriptionHasIsin(String securityDescription) {
+        securityDescription = securityDescription.trim();
         int len = securityDescription.length();
         return (len >= 15) && securityDescription.charAt(len - 14) == '(' && securityDescription.charAt(len - 1) == ')';
     }

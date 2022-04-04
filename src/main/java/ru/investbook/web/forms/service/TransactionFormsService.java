@@ -201,11 +201,11 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
 
         saveAndFlush(split.getPortfolio());
         saveAndFlush(builder
-                .tradeId(split.getTradeId() + "w")
+                .tradeId(split.getTradeId(savedSecurityId) + "w")
                 .count(-Math.abs(split.getWithdrawalCount()))
                 .build());
         saveAndFlush(builder
-                .tradeId(split.getTradeId() + "d")
+                .tradeId(split.getTradeId(savedSecurityId) + "d")
                 .count(Math.abs(split.getDepositCount()))
                 .build());
     }
