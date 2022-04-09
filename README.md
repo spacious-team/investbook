@@ -1,5 +1,7 @@
 ![java-version](https://img.shields.io/badge/Java-17-brightgreen?style=flat-square)
 ![spring-boot-version](https://img.shields.io/badge/SpringBoot-2.6.6-brightgreen?style=flat-square)
+![github-all-releases](https://img.shields.io/github/downloads/spacious-team/investbook/total?style=flat-square)
+![docker-pulls](https://img.shields.io/docker/pulls/spaciousteam/investbook?style=flat-square)
 
 <img src="https://user-images.githubusercontent.com/11336712/85948992-b1d6de00-b95c-11ea-8edc-4d5e7dfc8210.png" width="100%"/>
 
