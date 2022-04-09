@@ -67,7 +67,7 @@ public class CashFlowEventTable extends SingleAbstractReportTable<CashFlowEventT
         List<CashFlowEvent> data = super.getData();
         if (!isSubaccountPaymentsRemoved) {
             // gh-170: дивиденды и купоны субсчета, проходят через основный счет.
-            // Для основного счета удаляем события выплаты + перечисляения на субсчет
+            // Для основного счета удаляем события выплаты + перечисления на субсчет
             Collection<CashFlowEvent> filteredData = new ArrayList<>(data.size());
             for (CashFlowEvent event : data) {
                 if (data.stream().noneMatch(e -> e.isSubaccountPaymentEvent(event))) {
@@ -113,43 +113,42 @@ public class CashFlowEventTable extends SingleAbstractReportTable<CashFlowEventT
 
         CashFlowType getEventType() {
             String lowercaseDescription = getLowercaseDescription();
-            switch (operation) {
+            return switch (operation) {
                 // gh-170
-                case "дивиденды":
-                    return CashFlowType.DIVIDEND;
-                case "купонный доход":
-                    return CashFlowType.COUPON;
-                case "погашение ценных бумаг":
+                case "дивиденды" -> CashFlowType.DIVIDEND;
+                case "купонный доход" -> CashFlowType.COUPON;
+                case "погашение ценных бумаг" -> {
                     if (lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч")) {
-                        return CashFlowType.AMORTIZATION;
+                        yield CashFlowType.AMORTIZATION;
                     } else if (lowercaseDescription.contains("погаш. номин.ст-ти обл")) { // предположение
-                        return CashFlowType.REDEMPTION;
+                        yield CashFlowType.REDEMPTION;
                     }
                     throw new IllegalArgumentException("Неожиданное значение: " + description);
-                case "зачисление денежных средств":
+                }
+                case "зачисление денежных средств" -> {
                     if (lowercaseDescription.contains("дивиденды")) {
-                        return CashFlowType.DIVIDEND;
+                        yield CashFlowType.DIVIDEND;
                     } else if (lowercaseDescription.contains("погаш. номин.ст-ти обл")) {
-                        return CashFlowType.REDEMPTION;
+                        yield CashFlowType.REDEMPTION;
                     } else if (lowercaseDescription.contains("част.погаш") || lowercaseDescription.contains("частичное досроч")) {
-                        return CashFlowType.AMORTIZATION;
+                        yield CashFlowType.AMORTIZATION;
                     } else if (lowercaseDescription.contains("куп. дох. по обл")) {
-                        return CashFlowType.COUPON;
+                        yield CashFlowType.COUPON;
                     } else {
-                        return CashFlowType.CASH;
+                        yield CashFlowType.CASH;
                     }
-                case "списание денежных средств":
-                    return CashFlowType.CASH;
-                case "перевод денежных средств":
-                    return CashFlowType.CASH; // перевод ДС на другой субсчет
-                case "перераспределение дохода между субсчетами / торговыми площадками":
-                    return CashFlowType.CASH; // выплаты субсчета проходят через основной счет
-                case "ндфл":
-                    return CashFlowType.TAX;
-                default:
+                }
+                case "списание денежных средств" -> CashFlowType.CASH;
+                case "перевод денежных средств" -> CashFlowType.CASH; // перевод ДС на другой субсчет
+                // выплаты субсчета проходят через основной счет
+                case "перераспределение дохода между субсчетами / торговыми площадками" -> CashFlowType.CASH;
+                case "ндфл" -> CashFlowType.TAX;
+                case "вариационная маржа" -> CashFlowType.DERIVATIVE_PROFIT;
+                default -> {
                     log.debug("Проигнорирована операция '{}': {}", operation, description);
-                    return null;
-            }
+                    yield null;
+                }
+            };
         }
 
     }

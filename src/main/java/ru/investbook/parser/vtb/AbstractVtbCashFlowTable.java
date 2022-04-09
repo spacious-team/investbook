@@ -26,6 +26,7 @@ import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableCollection;
 import static org.spacious_team.table_wrapper.api.AbstractTable.addWithEqualityChecker;
@@ -54,14 +55,13 @@ public abstract class AbstractVtbCashFlowTable<RowType> extends SingleInitializa
 
     @Override
     protected Collection<RowType> parseTable() {
+        Stream<RowType> stream = events.stream()
+                .map(this::getRow)
+                .flatMap(Collection::stream);
         if (equalityChecker == null || duplicatesMerger == null) {
-            return events.stream()
-                    .flatMap(e -> getRow(e).stream())
-                    .collect(Collectors.toList());
+            return stream.collect(Collectors.toList());
         } else {
-            return events.stream()
-                    .flatMap(e -> getRow(e).stream())
-                    .collect(toList(equalityChecker, duplicatesMerger));
+            return stream.collect(toList(equalityChecker, duplicatesMerger));
         }
     }
 
