@@ -104,7 +104,7 @@ public class TinkoffDepositAndWithdrawalTable extends SingleAbstractReportTable<
         log.warn("В отчете брокера для акции {} ({}) для сплита {}:{} не указана дата, " +
                         "использую конечную дату отчета {}, " +
                         "исправьте дату через Формы",
-                row.getStringCellValue(SHORT_NAME), row.getStringCellValue(CODE), splitWithdrawal, splitDeposit, splitDate);
+                row.getStringCellValue(SHORT_NAME), row.getStringCellValue(CODE), splitDeposit, splitWithdrawal, splitDate);
         return List.of(deposit, withdrawal);
     }
 
