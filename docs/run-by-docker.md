@@ -45,7 +45,7 @@ mkdir ~/investbook
 Если Investbook запущен, остановите его. Для этого откройте http://localhost и сверху-справа нажмите кнопку выхода. 
 Запустите терминал и удалите текущую версию
 ```shell
-docker rmi spaciousteam/investbook:latest
+docker rmi spaciousteam/investbook
 ```
 Далее для загрузки и запуска новой версии Investbook выполните команду из предыдущего раздела.
 
