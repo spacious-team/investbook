@@ -114,7 +114,6 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     }
 
     private String getLastCashValue(Table table, ExcelTableHeader column) {
-        // https://www.extendoffice.com/documents/excel/2104-excel-return-first-last-non-blank-cell-in-row-column.html
         return "=INDEX(" +
                 getColumnsRange(CASH_RUB, 3, TOTAL_CASH_USD, table.size() + 2) + "," +
                 "MATCH(1E+99," + TOTAL_CASH_USD.getRange(3, table.size() + 2) + ")," +
