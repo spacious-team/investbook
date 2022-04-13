@@ -114,6 +114,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     }
 
     private String getLastCashValue(Table table, ExcelTableHeader column) {
+        // https://www.extendoffice.com/documents/excel/2104-excel-return-first-last-non-blank-cell-in-row-column.html
         return "=INDEX(" +
                 getColumnsRange(CASH_RUB, 3, TOTAL_CASH_USD, table.size() + 2) + "," +
                 "MATCH(1E+99," + TOTAL_CASH_USD.getRange(3, table.size() + 2) + ")," +
@@ -121,7 +122,11 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     }
 
     private static String getLastValue(Table table, ExcelTableHeader column) {
-        return "=LOOKUP(2,1/(" + column.getRange(3, table.size() + 2) + "<>0)," + column.getRange(3, table.size() + 2) + ")";
+        // https://exceljet.net/formula/get-value-of-last-non-empty-cell
+        // = LOOKUP(2,1/(B:B<>"" + 1),B:B)
+        // Результат B:B<>"" -это TRUE и FALSE, которые преобразуются к 1 и 0, чтобы исключить ошибку деления на 0, нужно
+        // к результату вычисления добавить 0.
+        return "=LOOKUP(2,1/(" + column.getRange(3, table.size() + 2) + "<>0 + 1)," + column.getRange(3, table.size() + 2) + ")";
     }
 
     @Override
