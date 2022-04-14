@@ -300,7 +300,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     }
 
     private static String getInvestmentProportionFormula() {
-        return "=IF(" + COUNT.getCellAddr() + ">0,1,0)*" +
+        return "=IF(" + COUNT.getCellAddr() + ">0," +
                 "((" + AVERAGE_PRICE.getCellAddr() + "+" + AVERAGE_ACCRUED_INTEREST.getCellAddr() + ")*" + COUNT.getCellAddr() +
                 "-" + AMORTIZATION.getCellAddr() + ")" +
                 "/(SUMPRODUCT((0+" + AVERAGE_PRICE.getRange(3, 1000) + ")," +
@@ -310,11 +310,12 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 "+SUMPRODUCT((0+" + AVERAGE_ACCRUED_INTEREST.getRange(3, 1000) + ")," +
                 "(0+" + COUNT.getRange(3, 1000) + ")," +
                 "SIGN(" + COUNT.getRange(3, 1000) + ">0))" +
-                "-SUMIF(" + COUNT.getRange(3, 1000) + ",\">0\"," + AMORTIZATION.getRange(3, 1000) + "))";
+                "-SUMIF(" + COUNT.getRange(3, 1000) + ",\">0\"," + AMORTIZATION.getRange(3, 1000) + "))," +
+                "0)";
     }
 
     private static String getProportionFormula() {
-        return "=IF(" + COUNT.getCellAddr() + ">0,1,0)*" +
+        return "=IF(" + COUNT.getCellAddr() + ">0," +
                 "((" + LAST_PRICE.getCellAddr() + "+" + LAST_ACCRUED_INTEREST.getCellAddr() + ")*" + COUNT.getCellAddr() +
                 ")/(SUMPRODUCT((0+" + LAST_PRICE.getRange(3, 1000) + ")," +
                 "(0+" + COUNT.getRange(3, 1000) + ")," +
@@ -322,6 +323,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 "(0+(" + TYPE.getRange(3, 1000) + "<>\"" + DERIVATIVE.getDescription() + "\")))" +
                 "+SUMPRODUCT((0+" + LAST_ACCRUED_INTEREST.getRange(3, 1000) + ")," +
                 "(0+" + COUNT.getRange(3, 1000) + ")," +
-                "SIGN(" + COUNT.getRange(3, 1000) + ">0)))";
+                "SIGN(" + COUNT.getRange(3, 1000) + ">0)))," +
+                "0)";
     }
 }
