@@ -121,11 +121,9 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     }
 
     private static String getLastValue(Table table, ExcelTableHeader column) {
-        // https://exceljet.net/formula/get-value-of-last-non-empty-cell
-        // = LOOKUP(2,1/(B:B<>"" + 1),B:B)
-        // Результат B:B<>"" -это TRUE и FALSE, которые преобразуются к 1 и 0, чтобы исключить ошибку деления на 0, нужно
-        // к результату вычисления добавить 0.
-        return "=LOOKUP(2,1/(" + column.getRange(3, table.size() + 2) + "<>0 + 1)," + column.getRange(3, table.size() + 2) + ")";
+        // MATCH вернет последнее заполненный индекс колонки, т.к. не найдет значение 1E+99
+        String range = column.getRange(3, table.size() + 2);
+        return "=INDEX(" + range + ",MATCH(1E+99," + range + "))";
     }
 
     @Override
