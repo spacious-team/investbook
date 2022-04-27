@@ -308,7 +308,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         "(" + AVERAGE_PRICE.getRange(3, 1000) + "+" + AVERAGE_ACCRUED_INTEREST.getRange(3, 1000) + ")," +
                         COUNT.getRange(3, 1000) + "," +
                         "SIGN(" + COUNT.getRange(3, 1000) + ">0)," +
-                        "N(" + TYPE.getRange(3, 1000) + "<>\"" + DERIVATIVE.getDescription() + "\")" +
+                        "N(" + TYPE.getRange(3, 1000) + "<>\"" + DERIVATIVE.getDescription() + "\")," +
+                        "N(" + TYPE.getRange(3, 1000) + "<>\"" + CURRENCY_PAIR.getDescription() + "\")" +
                         ")" +
                     "-SUMIF(" + COUNT.getRange(3, 1000) + ",\">0\"," + AMORTIZATION.getRange(3, 1000) + ")" +
                     ")";
@@ -322,7 +323,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         "(" + LAST_PRICE.getRange(3, 1000) + "+" + LAST_ACCRUED_INTEREST.getRange(3, 1000) + ")," +
                         COUNT.getRange(3, 1000) + "," +
                         "SIGN(" + COUNT.getRange(3, 1000) + ">0)," +
-                        "N(" + TYPE.getRange(3, 1000) + "<>\"" + DERIVATIVE.getDescription() + "\")" +
+                        "N(" + TYPE.getRange(3, 1000) + "<>\"" + DERIVATIVE.getDescription() + "\")," +
+                        "N(" + TYPE.getRange(3, 1000) + "<>\"" + CURRENCY_PAIR.getDescription() + "\")" +
                         ")";
         return "=IF(" + COUNT.getCellAddr() + ">0," + formula + ",0)";
     }
