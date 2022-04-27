@@ -300,39 +300,30 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     }
 
     private static String getInvestmentProportionFormula() {
-        return "=IF(" + COUNT.getCellAddr() + ">0," +
+        String formula =
                 "((" + AVERAGE_PRICE.getCellAddr() + "+" + AVERAGE_ACCRUED_INTEREST.getCellAddr() + ")*" + COUNT.getCellAddr() +
                 "-" + AMORTIZATION.getCellAddr() + ")" +
-                "/(SUMPRODUCT(" +
-                "(" + AVERAGE_PRICE.getRange(3, 1000) + ")," +
-                "(" + COUNT.getRange(3, 1000) + ")," +
-                "SIGN(" + COUNT.getRange(3, 1000) + ">0)," +
-                "(0+(" + TYPE.getRange(3, 1000) + "<>\"" + DERIVATIVE.getDescription() + "\"))" +
-                ")" +
-                "+SUMPRODUCT(" +
-                "(" + AVERAGE_ACCRUED_INTEREST.getRange(3, 1000) + ")," +
-                "(" + COUNT.getRange(3, 1000) + ")," +
-                "SIGN(" + COUNT.getRange(3, 1000) + ">0)" +
-                ")" +
-                "-SUMIF(" + COUNT.getRange(3, 1000) + ",\">0\"," + AMORTIZATION.getRange(3, 1000) + ")" +
-                ")," +
-                "0)";
+                "/(" +
+                    "SUMPRODUCT(" +
+                        "(" + AVERAGE_PRICE.getRange(3, 1000) + "+" + AVERAGE_ACCRUED_INTEREST.getRange(3, 1000) + ")," +
+                        COUNT.getRange(3, 1000) + "," +
+                        "SIGN(" + COUNT.getRange(3, 1000) + ">0)," +
+                        "N(" + TYPE.getRange(3, 1000) + "<>\"" + DERIVATIVE.getDescription() + "\")" +
+                        ")" +
+                    "-SUMIF(" + COUNT.getRange(3, 1000) + ",\">0\"," + AMORTIZATION.getRange(3, 1000) + ")" +
+                    ")";
+        return "=IF(" + COUNT.getCellAddr() + ">0," + formula + ",0)";
     }
 
     private static String getProportionFormula() {
-        return "=IF(" + COUNT.getCellAddr() + ">0," +
+        String formula =
                 "((" + LAST_PRICE.getCellAddr() + "+" + LAST_ACCRUED_INTEREST.getCellAddr() + ")*" + COUNT.getCellAddr() + ")" +
-                "/(SUMPRODUCT(" +
-                "(" + LAST_PRICE.getRange(3, 1000) + ")," +
-                "(" + COUNT.getRange(3, 1000) + ")," +
-                "SIGN(" + COUNT.getRange(3, 1000) + ">0)," +
-                "(0+(" + TYPE.getRange(3, 1000) + "<>\"" + DERIVATIVE.getDescription() + "\"))" +
-                ")" +
-                "+SUMPRODUCT(" +
-                "(" + LAST_ACCRUED_INTEREST.getRange(3, 1000) + ")," +
-                "(" + COUNT.getRange(3, 1000) + ")," +
-                "SIGN(" + COUNT.getRange(3, 1000) + ">0)" +
-                "))," +
-                "0)";
+                "/SUMPRODUCT(" +
+                        "(" + LAST_PRICE.getRange(3, 1000) + "+" + LAST_ACCRUED_INTEREST.getRange(3, 1000) + ")," +
+                        COUNT.getRange(3, 1000) + "," +
+                        "SIGN(" + COUNT.getRange(3, 1000) + ">0)," +
+                        "N(" + TYPE.getRange(3, 1000) + "<>\"" + DERIVATIVE.getDescription() + "\")" +
+                        ")";
+        return "=IF(" + COUNT.getCellAddr() + ">0," + formula + ",0)";
     }
 }
