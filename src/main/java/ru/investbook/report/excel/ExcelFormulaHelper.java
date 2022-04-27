@@ -18,10 +18,29 @@
 
 package ru.investbook.report.excel;
 
+import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
+import org.apache.poi.ss.usermodel.Cell;
+
 public class ExcelFormulaHelper {
 
     static String sumAbsValues(ExcelTableHeader column, int firstRowNum, int lastRowNum) {
         String range = column.getRange(firstRowNum, lastRowNum);
         return "=SUMIF(" + range + ",\">0\")-SUMIF(" + range + ",\"<0\")";
+    }
+
+    static String xirr(ExcelTableHeader cashColumn, ExcelTableHeader dateColumn,
+                       int firstRowNum, int lastRowNum,
+                       double devaultValueForApachePoi) {
+        String excelXirrFormula = "XIRR("
+                + cashColumn.getRange(firstRowNum, lastRowNum) + ","
+                + dateColumn.getRange(firstRowNum, lastRowNum) + ")";
+        return "=100*" + ifError(excelXirrFormula, devaultValueForApachePoi);
+    }
+
+    /**
+     * {@link ru.investbook.report.html.HtmlView#handleNotImplementedException(Cell, HSSFFormulaEvaluator)}
+     */
+    static String ifError(String formula, Object defaultValueOrFormula) {
+        return "IFERROR(" + formula + "," + defaultValueOrFormula + ")";
     }
 }

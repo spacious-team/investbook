@@ -25,24 +25,36 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.decampo.xirr.NewtonRaphson;
+import org.decampo.xirr.Transaction;
+import org.decampo.xirr.Xirr;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.service.AssetsAndCashService;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import static ru.investbook.report.excel.CashFlowExcelTableHeader.*;
+import static ru.investbook.report.excel.ExcelFormulaHelper.xirr;
 
 @Component
 @Slf4j
 public class CashFlowExcelTableView extends ExcelTableView {
 
+    private final ForeignExchangeRateService foreignExchangeRateService;
     @Getter
     private final boolean summaryView = true;
     @Getter
@@ -50,13 +62,17 @@ public class CashFlowExcelTableView extends ExcelTableView {
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> "Доходность (" + portfolio + ")";
     private final AssetsAndCashService assetsAndCashService;
+    private final Xirr.Builder xirrBuilder = Xirr.builder()
+            .withNewtonRaphsonBuilder(NewtonRaphson.builder().withTolerance(0.001)); // in currency units (RUB, USD)
 
     public CashFlowExcelTableView(PortfolioRepository portfolioRepository,
                                   CashFlowExcelTableFactory tableFactory,
                                   PortfolioConverter portfolioConverter,
-                                  AssetsAndCashService assetsAndCashService) {
+                                  AssetsAndCashService assetsAndCashService,
+                                  ForeignExchangeRateService foreignExchangeRateService) {
         super(portfolioRepository, tableFactory, portfolioConverter);
         this.assetsAndCashService = assetsAndCashService;
+        this.foreignExchangeRateService = foreignExchangeRateService;
     }
 
     @Override
@@ -85,12 +101,39 @@ public class CashFlowExcelTableView extends ExcelTableView {
                 CASH_RUB.getRange(3, table.size() + 2) + ")+" +
                 LIQUIDATION_VALUE_RUB.getCellAddr());
         total.put(LIQUIDATION_VALUE_RUB, liquidationValueRub);
-        total.put(PROFIT, "=100*XIRR("
-                + CASH_RUB.getRange(3, table.size() + 2) + ","
-                + DATE.getRange(3, table.size() + 2) + ")");
+        double xirrProfitForApachePoi = getXirrProfitInPercent(table, liquidationValueRub);
+        total.put(PROFIT, xirr(CASH_RUB, DATE, 3, table.size() + 2, xirrProfitForApachePoi));
         total.put(CASH_BALANCE, "=SUMPRODUCT(" + CASH_BALANCE.getRange(3, table.size() + 2) + ","
                 + EXCHANGE_RATE.getRange(3, table.size() + 2) + ")");
         return total;
+    }
+
+    private double getXirrProfitInPercent(Table table, BigDecimal liquidationValueRub) {
+        try {
+            Collection<Transaction> transactions = table.stream()
+                    .map(this::castRecordToXirrTransaction)
+                    .flatMap(Optional::stream)
+                    .collect(Collectors.toCollection(ArrayList::new));
+            transactions.add(new Transaction(-liquidationValueRub.doubleValue(), LocalDate.now()));
+            return xirrBuilder.withTransactions(transactions).xirr();
+        } catch (Exception e) {
+            log.debug("Can't calculate XIRR, set to 0", e);
+            return 0;
+        }
+    }
+
+    private Optional<Transaction> castRecordToXirrTransaction(Table.Record record) {
+        Object cash = record.get(CASH);
+        Object currency = record.get(CURRENCY);
+        Double cashInRub = null;
+        if (cash instanceof Number n && currency instanceof String cur) {
+            cashInRub = n.doubleValue() * foreignExchangeRateService.getExchangeRateToRub(cur).doubleValue();
+        }
+        Object date = record.get(DATE);
+        Transaction transaction = (cashInRub != null && date instanceof Instant instant) ?
+                new Transaction(cashInRub, LocalDate.ofInstant(instant, ZoneId.systemDefault())) :
+                null;
+        return Optional.ofNullable(transaction);
     }
 
     @Override
@@ -111,7 +154,7 @@ public class CashFlowExcelTableView extends ExcelTableView {
             if (cell == null) continue;
             if (cell.getColumnIndex() == DATE.ordinal()) {
                 cell.setCellStyle(styles.getTotalTextStyle());
-            } else if (cell.getColumnIndex() == DAYS_COUNT.ordinal()){
+            } else if (cell.getColumnIndex() == DAYS_COUNT.ordinal()) {
                 cell.setCellStyle(styles.getIntStyle());
             } else {
                 cell.setCellStyle(styles.getTotalRowStyle());
