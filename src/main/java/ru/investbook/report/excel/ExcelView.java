@@ -19,7 +19,6 @@
 package ru.investbook.report.excel;
 
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.report.ViewFilter;
@@ -47,7 +46,7 @@ public class ExcelView {
     }
 
     @Transactional(readOnly = true)
-    public void writeTo(XSSFWorkbook book, ViewFilter filter) throws InterruptedException, ExecutionException {
+    public void writeTo(Workbook book, ViewFilter filter) throws InterruptedException, ExecutionException {
 
         CellStyles styles = new CellStyles(book);
         ExecutorService tableWriterExecutor = Executors.newSingleThreadExecutor();

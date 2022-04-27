@@ -24,8 +24,8 @@ import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 @Getter
 public class CellStyles {
@@ -39,7 +39,7 @@ public class CellStyles {
     private final CellStyle intStyle;
     private final CellStyle percentStyle;
 
-    public CellStyles(XSSFWorkbook book) {
+    public CellStyles(Workbook book) {
         this.defaultStyle = createDefaultStyle(book);
         this.headerStyle = createHeaderStyle(book);
         this.totalTextStyle = createLeftAlignedItalicTextStyle(book);
@@ -51,61 +51,67 @@ public class CellStyles {
         this.percentStyle = createPercentStyle(book);
     }
 
-    protected static XSSFCellStyle createHeaderStyle(XSSFWorkbook book) {
-        XSSFCellStyle style = createDefaultStyle(book);
-        style.getFont().setBold(true);
+    protected static CellStyle createHeaderStyle(Workbook book) {
+        CellStyle style = createDefaultStyle(book);
+        if (style instanceof XSSFCellStyle s) {
+            s.getFont().setBold(true);
+        }
         return style;
     }
 
-    protected static XSSFCellStyle createLeftAlignedItalicTextStyle(XSSFWorkbook book) {
-        XSSFCellStyle style = createLeftAlignedTextStyle(book);
-        style.getFont().setItalic(true);
+    protected static CellStyle createLeftAlignedItalicTextStyle(Workbook book) {
+        CellStyle style = createLeftAlignedTextStyle(book);
+        if (style instanceof XSSFCellStyle s) {
+            s.getFont().setItalic(true);
+        }
         return style;
     }
 
-    protected static XSSFCellStyle createLeftAlignedTextStyle(XSSFWorkbook book) {
-        XSSFCellStyle style = createDefaultStyle(book);
+    protected static CellStyle createLeftAlignedTextStyle(Workbook book) {
+        CellStyle style = createDefaultStyle(book);
         style.setAlignment(HorizontalAlignment.LEFT);
         return style;
     }
 
-    protected static XSSFCellStyle createTotalRowStyle(XSSFWorkbook book) {
-        XSSFCellStyle style = createMoneyStyle(book);
-        style.getFont().setItalic(true);
+    protected static CellStyle createTotalRowStyle(Workbook book) {
+        CellStyle style = createMoneyStyle(book);
+        if (style instanceof XSSFCellStyle s) {
+            s.getFont().setItalic(true);
+        }
         return style;
     }
 
-    protected static XSSFCellStyle createDateStyle(XSSFWorkbook book) {
-        XSSFCellStyle style = createDefaultStyle(book);
+    protected static CellStyle createDateStyle(Workbook book) {
+        CellStyle style = createDefaultStyle(book);
         CreationHelper createHelper = book.getCreationHelper();
         style.setDataFormat(createHelper.createDataFormat().getFormat("dd.mm.yyyy"));
         return style;
     }
 
-    protected static XSSFCellStyle createIntegerStyle(XSSFWorkbook book) {
-        XSSFCellStyle style = createDefaultStyle(book);
+    protected static CellStyle createIntegerStyle(Workbook book) {
+        CellStyle style = createDefaultStyle(book);
         CreationHelper createHelper = book.getCreationHelper();
         style.setDataFormat(createHelper.createDataFormat().getFormat("_-* # ### ##0_-;-* # ### ##0_-;_-* \"-\"??_-;_-@_-"));
         return style;
     }
 
-    protected static XSSFCellStyle createMoneyStyle(XSSFWorkbook book) {
-        XSSFCellStyle style = createDefaultStyle(book);
+    protected static CellStyle createMoneyStyle(Workbook book) {
+        CellStyle style = createDefaultStyle(book);
         CreationHelper createHelper = book.getCreationHelper();
         style.setDataFormat(createHelper.createDataFormat().getFormat("_-* # ### ##0.00_р_._-;-* # ### ##0.00_р_._-;_-* \"-\"??_р_._-;_-@_-"));
         return style;
     }
 
-    protected static XSSFCellStyle createPercentStyle(XSSFWorkbook book) {
-        XSSFCellStyle style = createDefaultStyle(book);
+    protected static CellStyle createPercentStyle(Workbook book) {
+        CellStyle style = createDefaultStyle(book);
         CreationHelper createHelper = book.getCreationHelper();
         style.setDataFormat(createHelper.createDataFormat().getFormat("0.0%"));
         return style;
     }
 
-    protected static XSSFCellStyle createDefaultStyle(XSSFWorkbook book) {
+    protected static CellStyle createDefaultStyle(Workbook book) {
         Font font = book.createFont();
-        XSSFCellStyle style = book.createCellStyle();
+        CellStyle style = book.createCellStyle();
         style.setFont(font);
         style.setAlignment(HorizontalAlignment.CENTER);
         style.setVerticalAlignment(VerticalAlignment.CENTER);
