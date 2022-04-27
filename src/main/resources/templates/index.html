@@ -73,7 +73,7 @@
             <a href="/portfolio-properties/edit-form/total-assets" class="value" th:if="${assets.isEmpty}" th:text="--" title="Ликвидная стоимости Активов не известна, загрузите отчет брокера или задайте оценку активов вручную. Если брокер в отчете не предоставляет информацию об Активах, Investbook оценит стоимость Активов по текущей котировке или котировке покупки. Котировку можно получить через Формы."></a>
             <a href="/portfolio-properties" class="value" th:if="${assets.isPresent}" th:text="${T(java.lang.String).format('%,d', assets.get().intValue()).replace(',', ' ')} + '&ensp;P'" title="Оценка стоимости активов (в порядке приоритета): брокера, по текущим котировкам, по самой свежей котировке сделок"></a>
             <p>
-                <a href="/portfolio" class="assets-detail">Детальная информация &#8250;</a>
+                <a th:href="@{/portfolio(format=excel)}" class="assets-detail">Детальная информация &#8250;</a>
             </p>
         </div>
     </div>
