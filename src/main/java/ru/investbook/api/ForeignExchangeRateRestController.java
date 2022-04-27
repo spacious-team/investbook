@@ -69,7 +69,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
 
     @GetMapping("/currency-pairs/{currency-pair}")
     @Operation(summary = "Отобразить по валюте",
-            description = "Отображает всю загруженные в БД информацию по обменну курсу одной валюте")
+            description = "Отображает всю загруженные в БД информацию по обменному курсу одной валюте")
     protected List<ForeignExchangeRate> get(@PathVariable("currency-pair")
                                             @Parameter(description = "Валютная пара")
                                                     String currencyPair) {
