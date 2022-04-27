@@ -56,6 +56,7 @@ import static ru.investbook.report.ForeignExchangeRateService.RUB;
 import static ru.investbook.report.excel.DerivativesMarketTotalProfitExcelTableHeader.*;
 import static ru.investbook.report.excel.ExcelChartPlotHelper.*;
 import static ru.investbook.report.excel.ExcelConditionalFormatHelper.highlightNegativeByRed;
+import static ru.investbook.report.excel.ExcelFormulaHelper.sumAbsValues;
 
 @Component
 @Slf4j
@@ -148,7 +149,7 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
             totalRow.put(column, "=SUM(" + column.getRange(3, table.size() + 2) + ")");
         }
         totalRow.put(CONTRACT_GROUP, "Итого:");
-        totalRow.put(COUNT, "=SUMPRODUCT(ABS(" + COUNT.getRange(3, table.size() + 2) + "))");
+        totalRow.put(COUNT, sumAbsValues(COUNT, 3, table.size() + 2));
         totalRow.remove(FIRST_TRANSACTION_DATE);
         totalRow.remove(LAST_TRANSACTION_DATE);
         totalRow.remove(LAST_EVENT_DATE);

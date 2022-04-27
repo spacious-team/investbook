@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.function.UnaryOperator;
 
 import static ru.investbook.report.excel.DerivativesMarketProfitExcelTableHeader.*;
+import static ru.investbook.report.excel.ExcelFormulaHelper.sumAbsValues;
 
 @Component
 public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
@@ -69,7 +70,7 @@ public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
         Table.Record totalRow = new Table.Record();
         totalRow.put(CONTRACT, "Итого:");
         totalRow.put(COUNT, getSumFormula(COUNT, table.size()));
-        totalRow.put(AMOUNT, "=SUMPRODUCT(ABS(" + AMOUNT.getRange(3, table.size() + 2) + "))");
+        totalRow.put(AMOUNT, sumAbsValues(AMOUNT, 3, table.size() + 2));
         totalRow.put(COMMISSION, getSumFormula(COMMISSION, table.size()) + "/2");
         totalRow.put(DERIVATIVE_PROFIT_DAY, getSumFormula(DERIVATIVE_PROFIT_DAY, table.size()));
         String profitMinusCommission = "(" + DERIVATIVE_PROFIT_DAY.getCellAddr() + "-" + COMMISSION.getCellAddr() + ")";
