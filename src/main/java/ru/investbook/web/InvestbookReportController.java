@@ -20,10 +20,8 @@ package ru.investbook.web;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,7 +39,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import static java.time.ZoneId.systemDefault;
@@ -73,28 +70,28 @@ public class InvestbookReportController {
     @GetMapping("report")
     public void buildInvestbookHtmlReportByGet(@RequestParam(name = "format", defaultValue = "excel") String format,
                                                HttpServletResponse response) throws Exception {
-        switch (format) {
-            case "html" -> buildInvestbookHtmlReport(response);
-            default -> buildInvestbookExcelReport(response);
-        }
-    }
-
-    public void buildInvestbookHtmlReport(HttpServletResponse response) throws Exception {
         ViewFilter filter = getViewFilter(getViewFilterModel());
-        htmlView.create(response.getOutputStream(), filter);
-    }
-
-    public void buildInvestbookExcelReport(HttpServletResponse response) throws IOException {
-        ViewFilterModel viewFilter = getViewFilterModel();
-        buildInvestbookReport("excel", viewFilter, response);
+        buildReport(format, response, filter);
     }
 
     @PostMapping("report")
     public void buildInvestbookReport(@RequestParam(name = "format", defaultValue = "excel") String format,
                                       @ModelAttribute("viewFilter") ViewFilterModel viewFilter,
-                                      HttpServletResponse response) throws IOException {
+                                      HttpServletResponse response) throws Exception {
+        ViewFilter filter = getViewFilter(viewFilter);
+        buildReport(format, response, filter);
+    }
+
+    private void buildReport(String format, HttpServletResponse response, ViewFilter filter) throws Exception {
+        if ("html".equals(format)) {
+            htmlView.create(response.getOutputStream(), filter);
+        } else {
+            sendExcelFileIfCan(response, filter);
+        }
+    }
+
+    private void sendExcelFileIfCan(HttpServletResponse response, ViewFilter viewFilter) throws IOException {
         try {
-            Assert.isTrue(Objects.equals(format, "excel"), "Поддерживается выгрузка только в формате excel");
             long t0 = System.nanoTime();
             String fileName = sendExcelFile(viewFilter, response);
             log.info("Отчет '{}' сформирован за {}", fileName, Duration.ofNanos(System.nanoTime() - t0));
@@ -105,15 +102,11 @@ public class InvestbookReportController {
         response.flushBuffer();
     }
 
-    private String sendExcelFile(ViewFilterModel viewFilterModel, HttpServletResponse response)
+    private String sendExcelFile(ViewFilter viewFilter, HttpServletResponse response)
             throws IOException, InterruptedException, ExecutionException {
-        ViewFilter viewFilter = getViewFilter(viewFilterModel);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream(expectedFileSize);
-        try (XSSFWorkbook book = new XSSFWorkbook()) {
-            excelView.writeTo(book, viewFilter);
-            book.write(outputStream);
-            expectedFileSize = outputStream.size();
-        }
+        excelView.create(outputStream, viewFilter);
+        expectedFileSize = outputStream.size();
         String fileName = getReportName(viewFilter);
         sendSuccessHeader(response, fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         outputStream.writeTo(response.getOutputStream());

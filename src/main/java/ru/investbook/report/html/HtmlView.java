@@ -26,6 +26,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import ru.investbook.report.ViewFilter;
 import ru.investbook.report.excel.ExcelView;
 
@@ -52,6 +53,7 @@ public class HtmlView {
         try (HSSFWorkbook workbook = createWorkbook(filter)) {
             Document htmlDocument = buildHtmlDocument(workbook);
             addCssStyle(htmlDocument);
+            addReportFileDownloadLink(htmlDocument);
             write(htmlDocument, out);
         }
     }
@@ -88,6 +90,16 @@ public class HtmlView {
         htmlDocument.getFirstChild() // html
                 .getFirstChild()     // head
                 .appendChild(style);
+    }
+
+    private void addReportFileDownloadLink(Document htmlDocument) {
+        Node body = htmlDocument.getFirstChild() // html
+                .getLastChild(); // body
+        Element link = htmlDocument.createElement("a");
+        link.setTextContent("\uD83D\uDCE5 Сохранить в xlsx");
+        link.setAttribute("href", "/portfolio/report?format=excel");
+        link.setAttribute("style", "text-decoration: none; float: right;");
+        body.insertBefore(link, body.getFirstChild());
     }
 
     private void write(Document htmlDocument, OutputStream out) throws TransformerException {

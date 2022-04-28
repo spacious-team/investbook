@@ -19,10 +19,13 @@
 package ru.investbook.report.excel;
 
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.report.ViewFilter;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,9 +49,12 @@ public class ExcelView {
     }
 
     @Transactional(readOnly = true)
-    public void writeTo(Workbook book, ViewFilter filter) throws InterruptedException, ExecutionException {
-        CellStyles styles = new CellStyles(book);
-        writeTo(book, filter, styles);
+    public void create(OutputStream out, ViewFilter filter) throws IOException, ExecutionException, InterruptedException {
+        try (XSSFWorkbook book = new XSSFWorkbook()) {
+            CellStyles styles = new CellStyles(book);
+            writeTo(book, filter, styles);
+            book.write(out);
+        }
     }
 
     @Transactional(readOnly = true)
