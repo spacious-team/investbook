@@ -22,27 +22,25 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hpsf.SummaryInformation;
 import org.apache.poi.hssf.converter.ExcelToHtmlConverter;
-import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.formula.eval.NotImplementedException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import ru.investbook.report.ViewFilter;
 import ru.investbook.report.excel.ExcelView;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutionException;
+
+import static ru.investbook.report.html.ExcelFormulaEvaluatorHelper.evaluateFormulaCells;
 
 @Component
 @RequiredArgsConstructor
@@ -51,127 +49,54 @@ public class HtmlView {
     private final ExcelView excelView;
 
     public void create(OutputStream out, ViewFilter filter) throws Exception {
-        try (HSSFWorkbook workbook = new HSSFWorkbook()) {
-
-            excelView.writeTo(workbook, filter, new HtmlCellStyles(workbook));
-            evaluateAllFormulaCells(workbook);
-
-            workbook.createInformationProperties();
-            SummaryInformation info = workbook.getSummaryInformation();
-            info.setTitle("Отчет");
-            info.setLastAuthor("Investbook");
-
-            ExcelToHtmlConverter excelToHtmlConverter = new ExcelToHtmlConverter(
-                    DocumentBuilderFactory.newInstance()
-                            .newDocumentBuilder()
-                            .newDocument());
-            excelToHtmlConverter.setOutputColumnHeaders(false);
-            excelToHtmlConverter.setOutputRowNumbers(false);
-
-            excelToHtmlConverter.processWorkbook(workbook);
-
-            Document htmlDocument = excelToHtmlConverter.getDocument();
-
-            Element style = htmlDocument.createElement("style");
-            style.setTextContent("tr { border-bottom: 1pt solid #eee; }");
-            htmlDocument.getFirstChild() // html
-                    .getFirstChild()     // head
-                    .appendChild(style);
-
-            DOMSource domSource = new DOMSource(htmlDocument);
-            StreamResult streamResult = new StreamResult(out);
-
-            TransformerFactory tf = TransformerFactory.newInstance();
-            Transformer serializer = tf.newTransformer();
-            serializer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            serializer.setOutputProperty(OutputKeys.INDENT, "yes");
-            serializer.setOutputProperty(OutputKeys.METHOD, "html");
-            serializer.transform(domSource, streamResult);
+        try (HSSFWorkbook workbook = createWorkbook(filter)) {
+            Document htmlDocument = buildHtmlDocument(workbook);
+            addCssStyle(htmlDocument);
+            write(htmlDocument, out);
         }
     }
 
-    private void evaluateAllFormulaCells(HSSFWorkbook workbook) {
-        HSSFFormulaEvaluator evaluator = new HSSFFormulaEvaluator(workbook);
-        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-            Sheet sheet = workbook.getSheetAt(i);
-            for (Row r : sheet) {
-                for (Cell c : r) {
-                    if (c.getCellType() == CellType.FORMULA) {
-                        evaluate(c, evaluator);
-                    }
-                }
-            }
-        }
+    private HSSFWorkbook createWorkbook(ViewFilter filter) throws InterruptedException, ExecutionException {
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        excelView.writeTo(workbook, filter, new HtmlCellStyles(workbook));
+        evaluateFormulaCells(workbook);
+        setTitleAndAuthor(workbook);
+        return workbook;
     }
 
-    private void evaluate(Cell c, HSSFFormulaEvaluator evaluator) {
-        try {
-            evaluator.evaluateFormulaCell(c);
-        } catch (NotImplementedException e) {
-            if (!handleNotImplementedException(c, evaluator)) {
-                log.warn("Can't evaluate cell formula {}", c.getCellFormula(), e);
-            }
-        } catch (Exception e) {
-            log.warn("Can't evaluate cell formula {}", c.getCellFormula(), e);
-        }
+    private void setTitleAndAuthor(HSSFWorkbook workbook) {
+        workbook.createInformationProperties();
+        SummaryInformation info = workbook.getSummaryInformation();
+        info.setTitle("Отчет");
+        info.setLastAuthor("Investbook");
     }
 
-    /**
-     * Если формула соответствует шаблону '{A}IFERROR({B},{default-value}){C}', то будет попытка вычислить значение '{A}{default-value}{C}'
-     */
-    private boolean handleNotImplementedException(Cell c, HSSFFormulaEvaluator evaluator) {
-        try {
-            String formula = c.getCellFormula();
-            int ifErrorFuncStartPos = formula.toUpperCase().indexOf("IFERROR(");
-            if (ifErrorFuncStartPos != -1) {
-                int openBracePos = formula.indexOf("(", ifErrorFuncStartPos);
-                int ifErrorFuncEndPos = indexOfCloseBrace(formula, openBracePos);
-                if (ifErrorFuncEndPos != -1) {
-                    int positionOfSecondArg = indexOfSecondArg(formula, openBracePos);
-                    String defaultValueOrFunction = formula.substring(positionOfSecondArg, ifErrorFuncEndPos);
-                    String newFormula = formula.substring(0, ifErrorFuncStartPos) +
-                            defaultValueOrFunction +
-                            formula.substring(Math.min(ifErrorFuncEndPos + 1, formula.length()));
-                    c.setCellFormula(newFormula);
-                    evaluate(c, evaluator);
-                    return true;
-                }
-            }
-        } catch (Exception ignore) {
-        }
-        return false;
+    private Document buildHtmlDocument(HSSFWorkbook workbook) throws ParserConfigurationException {
+        Document doc = DocumentBuilderFactory.newInstance()
+                .newDocumentBuilder()
+                .newDocument();
+        ExcelToHtmlConverter excelToHtmlConverter = new ExcelToHtmlConverter(doc);
+        excelToHtmlConverter.setOutputColumnHeaders(false);
+        excelToHtmlConverter.setOutputRowNumbers(false);
+        excelToHtmlConverter.processWorkbook(workbook);
+        return excelToHtmlConverter.getDocument();
     }
 
-    private int indexOfCloseBrace(String formula, int openBracePos) {
-        Assert.isTrue(formula.charAt(openBracePos) == '(', "Open brace expected");
-        int braceCnt = 1;
-        for (int i = openBracePos + 1; i < formula.length(); i++) {
-            char c = formula.charAt(i);
-            if (c == '(') {
-                braceCnt++;
-            } else if (c == ')') {
-                braceCnt--;
-            }
-            if (braceCnt == 0) {
-                return i;
-            }
-        }
-        return -1;
+    private void addCssStyle(Document htmlDocument) {
+        Element style = htmlDocument.createElement("style");
+        style.setTextContent("tr { border-bottom: 1pt solid #eee; }");
+        htmlDocument.getFirstChild() // html
+                .getFirstChild()     // head
+                .appendChild(style);
     }
 
-    private int indexOfSecondArg(String formula, int openBracePos) {
-        Assert.isTrue(formula.charAt(openBracePos) == '(', "Open brace expected");
-        int braceCnt = 0;
-        for (int i = openBracePos + 1; i < formula.length(); i++) {
-            char c = formula.charAt(i);
-            if (c == ',' && braceCnt == 0) {
-                return i + 1;
-            } else if (c == '(') {
-                braceCnt++;
-            } else if (c == ')') {
-                braceCnt--;
-            }
-        }
-        return -1;
+    private void write(Document htmlDocument, OutputStream out) throws TransformerException {
+        DOMSource domSource = new DOMSource(htmlDocument);
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer serializer = tf.newTransformer();
+        serializer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        serializer.setOutputProperty(OutputKeys.INDENT, "yes");
+        serializer.setOutputProperty(OutputKeys.METHOD, "html");
+        serializer.transform(domSource, new StreamResult(out));
     }
 }
