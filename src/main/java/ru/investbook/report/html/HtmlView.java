@@ -20,6 +20,7 @@ package ru.investbook.report.html;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hpsf.SummaryInformation;
 import org.apache.poi.hssf.converter.ExcelToHtmlConverter;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -55,6 +56,11 @@ public class HtmlView {
             excelView.writeTo(workbook, filter);
             evaluateAllFormulaCells(workbook);
 
+            workbook.createInformationProperties();
+            SummaryInformation info = workbook.getSummaryInformation();
+            info.setTitle("Отчет");
+            info.setLastAuthor("Investbook");
+
             ExcelToHtmlConverter excelToHtmlConverter = new ExcelToHtmlConverter(
                     DocumentBuilderFactory.newInstance()
                             .newDocumentBuilder()
@@ -67,7 +73,7 @@ public class HtmlView {
             Document htmlDocument = excelToHtmlConverter.getDocument();
 
             Element style = htmlDocument.createElement("style");
-            style.setTextContent(".r1 { border-bottom: 1pt solid #eee; }");
+            style.setTextContent("tr { border-bottom: 1pt solid #eee; }");
             htmlDocument.getFirstChild() // html
                     .getFirstChild()     // head
                     .appendChild(style);

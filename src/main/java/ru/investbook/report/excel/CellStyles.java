@@ -25,7 +25,6 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 
 @Getter
 public class CellStyles {
@@ -53,17 +52,17 @@ public class CellStyles {
 
     protected static CellStyle createHeaderStyle(Workbook book) {
         CellStyle style = createDefaultStyle(book);
-        if (style instanceof XSSFCellStyle s) {
-            s.getFont().setBold(true);
-        }
+        Font font = book.createFont();
+        font.setBold(true);
+        style.setFont(font);
         return style;
     }
 
     protected static CellStyle createLeftAlignedItalicTextStyle(Workbook book) {
         CellStyle style = createLeftAlignedTextStyle(book);
-        if (style instanceof XSSFCellStyle s) {
-            s.getFont().setItalic(true);
-        }
+        Font font = book.createFont();
+        font.setItalic(true);
+        style.setFont(font);
         return style;
     }
 
@@ -75,9 +74,10 @@ public class CellStyles {
 
     protected static CellStyle createTotalRowStyle(Workbook book) {
         CellStyle style = createMoneyStyle(book);
-        if (style instanceof XSSFCellStyle s) {
-            s.getFont().setItalic(true);
-        }
+        Font font = book.createFont();
+        font.setItalic(true);
+        style.setFont(font);
+        style.setAlignment(HorizontalAlignment.CENTER);
         return style;
     }
 
@@ -90,6 +90,8 @@ public class CellStyles {
 
     protected static CellStyle createIntegerStyle(Workbook book) {
         CellStyle style = createDefaultStyle(book);
+        style.setAlignment(HorizontalAlignment.RIGHT);
+        style.setIndention((short) 1);
         CreationHelper createHelper = book.getCreationHelper();
         style.setDataFormat(createHelper.createDataFormat().getFormat("_-* # ### ##0_-;-* # ### ##0_-;_-* \"-\"??_-;_-@_-"));
         return style;
@@ -97,6 +99,8 @@ public class CellStyles {
 
     protected static CellStyle createMoneyStyle(Workbook book) {
         CellStyle style = createDefaultStyle(book);
+        style.setAlignment(HorizontalAlignment.RIGHT);
+        style.setIndention((short) 1);
         CreationHelper createHelper = book.getCreationHelper();
         style.setDataFormat(createHelper.createDataFormat().getFormat("_-* # ### ##0.00_р_._-;-* # ### ##0.00_р_._-;_-* \"-\"??_р_._-;_-@_-"));
         return style;
