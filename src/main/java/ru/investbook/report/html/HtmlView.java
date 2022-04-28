@@ -114,8 +114,7 @@ public class HtmlView {
 
         link = htmlDocument.createElement("a");
         link.setTextContent(", pdf");
-        link.setAttribute("href", "#");
-        link.setAttribute("onclick", "window.print()");
+        link.setAttribute("href", "/portfolio/report?format=pdf");
         link.setAttribute("style", linkStyle);
         div.appendChild(link);
     }

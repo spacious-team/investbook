@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.report.ViewFilter;
 import ru.investbook.report.excel.ExcelView;
 import ru.investbook.report.html.HtmlView;
+import ru.investbook.report.pdf.PdfView;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.web.model.ViewFilterModel;
 
@@ -59,6 +60,7 @@ public class InvestbookReportController {
     private final PortfolioRepository portfolioRepository;
     private final ExcelView excelView;
     private final HtmlView htmlView;
+    private final PdfView pdfView;
 
     @GetMapping("select-period")
     public String getPage(Model model, @ModelAttribute("viewFilter") ViewFilterModel viewFilter) {
@@ -83,11 +85,16 @@ public class InvestbookReportController {
     }
 
     private void buildReport(String format, HttpServletResponse response, ViewFilter filter) throws Exception {
-        if ("html".equals(format)) {
-            htmlView.create(response.getOutputStream(), filter);
-        } else {
-            String fileName = getReportName(filter, "xlsx");
-            sendFileOrShowErrorPage(fileName, out -> excelView.create(out, filter), response);
+        switch (format) {
+            case "html" -> htmlView.create(response.getOutputStream(), filter);
+            case "pdf" -> {
+                String fileName = getReportName(filter, "pdf");
+                sendFileOrShowErrorPage(fileName, out -> pdfView.create(out, filter), response);
+            }
+            default -> {
+                String fileName = getReportName(filter, "xlsx");
+                sendFileOrShowErrorPage(fileName, out -> excelView.create(out, filter), response);
+            }
         }
     }
 
@@ -109,7 +116,10 @@ public class InvestbookReportController {
             throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         fileWriter.accept(outputStream);
-        sendSuccessHeader(response, fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        String contentType = fileName.endsWith("xlsx") ?
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" :
+                "application/pdf";
+        sendSuccessHeader(response, fileName, contentType);
         outputStream.writeTo(response.getOutputStream());
     }
 
