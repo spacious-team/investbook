@@ -32,7 +32,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.report.ViewFilter;
 import ru.investbook.report.excel.ExcelView;
 import ru.investbook.report.html.HtmlView;
-import ru.investbook.report.pdf.PdfView;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.web.model.ViewFilterModel;
 
@@ -62,7 +61,6 @@ public class InvestbookReportController {
     private final PortfolioRepository portfolioRepository;
     private final ExcelView excelView;
     private final HtmlView htmlView;
-    private final PdfView pdfView;
     private volatile int expectedFileSize = 0xFFFF;
 
     @GetMapping("select-period")
@@ -77,7 +75,6 @@ public class InvestbookReportController {
                                                HttpServletResponse response) throws Exception {
         switch (format) {
             case "html" -> buildInvestbookHtmlReport(response);
-            case "pdf" -> buildInvestbookPdfReport(response);
             default -> buildInvestbookExcelReport(response);
         }
     }
@@ -85,12 +82,6 @@ public class InvestbookReportController {
     public void buildInvestbookHtmlReport(HttpServletResponse response) throws Exception {
         ViewFilter filter = getViewFilter(getViewFilterModel());
         htmlView.create(response.getOutputStream(), filter);
-    }
-
-    public void buildInvestbookPdfReport(HttpServletResponse response) throws Exception {
-        sendSuccessHeader(response, "investbook.pdf", "application/pdf");
-        ViewFilter filter = getViewFilter(getViewFilterModel());
-        pdfView.create(response.getOutputStream(), filter);
     }
 
     public void buildInvestbookExcelReport(HttpServletResponse response) throws IOException {
