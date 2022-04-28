@@ -47,8 +47,12 @@ public class ExcelView {
 
     @Transactional(readOnly = true)
     public void writeTo(Workbook book, ViewFilter filter) throws InterruptedException, ExecutionException {
-
         CellStyles styles = new CellStyles(book);
+        writeTo(book, filter, styles);
+    }
+
+    @Transactional(readOnly = true)
+    public void writeTo(Workbook book, ViewFilter filter, CellStyles styles) throws InterruptedException, ExecutionException {
         ExecutorService tableWriterExecutor = Executors.newSingleThreadExecutor();
         Collection<Future<?>> sheetWriterFutures = new ArrayList<>();
         int cpuCnt = Runtime.getRuntime().availableProcessors();

@@ -50,7 +50,7 @@ public class CellStyles {
         this.percentStyle = createPercentStyle(book);
     }
 
-    protected static CellStyle createHeaderStyle(Workbook book) {
+    protected CellStyle createHeaderStyle(Workbook book) {
         CellStyle style = createDefaultStyle(book);
         Font font = book.createFont();
         font.setBold(true);
@@ -58,7 +58,7 @@ public class CellStyles {
         return style;
     }
 
-    protected static CellStyle createLeftAlignedItalicTextStyle(Workbook book) {
+    protected CellStyle createLeftAlignedItalicTextStyle(Workbook book) {
         CellStyle style = createLeftAlignedTextStyle(book);
         Font font = book.createFont();
         font.setItalic(true);
@@ -66,13 +66,13 @@ public class CellStyles {
         return style;
     }
 
-    protected static CellStyle createLeftAlignedTextStyle(Workbook book) {
+    protected CellStyle createLeftAlignedTextStyle(Workbook book) {
         CellStyle style = createDefaultStyle(book);
         style.setAlignment(HorizontalAlignment.LEFT);
         return style;
     }
 
-    protected static CellStyle createTotalRowStyle(Workbook book) {
+    protected CellStyle createTotalRowStyle(Workbook book) {
         CellStyle style = createMoneyStyle(book);
         Font font = book.createFont();
         font.setItalic(true);
@@ -81,14 +81,14 @@ public class CellStyles {
         return style;
     }
 
-    protected static CellStyle createDateStyle(Workbook book) {
+    protected CellStyle createDateStyle(Workbook book) {
         CellStyle style = createDefaultStyle(book);
         CreationHelper createHelper = book.getCreationHelper();
         style.setDataFormat(createHelper.createDataFormat().getFormat("dd.mm.yyyy"));
         return style;
     }
 
-    protected static CellStyle createIntegerStyle(Workbook book) {
+    protected CellStyle createIntegerStyle(Workbook book) {
         CellStyle style = createDefaultStyle(book);
         style.setAlignment(HorizontalAlignment.RIGHT);
         style.setIndention((short) 1);
@@ -97,7 +97,7 @@ public class CellStyles {
         return style;
     }
 
-    protected static CellStyle createMoneyStyle(Workbook book) {
+    protected CellStyle createMoneyStyle(Workbook book) {
         CellStyle style = createDefaultStyle(book);
         style.setAlignment(HorizontalAlignment.RIGHT);
         style.setIndention((short) 1);
@@ -106,7 +106,7 @@ public class CellStyles {
         return style;
     }
 
-    protected static CellStyle createPercentStyle(Workbook book) {
+    protected CellStyle createPercentStyle(Workbook book) {
         CellStyle style = createDefaultStyle(book);
         style.setAlignment(HorizontalAlignment.RIGHT);
         style.setIndention((short) 1);
@@ -115,7 +115,7 @@ public class CellStyles {
         return style;
     }
 
-    protected static CellStyle createDefaultStyle(Workbook book) {
+    protected CellStyle createDefaultStyle(Workbook book) {
         Font font = book.createFont();
         CellStyle style = book.createCellStyle();
         style.setFont(font);

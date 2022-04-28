@@ -53,7 +53,7 @@ public class HtmlView {
     public void create(OutputStream out, ViewFilter filter) throws Exception {
         try (HSSFWorkbook workbook = new HSSFWorkbook()) {
 
-            excelView.writeTo(workbook, filter);
+            excelView.writeTo(workbook, filter, new HtmlCellStyles(workbook));
             evaluateAllFormulaCells(workbook);
 
             workbook.createInformationProperties();
