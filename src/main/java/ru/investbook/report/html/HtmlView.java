@@ -86,7 +86,11 @@ public class HtmlView {
 
     private void addCssStyle(Document htmlDocument) {
         Element style = htmlDocument.createElement("style");
-        style.setTextContent("tr { border-bottom: 1pt solid #eee; }");
+        // @page for A4 landscape proportion when printing by ctrl+P
+        style.setTextContent("""
+                @page { size: 1980px 1395px; }
+                tr { border-bottom: 1pt solid #eee; }
+                """);
         htmlDocument.getFirstChild() // html
                 .getFirstChild()     // head
                 .appendChild(style);
