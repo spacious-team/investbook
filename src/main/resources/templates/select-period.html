@@ -58,7 +58,7 @@
 
 <a href="/">На главную</a>
 
-<form th:action="@{/portfolio(format=excel)}" method="POST" id="get-portfolio" class="grey-smaller" th:object="${viewFilter}">
+<form th:action="@{/portfolio/report(format=excel)}" method="POST" id="get-portfolio" class="grey-smaller" th:object="${viewFilter}">
     <div class="flex">
         <a onclick="selectPeriodView()" id="perion-link" class="inactive-text" href="#" title="выбрать период">за период</a>
         <span class="inactive-text" style="text-decoration: none">/</span>

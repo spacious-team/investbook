@@ -65,14 +65,14 @@ public class InvestbookReportController {
     private final PdfView pdfView;
     private volatile int expectedFileSize = 0xFFFF;
 
-    @GetMapping("/select-period")
+    @GetMapping("select-period")
     public String getPage(Model model, @ModelAttribute("viewFilter") ViewFilterModel viewFilter) {
         viewFilter.setPortfolios(getActivePortfolios(portfolioRepository));
         model.addAttribute("allPortfolios", getPortfolios(portfolioRepository));
         return "select-period";
     }
 
-    @GetMapping
+    @GetMapping("report")
     public void buildInvestbookHtmlReportByGet(@RequestParam(name = "format", defaultValue = "excel") String format,
                                                HttpServletResponse response) throws Exception {
         switch (format) {
@@ -98,7 +98,7 @@ public class InvestbookReportController {
         buildInvestbookReport("excel", viewFilter, response);
     }
 
-    @PostMapping
+    @PostMapping("report")
     public void buildInvestbookReport(@RequestParam(name = "format", defaultValue = "excel") String format,
                                       @ModelAttribute("viewFilter") ViewFilterModel viewFilter,
                                       HttpServletResponse response) throws IOException {
