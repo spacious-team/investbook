@@ -104,6 +104,8 @@ public class CellStyles {
 
     protected static CellStyle createPercentStyle(Workbook book) {
         CellStyle style = createDefaultStyle(book);
+        style.setAlignment(HorizontalAlignment.RIGHT);
+        style.setIndention((short) 1);
         CreationHelper createHelper = book.getCreationHelper();
         style.setDataFormat(createHelper.createDataFormat().getFormat("0.0%"));
         return style;

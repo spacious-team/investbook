@@ -152,9 +152,7 @@ public class CashFlowExcelTableView extends ExcelTableView {
         }
         for (Cell cell : sheet.getRow(1)) {
             if (cell == null) continue;
-            if (cell.getColumnIndex() == DATE.ordinal()) {
-                cell.setCellStyle(styles.getTotalTextStyle());
-            } else if (cell.getColumnIndex() == DAYS_COUNT.ordinal()) {
+            if (cell.getColumnIndex() == DAYS_COUNT.ordinal()) {
                 cell.setCellStyle(styles.getIntStyle());
             } else {
                 cell.setCellStyle(styles.getTotalRowStyle());
