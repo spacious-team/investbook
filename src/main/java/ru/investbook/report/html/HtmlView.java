@@ -54,6 +54,7 @@ public class HtmlView {
             Document htmlDocument = buildHtmlDocument(workbook);
             addCssStyle(htmlDocument);
             addReportFileDownloadLink(htmlDocument);
+            addHomeLink(htmlDocument);
             write(htmlDocument, out);
         }
     }
@@ -88,7 +89,7 @@ public class HtmlView {
         Element style = htmlDocument.createElement("style");
         // @page for A4 landscape proportion when printing by ctrl+P
         style.setTextContent("""
-                @page { size: 1980px 1395px; }
+                @page { size: 1980px 1400px landscape; }
                 tr { border-bottom: 1pt solid #eee; }
                 """);
         htmlDocument.getFirstChild() // html
@@ -99,10 +100,32 @@ public class HtmlView {
     private void addReportFileDownloadLink(Document htmlDocument) {
         Node body = htmlDocument.getFirstChild() // html
                 .getLastChild(); // body
+
+        Element div = htmlDocument.createElement("div");
+        div.setAttribute("style", "float: right");
+        body.insertBefore(div, body.getFirstChild());
+
+        String linkStyle = "text-decoration: none";
         Element link = htmlDocument.createElement("a");
         link.setTextContent("\uD83D\uDCE5 Сохранить в xlsx");
         link.setAttribute("href", "/portfolio/report?format=excel");
-        link.setAttribute("style", "text-decoration: none; float: right;");
+        link.setAttribute("style", linkStyle);
+        div.appendChild(link);
+
+        link = htmlDocument.createElement("a");
+        link.setTextContent(", pdf");
+        link.setAttribute("href", "#");
+        link.setAttribute("onclick", "window.print()");
+        link.setAttribute("style", linkStyle);
+        div.appendChild(link);
+    }
+
+    private void addHomeLink(Document htmlDocument) {
+        Node body = htmlDocument.getFirstChild() // html
+                .getLastChild(); // body
+        Element link = htmlDocument.createElement("a");
+        link.setTextContent("[На главную]");
+        link.setAttribute("href", "/");
         body.insertBefore(link, body.getFirstChild());
     }
 
