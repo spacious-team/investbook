@@ -24,6 +24,7 @@ import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTables;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
@@ -37,8 +38,7 @@ public class VtbReportTables extends AbstractReportTables<SingleBrokerReport> {
     @Getter
     private final ReportTable<Security> securitiesTable;
     private final ReportTable<SecurityTransaction> securityTransactionTable;
-    @Getter
-    private final VtbCouponAmortizationRedemptionTable securityEventCashFlowTable;
+    private final VtbCouponAmortizationRedemptionTable couponAmortizationRedemptionTable;
     private final CashFlowEventTable cashFlowEventTable;
 
     public VtbReportTables(SingleBrokerReport report) {
@@ -58,7 +58,7 @@ public class VtbReportTables extends AbstractReportTables<SingleBrokerReport> {
         this.securityTransactionTable = WrappingReportTable.of(
                 securityTransactionTable,
                 securityDepositAndWithdrawalTable);
-        this.securityEventCashFlowTable = new VtbCouponAmortizationRedemptionTable(
+        this.couponAmortizationRedemptionTable = new VtbCouponAmortizationRedemptionTable(
                 cashFlowEventTable, securityRegNumberRegistrar, securityDepositAndWithdrawalTable);
     }
 
@@ -77,7 +77,7 @@ public class VtbReportTables extends AbstractReportTables<SingleBrokerReport> {
         return WrappingReportTable.of(
                 new VtbCashFlowTable(cashFlowEventTable),
                 new VtbDividendTable(cashFlowEventTable),
-                WrappingReportTable.of(report, securityEventCashFlowTable.getExternalBondPayments()));
+                WrappingReportTable.of(report, couponAmortizationRedemptionTable.getExternalBondPayments()));
     }
 
     @Override
@@ -86,6 +86,13 @@ public class VtbReportTables extends AbstractReportTables<SingleBrokerReport> {
                 securityTransactionTable,
                 new VtbDerivativeTransactionTable(report),
                 new VtbForeignExchangeTransactionTable(report));
+    }
+
+    @Override
+    public ReportTable<SecurityEventCashFlow> getSecurityEventCashFlowTable() {
+        return WrappingReportTable.of(
+                couponAmortizationRedemptionTable,
+                new VtbDerivativeCashFlowTable(cashFlowEventTable));
     }
 
     @Override

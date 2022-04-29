@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import ru.investbook.report.FifoPositionsFactory;
+import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.forms.model.ArchivedPortfolioModel;
@@ -41,6 +43,8 @@ import static ru.investbook.web.ControllerHelper.getPortfolios;
 public class PortfolioController {
     private final PortfolioRepository portfolioRepository;
     private final SecurityRepository securityRepository;
+    private final FifoPositionsFactory fifoPositionsFactory;
+    private final ForeignExchangeRateService foreignExchangeRateService;
 
     @GetMapping("/archive")
     public String get(Model model, @ModelAttribute("archive") ArchivedPortfolioModel archive) {
@@ -78,6 +82,8 @@ public class PortfolioController {
     public String deleteAllAccepted(Model model) {
         portfolioRepository.deleteAll();
         securityRepository.deleteAll();
+        fifoPositionsFactory.invalidateCache();
+        foreignExchangeRateService.invalidateCache();
         model.addAttribute("message", "Информация по всем счетам удалена");
         model.addAttribute("backLink", "/forms.html");
         return "success";

@@ -43,7 +43,7 @@ public class TinkoffReportTables extends AbstractReportTables<TinkoffBrokerRepor
 
     protected TinkoffReportTables(TinkoffBrokerReport report,
                                   TransactionValueAndFeeParser transactionValueAndFeeParser,
-                                    ForeignExchangeRateService foreignExchangeRateService) {
+                                  ForeignExchangeRateService foreignExchangeRateService) {
         super(report);
         this.transactionValueAndFeeParser = transactionValueAndFeeParser;
         this.securityCodeAndIsinTable = new SecurityCodeAndIsinTable(this.report);
@@ -67,7 +67,11 @@ public class TinkoffReportTables extends AbstractReportTables<TinkoffBrokerRepor
 
     @Override
     public ReportTable<AbstractTransaction> getTransactionTable() {
-        return TinkoffSecurityTransactionTable.of(report, securityCodeAndIsinTable, transactionValueAndFeeParser);
+        ReportTable<AbstractTransaction> transactionTable =
+                TinkoffSecurityTransactionTable.of(report, securityCodeAndIsinTable, transactionValueAndFeeParser);
+        TinkoffDepositAndWithdrawalTable depositAndWithdrawalTable =
+                new TinkoffDepositAndWithdrawalTable(report, transactionTable, securityCodeAndIsinTable);
+        return WrappingReportTable.of(transactionTable, depositAndWithdrawalTable);
     }
 
     @Override

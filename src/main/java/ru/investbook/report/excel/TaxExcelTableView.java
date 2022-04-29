@@ -79,10 +79,7 @@ public class TaxExcelTableView extends ExcelTableView {
             }
         }
         for (Cell cell : sheet.getRow(1)) {
-            if (cell == null) continue;
-            if (cell.getColumnIndex() == DATE.ordinal()) {
-                cell.setCellStyle(styles.getTotalTextStyle());
-            } else {
+            if (cell != null) {
                 cell.setCellStyle(styles.getTotalRowStyle());
             }
         }

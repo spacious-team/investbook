@@ -34,6 +34,7 @@ import ru.investbook.repository.PortfolioRepository;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 
+import static ru.investbook.report.excel.ExcelFormulaHelper.sumAbsValues;
 import static ru.investbook.report.excel.ForeignMarketProfitExcelTableHeader.*;
 
 @Component
@@ -68,7 +69,7 @@ public class ForeignMarketProfitExcelTableView extends ExcelTableView {
             totalRow.put(column, "=SUM(" + column.getRange(3, table.size() + 2) + ")");
         }
         totalRow.put(CURRENCY_PAIR, "Итого:");
-        totalRow.put(COUNT, "=SUMPRODUCT(ABS(" + COUNT.getRange(3, table.size() + 2) + "))");
+        totalRow.put(COUNT, sumAbsValues(COUNT, 3, table.size() + 2));
         totalRow.remove(OPEN_DATE);
         totalRow.remove(CLOSE_DATE);
         totalRow.remove(OPEN_PRICE);

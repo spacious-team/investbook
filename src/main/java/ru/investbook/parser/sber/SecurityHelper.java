@@ -24,13 +24,11 @@ import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.util.StringUtils;
 import ru.investbook.parser.SecurityRegistrar;
 
-import java.util.regex.Pattern;
+import static ru.investbook.entity.SecurityEntity.isinPattern;
 
 
 @Slf4j
 public class SecurityHelper {
-
-    private static final Pattern isinPattern = Pattern.compile("^[A-Z]{2}[A-Z0-9]{9}[0-9]$");
 
     public static Security getSecurity(String code, String securityName, String section, String type, SecurityRegistrar securityRegistrar) {
         String securityId = getSecurityId(code, section);
