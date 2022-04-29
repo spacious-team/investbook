@@ -44,6 +44,7 @@
     <scm>
         <connection>scm:git:https://github.com/spacious-team/investbook.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:spacious-team/investbook.git</developerConnection>
+        <tag>master</tag>
         <url>https://github.com/spacious-team/investbook</url>
     </scm>
 
@@ -103,7 +104,7 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-excel-impl</artifactId>
-            <version>1b6c3b0dd5</version>
+            <version>ca5bdd3643</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
