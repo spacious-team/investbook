@@ -42,8 +42,22 @@
     </licenses>
 
     <scm>
+        <connection>scm:git:https://github.com/spacious-team/investbook.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:spacious-team/investbook.git</developerConnection>
         <url>https://github.com/spacious-team/investbook</url>
     </scm>
+
+    <issueManagement>
+        <url>https://github.com/spacious-team/investbook/issues</url>
+    </issueManagement>
+
+    <developers>
+        <developer>
+            <organization>Spacious Team</organization>
+            <organizationUrl>https://github.com/spacious-team</organizationUrl>
+            <email>spacious-team@ya.ru</email>
+        </developer>
+    </developers>
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
