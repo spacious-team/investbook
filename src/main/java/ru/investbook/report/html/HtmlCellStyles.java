@@ -22,9 +22,9 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
 import ru.investbook.report.excel.CellStyles;
 
-class HtmlCellStyles extends CellStyles {
+public class HtmlCellStyles extends CellStyles {
 
-    HtmlCellStyles(Workbook book) {
+    public HtmlCellStyles(Workbook book) {
         super(book);
     }
 
