@@ -18,12 +18,14 @@
 
 package ru.investbook.report.excel;
 
+import lombok.SneakyThrows;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.report.ViewFilter;
 
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -47,9 +49,17 @@ public class ExcelView {
     }
 
     @Transactional(readOnly = true)
-    public void writeTo(XSSFWorkbook book, ViewFilter filter) throws InterruptedException, ExecutionException {
+    @SneakyThrows
+    public void create(OutputStream out, ViewFilter filter) {
+        try (XSSFWorkbook book = new XSSFWorkbook()) {
+            CellStyles styles = new CellStyles(book);
+            writeTo(book, filter, styles);
+            book.write(out);
+        }
+    }
 
-        CellStyles styles = new CellStyles(book);
+    @Transactional(readOnly = true)
+    public void writeTo(Workbook book, ViewFilter filter, CellStyles styles) throws InterruptedException, ExecutionException {
         ExecutorService tableWriterExecutor = Executors.newSingleThreadExecutor();
         Collection<Future<?>> sheetWriterFutures = new ArrayList<>();
         int cpuCnt = Runtime.getRuntime().availableProcessors();

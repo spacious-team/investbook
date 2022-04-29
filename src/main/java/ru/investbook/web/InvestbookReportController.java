@@ -20,25 +20,27 @@ package ru.investbook.web;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.report.ViewFilter;
 import ru.investbook.report.excel.ExcelView;
+import ru.investbook.report.html.HtmlView;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.web.model.ViewFilterModel;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 import static java.time.ZoneId.systemDefault;
 import static ru.investbook.web.ControllerHelper.getActivePortfolios;
@@ -56,28 +58,45 @@ public class InvestbookReportController {
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private final PortfolioRepository portfolioRepository;
     private final ExcelView excelView;
-    private volatile int expectedFileSize = 0xFFFF;
+    private final HtmlView htmlView;
 
-    @GetMapping("/select-period")
+    @GetMapping("select-period")
     public String getPage(Model model, @ModelAttribute("viewFilter") ViewFilterModel viewFilter) {
         viewFilter.setPortfolios(getActivePortfolios(portfolioRepository));
         model.addAttribute("allPortfolios", getPortfolios(portfolioRepository));
         return "select-period";
     }
 
-    @GetMapping
-    public void buildInvestbookReportByGet(HttpServletResponse response) throws IOException {
-        ViewFilterModel viewFilter = new ViewFilterModel();
-        viewFilter.setPortfolios(getActivePortfolios(portfolioRepository));
-        buildInvestbookReport(viewFilter, response);
+    @GetMapping("report")
+    public void buildInvestbookHtmlReportByGet(@RequestParam(name = "format", defaultValue = "excel") String format,
+                                               HttpServletResponse response) throws Exception {
+        ViewFilter filter = getViewFilter(getViewFilterModel());
+        buildReport(format, response, filter);
     }
 
-    @PostMapping
-    public void buildInvestbookReport(@ModelAttribute("viewFilter") ViewFilterModel viewFilter,
-                                      HttpServletResponse response) throws IOException {
+    @PostMapping("report")
+    public void buildInvestbookReport(@RequestParam(name = "format", defaultValue = "excel") String format,
+                                      @ModelAttribute("viewFilter") ViewFilterModel viewFilter,
+                                      HttpServletResponse response) throws Exception {
+        ViewFilter filter = getViewFilter(viewFilter);
+        buildReport(format, response, filter);
+    }
+
+    private void buildReport(String format, HttpServletResponse response, ViewFilter filter) throws Exception {
+        if ("html".equals(format)) {
+            htmlView.create(response.getOutputStream(), filter);
+        } else {
+            String fileName = getReportName(filter, "xlsx");
+            sendFileOrShowErrorPage(fileName, out -> excelView.create(out, filter), response);
+        }
+    }
+
+    private void sendFileOrShowErrorPage(String fileName,
+                                         Consumer<OutputStream> fileWriter,
+                                         HttpServletResponse response) throws IOException {
         try {
             long t0 = System.nanoTime();
-            String fileName = sendExcelFile(viewFilter, response);
+            sendFile(fileName, fileWriter, response);
             log.info("Отчет '{}' сформирован за {}", fileName, Duration.ofNanos(System.nanoTime() - t0));
         } catch (Exception e) {
             log.error("Ошибка сборки отчета", e);
@@ -86,28 +105,31 @@ public class InvestbookReportController {
         response.flushBuffer();
     }
 
-    private String sendExcelFile(ViewFilterModel viewFilterModel, HttpServletResponse response)
-            throws IOException, InterruptedException, ExecutionException {
-        ViewFilter viewFilter = ViewFilter.of(viewFilterModel, () -> getPortfolios(portfolioRepository));
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(expectedFileSize);
-        try (XSSFWorkbook book = new XSSFWorkbook()) {
-            excelView.writeTo(book, viewFilter);
-            book.write(outputStream);
-            expectedFileSize = outputStream.size();
-        }
-        String fileName = getReportName(viewFilter);
+    private void sendFile(String fileName, Consumer<OutputStream> fileWriter, HttpServletResponse response)
+            throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        fileWriter.accept(outputStream);
         sendSuccessHeader(response, fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         outputStream.writeTo(response.getOutputStream());
-        return fileName;
     }
 
-    private String getReportName(ViewFilter filter) {
+    private String getReportName(ViewFilter filter, String extention) {
         LocalDate fromDate = LocalDate.ofInstant(filter.getFromDate(), systemDefault());
         LocalDate toDate = LocalDate.ofInstant(filter.getToDate(), systemDefault());
         LocalDate maxToDate = LocalDate.now().plusDays(2);
         if (toDate.isAfter(maxToDate)) {
             toDate = maxToDate;
         }
-        return REPORT_NAME + " с " + dateFormatter.format(fromDate) + " по " + dateFormatter.format(toDate) + ".xlsx";
+        return REPORT_NAME + " с " + dateFormatter.format(fromDate) + " по " + dateFormatter.format(toDate) + "." + extention;
+    }
+
+    private ViewFilterModel getViewFilterModel() {
+        ViewFilterModel viewFilter = new ViewFilterModel();
+        viewFilter.setPortfolios(getActivePortfolios(portfolioRepository));
+        return viewFilter;
+    }
+
+    private ViewFilter getViewFilter(ViewFilterModel viewFilterModel) {
+        return ViewFilter.of(viewFilterModel, () -> getPortfolios(portfolioRepository));
     }
 }
