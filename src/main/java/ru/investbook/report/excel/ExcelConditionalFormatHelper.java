@@ -34,6 +34,9 @@ class ExcelConditionalFormatHelper {
     private static final byte[] borderRed = new byte[]{(byte) 255, (byte) 175, (byte) 175};
 
     static void highlightNegativeByRed(Sheet sheet, ExcelTableHeader column) {
+        if (!(sheet instanceof XSSFSheet)) {
+            return;
+        }
         SheetConditionalFormatting sheetCF = sheet.getSheetConditionalFormatting();
         IndexedColorMap indexedColors = ((XSSFSheet) sheet).getWorkbook()
                 .getStylesSource()

@@ -5,16 +5,16 @@
    ```shell script
    $ java -version
    ```
-   Если версия 17 или выше, пропустите следующий пункт.
-2. Воспользуйтесь менеджером пакетов вашей ОС для установки java 17, например на Ubuntu
+   Если версия 18 или выше, пропустите следующий пункт.
+2. Воспользуйтесь менеджером пакетов вашей ОС для установки java, например на Ubuntu
    ```shell
-   $ sudo apt install openjdk-17-jre-headless
+   $ sudo apt install openjdk-18-jre-headless
    ```
-   Или можно скачать [Java 17](https://jdk.java.net/17/) и распаковать папку `jdk-17` в директорию `/opt`.
-   Для 32 разрядных ОС можно скачать [Java 17 x86 JRE](https://bell-sw.com/pages/downloads/). Если java распакована из
+   Или можно скачать [Java 18](https://jdk.java.net/18/) и распаковать папку `jdk-18` в директорию `/opt`.
+   Для 32 разрядных ОС можно скачать [Java 18 x86 JRE](https://bell-sw.com/pages/downloads/). Если java распакована из
    архива, то в директории приложения нужно найти файл `start.sh`, раскомментировать и актуализировать `JAVA_HOME`
    ```shell
-   $ export JAVA_HOME=/opt/jdk-17
+   $ export JAVA_HOME=/opt/jdk-18
    ```
 3. Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest) архив `.zip` и
    распаковать в директорию `/opt`.
@@ -47,6 +47,7 @@
 | c 2020.11                 | java 15 и выше          |
 | с 2021.5                  | java 16 и выше          |
 | с 2021.9                  | java 17 и выше          |
+| с 2020.7                  | java 18 и выше          | 
 
 #### Установка расширений
 

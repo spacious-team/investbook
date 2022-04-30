@@ -23,6 +23,10 @@
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
     <style>
+        body {
+            max-width: 1000px;
+        }
+
         .flex {
             display: flex;
             align-items: center;
@@ -58,7 +62,7 @@
 
 <a href="/">На главную</a>
 
-<form action="/portfolio" method="POST" id="get-portfolio" class="grey-smaller" th:object="${viewFilter}">
+<form method="POST" id="get-portfolio" class="grey-smaller" th:object="${viewFilter}">
     <div class="flex">
         <a onclick="selectPeriodView()" id="perion-link" class="inactive-text" href="#" title="выбрать период">за период</a>
         <span class="inactive-text" style="text-decoration: none">/</span>
@@ -68,7 +72,13 @@
         <label id="to-date-label" for="to-date">&emsp; по &emsp;</label>
         <input id="to-date" name="to-date" type="date" th:field="*{toDate}"/>
         &emsp;
-        <input type="submit" value="Получить"/>
+        <select id="format">
+            <option value="excel">excel</option>
+            <option value="html">web</option>
+        </select>
+        &emsp;
+        <input type="submit" value="Получить"
+               onclick='this.form.action="/portfolio/report?format=" + document.getElementById("format").value'/>
     </div>
     <p id='portfolios'>Счета:
         <span th:each="portfolio : ${allPortfolios}">

@@ -34,7 +34,7 @@ mkdir ~/investbook
    docker run --rm -d -p 80:80 -v /c/users/<имя-windows-пользователя>/investbook:/home/cnb/investbook spaciousteam/investbook
    ```
    где вместо `<имя-windows-пользователя>` нужно подставить имя вашего пользователя в Windows.
-1. Если используется MaсOS или Linux, запустите в терминале
+1. Если используется MacOS или Linux, запустите в терминале
    ```shell
    docker run --rm -d -p 80:80 -v ~/investbook:/home/cnb/investbook spaciousteam/investbook
    ```

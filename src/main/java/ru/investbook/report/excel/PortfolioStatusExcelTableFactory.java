@@ -59,18 +59,18 @@ import java.util.stream.Collectors;
 import static java.util.Collections.singleton;
 import static java.util.Optional.ofNullable;
 import static org.spacious_team.broker.pojo.SecurityType.*;
+import static ru.investbook.report.excel.PortfolioStatusExcelTableFactoryProportionHelper.setCurrentProportionFormula;
+import static ru.investbook.report.excel.PortfolioStatusExcelTableFactoryProportionHelper.setInvestmentProportionFormula;
 import static ru.investbook.report.excel.PortfolioStatusExcelTableHeader.*;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class PortfolioStatusExcelTableFactory implements TableFactory {
-    static final BigDecimal minCash = BigDecimal.valueOf(0.01);
+    static final String CASH_BALANCE = "Остаток денежных средств";
     private static final String STOCK_OR_BOND_GROSS_PROFIT_FORMULA = getStockOrBondGrossProfitFormula();
     private static final String PROFIT_FORMULA = getProfitFormula();
     private static final String PROFIT_PROPORTION_FORMULA = getProfitProportionFormula();
-    private static final String INVESTMENT_PROPORTION_FORMULA = getInvestmentProportionFormula();
-    private static final String PROPORTION_FORMULA = getProportionFormula();
     protected final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final SecurityConverter securityConverter;
@@ -103,6 +103,8 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         Collection<Security> securities = getSecurities(portfolios, forCurrency);
         Table table = create(portfolios, securities, forCurrency);
         table.add(getCashRow(portfolios, forCurrency));
+        setInvestmentProportionFormula(table);
+        setCurrentProportionFormula(table);
         return table;
     }
 
@@ -169,7 +171,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         Instant atTime = Instant.ofEpochSecond(Math.min(
                 ViewFilter.get().getToDate().getEpochSecond(),
                 Instant.now().getEpochSecond()));
-        row.put(SECURITY, "Остаток денежных средств, " + forCurrency.toLowerCase());
+        row.put(SECURITY, CASH_BALANCE + ", " + forCurrency.toLowerCase());
         Collection<PortfolioCash> portfolioCashes = assetsAndCashService.getPortfolioCash(portfolios, atTime);
         row.put(LAST_EVENT_DATE, portfolioCashes.stream()
                 .map(PortfolioCash::getTimestamp)
@@ -181,10 +183,9 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         row.put(LAST_PRICE, portfolioCash);
         if (ViewFilter.get().getFromDate().isBefore(instantOf2000_01_01) &&
-                portfolioCash.compareTo(minCash) >= 1) { // fix div by zero in proportion column
+                portfolioCash.floatValue() >= 0.01) { // fix div by zero in proportion column when all position closed and money = 0
             // режим отображения по умолчанию, скорее всего отображаем портфель с начала открытия счета,
             // учитываем остаток денежных средств в Доле портфеля (%)
-            row.put(PROPORTION, PROPORTION_FORMULA);
             row.put(COUNT, 1);
         }
         return row;
@@ -257,10 +258,6 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 } else {
                     row.put(GROSS_PROFIT, STOCK_OR_BOND_GROSS_PROFIT_FORMULA);
                 }
-                if (securityType != DERIVATIVE && securityType != CURRENCY_PAIR) {
-                    row.put(INVESTMENT_PROPORTION, INVESTMENT_PROPORTION_FORMULA);
-                    row.put(PROPORTION, PROPORTION_FORMULA);
-                }
             }
             row.put(COMMISSION, securityProfitService.getTotal(positions.getTransactions(), CashFlowType.COMMISSION, toCurrency).abs());
             if (securityType.isBond()) {
@@ -297,31 +294,5 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
 
     private static String getProfitProportionFormula() {
         return "=" + PROFIT.getCellAddr() + "/ABS(" + PROFIT.getColumnIndex() + "2)";
-    }
-
-    private static String getInvestmentProportionFormula() {
-        return "=IF(" + COUNT.getCellAddr() + ">0,1,0)*" +
-                "((" + AVERAGE_PRICE.getCellAddr() + "+" + AVERAGE_ACCRUED_INTEREST.getCellAddr() + ")*" + COUNT.getCellAddr() +
-                "-" + AMORTIZATION.getCellAddr() + ")" +
-                "/(SUMPRODUCT((0+" + AVERAGE_PRICE.getRange(3, 1000) + ")," +
-                "(0+" + COUNT.getRange(3, 1000) + ")," +
-                "SIGN(" + COUNT.getRange(3, 1000) + ">0)," +
-                "(0+(" + TYPE.getRange(3, 1000) + "<>\"" + DERIVATIVE.getDescription() + "\")))" +
-                "+SUMPRODUCT((0+" + AVERAGE_ACCRUED_INTEREST.getRange(3, 1000) + ")," +
-                "(0+" + COUNT.getRange(3, 1000) + ")," +
-                "SIGN(" + COUNT.getRange(3, 1000) + ">0))" +
-                "-SUMIF(" + COUNT.getRange(3, 1000) + ",\">0\"," + AMORTIZATION.getRange(3, 1000) + "))";
-    }
-
-    private static String getProportionFormula() {
-        return "=IF(" + COUNT.getCellAddr() + ">0,1,0)*" +
-                "((" + LAST_PRICE.getCellAddr() + "+" + LAST_ACCRUED_INTEREST.getCellAddr() + ")*" + COUNT.getCellAddr() +
-                ")/(SUMPRODUCT((0+" + LAST_PRICE.getRange(3, 1000) + ")," +
-                "(0+" + COUNT.getRange(3, 1000) + ")," +
-                "SIGN(" + COUNT.getRange(3, 1000) + ">0)," +
-                "(0+(" + TYPE.getRange(3, 1000) + "<>\"" + DERIVATIVE.getDescription() + "\")))" +
-                "+SUMPRODUCT((0+" + LAST_ACCRUED_INTEREST.getRange(3, 1000) + ")," +
-                "(0+" + COUNT.getRange(3, 1000) + ")," +
-                "SIGN(" + COUNT.getRange(3, 1000) + ">0)))";
     }
 }
