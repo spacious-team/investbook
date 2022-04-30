@@ -104,7 +104,7 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-excel-impl</artifactId>
-            <version>ca5bdd3643</version>
+            <version>2022.7</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
