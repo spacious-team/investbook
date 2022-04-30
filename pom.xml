@@ -43,7 +43,7 @@
 
     <scm>
         <connection>scm:git:https://github.com/spacious-team/investbook.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:spacious-team/investbook.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:spacious-team/investbook.git</developerConnection>
         <tag>master</tag>
         <url>https://github.com/spacious-team/investbook</url>
     </scm>
