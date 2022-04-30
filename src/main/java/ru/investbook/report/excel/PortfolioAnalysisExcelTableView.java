@@ -71,7 +71,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
         Collection<String> portfolios = filter.getPortfolios();
         if (showOnlySummary(filter) || isManyPortfolioRequested(portfolios)) {
             Table table = tableFactory.create(portfolios);
-            tables.add(ExcelTable.of("Обзор", table, this));
+            tables.add(ExcelTable.of("Обзор (все)", table, this));
         }
         if (!showOnlySummary(filter)) {
             tables.addAll(super.createExcelTables());
