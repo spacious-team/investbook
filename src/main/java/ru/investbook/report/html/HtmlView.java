@@ -110,13 +110,13 @@ public class HtmlView {
 
         String linkStyle = "text-decoration: none; margin-right: 1em;";
         Element link = htmlDocument.createElement("a");
-        link.setTextContent("\uD83D\uDCE5 Сохранить в xlsx");
+        link.setTextContent("Сохранить в xlsx \uD83D\uDCE5");
         link.setAttribute("href", EXCEL_REPORT_LINK);
         link.setAttribute("style", linkStyle);
         div.appendChild(link);
 
         link = htmlDocument.createElement("a");
-        link.setTextContent("\uD83D\uDCE5 Сохранить в pdf");
+        link.setTextContent("Сохранить в pdf \uD83D\uDCE5");
         link.setAttribute("href", "#");
         link.setAttribute("onclick", PDF_REPORT_LINK);
         link.setAttribute("style", linkStyle);

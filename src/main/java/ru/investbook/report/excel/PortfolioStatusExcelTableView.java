@@ -97,7 +97,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
                     transactionCashFlowRepository.findDistinctCurrencyByPortfolioInAndCashFlowTypeIn(portfolios, types);
             for (String currency : currencies) {
                 Table table = tableFactory.create(portfolios, currency);
-                String sheetName = "Портфель " + currency;
+                String sheetName = "Портфель (все) " + currency;
                 tables.add(ExcelTable.of(sheetName, table, this));
             }
             return tables;

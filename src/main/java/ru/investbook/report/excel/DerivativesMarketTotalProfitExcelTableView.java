@@ -100,7 +100,7 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
             if (!currencies.contains(RUB)) currencies.add(RUB);
             for (String currency : currencies) {
                 Table table = tableFactory.create(portfolios, currency);
-                String sheetName = "Портфель трейдера " + currency;
+                String sheetName = "Портфель трейдера (все) " + currency;
                 tables.add(ExcelTable.of(sheetName, table, this));
             }
             return tables;
