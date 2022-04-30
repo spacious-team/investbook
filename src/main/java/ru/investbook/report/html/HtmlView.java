@@ -47,6 +47,9 @@ import static ru.investbook.report.html.ExcelFormulaEvaluatorHelper.evaluateForm
 @RequiredArgsConstructor
 @Slf4j
 public class HtmlView {
+    private static final String EXCEL_REPORT_LINK = "/portfolio/report?format=excel";
+    private static final String PDF_REPORT_LINK = "window.print()";
+    private static final String DOC_LINK = "/user-guide/investbook-report.html";
     private final ExcelView excelView;
 
     public void create(OutputStream out, ViewFilter filter) throws Exception {
@@ -105,17 +108,17 @@ public class HtmlView {
         div.setAttribute("style", "float: right");
         body.insertBefore(div, body.getFirstChild());
 
-        String linkStyle = "text-decoration: none";
+        String linkStyle = "text-decoration: none; margin-right: 1em;";
         Element link = htmlDocument.createElement("a");
         link.setTextContent("\uD83D\uDCE5 Сохранить в xlsx");
-        link.setAttribute("href", "/portfolio/report?format=excel");
+        link.setAttribute("href", EXCEL_REPORT_LINK);
         link.setAttribute("style", linkStyle);
         div.appendChild(link);
 
         link = htmlDocument.createElement("a");
-        link.setTextContent(", pdf");
+        link.setTextContent("\uD83D\uDCE5 Сохранить в pdf");
         link.setAttribute("href", "#");
-        link.setAttribute("onclick", "window.print()");
+        link.setAttribute("onclick", PDF_REPORT_LINK);
         link.setAttribute("style", linkStyle);
         div.appendChild(link);
     }
@@ -123,9 +126,16 @@ public class HtmlView {
     private void addHomeLink(Document htmlDocument) {
         Node body = htmlDocument.getFirstChild() // html
                 .getLastChild(); // body
+
+        Element doc = htmlDocument.createElement("a");
+        doc.setTextContent("[Описание таблиц]");
+        doc.setAttribute("href", DOC_LINK);
+        body.insertBefore(doc, body.getFirstChild());
+
         Element link = htmlDocument.createElement("a");
         link.setTextContent("[На главную]");
         link.setAttribute("href", "/");
+        link.setAttribute("style", "margin-right: 1em");
         body.insertBefore(link, body.getFirstChild());
     }
 
