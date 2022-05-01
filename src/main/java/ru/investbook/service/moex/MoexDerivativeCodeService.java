@@ -207,7 +207,7 @@ public class MoexDerivativeCodeService {
     }
 
     /**
-     * @return true for for options (in {@code Si65000BC9}, {@code Si65000BC9D}, {@code Si-6.19M280319CA65000}
+     * @return true for options (in {@code Si65000BC9}, {@code Si65000BC9D}, {@code Si-6.19M280319CA65000}
      * or {@code BR-7.16M270616CA 50} format)
      */
     public boolean isOption(String contract) {
