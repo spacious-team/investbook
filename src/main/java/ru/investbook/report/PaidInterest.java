@@ -78,7 +78,7 @@ public class PaidInterest {
 
     /**
      * Positions with unknown transaction date
-     * (for example dividend payment record exists but security transaction does not uploaded by broker report)
+     * (for example dividend payment record exists but security transaction does not upload by broker report)
      */
     public Deque<OpenedPosition> getFictitiousPositions() {
         return paidInterest.values()

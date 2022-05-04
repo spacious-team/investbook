@@ -319,7 +319,7 @@ public class MoexDerivativeCodeService {
     }
 
     /**
-     * Convert derivative codes before storing to DB if need
+     * Convert derivative codes before storing to DB if you need
      */
     public String convertDerivativeCode(String code) {
         return isFuturesCode(code) ?
