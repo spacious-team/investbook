@@ -191,7 +191,7 @@ public class InvestbookApiClient {
     }
 
     /**
-     * @return true if new row was added or it was already exists in DB, false - or error
+     * @return true if new row was added, or it was already exists in DB, false - or error
      */
     private <T> boolean handlePost(T object, Function<T, ResponseEntity<?>> saver, String errorPrefix) {
         try {
