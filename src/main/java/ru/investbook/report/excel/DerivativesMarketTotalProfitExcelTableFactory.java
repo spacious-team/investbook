@@ -198,7 +198,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     }
 
     /**
-     * Cуммарная вариационная маржа по всем контрактам
+     * Суммарная вариационная маржа по всем контрактам
      */
     private BigDecimal getGrossProfit(Collection<String> portfolios, Collection<Security> contracts, String toCurrency) {
         return contracts.stream()
