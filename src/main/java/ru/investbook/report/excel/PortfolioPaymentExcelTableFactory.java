@@ -132,7 +132,7 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
             case DIVIDEND -> "Дивиденды";
             case COUPON -> "Купоны";
             case REDEMPTION -> "Погашение облигации";
-            case AMORTIZATION -> "Амортизация облигаци";
+            case AMORTIZATION -> "Амортизация облигации";
             case TAX -> "Удержание налога";
             default -> null;
         };
