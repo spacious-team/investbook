@@ -23,6 +23,10 @@ import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -34,6 +38,8 @@ import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.repository.EventCashFlowRepository;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
+import ru.investbook.repository.specs.EventCashFlowEntitySearchSpecification;
+import ru.investbook.web.forms.model.filter.EventCashFlowFormFilterModel;
 import ru.investbook.web.forms.model.EventCashFlowModel;
 
 import java.time.ZoneId;
@@ -60,6 +66,18 @@ public class EventCashFlowFormsService implements FormsService<EventCashFlowMode
     public Optional<EventCashFlowModel> getById(Integer id) {
         return eventCashFlowRepository.findById(id)
                 .map(this::toModel);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<EventCashFlowModel> getPage(EventCashFlowFormFilterModel filter) {
+        var spec = EventCashFlowEntitySearchSpecification.of(
+                filter.getPortfolio(), filter.getDateFrom(), filter.getDateTo()
+        );
+        var page = PageRequest.of(
+                filter.getPage(), filter.getPageSize(), Sort.by(Order.asc("portfolio.id"), Order.desc("timestamp"))
+        );
+
+        return eventCashFlowRepository.findAll(spec, page).map(this::toModel);
     }
 
     @Override
