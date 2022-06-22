@@ -40,7 +40,7 @@
 
 ![main-page](https://user-images.githubusercontent.com/11336712/128609729-08b5cb5e-9f58-452e-a661-a0258d7fb512.png)
 
-![portfolio-composition](https://user-images.githubusercontent.com/11336712/120564463-a5cc8980-c413-11eb-8326-46efcdc85c23.gif)
+![sectors-pie-chart](https://user-images.githubusercontent.com/11336712/120564463-a5cc8980-c413-11eb-8326-46efcdc85c23.gif)
 
 Все что нужно - это подгружать свежие отчеты брокера или [вручную вводить](src/main/asciidoc/investbook-forms.adoc)
 информацию. При этом вся информация сохраняется на вашем компьютере, в облако данные не уходят, для работы интернет не требуется.

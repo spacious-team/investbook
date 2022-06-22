@@ -34,7 +34,7 @@ import java.util.Set;
 import static java.util.stream.Collectors.toList;
 
 @Controller
-@RequestMapping("/portfolio-composition")
+@RequestMapping("/charts")
 @RequiredArgsConstructor
 @Slf4j
 public class PortfolioCompositionController {
@@ -42,11 +42,11 @@ public class PortfolioCompositionController {
     private final InvestmentProportionService investmentProportionService;
     private final AssetsAndCashService assetsAndCashService;
 
-    @GetMapping
-    public String getPage(Model model) {
+    @GetMapping("/sectors-pie-chart")
+    public String getSectorsProportionPage(Model model) {
         try {
             Set<String> portfolios = assetsAndCashService.getActivePortfolios();
-            Collection<Map<String, ?>> sectorProportions = investmentProportionService.getSectorProportions(portfolios)
+            Collection<Map<String, ?>> sectorsProportion = investmentProportionService.getSectorsProportion(portfolios)
                     .entrySet()
                     .stream()
                     .map(e -> Map.of("sector", e.getKey(), "investment", ((Number) e.getValue()).intValue()))
@@ -54,9 +54,33 @@ public class PortfolioCompositionController {
             int cash = assetsAndCashService.getTotalCashInRub(portfolios)
                     .map(Number::intValue)
                     .orElse(0);
-            sectorProportions.add(Map.of("sector", "Кеш", "investment", cash));
-            model.addAttribute("sectorProportions", sectorProportions);
-            return "portfolio-composition";
+            sectorsProportion.add(Map.of("sector", "Кеш", "investment", cash));
+            model.addAttribute("sectorsProportion", sectorsProportion);
+            return "charts/sectors-pie-chart";
+        } catch (Exception e) {
+            model.addAttribute("title", "Ошибка");
+            model.addAttribute("message",
+                    "При сборке круговой диаграммы секторального состава портфеля возникла ошибка: " + e.getMessage() +
+                            ". Полное описание ошибки доступно в файле лога, обратитесь в техническую поддержку.");
+            return "success";
+        }
+    }
+
+    @GetMapping("/securities-pie-chart")
+    public String getSecuritiesProportionPage(Model model) {
+        try {
+            Set<String> portfolios = assetsAndCashService.getActivePortfolios();
+            Collection<Map<String, ?>> securitiesProportion = investmentProportionService.getSecuritiesProportion(portfolios)
+                    .entrySet()
+                    .stream()
+                    .map(e -> Map.of("security", e.getKey(), "investment", ((Number) e.getValue()).intValue()))
+                    .collect(toList());
+            int cash = assetsAndCashService.getTotalCashInRub(portfolios)
+                    .map(Number::intValue)
+                    .orElse(0);
+            securitiesProportion.add(Map.of("security", "Кеш", "investment", cash));
+            model.addAttribute("securitiesProportion", securitiesProportion);
+            return "charts/securities-pie-chart";
         } catch (Exception e) {
             model.addAttribute("title", "Ошибка");
             model.addAttribute("message",
