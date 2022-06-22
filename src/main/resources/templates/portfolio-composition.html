@@ -52,7 +52,7 @@
         var chart = am4core.create("chartdiv", am4charts.PieChart);
 
         // Add data
-        chart.data = /*[[ ${investmentProportion} ]]*/ [{"sector": "Другое", "investment": 100}];
+        chart.data = /*[[ ${sectorProportions} ]]*/ [{"sector": "Другое", "investment": 100}];
 
         // Add and configure Series
         var pieSeries = chart.series.push(new am4charts.PieSeries());

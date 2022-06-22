@@ -63,7 +63,7 @@ public class InvestmentProportionService {
             Map<String, Float> result = securityRepository.findByTypeIn(stockAndBondTypes)
                     .stream()
                     .map(securityConverter::fromEntity)
-                    .map(security -> getInvestmentAmount(security, filter))
+                    .map(security -> getCurrentAmount(security, filter))
                     .flatMap(Optional::stream)
                     .filter(v -> v.investment().floatValue() > 1)
                     .collect(Collectors.groupingBy(this::getEconomicSector,
@@ -77,7 +77,7 @@ public class InvestmentProportionService {
         }
     }
 
-    private Optional<SecurityInvestment> getInvestmentAmount(Security security, FifoPositionsFilter filter) {
+    private Optional<SecurityInvestment> getCurrentAmount(Security security, FifoPositionsFilter filter) {
         return getOpenedPositionsCostByCurrentOrLastTransactionQuoteInRub(security, filter)
                 .map(investmentRub -> new SecurityInvestment(security, investmentRub));
     }

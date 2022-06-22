@@ -46,7 +46,7 @@ public class PortfolioCompositionController {
     public String getPage(Model model) {
         try {
             Set<String> portfolios = assetsAndCashService.getActivePortfolios();
-            Collection<Map<String, ?>> investmentProportion = investmentProportionService.getSectorProportions(portfolios)
+            Collection<Map<String, ?>> sectorProportions = investmentProportionService.getSectorProportions(portfolios)
                     .entrySet()
                     .stream()
                     .map(e -> Map.of("sector", e.getKey(), "investment", ((Number) e.getValue()).intValue()))
@@ -54,8 +54,8 @@ public class PortfolioCompositionController {
             int cash = assetsAndCashService.getTotalCashInRub(portfolios)
                     .map(Number::intValue)
                     .orElse(0);
-            investmentProportion.add(Map.of("sector", "Кеш", "investment", cash));
-            model.addAttribute("investmentProportion", investmentProportion);
+            sectorProportions.add(Map.of("sector", "Кеш", "investment", cash));
+            model.addAttribute("sectorProportions", sectorProportions);
             return "portfolio-composition";
         } catch (Exception e) {
             model.addAttribute("title", "Ошибка");
