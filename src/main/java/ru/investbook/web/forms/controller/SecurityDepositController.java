@@ -30,6 +30,7 @@ import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.forms.model.SplitModel;
 import ru.investbook.web.forms.model.TransactionModel;
+import ru.investbook.web.forms.model.filter.TransactionFormFilterModel;
 import ru.investbook.web.forms.service.TransactionFormsService;
 
 import javax.validation.Valid;
@@ -48,7 +49,8 @@ public class SecurityDepositController extends TransactionController {
 
     @GetMapping
     @Override
-    public String get(Model model) {
+    //todo: remove usage of TransactionFormFilterModel later
+    public String get(@ModelAttribute("filter") TransactionFormFilterModel filter, Model model) {
         List<TransactionModel> models = transactionFormsService.getAll()
                 .stream()
                 .filter(tr -> tr.getPrice() == null)
