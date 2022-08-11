@@ -23,6 +23,9 @@ import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow.SecurityEventCashFlowBuilder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.PortfolioConverter;
@@ -31,7 +34,9 @@ import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
+import ru.investbook.repository.specs.SecurityEventCashFlowEntitySearchSpecification;
 import ru.investbook.web.forms.model.SecurityEventCashFlowModel;
+import ru.investbook.web.forms.model.filter.SecurityEventCashFlowFormFilterModel;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -41,6 +46,8 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +63,19 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
     public Optional<SecurityEventCashFlowModel> getById(Integer id) {
         return securityEventCashFlowRepository.findById(id)
                 .map(this::toSecurityEventModel);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<SecurityEventCashFlowModel> getPage(SecurityEventCashFlowFormFilterModel filter) {
+        var spec = SecurityEventCashFlowEntitySearchSpecification.of(
+                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo()
+        );
+        var page = PageRequest.of(
+                filter.getPage(), filter.getPageSize(),
+                Sort.by(asc("portfolio.id"), desc("timestamp"), asc("security.id"))
+        );
+
+        return securityEventCashFlowRepository.findAll(spec, page).map(this::toSecurityEventModel);
     }
 
     @Override
