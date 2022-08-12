@@ -106,6 +106,17 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
         return transactionRepository.findAll(spec, page).map(this::toTransactionModel);
     }
 
+    @Transactional(readOnly = true)
+    public List<TransactionModel> getAll(TransactionFormFilterModel filter) {
+        var spec = TransactionSearchSpecification.of(
+                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo()
+        );
+
+        return transactionRepository.findAll(spec).stream()
+                .map(this::toTransactionModel)
+                .collect(Collectors.toList());
+    }
+
     @Override
     @Transactional(readOnly = true)
     public List<TransactionModel> getAll() {
