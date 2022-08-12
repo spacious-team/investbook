@@ -39,6 +39,7 @@
 <div th:fragment="currency-picker(var)">
     <select th:field="__${var}__">
         <option th:value="NULL" th:selected></option>
+        <option th:value="RUB" th:text="RUB"></option>
         <option th:value="USD" th:text="USD"></option>
         <option th:value="EUR" th:text="EUR"></option>
         <option th:value="GBP" th:text="GBP"></option>

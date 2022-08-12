@@ -20,20 +20,27 @@ package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.SecurityQuote;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.SecurityQuoteConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityQuoteEntity;
 import ru.investbook.repository.SecurityQuoteRepository;
+import ru.investbook.repository.specs.SecurityQuoteSearchSpecification;
 import ru.investbook.web.forms.model.SecurityQuoteModel;
 import ru.investbook.web.forms.model.SecurityType;
+import ru.investbook.web.forms.model.filter.SecurityQuoteFormFilterModel;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
 import static org.springframework.util.StringUtils.hasLength;
 
 @Service
@@ -47,6 +54,18 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
     public Optional<SecurityQuoteModel> getById(Integer id) {
         return securityQuoteRepository.findById(id)
                 .map(this::toSecurityQuoteModel);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<SecurityQuoteModel> getPage(SecurityQuoteFormFilterModel filter) {
+        var spec = SecurityQuoteSearchSpecification.of(
+                filter.getSecurity(), filter.getCurrency(), filter.getDate()
+        );
+        var page = PageRequest.of(
+                filter.getPage(), filter.getPageSize(), Sort.by(desc("timestamp"), asc("security.name"))
+        );
+
+        return securityQuoteRepository.findAll(spec, page).map(this::toSecurityQuoteModel);
     }
 
     @Override
