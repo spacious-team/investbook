@@ -34,9 +34,7 @@ import ru.investbook.web.forms.model.SecurityQuoteModel;
 import ru.investbook.web.forms.model.SecurityType;
 import ru.investbook.web.forms.model.filter.SecurityQuoteFormFilterModel;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.springframework.data.domain.Sort.Order.asc;
@@ -45,7 +43,7 @@ import static org.springframework.util.StringUtils.hasLength;
 
 @Service
 @RequiredArgsConstructor
-public class SecurityQuoteFormsService implements FormsService<SecurityQuoteModel> {
+public class SecurityQuoteFormsService {
     private final SecurityQuoteRepository securityQuoteRepository;
     private final SecurityQuoteConverter securityQuoteConverter;
     private final SecurityRepositoryHelper securityRepositoryHelper;
@@ -68,16 +66,6 @@ public class SecurityQuoteFormsService implements FormsService<SecurityQuoteMode
         return securityQuoteRepository.findAll(spec, page).map(this::toSecurityQuoteModel);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<SecurityQuoteModel> getAll() {
-        return securityQuoteRepository.findByOrderByTimestampDescSecurityAsc()
-                .stream()
-                .map(this::toSecurityQuoteModel)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     @Transactional
     public void save(SecurityQuoteModel e) {
         int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(e);

@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PortfolioCashFormsService implements FormsService<PortfolioCashModel> {
+public class PortfolioCashFormsService {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final PortfolioCashRepository portfolioCashRepository;
     private final PortfolioRepository portfolioRepository;
@@ -56,7 +56,6 @@ public class PortfolioCashFormsService implements FormsService<PortfolioCashMode
                 .map(this::toModel);
     }
 
-    @Override
     @Transactional(readOnly = true)
     public List<PortfolioCashModel> getAll() {
         Collection<String> enabledPortfolios = portfolioRepository.findByEnabledIsTrue()
@@ -69,7 +68,6 @@ public class PortfolioCashFormsService implements FormsService<PortfolioCashMode
                 .collect(Collectors.toList());
     }
 
-    @Override
     @Transactional
     public void save(PortfolioCashModel m) {
         saveAndFlush(m.getPortfolio());

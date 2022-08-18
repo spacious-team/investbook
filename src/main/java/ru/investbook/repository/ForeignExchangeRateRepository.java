@@ -36,8 +36,6 @@ public interface ForeignExchangeRateRepository extends
         JpaSpecificationExecutor<ForeignExchangeRateEntity>
 {
 
-    List<ForeignExchangeRateEntity> findByOrderByPkDateDescPkCurrencyPairAsc();
-
     Optional<ForeignExchangeRateEntity> findByPkCurrencyPairAndPkDate(String currencyPair, LocalDate atDate);
 
     Optional<ForeignExchangeRateEntity> findFirstByPkCurrencyPairOrderByPkDateDesc(String currencyPair);

@@ -34,9 +34,7 @@ import ru.investbook.web.forms.model.ForeignExchangeRateModel;
 import ru.investbook.web.forms.model.filter.ForeignExchangeRateFormFilterModel;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.lang.Math.min;
 import static org.springframework.data.domain.Sort.Order.asc;
@@ -44,7 +42,7 @@ import static org.springframework.data.domain.Sort.Order.desc;
 
 @Service
 @RequiredArgsConstructor
-public class ForeignExchangeRateFormsService implements FormsService<ForeignExchangeRateModel> {
+public class ForeignExchangeRateFormsService {
     private final ForeignExchangeRateRepository foreignExchangeRateRepository;
     private final ForeignExchangeRateConverter foreignExchangeRateConverter;
 
@@ -70,16 +68,6 @@ public class ForeignExchangeRateFormsService implements FormsService<ForeignExch
         return foreignExchangeRateRepository.findAll(spec, page).map(this::toModel);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<ForeignExchangeRateModel> getAll() {
-        return foreignExchangeRateRepository.findByOrderByPkDateDescPkCurrencyPairAsc()
-                .stream()
-                .map(this::toModel)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     @Transactional
     public void save(ForeignExchangeRateModel m) {
         foreignExchangeRateRepository.saveAndFlush(

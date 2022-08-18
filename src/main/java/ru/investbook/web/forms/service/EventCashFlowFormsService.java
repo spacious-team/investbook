@@ -39,20 +39,18 @@ import ru.investbook.repository.EventCashFlowRepository;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.specs.EventCashFlowEntitySearchSpecification;
-import ru.investbook.web.forms.model.filter.EventCashFlowFormFilterModel;
 import ru.investbook.web.forms.model.EventCashFlowModel;
+import ru.investbook.web.forms.model.filter.EventCashFlowFormFilterModel;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
 @Service
 @RequiredArgsConstructor
-public class EventCashFlowFormsService implements FormsService<EventCashFlowModel> {
+public class EventCashFlowFormsService {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final EventCashFlowRepository eventCashFlowRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
@@ -80,17 +78,6 @@ public class EventCashFlowFormsService implements FormsService<EventCashFlowMode
         return eventCashFlowRepository.findAll(spec, page).map(this::toModel);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<EventCashFlowModel> getAll() {
-        return eventCashFlowRepository
-                .findByPortfolioInOrderByPortfolioIdAscTimestampDesc(portfolioRepository.findByEnabledIsTrue())
-                .stream()
-                .map(this::toModel)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     @Transactional
     public void save(EventCashFlowModel e) {
         saveAndFlush(e.getPortfolio());

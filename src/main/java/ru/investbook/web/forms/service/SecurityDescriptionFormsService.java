@@ -37,7 +37,7 @@ import static java.util.Optional.ofNullable;
 
 @Component
 @RequiredArgsConstructor
-public class SecurityDescriptionFormsService implements FormsService<SecurityDescriptionModel> {
+public class SecurityDescriptionFormsService {
     private final SecurityDescriptionRepository securityDescriptionRepository;
     private final SecurityRepository securityRepository;
     private final SecurityRepositoryHelper securityRepositoryHelper;
@@ -49,7 +49,6 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
     }
 
     @Transactional(readOnly = true)
-    @Override
     public List<SecurityDescriptionModel> getAll() {
         return securityDescriptionRepository.findAll()
                 .stream()
@@ -57,7 +56,6 @@ public class SecurityDescriptionFormsService implements FormsService<SecurityDes
                 .collect(Collectors.toList());
     }
 
-    @Override
     @Transactional
     public void save(SecurityDescriptionModel m) {
         int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(m);

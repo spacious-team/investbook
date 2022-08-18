@@ -24,15 +24,12 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.SecurityQuoteEntity;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 @Transactional(readOnly = true)
 public interface SecurityQuoteRepository extends
         JpaRepository<SecurityQuoteEntity, Integer>,
         JpaSpecificationExecutor<SecurityQuoteEntity> {
-
-    List<SecurityQuoteEntity> findByOrderByTimestampDescSecurityAsc();
 
     Optional<SecurityQuoteEntity> findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(
             Integer securityId,

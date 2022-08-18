@@ -47,7 +47,7 @@ import static org.spacious_team.broker.pojo.PortfolioPropertyType.*;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PortfolioPropertyFormsService implements FormsService<PortfolioPropertyModel> {
+public class PortfolioPropertyFormsService {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final PortfolioPropertyRepository portfolioPropertyRepository;
     private final PortfolioRepository portfolioRepository;
@@ -61,7 +61,6 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
                 .map(this::toModel);
     }
 
-    @Override
     @Transactional(readOnly = true)
     public List<PortfolioPropertyModel> getAll() {
         return portfolioPropertyRepository
@@ -73,7 +72,6 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
                 .collect(Collectors.toList());
     }
 
-    @Override
     @Transactional
     public void save(PortfolioPropertyModel m) {
         saveAndFlush(m.getPortfolio());

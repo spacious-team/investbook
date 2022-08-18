@@ -40,9 +40,7 @@ import ru.investbook.web.forms.model.filter.SecurityEventCashFlowFormFilterModel
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
@@ -51,7 +49,7 @@ import static org.springframework.data.domain.Sort.Order.desc;
 
 @Service
 @RequiredArgsConstructor
-public class SecurityEventCashFlowFormsService implements FormsService<SecurityEventCashFlowModel> {
+public class SecurityEventCashFlowFormsService {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final PortfolioRepository portfolioRepository;
@@ -78,19 +76,6 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
         return securityEventCashFlowRepository.findAll(spec, page).map(this::toSecurityEventModel);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<SecurityEventCashFlowModel> getAll() {
-        return securityEventCashFlowRepository
-                .findByPortfolioInOrderByPortfolioIdAscTimestampDescSecurityIdAsc(
-                        portfolioRepository.findByEnabledIsTrue())
-                .stream()
-                .filter(e -> e.getCashFlowType().getId() != CashFlowType.TAX.getId())
-                .map(this::toSecurityEventModel)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     @Transactional
     public void save(SecurityEventCashFlowModel e) {
         saveAndFlush(e.getPortfolio());

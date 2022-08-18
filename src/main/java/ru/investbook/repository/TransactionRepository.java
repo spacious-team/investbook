@@ -25,7 +25,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
-import ru.investbook.entity.EventCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
 
 import java.time.Instant;
@@ -48,9 +47,6 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     List<TransactionEntity> findByTradeId(String tradeId);
 
     Optional<TransactionEntity> findByPortfolioAndTradeId(String portfolio, String tradeId);
-
-    List<TransactionEntity> findByPortfolioInOrderByPortfolioAscTimestampDescSecurityIdAsc(
-            Collection<String> portfolios);
 
     /**
      * Returns stock market share, bonds ISINs and assets

@@ -70,7 +70,7 @@ import static ru.investbook.web.forms.model.SecurityType.DERIVATIVE;
 
 @Component
 @RequiredArgsConstructor
-public class TransactionFormsService implements FormsService<TransactionModel> {
+public class TransactionFormsService {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final TransactionRepository transactionRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
@@ -117,21 +117,6 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<TransactionModel> getAll() {
-        Set<String> activePortfolios = portfolioRepository.findByEnabledIsTrue()
-                .stream()
-                .map(PortfolioEntity::getId)
-                .collect(Collectors.toSet());
-        return transactionRepository
-                .findByPortfolioInOrderByPortfolioAscTimestampDescSecurityIdAsc(activePortfolios)
-                .stream()
-                .map(this::toTransactionModel)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     @Transactional
     public void save(TransactionModel tr) {
         int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(tr);
