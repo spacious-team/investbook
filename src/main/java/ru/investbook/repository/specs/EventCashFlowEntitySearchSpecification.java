@@ -19,7 +19,6 @@
 package ru.investbook.repository.specs;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.EventCashFlowEntity;
 import ru.investbook.entity.EventCashFlowEntity_;
@@ -29,11 +28,12 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import static org.springframework.util.StringUtils.hasText;
 
 
 @RequiredArgsConstructor(staticName = "of")
@@ -57,7 +57,7 @@ public class EventCashFlowEntitySearchSpecification implements Specification<Eve
 
     private Predicate getPortfolioPredicate(Root<EventCashFlowEntity> root, CriteriaBuilder builder) {
         Predicate predicate;
-        if (StringUtils.isNotBlank(portfolio)) {
+        if (hasText(portfolio)) {
             predicate = builder.equal(
                     root.get(EventCashFlowEntity_.portfolio).get(PortfolioEntity_.ID),
                     portfolio

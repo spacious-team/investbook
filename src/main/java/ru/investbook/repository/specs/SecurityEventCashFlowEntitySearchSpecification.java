@@ -19,7 +19,6 @@
 package ru.investbook.repository.specs;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.CashFlowTypeEntity_;
@@ -37,7 +36,7 @@ import java.time.ZoneId;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.springframework.util.StringUtils.hasText;
 
 
 @RequiredArgsConstructor(staticName = "of")
@@ -64,7 +63,7 @@ public class SecurityEventCashFlowEntitySearchSpecification implements Specifica
 
     private Predicate getPortfolioPredicate(Root<SecurityEventCashFlowEntity> root, CriteriaBuilder builder) {
         Predicate predicate;
-        if (StringUtils.isNotBlank(portfolio)) {
+        if (hasText(portfolio)) {
             predicate = builder.equal(
                     root.get(SecurityEventCashFlowEntity_.portfolio).get(PortfolioEntity_.ID),
                     portfolio
@@ -99,7 +98,7 @@ public class SecurityEventCashFlowEntitySearchSpecification implements Specifica
 
     private Predicate getSecurityPredicate(Root<SecurityEventCashFlowEntity> root, CriteriaBuilder builder) {
         Predicate predicate = null;
-        if (isNotBlank(security)) {
+        if (hasText(security)) {
             predicate= builder.or(
                     builder.equal(root.get(SecurityEventCashFlowEntity_.security).get(SecurityEntity_.ticker), security),
                     builder.equal(root.get(SecurityEventCashFlowEntity_.security).get(SecurityEntity_.isin), security),

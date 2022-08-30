@@ -19,7 +19,6 @@
 package ru.investbook.repository.specs;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.SecurityEntity_;
 import ru.investbook.entity.SecurityQuoteEntity;
@@ -34,7 +33,7 @@ import java.time.ZoneId;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.springframework.util.StringUtils.hasText;
 
 
 @RequiredArgsConstructor(staticName = "of")
@@ -57,7 +56,7 @@ public class SecurityQuoteSearchSpecification implements Specification<SecurityQ
 
     private Predicate getCurrencyPredicate(Root<SecurityQuoteEntity> root, CriteriaBuilder builder) {
         Predicate predicate = null;
-        if (StringUtils.isNotBlank(currency)) {
+        if (hasText(currency)) {
             predicate = builder.equal(
                     root.get(SecurityQuoteEntity_.currency),
                     currency
@@ -80,7 +79,7 @@ public class SecurityQuoteSearchSpecification implements Specification<SecurityQ
 
     private Predicate getSecurityPredicate(Root<SecurityQuoteEntity> root, CriteriaBuilder builder) {
         Predicate predicate = null;
-        if (isNotBlank(security)) {
+        if (hasText(security)) {
             predicate= builder.or(
                     builder.equal(root.get(SecurityQuoteEntity_.security).get(SecurityEntity_.ticker), security),
                     builder.equal(root.get(SecurityQuoteEntity_.security).get(SecurityEntity_.isin), security),

@@ -36,7 +36,7 @@ import java.time.ZoneId;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.springframework.util.StringUtils.hasText;
 
 
 @RequiredArgsConstructor(staticName = "of")
@@ -62,7 +62,7 @@ public class TransactionSearchSpecification implements Specification<Transaction
     private Predicate getPortfolioPredicate(Root<TransactionEntity> root, CriteriaQuery<?> query,
                                             CriteriaBuilder builder) {
         Predicate predicate;
-        if (isNotBlank(portfolio)) {
+        if (hasText(portfolio)) {
             predicate = builder.equal(
                     root.get(TransactionEntity_.portfolio),
                     portfolio
@@ -106,7 +106,7 @@ public class TransactionSearchSpecification implements Specification<Transaction
 
     private Predicate getSecurityPredicate(Root<TransactionEntity> root, CriteriaBuilder builder) {
         Predicate predicate = null;
-        if (isNotBlank(security)) {
+        if (hasText(security)) {
             predicate= builder.or(
                     builder.equal(root.get(TransactionEntity_.security).get(SecurityEntity_.ticker), security),
                     builder.equal(root.get(TransactionEntity_.security).get(SecurityEntity_.isin), security),

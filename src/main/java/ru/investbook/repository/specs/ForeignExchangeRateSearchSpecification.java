@@ -19,7 +19,6 @@
 package ru.investbook.repository.specs;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.ForeignExchangeRateEntity;
 import ru.investbook.entity.ForeignExchangeRateEntityPk_;
@@ -32,6 +31,8 @@ import javax.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import static org.springframework.util.StringUtils.hasText;
 
 
 @RequiredArgsConstructor(staticName = "of")
@@ -53,7 +54,7 @@ public class ForeignExchangeRateSearchSpecification implements Specification<For
 
     private Predicate getCurrencyPredicate(Root<ForeignExchangeRateEntity> root, CriteriaBuilder builder) {
         Predicate predicate = null;
-        if (StringUtils.isNotBlank(currency)) {
+        if (hasText(currency)) {
             predicate = builder.like(
                     root.get(ForeignExchangeRateEntity_.pk).get(ForeignExchangeRateEntityPk_.CURRENCY_PAIR),
                     currency + "%"
