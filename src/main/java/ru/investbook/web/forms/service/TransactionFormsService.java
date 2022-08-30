@@ -35,7 +35,6 @@ import org.springframework.util.Assert;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.TransactionCashFlowConverter;
 import ru.investbook.converter.TransactionConverter;
-import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
@@ -94,11 +93,11 @@ public class TransactionFormsService {
 
     @Transactional(readOnly = true)
     public Page<TransactionModel> getPage(TransactionFormFilterModel filter) {
-        var spec = TransactionSearchSpecification.of(
+        TransactionSearchSpecification spec = TransactionSearchSpecification.of(
                 filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo()
         );
 
-        var page = PageRequest.of(
+        PageRequest page = PageRequest.of(
                 filter.getPage(), filter.getPageSize(),
                 Sort.by(asc("portfolio"), desc("timestamp"), asc("security.id"))
         );
@@ -108,7 +107,7 @@ public class TransactionFormsService {
 
     @Transactional(readOnly = true)
     public List<TransactionModel> getAll(TransactionFormFilterModel filter) {
-        var spec = TransactionSearchSpecification.of(
+        TransactionSearchSpecification spec = TransactionSearchSpecification.of(
                 filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo()
         );
 

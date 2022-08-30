@@ -57,11 +57,11 @@ public class ForeignExchangeRateFormsService {
 
     @Transactional(readOnly = true)
     public Page<ForeignExchangeRateModel> getPage(ForeignExchangeRateFormFilterModel filter) {
-        var spec = ForeignExchangeRateSearchSpecification.of(
+        ForeignExchangeRateSearchSpecification spec = ForeignExchangeRateSearchSpecification.of(
                 filter.getCurrency(), filter.getDate()
         );
 
-        var page = PageRequest.of(
+        PageRequest page = PageRequest.of(
                 filter.getPage(), filter.getPageSize(), Sort.by(desc("pk.date"), asc("pk.currencyPair"))
         );
 

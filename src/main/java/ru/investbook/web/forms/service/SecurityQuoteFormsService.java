@@ -56,10 +56,10 @@ public class SecurityQuoteFormsService {
 
     @Transactional(readOnly = true)
     public Page<SecurityQuoteModel> getPage(SecurityQuoteFormFilterModel filter) {
-        var spec = SecurityQuoteSearchSpecification.of(
+        SecurityQuoteSearchSpecification spec = SecurityQuoteSearchSpecification.of(
                 filter.getSecurity(), filter.getCurrency(), filter.getDate()
         );
-        var page = PageRequest.of(
+        PageRequest page = PageRequest.of(
                 filter.getPage(), filter.getPageSize(), Sort.by(desc("timestamp"), asc("security.name"))
         );
 

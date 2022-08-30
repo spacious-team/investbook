@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,7 +61,7 @@ public class TransactionController {
 
     @GetMapping
     public String get(@ModelAttribute("filter") TransactionFormFilterModel filter, Model model) {
-        var data = transactionFormsService.getPage(filter);
+        Page<TransactionModel> data = transactionFormsService.getPage(filter);
         model.addAttribute("page", new PageableWrapperModel<>(data));
         model.addAttribute("portfolios", portfolios);
 

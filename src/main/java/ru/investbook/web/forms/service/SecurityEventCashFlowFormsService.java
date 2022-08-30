@@ -65,10 +65,10 @@ public class SecurityEventCashFlowFormsService {
 
     @Transactional(readOnly = true)
     public Page<SecurityEventCashFlowModel> getPage(SecurityEventCashFlowFormFilterModel filter) {
-        var spec = SecurityEventCashFlowEntitySearchSpecification.of(
+        SecurityEventCashFlowEntitySearchSpecification spec = SecurityEventCashFlowEntitySearchSpecification.of(
                 filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo()
         );
-        var page = PageRequest.of(
+        PageRequest page = PageRequest.of(
                 filter.getPage(), filter.getPageSize(),
                 Sort.by(asc("portfolio.id"), desc("timestamp"), asc("security.id"))
         );

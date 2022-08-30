@@ -30,6 +30,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Objects;
@@ -69,8 +70,8 @@ public class TransactionSearchSpecification implements Specification<Transaction
         } else {
             //We do subquery because TransactionEntity is not related to PortfolioEntity in Java model, so
             //we can not do join query in Criteria API
-            var activePortfoliosSubquery = query.subquery(String.class);
-            var activePortfoliosRoot = activePortfoliosSubquery.from(PortfolioEntity.class);
+            Subquery<String> activePortfoliosSubquery = query.subquery(String.class);
+            Root<PortfolioEntity> activePortfoliosRoot = activePortfoliosSubquery.from(PortfolioEntity.class);
 
             predicate = builder.in(root.get(TransactionEntity_.portfolio)).value(
                     activePortfoliosSubquery
