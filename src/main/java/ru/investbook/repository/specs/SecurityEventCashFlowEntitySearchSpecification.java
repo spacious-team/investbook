@@ -33,7 +33,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -80,9 +82,11 @@ public class SecurityEventCashFlowEntitySearchSpecification implements Specifica
         if (dateFrom == null) {
             return null;
         }
+        Instant startOfDay = dateFrom.atStartOfDay(ZoneId.systemDefault())
+                .toInstant();
         return builder.greaterThanOrEqualTo(
                 root.get(SecurityEventCashFlowEntity_.timestamp),
-                dateFrom.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                startOfDay);
     }
 
     @Nullable
@@ -90,9 +94,12 @@ public class SecurityEventCashFlowEntitySearchSpecification implements Specifica
         if (dateTo == null) {
             return null;
         }
+        Instant endOfDay = dateTo.atTime(LocalTime.MAX)
+                .atZone(ZoneId.systemDefault())
+                .toInstant();
         return builder.lessThanOrEqualTo(
                 root.get(SecurityEventCashFlowEntity_.timestamp),
-                dateTo.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                endOfDay);
     }
 
     @Nullable

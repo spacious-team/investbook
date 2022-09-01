@@ -33,7 +33,9 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -88,9 +90,11 @@ public class TransactionSearchSpecification implements Specification<Transaction
         if (dateFrom == null) {
             return null;
         }
+        Instant startOfDay = dateFrom.atStartOfDay(ZoneId.systemDefault())
+                .toInstant();
         return builder.greaterThanOrEqualTo(
                 root.get(TransactionEntity_.timestamp),
-                dateFrom.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                startOfDay);
     }
 
     @Nullable
@@ -98,9 +102,12 @@ public class TransactionSearchSpecification implements Specification<Transaction
         if (dateTo == null) {
             return null;
         }
+        Instant endOfDay = dateTo.atTime(LocalTime.MAX)
+                .atZone(ZoneId.systemDefault())
+                .toInstant();
         return builder.lessThanOrEqualTo(
                 root.get(TransactionEntity_.timestamp),
-                dateTo.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                endOfDay);
     }
 
     @Nullable

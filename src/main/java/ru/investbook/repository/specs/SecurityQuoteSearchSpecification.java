@@ -30,7 +30,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -70,10 +72,15 @@ public class SecurityQuoteSearchSpecification implements Specification<SecurityQ
         if (date == null) {
             return null;
         }
+        Instant startOfDay = date.atStartOfDay(ZoneId.systemDefault())
+                .toInstant();
+        Instant endOfDay = date.atTime(LocalTime.MAX)
+               .atZone(ZoneId.systemDefault())
+                .toInstant();
         return builder.between(
                 root.get(SecurityQuoteEntity_.timestamp),
-                date.atStartOfDay(ZoneId.systemDefault()).toInstant(),
-                date.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                startOfDay,
+                endOfDay);
     }
 
     @Nullable
