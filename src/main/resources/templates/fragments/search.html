@@ -20,32 +20,37 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <body>
 
-<div th:fragment="date-range(from, to)">
-    <div style="display: flex">
+<label th:fragment="date-range(from, to)">
+    Дата
+    <span style="display: flex">
         <input type="date" th:field="__${from}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2001-01-31"/>
-        <input type="date" th:field="__${to}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2001-01-31"/>
-    </div>
-</div>
+        <input type="date" th:field="__${to}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2100-12-31"/>
+    </span>
+</label>
 
-<div th:fragment="page-size(var)">
-    <select th:field="__${var}__" required>
+<label th:fragment="page-size(size)">
+    Размер страницы
+    <select th:field="__${size}__" required>
         <option th:value="10" th:text="10"></option>
         <option th:value="20" th:text="20"></option>
         <option th:value="30" th:text="30"></option>
         <option th:value="50" th:text="50"></option>
+        <option th:value="100" th:text="100"></option>
+        <option th:value="1000" th:text="1000"></option>
     </select>
-</div>
+</label>
 
-<div th:fragment="currency-picker(var)">
-    <select th:field="__${var}__">
-        <option th:value="NULL" th:selected></option>
-        <option th:value="RUB" th:text="RUB"></option>
-        <option th:value="USD" th:text="USD"></option>
-        <option th:value="EUR" th:text="EUR"></option>
-        <option th:value="GBP" th:text="GBP"></option>
-        <option th:value="CHF" th:text="CHF"></option>
-    </select>
-</div>
+<label th:fragment="currency-picker(currency)">
+    Валюта
+    <input type="text" th:field="__${currency}__" list="currencies"/>
+    <datalist id="currencies">
+        <option>RUB</option>
+        <option>USD</option>
+        <option>EUR</option>
+        <option>GBP</option>
+        <option>CHF</option>
+    </datalist>
+</label>
 
 </body>
 </html>

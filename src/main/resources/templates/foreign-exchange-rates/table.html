@@ -36,18 +36,12 @@
 
 <form action="#" th:action="@{/foreign-exchange-rates/search}" th:object="${filter}" method="post">
     <div>
-        <label>
-            Валюта
-            <div th:replace="fragments/search :: currency-picker ('*{currency}')"/>
-        </label>
+        <div th:replace="fragments/search :: currency-picker ('*{currency}')"/>
         <label>
             Дата
             <input type="date" th:field="*{date}" pattern="\d{4}-\d{2}-\d{2}" placeholder="2001-01-31"/>
         </label>
-        <label>
-            Размер страницы
-            <div th:replace="fragments/search :: page-size ('*{pageSize}')"/>
-        </label>
+        <div th:replace="fragments/search :: page-size ('*{pageSize}')"/>
     </div>
     <input type="submit" value="Поиск"/>
 </form>
@@ -77,9 +71,9 @@
 
 <div th:insert="fragments/navigation :: navigation-bar (
         endpoint='foreign-exchange-rates',
-        params='currency=__${filter.currency}__,
-                date=__${filter.date}__,
-                pageSize=__${filter.pageSize}__'
+        params='currency=${filter.currency},
+                date=${filter.date},
+                pageSize=${filter.pageSize}'
     )">
 </div>
 </body>

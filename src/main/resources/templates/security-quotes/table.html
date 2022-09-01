@@ -48,18 +48,12 @@
             Инструмент
             <input type="text" th:field="*{security}" placeholder="Название / Тикер / ISIN"/>
         </label>
-        <label>
-            Валюта
-            <div th:replace="fragments/search :: currency-picker ('*{currency}')"/>
-        </label>
+        <div th:replace="fragments/search :: currency-picker ('*{currency}')"/>
         <label>
             Дата
             <input type="date" th:field="*{date}" pattern="\d{4}-\d{2}-\d{2}" placeholder="2001-01-31"/>
         </label>
-        <label>
-            Размер страницы
-            <div th:replace="fragments/search :: page-size ('*{pageSize}')"/>
-        </label>
+        <div th:replace="fragments/search :: page-size ('*{pageSize}')"/>
     </div>
     <input type="submit" value="Поиск"/>
 </form>
@@ -94,10 +88,10 @@
 
 <div th:insert="fragments/navigation :: navigation-bar (
         endpoint='security-quotes',
-        params='security=__${filter.security}__,
-                date=__${filter.date}__,
-                currency=__${filter.currency}__,
-                pageSize=__${filter.pageSize}__'
+        params='security=${filter.security},
+                date=${filter.date},
+                currency=${filter.currency},
+                pageSize=${filter.pageSize}'
     )">
 </div>
 

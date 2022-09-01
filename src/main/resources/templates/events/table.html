@@ -53,14 +53,8 @@
                 <option th:each="portfolio : ${portfolios}" th:text="${portfolio}" th:value="${portfolio}"/>
             </select>
         </label>
-        <label>
-            Дата
-            <div th:replace="fragments/search :: date-range (from='*{dateFrom}', to='*{dateTo}')"/>
-        </label>
-        <label>
-            Размер страницы
-            <div th:replace="fragments/search :: page-size ('*{pageSize}')"/>
-        </label>
+        <div th:replace="fragments/search :: date-range (from='*{dateFrom}', to='*{dateTo}')"/>
+        <div th:replace="fragments/search :: page-size ('*{pageSize}')"/>
     </div>
     <input type="submit" value="Поиск"/>
 </form>
@@ -103,10 +97,10 @@
 
     <div th:insert="fragments/navigation :: navigation-bar (
         endpoint='events',
-        params='portfolio=__${filter.portfolio}__,
-                dateFrom=__${filter.dateFrom}__,
-                dateTo=__${filter.dateTo}__,
-                pageSize=__${filter.pageSize}__'
+        params='portfolio=${filter.portfolio},
+                dateFrom=${filter.dateFrom},
+                dateTo=${filter.dateTo},
+                pageSize=${filter.pageSize}'
     )">
     </div>
 
