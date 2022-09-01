@@ -27,11 +27,15 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.repository.ForeignExchangeRateRepository;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.service.cbr.CbrForeignExchangeRateService;
 import ru.investbook.web.forms.model.ForeignExchangeRateModel;
+import ru.investbook.web.forms.model.PageableWrapperModel;
+import ru.investbook.web.forms.model.filter.EventCashFlowFormFilterModel;
+import ru.investbook.web.forms.model.filter.ForeignExchangeRateFormFilterModel;
 import ru.investbook.web.forms.service.ForeignExchangeRateFormsService;
 
 import javax.validation.Valid;
@@ -49,9 +53,18 @@ public class ForeignExchangeRateController {
     private final TransactionRepository transactionRepository;
 
     @GetMapping
-    public String get(Model model) {
-        model.addAttribute("rates", foreignExchangeRateFormsService.getAll());
+    public String get(@ModelAttribute("filter") ForeignExchangeRateFormFilterModel filter, Model model) {
+        var data = foreignExchangeRateFormsService.getPage(filter);
+        model.addAttribute("page", new PageableWrapperModel<>(data));
+
         return "foreign-exchange-rates/table";
+    }
+
+    @PostMapping("/search")
+    public String search(@ModelAttribute("filter") ForeignExchangeRateFormFilterModel filter,
+                         RedirectAttributes attributes) {
+        attributes.addFlashAttribute("filter", filter);
+        return "redirect:/foreign-exchange-rates";
     }
 
     @GetMapping("/edit-form")

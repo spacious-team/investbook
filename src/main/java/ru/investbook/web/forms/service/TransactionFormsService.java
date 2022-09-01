@@ -26,6 +26,9 @@ import org.spacious_team.broker.report_parser.api.AbstractTransaction.AbstractTr
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -42,9 +45,11 @@ import ru.investbook.report.FifoPositionsFilter;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
+import ru.investbook.repository.specs.TransactionSearchSpecification;
 import ru.investbook.web.forms.model.SecurityType;
 import ru.investbook.web.forms.model.SplitModel;
 import ru.investbook.web.forms.model.TransactionModel;
+import ru.investbook.web.forms.model.filter.TransactionFormFilterModel;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -59,11 +64,13 @@ import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
 import static java.util.Optional.ofNullable;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
 import static ru.investbook.web.forms.model.SecurityType.DERIVATIVE;
 
 @Component
 @RequiredArgsConstructor
-public class TransactionFormsService implements FormsService<TransactionModel> {
+public class TransactionFormsService {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final TransactionRepository transactionRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
@@ -85,21 +92,31 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 .map(this::toTransactionModel);
     }
 
-    @Override
     @Transactional(readOnly = true)
-    public List<TransactionModel> getAll() {
-        Set<String> activePortfolios = portfolioRepository.findByEnabledIsTrue()
-                .stream()
-                .map(PortfolioEntity::getId)
-                .collect(Collectors.toSet());
-        return transactionRepository
-                .findByPortfolioInOrderByPortfolioAscTimestampDescSecurityIdAsc(activePortfolios)
-                .stream()
+    public Page<TransactionModel> getPage(TransactionFormFilterModel filter) {
+        var spec = TransactionSearchSpecification.of(
+                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo()
+        );
+
+        var page = PageRequest.of(
+                filter.getPage(), filter.getPageSize(),
+                Sort.by(asc("portfolio"), desc("timestamp"), asc("security.id"))
+        );
+
+        return transactionRepository.findAll(spec, page).map(this::toTransactionModel);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TransactionModel> getAll(TransactionFormFilterModel filter) {
+        var spec = TransactionSearchSpecification.of(
+                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo()
+        );
+
+        return transactionRepository.findAll(spec).stream()
                 .map(this::toTransactionModel)
                 .collect(Collectors.toList());
     }
 
-    @Override
     @Transactional
     public void save(TransactionModel tr) {
         int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(tr);

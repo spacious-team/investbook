@@ -40,6 +40,27 @@
     Для редактирования сделки кликните по ее номеру, для удаления - на крестик.
 </p>
 
+<form action="#" th:action="@{/security-deposit/search}" th:object="${filter}" method="post">
+    <div>
+        <label>
+            Счет
+            <select th:field="*{portfolio}">
+                <option th:value="NULL" th:selected/>
+                <option th:each="portfolio : ${portfolios}" th:text="${portfolio}" th:value="${portfolio}"/>
+            </select>
+        </label>
+        <label>
+            Инструмент
+            <input type="text" th:field="*{security}" placeholder="Название / Тикер / ISIN"/>
+        </label>
+        <label>
+            Дата
+            <div th:replace="fragments/search :: date-range (from='*{dateFrom}', to='*{dateTo}')"/>
+        </label>
+    </div>
+    <input type="submit" value="Поиск"/>
+</form>
+
 <table>
     <tr>
         <th>Счет</th>
@@ -50,7 +71,7 @@
         <th>Количество, шт</th>
         <th></th>
     </tr>
-    <tr th:each="tr : ${transactions}">
+    <tr th:each="tr : ${page.content}">
         <td th:text="${tr.portfolio}"/>
         <td>
             <a th:href="@{/security-deposit/edit-form(id=${tr.id})}"
@@ -68,6 +89,16 @@
         </td>
     </tr>
 </table>
+
+<div th:insert="fragments/navigation :: navigation-bar (
+    endpoint='security-deposit',
+    params='portfolio=__${filter.portfolio}__,
+            dateFrom=__${filter.dateFrom}__,
+            dateTo=__${filter.dateTo}__,
+            security=__${filter.security}__,
+            pageSize=__${filter.pageSize}__'
+)">
+</div>
 
 </body>
 </html>

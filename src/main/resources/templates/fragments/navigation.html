@@ -1,0 +1,48 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<body>
+
+<nav aria-label="Page navigation" th:fragment="navigation-bar(endpoint, params)">
+
+    <ul th:if="${page.total > 1}" class="page-bar">
+        <li class="page-item" th:classappend="${page.previous == null ? 'page-disabled' : ''}">
+            <span th:with="link=@{/__${endpoint}__(__${params}__, page=__${page.previous}__)}">
+                <a class="page-link" th:href="${link}" tabindex="-1" title="Назад">&#129136;</a>
+            </span>
+        </li>
+
+        <th:block th:each="item : ${#numbers.sequence(0, 10, 1)}">
+            <li th:if="${item < page.total}" th:classappend="${item == page.current ? 'page-active' : ''}">
+                <span th:with="link=@{/__${endpoint}__(__${params}__, page=__${item}__)}">
+                    <a class="page-item" th:href="${link}" th:text="${item} + 1"></a>
+                </span>
+            </li>
+        </th:block>
+
+        <li class="page-item" th:classappend="${page.next == null ? 'page-disabled' : ''}">
+            <span th:with="link=@{/__${endpoint}__(__${params}__, page=__${page.next}__)}">
+                <a class="page-link" th:href="${link}" title="Вперед">&#129138;</a>
+            </span>
+        </li>
+    </ul>
+</nav>
+</body>
+</html>

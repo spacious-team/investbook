@@ -26,11 +26,14 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.ControllerHelper;
+import ru.investbook.web.forms.model.PageableWrapperModel;
 import ru.investbook.web.forms.model.SecurityEventCashFlowModel;
+import ru.investbook.web.forms.model.filter.SecurityEventCashFlowFormFilterModel;
 import ru.investbook.web.forms.service.SecurityEventCashFlowFormsService;
 
 import javax.annotation.PostConstruct;
@@ -56,9 +59,19 @@ public class SecurityEventCashFlowController {
     }
 
     @GetMapping
-    public String get(Model model) {
-        model.addAttribute("events", securityEventCashFlowFormsService.getAll());
+    public String get(@ModelAttribute("filter") SecurityEventCashFlowFormFilterModel filter, Model model) {
+        var data = securityEventCashFlowFormsService.getPage(filter);
+        model.addAttribute("page", new PageableWrapperModel<>(data));
+        model.addAttribute("portfolios", portfolios);
+
         return "security-events/table";
+    }
+
+    @PostMapping("/search")
+    public String search(@ModelAttribute("filter") SecurityEventCashFlowFormFilterModel filter,
+                         RedirectAttributes attributes) {
+        attributes.addFlashAttribute("filter", filter);
+        return "redirect:/security-events";
     }
 
     @GetMapping("/edit-form")

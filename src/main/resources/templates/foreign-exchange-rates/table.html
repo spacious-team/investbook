@@ -34,6 +34,24 @@
     Для редактирования курса кликните по его дате, для удаления - на крестик.
 </p>
 
+<form action="#" th:action="@{/foreign-exchange-rates/search}" th:object="${filter}" method="post">
+    <div>
+        <label>
+            Валюта
+            <div th:replace="fragments/search :: currency-picker ('*{currency}')"/>
+        </label>
+        <label>
+            Дата
+            <input type="date" th:field="*{date}" pattern="\d{4}-\d{2}-\d{2}" placeholder="2001-01-31"/>
+        </label>
+        <label>
+            Размер страницы
+            <div th:replace="fragments/search :: page-size ('*{pageSize}')"/>
+        </label>
+    </div>
+    <input type="submit" value="Поиск"/>
+</form>
+
 <table>
     <tr>
         <th>Дата</th>
@@ -42,7 +60,7 @@
         <th>Котируемая валюта</th>
         <th></th>
     </tr>
-    <tr th:each="rate : ${rates}">
+    <tr th:each="rate : ${page.content}">
         <td>
             <a th:href="@{/foreign-exchange-rates/edit-form(date=${rate.date}, baseCurrency=${rate.baseCurrency}, quoteCurrency=${rate.quoteCurrency})}"
                th:text="${rate.date}"/>
@@ -57,5 +75,12 @@
     </tr>
 </table>
 
+<div th:insert="fragments/navigation :: navigation-bar (
+        endpoint='foreign-exchange-rates',
+        params='currency=__${filter.currency}__,
+                date=__${filter.date}__,
+                pageSize=__${filter.pageSize}__'
+    )">
+</div>
 </body>
 </html>

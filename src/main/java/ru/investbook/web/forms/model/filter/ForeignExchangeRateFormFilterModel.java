@@ -16,13 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.web.forms.service;
+package ru.investbook.web.forms.model.filter;
 
-import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
+import ru.investbook.web.forms.model.AbstractFormFilterModel;
 
-public interface FormsService<Model> {
+import java.time.LocalDate;
 
-    List<Model> getAll();
-
-    <T extends Model> void save(T model);
+@Getter
+@Setter
+public class ForeignExchangeRateFormFilterModel extends AbstractFormFilterModel {
+    private String currency;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private LocalDate date;
 }

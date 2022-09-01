@@ -18,6 +18,7 @@
 
 package ru.investbook.web.forms.controller;
 
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,15 +26,17 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
+import ru.investbook.web.forms.model.PageableWrapperModel;
 import ru.investbook.web.forms.model.SplitModel;
 import ru.investbook.web.forms.model.TransactionModel;
+import ru.investbook.web.forms.model.filter.TransactionFormFilterModel;
 import ru.investbook.web.forms.service.TransactionFormsService;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
@@ -47,14 +50,24 @@ public class SecurityDepositController extends TransactionController {
     }
 
     @GetMapping
-    @Override
-    public String get(Model model) {
-        List<TransactionModel> models = transactionFormsService.getAll()
+    public String get(@ModelAttribute("filter") TransactionFormFilterModel filter, Model model) {
+        var data = transactionFormsService.getAll(filter)
                 .stream()
                 .filter(tr -> tr.getPrice() == null)
                 .collect(Collectors.toList());
-        model.addAttribute("transactions", models);
+
+        //there is no paging here because for now it is difficult to do it on DB level
+        // since we have filtering by price
+        model.addAttribute("page", new PageableWrapperModel<>(new PageImpl<>(data)));
+        model.addAttribute("portfolios", portfolios);
+
         return "security-deposit/table";
+    }
+
+    @PostMapping("/search")
+    public String search(@ModelAttribute("filter") TransactionFormFilterModel filter, RedirectAttributes attributes) {
+        attributes.addFlashAttribute("filter", filter);
+        return "redirect:/security-deposit";
     }
 
     @GetMapping("/edit-form")

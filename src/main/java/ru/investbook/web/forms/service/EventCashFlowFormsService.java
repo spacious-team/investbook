@@ -23,6 +23,10 @@ import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -34,19 +38,19 @@ import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.repository.EventCashFlowRepository;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
+import ru.investbook.repository.specs.EventCashFlowEntitySearchSpecification;
 import ru.investbook.web.forms.model.EventCashFlowModel;
+import ru.investbook.web.forms.model.filter.EventCashFlowFormFilterModel;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
 @Service
 @RequiredArgsConstructor
-public class EventCashFlowFormsService implements FormsService<EventCashFlowModel> {
+public class EventCashFlowFormsService {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final EventCashFlowRepository eventCashFlowRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
@@ -62,17 +66,18 @@ public class EventCashFlowFormsService implements FormsService<EventCashFlowMode
                 .map(this::toModel);
     }
 
-    @Override
     @Transactional(readOnly = true)
-    public List<EventCashFlowModel> getAll() {
-        return eventCashFlowRepository
-                .findByPortfolioInOrderByPortfolioIdAscTimestampDesc(portfolioRepository.findByEnabledIsTrue())
-                .stream()
-                .map(this::toModel)
-                .collect(Collectors.toList());
+    public Page<EventCashFlowModel> getPage(EventCashFlowFormFilterModel filter) {
+        var spec = EventCashFlowEntitySearchSpecification.of(
+                filter.getPortfolio(), filter.getDateFrom(), filter.getDateTo()
+        );
+        var page = PageRequest.of(
+                filter.getPage(), filter.getPageSize(), Sort.by(Order.asc("portfolio.id"), Order.desc("timestamp"))
+        );
+
+        return eventCashFlowRepository.findAll(spec, page).map(this::toModel);
     }
 
-    @Override
     @Transactional
     public void save(EventCashFlowModel e) {
         saveAndFlush(e.getPortfolio());

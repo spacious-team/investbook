@@ -42,6 +42,28 @@
     Для редактирования котировки кликните по ее номеру, для удаления - на крестик.
 </p>
 
+<form action="#" th:action="@{/security-quotes/search}" th:object="${filter}" method="post">
+    <div>
+        <label>
+            Инструмент
+            <input type="text" th:field="*{security}" placeholder="Название / Тикер / ISIN"/>
+        </label>
+        <label>
+            Валюта
+            <div th:replace="fragments/search :: currency-picker ('*{currency}')"/>
+        </label>
+        <label>
+            Дата
+            <input type="date" th:field="*{date}" pattern="\d{4}-\d{2}-\d{2}" placeholder="2001-01-31"/>
+        </label>
+        <label>
+            Размер страницы
+            <div th:replace="fragments/search :: page-size ('*{pageSize}')"/>
+        </label>
+    </div>
+    <input type="submit" value="Поиск"/>
+</form>
+
 <table>
     <tr>
         <th>Номер записи</th>
@@ -53,7 +75,7 @@
         <th>Валюта</th>
         <th></th>
     </tr>
-    <tr th:each="quote : ${quotes}">
+    <tr th:each="quote : ${page.content}">
         <td><a th:href="@{/security-quotes/edit-form(id=${quote.id})}" th:text="${quote.id}"/></td>
         <td th:text="${quote.timestamp}" class="date-time"/>
         <td th:text="${quote.getSecurityName}"/>
@@ -69,6 +91,15 @@
         </td>
     </tr>
 </table>
+
+<div th:insert="fragments/navigation :: navigation-bar (
+        endpoint='security-quotes',
+        params='security=__${filter.security}__,
+                date=__${filter.date}__,
+                currency=__${filter.currency}__,
+                pageSize=__${filter.pageSize}__'
+    )">
+</div>
 
 <script type="text/javascript">
     let elements = document.getElementsByClassName("date-time")

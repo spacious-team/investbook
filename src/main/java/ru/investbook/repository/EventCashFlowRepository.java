@@ -19,9 +19,9 @@
 package ru.investbook.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.EventCashFlowEntity;
-import ru.investbook.entity.PortfolioEntity;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -29,11 +29,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Transactional(readOnly = true)
-public interface EventCashFlowRepository extends JpaRepository<EventCashFlowEntity, Integer> {
+public interface EventCashFlowRepository extends JpaRepository<EventCashFlowEntity, Integer>, JpaSpecificationExecutor<EventCashFlowEntity> {
 
     Optional<EventCashFlowEntity> findFirstByOrderByTimestampDesc();
-
-    List<EventCashFlowEntity> findByPortfolioInOrderByPortfolioIdAscTimestampDesc(Collection<PortfolioEntity> portfolios);
 
     List<EventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdOrderByTimestamp(String portfolio,
                                                                                  int cashFlowType);
