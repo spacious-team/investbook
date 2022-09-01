@@ -20,12 +20,14 @@ package ru.investbook.repository.specs;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.Nullable;
 import ru.investbook.entity.ForeignExchangeRateEntity;
 import ru.investbook.entity.ForeignExchangeRateEntityPk_;
 import ru.investbook.entity.ForeignExchangeRateEntity_;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.time.LocalDate;
@@ -41,36 +43,32 @@ public class ForeignExchangeRateSearchSpecification implements Specification<For
     private final LocalDate date;
 
     @Override
-    public Predicate toPredicate(Root<ForeignExchangeRateEntity> root, CriteriaQuery<?> query,
-                                 CriteriaBuilder builder) {
+    public Predicate toPredicate(Root<ForeignExchangeRateEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
         return Stream.of(
                         getCurrencyPredicate(root, builder),
-                        getDatePredicate(root, builder)
-                )
+                        getDatePredicate(root, builder))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);
     }
 
+    @Nullable
     private Predicate getCurrencyPredicate(Root<ForeignExchangeRateEntity> root, CriteriaBuilder builder) {
-        Predicate predicate = null;
         if (hasText(currency)) {
-            predicate = builder.like(
-                    root.get(ForeignExchangeRateEntity_.pk).get(ForeignExchangeRateEntityPk_.CURRENCY_PAIR),
-                    currency + "%"
-            );
+            Path<String> path = root.get(ForeignExchangeRateEntity_.pk)
+                    .get(ForeignExchangeRateEntityPk_.CURRENCY_PAIR);
+            return builder.like(path, currency + "%");
         }
-        return predicate;
+        return null;
     }
 
+    @Nullable
     private Predicate getDatePredicate(Root<ForeignExchangeRateEntity> root, CriteriaBuilder builder) {
-        Predicate predicate = null;
-        if (date != null) {
-            predicate = builder.equal(
-                    root.get(ForeignExchangeRateEntity_.pk).get(ForeignExchangeRateEntityPk_.DATE),
-                    date
-            );
+        if (date == null) {
+            return null;
         }
-        return predicate;
+        Path<Object> path = root.get(ForeignExchangeRateEntity_.pk)
+                .get(ForeignExchangeRateEntityPk_.DATE);
+        return builder.equal(path, date);
     }
 }

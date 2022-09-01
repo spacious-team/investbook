@@ -69,13 +69,13 @@ public class EventCashFlowFormsService {
     @Transactional(readOnly = true)
     public Page<EventCashFlowModel> getPage(EventCashFlowFormFilterModel filter) {
         EventCashFlowEntitySearchSpecification spec = EventCashFlowEntitySearchSpecification.of(
-                filter.getPortfolio(), filter.getDateFrom(), filter.getDateTo()
-        );
-        PageRequest page = PageRequest.of(
-                filter.getPage(), filter.getPageSize(), Sort.by(Order.asc("portfolio.id"), Order.desc("timestamp"))
-        );
+                filter.getPortfolio(), filter.getDateFrom(), filter.getDateTo());
 
-        return eventCashFlowRepository.findAll(spec, page).map(this::toModel);
+        Sort sort = Sort.by(Order.asc("portfolio.id"), Order.desc("timestamp"));
+        PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
+
+        return eventCashFlowRepository.findAll(spec, page)
+                .map(this::toModel);
     }
 
     @Transactional

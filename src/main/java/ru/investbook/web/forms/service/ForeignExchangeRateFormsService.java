@@ -57,15 +57,14 @@ public class ForeignExchangeRateFormsService {
 
     @Transactional(readOnly = true)
     public Page<ForeignExchangeRateModel> getPage(ForeignExchangeRateFormFilterModel filter) {
-        ForeignExchangeRateSearchSpecification spec = ForeignExchangeRateSearchSpecification.of(
-                filter.getCurrency(), filter.getDate()
-        );
+        ForeignExchangeRateSearchSpecification spec =
+                ForeignExchangeRateSearchSpecification.of(filter.getCurrency(), filter.getDate());
 
-        PageRequest page = PageRequest.of(
-                filter.getPage(), filter.getPageSize(), Sort.by(desc("pk.date"), asc("pk.currencyPair"))
-        );
+        Sort sort = Sort.by(desc("pk.date"), asc("pk.currencyPair"));
+        PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
-        return foreignExchangeRateRepository.findAll(spec, page).map(this::toModel);
+        return foreignExchangeRateRepository.findAll(spec, page)
+                .map(this::toModel);
     }
 
     @Transactional

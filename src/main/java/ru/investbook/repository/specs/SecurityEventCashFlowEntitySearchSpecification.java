@@ -21,14 +21,16 @@ package ru.investbook.repository.specs;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.Nullable;
 import ru.investbook.entity.CashFlowTypeEntity_;
 import ru.investbook.entity.PortfolioEntity_;
-import ru.investbook.entity.SecurityEntity_;
+import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity_;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.time.LocalDate;
@@ -37,6 +39,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static org.springframework.util.StringUtils.hasText;
+import static ru.investbook.repository.specs.SpecificationHelper.filterSecurity;
 
 
 @RequiredArgsConstructor(staticName = "of")
@@ -47,71 +50,63 @@ public class SecurityEventCashFlowEntitySearchSpecification implements Specifica
     private final LocalDate dateTo;
 
     @Override
-    public Predicate toPredicate(Root<SecurityEventCashFlowEntity> root, CriteriaQuery<?> query,
+    public Predicate toPredicate(Root<SecurityEventCashFlowEntity> root,
+                                 CriteriaQuery<?> query,
                                  CriteriaBuilder builder) {
         return Stream.of(
                         getPortfolioPredicate(root, builder),
                         getDateFromPredicate(root, builder),
                         getDateToPredicate(root, builder),
                         getSecurityPredicate(root, builder),
-                        getCacheFlowTypePredicate(root, builder)
-                )
+                        getCacheFlowTypePredicate(root, builder))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);
     }
 
     private Predicate getPortfolioPredicate(Root<SecurityEventCashFlowEntity> root, CriteriaBuilder builder) {
-        Predicate predicate;
         if (hasText(portfolio)) {
-            predicate = builder.equal(
-                    root.get(SecurityEventCashFlowEntity_.portfolio).get(PortfolioEntity_.ID),
-                    portfolio
-            );
-        } else {
-            predicate = builder.isTrue(root.get(SecurityEventCashFlowEntity_.portfolio).get(PortfolioEntity_.enabled));
+            Path<Object> path = root.get(SecurityEventCashFlowEntity_.portfolio)
+                    .get(PortfolioEntity_.ID);
+            return builder.equal(path, portfolio);
         }
-        return predicate;
+        Path<Boolean> path = root.get(SecurityEventCashFlowEntity_.portfolio)
+                .get(PortfolioEntity_.enabled);
+        return builder.isTrue(path);
     }
 
+    @Nullable
     private Predicate getDateFromPredicate(Root<SecurityEventCashFlowEntity> root, CriteriaBuilder builder) {
-        Predicate predicate = null;
-        if (dateFrom != null) {
-            predicate = builder.greaterThanOrEqualTo(
-                    root.get(SecurityEventCashFlowEntity_.timestamp),
-                    dateFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()
-            );
+        if (dateFrom == null) {
+            return null;
         }
-        return predicate;
+        return builder.greaterThanOrEqualTo(
+                root.get(SecurityEventCashFlowEntity_.timestamp),
+                dateFrom.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
+    @Nullable
     private Predicate getDateToPredicate(Root<SecurityEventCashFlowEntity> root, CriteriaBuilder builder) {
-        Predicate predicate = null;
-        if (dateTo != null) {
-            predicate = builder.lessThanOrEqualTo(
-                    root.get(SecurityEventCashFlowEntity_.timestamp),
-                    dateTo.atStartOfDay(ZoneId.systemDefault()).toInstant()
-            );
+        if (dateTo == null) {
+            return null;
         }
-        return predicate;
+        return builder.lessThanOrEqualTo(
+                root.get(SecurityEventCashFlowEntity_.timestamp),
+                dateTo.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
+    @Nullable
     private Predicate getSecurityPredicate(Root<SecurityEventCashFlowEntity> root, CriteriaBuilder builder) {
-        Predicate predicate = null;
         if (hasText(security)) {
-            predicate= builder.or(
-                    builder.equal(root.get(SecurityEventCashFlowEntity_.security).get(SecurityEntity_.ticker), security),
-                    builder.equal(root.get(SecurityEventCashFlowEntity_.security).get(SecurityEntity_.isin), security),
-                    builder.like(root.get(SecurityEventCashFlowEntity_.security).get(SecurityEntity_.name), security +"%")
-            );
+            Path<SecurityEntity> securityPath = root.get(SecurityEventCashFlowEntity_.security);
+            return filterSecurity(builder, securityPath, security);
         }
-        return predicate;
+        return null;
     }
 
     private Predicate getCacheFlowTypePredicate(Root<SecurityEventCashFlowEntity> root, CriteriaBuilder builder) {
-        return builder.notEqual(
-                root.get(SecurityEventCashFlowEntity_.cashFlowType).get(CashFlowTypeEntity_.ID),
-                CashFlowType.TAX.getId()
-        );
+        Path<Object> path = root.get(SecurityEventCashFlowEntity_.cashFlowType)
+                .get(CashFlowTypeEntity_.ID);
+        return builder.notEqual(path, CashFlowType.TAX.getId());
     }
 }

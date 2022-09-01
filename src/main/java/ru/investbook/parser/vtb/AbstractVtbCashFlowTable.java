@@ -79,8 +79,7 @@ public abstract class AbstractVtbCashFlowTable<RowType> extends SingleInitializa
                     left.addAll(right);
                     return left;
                 },
-                Collector.Characteristics.IDENTITY_FINISH
-        );
+                Collector.Characteristics.IDENTITY_FINISH);
     }
 
     protected abstract Collection<RowType> getRow(CashFlowEventTable.CashFlowEvent event);

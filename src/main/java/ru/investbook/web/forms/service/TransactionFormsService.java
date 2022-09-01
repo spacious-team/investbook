@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
 import static java.util.Optional.ofNullable;
@@ -94,13 +93,10 @@ public class TransactionFormsService {
     @Transactional(readOnly = true)
     public Page<TransactionModel> getPage(TransactionFormFilterModel filter) {
         TransactionSearchSpecification spec = TransactionSearchSpecification.of(
-                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo()
-        );
+                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo());
 
-        PageRequest page = PageRequest.of(
-                filter.getPage(), filter.getPageSize(),
-                Sort.by(asc("portfolio"), desc("timestamp"), asc("security.id"))
-        );
+        Sort sort = Sort.by(asc("portfolio"), desc("timestamp"), asc("security.id"));
+        PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
         return transactionRepository.findAll(spec, page).map(this::toTransactionModel);
     }
@@ -108,12 +104,11 @@ public class TransactionFormsService {
     @Transactional(readOnly = true)
     public List<TransactionModel> getAll(TransactionFormFilterModel filter) {
         TransactionSearchSpecification spec = TransactionSearchSpecification.of(
-                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo()
-        );
+                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo());
 
         return transactionRepository.findAll(spec).stream()
                 .map(this::toTransactionModel)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional
