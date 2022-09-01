@@ -40,7 +40,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.spacious_team.broker.pojo.PortfolioPropertyType.*;
 
@@ -69,7 +68,7 @@ public class PortfolioPropertyFormsService {
                         properties)
                 .stream()
                 .map(this::toModel)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional

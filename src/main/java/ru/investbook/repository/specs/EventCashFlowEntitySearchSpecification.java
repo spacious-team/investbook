@@ -19,21 +19,25 @@
 package ru.investbook.repository.specs;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.Nullable;
 import ru.investbook.entity.EventCashFlowEntity;
 import ru.investbook.entity.EventCashFlowEntity_;
 import ru.investbook.entity.PortfolioEntity_;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import static org.springframework.util.StringUtils.hasText;
 
 
 @RequiredArgsConstructor(staticName = "of")
@@ -44,49 +48,49 @@ public class EventCashFlowEntitySearchSpecification implements Specification<Eve
 
     @Override
     public Predicate toPredicate(Root<EventCashFlowEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
-
         return Stream.of(
                         getPortfolioPredicate(root, builder),
                         getDateFromPredicate(root, builder),
-                        getDateToPredicate(root, builder)
-                )
+                        getDateToPredicate(root, builder))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);
     }
 
     private Predicate getPortfolioPredicate(Root<EventCashFlowEntity> root, CriteriaBuilder builder) {
-        Predicate predicate;
-        if (StringUtils.isNotBlank(portfolio)) {
-            predicate = builder.equal(
-                    root.get(EventCashFlowEntity_.portfolio).get(PortfolioEntity_.ID),
-                    portfolio
-            );
-        } else {
-            predicate = builder.isTrue(root.get(EventCashFlowEntity_.portfolio).get(PortfolioEntity_.enabled));
+        if (hasText(portfolio)) {
+            Path<Object> path = root.get(EventCashFlowEntity_.portfolio)
+                    .get(PortfolioEntity_.ID);
+            return builder.equal(path, portfolio);
         }
-        return predicate;
+        Path<Boolean> path = root.get(EventCashFlowEntity_.portfolio)
+                .get(PortfolioEntity_.enabled);
+        return builder.isTrue(path);
+
     }
 
+    @Nullable
     private Predicate getDateFromPredicate(Root<EventCashFlowEntity> root, CriteriaBuilder builder) {
-        Predicate predicate = null;
-        if (dateFrom != null) {
-            predicate = builder.greaterThanOrEqualTo(
-                    root.get(EventCashFlowEntity_.timestamp),
-                    dateFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()
-            );
+        if (dateFrom == null) {
+            return null;
         }
-        return predicate;
+        Instant startOfDay = dateFrom.atStartOfDay(ZoneId.systemDefault())
+                .toInstant();
+        return builder.greaterThanOrEqualTo(
+                root.get(EventCashFlowEntity_.timestamp),
+                startOfDay);
     }
 
+    @Nullable
     private Predicate getDateToPredicate(Root<EventCashFlowEntity> root, CriteriaBuilder builder) {
-        Predicate predicate = null;
-        if (dateTo != null) {
-            predicate = builder.lessThanOrEqualTo(
-                    root.get(EventCashFlowEntity_.timestamp),
-                    dateTo.atStartOfDay(ZoneId.systemDefault()).toInstant()
-            );
+        if (dateTo == null) {
+            return null;
         }
-        return predicate;
+        Instant endOfDay = dateTo.atTime(LocalTime.MAX)
+                .atZone(ZoneId.systemDefault())
+                .toInstant();
+        return builder.lessThanOrEqualTo(
+                root.get(EventCashFlowEntity_.timestamp),
+                endOfDay);
     }
 }

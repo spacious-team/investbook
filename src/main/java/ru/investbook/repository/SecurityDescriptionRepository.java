@@ -44,7 +44,7 @@ public interface SecurityDescriptionRepository extends JpaRepository<SecurityDes
     @Transactional
     default void createSectorIfNotExists(int securityId, String sector) {
         if (!existsById(securityId)) {
-            var entity = new SecurityDescriptionEntity();
+            SecurityDescriptionEntity entity = new SecurityDescriptionEntity();
             entity.setSecurity(securityId);
             entity.setSector(sector);
             saveAndFlush(entity);

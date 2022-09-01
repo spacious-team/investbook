@@ -19,22 +19,26 @@
 package ru.investbook.repository.specs;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
-import ru.investbook.entity.SecurityEntity_;
+import org.springframework.lang.Nullable;
+import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityQuoteEntity;
 import ru.investbook.entity.SecurityQuoteEntity_;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.springframework.util.StringUtils.hasText;
+import static ru.investbook.repository.specs.SpecificationHelper.filterSecurity;
 
 
 @RequiredArgsConstructor(staticName = "of")
@@ -48,45 +52,43 @@ public class SecurityQuoteSearchSpecification implements Specification<SecurityQ
         return Stream.of(
                         getSecurityPredicate(root, builder),
                         getCurrencyPredicate(root, builder),
-                        getDatePredicate(root, builder)
-                )
+                        getDatePredicate(root, builder))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);
     }
 
+    @Nullable
     private Predicate getCurrencyPredicate(Root<SecurityQuoteEntity> root, CriteriaBuilder builder) {
-        Predicate predicate = null;
-        if (StringUtils.isNotBlank(currency)) {
-            predicate = builder.equal(
-                    root.get(SecurityQuoteEntity_.currency),
-                    currency
-            );
+        if (hasText(currency)) {
+            Path<String> path = root.get(SecurityQuoteEntity_.currency);
+            return builder.equal(path, currency);
         }
-        return predicate;
+        return null;
     }
 
+    @Nullable
     private Predicate getDatePredicate(Root<SecurityQuoteEntity> root, CriteriaBuilder builder) {
-        Predicate predicate = null;
-        if (date != null) {
-            predicate = builder.between(
-                    root.get(SecurityQuoteEntity_.timestamp),
-                    date.atStartOfDay(ZoneId.systemDefault()).toInstant(),
-                    date.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
-            );
+        if (date == null) {
+            return null;
         }
-        return predicate;
+        Instant startOfDay = date.atStartOfDay(ZoneId.systemDefault())
+                .toInstant();
+        Instant endOfDay = date.atTime(LocalTime.MAX)
+               .atZone(ZoneId.systemDefault())
+                .toInstant();
+        return builder.between(
+                root.get(SecurityQuoteEntity_.timestamp),
+                startOfDay,
+                endOfDay);
     }
 
+    @Nullable
     private Predicate getSecurityPredicate(Root<SecurityQuoteEntity> root, CriteriaBuilder builder) {
-        Predicate predicate = null;
-        if (isNotBlank(security)) {
-            predicate= builder.or(
-                    builder.equal(root.get(SecurityQuoteEntity_.security).get(SecurityEntity_.ticker), security),
-                    builder.equal(root.get(SecurityQuoteEntity_.security).get(SecurityEntity_.isin), security),
-                    builder.like(root.get(SecurityQuoteEntity_.security).get(SecurityEntity_.name), security +"%")
-            );
+        if (hasText(security)) {
+            Path<SecurityEntity> securityPath = root.get(SecurityQuoteEntity_.security);
+            return filterSecurity(builder, securityPath, security);
         }
-        return predicate;
+        return null;
     }
 }

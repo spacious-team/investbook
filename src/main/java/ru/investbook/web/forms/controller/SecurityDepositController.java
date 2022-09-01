@@ -37,6 +37,7 @@ import ru.investbook.web.forms.model.filter.TransactionFormFilterModel;
 import ru.investbook.web.forms.service.TransactionFormsService;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
@@ -51,7 +52,7 @@ public class SecurityDepositController extends TransactionController {
 
     @GetMapping
     public String get(@ModelAttribute("filter") TransactionFormFilterModel filter, Model model) {
-        var data = transactionFormsService.getAll(filter)
+        List<TransactionModel> data = transactionFormsService.getAll(filter)
                 .stream()
                 .filter(tr -> tr.getPrice() == null)
                 .collect(Collectors.toList());

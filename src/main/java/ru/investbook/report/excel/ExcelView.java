@@ -69,7 +69,7 @@ public class ExcelView {
             idx += delta;
             delta = cpuCnt;
             int toIndex = min(idx, usedExcelTableViews.size());
-            final var tables = usedExcelTableViews.subList(fromIndex, toIndex)
+            List<ExcelTable> tables = usedExcelTableViews.subList(fromIndex, toIndex)
                     .parallelStream()
                     .map(excelTableView -> getExcelTables(excelTableView, filter))
                     .flatMap(Collection::stream)

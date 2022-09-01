@@ -35,7 +35,6 @@ import org.springframework.util.Assert;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.TransactionCashFlowConverter;
 import ru.investbook.converter.TransactionConverter;
-import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
@@ -60,7 +59,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
 import static java.util.Optional.ofNullable;
@@ -94,27 +92,27 @@ public class TransactionFormsService {
 
     @Transactional(readOnly = true)
     public Page<TransactionModel> getPage(TransactionFormFilterModel filter) {
-        var spec = TransactionSearchSpecification.of(
-                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo()
-        );
+        TransactionSearchSpecification spec = TransactionSearchSpecification.of(
+                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo());
 
-        var page = PageRequest.of(
-                filter.getPage(), filter.getPageSize(),
-                Sort.by(asc("portfolio"), desc("timestamp"), asc("security.id"))
-        );
+        Sort sort = Sort.by(asc("portfolio"), desc("timestamp"), asc("security.id"));
+        PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
-        return transactionRepository.findAll(spec, page).map(this::toTransactionModel);
+        return transactionRepository.findAll(spec, page)
+                .map(this::toTransactionModel);
     }
 
     @Transactional(readOnly = true)
     public List<TransactionModel> getAll(TransactionFormFilterModel filter) {
-        var spec = TransactionSearchSpecification.of(
-                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo()
-        );
+        TransactionSearchSpecification spec = TransactionSearchSpecification.of(
+                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo());
 
-        return transactionRepository.findAll(spec).stream()
+        Sort sort = Sort.by(asc("portfolio"), desc("timestamp"), asc("security.id"));
+
+        return transactionRepository.findAll(spec, sort)
+                .stream()
                 .map(this::toTransactionModel)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional

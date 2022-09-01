@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,7 +59,7 @@ public class EventCashFlowController {
 
     @GetMapping
     public String get(@ModelAttribute("filter") EventCashFlowFormFilterModel filter, Model model) {
-        var data = eventCashFlowFormsService.getPage(filter);
+        Page<EventCashFlowModel> data = eventCashFlowFormsService.getPage(filter);
         model.addAttribute("page", new PageableWrapperModel<>(data));
         model.addAttribute("portfolios", portfolios);
 

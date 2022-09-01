@@ -38,7 +38,6 @@ import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -65,7 +64,7 @@ public class PortfolioCashFormsService {
         return portfolioCashRepository.findByPortfolioInOrderByTimestampDesc(enabledPortfolios)
                 .stream()
                 .map(this::toModel)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional

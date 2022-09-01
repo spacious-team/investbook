@@ -20,6 +20,7 @@ package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -66,7 +67,7 @@ public class SecurityQuoteController {
 
     @GetMapping
     public String get(@ModelAttribute("filter") SecurityQuoteFormFilterModel filter, Model model) {
-        var data = securityQuoteFormsService.getPage(filter);
+        Page<SecurityQuoteModel> data = securityQuoteFormsService.getPage(filter);
         model.addAttribute("page", new PageableWrapperModel<>(data));
 
         return "security-quotes/table";

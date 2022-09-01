@@ -39,29 +39,11 @@
     Для редактирования сделки кликните по ее номеру, для удаления - на крестик.
 </p>
 
-<form action="#" th:action="@{/transactions/search}" th:object="${filter}" method="post">
-    <div>
-        <label>
-            Счет
-            <select th:field="*{portfolio}">
-                <option th:value="NULL" th:selected/>
-                <option th:each="portfolio : ${portfolios}" th:text="${portfolio}" th:value="${portfolio}"/>
-            </select>
-        </label>
-        <label>
-            Инструмент
-            <input type="text" th:field="*{security}" placeholder="Название / Тикер / ISIN"/>
-        </label>
-        <label>
-            Дата
-            <div th:replace="fragments/search :: date-range (from='*{dateFrom}', to='*{dateTo}')"/>
-        </label>
-        <label>
-            Размер страницы
-            <div th:replace="fragments/search :: page-size ('*{pageSize}')"/>
-        </label>
-    </div>
-    <input type="submit" value="Поиск"/>
+<form action="#" th:action="@{/transactions/search}" th:object="${filter}" method="post" class="search-filter">
+    <div th:replace="fragments/search :: portfolio (selected='*{portfolio}', portfolios=${portfolios})"></div>
+    <div th:replace="fragments/search :: security ('*{security}')"></div>
+    <div th:replace="fragments/search :: date-range (from='*{dateFrom}', to='*{dateTo}')"></div>
+    <div th:replace="fragments/search :: page-size ('*{pageSize}')"></div>
 </form>
 
 <table>
@@ -108,11 +90,11 @@
 
 <div th:insert="fragments/navigation :: navigation-bar (
     endpoint='transactions',
-    params='portfolio=__${filter.portfolio}__,
-            dateFrom=__${filter.dateFrom}__,
-            dateTo=__${filter.dateTo}__,
-            security=__${filter.security}__,
-            pageSize=__${filter.pageSize}__'
+    params='portfolio=${filter.portfolio},
+            dateFrom=${filter.dateFrom},
+            dateTo=${filter.dateTo},
+            security=${filter.security},
+            pageSize=${filter.pageSize}'
 )">
 </div>
 

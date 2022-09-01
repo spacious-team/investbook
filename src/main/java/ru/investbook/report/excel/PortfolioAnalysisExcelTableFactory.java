@@ -141,7 +141,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     }
 
     private void addCashBalanceColumns(LinkedHashMap<Instant, Map<String, BigDecimal>> cashBalances, Table table) {
-        for (var entry : cashBalances.entrySet()) {
+        for (Map.Entry<Instant, Map<String, BigDecimal>> entry : cashBalances.entrySet()) {
             Instant instant = entry.getKey();
             Table.Record record = recordOf(table, instant);
             Map<String, BigDecimal> currencyValue = entry.getValue();
@@ -160,7 +160,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     }
 
     private void addAssetsColumns(LinkedHashMap<Instant, BigDecimal> totalAssets, Table table) {
-        for (var entry : totalAssets.entrySet()) {
+        for (Map.Entry<Instant, BigDecimal> entry : totalAssets.entrySet()) {
             Instant instant = entry.getKey();
             BigDecimal assets = entry.getValue();
             Table.Record record = recordOf(table, instant);
@@ -177,7 +177,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
             Double divider = null;
             double investmentUsd = 0;
             Double prevAssetsGrownValue = null;
-            for (var record : table) {
+            for (Table.Record record : table) {
                 investmentUsd += getInvestmentUsd(record, usdToRubExchangeRate);
                 Number assetsRub = (Number) record.get(ASSETS_RUB);
                 if (assetsRub != null) {
@@ -231,7 +231,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
 
     private static void addSp500GrowthColumn(Map<LocalDate, BigDecimal> sp500, Table table) {
         boolean isSp500ValueKnown = false;
-        for (var record : table) {
+        for (Table.Record record : table) {
             LocalDate date = (LocalDate) record.get(DATE);
             BigDecimal value = sp500.get(date);
             if (value != null) {
@@ -247,7 +247,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
 
     private void fillEmptyTotalInvestmentCells(Table table) {
         boolean isTotalInvestmentUsdKnown = false;
-        for (var record : table) {
+        for (Table.Record record : table) {
             isTotalInvestmentUsdKnown = isTotalInvestmentUsdKnown || record.containsKey(TOTAL_INVESTMENT_USD);
             if (isTotalInvestmentUsdKnown) {
                 record.computeIfAbsent(TOTAL_INVESTMENT_USD,
@@ -393,7 +393,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     }
 
     private static List<PortfolioInstantCurrencyValue> sumCashWithSameCurrency(List<PortfolioCash> portfolioCashes) {
-        var portfolioTimestampCurrencyMap = portfolioCashes.stream()
+        Map<String, Map<Instant, Map<String, BigDecimal>>> portfolioTimestampCurrencyMap = portfolioCashes.stream()
                 .collect(
                         groupingBy(PortfolioCash::getPortfolio,
                                 groupingBy(PortfolioCash::getTimestamp,

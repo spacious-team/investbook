@@ -56,14 +56,14 @@ public class SecurityQuoteFormsService {
 
     @Transactional(readOnly = true)
     public Page<SecurityQuoteModel> getPage(SecurityQuoteFormFilterModel filter) {
-        var spec = SecurityQuoteSearchSpecification.of(
-                filter.getSecurity(), filter.getCurrency(), filter.getDate()
-        );
-        var page = PageRequest.of(
-                filter.getPage(), filter.getPageSize(), Sort.by(desc("timestamp"), asc("security.name"))
-        );
+        SecurityQuoteSearchSpecification spec = SecurityQuoteSearchSpecification.of(
+                filter.getSecurity(), filter.getCurrency(), filter.getDate());
 
-        return securityQuoteRepository.findAll(spec, page).map(this::toSecurityQuoteModel);
+        Sort sort = Sort.by(desc("timestamp"), asc("security.name"));
+        PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
+
+        return securityQuoteRepository.findAll(spec, page)
+                .map(this::toSecurityQuoteModel);
     }
 
     @Transactional

@@ -20,22 +20,28 @@ package ru.investbook.repository.specs;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.Nullable;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.PortfolioEntity_;
-import ru.investbook.entity.SecurityEntity_;
+import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.entity.TransactionEntity_;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.springframework.util.StringUtils.hasText;
+import static ru.investbook.repository.specs.SpecificationHelper.filterSecurity;
 
 
 @RequiredArgsConstructor(staticName = "of")
@@ -51,67 +57,65 @@ public class TransactionSearchSpecification implements Specification<Transaction
                         getPortfolioPredicate(root, query, builder),
                         getSecurityPredicate(root, builder),
                         getDateFromPredicate(root, builder),
-                        getDateToPredicate(root, builder)
-                )
+                        getDateToPredicate(root, builder))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);
     }
 
-    private Predicate getPortfolioPredicate(Root<TransactionEntity> root, CriteriaQuery<?> query,
+    private Predicate getPortfolioPredicate(Root<TransactionEntity> root,
+                                            CriteriaQuery<?> query,
                                             CriteriaBuilder builder) {
-        Predicate predicate;
-        if (isNotBlank(portfolio)) {
-            predicate = builder.equal(
-                    root.get(TransactionEntity_.portfolio),
-                    portfolio
-            );
-        } else {
-            //We do subquery because TransactionEntity is not related to PortfolioEntity in Java model, so
-            //we can not do join query in Criteria API
-            var activePortfoliosSubquery = query.subquery(String.class);
-            var activePortfoliosRoot = activePortfoliosSubquery.from(PortfolioEntity.class);
-
-            predicate = builder.in(root.get(TransactionEntity_.portfolio)).value(
-                    activePortfoliosSubquery
-                            .select(activePortfoliosRoot.get(PortfolioEntity_.ID))
-                            .where(builder.and(builder.isTrue(activePortfoliosRoot.get(PortfolioEntity_.enabled))))
-            );
+        Path<String> transactionPortfolioPath = root.get(TransactionEntity_.portfolio);
+        if (hasText(portfolio)) {
+            return builder.equal(transactionPortfolioPath, portfolio);
         }
-        return predicate;
+        //We do subquery because TransactionEntity is not related to PortfolioEntity in Java model, so
+        //we can not do join query in Criteria API
+        Subquery<String> subquery = query.subquery(String.class);
+        Root<PortfolioEntity> portfolios = subquery.from(PortfolioEntity.class);
+
+        Path<String> portfolioId = portfolios.get(PortfolioEntity_.ID);
+        Path<Boolean> portfolioEnabled = portfolios.get(PortfolioEntity_.enabled);
+
+        Subquery<String> enabledPortfolioIds = subquery.select(portfolioId)
+                        .where(builder.isTrue(portfolioEnabled));
+
+        return builder.in(transactionPortfolioPath)
+                .value(enabledPortfolioIds);
     }
 
+    @Nullable
     private Predicate getDateFromPredicate(Root<TransactionEntity> root, CriteriaBuilder builder) {
-        Predicate predicate = null;
-        if (dateFrom != null) {
-            predicate = builder.greaterThanOrEqualTo(
-                    root.get(TransactionEntity_.timestamp),
-                    dateFrom.atStartOfDay(ZoneId.systemDefault()).toInstant()
-            );
+        if (dateFrom == null) {
+            return null;
         }
-        return predicate;
+        Instant startOfDay = dateFrom.atStartOfDay(ZoneId.systemDefault())
+                .toInstant();
+        return builder.greaterThanOrEqualTo(
+                root.get(TransactionEntity_.timestamp),
+                startOfDay);
     }
 
+    @Nullable
     private Predicate getDateToPredicate(Root<TransactionEntity> root, CriteriaBuilder builder) {
-        Predicate predicate = null;
-        if (dateTo != null) {
-            predicate = builder.lessThanOrEqualTo(
-                    root.get(TransactionEntity_.timestamp),
-                    dateTo.atStartOfDay(ZoneId.systemDefault()).toInstant()
-            );
+        if (dateTo == null) {
+            return null;
         }
-        return predicate;
+        Instant endOfDay = dateTo.atTime(LocalTime.MAX)
+                .atZone(ZoneId.systemDefault())
+                .toInstant();
+        return builder.lessThanOrEqualTo(
+                root.get(TransactionEntity_.timestamp),
+                endOfDay);
     }
 
+    @Nullable
     private Predicate getSecurityPredicate(Root<TransactionEntity> root, CriteriaBuilder builder) {
-        Predicate predicate = null;
-        if (isNotBlank(security)) {
-            predicate= builder.or(
-                    builder.equal(root.get(TransactionEntity_.security).get(SecurityEntity_.ticker), security),
-                    builder.equal(root.get(TransactionEntity_.security).get(SecurityEntity_.isin), security),
-                    builder.like(root.get(TransactionEntity_.security).get(SecurityEntity_.name), security +"%")
-            );
+        if (hasText(security)) {
+            Path<SecurityEntity> securityPath = root.get(TransactionEntity_.security);
+            return filterSecurity(builder, securityPath, security);
         }
-        return predicate;
+        return null;
     }
 }

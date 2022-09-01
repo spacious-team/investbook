@@ -65,15 +65,15 @@ public class SecurityEventCashFlowFormsService {
 
     @Transactional(readOnly = true)
     public Page<SecurityEventCashFlowModel> getPage(SecurityEventCashFlowFormFilterModel filter) {
-        var spec = SecurityEventCashFlowEntitySearchSpecification.of(
-                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo()
-        );
-        var page = PageRequest.of(
-                filter.getPage(), filter.getPageSize(),
-                Sort.by(asc("portfolio.id"), desc("timestamp"), asc("security.id"))
-        );
+        SecurityEventCashFlowEntitySearchSpecification spec =
+                SecurityEventCashFlowEntitySearchSpecification.of(
+                        filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo());
 
-        return securityEventCashFlowRepository.findAll(spec, page).map(this::toSecurityEventModel);
+        Sort sort = Sort.by(asc("portfolio.id"), desc("timestamp"), asc("security.id"));
+        PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
+
+        return securityEventCashFlowRepository.findAll(spec, page)
+                .map(this::toSecurityEventModel);
     }
 
     @Transactional
@@ -132,16 +132,16 @@ public class SecurityEventCashFlowFormsService {
                 securityEntity.getIsin(),
                 ofNullable(securityEntity.getName()).orElse(securityEntity.getTicker()),
                 m.getSecurityType());
-        m.setValue(type == DERIVATIVE_PROFIT ? e.getValue() :  e.getValue().abs());
+        m.setValue(type == DERIVATIVE_PROFIT ? e.getValue() : e.getValue().abs());
         m.setValueCurrency(e.getCurrency());
 
         if (m.getType() != CashFlowType.TAX) {
             securityEventCashFlowRepository.findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampAndCount(
-                    m.getPortfolio(),
-                    securityEntity.getId(),
-                    CashFlowType.TAX.getId(),
-                    e.getTimestamp(),
-                    m.getCount())
+                            m.getPortfolio(),
+                            securityEntity.getId(),
+                            CashFlowType.TAX.getId(),
+                            e.getTimestamp(),
+                            m.getCount())
                     .ifPresent(tax -> {
                         m.setTaxId(tax.getId());
                         m.setTax(tax.getValue().abs());
