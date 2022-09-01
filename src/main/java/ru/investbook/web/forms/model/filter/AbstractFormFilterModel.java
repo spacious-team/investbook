@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.web.forms.model;
+package ru.investbook.web.forms.model.filter;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public abstract class AbstractFormFilterModel {
-    private Integer pageSize = 20;
+abstract class AbstractFormFilterModel {
+    private Integer pageSize = 10;
     private Integer page = 0;
 }

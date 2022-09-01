@@ -42,20 +42,10 @@
     Для редактирования котировки кликните по ее номеру, для удаления - на крестик.
 </p>
 
-<form action="#" th:action="@{/security-quotes/search}" th:object="${filter}" method="post">
-    <div>
-        <label>
-            Инструмент
-            <input type="text" th:field="*{security}" placeholder="Название / Тикер / ISIN"/>
-        </label>
-        <div th:replace="fragments/search :: currency-picker ('*{currency}')"/>
-        <label>
-            Дата
-            <input type="date" th:field="*{date}" pattern="\d{4}-\d{2}-\d{2}" placeholder="2001-01-31"/>
-        </label>
-        <div th:replace="fragments/search :: page-size ('*{pageSize}')"/>
-    </div>
-    <input type="submit" value="Поиск"/>
+<form action="#" th:action="@{/security-quotes/search}" th:object="${filter}" method="post" class="search-filter">
+    <div th:replace="fragments/search :: security ('*{security}')"></div>
+    <div th:replace="fragments/search :: date ('*{date}')"></div>
+    <div th:replace="fragments/search :: page-size ('*{pageSize}')"></div>
 </form>
 
 <table>

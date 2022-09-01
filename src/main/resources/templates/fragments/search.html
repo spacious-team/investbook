@@ -20,29 +20,49 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <body>
 
+<label th:fragment="portfolio(selected, portfolios)">
+    Счет
+    <select th:field="__${selected}__" onchange="this.form.submit()">
+        <option th:value="NULL" th:text="NULL" th:selected onchange="this.form.submit()"/>
+        <option th:each="portfolio : ${portfolios}" th:value="${portfolio}" th:text="${portfolio}" onchange="this.form.submit()"/>
+    </select>
+</label>
+
+<label th:fragment="security(security)">
+    Инструмент
+    <input type="text" th:field="__${security}__" placeholder="Название / Тикер / ISIN" onchange="this.form.submit()"/>
+</label>
+
+<label th:fragment="date(date)">
+    <label>
+        Дата
+        <input type="date" th:field="__${date}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2022-01-01" onchange="this.form.submit()"/>
+    </label>
+</label>
+
 <label th:fragment="date-range(from, to)">
     Дата
     <span style="display: flex">
-        <input type="date" th:field="__${from}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2001-01-31"/>
-        <input type="date" th:field="__${to}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2100-12-31"/>
+        <input type="date" th:field="__${from}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2001-01-31" onchange="this.form.submit()"/>
+        <input type="date" th:field="__${to}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2100-12-31" onchange="this.form.submit()"/>
     </span>
 </label>
 
 <label th:fragment="page-size(size)">
-    Размер страницы
-    <select th:field="__${size}__" required>
+    Количество
+    <select th:field="__${size}__" onchange="this.form.submit()" class="page-size" required>
         <option th:value="10" th:text="10"></option>
         <option th:value="20" th:text="20"></option>
         <option th:value="30" th:text="30"></option>
         <option th:value="50" th:text="50"></option>
         <option th:value="100" th:text="100"></option>
-        <option th:value="1000" th:text="1000"></option>
+        <option th:value="1000000000" th:text="Все"></option>
     </select>
 </label>
 
 <label th:fragment="currency-picker(currency)">
     Валюта
-    <input type="text" th:field="__${currency}__" list="currencies"/>
+    <input class="currency" type="text" th:field="__${currency}__" list="currencies" onchange="this.form.submit()"/>
     <datalist id="currencies">
         <option>RUB</option>
         <option>USD</option>

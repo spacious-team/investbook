@@ -22,25 +22,30 @@
 
 <nav aria-label="Page navigation" th:fragment="navigation-bar(endpoint, params)">
 
-    <ul th:if="${page.total > 1}" class="page-bar">
-        <li class="page-item" th:classappend="${page.previous == null ? 'page-disabled' : ''}">
-            <span th:with="link=@{/__${endpoint}__(__${params}__, page=__${page.previous}__)}">
-                <a class="page-link" th:href="${link}" tabindex="-1" title="Назад">&#129136;</a>
-            </span>
+    <ul th:if="${page.total > 1}" th:with="startPage=${T(java.lang.Math).max(0, page.current - 5)}" class="page-bar">
+        <li th:classappend="${page.isFirst ? 'page-disabled' : ''}">
+            <a class="page-link" th:href="@{/__${endpoint}__(__${params}__, page=__${page.previous}__)}" title="Назад">&#8592;</a>
         </li>
 
-        <th:block th:each="item : ${#numbers.sequence(0, 10, 1)}">
-            <li th:if="${item < page.total}" th:classappend="${item == page.current ? 'page-active' : ''}">
-                <span th:with="link=@{/__${endpoint}__(__${params}__, page=__${item}__)}">
-                    <a class="page-item" th:href="${link}" th:text="${item} + 1"></a>
-                </span>
+        <li th:if="${page.current > 5}">
+            <a th:href="@{/__${endpoint}__(__${params}__, page=0)}">1</a>
+            <span>..</span>
+        </li>
+
+        <th:block th:each="item : ${#numbers.sequence(startPage, T(java.lang.Math).min(startPage + 10, page.total - 1))}">
+            <li th:classappend="${item == page.current ? 'page-active' : ''}">
+                <a th:href="@{/__${endpoint}__(__${params}__, page=__${item}__)}" th:text="${item} + 1"/>
             </li>
         </th:block>
 
-        <li class="page-item" th:classappend="${page.next == null ? 'page-disabled' : ''}">
-            <span th:with="link=@{/__${endpoint}__(__${params}__, page=__${page.next}__)}">
-                <a class="page-link" th:href="${link}" title="Вперед">&#129138;</a>
-            </span>
+        <li th:if="${page.current < page.total - 6}" th:with="lastPage=${page.total} - 1">
+            <span>..</span>
+            <a th:href="@{/__${endpoint}__(__${params}__, page=__${lastPage}__)}" th:text="${page.total}"
+               title="Последняя"/>
+        </li>
+
+        <li class="page-item" th:classappend="${page.isLast ? 'page-disabled' : ''}">
+            <a class="page-link" th:href="@{/__${endpoint}__(__${params}__, page=__${page.next}__)}" title="Вперед">&#8594;</a>
         </li>
     </ul>
 </nav>
