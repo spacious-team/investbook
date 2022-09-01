@@ -30,7 +30,6 @@ import ru.investbook.web.forms.model.SecurityType;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -53,7 +52,7 @@ public class SecurityDescriptionFormsService {
         return securityDescriptionRepository.findAll()
                 .stream()
                 .map(this::toModel)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional

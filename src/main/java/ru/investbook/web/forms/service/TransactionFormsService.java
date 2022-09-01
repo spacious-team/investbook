@@ -98,7 +98,8 @@ public class TransactionFormsService {
         Sort sort = Sort.by(asc("portfolio"), desc("timestamp"), asc("security.id"));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
-        return transactionRepository.findAll(spec, page).map(this::toTransactionModel);
+        return transactionRepository.findAll(spec, page)
+                .map(this::toTransactionModel);
     }
 
     @Transactional(readOnly = true)
@@ -106,7 +107,10 @@ public class TransactionFormsService {
         TransactionSearchSpecification spec = TransactionSearchSpecification.of(
                 filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo());
 
-        return transactionRepository.findAll(spec).stream()
+        Sort sort = Sort.by(asc("portfolio"), desc("timestamp"), asc("security.id"));
+
+        return transactionRepository.findAll(spec, sort)
+                .stream()
                 .map(this::toTransactionModel)
                 .toList();
     }
