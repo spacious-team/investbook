@@ -30,7 +30,7 @@ import java.io.Serializable;
  *
  * @see <a href="https://stackoverflow.com/questions/2108178/id-generatedvalue-but-set-own-id-value">Stack Overflow</a>
  */
-class UseExistingOrGenerateIdGenerator extends IdentityGenerator {
+public class UseExistingOrGenerateIdGenerator extends IdentityGenerator {
     static final String NAME = "UseExistingOrGenerateIdGenerator";
     static final String STRATEGY = "ru.investbook.entity.UseExistingOrGenerateIdGenerator";
 
