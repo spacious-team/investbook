@@ -20,24 +20,18 @@ package ru.investbook.repository.specs;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.Nullable;
 import ru.investbook.entity.SecurityQuoteEntity;
 import ru.investbook.entity.SecurityQuoteEntity_;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static org.springframework.util.StringUtils.hasText;
-import static ru.investbook.repository.specs.SpecificationHelper.filterBySecurity;
+import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 
 @RequiredArgsConstructor(staticName = "of")
@@ -50,35 +44,11 @@ public class SecurityQuoteSearchSpecification implements Specification<SecurityQ
     public Predicate toPredicate(Root<SecurityQuoteEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
         return Stream.of(
                         filterBySecurity(root, builder, SecurityQuoteEntity_.security, security),
-                        getCurrencyPredicate(root, builder),
-                        getDatePredicate(root, builder))
+                        filterByCurrency(root, builder, SecurityQuoteEntity_.currency, currency),
+                        filterByInstantBelongsToDate(root, builder, SecurityQuoteEntity_.timestamp, date))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);
     }
 
-    @Nullable
-    private Predicate getCurrencyPredicate(Root<SecurityQuoteEntity> root, CriteriaBuilder builder) {
-        if (hasText(currency)) {
-            Path<String> path = root.get(SecurityQuoteEntity_.currency);
-            return builder.equal(path, currency);
-        }
-        return null;
-    }
-
-    @Nullable
-    private Predicate getDatePredicate(Root<SecurityQuoteEntity> root, CriteriaBuilder builder) {
-        if (date == null) {
-            return null;
-        }
-        Instant startOfDay = date.atStartOfDay(ZoneId.systemDefault())
-                .toInstant();
-        Instant endOfDay = date.atTime(LocalTime.MAX)
-               .atZone(ZoneId.systemDefault())
-                .toInstant();
-        return builder.between(
-                root.get(SecurityQuoteEntity_.timestamp),
-                startOfDay,
-                endOfDay);
-    }
 }

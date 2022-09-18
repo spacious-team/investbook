@@ -53,13 +53,13 @@ public class SecurityEventCashFlowEntitySearchSpecification implements Specifica
                         filterByDateFrom(root, builder, SecurityEventCashFlowEntity_.timestamp, dateFrom),
                         filterByDateTo(root, builder, SecurityEventCashFlowEntity_.timestamp, dateTo),
                         filterBySecurity(root, builder, SecurityEventCashFlowEntity_.security, security),
-                        getCacheFlowTypePredicate(root, builder))
+                        filterByCacheFlowType(root, builder))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);
     }
 
-    private Predicate getCacheFlowTypePredicate(Root<SecurityEventCashFlowEntity> root, CriteriaBuilder builder) {
+    private Predicate filterByCacheFlowType(Root<SecurityEventCashFlowEntity> root, CriteriaBuilder builder) {
         Path<Object> path = root.get(SecurityEventCashFlowEntity_.cashFlowType)
                 .get(CashFlowTypeEntity_.ID);
         return builder.notEqual(path, CashFlowType.TAX.getId());

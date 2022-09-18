@@ -87,6 +87,25 @@ class SpecificationHelper {
                 endOfDay);
     }
 
+    @Nullable
+    static <T> Predicate filterByInstantBelongsToDate(Root<T> root,
+                                                      CriteriaBuilder builder,
+                                                      SingularAttribute<T, Instant> attribute,
+                                                      LocalDate date) {
+        if (date == null) {
+            return null;
+        }
+        Instant startOfDay = date.atStartOfDay(ZoneId.systemDefault())
+                .toInstant();
+        Instant endOfDay = date.atTime(LocalTime.MAX)
+                .atZone(ZoneId.systemDefault())
+                .toInstant();
+        return builder.between(
+                root.get(attribute),
+                startOfDay,
+                endOfDay);
+    }
+
     static <T> Predicate filterByPortfolio(Root<T> root,
                                            CriteriaBuilder builder,
                                            SingularAttribute<T, PortfolioEntity> attribute,
@@ -99,5 +118,17 @@ class SpecificationHelper {
         Path<Boolean> path = root.get(attribute)
                 .get(PortfolioEntity_.enabled);
         return builder.isTrue(path);
+    }
+
+    @Nullable
+    static <T> Predicate filterByCurrency(Root<T> root,
+                                          CriteriaBuilder builder,
+                                          SingularAttribute<T, String> attribute,
+                                          String currency) {
+        if (hasText(currency)) {
+            Path<String> path = root.get(attribute);
+            return builder.equal(path, currency);
+        }
+        return null;
     }
 }
