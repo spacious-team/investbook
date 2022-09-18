@@ -26,9 +26,11 @@ import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEntity_;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.SingularAttribute;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -118,6 +120,30 @@ class SpecificationHelper {
         Path<Boolean> path = root.get(attribute)
                 .get(PortfolioEntity_.enabled);
         return builder.isTrue(path);
+    }
+
+    static <T> Predicate filterByPortfolioName(Root<T> root,
+                                               CriteriaBuilder builder,
+                                               SingularAttribute<T, String> attribute,
+                                               String portfolio,
+                                               CriteriaQuery<?> query) {
+        Path<String> transactionPortfolioPath = root.get(attribute);
+        if (hasText(portfolio)) {
+            return builder.equal(transactionPortfolioPath, portfolio);
+        }
+        // Do sub-query because <...>Entity is not related to PortfolioEntity in Java model, so
+        // can not do join query in Criteria API
+        Subquery<String> subQuery = query.subquery(String.class);
+        Root<PortfolioEntity> portfolios = subQuery.from(PortfolioEntity.class);
+
+        Path<String> portfolioId = portfolios.get(PortfolioEntity_.ID);
+        Path<Boolean> portfolioEnabled = portfolios.get(PortfolioEntity_.enabled);
+
+        Subquery<String> enabledPortfolioIds = subQuery.select(portfolioId)
+                .where(builder.isTrue(portfolioEnabled));
+
+        return builder.in(transactionPortfolioPath)
+                .value(enabledPortfolioIds);
     }
 
     @Nullable

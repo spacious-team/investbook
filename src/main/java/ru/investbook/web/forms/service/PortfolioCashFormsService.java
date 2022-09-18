@@ -22,22 +22,27 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioCash;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import ru.investbook.converter.PortfolioCashConverter;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.entity.PortfolioCashEntity;
-import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.repository.PortfolioCashRepository;
 import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.specs.PortfolioCashSearchSpecification;
 import ru.investbook.web.forms.model.PortfolioCashModel;
+import ru.investbook.web.forms.model.filter.PortfolioCashFormFilterModel;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
 
 @Service
 @Slf4j
@@ -56,15 +61,15 @@ public class PortfolioCashFormsService {
     }
 
     @Transactional(readOnly = true)
-    public List<PortfolioCashModel> getAll() {
-        Collection<String> enabledPortfolios = portfolioRepository.findByEnabledIsTrue()
-                .stream()
-                .map(PortfolioEntity::getId)
-                .toList();
-        return portfolioCashRepository.findByPortfolioInOrderByTimestampDesc(enabledPortfolios)
-                .stream()
-                .map(this::toModel)
-                .toList();
+    public Page<PortfolioCashModel> getPage(PortfolioCashFormFilterModel filter) {
+        PortfolioCashSearchSpecification spec = PortfolioCashSearchSpecification.of(
+                filter.getPortfolio(), filter.getDateFrom(), filter.getDateTo(), filter.getCurrency());
+
+        Sort sort = Sort.by(asc("portfolio"), desc("timestamp"));
+        PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
+
+        return portfolioCashRepository.findAll(spec, page)
+                .map(this::toModel);
     }
 
     @Transactional

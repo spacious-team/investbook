@@ -20,8 +20,8 @@ package ru.investbook.repository.specs;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
-import ru.investbook.entity.TransactionEntity;
-import ru.investbook.entity.TransactionEntity_;
+import ru.investbook.entity.PortfolioCashEntity;
+import ru.investbook.entity.PortfolioCashEntity_;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -35,19 +35,19 @@ import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 
 @RequiredArgsConstructor(staticName = "of")
-public class TransactionSearchSpecification implements Specification<TransactionEntity> {
+public class PortfolioCashSearchSpecification implements Specification<PortfolioCashEntity> {
     private final String portfolio;
-    private final String security;
     private final LocalDate dateFrom;
     private final LocalDate dateTo;
+    private final String currency;
 
     @Override
-    public Predicate toPredicate(Root<TransactionEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+    public Predicate toPredicate(Root<PortfolioCashEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
         return Stream.of(
-                        filterByPortfolioName(root, builder, TransactionEntity_.portfolio, portfolio, query),
-                        filterBySecurity(root, builder, TransactionEntity_.security, security),
-                        filterByDateFrom(root, builder, TransactionEntity_.timestamp, dateFrom),
-                        filterByDateTo(root, builder, TransactionEntity_.timestamp, dateTo))
+                        filterByPortfolioName(root, builder, PortfolioCashEntity_.portfolio, portfolio, query),
+                        filterByDateFrom(root, builder, PortfolioCashEntity_.timestamp, dateFrom),
+                        filterByDateTo(root, builder, PortfolioCashEntity_.timestamp, dateTo),
+                        filterByCurrency(root, builder, PortfolioCashEntity_.currency, currency))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);
