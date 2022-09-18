@@ -19,12 +19,19 @@
 package ru.investbook.repository.specs;
 
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEntity_;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.SingularAttribute;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -36,5 +43,36 @@ class SpecificationHelper {
                 builder.equal(security.get(SecurityEntity_.ticker), searchingSecurity),
                 builder.equal(security.get(SecurityEntity_.isin), searchingSecurity),
                 builder.like(security.get(SecurityEntity_.name), searchingSecurity + "%"));
+    }
+
+    @Nullable
+    static <T> Predicate filterByDateFrom(Root<T> root,
+                                          CriteriaBuilder builder,
+                                          SingularAttribute<T, Instant> attribute,
+                                          LocalDate dateFrom) {
+        if (dateFrom == null) {
+            return null;
+        }
+        Instant startOfDay = dateFrom.atStartOfDay(ZoneId.systemDefault())
+                .toInstant();
+        return builder.greaterThanOrEqualTo(
+                root.get(attribute),
+                startOfDay);
+    }
+
+    @Nullable
+    static <T> Predicate filterByDateTo(Root<T> root,
+                                        CriteriaBuilder builder,
+                                        SingularAttribute<T, Instant> attribute,
+                                        LocalDate dateTo) {
+        if (dateTo == null) {
+            return null;
+        }
+        Instant endOfDay = dateTo.atTime(LocalTime.MAX)
+                .atZone(ZoneId.systemDefault())
+                .toInstant();
+        return builder.lessThanOrEqualTo(
+                root.get(attribute),
+                endOfDay);
     }
 }

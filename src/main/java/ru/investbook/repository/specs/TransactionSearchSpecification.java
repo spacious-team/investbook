@@ -33,15 +33,12 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 import static org.springframework.util.StringUtils.hasText;
-import static ru.investbook.repository.specs.SpecificationHelper.filterSecurity;
+import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 
 @RequiredArgsConstructor(staticName = "of")
@@ -56,8 +53,8 @@ public class TransactionSearchSpecification implements Specification<Transaction
         return Stream.of(
                         getPortfolioPredicate(root, query, builder),
                         getSecurityPredicate(root, builder),
-                        getDateFromPredicate(root, builder),
-                        getDateToPredicate(root, builder))
+                        filterByDateFrom(root, builder, TransactionEntity_.timestamp, dateFrom),
+                        filterByDateTo(root, builder, TransactionEntity_.timestamp, dateTo))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);
@@ -83,31 +80,6 @@ public class TransactionSearchSpecification implements Specification<Transaction
 
         return builder.in(transactionPortfolioPath)
                 .value(enabledPortfolioIds);
-    }
-
-    @Nullable
-    private Predicate getDateFromPredicate(Root<TransactionEntity> root, CriteriaBuilder builder) {
-        if (dateFrom == null) {
-            return null;
-        }
-        Instant startOfDay = dateFrom.atStartOfDay(ZoneId.systemDefault())
-                .toInstant();
-        return builder.greaterThanOrEqualTo(
-                root.get(TransactionEntity_.timestamp),
-                startOfDay);
-    }
-
-    @Nullable
-    private Predicate getDateToPredicate(Root<TransactionEntity> root, CriteriaBuilder builder) {
-        if (dateTo == null) {
-            return null;
-        }
-        Instant endOfDay = dateTo.atTime(LocalTime.MAX)
-                .atZone(ZoneId.systemDefault())
-                .toInstant();
-        return builder.lessThanOrEqualTo(
-                root.get(TransactionEntity_.timestamp),
-                endOfDay);
     }
 
     @Nullable
