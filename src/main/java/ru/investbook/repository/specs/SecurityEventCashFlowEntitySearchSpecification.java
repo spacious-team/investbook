@@ -21,9 +21,7 @@ package ru.investbook.repository.specs;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.Nullable;
 import ru.investbook.entity.CashFlowTypeEntity_;
-import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity_;
 
@@ -36,7 +34,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static org.springframework.util.StringUtils.hasText;
 import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 
@@ -55,20 +52,11 @@ public class SecurityEventCashFlowEntitySearchSpecification implements Specifica
                         filterByPortfolio(root, builder, SecurityEventCashFlowEntity_.portfolio, portfolio),
                         filterByDateFrom(root, builder, SecurityEventCashFlowEntity_.timestamp, dateFrom),
                         filterByDateTo(root, builder, SecurityEventCashFlowEntity_.timestamp, dateTo),
-                        getSecurityPredicate(root, builder),
+                        filterBySecurity(root, builder, SecurityEventCashFlowEntity_.security, security),
                         getCacheFlowTypePredicate(root, builder))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);
-    }
-
-    @Nullable
-    private Predicate getSecurityPredicate(Root<SecurityEventCashFlowEntity> root, CriteriaBuilder builder) {
-        if (hasText(security)) {
-            Path<SecurityEntity> securityPath = root.get(SecurityEventCashFlowEntity_.security);
-            return filterSecurity(builder, securityPath, security);
-        }
-        return null;
     }
 
     private Predicate getCacheFlowTypePredicate(Root<SecurityEventCashFlowEntity> root, CriteriaBuilder builder) {

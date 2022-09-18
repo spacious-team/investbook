@@ -21,7 +21,6 @@ package ru.investbook.repository.specs;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.Nullable;
-import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityQuoteEntity;
 import ru.investbook.entity.SecurityQuoteEntity_;
 
@@ -38,7 +37,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static org.springframework.util.StringUtils.hasText;
-import static ru.investbook.repository.specs.SpecificationHelper.filterSecurity;
+import static ru.investbook.repository.specs.SpecificationHelper.filterBySecurity;
 
 
 @RequiredArgsConstructor(staticName = "of")
@@ -50,7 +49,7 @@ public class SecurityQuoteSearchSpecification implements Specification<SecurityQ
     @Override
     public Predicate toPredicate(Root<SecurityQuoteEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
         return Stream.of(
-                        getSecurityPredicate(root, builder),
+                        filterBySecurity(root, builder, SecurityQuoteEntity_.security, security),
                         getCurrencyPredicate(root, builder),
                         getDatePredicate(root, builder))
                 .filter(Objects::nonNull)
@@ -81,14 +80,5 @@ public class SecurityQuoteSearchSpecification implements Specification<SecurityQ
                 root.get(SecurityQuoteEntity_.timestamp),
                 startOfDay,
                 endOfDay);
-    }
-
-    @Nullable
-    private Predicate getSecurityPredicate(Root<SecurityQuoteEntity> root, CriteriaBuilder builder) {
-        if (hasText(security)) {
-            Path<SecurityEntity> securityPath = root.get(SecurityQuoteEntity_.security);
-            return filterSecurity(builder, securityPath, security);
-        }
-        return null;
     }
 }

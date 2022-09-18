@@ -23,7 +23,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.Nullable;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.PortfolioEntity_;
-import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.entity.TransactionEntity_;
 
@@ -84,10 +83,7 @@ public class TransactionSearchSpecification implements Specification<Transaction
 
     @Nullable
     private Predicate getSecurityPredicate(Root<TransactionEntity> root, CriteriaBuilder builder) {
-        if (hasText(security)) {
-            Path<SecurityEntity> securityPath = root.get(TransactionEntity_.security);
-            return filterSecurity(builder, securityPath, security);
-        }
-        return null;
+        return filterBySecurity(root, builder, TransactionEntity_.security, security);
     }
+
 }

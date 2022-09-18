@@ -41,11 +41,19 @@ import static org.springframework.util.StringUtils.hasText;
 @NoArgsConstructor(access = PRIVATE)
 class SpecificationHelper {
 
-    static Predicate filterSecurity(CriteriaBuilder builder, Path<SecurityEntity> security, String searchingSecurity) {
-        return builder.or(
-                builder.equal(security.get(SecurityEntity_.ticker), searchingSecurity),
-                builder.equal(security.get(SecurityEntity_.isin), searchingSecurity),
-                builder.like(security.get(SecurityEntity_.name), searchingSecurity + "%"));
+    @Nullable
+    static <T> Predicate filterBySecurity(Root<T> root,
+                                          CriteriaBuilder builder,
+                                          SingularAttribute<T, SecurityEntity> attribute,
+                                          String security) {
+        if (hasText(security)) {
+            Path<SecurityEntity> securityPath = root.get(attribute);
+            return builder.or(
+                    builder.equal(securityPath.get(SecurityEntity_.ticker), security),
+                    builder.equal(securityPath.get(SecurityEntity_.isin), security),
+                    builder.like(securityPath.get(SecurityEntity_.name), security + "%"));
+        }
+        return null;
     }
 
     @Nullable
