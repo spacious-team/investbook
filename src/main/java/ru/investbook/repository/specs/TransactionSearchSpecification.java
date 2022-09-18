@@ -67,15 +67,15 @@ public class TransactionSearchSpecification implements Specification<Transaction
         if (hasText(portfolio)) {
             return builder.equal(transactionPortfolioPath, portfolio);
         }
-        //We do subquery because TransactionEntity is not related to PortfolioEntity in Java model, so
-        //we can not do join query in Criteria API
-        Subquery<String> subquery = query.subquery(String.class);
-        Root<PortfolioEntity> portfolios = subquery.from(PortfolioEntity.class);
+        // Do sub-query because TransactionEntity is not related to PortfolioEntity in Java model, so
+        // can not do join query in Criteria API
+        Subquery<String> subQuery = query.subquery(String.class);
+        Root<PortfolioEntity> portfolios = subQuery.from(PortfolioEntity.class);
 
         Path<String> portfolioId = portfolios.get(PortfolioEntity_.ID);
         Path<Boolean> portfolioEnabled = portfolios.get(PortfolioEntity_.enabled);
 
-        Subquery<String> enabledPortfolioIds = subquery.select(portfolioId)
+        Subquery<String> enabledPortfolioIds = subQuery.select(portfolioId)
                         .where(builder.isTrue(portfolioEnabled));
 
         return builder.in(transactionPortfolioPath)

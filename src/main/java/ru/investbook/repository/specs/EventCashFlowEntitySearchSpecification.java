@@ -22,20 +22,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.EventCashFlowEntity;
 import ru.investbook.entity.EventCashFlowEntity_;
-import ru.investbook.entity.PortfolioEntity_;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static org.springframework.util.StringUtils.hasText;
-import static ru.investbook.repository.specs.SpecificationHelper.filterByDateFrom;
-import static ru.investbook.repository.specs.SpecificationHelper.filterByDateTo;
+import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 
 @RequiredArgsConstructor(staticName = "of")
@@ -47,22 +43,11 @@ public class EventCashFlowEntitySearchSpecification implements Specification<Eve
     @Override
     public Predicate toPredicate(Root<EventCashFlowEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
         return Stream.of(
-                        getPortfolioPredicate(root, builder),
+                        filterByPortfolio(root, builder, EventCashFlowEntity_.portfolio, portfolio),
                         filterByDateFrom(root, builder, EventCashFlowEntity_.timestamp, dateFrom),
                         filterByDateTo(root, builder, EventCashFlowEntity_.timestamp, dateTo))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);
-    }
-
-    private Predicate getPortfolioPredicate(Root<EventCashFlowEntity> root, CriteriaBuilder builder) {
-        if (hasText(portfolio)) {
-            Path<Object> path = root.get(EventCashFlowEntity_.portfolio)
-                    .get(PortfolioEntity_.ID);
-            return builder.equal(path, portfolio);
-        }
-        Path<Boolean> path = root.get(EventCashFlowEntity_.portfolio)
-                .get(PortfolioEntity_.enabled);
-        return builder.isTrue(path);
     }
 }

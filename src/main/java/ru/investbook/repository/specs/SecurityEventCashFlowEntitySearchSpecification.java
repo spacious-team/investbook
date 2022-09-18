@@ -23,7 +23,6 @@ import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.Nullable;
 import ru.investbook.entity.CashFlowTypeEntity_;
-import ru.investbook.entity.PortfolioEntity_;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity_;
@@ -53,7 +52,7 @@ public class SecurityEventCashFlowEntitySearchSpecification implements Specifica
                                  CriteriaQuery<?> query,
                                  CriteriaBuilder builder) {
         return Stream.of(
-                        getPortfolioPredicate(root, builder),
+                        filterByPortfolio(root, builder, SecurityEventCashFlowEntity_.portfolio, portfolio),
                         filterByDateFrom(root, builder, SecurityEventCashFlowEntity_.timestamp, dateFrom),
                         filterByDateTo(root, builder, SecurityEventCashFlowEntity_.timestamp, dateTo),
                         getSecurityPredicate(root, builder),
@@ -61,17 +60,6 @@ public class SecurityEventCashFlowEntitySearchSpecification implements Specifica
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);
-    }
-
-    private Predicate getPortfolioPredicate(Root<SecurityEventCashFlowEntity> root, CriteriaBuilder builder) {
-        if (hasText(portfolio)) {
-            Path<Object> path = root.get(SecurityEventCashFlowEntity_.portfolio)
-                    .get(PortfolioEntity_.ID);
-            return builder.equal(path, portfolio);
-        }
-        Path<Boolean> path = root.get(SecurityEventCashFlowEntity_.portfolio)
-                .get(PortfolioEntity_.enabled);
-        return builder.isTrue(path);
     }
 
     @Nullable

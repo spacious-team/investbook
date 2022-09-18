@@ -20,6 +20,8 @@ package ru.investbook.repository.specs;
 
 import lombok.NoArgsConstructor;
 import org.springframework.lang.Nullable;
+import ru.investbook.entity.PortfolioEntity;
+import ru.investbook.entity.PortfolioEntity_;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEntity_;
 
@@ -34,6 +36,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 
 import static lombok.AccessLevel.PRIVATE;
+import static org.springframework.util.StringUtils.hasText;
 
 @NoArgsConstructor(access = PRIVATE)
 class SpecificationHelper {
@@ -74,5 +77,19 @@ class SpecificationHelper {
         return builder.lessThanOrEqualTo(
                 root.get(attribute),
                 endOfDay);
+    }
+
+    static <T> Predicate filterByPortfolio(Root<T> root,
+                                           CriteriaBuilder builder,
+                                           SingularAttribute<T, PortfolioEntity> attribute,
+                                           String portfolio) {
+        if (hasText(portfolio)) {
+            Path<Object> path = root.get(attribute)
+                    .get(PortfolioEntity_.ID);
+            return builder.equal(path, portfolio);
+        }
+        Path<Boolean> path = root.get(attribute)
+                .get(PortfolioEntity_.enabled);
+        return builder.isTrue(path);
     }
 }
