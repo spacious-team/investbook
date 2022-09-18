@@ -36,15 +36,15 @@
 <label th:fragment="date(date)">
     <label>
         Дата
-        <input type="date" th:field="__${date}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2022-01-01" onchange="this.form.submit()"/>
+        <input type="date" th:field="__${date}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2022-01-01" onfocusout="this.form.submit()"/>
     </label>
 </label>
 
 <label th:fragment="date-range(from, to)">
     Дата
     <span style="display: flex">
-        <input type="date" th:field="__${from}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2001-01-31" onchange="this.form.submit()"/>
-        <input type="date" th:field="__${to}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2100-12-31" onchange="this.form.submit()"/>
+        <input type="date" th:field="__${from}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2001-01-31" onfocusout="this.form.submit()"/>
+        <input type="date" th:field="__${to}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2100-12-31" onfocusout="this.form.submit()"/>
     </span>
 </label>
 
