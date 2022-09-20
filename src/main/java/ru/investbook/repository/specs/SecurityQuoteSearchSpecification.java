@@ -44,7 +44,7 @@ public class SecurityQuoteSearchSpecification implements Specification<SecurityQ
     public Predicate toPredicate(Root<SecurityQuoteEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
         return Stream.of(
                         filterBySecurity(root, builder, SecurityQuoteEntity_.security, security),
-                        filterByCurrency(root, builder, SecurityQuoteEntity_.currency, currency),
+                        filterByEquals(root, builder, SecurityQuoteEntity_.currency, currency),
                         filterByInstantBelongsToDate(root, builder, SecurityQuoteEntity_.timestamp, date))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)

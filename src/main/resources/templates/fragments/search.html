@@ -33,6 +33,11 @@
     <input type="text" th:field="__${security}__" placeholder="Название / Тикер / ISIN" onchange="this.form.submit()"/>
 </label>
 
+<label th:fragment="security-sector(securitySector)">
+    Сектор
+    <input type="text" th:field="__${securitySector}__" placeholder="Сектор" onchange="this.form.submit()"/>
+</label>
+
 <label th:fragment="date(date)">
     <label>
         Дата

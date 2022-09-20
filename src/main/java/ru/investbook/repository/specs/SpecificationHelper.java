@@ -53,7 +53,32 @@ class SpecificationHelper {
             return builder.or(
                     builder.equal(securityPath.get(SecurityEntity_.ticker), security),
                     builder.equal(securityPath.get(SecurityEntity_.isin), security),
-                    builder.like(securityPath.get(SecurityEntity_.name), security + "%"));
+                    builder.like(securityPath.get(SecurityEntity_.name), "%" + security + "%"));
+        }
+        return null;
+    }
+
+    @Nullable
+    static <T> Predicate filterBySecurityId(Root<T> root,
+                                            CriteriaBuilder builder,
+                                            SingularAttribute<T, Integer> attribute,
+                                            String security,
+                                            CriteriaQuery<?> query) {
+        if (hasText(security)) {
+            // Do sub-query because SecurityEntity is not related to SecurityDescriptionEntity in Java model, so
+            // can not do join query in Criteria API
+            Subquery<Integer> subQuery = query.subquery(Integer.class);
+            Root<SecurityEntity> securities = subQuery.from(SecurityEntity.class);
+
+            Subquery<Integer> requestedSecurityIds = subQuery.select(securities.get(SecurityEntity_.ID))
+                    .where(builder.or(
+                            builder.equal(securities.get(SecurityEntity_.ticker), security),
+                            builder.equal(securities.get(SecurityEntity_.isin), security),
+                            builder.like(securities.get(SecurityEntity_.name), "%" + security + "%")));
+
+            Path<Integer> securityIdPath = root.get(attribute);
+            return builder.in(securityIdPath)
+                    .value(requestedSecurityIds);
         }
         return null;
     }
@@ -136,7 +161,7 @@ class SpecificationHelper {
         Subquery<String> subQuery = query.subquery(String.class);
         Root<PortfolioEntity> portfolios = subQuery.from(PortfolioEntity.class);
 
-        Path<String> portfolioId = portfolios.get(PortfolioEntity_.ID);
+        Path<String> portfolioId = portfolios.get(PortfolioEntity_.id);
         Path<Boolean> portfolioEnabled = portfolios.get(PortfolioEntity_.enabled);
 
         Subquery<String> enabledPortfolioIds = subQuery.select(portfolioId)
@@ -147,13 +172,25 @@ class SpecificationHelper {
     }
 
     @Nullable
-    static <T> Predicate filterByCurrency(Root<T> root,
-                                          CriteriaBuilder builder,
-                                          SingularAttribute<T, String> attribute,
-                                          String currency) {
-        if (hasText(currency)) {
+    static <X, T> Predicate filterByEquals(Root<X> root,
+                                           CriteriaBuilder builder,
+                                           SingularAttribute<X, T> attribute,
+                                           String value) {
+        if (hasText(value)) {
+            Path<T> path = root.get(attribute);
+            return builder.equal(path, value);
+        }
+        return null;
+    }
+
+    @Nullable
+    static <X> Predicate filterByLike(Root<X> root,
+                                           CriteriaBuilder builder,
+                                           SingularAttribute<X, String> attribute,
+                                           String value) {
+        if (hasText(value)) {
             Path<String> path = root.get(attribute);
-            return builder.equal(path, currency);
+            return builder.like(path, value + "%");
         }
         return null;
     }
