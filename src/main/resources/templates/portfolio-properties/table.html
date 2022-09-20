@@ -39,6 +39,13 @@
     Для редактирования свойства кликните по его номеру, для удаления - на крестик.
 </p>
 
+<form action="#" th:action="@{/portfolio-properties/search}" th:object="${filter}" method="post" class="search-filter">
+    <div th:replace="fragments/search :: portfolio (selected='*{portfolio}', portfolios=${portfolios})"></div>
+    <div th:replace="fragments/search :: date ('*{date}')"></div>
+    <div th:replace="fragments/search :: portfolio-property-type ('*{property}')"></div>
+    <div th:replace="fragments/search :: page-size ('*{pageSize}')"></div>
+</form>
+
 <table>
     <tr>
         <th>Счет</th>
@@ -48,7 +55,7 @@
         <th class="value">Значение</th>
         <th></th>
     </tr>
-    <th:block th:each="property : ${properties}">
+    <th:block th:each="property : ${page.content}">
         <tr th:if="${property instanceof T(ru.investbook.web.forms.model.PortfolioPropertyTotalAssetsModel)}">
             <td th:text="${property.portfolio}"/>
             <td><a th:href="@{/portfolio-properties/edit-form/total-assets(id=${property.id})}" th:text="${property.id}"/></td>
@@ -59,6 +66,15 @@
         </tr>
     </th:block>
 </table>
+
+<div th:insert="fragments/navigation :: navigation-bar (
+        endpoint='portfolio-properties',
+        params='portfolio=${filter.portfolio},
+                date=${filter.date},
+                property=${filter.property},
+                pageSize=${filter.pageSize}'
+)">
+</div>
 
 </body>
 </html>
