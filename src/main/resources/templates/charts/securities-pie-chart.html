@@ -31,10 +31,7 @@
 <body>
 <h1>Диаграммы</h1>
 <a href="/">На главную</a><br>
-<p class="menu">
-    <a href="/charts/sectors-pie-chart">Секторальный состав</a>
-    <a href="/charts/securities-pie-chart" style="text-decoration: underline">Состав бумаг</a>
-</p>
+<p th:replace="charts/menu :: pie_charts_menu"></p>
 <div id="chartdiv"></div>
 
 <script th:inline="javascript">
