@@ -18,7 +18,7 @@
 
 package ru.investbook.web.forms.controller;
 
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,8 +37,6 @@ import ru.investbook.web.forms.model.filter.TransactionFormFilterModel;
 import ru.investbook.web.forms.service.TransactionFormsService;
 
 import javax.validation.Valid;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/security-deposit")
@@ -52,14 +50,8 @@ public class SecurityDepositController extends TransactionController {
 
     @GetMapping
     public String get(@ModelAttribute("filter") TransactionFormFilterModel filter, Model model) {
-        List<TransactionModel> data = transactionFormsService.getAll(filter)
-                .stream()
-                .filter(tr -> tr.getPrice() == null)
-                .collect(Collectors.toList());
-
-        //there is no paging here because for now it is difficult to do it on DB level
-        // since we have filtering by price
-        model.addAttribute("page", new PageableWrapperModel<>(new PageImpl<>(data)));
+        Page<TransactionModel> page = transactionFormsService.getSecurityDepositPage(filter);
+        model.addAttribute("page", new PageableWrapperModel<>(page));
         model.addAttribute("portfolios", portfolios);
 
         return "security-deposit/table";

@@ -70,7 +70,7 @@ class SpecificationHelper {
             Subquery<Integer> subQuery = query.subquery(Integer.class);
             Root<SecurityEntity> securities = subQuery.from(SecurityEntity.class);
 
-            Subquery<Integer> requestedSecurityIds = subQuery.select(securities.get(SecurityEntity_.ID))
+            Subquery<Integer> requestedSecurityIds = subQuery.select(securities.get(SecurityEntity_.id))
                     .where(builder.or(
                             builder.equal(securities.get(SecurityEntity_.ticker), security),
                             builder.equal(securities.get(SecurityEntity_.isin), security),
@@ -185,9 +185,9 @@ class SpecificationHelper {
 
     @Nullable
     static <X> Predicate filterByLike(Root<X> root,
-                                           CriteriaBuilder builder,
-                                           SingularAttribute<X, String> attribute,
-                                           @Nullable String value) {
+                                      CriteriaBuilder builder,
+                                      SingularAttribute<X, String> attribute,
+                                      @Nullable String value) {
         if (hasText(value)) {
             Path<String> path = root.get(attribute);
             return builder.like(path, value + "%");

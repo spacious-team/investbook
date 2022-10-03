@@ -44,6 +44,7 @@
     <div th:replace="fragments/search :: portfolio (selected='*{portfolio}', portfolios=${portfolios})"></div>
     <div th:replace="fragments/search :: security ('*{security}')"></div>
     <div th:replace="fragments/search :: date-range (from='*{dateFrom}', to='*{dateTo}')"></div>
+    <div th:replace="fragments/search :: page-size ('*{pageSize}')"></div>
 </form>
 
 <table>

@@ -29,6 +29,7 @@ import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -38,12 +39,14 @@ import ru.investbook.converter.TransactionConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
+import ru.investbook.entity.TransactionEntity_;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.report.FifoPositionsFilter;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
+import ru.investbook.repository.specs.SecurityDepositSearchSpecification;
 import ru.investbook.repository.specs.TransactionSearchSpecification;
 import ru.investbook.web.forms.model.SecurityType;
 import ru.investbook.web.forms.model.SplitModel;
@@ -91,28 +94,29 @@ public class TransactionFormsService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TransactionModel> getPage(TransactionFormFilterModel filter) {
+    public Page<TransactionModel> getTransactionPage(TransactionFormFilterModel filter) {
         TransactionSearchSpecification spec = TransactionSearchSpecification.of(
                 filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo());
 
-        Sort sort = Sort.by(asc("portfolio"), desc("timestamp"), asc("security.id"));
+        return getTransactionModels(spec, filter);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<TransactionModel> getSecurityDepositPage(TransactionFormFilterModel filter) {
+        SecurityDepositSearchSpecification spec = SecurityDepositSearchSpecification.of(
+                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo());
+
+        return getTransactionModels(spec, filter);
+    }
+
+    @NonNull
+    private Page<TransactionModel> getTransactionModels(TransactionSearchSpecification spec,
+                                                        TransactionFormFilterModel filter) {
+        Sort sort = Sort.by(asc(TransactionEntity_.PORTFOLIO), desc(TransactionEntity_.TIMESTAMP), asc("security.id"));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
         return transactionRepository.findAll(spec, page)
                 .map(this::toTransactionModel);
-    }
-
-    @Transactional(readOnly = true)
-    public List<TransactionModel> getAll(TransactionFormFilterModel filter) {
-        TransactionSearchSpecification spec = TransactionSearchSpecification.of(
-                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo());
-
-        Sort sort = Sort.by(asc("portfolio"), desc("timestamp"), asc("security.id"));
-
-        return transactionRepository.findAll(spec, sort)
-                .stream()
-                .map(this::toTransactionModel)
-                .toList();
     }
 
     @Transactional

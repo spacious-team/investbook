@@ -82,7 +82,7 @@ public class TransactionModel {
     private int count;
 
     /**
-     * May be null for security deposit and withdrawal
+     * Equals to null for security deposit and withdrawal
      */
     @Nullable
     @Positive
