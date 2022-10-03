@@ -45,15 +45,15 @@ public class ForeignExchangeRateSearchSpecification implements Specification<For
     @Override
     public Predicate toPredicate(Root<ForeignExchangeRateEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
         return Stream.of(
-                        getCurrencyPredicate(root, builder),
-                        getDatePredicate(root, builder))
+                        filterByCurrency(root, builder),
+                        filterByDate(root, builder))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);
     }
 
     @Nullable
-    private Predicate getCurrencyPredicate(Root<ForeignExchangeRateEntity> root, CriteriaBuilder builder) {
+    private Predicate filterByCurrency(Root<ForeignExchangeRateEntity> root, CriteriaBuilder builder) {
         if (hasText(currency)) {
             Path<String> path = root.get(ForeignExchangeRateEntity_.pk)
                     .get(ForeignExchangeRateEntityPk_.CURRENCY_PAIR);
@@ -63,11 +63,11 @@ public class ForeignExchangeRateSearchSpecification implements Specification<For
     }
 
     @Nullable
-    private Predicate getDatePredicate(Root<ForeignExchangeRateEntity> root, CriteriaBuilder builder) {
+    private Predicate filterByDate(Root<ForeignExchangeRateEntity> root, CriteriaBuilder builder) {
         if (date == null) {
             return null;
         }
-        Path<Object> path = root.get(ForeignExchangeRateEntity_.pk)
+        Path<LocalDate> path = root.get(ForeignExchangeRateEntity_.pk)
                 .get(ForeignExchangeRateEntityPk_.DATE);
         return builder.equal(path, date);
     }

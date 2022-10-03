@@ -61,7 +61,7 @@ public class TransactionController {
 
     @GetMapping
     public String get(@ModelAttribute("filter") TransactionFormFilterModel filter, Model model) {
-        Page<TransactionModel> data = transactionFormsService.getPage(filter);
+        Page<TransactionModel> data = transactionFormsService.getTransactionPage(filter);
         model.addAttribute("page", new PageableWrapperModel<>(data));
         model.addAttribute("portfolios", portfolios);
 

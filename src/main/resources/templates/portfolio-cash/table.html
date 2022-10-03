@@ -39,6 +39,13 @@
     Для редактирования свойства кликните по его номеру, для удаления - на крестик.
 </p>
 
+<form action="#" th:action="@{/portfolio-cash/search}" th:object="${filter}" method="post" class="search-filter">
+    <div th:replace="fragments/search :: portfolio (selected='*{portfolio}', portfolios=${portfolios})"></div>
+    <div th:replace="fragments/search :: date-range (from='*{dateFrom}', to='*{dateTo}')"></div>
+    <div th:replace="fragments/search :: currency-picker ('*{currency}')"></div>
+    <div th:replace="fragments/search :: page-size ('*{pageSize}')"></div>
+</form>
+
 <table>
     <tr>
         <th>Счет</th>
@@ -48,7 +55,7 @@
         <th class="value">Значение</th>
         <th></th>
     </tr>
-    <th:block th:each="cash : ${cashObjects}">
+    <th:block th:each="cash : ${page.content}">
         <tr>
             <td th:text="${cash.portfolio}"/>
             <td><a th:href="@{/portfolio-cash/edit-form(id=${cash.id})}" th:text="${cash.id}"/></td>
@@ -59,6 +66,16 @@
         </tr>
     </th:block>
 </table>
+
+<div th:insert="fragments/navigation :: navigation-bar (
+        endpoint='portfolio-cash',
+        params='portfolio=${filter.portfolio},
+                dateFrom=${filter.dateFrom},
+                dateTo=${filter.dateTo},
+                currency=${filter.currency},
+                pageSize=${filter.pageSize}'
+    )">
+</div>
 
 </body>
 </html>

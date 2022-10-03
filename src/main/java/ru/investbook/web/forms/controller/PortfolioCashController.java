@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,9 +27,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.web.ControllerHelper;
+import ru.investbook.web.forms.model.PageableWrapperModel;
 import ru.investbook.web.forms.model.PortfolioCashModel;
+import ru.investbook.web.forms.model.filter.PortfolioCashFormFilterModel;
 import ru.investbook.web.forms.service.PortfolioCashFormsService;
 
 import javax.annotation.PostConstruct;
@@ -51,9 +55,19 @@ public class PortfolioCashController {
     }
 
     @GetMapping
-    public String get(Model model) {
-        model.addAttribute("cashObjects", portfolioCashFormsService.getAll());
+    public String get(@ModelAttribute("filter") PortfolioCashFormFilterModel filter, Model model) {
+        Page<PortfolioCashModel> data = portfolioCashFormsService.getPage(filter);
+        model.addAttribute("page", new PageableWrapperModel<>(data));
+        model.addAttribute("portfolios", portfolios);
+
         return "portfolio-cash/table";
+    }
+
+    @PostMapping("/search")
+    public String search(@ModelAttribute("filter") PortfolioCashFormFilterModel filter,
+                         RedirectAttributes attributes) {
+        attributes.addFlashAttribute("filter", filter);
+        return "redirect:/portfolio-cash";
     }
 
     @GetMapping("/edit-form")

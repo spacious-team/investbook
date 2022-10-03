@@ -18,11 +18,11 @@
 
 package ru.investbook.repository.specs;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.springframework.data.jpa.domain.Specification;
-import ru.investbook.entity.TransactionEntity;
-import ru.investbook.entity.TransactionEntity_;
+import ru.investbook.entity.PortfolioPropertyEntity;
+import ru.investbook.entity.PortfolioPropertyEntity_;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -35,27 +35,19 @@ import java.util.stream.Stream;
 import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-public class TransactionSearchSpecification implements Specification<TransactionEntity> {
+@RequiredArgsConstructor(staticName = "of")
+public class PortfolioPropertySearchSpecification implements Specification<PortfolioPropertyEntity> {
     private final String portfolio;
-    private final String security;
-    private final LocalDate dateFrom;
-    private final LocalDate dateTo;
-
-    public static TransactionSearchSpecification of(String portfolio,
-                                                    String security,
-                                                    LocalDate dateFrom,
-                                                    LocalDate dateTo) {
-        return new TransactionSearchSpecification(portfolio, security, dateFrom, dateTo);
-    }
+    private final LocalDate date;
+    private final PortfolioPropertyType property;
 
     @Override
-    public Predicate toPredicate(Root<TransactionEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+    public Predicate toPredicate(Root<PortfolioPropertyEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+        String propertyName = (property == null) ? null : property.name();
         return Stream.of(
-                        filterByPortfolioName(root, builder, TransactionEntity_.portfolio, portfolio, query),
-                        filterBySecurity(root, builder, TransactionEntity_.security, security),
-                        filterByDateFrom(root, builder, TransactionEntity_.timestamp, dateFrom),
-                        filterByDateTo(root, builder, TransactionEntity_.timestamp, dateTo))
+                        filterByPortfolio(root, builder, PortfolioPropertyEntity_.portfolio, portfolio),
+                        filterByInstantBelongsToDate(root, builder, PortfolioPropertyEntity_.timestamp, date),
+                        filterByEquals(root, builder, PortfolioPropertyEntity_.property, propertyName))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);

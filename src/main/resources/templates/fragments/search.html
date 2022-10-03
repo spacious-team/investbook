@@ -23,8 +23,17 @@
 <label th:fragment="portfolio(selected, portfolios)">
     Счет
     <select th:field="__${selected}__" onchange="this.form.submit()">
-        <option th:value="NULL" th:text="NULL" th:selected onchange="this.form.submit()"/>
-        <option th:each="portfolio : ${portfolios}" th:value="${portfolio}" th:text="${portfolio}" onchange="this.form.submit()"/>
+        <option th:value="NULL" th:text="NULL" th:selected/>
+        <option th:each="portfolio : ${portfolios}" th:value="${portfolio}" th:text="${portfolio}"/>
+    </select>
+</label>
+
+<label th:fragment="portfolio-property-type(property)">
+    Свойство
+    <select th:field="__${property}__" onchange="this.form.submit()">
+        <option th:value="NULL" th:text="NULL" th:selected/>
+        <option value="TOTAL_ASSETS_RUB">Активы, руб</option>
+        <option value="TOTAL_ASSETS_USD">Активы, usd</option>
     </select>
 </label>
 
@@ -33,18 +42,23 @@
     <input type="text" th:field="__${security}__" placeholder="Название / Тикер / ISIN" onchange="this.form.submit()"/>
 </label>
 
+<label th:fragment="security-sector(securitySector)">
+    Сектор
+    <input type="text" th:field="__${securitySector}__" placeholder="Сектор" onchange="this.form.submit()"/>
+</label>
+
 <label th:fragment="date(date)">
     <label>
         Дата
-        <input type="date" th:field="__${date}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2022-01-01" onchange="this.form.submit()"/>
+        <input type="date" th:field="__${date}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2022-01-01" onfocusout="this.form.submit()"/>
     </label>
 </label>
 
 <label th:fragment="date-range(from, to)">
     Дата
     <span style="display: flex">
-        <input type="date" th:field="__${from}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2001-01-31" onchange="this.form.submit()"/>
-        <input type="date" th:field="__${to}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2100-12-31" onchange="this.form.submit()"/>
+        <input type="date" th:field="__${from}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2001-01-31" onfocusout="this.form.submit()"/>
+        <input type="date" th:field="__${to}__" pattern="\d{4}-\d{2}-\d{2}" placeholder="2100-12-31" onfocusout="this.form.submit()"/>
     </span>
 </label>
 

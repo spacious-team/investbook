@@ -18,11 +18,10 @@
 
 package ru.investbook.repository.specs;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
-import ru.investbook.entity.TransactionEntity;
-import ru.investbook.entity.TransactionEntity_;
+import ru.investbook.entity.PortfolioCashEntity;
+import ru.investbook.entity.PortfolioCashEntity_;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -35,27 +34,20 @@ import java.util.stream.Stream;
 import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-public class TransactionSearchSpecification implements Specification<TransactionEntity> {
+@RequiredArgsConstructor(staticName = "of")
+public class PortfolioCashSearchSpecification implements Specification<PortfolioCashEntity> {
     private final String portfolio;
-    private final String security;
     private final LocalDate dateFrom;
     private final LocalDate dateTo;
-
-    public static TransactionSearchSpecification of(String portfolio,
-                                                    String security,
-                                                    LocalDate dateFrom,
-                                                    LocalDate dateTo) {
-        return new TransactionSearchSpecification(portfolio, security, dateFrom, dateTo);
-    }
+    private final String currency;
 
     @Override
-    public Predicate toPredicate(Root<TransactionEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+    public Predicate toPredicate(Root<PortfolioCashEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
         return Stream.of(
-                        filterByPortfolioName(root, builder, TransactionEntity_.portfolio, portfolio, query),
-                        filterBySecurity(root, builder, TransactionEntity_.security, security),
-                        filterByDateFrom(root, builder, TransactionEntity_.timestamp, dateFrom),
-                        filterByDateTo(root, builder, TransactionEntity_.timestamp, dateTo))
+                        filterByPortfolioName(root, builder, PortfolioCashEntity_.portfolio, portfolio, query),
+                        filterByDateFrom(root, builder, PortfolioCashEntity_.timestamp, dateFrom),
+                        filterByDateTo(root, builder, PortfolioCashEntity_.timestamp, dateTo),
+                        filterByEquals(root, builder, PortfolioCashEntity_.currency, currency))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);

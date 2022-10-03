@@ -20,35 +20,32 @@ package ru.investbook.repository.specs;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
-import ru.investbook.entity.SecurityQuoteEntity;
-import ru.investbook.entity.SecurityQuoteEntity_;
+import ru.investbook.entity.SecurityDescriptionEntity;
+import ru.investbook.entity.SecurityDescriptionEntity_;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static ru.investbook.repository.specs.SpecificationHelper.*;
+import static ru.investbook.repository.specs.SpecificationHelper.filterByLike;
+import static ru.investbook.repository.specs.SpecificationHelper.filterBySecurityId;
 
 
 @RequiredArgsConstructor(staticName = "of")
-public class SecurityQuoteSearchSpecification implements Specification<SecurityQuoteEntity> {
+public class SecurityDescriptionSearchSpecification implements Specification<SecurityDescriptionEntity> {
     private final String security;
-    private final String currency;
-    private final LocalDate date;
+    private final String securitySector;
 
     @Override
-    public Predicate toPredicate(Root<SecurityQuoteEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+    public Predicate toPredicate(Root<SecurityDescriptionEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
         return Stream.of(
-                        filterBySecurity(root, builder, SecurityQuoteEntity_.security, security),
-                        filterByEquals(root, builder, SecurityQuoteEntity_.currency, currency),
-                        filterByInstantBelongsToDate(root, builder, SecurityQuoteEntity_.timestamp, date))
+                        filterBySecurityId(root, builder, SecurityDescriptionEntity_.security, security, query),
+                        filterByLike(root, builder, SecurityDescriptionEntity_.sector, securitySector))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);
     }
-
 }

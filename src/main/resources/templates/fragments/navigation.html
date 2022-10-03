@@ -20,26 +20,27 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <body>
 
-<nav aria-label="Page navigation" th:fragment="navigation-bar(endpoint, params)">
+<nav aria-label="Page navigation" th:fragment="navigation-bar(endpoint, params)"
+     th:with="rangeStartPage=${T(java.lang.Math).max(0, page.current - 5)}">
 
-    <ul th:if="${page.total > 1}" th:with="startPage=${T(java.lang.Math).max(0, page.current - 5)}" class="page-bar">
+    <ul th:if="${page.total > 1}" th:with="rangeLastPage=${T(java.lang.Math).min(rangeStartPage + 10, page.total - 1)}" class="page-bar">
         <li th:classappend="${page.isFirst ? 'page-disabled' : ''}">
             <a class="page-link" th:href="@{/__${endpoint}__(__${params}__, page=__${page.previous}__)}" title="Назад">&#8592;</a>
         </li>
 
         <li th:if="${page.current > 5}">
             <a th:href="@{/__${endpoint}__(__${params}__, page=0)}">1</a>
-            <span>..</span>
+            <span th:if="${rangeStartPage > 1}">..</span>
         </li>
 
-        <th:block th:each="item : ${#numbers.sequence(startPage, T(java.lang.Math).min(startPage + 10, page.total - 1))}">
+        <th:block th:each="item : ${#numbers.sequence(rangeStartPage, rangeLastPage)}">
             <li th:classappend="${item == page.current ? 'page-active' : ''}">
                 <a th:href="@{/__${endpoint}__(__${params}__, page=__${item}__)}" th:text="${item} + 1"/>
             </li>
         </th:block>
 
-        <li th:if="${page.current < page.total - 6}" th:with="lastPage=${page.total} - 1">
-            <span>..</span>
+        <li th:if="${(page.total > 11) && (page.current < page.total - 6)}" th:with="lastPage=${page.total} - 1">
+            <span th:if="${rangeLastPage < lastPage - 1}">..</span>
             <a th:href="@{/__${endpoint}__(__${params}__, page=__${lastPage}__)}" th:text="${page.total}"
                title="Последняя"/>
         </li>

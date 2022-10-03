@@ -19,19 +19,25 @@
 package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.SecurityDescriptionEntity;
+import ru.investbook.entity.SecurityDescriptionEntity_;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityDescriptionRepository;
 import ru.investbook.repository.SecurityRepository;
+import ru.investbook.repository.specs.SecurityDescriptionSearchSpecification;
 import ru.investbook.web.forms.model.SecurityDescriptionModel;
 import ru.investbook.web.forms.model.SecurityType;
+import ru.investbook.web.forms.model.filter.SecurityDescriptionFormFilterModel;
 
-import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static org.springframework.data.domain.Sort.Order.asc;
 
 
 @Component
@@ -48,11 +54,15 @@ public class SecurityDescriptionFormsService {
     }
 
     @Transactional(readOnly = true)
-    public List<SecurityDescriptionModel> getAll() {
-        return securityDescriptionRepository.findAll()
-                .stream()
-                .map(this::toModel)
-                .toList();
+    public Page<SecurityDescriptionModel> getPage(SecurityDescriptionFormFilterModel filter) {
+        SecurityDescriptionSearchSpecification spec = SecurityDescriptionSearchSpecification.of(
+                filter.getSecurity(), filter.getSecuritySector());
+
+        Sort sort = Sort.by(asc(SecurityDescriptionEntity_.SECTOR));
+        PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
+
+        return securityDescriptionRepository.findAll(spec, page)
+                .map(this::toModel);
     }
 
     @Transactional
