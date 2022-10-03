@@ -16,30 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.entity;
-
-import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-@Entity
-@Table(name = "issuer")
-@Data
-public class IssuerEntity {
-    @Id
-    @GeneratedValue(generator = UseExistingOrGenerateIdGenerator.NAME)
-    @GenericGenerator(name = UseExistingOrGenerateIdGenerator.NAME, strategy = UseExistingOrGenerateIdGenerator.STRATEGY)
-    @Column(name = "id")
-    private Integer id;
-
-    @Column(name = "taxpayer_id")
-    private Long taxpayerId;
-
-    @Column(name = "name", nullable = false)
-    private String name;
+body {
+    min-width: 1000px;
+}
+#chartdiv {
+    width: 100%;
+    height: 500px;
+}
+.menu {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 3em;
+}
+.menu a {
+    margin-left: 1em;
 }

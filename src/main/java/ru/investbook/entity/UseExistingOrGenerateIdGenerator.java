@@ -24,10 +24,21 @@ import org.hibernate.id.IdentityGenerator;
 
 import java.io.Serializable;
 
+/**
+ * {@code @GeneratedValue} doesn't work out of box for H2.
+ * {@code @GeneratedValue(strategy = GenerationType.IDENTITY)} ignores entity id field set manually.
+ *
+ * @see <a href="https://stackoverflow.com/questions/2108178/id-generatedvalue-but-set-own-id-value">Stack Overflow</a>
+ */
 public class UseExistingOrGenerateIdGenerator extends IdentityGenerator {
+    static final String NAME = "UseExistingOrGenerateIdGenerator";
+    static final String STRATEGY = "ru.investbook.entity.UseExistingOrGenerateIdGenerator";
+
     @Override
     public Serializable generate(SharedSessionContractImplementor session, Object object) throws HibernateException {
-        Serializable id = session.getEntityPersister(null, object).getClassMetadata().getIdentifier(object, session);
-        return id != null ? id : super.generate(session, object);
+        Serializable id = session.getEntityPersister(null, object)
+                .getClassMetadata()
+                .getIdentifier(object, session);
+        return (id == null) ? super.generate(session, object) : id;
     }
 }

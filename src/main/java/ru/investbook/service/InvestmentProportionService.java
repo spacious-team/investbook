@@ -35,12 +35,11 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.System.nanoTime;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.reducing;
+import static java.util.stream.Collectors.*;
 import static org.spacious_team.broker.pojo.SecurityType.*;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 
@@ -56,17 +55,15 @@ public class InvestmentProportionService {
     private final FifoPositionsFactory fifoPositionsFactory;
     private final SecurityProfitService securityProfitService;
 
-    public Map<String, Float> getSectorProportions(Set<String> portfolios) {
+    /**
+     * Sector name -> value in rub
+     */
+    public Map<String, Float> getSectorsProportion(Set<String> portfolios) {
         try {
             long t0 = nanoTime();
             FifoPositionsFilter filter = FifoPositionsFilter.of(portfolios);
-            Map<String, Float> result = securityRepository.findByTypeIn(stockAndBondTypes)
-                    .stream()
-                    .map(securityConverter::fromEntity)
-                    .map(security -> getCurrentAmount(security, filter))
-                    .flatMap(Optional::stream)
-                    .filter(v -> v.investment().floatValue() > 1)
-                    .collect(Collectors.groupingBy(this::getEconomicSector,
+            Map<String, Float> result = getSecurityInvestmentStream(filter)
+                    .collect(groupingBy(this::getEconomicSector,
                             mapping(SecurityInvestment::getInvestment, reducing(0f, Float::sum))));
             log.info("Рассчитаны объемы инвестиций в сектора экономики за {}", Duration.ofNanos(nanoTime() - t0));
             return result;
@@ -75,6 +72,33 @@ public class InvestmentProportionService {
             log.error(message, e);
             throw new RuntimeException(message, e);
         }
+    }
+
+    /**
+     * Security name -> value in rub
+     */
+    public Map<String, Float> getSecuritiesProportion(Set<String> portfolios) {
+        try {
+            long t0 = nanoTime();
+            FifoPositionsFilter filter = FifoPositionsFilter.of(portfolios);
+            Map<String, Float> result = getSecurityInvestmentStream(filter)
+                    .collect(toMap(this::getSecurityDescription, SecurityInvestment::getInvestment));
+            log.info("Рассчитаны объемы инвестиций в бумаги за {}", Duration.ofNanos(nanoTime() - t0));
+            return result;
+        } catch (Exception e) {
+            String message = "Ошибка при расчете объемов инвестиций в бумаги";
+            log.error(message, e);
+            throw new RuntimeException(message, e);
+        }
+    }
+
+    private Stream<SecurityInvestment> getSecurityInvestmentStream(FifoPositionsFilter filter) {
+        return securityRepository.findByTypeIn(stockAndBondTypes)
+                .stream()
+                .map(securityConverter::fromEntity)
+                .map(security -> getCurrentAmount(security, filter))
+                .flatMap(Optional::stream)
+                .filter(v -> v.investment().floatValue() > 1);
     }
 
     private Optional<SecurityInvestment> getCurrentAmount(Security security, FifoPositionsFilter filter) {
@@ -97,6 +121,14 @@ public class InvestmentProportionService {
         return securityDescriptionRepository.findById(securityInvestment.security().getId())
                 .map(SecurityDescriptionEntity::getSector)
                 .orElse(SecuritySectorService.UNKNOWN_SECTOR);
+    }
+
+    private String getSecurityDescription(SecurityInvestment securityInvestment) {
+        Security security = securityInvestment.security();
+        return ofNullable(security.getName())
+                .or(() -> ofNullable(security.getTicker()))
+                .or(() -> ofNullable(security.getIsin()))
+                .orElseGet(() -> String.valueOf(security.getId()));
     }
 
     private record SecurityInvestment(Security security, BigDecimal investment) {

@@ -39,8 +39,8 @@ import java.time.Instant;
 public class PortfolioPropertyEntity {
 
     @Id
-    @GenericGenerator(name = "UseExistingOrGenerateIdGenerator", strategy = "ru.investbook.entity.UseExistingOrGenerateIdGenerator")
-    @GeneratedValue(generator = "UseExistingOrGenerateIdGenerator")
+    @GeneratedValue(generator = UseExistingOrGenerateIdGenerator.NAME)
+    @GenericGenerator(name = UseExistingOrGenerateIdGenerator.NAME, strategy = UseExistingOrGenerateIdGenerator.STRATEGY)
     @Column(name = "id")
     private Integer id;
 
