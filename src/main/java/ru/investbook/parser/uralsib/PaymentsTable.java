@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -56,7 +56,7 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
 
     static final String TABLE_NAME = "ДВИЖЕНИЕ ДЕНЕЖНЫХ СРЕДСТВ ЗА ОТЧЕТНЫЙ ПЕРИОД";
     protected static final BigDecimal minValue = BigDecimal.valueOf(0.01);
-    // human readable name -> incoming count
+    // human-readable name -> incoming count
     private final List<ReportSecurityInformation> securitiesIncomingCount;
     private final List<SecurityTransaction> securityTransactions;
     private final Collection<EventCashFlow> eventCashFlows = new ArrayList<>();

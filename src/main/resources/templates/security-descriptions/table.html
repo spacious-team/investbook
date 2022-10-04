@@ -29,13 +29,19 @@
 <h1>Информация по инструментам</h1>
 <a href="/security-descriptions/edit-form">Добавить инструмент</a><br>
 <a href="/security-descriptions/update?force=true">Принудительно обновить сектора экономики</a><br>
-<a href="/portfolio-composition">Состав портфеля на круговой диаграмме</a><br>
+<a href="/charts/sectors-pie-chart">Состав портфеля на круговой диаграмме</a><br>
 <a href="/forms.html">На главную</a><br>
 
 <p class="hint">
     Для редактирования кликните по инструменту, для принудительного обновления сектора экономики со SmartLab -
     на стрелку, для удаления - на крестик.
 </p>
+
+<form action="#" th:action="@{/security-descriptions/search}" th:object="${filter}" method="post" class="search-filter">
+    <div th:replace="fragments/search :: security ('*{security}')"></div>
+    <div th:replace="fragments/search :: security-sector ('*{securitySector}')"></div>
+    <div th:replace="fragments/search :: page-size ('*{pageSize}')"></div>
+</form>
 
 <table>
     <tr>
@@ -44,7 +50,7 @@
         <th></th>
         <th></th>
     </tr>
-    <tr th:each="description : ${securityDescriptions}">
+    <tr th:each="description : ${page.content}">
         <td><a th:href="@{/security-descriptions/edit-form(security-id=${description.getSecurityId})}" th:text="${description.getSecurityName}"/></td>
         <td th:text="${description.getSector}"/>
         <td class="table-row-control">
@@ -57,6 +63,14 @@
         </td>
     </tr>
 </table>
+
+<div th:insert="fragments/navigation :: navigation-bar (
+        endpoint='security-descriptions',
+        params='security=${filter.security},
+                securitySector=${filter.securitySector},
+                pageSize=${filter.pageSize}'
+)">
+</div>
 
 <p class="hint">
     При желании для инструментов срочного и валютного рынков, а также для произвольных активов "сектор" может быть задан вручную.

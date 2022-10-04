@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -78,7 +78,7 @@ public class PaidInterest {
 
     /**
      * Positions with unknown transaction date
-     * (for example dividend payment record exists but security transaction does not uploaded by broker report)
+     * (for example dividend payment record exists but security transaction does not upload by broker report)
      */
     public Deque<OpenedPosition> getFictitiousPositions() {
         return paidInterest.values()

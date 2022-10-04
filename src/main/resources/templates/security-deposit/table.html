@@ -20,7 +20,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>События депозитория</title>
+    <title>События депозитария</title>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
     <style>
@@ -31,7 +31,7 @@
 </head>
 <body>
 
-<h1>События депозитория</h1>
+<h1>События депозитария</h1>
 <a href="/security-deposit/edit-form">Добавить событие списания или зачисления</a><br>
 <a href="/security-deposit/create-split-form">Добавить событие сплита акции</a><br>
 <a href="/forms.html">На главную</a><br>
@@ -39,6 +39,13 @@
 <p class="hint">
     Для редактирования сделки кликните по ее номеру, для удаления - на крестик.
 </p>
+
+<form action="#" th:action="@{/security-deposit/search}" th:object="${filter}" method="post" class="search-filter">
+    <div th:replace="fragments/search :: portfolio (selected='*{portfolio}', portfolios=${portfolios})"></div>
+    <div th:replace="fragments/search :: security ('*{security}')"></div>
+    <div th:replace="fragments/search :: date-range (from='*{dateFrom}', to='*{dateTo}')"></div>
+    <div th:replace="fragments/search :: page-size ('*{pageSize}')"></div>
+</form>
 
 <table>
     <tr>
@@ -50,7 +57,7 @@
         <th>Количество, шт</th>
         <th></th>
     </tr>
-    <tr th:each="tr : ${transactions}">
+    <tr th:each="tr : ${page.content}">
         <td th:text="${tr.portfolio}"/>
         <td>
             <a th:href="@{/security-deposit/edit-form(id=${tr.id})}"
@@ -68,6 +75,16 @@
         </td>
     </tr>
 </table>
+
+<div th:insert="fragments/navigation :: navigation-bar (
+    endpoint='security-deposit',
+    params='portfolio=${filter.portfolio},
+            dateFrom=${filter.dateFrom},
+            dateTo=${filter.dateTo},
+            security=${filter.security},
+            pageSize=${filter.pageSize}'
+)">
+</div>
 
 </body>
 </html>

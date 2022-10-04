@@ -1,6 +1,6 @@
 ![java-version](https://img.shields.io/badge/java-18-brightgreen?style=flat-square)
-![spring-boot-version](https://img.shields.io/badge/spring--boot-2.6.7-brightgreen?style=flat-square)
-![lines-of-code](https://img.shields.io/tokei/lines/github/spacious-team/investbook?style=flat-square&color=lightblue)
+![spring-boot-version](https://img.shields.io/badge/spring--boot-2.7.4-brightgreen?style=flat-square)
+[![hits-of-code](https://img.shields.io/badge/dynamic/json?style=flat-square&color=lightblue&label=hits-of-code&url=https://hitsofcode.com/github/spacious-team/investbook/json?branch=develop&query=$.count)](https://hitsofcode.com/github/spacious-team/investbook/view?branch=develop)
 ![github-closed-pull-requests](https://img.shields.io/github/issues-pr-closed/spacious-team/investbook?style=flat-square&color=brightgreen)
 ![github-workflow-status](https://img.shields.io/github/workflow/status/spacious-team/investbook/Publish%20To%20Docker%20Hub?style=flat-square)
 [![github-all-releases](https://img.shields.io/github/downloads/spacious-team/investbook/total?style=flat-square&logo=github&color=lightblue)](https://github.com/spacious-team/investbook/releases/latest)
@@ -40,10 +40,10 @@
 
 ![main-page](https://user-images.githubusercontent.com/11336712/128609729-08b5cb5e-9f58-452e-a661-a0258d7fb512.png)
 
-![portfolio-composition](https://user-images.githubusercontent.com/11336712/120564463-a5cc8980-c413-11eb-8326-46efcdc85c23.gif)
+![sectors-pie-chart](https://user-images.githubusercontent.com/11336712/120564463-a5cc8980-c413-11eb-8326-46efcdc85c23.gif)
 
 Все что нужно - это подгружать свежие отчеты брокера или [вручную вводить](src/main/asciidoc/investbook-forms.adoc)
-информацию. При этом вся информация сохраняетя на вашем компьютере, в облако данные не уходят, для работы интернет не требуется.
+информацию. При этом вся информация сохраняется на вашем компьютере, в облако данные не уходят, для работы интернет не требуется.
 
 По каждому счету в отдельности и подводя единый итог по всем счетам, будет доступна следующая информация:
 - [обзор](src/main/asciidoc/portfolio-analysis.adoc) роста активов, рассчитанного по методике S&P 500,

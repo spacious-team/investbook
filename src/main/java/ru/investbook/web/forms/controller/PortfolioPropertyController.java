@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,10 +27,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.web.ControllerHelper;
+import ru.investbook.web.forms.model.PageableWrapperModel;
 import ru.investbook.web.forms.model.PortfolioPropertyModel;
 import ru.investbook.web.forms.model.PortfolioPropertyTotalAssetsModel;
+import ru.investbook.web.forms.model.filter.PortfolioPropertyFormFilterModel;
 import ru.investbook.web.forms.service.PortfolioPropertyFormsService;
 
 import javax.annotation.PostConstruct;
@@ -52,9 +56,18 @@ public class PortfolioPropertyController {
     }
 
     @GetMapping
-    public String get(Model model) {
-        model.addAttribute("properties", portfolioPropertyFormsService.getAll());
+    public String get(@ModelAttribute("filter") PortfolioPropertyFormFilterModel filter, Model model) {
+        Page<PortfolioPropertyModel> page = portfolioPropertyFormsService.getPage(filter);
+        model.addAttribute("page", new PageableWrapperModel<>(page));
+        model.addAttribute("portfolios", portfolios);
         return "portfolio-properties/table";
+    }
+
+    @PostMapping("/search")
+    public String search(@ModelAttribute("filter") PortfolioPropertyFormFilterModel filter,
+                         RedirectAttributes attributes) {
+        attributes.addFlashAttribute("filter", filter);
+        return "redirect:/portfolio-properties";
     }
 
     @GetMapping("/edit-form/total-assets")

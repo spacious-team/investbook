@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,24 +20,29 @@ package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.ForeignExchangeRateConverter;
 import ru.investbook.entity.ForeignExchangeRateEntity;
 import ru.investbook.entity.ForeignExchangeRateEntityPk;
 import ru.investbook.repository.ForeignExchangeRateRepository;
+import ru.investbook.repository.specs.ForeignExchangeRateSearchSpecification;
 import ru.investbook.web.forms.model.ForeignExchangeRateModel;
+import ru.investbook.web.forms.model.filter.ForeignExchangeRateFormFilterModel;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.lang.Math.min;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
 
 @Service
 @RequiredArgsConstructor
-public class ForeignExchangeRateFormsService implements FormsService<ForeignExchangeRateModel> {
+public class ForeignExchangeRateFormsService {
     private final ForeignExchangeRateRepository foreignExchangeRateRepository;
     private final ForeignExchangeRateConverter foreignExchangeRateConverter;
 
@@ -50,16 +55,18 @@ public class ForeignExchangeRateFormsService implements FormsService<ForeignExch
                 .map(this::toModel);
     }
 
-    @Override
     @Transactional(readOnly = true)
-    public List<ForeignExchangeRateModel> getAll() {
-        return foreignExchangeRateRepository.findByOrderByPkDateDescPkCurrencyPairAsc()
-                .stream()
-                .map(this::toModel)
-                .collect(Collectors.toList());
+    public Page<ForeignExchangeRateModel> getPage(ForeignExchangeRateFormFilterModel filter) {
+        ForeignExchangeRateSearchSpecification spec =
+                ForeignExchangeRateSearchSpecification.of(filter.getCurrency(), filter.getDate());
+
+        Sort sort = Sort.by(desc("pk.date"), asc("pk.currencyPair"));
+        PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
+
+        return foreignExchangeRateRepository.findAll(spec, page)
+                .map(this::toModel);
     }
 
-    @Override
     @Transactional
     public void save(ForeignExchangeRateModel m) {
         foreignExchangeRateRepository.saveAndFlush(

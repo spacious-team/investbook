@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -69,7 +69,7 @@ public class ExcelView {
             idx += delta;
             delta = cpuCnt;
             int toIndex = min(idx, usedExcelTableViews.size());
-            final var tables = usedExcelTableViews.subList(fromIndex, toIndex)
+            List<ExcelTable> tables = usedExcelTableViews.subList(fromIndex, toIndex)
                     .parallelStream()
                     .map(excelTableView -> getExcelTables(excelTableView, filter))
                     .flatMap(Collection::stream)

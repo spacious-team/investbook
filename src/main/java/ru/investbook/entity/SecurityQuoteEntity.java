@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -40,8 +40,8 @@ import java.time.Instant;
 public class SecurityQuoteEntity {
 
     @Id
-    @GenericGenerator(name = "UseExistingOrGenerateIdGenerator", strategy = "ru.investbook.entity.UseExistingOrGenerateIdGenerator")
-    @GeneratedValue(generator = "UseExistingOrGenerateIdGenerator")
+    @GeneratedValue(generator = UseExistingOrGenerateIdGenerator.NAME)
+    @GenericGenerator(name = UseExistingOrGenerateIdGenerator.NAME, strategy = UseExistingOrGenerateIdGenerator.STRATEGY)
     @Column(name = "id")
     private Integer id;
 

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,18 +27,19 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.ControllerHelper;
+import ru.investbook.web.forms.model.PageableWrapperModel;
 import ru.investbook.web.forms.model.TransactionModel;
+import ru.investbook.web.forms.model.filter.TransactionFormFilterModel;
 import ru.investbook.web.forms.service.TransactionFormsService;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/transactions")
@@ -58,13 +60,18 @@ public class TransactionController {
     }
 
     @GetMapping
-    public String get(Model model) {
-        List<TransactionModel> models = transactionFormsService.getAll()
-                .stream()
-                .filter(tr -> tr.getPrice() != null)
-                .collect(Collectors.toList());
-        model.addAttribute("transactions", models);
+    public String get(@ModelAttribute("filter") TransactionFormFilterModel filter, Model model) {
+        Page<TransactionModel> data = transactionFormsService.getTransactionPage(filter);
+        model.addAttribute("page", new PageableWrapperModel<>(data));
+        model.addAttribute("portfolios", portfolios);
+
         return "transactions/table";
+    }
+
+    @PostMapping("/search")
+    public String search(@ModelAttribute("filter") TransactionFormFilterModel filter, RedirectAttributes attributes) {
+        attributes.addFlashAttribute("filter", filter);
+        return "redirect:/transactions";
     }
 
     @GetMapping("/edit-form")

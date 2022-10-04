@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -79,8 +79,7 @@ public abstract class AbstractVtbCashFlowTable<RowType> extends SingleInitializa
                     left.addAll(right);
                     return left;
                 },
-                Collector.Characteristics.IDENTITY_FINISH
-        );
+                Collector.Characteristics.IDENTITY_FINISH);
     }
 
     protected abstract Collection<RowType> getRow(CashFlowEventTable.CashFlowEvent event);

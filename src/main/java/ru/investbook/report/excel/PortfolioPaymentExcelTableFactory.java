@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -132,7 +132,7 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
             case DIVIDEND -> "Дивиденды";
             case COUPON -> "Купоны";
             case REDEMPTION -> "Погашение облигации";
-            case AMORTIZATION -> "Амортизация облигаци";
+            case AMORTIZATION -> "Амортизация облигации";
             case TAX -> "Удержание налога";
             default -> null;
         };

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -19,13 +19,15 @@
 package ru.investbook.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.SecurityDescriptionEntity;
 
 @Transactional(readOnly = true)
-public interface SecurityDescriptionRepository extends JpaRepository<SecurityDescriptionEntity, Integer> {
+public interface SecurityDescriptionRepository extends JpaRepository<SecurityDescriptionEntity, Integer>,
+        JpaSpecificationExecutor<SecurityDescriptionEntity> {
 
     @Transactional
     default void createOrUpdateSector(int securityId, String sector) {
@@ -44,7 +46,7 @@ public interface SecurityDescriptionRepository extends JpaRepository<SecurityDes
     @Transactional
     default void createSectorIfNotExists(int securityId, String sector) {
         if (!existsById(securityId)) {
-            var entity = new SecurityDescriptionEntity();
+            SecurityDescriptionEntity entity = new SecurityDescriptionEntity();
             entity.setSecurity(securityId);
             entity.setSector(sector);
             saveAndFlush(entity);

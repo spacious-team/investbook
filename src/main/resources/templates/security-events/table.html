@@ -44,6 +44,13 @@
     Для редактирования события кликните по ее номеру, для удаления - на крестик.
 </p>
 
+<form action="#" th:action="@{/security-events/search}" th:object="${filter}" method="post" class="search-filter">
+    <div th:replace="fragments/search :: portfolio (selected='*{portfolio}', portfolios=${portfolios})"></div>
+    <div th:replace="fragments/search :: security ('*{security}')"></div>
+    <div th:replace="fragments/search :: date-range (from='*{dateFrom}', to='*{dateTo}')"></div>
+    <div th:replace="fragments/search :: page-size ('*{pageSize}')"></div>
+</form>
+
 <table>
     <tr>
         <th>Счет</th>
@@ -58,7 +65,7 @@
         <th>Валюта налога</th>
         <th></th>
     </tr>
-    <tr th:each="e : ${events}">
+    <tr th:each="e : ${page.content}">
         <td th:text="${e.portfolio}"/>
         <td>
             <a th:href="@{/security-events/edit-form(id=${e.id})}" th:text="${e.id}"/>
@@ -84,5 +91,15 @@
     </tr>
 </table>
 
+<div th:insert="fragments/navigation :: navigation-bar (
+        endpoint='security-events',
+        params='portfolio=${filter.portfolio},
+                dateFrom=${filter.dateFrom},
+                dateTo=${filter.dateTo},
+                security=${filter.security},
+                pageSize=${filter.pageSize}'
+)">
+
+</div>
 </body>
 </html>

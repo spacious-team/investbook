@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -25,10 +25,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriUtils;
 import ru.investbook.converter.EntityConverter;
+import ru.investbook.entity.UseExistingOrGenerateIdGenerator;
 
+import javax.persistence.GeneratedValue;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -61,9 +64,14 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
 
     /**
      * Create a new entity.
-     * In create case  method returns CREATE http status, Location header and entity in body.
-     * If entity already exists CONFLICT http status and Location header was returned.
-     * @param object new entity (ID may not be provided if it AUTOINCREMENT)
+     * If entity has ID and record with this ID already exists in DB, CONFLICT http status and Location header was returned.
+     * Otherwise, CREATE http status will be returned with Location header.
+     * When creating new object, ID may be passed, but that ID only used when no {@link GeneratedValue} set
+     * on Entity ID field or if {@link GeneratedValue#generator} set to {@link UseExistingOrGenerateIdGenerator}
+     * or similar generator impl; otherwise ID, passed in object, will be ignored (see JPA impl).
+     *
+     * @param object new entity (ID may be missed)
+     * @throws InternalServerErrorException if object not created or updated
      */
     @Transactional
     protected ResponseEntity<Void> post(Pojo object) {
@@ -90,16 +98,21 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
 
     /**
      * Update or create a new entity.
-     * In update case method returns OK http status and updated version of entity in body.
-     * In create case  method returns CREATE http status, Location header and updated version of entity in body.
-     * @param id     updating or creating entity
-     * @param object new version of entity
+     * In update case method returns OK http status.
+     * In create case method returns CREATE http status and Location header.
+     * When creating new object, ID may be passed in the object, but it should be same as {@code id} argument.
+     *
+     * @param id     updating or creating entity id
+     * @param object entity
+     * @throws BadRequestException          if ID provided in object not same as in argument
+     * @throws InternalServerErrorException if object not created or updated
      */
     @Transactional
     public ResponseEntity<Void> put(ID id, Pojo object) {
         try {
-            object = (getId(object) != null) ? object : updateId(id, object);
-            if (!getId(object).equals(id)) {
+            if (getId(object) == null) {
+                object = updateId(id, object);
+            } else if (!Objects.equals(id, getId(object))) {
                 throw new BadRequestException("Идентификатор объекта, переданный в URI [" + id + "] и в теле " +
                         "запроса [" + getId(object) + "] не совпадают");
             }

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -23,6 +23,9 @@ import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow.SecurityEventCashFlowBuilder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.PortfolioConverter;
@@ -31,20 +34,22 @@ import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
+import ru.investbook.repository.specs.SecurityEventCashFlowEntitySearchSpecification;
 import ru.investbook.web.forms.model.SecurityEventCashFlowModel;
+import ru.investbook.web.forms.model.filter.SecurityEventCashFlowFormFilterModel;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
 
 @Service
 @RequiredArgsConstructor
-public class SecurityEventCashFlowFormsService implements FormsService<SecurityEventCashFlowModel> {
+public class SecurityEventCashFlowFormsService {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final PortfolioRepository portfolioRepository;
@@ -58,19 +63,19 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
                 .map(this::toSecurityEventModel);
     }
 
-    @Override
     @Transactional(readOnly = true)
-    public List<SecurityEventCashFlowModel> getAll() {
-        return securityEventCashFlowRepository
-                .findByPortfolioInOrderByPortfolioIdAscTimestampDescSecurityIdAsc(
-                        portfolioRepository.findByEnabledIsTrue())
-                .stream()
-                .filter(e -> e.getCashFlowType().getId() != CashFlowType.TAX.getId())
-                .map(this::toSecurityEventModel)
-                .collect(Collectors.toList());
+    public Page<SecurityEventCashFlowModel> getPage(SecurityEventCashFlowFormFilterModel filter) {
+        SecurityEventCashFlowEntitySearchSpecification spec =
+                SecurityEventCashFlowEntitySearchSpecification.of(
+                        filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo());
+
+        Sort sort = Sort.by(asc("portfolio.id"), desc("timestamp"), asc("security.id"));
+        PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
+
+        return securityEventCashFlowRepository.findAll(spec, page)
+                .map(this::toSecurityEventModel);
     }
 
-    @Override
     @Transactional
     public void save(SecurityEventCashFlowModel e) {
         saveAndFlush(e.getPortfolio());
@@ -127,16 +132,16 @@ public class SecurityEventCashFlowFormsService implements FormsService<SecurityE
                 securityEntity.getIsin(),
                 ofNullable(securityEntity.getName()).orElse(securityEntity.getTicker()),
                 m.getSecurityType());
-        m.setValue(type == DERIVATIVE_PROFIT ? e.getValue() :  e.getValue().abs());
+        m.setValue(type == DERIVATIVE_PROFIT ? e.getValue() : e.getValue().abs());
         m.setValueCurrency(e.getCurrency());
 
         if (m.getType() != CashFlowType.TAX) {
             securityEventCashFlowRepository.findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampAndCount(
-                    m.getPortfolio(),
-                    securityEntity.getId(),
-                    CashFlowType.TAX.getId(),
-                    e.getTimestamp(),
-                    m.getCount())
+                            m.getPortfolio(),
+                            securityEntity.getId(),
+                            CashFlowType.TAX.getId(),
+                            e.getTimestamp(),
+                            m.getCount())
                     .ifPresent(tax -> {
                         m.setTaxId(tax.getId());
                         m.setTax(tax.getValue().abs());

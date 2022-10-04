@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2022  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -34,12 +34,14 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.Map;
+
+import static java.util.Collections.emptyMap;
 
 @Service
 public class CbrForeignExchangeRateServiceXmlImpl extends AbstractCbrForeignExchangeRateService {
 
+    @SuppressWarnings("HttpUrlsUsage")
     private final UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(
             "http://www.cbr.ru/scripts/XML_dynamic.asp?date_req1={from-date}&date_req2={to-date}&VAL_NM_RQ={currency}");
     private final DateTimeFormatter requestDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -50,8 +52,8 @@ public class CbrForeignExchangeRateServiceXmlImpl extends AbstractCbrForeignExch
         super(foreignExchangeRateRepository, foreignExchangeRateConverter);
     }
 
-    @SneakyThrows
     @Override
+    @SneakyThrows
     protected void updateCurrencyRate(String currencyPair, String currencyId, LocalDate fromDate) {
         getFxRates(fromDate, currencyId)
                 .getRecord()
@@ -62,7 +64,7 @@ public class CbrForeignExchangeRateServiceXmlImpl extends AbstractCbrForeignExch
 
     private ValCurs getFxRates(LocalDate fromDate, String currencyId) throws JAXBException, IOException {
         try (InputStream stream = getInputStream(fromDate, currencyId)) {
-            return (ValCurs) ContextFactory.createContext(new Class[]{ValCurs.class}, Collections.emptyMap())
+            return (ValCurs) ContextFactory.createContext(new Class[]{ValCurs.class}, emptyMap())
                     .createUnmarshaller()
                     .unmarshal(stream);
         }

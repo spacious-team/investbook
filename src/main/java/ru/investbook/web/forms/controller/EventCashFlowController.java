@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,10 +27,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.ControllerHelper;
 import ru.investbook.web.forms.model.EventCashFlowModel;
+import ru.investbook.web.forms.model.PageableWrapperModel;
+import ru.investbook.web.forms.model.filter.EventCashFlowFormFilterModel;
 import ru.investbook.web.forms.service.EventCashFlowFormsService;
 
 import javax.annotation.PostConstruct;
@@ -54,9 +58,18 @@ public class EventCashFlowController {
     }
 
     @GetMapping
-    public String get(Model model) {
-        model.addAttribute("events", eventCashFlowFormsService.getAll());
+    public String get(@ModelAttribute("filter") EventCashFlowFormFilterModel filter, Model model) {
+        Page<EventCashFlowModel> data = eventCashFlowFormsService.getPage(filter);
+        model.addAttribute("page", new PageableWrapperModel<>(data));
+        model.addAttribute("portfolios", portfolios);
+
         return "events/table";
+    }
+
+    @PostMapping("/search")
+    public String search(@ModelAttribute("filter") EventCashFlowFormFilterModel filter, RedirectAttributes attributes) {
+        attributes.addFlashAttribute("filter", filter);
+        return "redirect:/events";
     }
 
     @GetMapping("/edit-form")

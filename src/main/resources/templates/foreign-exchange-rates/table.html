@@ -34,6 +34,12 @@
     Для редактирования курса кликните по его дате, для удаления - на крестик.
 </p>
 
+<form action="#" th:action="@{/foreign-exchange-rates/search}" th:object="${filter}" method="post" class="search-filter">
+    <div th:replace="fragments/search :: currency-picker ('*{currency}')"></div>
+    <div th:replace="fragments/search :: date ('*{date}')"></div>
+    <div th:replace="fragments/search :: page-size ('*{pageSize}')"></div>
+</form>
+
 <table>
     <tr>
         <th>Дата</th>
@@ -42,7 +48,7 @@
         <th>Котируемая валюта</th>
         <th></th>
     </tr>
-    <tr th:each="rate : ${rates}">
+    <tr th:each="rate : ${page.content}">
         <td>
             <a th:href="@{/foreign-exchange-rates/edit-form(date=${rate.date}, baseCurrency=${rate.baseCurrency}, quoteCurrency=${rate.quoteCurrency})}"
                th:text="${rate.date}"/>
@@ -52,10 +58,18 @@
             class="value"/>
         <td th:text="${rate.quoteCurrency}"/>
         <td class="table-row-control">
-            <a th:href="@{/foreign-exchange-rates/delete(date=${rate.date}, baseCurrency=${rate.baseCurrency}, quoteCurrency=${rate.quoteCurrency})}" title="Удалить">&#x274c;</a>
+            <a th:href="@{/foreign-exchange-rates/delete(date=${rate.date}, baseCurrency=${rate.baseCurrency}, quoteCurrency=${rate.quoteCurrency})}"
+               title="Удалить">&#x274c;</a>
         </td>
     </tr>
 </table>
 
+<div th:insert="fragments/navigation :: navigation-bar (
+        endpoint='foreign-exchange-rates',
+        params='currency=${filter.currency},
+                date=${filter.date},
+                pageSize=${filter.pageSize}'
+    )">
+</div>
 </body>
 </html>

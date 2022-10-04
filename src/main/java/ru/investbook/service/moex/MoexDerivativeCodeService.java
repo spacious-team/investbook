@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -207,7 +207,7 @@ public class MoexDerivativeCodeService {
     }
 
     /**
-     * @return true for for options (in {@code Si65000BC9}, {@code Si65000BC9D}, {@code Si-6.19M280319CA65000}
+     * @return true for options (in {@code Si65000BC9}, {@code Si65000BC9D}, {@code Si-6.19M280319CA65000}
      * or {@code BR-7.16M270616CA 50} format)
      */
     public boolean isOption(String contract) {
@@ -319,7 +319,7 @@ public class MoexDerivativeCodeService {
     }
 
     /**
-     * Convert derivative codes before storing to DB if need
+     * Convert derivative codes before storing to DB if you need
      */
     public String convertDerivativeCode(String code) {
         return isFuturesCode(code) ?

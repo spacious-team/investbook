@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -39,7 +39,7 @@ public class BrowserHomePageOpener {
             } else if (os.contains("mac")) {
                 rt.exec("open " + url);
             } else if (os.contains("nix") || os.contains("nux")) {
-                // Do a best guess on unix until we get a platform independent way
+                // Do the best guess on unix until we get a platform independent way
                 // Build a list of browsers to try, in this order.
                 String[] browsers = {"epiphany", "firefox", "mozilla", "konqueror", "netscape", "opera", "links", "lynx"};
                 // Build a command string which looks like "browser1 "url" || browser2 "url" ||..."

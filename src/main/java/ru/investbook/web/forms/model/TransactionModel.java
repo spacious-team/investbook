@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -82,7 +82,7 @@ public class TransactionModel {
     private int count;
 
     /**
-     * May be null for security deposit and withdrawal
+     * Equals to null for security deposit and withdrawal
      */
     @Nullable
     @Positive

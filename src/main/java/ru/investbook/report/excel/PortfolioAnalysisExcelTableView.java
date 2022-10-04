@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -129,7 +129,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     @Override
     protected void sheetPreCreate(Sheet sheet, Table table) {
         super.sheetPreCreate(sheet, table);
-        sheet.setZoom(85); // show all columns for 24 inch monitor for securities sheet
+        sheet.setZoom(85); // show all columns for 24-inch monitor for securities sheet
     }
 
     @Override

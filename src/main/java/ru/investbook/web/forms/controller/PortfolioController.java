@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -58,7 +58,7 @@ public class PortfolioController {
     public String postEventCashFlow(@Valid @ModelAttribute("archive") ArchivedPortfolioModel archive) {
         getPortfolios(portfolioRepository)
                 .forEach(portfolio -> {
-                    var isEnabled = !archive.getPortfolios().contains(portfolio);
+                    boolean isEnabled = !archive.getPortfolios().contains(portfolio);
                     portfolioRepository.setEnabledForPortfolio(portfolio, isEnabled);
                 });
         return "success";

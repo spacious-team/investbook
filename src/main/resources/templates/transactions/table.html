@@ -39,6 +39,13 @@
     Для редактирования сделки кликните по ее номеру, для удаления - на крестик.
 </p>
 
+<form action="#" th:action="@{/transactions/search}" th:object="${filter}" method="post" class="search-filter">
+    <div th:replace="fragments/search :: portfolio (selected='*{portfolio}', portfolios=${portfolios})"></div>
+    <div th:replace="fragments/search :: security ('*{security}')"></div>
+    <div th:replace="fragments/search :: date-range (from='*{dateFrom}', to='*{dateTo}')"></div>
+    <div th:replace="fragments/search :: page-size ('*{pageSize}')"></div>
+</form>
+
 <table>
     <tr>
         <th>Счет</th>
@@ -54,7 +61,7 @@
         <th>Валюта комиссии</th>
         <th></th>
     </tr>
-    <tr th:each="tr : ${transactions}">
+    <tr th:each="tr : ${page.content}">
         <td th:text="${tr.portfolio}"/>
         <td>
             <a th:href="@{/transactions/edit-form(id=${tr.id})}"
@@ -80,6 +87,17 @@
         </td>
     </tr>
 </table>
+
+<div th:insert="fragments/navigation :: navigation-bar (
+    endpoint='transactions',
+    params='portfolio=${filter.portfolio},
+            dateFrom=${filter.dateFrom},
+            dateTo=${filter.dateTo},
+            security=${filter.security},
+            pageSize=${filter.pageSize}'
+)">
+</div>
+
 
 </body>
 </html>

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -23,31 +23,37 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.PortfolioPropertyConverter;
 import ru.investbook.entity.PortfolioPropertyEntity;
+import ru.investbook.entity.PortfolioPropertyEntity_;
 import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.specs.PortfolioPropertySearchSpecification;
 import ru.investbook.web.forms.model.PortfolioPropertyModel;
 import ru.investbook.web.forms.model.PortfolioPropertyTotalAssetsModel;
+import ru.investbook.web.forms.model.filter.PortfolioPropertyFormFilterModel;
 
 import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.spacious_team.broker.pojo.PortfolioPropertyType.*;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PortfolioPropertyFormsService implements FormsService<PortfolioPropertyModel> {
+public class PortfolioPropertyFormsService {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final PortfolioPropertyRepository portfolioPropertyRepository;
     private final PortfolioRepository portfolioRepository;
@@ -61,19 +67,18 @@ public class PortfolioPropertyFormsService implements FormsService<PortfolioProp
                 .map(this::toModel);
     }
 
-    @Override
     @Transactional(readOnly = true)
-    public List<PortfolioPropertyModel> getAll() {
-        return portfolioPropertyRepository
-                .findByPortfolioInAndPropertyInOrderByTimestampDesc(
-                        portfolioRepository.findByEnabledIsTrue(),
-                        properties)
-                .stream()
-                .map(this::toModel)
-                .collect(Collectors.toList());
+    public Page<PortfolioPropertyModel> getPage(PortfolioPropertyFormFilterModel filter) {
+        PortfolioPropertySearchSpecification spec = PortfolioPropertySearchSpecification.of(
+                filter.getPortfolio(), filter.getDate(), filter.getProperty());
+
+        Sort sort = Sort.by(asc(PortfolioPropertyEntity_.PORTFOLIO), desc(PortfolioPropertyEntity_.TIMESTAMP));
+        PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
+
+        return portfolioPropertyRepository.findAll(spec, page)
+                .map(this::toModel);
     }
 
-    @Override
     @Transactional
     public void save(PortfolioPropertyModel m) {
         saveAndFlush(m.getPortfolio());

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -81,7 +81,7 @@ public class EventCashFlowModel {
         return switch (type) {
             case DIVIDEND, COUPON, REDEMPTION, AMORTIZATION, ACCRUED_INTEREST -> type.name();
             case CASH -> {
-                var desc = String.valueOf(description).toLowerCase();
+                String desc = String.valueOf(description).toLowerCase();
                 if (desc.contains("вычет") && desc.contains("иис")) {
                     yield "TAX_IIS_A";
                 }

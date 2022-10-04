@@ -40,7 +40,7 @@ input {
 }
 
 input[type=date] {
-    width:130px;
+    width: 130px;
 }
 
 input[type=submit] {
@@ -80,4 +80,52 @@ input.security {
 
 tr:hover > .table-row-control {
     opacity: 1;
+}
+
+.search-filter {
+    display: flex;
+    justify-content: center;
+    color: dimgray;
+}
+
+.search-filter * {
+    color: dimgray;
+}
+
+.search-filter input[type=date] {
+    width: 112px;
+}
+
+.search-filter .currency {
+    width: 76px;
+}
+
+.search-filter .page-size {
+    width: 6em;
+}
+
+.page-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    list-style-type: none;
+    padding: 0;
+}
+
+.page-bar li * {
+    margin: 0 10px;
+}
+
+.page-bar .page-disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    text-decoration: none;
+    pointer-events: none;
+}
+
+.page-bar .page-active a {
+    cursor: not-allowed;
+    pointer-events: none;
+    text-decoration: underline;
+    font-weight: bold;
 }

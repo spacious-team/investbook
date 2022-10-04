@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -191,7 +191,7 @@ public class InvestbookApiClient {
     }
 
     /**
-     * @return true if new row was added or it was already exists in DB, false - or error
+     * @return true if new row was added, or it was already exists in DB, false - or error
      */
     private <T> boolean handlePost(T object, Function<T, ResponseEntity<?>> saver, String errorPrefix) {
         try {

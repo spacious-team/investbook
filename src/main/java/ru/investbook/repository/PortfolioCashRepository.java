@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -19,6 +19,7 @@
 package ru.investbook.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Transactional(readOnly = true)
-public interface PortfolioCashRepository extends JpaRepository<PortfolioCashEntity, Integer> {
+public interface PortfolioCashRepository extends
+        JpaRepository<PortfolioCashEntity, Integer>,
+        JpaSpecificationExecutor<PortfolioCashEntity> {
 
     Optional<PortfolioCashEntity> findFirstByOrderByTimestampDesc();
 

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -26,25 +26,33 @@ import org.spacious_team.broker.report_parser.api.AbstractTransaction.AbstractTr
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.TransactionCashFlowConverter;
 import ru.investbook.converter.TransactionConverter;
-import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
+import ru.investbook.entity.TransactionEntity_;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.report.FifoPositionsFilter;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
+import ru.investbook.repository.specs.SecurityDepositSearchSpecification;
+import ru.investbook.repository.specs.TransactionSearchSpecification;
 import ru.investbook.web.forms.model.SecurityType;
 import ru.investbook.web.forms.model.SplitModel;
 import ru.investbook.web.forms.model.TransactionModel;
+import ru.investbook.web.forms.model.filter.TransactionFormFilterModel;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -55,15 +63,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
 import static java.util.Optional.ofNullable;
+import static org.springframework.data.domain.Sort.Order.asc;
+import static org.springframework.data.domain.Sort.Order.desc;
 import static ru.investbook.web.forms.model.SecurityType.DERIVATIVE;
 
 @Component
 @RequiredArgsConstructor
-public class TransactionFormsService implements FormsService<TransactionModel> {
+public class TransactionFormsService {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final TransactionRepository transactionRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
@@ -85,21 +94,32 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
                 .map(this::toTransactionModel);
     }
 
-    @Override
     @Transactional(readOnly = true)
-    public List<TransactionModel> getAll() {
-        Set<String> activePortfolios = portfolioRepository.findByEnabledIsTrue()
-                .stream()
-                .map(PortfolioEntity::getId)
-                .collect(Collectors.toSet());
-        return transactionRepository
-                .findByPortfolioInOrderByPortfolioAscTimestampDescSecurityIdAsc(activePortfolios)
-                .stream()
-                .map(this::toTransactionModel)
-                .collect(Collectors.toList());
+    public Page<TransactionModel> getTransactionPage(TransactionFormFilterModel filter) {
+        TransactionSearchSpecification spec = TransactionSearchSpecification.of(
+                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo());
+
+        return getTransactionModels(spec, filter);
     }
 
-    @Override
+    @Transactional(readOnly = true)
+    public Page<TransactionModel> getSecurityDepositPage(TransactionFormFilterModel filter) {
+        SecurityDepositSearchSpecification spec = SecurityDepositSearchSpecification.of(
+                filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo());
+
+        return getTransactionModels(spec, filter);
+    }
+
+    @NonNull
+    private Page<TransactionModel> getTransactionModels(Specification<TransactionEntity> spec,
+                                                        TransactionFormFilterModel filter) {
+        Sort sort = Sort.by(asc(TransactionEntity_.PORTFOLIO), desc(TransactionEntity_.TIMESTAMP), asc("security.id"));
+        PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
+
+        return transactionRepository.findAll(spec, page)
+                .map(this::toTransactionModel);
+    }
+
     @Transactional
     public void save(TransactionModel tr) {
         int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(tr);
@@ -142,7 +162,8 @@ public class TransactionFormsService implements FormsService<TransactionModel> {
         } else {
             builder = switch (tr.getSecurityType()) {
                 case SHARE, BOND -> SecurityTransaction.builder();
-                default -> throw new IllegalArgumentException("Only bond and stock can have deposit and withdrawal events");
+                default ->
+                        throw new IllegalArgumentException("Only bond and stock can have deposit and withdrawal events");
             };
         }
 

@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -61,7 +61,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Override
     @GetMapping("{id}")
     @Operation(summary = "Отобразить один",
-            description = "Отобразить биржевой инструмент по идентификатору (ISIN,  коду дериватива, вылютной пары)")
+            description = "Отобразить биржевой инструмент по идентификатору (ISIN,  коду дериватива, валютной пары)")
     public ResponseEntity<Security> get(@PathVariable("id")
                                         @Parameter(description = "Идентификатор", example = "123", required = true)
                                                 Integer id) {
