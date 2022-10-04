@@ -32,7 +32,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -51,14 +50,12 @@ public abstract class AbstractCbrForeignExchangeRateService implements CbrForeig
     @SneakyThrows
     public void updateFrom(LocalDate fromDate) {
         long t0 = System.nanoTime();
-        ForkJoinPool pool = new ForkJoinPool(currencyParamValues.size());
-        pool.submit(() -> currencyParamValues.entrySet()
-                        .parallelStream()
-                        .forEach(e -> updateCurrencyRate(fromDate, e)))
-                .get();
-        do {
-            pool.shutdown();
-        } while (!pool.awaitTermination(500, TimeUnit.MILLISECONDS));
+        try (ForkJoinPool pool = new ForkJoinPool(currencyParamValues.size())) {
+            pool.submit(() -> currencyParamValues.entrySet()
+                            .parallelStream()
+                            .forEach(e -> updateCurrencyRate(fromDate, e)))
+                    .get();
+        }
         log.info("Курсы валют обновлены за {}", Duration.ofNanos(System.nanoTime() - t0));
     }
 
