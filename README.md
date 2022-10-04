@@ -1,5 +1,5 @@
 ![java-version](https://img.shields.io/badge/java-18-brightgreen?style=flat-square)
-![spring-boot-version](https://img.shields.io/badge/spring--boot-2.6.7-brightgreen?style=flat-square)
+![spring-boot-version](https://img.shields.io/badge/spring--boot-2.7.4-brightgreen?style=flat-square)
 [![hits-of-code](https://img.shields.io/badge/dynamic/json?style=flat-square&color=lightblue&label=hits-of-code&url=https://hitsofcode.com/github/spacious-team/investbook/json?branch=develop&query=$.count)](https://hitsofcode.com/github/spacious-team/investbook/view?branch=develop)
 ![github-closed-pull-requests](https://img.shields.io/github/issues-pr-closed/spacious-team/investbook?style=flat-square&color=brightgreen)
 ![github-workflow-status](https://img.shields.io/github/workflow/status/spacious-team/investbook/Publish%20To%20Docker%20Hub?style=flat-square)

@@ -29,6 +29,7 @@ import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -110,7 +111,7 @@ public class TransactionFormsService {
     }
 
     @NonNull
-    private Page<TransactionModel> getTransactionModels(TransactionSearchSpecification spec,
+    private Page<TransactionModel> getTransactionModels(Specification<TransactionEntity> spec,
                                                         TransactionFormFilterModel filter) {
         Sort sort = Sort.by(asc(TransactionEntity_.PORTFOLIO), desc(TransactionEntity_.TIMESTAMP), asc("security.id"));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
@@ -161,7 +162,8 @@ public class TransactionFormsService {
         } else {
             builder = switch (tr.getSecurityType()) {
                 case SHARE, BOND -> SecurityTransaction.builder();
-                default -> throw new IllegalArgumentException("Only bond and stock can have deposit and withdrawal events");
+                default ->
+                        throw new IllegalArgumentException("Only bond and stock can have deposit and withdrawal events");
             };
         }
 
