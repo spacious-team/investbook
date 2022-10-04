@@ -18,6 +18,8 @@
 
 package ru.investbook.repository.specs;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntity_;
 import ru.investbook.entity.TransactionEntity;
@@ -32,25 +34,28 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static lombok.AccessLevel.PRIVATE;
 
-public class SecurityDepositSearchSpecification extends TransactionSearchSpecification {
+
+@RequiredArgsConstructor(access = PRIVATE)
+public class SecurityDepositSearchSpecification implements Specification<TransactionEntity> {
+
+    private final TransactionSearchSpecification specification;
 
     public static SecurityDepositSearchSpecification of(String portfolio,
                                                         String security,
                                                         LocalDate dateFrom,
                                                         LocalDate dateTo) {
-        return new SecurityDepositSearchSpecification(portfolio, security, dateFrom, dateTo);
-    }
-
-    private SecurityDepositSearchSpecification(String portfolio, String security, LocalDate dateFrom, LocalDate dateTo) {
-        super(portfolio, security, dateFrom, dateTo);
+        TransactionSearchSpecification specification =
+                TransactionSearchSpecification.of(portfolio, security, dateFrom, dateTo);
+        return new SecurityDepositSearchSpecification(specification);
     }
 
     @Override
     public Predicate toPredicate(Root<TransactionEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
         return Stream.of(
                         filterByNullPrice(root, builder, query),
-                        super.toPredicate(root, query, builder))
+                        specification.toPredicate(root, query, builder))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);

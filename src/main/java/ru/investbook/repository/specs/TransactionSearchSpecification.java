@@ -18,7 +18,6 @@
 
 package ru.investbook.repository.specs;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.TransactionEntity;
@@ -35,19 +34,12 @@ import java.util.stream.Stream;
 import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@RequiredArgsConstructor(staticName = "of")
 public class TransactionSearchSpecification implements Specification<TransactionEntity> {
     private final String portfolio;
     private final String security;
     private final LocalDate dateFrom;
     private final LocalDate dateTo;
-
-    public static TransactionSearchSpecification of(String portfolio,
-                                                    String security,
-                                                    LocalDate dateFrom,
-                                                    LocalDate dateTo) {
-        return new TransactionSearchSpecification(portfolio, security, dateFrom, dateTo);
-    }
 
     @Override
     public Predicate toPredicate(Root<TransactionEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
