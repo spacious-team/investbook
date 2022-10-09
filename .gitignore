@@ -23,6 +23,7 @@ report-backups/
 !.idea/runConfigurations
 !.idea/codeStyles
 !.idea/copyright
+!.idea/inspectionProfiles
 
 ### NetBeans ###
 /nbproject/private/
