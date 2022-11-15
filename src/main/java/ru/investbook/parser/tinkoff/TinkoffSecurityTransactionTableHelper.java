@@ -65,15 +65,26 @@ class TinkoffSecurityTransactionTableHelper {
                                 SecurityCodeAndIsinTable codeAndIsin,
                                 String shortName,
                                 SecurityType securityType) {
+        String isin = switch (securityType) {
+            case STOCK, BOND, STOCK_OR_BOND -> codeAndIsin.getIsin(code);
+            default -> null;
+        };
+        return getSecurity(code, isin, shortName, securityType);
+    }
+
+    static Security getSecurity(String code,
+                                String isin,
+                                String shortName,
+                                SecurityType securityType) {
         return switch (securityType) {
             case STOCK -> Security.builder()
                     .ticker(code)
-                    .isin(codeAndIsin.getIsin(code))
+                    .isin(isin)
                     .name(shortName)
                     .type(securityType)
                     .build();
             case BOND, STOCK_OR_BOND -> Security.builder()
-                    .isin(codeAndIsin.getIsin(code))
+                    .isin(isin)
                     .name(shortName)
                     .type(securityType)
                     .build();

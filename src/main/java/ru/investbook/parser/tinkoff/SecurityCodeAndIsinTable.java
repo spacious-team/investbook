@@ -84,25 +84,25 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
     @NotNull
     public String getIsin(String code) {
         initializeIfNeed();
-        return Objects.requireNonNull(codeToIsin.get(code));
+        return Objects.requireNonNull(codeToIsin.get(code), "Не найден ISIN");
     }
 
     @NotNull
     public SecurityType getSecurityType(String code) {
         initializeIfNeed();
-        return Objects.requireNonNull(codeToType.get(code));
+        return Objects.requireNonNull(codeToType.get(code), "Не найден тип ценной бумаги");
     }
 
     @NotNull
     public BigDecimal getFaceValue(String code) {
         initializeIfNeed();
-        return Objects.requireNonNull(codeToFaceValue.get(code));
+        return Objects.requireNonNull(codeToFaceValue.get(code), "Не найдена номинальная стоимость облигации");
     }
 
     @NotNull
     public String getCode(String shortName) {
         initializeIfNeed();
-        return Objects.requireNonNull(shortNameToCode.get(shortName));
+        return Objects.requireNonNull(shortNameToCode.get(shortName), "Не найден код бумаги");
     }
 
     protected enum SecurityAndCodeTableHeader implements TableColumnDescription {
