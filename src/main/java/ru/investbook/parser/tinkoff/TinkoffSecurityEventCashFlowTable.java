@@ -94,12 +94,15 @@ public class TinkoffSecurityEventCashFlowTable extends SingleAbstractReportTable
     }
 
     private int getSecurityId(TableRow row) {
+        // "Ford Motor-ао/ 60 шт." or "RU0007661625/ ГАЗПРОМ ао/ 30 шт."
         String description = row.getStringCellValue(DESCRIPTION);
-        String shortName = description.split("/")[0].trim();
+        String[] parts = description.split("/");
+        String shortName = (parts.length < 3) ? parts[0].trim() : parts[1].trim();
         String code = codeAndIsin.getCode(shortName);
+        String isin = (parts.length < 3) ? codeAndIsin.getIsin(code) : parts[0].trim();
         Security security = getSecurity(
                 code,
-                codeAndIsin,
+                isin,
                 shortName,
                 codeAndIsin.getSecurityType(code));
         return declareSecurity(security, getReport().getSecurityRegistrar());
@@ -107,8 +110,10 @@ public class TinkoffSecurityEventCashFlowTable extends SingleAbstractReportTable
 
     private int getCount(TableRow row) {
         String description = row.getStringCellValue(DESCRIPTION);
-        String text = description.split("/")[1].trim();
-        Assert.isTrue(text.endsWith(" шт."), "Ожидается количество бумаг в формате '<Наименование>/ 10 шт.'");
+        int slashPos = description.lastIndexOf('/');
+        Assert.isTrue(slashPos != -1 && description.endsWith(" шт."),
+                "Ожидается количество бумаг в формате '<...>/ 10 шт.'");
+        String text = description.substring(slashPos + 1).trim();
         return Integer.parseInt(text.split("\s+")[0]);
     }
 
