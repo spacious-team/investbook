@@ -58,6 +58,7 @@ public class PortfolioPropertyController {
     @GetMapping
     public String get(@ModelAttribute("filter") PortfolioPropertyFormFilterModel filter, Model model) {
         Page<PortfolioPropertyModel> page = portfolioPropertyFormsService.getPage(filter);
+        portfolios = ControllerHelper.getPortfolios(portfolioRepository); // update portfolios for filter
         model.addAttribute("page", new PageableWrapperModel<>(page));
         model.addAttribute("portfolios", portfolios);
         return "portfolio-properties/table";
