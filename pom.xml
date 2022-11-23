@@ -429,7 +429,7 @@
                                 </tags>
                                 <publish>true</publish>
                                 <env>
-                                    <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
+                                    <BP_JVM_VERSION>19</BP_JVM_VERSION> <!-- version >= ${java.version} -->
                                     <BPE_LANG>C.UTF-8</BPE_LANG>
                                 </env>
                             </image>
