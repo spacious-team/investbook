@@ -93,7 +93,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
         DATE_TIME("дата", "сделки"), // не "дата исполнения", иначе не примутся в расчет сделки выполненные без обналичивания валюты
         TRADE_ID("номер сделки"),
         DIRECTION("вид", "сделки"),
-        COUNT("кол-во","шт"),
+        COUNT("сумма базовой валюты"),
         VALUE("сумма сопряженной валюты"),
         VALUE_CURRENCY("сопряженная валюта"),
         MARKET_COMMISSION("комиссия tc", "руб"),

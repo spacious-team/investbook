@@ -57,6 +57,7 @@ public class PortfolioCashController {
     @GetMapping
     public String get(@ModelAttribute("filter") PortfolioCashFormFilterModel filter, Model model) {
         Page<PortfolioCashModel> data = portfolioCashFormsService.getPage(filter);
+        portfolios = ControllerHelper.getPortfolios(portfolioRepository); // update portfolios for filter
         model.addAttribute("page", new PageableWrapperModel<>(data));
         model.addAttribute("portfolios", portfolios);
 
