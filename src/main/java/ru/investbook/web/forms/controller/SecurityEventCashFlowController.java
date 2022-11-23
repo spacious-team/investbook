@@ -62,6 +62,7 @@ public class SecurityEventCashFlowController {
     @GetMapping
     public String get(@ModelAttribute("filter") SecurityEventCashFlowFormFilterModel filter, Model model) {
         Page<SecurityEventCashFlowModel> data = securityEventCashFlowFormsService.getPage(filter);
+        portfolios = ControllerHelper.getPortfolios(portfolioRepository); // update portfolios for filter
         model.addAttribute("page", new PageableWrapperModel<>(data));
         model.addAttribute("portfolios", portfolios);
 

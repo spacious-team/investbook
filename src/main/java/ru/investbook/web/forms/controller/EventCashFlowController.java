@@ -60,6 +60,7 @@ public class EventCashFlowController {
     @GetMapping
     public String get(@ModelAttribute("filter") EventCashFlowFormFilterModel filter, Model model) {
         Page<EventCashFlowModel> data = eventCashFlowFormsService.getPage(filter);
+        portfolios = ControllerHelper.getPortfolios(portfolioRepository); // update portfolios for filter
         model.addAttribute("page", new PageableWrapperModel<>(data));
         model.addAttribute("portfolios", portfolios);
 
