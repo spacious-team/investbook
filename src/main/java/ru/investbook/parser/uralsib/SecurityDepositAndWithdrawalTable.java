@@ -24,7 +24,6 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import static ru.investbook.parser.uralsib.SecurityRedemptionTable.SecurityFlowTableHeader.*;
 
@@ -35,11 +34,11 @@ public class SecurityDepositAndWithdrawalTable extends SingleAbstractReportTable
     private static final String TABLE_NAME = SecurityRedemptionTable.TABLE_NAME;
     private static final String IN_DESCRIPTION = "ввод цб";
     private static final String OUT_DESCRIPTION = "вывод цб";
-    private final List<SecuritiesTable.ReportSecurityInformation> securitiesIncomingCount;
+    private final SecuritiesTable securitiesTable;
 
     public SecurityDepositAndWithdrawalTable(UralsibBrokerReport report, SecuritiesTable securitiesTable) {
         super(report, TABLE_NAME, "", SecurityRedemptionTable.SecurityFlowTableHeader.class);
-        this.securitiesIncomingCount = securitiesTable.getData();
+        this.securitiesTable = securitiesTable;
     }
 
     @Override
@@ -64,10 +63,6 @@ public class SecurityDepositAndWithdrawalTable extends SingleAbstractReportTable
 
     private Security getSecurity(TableRow row) {
         String cfi = row.getStringCellValue(CFI);
-        return securitiesIncomingCount.stream()
-                .filter(security -> security.getCfi().equals(cfi))
-                .map(SecuritiesTable.ReportSecurityInformation::getSecurity)
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("Не могу найти ISIN для ЦБ с CFI = " + cfi));
+        return securitiesTable.getSecurityByCfi(cfi);
     }
 }
