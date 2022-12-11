@@ -61,7 +61,7 @@ public class UralsibReportTables extends AbstractReportTables<UralsibBrokerRepor
         this.portfolioPropertyTable = new PortfolioPropertyTable(securityAssetsTable, portfolioCashTable, foreignExchangeRateTable);
         this.portfolioSecuritiesTable = new SecuritiesTable(report);
         this.securityTransactionTable = WrappingReportTable.of(
-                new SecurityTransactionTable(report, foreignExchangeRateTable, transactionValueAndFeeParser),
+                new SecurityTransactionTable(report, portfolioSecuritiesTable, foreignExchangeRateTable, transactionValueAndFeeParser),
                 new SecurityDepositAndWithdrawalTable(report, portfolioSecuritiesTable));
         this.couponAmortizationRedemptionTable =
                 new CouponAmortizationRedemptionTable(report, portfolioSecuritiesTable, securityTransactionTable);
