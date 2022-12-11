@@ -31,6 +31,8 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
 
+import java.util.Objects;
+
 import static ru.investbook.parser.uralsib.SecuritiesTable.SecuritiesTableHeader.*;
 import static ru.investbook.parser.uralsib.SecurityRegistryHelper.declareStockOrBond;
 import static ru.investbook.parser.uralsib.SecurityRegistryHelper.getStockOrBond;
@@ -55,6 +57,14 @@ public class SecuritiesTable extends SingleAbstractReportTable<ReportSecurityInf
                 .cfi(row.getStringCellValue(CFI))
                 .incomingCount(row.getIntCellValue(INCOMING_COUNT))
                 .build();
+    }
+
+    public Security getSecurityByCfi(String cfi) {
+        return getData().stream()
+                .filter(info -> Objects.equals(info.getCfi(), cfi))
+                .map(ReportSecurityInformation::getSecurity)
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("ЦБ с номером гос. регистрации/CFI не найден: " + cfi));
     }
 
     enum SecuritiesTableHeader implements TableColumnDescription {
