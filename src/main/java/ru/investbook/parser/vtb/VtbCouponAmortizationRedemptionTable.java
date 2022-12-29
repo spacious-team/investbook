@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -82,10 +83,15 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
                 default -> throw new UnsupportedOperationException();
             };
             int securityId = getReport().getSecurityRegistrar().declareBondByIsin(security.getIsin(), security::toBuilder);
+            Instant instant = event.getDate();
+            if (eventType != COUPON) {
+                // gh-510: чтобы отличать налог на купон, событие налога и купона сдвигаем по времени от амортизации (погашения)
+                instant = instant.plusSeconds(1);
+            }
             SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                     .portfolio(getReport().getPortfolio())
                     .eventType(eventType)
-                    .timestamp(event.getDate())
+                    .timestamp(instant)
                     .value(value)
                     .currency(event.getCurrency())
                     .count(count)
