@@ -53,7 +53,8 @@ class SpecificationHelper {
             return builder.or(
                     builder.equal(securityPath.get(SecurityEntity_.ticker), security),
                     builder.equal(securityPath.get(SecurityEntity_.isin), security),
-                    builder.like(securityPath.get(SecurityEntity_.name), "%" + security + "%"));
+                    builder.like(builder.lower(securityPath.get(SecurityEntity_.name)),
+                            "%" + security.toLowerCase() + "%"));
         }
         return null;
     }
@@ -74,7 +75,8 @@ class SpecificationHelper {
                     .where(builder.or(
                             builder.equal(securities.get(SecurityEntity_.ticker), security),
                             builder.equal(securities.get(SecurityEntity_.isin), security),
-                            builder.like(securities.get(SecurityEntity_.name), "%" + security + "%")));
+                            builder.like(builder.lower(securities.get(SecurityEntity_.name)),
+                                    "%" + security.toLowerCase() + "%")));
 
             Path<Integer> securityIdPath = root.get(attribute);
             return builder.in(securityIdPath)
@@ -190,7 +192,7 @@ class SpecificationHelper {
                                       @Nullable String value) {
         if (hasText(value)) {
             Path<String> path = root.get(attribute);
-            return builder.like(path, value + "%");
+            return builder.like(builder.lower(path), value.toLowerCase() + "%");
         }
         return null;
     }

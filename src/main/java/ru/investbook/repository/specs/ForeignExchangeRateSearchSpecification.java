@@ -57,7 +57,7 @@ public class ForeignExchangeRateSearchSpecification implements Specification<For
         if (hasText(currency)) {
             Path<String> path = root.get(ForeignExchangeRateEntity_.pk)
                     .get(ForeignExchangeRateEntityPk_.CURRENCY_PAIR);
-            return builder.like(path, currency + "%");
+            return builder.like(builder.lower(path), "%" + currency.toLowerCase() + "%");
         }
         return null;
     }
