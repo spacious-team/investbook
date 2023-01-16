@@ -18,16 +18,16 @@
 
 package ru.investbook.service.cbr;
 
-import com.sun.xml.bind.v2.ContextFactory;
 import generated.ValCurs;
+import jakarta.xml.bind.JAXBException;
 import lombok.SneakyThrows;
+import org.glassfish.jaxb.runtime.v2.ContextFactory;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.investbook.converter.ForeignExchangeRateConverter;
 import ru.investbook.repository.ForeignExchangeRateRepository;
 
-import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;

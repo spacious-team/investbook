@@ -18,6 +18,7 @@
 
 package ru.investbook.web.forms.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -38,7 +39,6 @@ import ru.investbook.web.forms.model.PageableWrapperModel;
 import ru.investbook.web.forms.model.filter.ForeignExchangeRateFormFilterModel;
 import ru.investbook.web.forms.service.ForeignExchangeRateFormsService;
 
-import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.ZoneId;
 

@@ -21,6 +21,8 @@ package ru.investbook.openformat.v1_1_0;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
@@ -32,8 +34,6 @@ import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.springframework.lang.Nullable;
 import ru.investbook.entity.PortfolioEntity;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.HashMap;

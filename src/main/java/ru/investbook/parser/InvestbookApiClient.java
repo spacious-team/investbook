@@ -18,6 +18,7 @@
 
 package ru.investbook.parser;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.EventCashFlow;
@@ -34,6 +35,7 @@ import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import ru.investbook.api.EventCashFlowRestController;
@@ -49,7 +51,6 @@ import ru.investbook.api.TransactionCashFlowRestController;
 import ru.investbook.api.TransactionRestController;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
 
-import javax.validation.ConstraintViolationException;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -196,7 +197,7 @@ public class InvestbookApiClient {
     private <T> boolean handlePost(T object, Function<T, ResponseEntity<?>> saver, String errorPrefix) {
         try {
             validator.validate(object);
-            HttpStatus status = saver.apply(object).getStatusCode();
+            HttpStatusCode status = saver.apply(object).getStatusCode();
             if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
                 log.warn(errorPrefix + " " + object);
                 return false;

@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.tinkoff;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
@@ -28,7 +29,6 @@ import org.spacious_team.table_wrapper.api.TableColumnImpl;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.springframework.util.StringUtils;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;

@@ -18,6 +18,11 @@
 
 package ru.investbook.repository.specs;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,11 +30,6 @@ import ru.investbook.entity.CashFlowTypeEntity_;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity_;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;

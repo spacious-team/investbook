@@ -18,6 +18,7 @@
 
 package ru.investbook.parser;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -28,7 +29,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import ru.investbook.report.ForeignExchangeRateService;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;

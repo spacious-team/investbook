@@ -21,6 +21,7 @@ package ru.investbook.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.SecurityDescription;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,7 +36,6 @@ import ru.investbook.converter.SecurityDescriptionConverter;
 import ru.investbook.entity.SecurityDescriptionEntity;
 import ru.investbook.repository.SecurityDescriptionRepository;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 

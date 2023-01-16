@@ -18,6 +18,7 @@
 
 package ru.investbook.web.forms.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,7 +32,6 @@ import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.forms.model.ArchivedPortfolioModel;
 
-import javax.validation.Valid;
 import java.util.Set;
 
 import static ru.investbook.web.ControllerHelper.getInactivePortfolios;
