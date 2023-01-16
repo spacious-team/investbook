@@ -41,7 +41,6 @@ import java.util.Collections;
 public class VndInvestbookPof {
 
     @NotNull
-    @Builder.Default
     @JsonProperty("version")
     String version;
 
