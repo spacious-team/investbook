@@ -191,7 +191,6 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
-            <version>1.4.200</version>
         </dependency>
         <dependency>
             <groupId>com.mysql</groupId>
