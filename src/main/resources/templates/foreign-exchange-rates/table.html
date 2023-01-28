@@ -35,9 +35,9 @@
 </p>
 
 <form action="#" th:action="@{/foreign-exchange-rates/search}" th:object="${filter}" method="post" class="search-filter">
-    <div th:replace="fragments/search :: currency-picker ('*{currency}')"></div>
-    <div th:replace="fragments/search :: date ('*{date}')"></div>
-    <div th:replace="fragments/search :: page-size ('*{pageSize}')"></div>
+    <div th:replace="~{fragments/search :: currency-picker ('*{currency}')}"></div>
+    <div th:replace="~{fragments/search :: date ('*{date}')}"></div>
+    <div th:replace="~{fragments/search :: page-size ('*{pageSize}')}"></div>
 </form>
 
 <table>
@@ -64,12 +64,12 @@
     </tr>
 </table>
 
-<div th:insert="fragments/navigation :: navigation-bar (
+<div th:insert="~{fragments/navigation :: navigation-bar (
         endpoint='foreign-exchange-rates',
         params='currency=${filter.currency},
                 date=${filter.date},
                 pageSize=${filter.pageSize}'
-    )">
+    )}">
 </div>
 </body>
 </html>

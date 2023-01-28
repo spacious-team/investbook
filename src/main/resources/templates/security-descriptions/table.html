@@ -38,9 +38,9 @@
 </p>
 
 <form action="#" th:action="@{/security-descriptions/search}" th:object="${filter}" method="post" class="search-filter">
-    <div th:replace="fragments/search :: security ('*{security}')"></div>
-    <div th:replace="fragments/search :: security-sector ('*{securitySector}')"></div>
-    <div th:replace="fragments/search :: page-size ('*{pageSize}')"></div>
+    <div th:replace="~{fragments/search :: security ('*{security}')}"></div>
+    <div th:replace="~{fragments/search :: security-sector ('*{securitySector}')}"></div>
+    <div th:replace="~{fragments/search :: page-size ('*{pageSize}')}"></div>
 </form>
 
 <table>
@@ -64,12 +64,12 @@
     </tr>
 </table>
 
-<div th:insert="fragments/navigation :: navigation-bar (
+<div th:insert="~{fragments/navigation :: navigation-bar (
         endpoint='security-descriptions',
         params='security=${filter.security},
                 securitySector=${filter.securitySector},
                 pageSize=${filter.pageSize}'
-)">
+    )}">
 </div>
 
 <p class="hint">

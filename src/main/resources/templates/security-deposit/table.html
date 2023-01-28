@@ -41,10 +41,10 @@
 </p>
 
 <form action="#" th:action="@{/security-deposit/search}" th:object="${filter}" method="post" class="search-filter">
-    <div th:replace="fragments/search :: portfolio (selected='*{portfolio}', portfolios=${portfolios})"></div>
-    <div th:replace="fragments/search :: security ('*{security}')"></div>
-    <div th:replace="fragments/search :: date-range (from='*{dateFrom}', to='*{dateTo}')"></div>
-    <div th:replace="fragments/search :: page-size ('*{pageSize}')"></div>
+    <div th:replace="~{fragments/search :: portfolio (selected='*{portfolio}', portfolios=${portfolios})}"></div>
+    <div th:replace="~{fragments/search :: security ('*{security}')}"></div>
+    <div th:replace="~{fragments/search :: date-range (from='*{dateFrom}', to='*{dateTo}')}"></div>
+    <div th:replace="~{fragments/search :: page-size ('*{pageSize}')}"></div>
 </form>
 
 <table>
@@ -76,14 +76,14 @@
     </tr>
 </table>
 
-<div th:insert="fragments/navigation :: navigation-bar (
+<div th:insert="~{fragments/navigation :: navigation-bar (
     endpoint='security-deposit',
     params='portfolio=${filter.portfolio},
             dateFrom=${filter.dateFrom},
             dateTo=${filter.dateTo},
             security=${filter.security},
             pageSize=${filter.pageSize}'
-)">
+    )}">
 </div>
 
 </body>
