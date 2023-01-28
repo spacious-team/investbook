@@ -28,13 +28,15 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 
-@Component
-@ConfigurationProperties("investbook")
 @Getter
 @Setter
+@Component
+@ConfigurationProperties("investbook")
 public class InvestbookProperties {
 
-    private Path reportBackupPath = Paths.get(System.getProperty("user.home", ""), "investbook", "report-backups");
+    private Path dataPath = Paths.get(System.getProperty("user.home", ""), "investbook");
+
+    private Path reportBackupPath = dataPath.resolve("report-backups");
 
     private boolean openHomePageAfterStart = false;
 
