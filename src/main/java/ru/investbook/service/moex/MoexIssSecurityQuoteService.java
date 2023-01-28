@@ -29,6 +29,7 @@ import ru.investbook.repository.SecurityQuoteRepository;
 
 import java.util.Optional;
 
+import static org.spacious_team.broker.pojo.SecurityType.ASSET;
 import static org.spacious_team.broker.pojo.SecurityType.CURRENCY_PAIR;
 import static ru.investbook.repository.RepositoryHelper.isUniqIndexViolationException;
 
@@ -42,21 +43,27 @@ public class MoexIssSecurityQuoteService {
     private final SecurityQuoteRepository securityQuoteRepository;
 
     public void updateQuote(SecurityEntity security) {
-        Integer securityId = security.getId();
-        SecurityType securityType = security.getType();
-        if (securityType == CURRENCY_PAIR) {
-            return; // currency pair quote derived from foreign exchange rate, use CbrForeignExchangeRateService
-        } else if (moexClient.isDerivativeAndExpired(security.getTicker(), securityType)) {
-            return;
+        try {
+            Integer securityId = security.getId();
+            SecurityType securityType = security.getType();
+            if (securityType == CURRENCY_PAIR) {
+                return; // currency pair quote derived from foreign exchange rate, use CbrForeignExchangeRateService
+            } else if (securityType == ASSET) {
+                return; // moex has no quotes for arbitrary assets
+            } else if (moexClient.isDerivativeAndExpired(security.getTicker(), securityType)) {
+                return;
+            }
+            String isinOrContractName = Optional.ofNullable(security.getIsin())
+                    .or(() -> Optional.ofNullable(security.getTicker()))
+                    .orElseThrow();
+            moexClient.getSecId(isinOrContractName, securityType)
+                    .flatMap(this::getSecurityQuote)
+                    .ifPresentOrElse(
+                            quote -> saveQuote(securityId, quote),
+                            () -> log.debug("Котировка не обновлена. На сайте МосБиржи отсутствует котировка {}", securityId));
+        } catch (Exception e) {
+            log.debug("Котировка не обновлена для {}", security, e);
         }
-        String isinOrContractName = Optional.ofNullable(security.getIsin())
-                .or(() -> Optional.ofNullable(security.getTicker()))
-                .orElseThrow();
-        moexClient.getSecId(isinOrContractName, securityType)
-                .flatMap(this::getSecurityQuote)
-                .ifPresentOrElse(
-                        quote -> saveQuote(securityId, quote),
-                        () -> log.debug("Котировка не обновлена. На сайте МосБиржи отсутствует котировка {}", securityId));
     }
 
     private Optional<SecurityQuote> getSecurityQuote(String moexSecId) {
