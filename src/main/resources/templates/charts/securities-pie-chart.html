@@ -31,7 +31,7 @@
 <body>
 <h1>Диаграммы</h1>
 <a href="/">На главную</a><br>
-<p th:replace="charts/menu :: pie_charts_menu"></p>
+<p th:replace="~{charts/menu :: pie_charts_menu}"></p>
 <div id="chartdiv"></div>
 
 <script th:inline="javascript">

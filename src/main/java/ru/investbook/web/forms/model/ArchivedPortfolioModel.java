@@ -18,9 +18,9 @@
 
 package ru.investbook.web.forms.model;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Data

@@ -18,6 +18,13 @@
 
 package ru.investbook.repository.specs;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
+import jakarta.persistence.metamodel.SingularAttribute;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.Nullable;
 import ru.investbook.entity.PortfolioEntity;
@@ -25,13 +32,6 @@ import ru.investbook.entity.PortfolioEntity_;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEntity_;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-import javax.persistence.metamodel.SingularAttribute;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;

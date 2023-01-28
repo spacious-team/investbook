@@ -18,11 +18,10 @@
 
 package ru.investbook.web.forms.model;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.lang.Nullable;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 @Data
 public class SecurityDescriptionModel {

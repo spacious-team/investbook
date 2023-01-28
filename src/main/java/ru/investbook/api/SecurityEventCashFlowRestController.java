@@ -21,6 +21,7 @@ package ru.investbook.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +37,6 @@ import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.FifoPositionsFactory;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 

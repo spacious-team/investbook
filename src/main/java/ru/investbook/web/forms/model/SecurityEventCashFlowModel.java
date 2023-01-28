@@ -18,14 +18,14 @@
 
 package ru.investbook.web.forms.model;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.lang.Nullable;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;

@@ -19,6 +19,7 @@
 package ru.investbook.openformat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,6 @@ import ru.investbook.openformat.v1_1_0.PortfolioOpenFormatPersister;
 import ru.investbook.openformat.v1_1_0.PortfolioOpenFormatV1_1_0;
 import ru.investbook.parser.ValidatorService;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;

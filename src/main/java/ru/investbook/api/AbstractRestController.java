@@ -18,6 +18,7 @@
 
 package ru.investbook.api;
 
+import jakarta.persistence.GeneratedValue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
@@ -27,7 +28,6 @@ import org.springframework.web.util.UriUtils;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.UseExistingOrGenerateIdGenerator;
 
-import javax.persistence.GeneratedValue;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
