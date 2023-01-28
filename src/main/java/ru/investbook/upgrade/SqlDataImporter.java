@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import ru.investbook.InvestbookProperties;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,11 +34,16 @@ import java.time.Instant;
 @Service
 @RequiredArgsConstructor
 public class SqlDataImporter {
+    private final InvestbookProperties properties;
     private final JdbcTemplate jdbcTemplate;
 
     @PostConstruct
     public void init() {
-        Path path = Path.of("export-2022.9.sql");
+        properties.getSqlImportFiles()
+                .forEach(this::importFile);
+    }
+
+    private void importFile(Path path) {
         if (Files.exists(path)) {
             boolean isSuccess = importSqlData(path);
             if (isSuccess) {
@@ -49,12 +55,18 @@ public class SqlDataImporter {
     private boolean importSqlData(Path path) {
         try {
             Instant t0 = Instant.now();
-            jdbcTemplate.execute("RUNSCRIPT FROM '" + path + "' CHARSET 'UTF-8' FROM_1X");
+            Path absolutePath = path.toAbsolutePath().normalize();
+            String command = "RUNSCRIPT FROM '" + absolutePath + "' CHARSET 'UTF-8'";
+            boolean isH2v1_xFile = path.getFileName().toString().contains("2022.9");
+            if (isH2v1_xFile) {
+                command += " FROM_1X";
+            }
+            jdbcTemplate.execute(command);
             Instant t1 = Instant.now();
-            log.info("Импорт данных из Investbook 2022.9 завершен {}", Duration.between(t0, t1));
+            log.info("Импорт данных предыдущей версии Investbook из файла '{}' завершен за {}", path, Duration.between(t0, t1));
             return true;
         } catch (Exception e) {
-            log.error("Не смог выполнить импорт данных из файла '{}'", path, e);
+            log.error("Не смог выполнить импорт данных предыдущей версии Investbook из файла '{}'", path, e);
             return false;
         }
     }

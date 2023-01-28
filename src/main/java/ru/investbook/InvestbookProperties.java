@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Getter
 @Setter
@@ -37,6 +38,8 @@ public class InvestbookProperties {
     private Path dataPath = Paths.get(System.getProperty("user.home", ""), "investbook");
 
     private Path reportBackupPath = dataPath.resolve("report-backups");
+
+    private List<Path> sqlImportFiles = List.of(dataPath.resolve("export-2022.9.sql"));
 
     private boolean openHomePageAfterStart = false;
 
