@@ -1,6 +1,3 @@
-![java-version](https://img.shields.io/badge/java-19-brightgreen?style=flat-square)
-![spring-boot-version](https://img.shields.io/badge/spring--boot-3.0.1-brightgreen?style=flat-square)
-
 ### Инструкция для начинающих
 Если вы начинающий разработчик воспользуйтесь этой [инструкцией](https://github.com/spacious-team/investbook/files/5398264/github.docx).
 Если вы намерены изменить документацию, то эта инструкция самодостаточна, поэтому остальные пункты на этой странице
