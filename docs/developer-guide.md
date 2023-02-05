@@ -15,6 +15,11 @@ git clone https://github.com/spacious-team/investbook.git
 Если вы используете [IntelliJ IDEA](https://www.jetbrains.com/ru-ru/idea/download), файлы настроек среды разработки
 уже сохранены в репозиторий, просто импортируйте код как maven проект.
 
+### Установка java
+Для разработки требуется версия java, которая указана в файле [pom.xml](../pom.xml) в теге `<java.version>`.
+Скачайте java под свою ОС, например с сайта [OpenJDK](https://openjdk.org/install/), и установите переменные
+окружения `JAVA_HOME` и `PATH`, например для Windows 10 по этой [инструкции](https://csharpcoderr.com/5351/).
+
 ### Компиляция
 Компиляция запускается командой:
 ```
