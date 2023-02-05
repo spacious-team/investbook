@@ -1,4 +1,4 @@
-![java-version](https://img.shields.io/badge/java-18-brightgreen?style=flat-square)
+![java-version](https://img.shields.io/badge/java-19-brightgreen?style=flat-square)
 ![spring-boot-version](https://img.shields.io/badge/spring--boot-3.0.1-brightgreen?style=flat-square)
 [![hits-of-code](https://img.shields.io/badge/dynamic/json?style=flat-square&color=lightblue&label=hits-of-code&url=https://hitsofcode.com/github/spacious-team/investbook/json?branch=develop&query=$.count)](https://hitsofcode.com/github/spacious-team/investbook/view?branch=develop)
 ![github-closed-pull-requests](https://img.shields.io/github/issues-pr-closed/spacious-team/investbook?style=flat-square&color=brightgreen)

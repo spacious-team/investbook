@@ -63,7 +63,7 @@
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
         <win.msi.version>22.9</win.msi.version>
-        <java.version>18</java.version>
+        <java.version>19</java.version>
         <!-- version 3.2.0 provided by Spring Boot 2.4.1 bugged, using version from Spring Boot 2.3.4
         https://stackoverflow.com/questions/65910112/maven-clean-install-failed-to-execute-goal-org-apache-maven-pluginsmaven-resou
         TODO remove after fix -->
@@ -224,6 +224,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>1.18.26</version>
             <optional>true</optional>
         </dependency>
         <dependency>
