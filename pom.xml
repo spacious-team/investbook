@@ -90,7 +90,7 @@
             <dependency>
                 <groupId>com.github.spacious-team</groupId>
                 <artifactId>table-wrapper-api</artifactId>
-                <version>2022.4</version>
+                <version>4dde7fd269</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
