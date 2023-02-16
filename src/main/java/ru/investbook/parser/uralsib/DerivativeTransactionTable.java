@@ -37,15 +37,18 @@ import static ru.investbook.parser.uralsib.DerivativeTransactionTable.FortsTable
 @Slf4j
 public class DerivativeTransactionTable extends SingleAbstractReportTable<DerivativeTransaction> {
     private static final String TABLE_NAME = "СДЕЛКИ С ФЬЮЧЕРСАМИ И ОПЦИОНАМИ";
-    private static final String TABLE_END_TEXT = PaymentsTable.TABLE_NAME;
     private boolean expirationTableReached = false;
 
     public DerivativeTransactionTable(UralsibBrokerReport report) {
-        this(report, TABLE_NAME, TABLE_END_TEXT, 2);
+        this(report, TABLE_NAME, 2);
     }
 
-    protected DerivativeTransactionTable(UralsibBrokerReport report, String tableName, String tableFooter, int headersRowCount) {
-        super(report, tableName, tableFooter, FortsTableHeader.class, headersRowCount);
+    protected DerivativeTransactionTable(UralsibBrokerReport report, String tableName, int headersRowCount) {
+        super(report,
+                (cell) -> cell.startsWith(tableName),
+                UralsibTablesHelper::tableEndPredicate,
+                FortsTableHeader.class,
+                headersRowCount);
     }
 
     @Override

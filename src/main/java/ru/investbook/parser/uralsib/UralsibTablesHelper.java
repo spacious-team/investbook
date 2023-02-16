@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
+ * Copyright (C) 2023  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,10 +18,18 @@
 
 package ru.investbook.parser.uralsib;
 
-public class DerivativeExpirationTable extends DerivativeTransactionTable {
-    static final String TABLE_NAME = "ИСПОЛНЕНИЕ КОНТРАКТОВ";
+import lombok.NoArgsConstructor;
 
-    protected DerivativeExpirationTable(UralsibBrokerReport report) {
-        super(report, TABLE_NAME, 1);
+import java.util.regex.Pattern;
+
+import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
+import static lombok.AccessLevel.PRIVATE;
+
+@NoArgsConstructor(access = PRIVATE)
+final class UralsibTablesHelper {
+    private static Pattern tableEndPredicate = Pattern.compile("^[А-Я\s]+$", UNICODE_CHARACTER_CLASS);
+
+    static boolean tableEndPredicate(String cell) {
+        return tableEndPredicate.matcher(cell).matches();
     }
 }
