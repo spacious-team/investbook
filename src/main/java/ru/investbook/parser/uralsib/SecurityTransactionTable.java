@@ -53,7 +53,15 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                                     SecuritiesTable securitiesTable,
                                     ForeignExchangeRateTable foreignExchangeRateTable,
                                     TransactionValueAndFeeParser transactionValueAndFeeParser) {
-        super(report, TABLE_NAME, "", TransactionTableHeader.class, 2);
+        this(report, TABLE_NAME, securitiesTable, foreignExchangeRateTable, transactionValueAndFeeParser);
+    }
+
+    protected SecurityTransactionTable(UralsibBrokerReport report,
+                                       String tableName,
+                                       SecuritiesTable securitiesTable,
+                                       ForeignExchangeRateTable foreignExchangeRateTable,
+                                       TransactionValueAndFeeParser transactionValueAndFeeParser) {
+        super(report, tableName, "", TransactionTableHeader.class, 2);
         this.securitiesTable = securitiesTable;
         this.foreignExchangeRateTable = foreignExchangeRateTable;
         this.transactionValueAndFeeParser = transactionValueAndFeeParser;
@@ -128,7 +136,12 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
     }
 
     enum TransactionTableHeader implements TableColumnDescription {
-        DATE_TIME("дата", "поставки"),
+        DATE_TIME(
+                AnyOfTableColumn.of(
+                        MultiLineTableColumn.of(                                   // таблица "Биржевые сделки с ценными бумагами в отчетном периоде"
+                                TableColumnImpl.of("дата", "поставки"),
+                                TableColumnImpl.of("фактическая")),
+                        TableColumnImpl.of("дата", "поставки", "фактическая"))),   // таблица "Специальные сделки РЕПО для переноса длинной позиции"
         TRADE_ID("номер сделки"),
         DIRECTION("вид", "сделки"),
         COUNT("количество", "цб"),

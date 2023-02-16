@@ -43,9 +43,9 @@ import static java.util.Objects.requireNonNull;
 public class UralsibBrokerReport extends AbstractExcelBrokerReport {
     // "УРАЛСИБ Брокер" или "УРАЛСИБ Кэпитал - Финансовые услуги" (старый формат 2018 г)
     private static final String PORTFOLIO_MARKER = "Номер счета Клиента:";
-    private static final Predicate<Object> uralsibReportPredicate = (cell) ->
+    private final Predicate<Object> uralsibReportPredicate = (cell) ->
             (cell instanceof String) && ((String) cell).contains("УРАЛСИБ");
-    private static final Predicate<Object> dateMarkerPredicate = (cell) ->
+    private final Predicate<Object> dateMarkerPredicate = (cell) ->
             (cell instanceof String) && ((String) cell).contains("за период");
     private final Workbook book;
 
@@ -78,7 +78,7 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
         setReportEndDateTime(getReportEndDateTime(reportPage));
     }
 
-    private static void checkReportFormat(Path path, ReportPage reportPage) {
+    private void checkReportFormat(Path path, ReportPage reportPage) {
         if (reportPage.find(0, 1, uralsibReportPredicate) == TableCellAddress.NOT_FOUND) {
             throw new RuntimeException("В файле " + path + " не содержится отчет брокера Уралсиб");
         }
