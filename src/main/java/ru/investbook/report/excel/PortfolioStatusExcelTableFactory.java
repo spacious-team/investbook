@@ -240,11 +240,9 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                         (securityType.isBond() ? ("+" + AMORTIZATION.getCellAddr()) : ""));
             } else {
                 row.put(AVERAGE_PRICE, securityProfitService.getPurchaseCost(security, positions, toCurrency)
-                        .abs()
-                        .divide(BigDecimal.valueOf(Math.max(1, Math.abs(count))), 6, RoundingMode.CEILING));
+                        .divide(BigDecimal.valueOf(-count), 6, RoundingMode.CEILING));
                 row.put(AVERAGE_ACCRUED_INTEREST, securityProfitService.getPurchaseAccruedInterest(security, positions, toCurrency)
-                        .abs()
-                        .divide(BigDecimal.valueOf(Math.max(1, Math.abs(count))), 6, RoundingMode.CEILING));
+                        .divide(BigDecimal.valueOf(-count), 6, RoundingMode.CEILING));
 
                 quote = securityProfitService.getSecurityQuote(security, toCurrency, filter.getToDate());
 
