@@ -29,13 +29,14 @@ import javax.annotation.PreDestroy;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Objects;
+import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class SqlDataExporter {
-    private static final String EXPECTED_INVESTBOOK_VERSION_FOR_EXPORT = "2022.9";
+    private static final String EXPORT_FILE_NAME = "export-2022.9.sql";
+    private final List<String> expectedInvestbookVersionsForExport = List.of("2022.9", "2022.9.1");
     private final BuildProperties buildProperties;
     private final InvestbookProperties investbookProperties;
     private final JdbcTemplate jdbcTemplate;
@@ -43,9 +44,9 @@ public class SqlDataExporter {
     @PreDestroy
     public void preDestroy() {
         String version = buildProperties.getVersion();
-        if (Objects.equals(version, EXPECTED_INVESTBOOK_VERSION_FOR_EXPORT)) {
+        if (expectedInvestbookVersionsForExport.contains(version)) {
             Path file = investbookProperties.getDataPath()
-                    .resolve("export-" + version + ".sql")
+                    .resolve(EXPORT_FILE_NAME)
                     .toAbsolutePath();
             exportSqlData(file);
         }
