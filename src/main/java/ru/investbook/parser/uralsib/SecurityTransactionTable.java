@@ -138,10 +138,10 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
     enum TransactionTableHeader implements TableColumnDescription {
         DATE_TIME(
                 AnyOfTableColumn.of(
-                        MultiLineTableColumn.of(                                   // таблица "Биржевые сделки с ценными бумагами в отчетном периоде"
+                        MultiLineTableColumn.of(                                // таблица "Специальные сделки РЕПО для переноса длинной позиции"
                                 TableColumnImpl.of("дата", "поставки"),
-                                TableColumnImpl.of("фактическая")),
-                        TableColumnImpl.of("дата", "поставки", "фактическая"))),   // таблица "Специальные сделки РЕПО для переноса длинной позиции"
+                                TableColumnImpl.of("плановая")),
+                        TableColumnImpl.of("дата", "поставки"))),        // таблица "Биржевые сделки с ценными бумагами в отчетном периоде"
         TRADE_ID("номер сделки"),
         DIRECTION("вид", "сделки"),
         COUNT("количество", "цб"),
