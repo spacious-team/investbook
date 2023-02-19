@@ -31,21 +31,27 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
+import java.util.regex.Pattern;
 
+import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
 import static ru.investbook.parser.uralsib.DerivativeTransactionTable.FortsTableHeader.*;
 
 @Slf4j
 public class DerivativeTransactionTable extends SingleAbstractReportTable<DerivativeTransaction> {
     private static final String TABLE_NAME = "СДЕЛКИ С ФЬЮЧЕРСАМИ И ОПЦИОНАМИ";
-    private static final String TABLE_END_TEXT = PaymentsTable.TABLE_NAME;
+    private static final Pattern tableEndPredicate = Pattern.compile("^[А-Я\s]+$", UNICODE_CHARACTER_CLASS);
     private boolean expirationTableReached = false;
 
     public DerivativeTransactionTable(UralsibBrokerReport report) {
-        this(report, TABLE_NAME, TABLE_END_TEXT, 2);
+        this(report, TABLE_NAME, 2);
     }
 
-    protected DerivativeTransactionTable(UralsibBrokerReport report, String tableName, String tableFooter, int headersRowCount) {
-        super(report, tableName, tableFooter, FortsTableHeader.class, headersRowCount);
+    protected DerivativeTransactionTable(UralsibBrokerReport report, String tableName, int headersRowCount) {
+        super(report,
+                (cell) -> cell.startsWith(tableName),
+                (cell) -> tableEndPredicate.matcher(cell).matches(),
+                FortsTableHeader.class,
+                headersRowCount);
     }
 
     @Override

@@ -20,9 +20,8 @@ package ru.investbook.parser.uralsib;
 
 public class DerivativeExpirationTable extends DerivativeTransactionTable {
     static final String TABLE_NAME = "ИСПОЛНЕНИЕ КОНТРАКТОВ";
-    private static final String TABLE_END_TEXT = PaymentsTable.TABLE_NAME;
 
     protected DerivativeExpirationTable(UralsibBrokerReport report) {
-        super(report, TABLE_NAME, TABLE_END_TEXT, 1);
+        super(report, TABLE_NAME, 1);
     }
 }
