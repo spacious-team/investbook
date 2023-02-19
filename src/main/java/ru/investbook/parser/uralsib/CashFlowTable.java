@@ -49,8 +49,8 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
         String description = row.getStringCellValueOrDefault(DESCRIPTION, "");
         CashFlowType type;
         switch (action) {
-            case"ввод дс":
-            case"вывод дс":
+            case "ввод дс":
+            case "вывод дс":
                 type = CashFlowType.CASH;
                 break;
             case "перевод дс":
@@ -60,7 +60,7 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
                     String to = matcherTo.group(1);
                     String from = matcherFrom.group(1);
                     if (isCurrentPortfolioAccount(to) != isCurrentPortfolioAccount(from)) {
-                        if (getClientCode(from) != 0 && getClientCode(to) != 0) {
+                        if (isExternalAccount(from) && isExternalAccount(to)) {
                             type = CashFlowType.CASH;
                             break;
                         }
@@ -97,6 +97,14 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
             // Мосбиржа, СПб биржа
             return getClientCode(portfolio).equals(getClientCode(account))
                     && (isIIS == account.endsWith("I"));
+        }
+    }
+
+    private boolean isExternalAccount(String account) {
+        try {
+            return getClientCode(account) != 0;
+        } catch (Exception ignore) {
+            return true;  // current account != "00000[^0-9]*"
         }
     }
 
