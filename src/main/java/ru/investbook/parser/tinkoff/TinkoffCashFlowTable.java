@@ -22,9 +22,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.SingleBrokerReport;
@@ -76,7 +76,7 @@ public class TinkoffCashFlowTable extends SingleAbstractReportTable<EventCashFlo
                     .build();
         } else if (operation.contains("комиссия по тарифу")) {
             return getBuilder(row, currency)
-                    .eventType(CashFlowType.COMMISSION)
+                    .eventType(CashFlowType.FEE)
                     .value(row.getBigDecimalCellValue(WITHDRAWAL).negate())
                     .description(operationOriginal)
                     .build();
@@ -108,7 +108,7 @@ public class TinkoffCashFlowTable extends SingleAbstractReportTable<EventCashFlo
      * Таблица не имеет собственного названия, поэтому ищем предыдущую таблицу, используется ее заголовок
      */
     @RequiredArgsConstructor
-    protected enum CashFlowTableHeader implements TableColumnDescription {
+    protected enum CashFlowTableHeader implements TableHeaderColumn {
         CURRENCY("Валюта"),
         DATE("Исходящий", "остаток", "на конец", "периода"), // Дата исполнения
         OPERATION("Плановый", "исходящий", "остаток"), // Операция
@@ -120,7 +120,7 @@ public class TinkoffCashFlowTable extends SingleAbstractReportTable<EventCashFlo
         private final TableColumn column;
 
         CashFlowTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

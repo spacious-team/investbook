@@ -25,6 +25,7 @@ import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
+import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
@@ -61,7 +62,7 @@ import static ru.investbook.report.excel.DerivativesMarketTotalProfitExcelTableH
 @RequiredArgsConstructor
 @Slf4j
 public class DerivativesMarketTotalProfitExcelTableFactory implements TableFactory {
-    private static final String QUOTE_CURRENCY = "PNT"; // point
+    private static final String QUOTE_CURRENCY = DerivativeTransaction.QUOTE_CURRENCY;
     private static final String PROFIT_FORMULA = getProfitFormula();
     private static final String PROFIT_PROPORTION_FORMULA = getProfitProportionFormula();
     private final TransactionRepository transactionRepository;
@@ -164,7 +165,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
             int openedPositions = contractToOpenedPositions.values().stream().mapToInt(Math::abs).sum();
 
             row.put(COUNT, openedPositions);
-            row.put(COMMISSION, securityProfitService.getTotal(transactions, CashFlowType.COMMISSION, toCurrency).abs());
+            row.put(COMMISSION, securityProfitService.getTotal(transactions, CashFlowType.FEE, toCurrency).abs());
             if (openedPositions == 0) {
                 row.put(GROSS_PROFIT_PNT, securityProfitService.getTotal(transactions, DERIVATIVE_QUOTE, QUOTE_CURRENCY));
             }

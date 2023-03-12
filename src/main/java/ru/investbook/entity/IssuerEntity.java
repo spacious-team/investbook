@@ -37,7 +37,7 @@ public class IssuerEntity {
     private Integer id;
 
     @Column(name = "taxpayer_id")
-    private Long taxpayerId;
+    private String taxpayerId;
 
     @Column(name = "name", nullable = false)
     private String name;

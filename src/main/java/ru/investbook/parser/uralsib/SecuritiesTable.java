@@ -24,9 +24,9 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
@@ -67,7 +67,7 @@ public class SecuritiesTable extends SingleAbstractReportTable<ReportSecurityInf
                 .orElseThrow(() -> new RuntimeException("ЦБ с номером гос. регистрации/CFI не найден: " + cfi));
     }
 
-    enum SecuritiesTableHeader implements TableColumnDescription {
+    enum SecuritiesTableHeader implements TableHeaderColumn {
         NAME("наименование"),
         ISIN("isin"),
         CFI("cfi"),
@@ -81,7 +81,7 @@ public class SecuritiesTable extends SingleAbstractReportTable<ReportSecurityInf
         private final TableColumn column;
 
         SecuritiesTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 

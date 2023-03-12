@@ -23,9 +23,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.springframework.util.StringUtils;
 import ru.investbook.parser.SingleAbstractReportTable;
@@ -154,7 +154,7 @@ public class CashFlowEventTable extends SingleAbstractReportTable<CashFlowEventT
     }
 
     @Getter
-    enum VtbCashFlowTableHeader implements TableColumnDescription {
+    enum VtbCashFlowTableHeader implements TableHeaderColumn {
         DATE("дата"),
         VALUE("сумма"),
         CURRENCY("валюта"),
@@ -164,7 +164,7 @@ public class CashFlowEventTable extends SingleAbstractReportTable<CashFlowEventT
         private final TableColumn column;
 
         VtbCashFlowTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

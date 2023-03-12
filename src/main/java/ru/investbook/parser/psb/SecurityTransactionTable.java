@@ -25,9 +25,9 @@ import org.spacious_team.broker.pojo.Security.SecurityBuilder;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleInitializableReportTable;
 
@@ -100,9 +100,9 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)
                 .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)
-                .commission(commission)
+                .fee(commission)
                 .valueCurrency(row.getStringCellValue(VALUE_CURRENCY).replace(" ", "").split("/")[1])
-                .commissionCurrency(row.getStringCellValue(COMMISSION_CURRENCY))
+                .feeCurrency(row.getStringCellValue(COMMISSION_CURRENCY))
                 .build();
     }
 
@@ -123,8 +123,8 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
         return Set.copyOf(securities);
     }
 
-    enum TransactionTableHeader implements TableColumnDescription {
-        DATE_TIME(TableColumnImpl.of("дата", "исполнения"), TableColumnImpl.of("дата и время")),
+    enum TransactionTableHeader implements TableHeaderColumn {
+        DATE_TIME(PatternTableColumn.of("дата", "исполнения"), PatternTableColumn.of("дата и время")),
         TRADE_ID("номер сделки"),
         NAME("наименование"),
         ISIN("isin"),
@@ -143,7 +143,7 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
         private final TableColumn column;
 
         TransactionTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
 
         TransactionTableHeader(TableColumn... columns) {

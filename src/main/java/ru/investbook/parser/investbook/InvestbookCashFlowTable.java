@@ -26,8 +26,8 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.spacious_team.broker.pojo.CashFlowType.*;
-import static ru.investbook.parser.investbook.AbstractInvestbookTable.InvestbookReportTableHeader.PRICE;
+import static org.spacious_team.broker.pojo.CashFlowType.CASH;
+import static org.spacious_team.broker.pojo.CashFlowType.TAX;
 import static ru.investbook.parser.investbook.AbstractInvestbookTable.InvestbookReportTableHeader.*;
 
 public class InvestbookCashFlowTable extends AbstractInvestbookTable<EventCashFlow> {
@@ -45,7 +45,7 @@ public class InvestbookCashFlowTable extends AbstractInvestbookTable<EventCashFl
             type = (operation.contains("возврат") || operation.contains("вычет")) ? CASH : TAX;
             negate = true;
         } else if (operation.contains("комис")) { // Комиссия / Возврат комиссии
-            type = COMMISSION;
+            type = CashFlowType.FEE;
             negate = !operation.contains("возврат");
         } else if (operation.contains("ввод")) { // Ввод денежных средств
             type = CASH;

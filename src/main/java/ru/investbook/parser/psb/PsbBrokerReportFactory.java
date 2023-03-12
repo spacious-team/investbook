@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Component
@@ -48,10 +49,10 @@ public class PsbBrokerReportFactory extends AbstractBrokerReportFactory {
     }
 
     @Override
-    public BrokerReport create(String excelFileName, InputStream is) {
-        BrokerReport brokerReport = create(excelFileName, is,
+    public Optional<BrokerReport> create(String excelFileName, InputStream is) {
+        Optional<BrokerReport> brokerReport = create(excelFileName, is,
                 (fileName, stream) -> new PsbBrokerReport(fileName, stream, securityRegistrar));
-        if (brokerReport != null) {
+        if (brokerReport.isPresent()) {
             log.info("Обнаружен отчет '{}' фондового и срочного рынков Промсвязьбанк брокера", excelFileName);
         }
         return brokerReport;

@@ -24,9 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
@@ -90,39 +90,39 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
                 .count((isBuy ? 1 : -1) * count)
                 .valueInPoints(valueInPoints)
                 .value(value)
-                .commission(commission)
+                .fee(commission)
                 .valueCurrency(valueCurrency)
-                .commissionCurrency("RUB") // FORTS, only RUB
+                .feeCurrency("RUB") // FORTS, only RUB
                 .build();
     }
 
     @RequiredArgsConstructor
-    enum FortsTableHeader implements TableColumnDescription {
+    enum FortsTableHeader implements TableHeaderColumn {
         DATE_TIME(AnyOfTableColumn.of(
-                TableColumnImpl.of("дата расчетов"),
-                TableColumnImpl.of("дата исполнения"))),
+                PatternTableColumn.of("дата расчетов"),
+                PatternTableColumn.of("дата исполнения"))),
         TRANSACTION("номер сделки"),
         TYPE("вид контракта"),
         CONTRACT("наименование контракта"),
         DIRECTION(AnyOfTableColumn.of(
-                TableColumnImpl.of("вид сделки"),
-                TableColumnImpl.of("зачисление/списание"))),
+                PatternTableColumn.of("вид сделки"),
+                PatternTableColumn.of("зачисление/списание"))),
         COUNT("количество"),
         QUOTE(AnyOfTableColumn.of(
-                TableColumnImpl.of("цена фьючерса"),
-                TableColumnImpl.of("премия по опциону"))),
+                PatternTableColumn.of("цена фьючерса"),
+                PatternTableColumn.of("премия по опциону"))),
         VALUE("^сумма$"),
         VALUE_CURRENCY(OptionalTableColumn.of(
-                TableColumnImpl.of("валюта суммы"))), // sometime does not exists
+                PatternTableColumn.of("валюта суммы"))), // sometime does not exists
         MARKET_COMMISSION("комиссия тс"),
         BROKER_COMMISSION("комиссия брокера"),
         CLEARING_COMMISSION(OptionalTableColumn.of(
-                TableColumnImpl.of("клиринговая комиссия"))); // only for Expiration table
+                PatternTableColumn.of("клиринговая комиссия"))); // only for Expiration table
 
         @Getter
         private final TableColumn column;
         FortsTableHeader(String ... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

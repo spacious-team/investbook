@@ -24,9 +24,9 @@ import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.ConstantPositionTableColumn;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 
 public class AbstractInvestbookTable<RowType> extends AbstractReportTable<RowType> {
 
@@ -41,40 +41,40 @@ public class AbstractInvestbookTable<RowType> extends AbstractReportTable<RowTyp
 
     @Getter
     @RequiredArgsConstructor
-    public enum InvestbookReportTableHeader implements TableColumnDescription {
+    public enum InvestbookReportTableHeader implements TableHeaderColumn {
         OPERATION(AnyOfTableColumn.of(
-                TableColumnImpl.of("событие"),
-                TableColumnImpl.of("тип"),
+                PatternTableColumn.of("событие"),
+                PatternTableColumn.of("тип"),
                 ConstantPositionTableColumn.of(0))),
         PORTFOLIO(AnyOfTableColumn.of(
-                TableColumnImpl.of("счет"),
+                PatternTableColumn.of("счет"),
                 ConstantPositionTableColumn.of(1))),
         DATE_TIME(AnyOfTableColumn.of(
-                TableColumnImpl.of("дата"),
+                PatternTableColumn.of("дата"),
                 ConstantPositionTableColumn.of(2))),
         TICKER_NAME_ISIN(AnyOfTableColumn.of(
-                TableColumnImpl.of("наименование"),
+                PatternTableColumn.of("наименование"),
                 ConstantPositionTableColumn.of(3))),
         COUNT(AnyOfTableColumn.of(
-                TableColumnImpl.of("количество"),
+                PatternTableColumn.of("количество"),
                 ConstantPositionTableColumn.of(4))),
         PRICE(AnyOfTableColumn.of(
-                TableColumnImpl.of("цена"),
+                PatternTableColumn.of("цена"),
                 ConstantPositionTableColumn.of(5))),
         ACCRUED_INTEREST(AnyOfTableColumn.of(
-                TableColumnImpl.of("нкд"),
+                PatternTableColumn.of("нкд"),
                 ConstantPositionTableColumn.of(6))),
         DERIVATIVE_PRICE_IN_CURRENCY(AnyOfTableColumn.of(
-                TableColumnImpl.of("стоимость", "контракта"),
+                PatternTableColumn.of("стоимость", "контракта"),
                 ConstantPositionTableColumn.of(7))),
         CURRENCY(AnyOfTableColumn.of(
-                TableColumnImpl.of("валюта", "цены"),
+                PatternTableColumn.of("валюта", "цены"),
                 ConstantPositionTableColumn.of(8))),
         FEE(AnyOfTableColumn.of(
-                TableColumnImpl.of("комиссия"),
+                PatternTableColumn.of("комиссия"),
                 ConstantPositionTableColumn.of(9))),
         FEE_CURRENCY(AnyOfTableColumn.of(
-                TableColumnImpl.of("валюта", "комиссии"),
+                PatternTableColumn.of("валюта", "комиссии"),
                 ConstantPositionTableColumn.of(10)));
 
         private final TableColumn column;

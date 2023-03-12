@@ -22,9 +22,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.springframework.util.StringUtils;
 import ru.investbook.parser.SingleAbstractReportTable;
@@ -88,7 +88,7 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
         return EventCashFlow.mergeDuplicates(old, nw);
     }
 
-    enum CashFlowTableHeader implements TableColumnDescription {
+    enum CashFlowTableHeader implements TableHeaderColumn {
         DATE("дата"),
         OPERATION("операция"),
         VALUE("сумма"),
@@ -98,7 +98,7 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
         @Getter
         private final TableColumn column;
         CashFlowTableHeader(String ... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

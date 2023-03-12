@@ -25,10 +25,10 @@ import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleBrokerReport;
 import ru.investbook.parser.SingleInitializableReportTable;
@@ -88,15 +88,15 @@ public class AssetsTable extends SingleInitializableReportTable<PortfolioPropert
     }
 
     @RequiredArgsConstructor
-    enum SummaryTableHeader implements TableColumnDescription {
+    enum SummaryTableHeader implements TableHeaderColumn {
         RUB(AnyOfTableColumn.of(
                 MultiLineTableColumn.of(
-                        TableColumnImpl.of(TABLE_FIRST_HEADER_LINE),
-                        TableColumnImpl.of(TABLE_SECOND_HEADER_LINE),
-                        TableColumnImpl.of("RUR")),
+                        PatternTableColumn.of(TABLE_FIRST_HEADER_LINE),
+                        PatternTableColumn.of(TABLE_SECOND_HEADER_LINE),
+                        PatternTableColumn.of("RUR")),
                 MultiLineTableColumn.of(
-                        TableColumnImpl.of(TABLE_SECOND_HEADER_LINE),
-                        TableColumnImpl.of("RUR"))));
+                        PatternTableColumn.of(TABLE_SECOND_HEADER_LINE),
+                        PatternTableColumn.of("RUR"))));
 
         @Getter
         private final TableColumn column;

@@ -42,7 +42,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.spacious_team.broker.pojo.CashFlowType.COMMISSION;
+import static org.spacious_team.broker.pojo.CashFlowType.FEE;
 import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 
 @Jacksonized
@@ -137,7 +137,7 @@ public class TransferPof {
                                 .timestamp(Instant.ofEpochSecond(timestamp))
                                 .security(getSecurityId(assetToSecurityId))
                                 .count(count.intValueExact())
-                                .eventType(COMMISSION)
+                                .eventType(FEE)
                                 .value(fee.negate())
                                 .currency(getValidCurrencyOrNull(feeCurrency))
                                 .build());

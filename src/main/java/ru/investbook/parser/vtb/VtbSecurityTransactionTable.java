@@ -22,9 +22,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.SingleBrokerReport;
@@ -78,9 +78,9 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)
                 .accruedInterest(accruedInterest)
-                .commission(commission)
+                .fee(commission)
                 .valueCurrency(currency)
-                .commissionCurrency(currency)
+                .feeCurrency(currency)
                 .build();
     }
 
@@ -90,7 +90,7 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
     }
 
     @RequiredArgsConstructor
-    enum VtbSecurityTransactionTableHeader implements TableColumnDescription {
+    enum VtbSecurityTransactionTableHeader implements TableHeaderColumn {
         DATE("плановая дата поставки"),
         TRADE_ID("№ сделки"),
         NAME_AND_ISIN("наименование", "isin"),
@@ -106,7 +106,7 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
         private final TableColumn column;
 
         VtbSecurityTransactionTableHeader(String ... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

@@ -23,9 +23,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
 import org.springframework.core.io.Resource;
@@ -95,9 +95,9 @@ public class Sp500Service {
     }
 
     @RequiredArgsConstructor
-    private enum TableHeader implements TableColumnDescription {
-        DATE(TableColumnImpl.of("Effective date")),
-        VALUE(TableColumnImpl.of("S&P 500"));
+    private enum TableHeader implements TableHeaderColumn {
+        DATE(PatternTableColumn.of("Effective date")),
+        VALUE(PatternTableColumn.of("S&P 500"));
 
         @Getter
         private final TableColumn column;
