@@ -113,7 +113,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
     }
 
     enum ContractCountTableHeader implements TableHeaderColumn {
-        CONTRACT("контракт"),
+        CONTRACT("^контракт$"),
         INCOMING("входящий остаток"),
         OUTGOING("исходящий остаток"),
         BUY("зачислено"),
