@@ -36,8 +36,8 @@ public class TinkoffDerivativeCashFlowTable extends SingleAbstractReportTable<Se
 
     protected TinkoffDerivativeCashFlowTable(SingleBrokerReport report) {
         super(report,
-                (cell) -> cell.startsWith("3.3 Информация о позиционном состоянии по производным финансовым инструментам"),
-                (cell) -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
+                cell -> cell.startsWith("3.3 Информация о позиционном состоянии по производным финансовым инструментам"),
+                cell -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
                 DerivativeCashFlowTableHeader.class);
     }
 

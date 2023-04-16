@@ -46,8 +46,8 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
 
     protected SecurityCodeAndIsinTable(BrokerReport report) {
         super(report,
-                (cell) -> cell.startsWith("4.1 Информация о ценных бумагах"),
-                (cell) -> tablesLastRowPattern.matcher(cell).lookingAt(),
+                cell -> cell.startsWith("4.1 Информация о ценных бумагах"),
+                cell -> tablesLastRowPattern.matcher(cell).lookingAt(),
                 SecurityAndCodeTableHeader.class);
     }
 

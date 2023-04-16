@@ -48,8 +48,8 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
 
     protected DerivativeTransactionTable(UralsibBrokerReport report, String tableName, int headersRowCount) {
         super(report,
-                (cell) -> cell.startsWith(tableName),
-                (cell) -> tableEndPredicate.matcher(cell).matches(),
+                cell -> cell.startsWith(tableName),
+                cell -> tableEndPredicate.matcher(cell).matches(),
                 FortsTableHeader.class,
                 headersRowCount);
     }

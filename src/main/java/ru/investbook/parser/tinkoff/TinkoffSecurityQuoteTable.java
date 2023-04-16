@@ -66,8 +66,8 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
                                      SecurityCodeAndIsinTable codeAndIsin,
                                      ForeignExchangeRateService foreignExchangeRateService) {
         super(report,
-                (cell) -> cell.startsWith(tableNamePrefix),
-                (cell) -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
+                cell -> cell.startsWith(tableNamePrefix),
+                cell -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
                 SecurityQuoteTableHeader.class);
         this.codeAndIsin = codeAndIsin;
         this.foreignExchangeRateService = foreignExchangeRateService;

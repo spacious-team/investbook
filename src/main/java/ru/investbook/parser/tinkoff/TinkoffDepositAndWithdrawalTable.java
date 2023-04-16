@@ -55,8 +55,8 @@ public class TinkoffDepositAndWithdrawalTable extends SingleAbstractReportTable<
                                                ReportTable<AbstractTransaction> transactions,
                                                SecurityCodeAndIsinTable codeAndIsin) {
         super(report,
-                (cell) -> cell.startsWith("3.1 Движение по ценным бумагам инвестора"),
-                (cell) -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
+                cell -> cell.startsWith("3.1 Движение по ценным бумагам инвестора"),
+                cell -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
                 TinkoffDepositAndWithdrawalTable.SecurityDepositAndWithdrawalTableHeader.class);
         this.codeAndIsin = codeAndIsin;
         this.transactionDeposit = getCounter(transactions, t -> t.getCount() > 0);

@@ -65,8 +65,8 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
                                             SecurityCodeAndIsinTable codeAndIsin,
                                             TransactionValueAndFeeParser transactionValueAndFeeParser) {
         super(report,
-                (cell) -> cell.startsWith(tableNamePrefix),
-                (cell) -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
+                cell -> cell.startsWith(tableNamePrefix),
+                cell -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
                 TransactionTableHeader.class);
         this.codeAndIsin = codeAndIsin;
         this.transactionValueAndFeeParser = transactionValueAndFeeParser;

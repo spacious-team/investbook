@@ -43,8 +43,8 @@ public class TinkoffSecurityEventCashFlowTable extends SingleAbstractReportTable
         super(report,
                 // Таблица не имеет собственного названия, поэтому ищем предыдущую таблицу,
                 // строки чужой таблицы пропускаются
-                (cell) -> cell.startsWith("2. Операции с денежными средствами"),
-                (cell) -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
+                cell -> cell.startsWith("2. Операции с денежными средствами"),
+                cell -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
                 TinkoffCashFlowTable.CashFlowTableHeader.class);
         this.codeAndIsin = codeAndIsin;
     }

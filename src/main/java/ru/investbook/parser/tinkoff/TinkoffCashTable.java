@@ -34,8 +34,8 @@ public class TinkoffCashTable extends SingleAbstractReportTable<PortfolioCash>  
 
     protected TinkoffCashTable(SingleBrokerReport report) {
         super(report,
-                (cell) -> cell.startsWith("2. Операции с денежными средствами"),
-                (cell) -> cell.contains("Дата"),
+                cell -> cell.startsWith("2. Операции с денежными средствами"),
+                cell -> cell.contains("Дата"),
                 CashTableHeader.class);
     }
 
