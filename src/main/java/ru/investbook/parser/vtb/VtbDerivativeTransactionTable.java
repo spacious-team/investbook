@@ -20,9 +20,9 @@ package ru.investbook.parser.vtb;
 
 import lombok.Getter;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.SingleBrokerReport;
@@ -59,12 +59,12 @@ public class VtbDerivativeTransactionTable extends SingleAbstractReportTable<Der
                 .security(securityId)
                 .count((isBuy ? 1 : -1) * count)
                 .valueInPoints(valueInPoints)
-                .commission(commission)
-                .commissionCurrency("RUB") // FORTS, only RUB
+                .fee(commission)
+                .feeCurrency("RUB") // FORTS, only RUB
                 .build();
     }
 
-    enum VtbDerivativeTransactionTableHeader implements TableColumnDescription {
+    enum VtbDerivativeTransactionTableHeader implements TableHeaderColumn {
         DATE_TIME("Дата и время заключения сделки"),
         TRADE_ID("№ сделки"),
         CONTRACT("Фьючерсный контракт", "опцион, код"),
@@ -79,7 +79,7 @@ public class VtbDerivativeTransactionTable extends SingleAbstractReportTable<Der
         private final TableColumn column;
 
         VtbDerivativeTransactionTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

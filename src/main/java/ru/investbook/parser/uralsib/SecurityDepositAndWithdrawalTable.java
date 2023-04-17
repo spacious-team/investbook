@@ -55,9 +55,9 @@ public class SecurityDepositAndWithdrawalTable extends SingleAbstractReportTable
                 .count(row.getIntCellValue(COUNT))
                 .value(BigDecimal.ZERO)
                 .accruedInterest(BigDecimal.ZERO)
-                .commission(BigDecimal.ZERO)
+                .fee(BigDecimal.ZERO)
                 .valueCurrency("RUB")
-                .commissionCurrency("RUB")
+                .feeCurrency("RUB")
                 .build();
     }
 

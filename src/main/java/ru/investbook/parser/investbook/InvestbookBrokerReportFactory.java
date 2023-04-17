@@ -27,10 +27,12 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.util.Optional;
 
+@Slf4j
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
-@Slf4j
+@SuppressWarnings("DefaultAnnotationParam")
 public class InvestbookBrokerReportFactory extends AbstractBrokerReportFactory {
     @Getter
     private final String brokerName = "Investbook";
@@ -41,9 +43,9 @@ public class InvestbookBrokerReportFactory extends AbstractBrokerReportFactory {
     }
 
     @Override
-    public BrokerReport create(String fileName, InputStream is) {
-        BrokerReport brokerReport = create(fileName, is, InvestbookBrokerReport::new);
-        if (brokerReport != null) {
+    public Optional<BrokerReport> create(String fileName, InputStream is) {
+        Optional<BrokerReport> brokerReport = create(fileName, is, InvestbookBrokerReport::new);
+        if (brokerReport.isPresent()) {
             log.info("Обнаружен отчет '{}' в формате Investbook", fileName);
         }
         return brokerReport;

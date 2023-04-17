@@ -22,9 +22,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
@@ -62,13 +62,13 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<A
                 .security(securityId)
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)
-                .commission(row.getBigDecimalCellValue(MARKET_COMMISSION).negate())
+                .fee(row.getBigDecimalCellValue(MARKET_COMMISSION).negate())
                 .valueCurrency(quoteCurrency)
-                .commissionCurrency("RUB")
+                .feeCurrency("RUB")
                 .build();
     }
 
-    enum FxTransactionTableHeader implements TableColumnDescription {
+    enum FxTransactionTableHeader implements TableHeaderColumn {
         TRADE_ID("номер сделки"),
         DATE_TIME("дата", "заключения сделки"), // учет по дате сделки, а не дате исполнения, чтобы учесть неисполненные сделки
         CONTRACT("инструмент"),
@@ -82,7 +82,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<A
         private final TableColumn column;
 
         FxTransactionTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

@@ -43,9 +43,9 @@ import static java.util.Objects.requireNonNull;
 public class UralsibBrokerReport extends AbstractExcelBrokerReport {
     // "УРАЛСИБ Брокер" или "УРАЛСИБ Кэпитал - Финансовые услуги" (старый формат 2018 г)
     private static final String PORTFOLIO_MARKER = "Номер счета Клиента:";
-    private final Predicate<Object> uralsibReportPredicate = (cell) ->
+    private final Predicate<Object> uralsibReportPredicate = cell ->
             (cell instanceof String) && ((String) cell).contains("УРАЛСИБ");
-    private final Predicate<Object> dateMarkerPredicate = (cell) ->
+    private final Predicate<Object> dateMarkerPredicate = cell ->
             (cell instanceof String) && ((String) cell).contains("за период");
     private final Workbook book;
 

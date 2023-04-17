@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
@@ -53,8 +54,8 @@ public class UralsibBrokerReportFactory extends AbstractBrokerReportFactory {
     }
 
     @Override
-    public BrokerReport create(String excelFileName, InputStream is) {
-        BrokerReport brokerReport;
+    public Optional<BrokerReport> create(String excelFileName, InputStream is) {
+        Optional<BrokerReport> brokerReport;
         BiFunction<String, InputStream, BrokerReport> reportProvider;
         if (excelFileName.toLowerCase().endsWith(".zip")) {
             reportProvider = (fileName, stream) -> new UralsibBrokerReport(new ZipInputStream(stream), securityRegistrar);
@@ -62,7 +63,7 @@ public class UralsibBrokerReportFactory extends AbstractBrokerReportFactory {
             reportProvider = (fileName, stream) ->  new UralsibBrokerReport(fileName, stream, securityRegistrar);
         }
         brokerReport = create(excelFileName, is, reportProvider);
-        if (brokerReport != null) {
+        if (brokerReport.isPresent()) {
             log.info("Обнаружен отчет '{}' Уралсиб брокера", excelFileName);
             if (!excelFileName.contains("_invest_")) {
                 log.warn("Рекомендуется загружать отчеты Уралсиб брокера, содержащие в имени файла слово 'invest'");

@@ -158,7 +158,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         }
         double multiplier = Math.abs(1d * position.getCount() / transaction.getCount());
         row.put(OPEN_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier, toCurrency));
-        row.put(OPEN_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multiplier, toCurrency));
+        row.put(OPEN_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.FEE, multiplier, toCurrency));
         return row;
     }
 
@@ -182,7 +182,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         }
         row.put(CLOSE_AMOUNT, closeAmount);
         row.put(CLOSE_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier, toCurrency));
-        row.put(CLOSE_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multiplier, toCurrency));
+        row.put(CLOSE_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.FEE, multiplier, toCurrency));
         boolean isLongPosition = isLongPosition(position);
         row.put(FORECAST_TAX, getForecastTax(isLongPosition));
         row.put(PROFIT, getClosedPositionProfit(isLongPosition));

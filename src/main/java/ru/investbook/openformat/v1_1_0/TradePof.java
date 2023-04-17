@@ -162,7 +162,7 @@ public class TradePof {
                 .findAny()
                 .ifPresent(e -> builder.quote(divide(e, count).abs()));
         transactionCashFlows.stream()
-                .filter(e -> e.getCashFlowType().getId() == COMMISSION.getId())
+                .filter(e -> e.getCashFlowType().getId() == FEE.getId())
                 .findAny()
                 .ifPresentOrElse(e -> builder
                         .fee(e.getValue().negate())
@@ -225,8 +225,8 @@ public class TradePof {
                     .security(getSecurityId(assetToSecurityId))
                     .count(count.intValueExact())
                     .timestamp(Instant.ofEpochSecond(ts))
-                    .commission((fee == null) ? null : fee.negate())
-                    .commissionCurrency(getValidCurrencyOrNull(feeCurrency))
+                    .fee((fee == null) ? null : fee.negate())
+                    .feeCurrency(getValidCurrencyOrNull(feeCurrency))
                     .build());
         } catch (Exception e) {
             log.error("Не могу распарсить {}", this, e);

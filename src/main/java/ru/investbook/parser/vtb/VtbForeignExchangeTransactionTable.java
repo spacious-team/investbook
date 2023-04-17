@@ -20,9 +20,9 @@ package ru.investbook.parser.vtb;
 
 import lombok.Getter;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleBrokerReport;
 import ru.investbook.parser.SingleInitializableReportTable;
@@ -85,13 +85,13 @@ public class VtbForeignExchangeTransactionTable extends SingleInitializableRepor
                 .security(securityId)
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)
-                .commission(commission)
+                .fee(commission)
                 .valueCurrency(VtbBrokerReport.convertToCurrency(row.getStringCellValue(VALUE_CURRENCY)))
-                .commissionCurrency("RUB")
+                .feeCurrency("RUB")
                 .build();
     }
 
-    enum FxTransactionTableHeader implements TableColumnDescription {
+    enum FxTransactionTableHeader implements TableHeaderColumn {
         TRADE_ID("№ сделки"),
         INSTRUMENT("Финансовый инструмент"),
         DATE_TIME("Дата и время заключения сделки"),
@@ -106,7 +106,7 @@ public class VtbForeignExchangeTransactionTable extends SingleInitializableRepor
         private final TableColumn column;
 
         FxTransactionTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

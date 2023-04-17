@@ -21,9 +21,9 @@ package ru.investbook.parser.vtb;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.SingleBrokerReport;
@@ -66,7 +66,7 @@ public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
 
     @Getter
     @RequiredArgsConstructor
-    enum VtbSecuritiesTableHeader implements TableColumnDescription {
+    enum VtbSecuritiesTableHeader implements TableHeaderColumn {
         NAME_REGNUMBER_ISIN("наименование", "гос. регистрации", "isin"),
         SECTION("площадка"),
         OUTGOING("исходящий остаток"),
@@ -78,7 +78,7 @@ public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
         private final TableColumn column;
 
         VtbSecuritiesTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

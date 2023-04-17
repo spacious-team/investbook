@@ -257,7 +257,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     row.put(GROSS_PROFIT, STOCK_OR_BOND_GROSS_PROFIT_FORMULA);
                 }
             }
-            row.put(COMMISSION, securityProfitService.getTotal(positions.getTransactions(), CashFlowType.COMMISSION, toCurrency).abs());
+            row.put(COMMISSION, securityProfitService.getTotal(positions.getTransactions(), CashFlowType.FEE, toCurrency).abs());
             if (securityType.isBond()) {
                 row.put(COUPON, securityProfitService.sumPaymentsForType(portfolios, security, CashFlowType.COUPON, toCurrency));
                 row.put(AMORTIZATION, securityProfitService.sumPaymentsForType(portfolios, security, CashFlowType.AMORTIZATION, toCurrency));

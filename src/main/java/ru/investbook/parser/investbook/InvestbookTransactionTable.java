@@ -92,8 +92,8 @@ public class InvestbookTransactionTable extends AbstractSecurityAwareInvestbookT
                 .timestamp(timestamp)
                 .security(securityId)
                 .count(count * (isBuy ? 1 : -1))
-                .commission(getOptionalAmount(row.getBigDecimalCellValueOrDefault(FEE, null), 1, true))
-                .commissionCurrency(row.getStringCellValueOrDefault(FEE_CURRENCY, null))
+                .fee(getOptionalAmount(row.getBigDecimalCellValueOrDefault(FEE, null), 1, true))
+                .feeCurrency(row.getStringCellValueOrDefault(FEE_CURRENCY, null))
                 .build();
     }
 

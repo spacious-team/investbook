@@ -23,7 +23,7 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -93,7 +93,7 @@ public class TransactionValueAndFeeParser {
         return new Result(value, valueCurrency, totalFee, totalFeeCurrency);
     }
 
-    private Optional<BigDecimal> getFee(TableRow row, TableColumnDescription feeColumn) {
+    private Optional<BigDecimal> getFee(TableRow row, TableHeaderColumn feeColumn) {
         return Optional.ofNullable(feeColumn)
                 .map(col -> row.getBigDecimalCellValueOrDefault(col, null))
                 .map(v -> Math.abs(v.floatValue()) > 1e-3 ? v : null);
@@ -134,7 +134,7 @@ public class TransactionValueAndFeeParser {
      * @throws NoSuchElementException если обменный курс не известен
      */
     private BigDecimal addToTotalFee(BigDecimal totalFee, String totalFeeCurrency,
-                                     BigDecimal fee, TableColumnDescription feeCurrencyColumn,
+                                     BigDecimal fee, TableHeaderColumn feeCurrencyColumn,
                                      Arguments arg) {
         if (fee != null) {
             String feeCurrency = filterCurrency(arg.row.getStringCellValue(feeCurrencyColumn));
@@ -146,7 +146,7 @@ public class TransactionValueAndFeeParser {
     }
 
     private BigDecimal subtractFromValue(BigDecimal value, String valueCurrency,
-                                         BigDecimal fee, TableColumnDescription feeCurrencyColumn,
+                                         BigDecimal fee, TableHeaderColumn feeCurrencyColumn,
                                          Arguments arg) {
         if (fee == null) {
             return value;
@@ -186,19 +186,19 @@ public class TransactionValueAndFeeParser {
         @NotNull
         BigDecimal value; // отрицательное - для покупки, положительное - для продажи
         @NotNull
-        TableColumnDescription valueCurrencyColumn;
+        TableHeaderColumn valueCurrencyColumn;
         @Nullable
-        TableColumnDescription brokerFeeColumn; // положительное значение для списания комиссии
+        TableHeaderColumn brokerFeeColumn; // положительное значение для списания комиссии
         @Nullable
-        TableColumnDescription brokerFeeCurrencyColumn;
+        TableHeaderColumn brokerFeeCurrencyColumn;
         @Nullable
-        TableColumnDescription marketFeeColumn; // положительное значение для списания комиссии
+        TableHeaderColumn marketFeeColumn; // положительное значение для списания комиссии
         @Nullable
-        TableColumnDescription marketFeeCurrencyColumn;
+        TableHeaderColumn marketFeeCurrencyColumn;
         @Nullable
-        TableColumnDescription clearingFeeColumn; // положительное значение для списания комиссии
+        TableHeaderColumn clearingFeeColumn; // положительное значение для списания комиссии
         @Nullable
-        TableColumnDescription clearingFeeCurrencyColumn;
+        TableHeaderColumn clearingFeeCurrencyColumn;
     }
 
     public interface ExchangeRateProvider {

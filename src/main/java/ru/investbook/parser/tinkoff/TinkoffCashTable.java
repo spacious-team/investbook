@@ -21,9 +21,9 @@ package ru.investbook.parser.tinkoff;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.PortfolioCash;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.SingleBrokerReport;
@@ -34,8 +34,8 @@ public class TinkoffCashTable extends SingleAbstractReportTable<PortfolioCash>  
 
     protected TinkoffCashTable(SingleBrokerReport report) {
         super(report,
-                (cell) -> cell.startsWith("2. Операции с денежными средствами"),
-                (cell) -> cell.contains("Дата"),
+                cell -> cell.startsWith("2. Операции с денежными средствами"),
+                cell -> cell.contains("Дата"),
                 CashTableHeader.class);
     }
 
@@ -55,7 +55,7 @@ public class TinkoffCashTable extends SingleAbstractReportTable<PortfolioCash>  
     }
 
     @RequiredArgsConstructor
-    protected enum CashTableHeader implements TableColumnDescription {
+    protected enum CashTableHeader implements TableHeaderColumn {
         CURRENCY("Валюта"),
         VALUE("Исходящий", "остаток", "на конец", "периода");
 
@@ -63,7 +63,7 @@ public class TinkoffCashTable extends SingleAbstractReportTable<PortfolioCash>  
         private final TableColumn column;
 
         CashTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

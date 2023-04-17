@@ -32,10 +32,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
 import static org.spacious_team.table_wrapper.api.TableCellAddress.NOT_FOUND;
 
 class TinkoffBrokerReportHelper {
-    private static final Pattern tableNamePattern = Pattern.compile("^[0-9]+\\.[0-9]+\\s+\\b");
+    private static final Pattern tableNamePattern = Pattern.compile("^[0-9]+\\.[0-9]+\\s+\\b", UNICODE_CHARACTER_CLASS);
     private static final Pattern pageNumberPattern = Pattern.compile("^[0-9]+\\s+из");
 
     /**

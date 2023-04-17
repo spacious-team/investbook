@@ -117,7 +117,7 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
                     record.put(AMOUNT, Optional.ofNullable(transactionCashFlows.get(CashFlowType.DERIVATIVE_PRICE))
                             .map(TransactionCashFlow::getValue)
                             .orElse(null));
-                    BigDecimal commission = Optional.ofNullable(transactionCashFlows.get(CashFlowType.COMMISSION))
+                    BigDecimal commission = Optional.ofNullable(transactionCashFlows.get(CashFlowType.FEE))
                             .map(TransactionCashFlow::getValue)
                             .map(BigDecimal::abs)
                             .orElse(BigDecimal.ZERO);

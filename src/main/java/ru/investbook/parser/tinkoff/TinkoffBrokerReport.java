@@ -34,15 +34,16 @@ import java.time.temporal.ChronoUnit;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
 import static ru.investbook.parser.tinkoff.TinkoffBrokerReportHelper.removePageNumRows;
 
 @EqualsAndHashCode(callSuper = true)
 public class TinkoffBrokerReport extends AbstractExcelBrokerReport {
-    static final Pattern tablesLastRowPattern = Pattern.compile("^[0-9]+\\.[0-9]+\\s+\\b");
+    static final Pattern tablesLastRowPattern = Pattern.compile("^[0-9]+\\.[0-9]+\\s+\\b", UNICODE_CHARACTER_CLASS);
     private static final String PORTFOLIO_MARKER = "Инвестор:";
-    private static final Predicate<Object> tinkoffReportPredicate = (cell) ->
+    private static final Predicate<Object> tinkoffReportPredicate = cell ->
             (cell instanceof String) && ((String) cell).contains("Тинькофф");
-    private static final Predicate<Object> dateMarkerPredicate = (cell) ->
+    private static final Predicate<Object> dateMarkerPredicate = cell ->
             (cell instanceof String) && ((String) cell).contains("за период");
 
     private final Workbook book;

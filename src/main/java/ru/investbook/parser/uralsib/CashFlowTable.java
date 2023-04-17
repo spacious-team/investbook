@@ -72,7 +72,7 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
                 break;
             case "доначисление комиссии до размера минимальной":
             case "депозитарные сборы других депозитариев":
-                type = CashFlowType.COMMISSION;
+                type = CashFlowType.FEE;
                 break;
             default:
                 return null;

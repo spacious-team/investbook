@@ -24,9 +24,9 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.sber.SecurityHelper;
 
@@ -88,7 +88,7 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Ab
         return id.substring(0, Math.min(32, id.length()));
     }
 
-    enum SberSecurityDepositAndWithdrawalTableHeader implements TableColumnDescription {
+    enum SberSecurityDepositAndWithdrawalTableHeader implements TableHeaderColumn {
         PORTFOLIO("Номер договора"),
         DATE_TIME("Дата исполнения поручения"),
         CODE("Код финансового инструмента"),
@@ -102,7 +102,7 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Ab
         @Getter
         private final TableColumn column;
         SberSecurityDepositAndWithdrawalTableHeader(String words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }
