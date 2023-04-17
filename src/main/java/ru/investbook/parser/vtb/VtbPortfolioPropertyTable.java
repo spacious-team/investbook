@@ -57,13 +57,11 @@ public class VtbPortfolioPropertyTable extends SingleInitializableReportTable<Po
     }
 
     private BigDecimal getBigDecimalValue() {
-        Object value;
-        try {
-            value = getReport().getReportPage().getNextColumnValue(TOTAL_ASSETS1);
-        } catch (Exception e) {
+        Object value = getReport().getReportPage().getNextColumnValue(TOTAL_ASSETS1);
+        if (value == null) {
             value = getReport().getReportPage().getNextColumnValue(TOTAL_ASSETS2);
         }
         return BigDecimal.valueOf(
-                Double.parseDouble(value.toString()));
+                Double.parseDouble(String.valueOf(value)));
     }
 }
