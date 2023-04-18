@@ -30,7 +30,6 @@ import ru.investbook.InvestbookProperties;
 import java.lang.reflect.Constructor;
 import java.time.Duration;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -40,18 +39,17 @@ import static java.lang.System.nanoTime;
 @Slf4j
 public class TableFactoryRegistryService {
 
-    public TableFactoryRegistryService(Collection<TableFactory> tableFactories, InvestbookProperties properties) {
+    public TableFactoryRegistryService(InvestbookProperties properties) {
         long t0 = nanoTime();
-        Collection<String> tableFactoryPackages = new HashSet<>();
-        tableFactoryPackages.add(getDefaultTableFactoryPackage());
-        tableFactoryPackages.addAll(properties.getTableParsers());
-        tableFactoryPackages.stream()
+        properties.getTableParsers()
+                .stream()
                 .map(TableFactoryRegistryService::findTableFactories)
                 .flatMap(Collection::stream)
                 .forEach(TableFactoryRegistry::add);
-        tableFactories.forEach(TableFactoryRegistry::add);
         Collection<TableFactory> factories = TableFactoryRegistry.getAll();
-        log.info("{} implementations of table factory found in {}: {}", factories.size(), Duration.ofNanos(nanoTime() - t0),
+        log.info("{} extensions implementations of table factory found in {}: {}",
+                factories.size(),
+                Duration.ofNanos(nanoTime() - t0),
                 factories.stream()
                         .map(TableFactory::getClass)
                         .collect(Collectors.toList()));
@@ -66,11 +64,6 @@ public class TableFactoryRegistryService {
                 .map(TableFactoryRegistryService::getInstance)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-    }
-
-    private static String getDefaultTableFactoryPackage() {
-        String tableWrapperApiPackage = TableFactory.class.getPackage().getName();
-        return tableWrapperApiPackage.substring(0, tableWrapperApiPackage.lastIndexOf('.'));
     }
 
     private static TableFactory getInstance(String className) {
