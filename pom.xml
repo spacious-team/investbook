@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.2</version>
+        <version>3.0.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.investbook</groupId>
@@ -88,11 +88,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.github.spacious-team</groupId>
-                <artifactId>table-wrapper-api</artifactId>
-                <version>26e4fbf382</version>
-            </dependency>
-            <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
                 <!-- version is same as for hibernate-jpamodelgen dep, just scope is changed -->
@@ -109,18 +104,8 @@
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
-            <artifactId>table-wrapper-excel-impl</artifactId>
-            <version>3b307711bd</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.spacious-team</groupId>
-            <artifactId>table-wrapper-xml-impl</artifactId>
-            <version>35f6fe372d</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.spacious-team</groupId>
-            <artifactId>table-wrapper-csv-impl</artifactId>
-            <version>195f978280</version>
+            <artifactId>table-wrapper-spring-boot-starter</artifactId>
+            <version>9afba878be</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
