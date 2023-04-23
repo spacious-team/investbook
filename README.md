@@ -104,9 +104,9 @@ Investbook в сравнении с [Intelinvest](https://intelinvest.ru) и [Sn
 
 ### Брокеры
 Приложение анализирует отчеты брокеров Тинькофф (xlsx), Сбербанк (xlsx), ВТБ (xls), Промсвязьбанк (xlsx, xml)
-и Уралсиб (zip с xls). В ближайшее время будет поддерживать Альфа-Инвестиции, БКС и Финам. Если ваш счет открыт у
-другого брокера, напишите [нам](https://t.me/investbook_support). Также вы можете уже на вашей версии приложения 
-воспользоваться [формами](src/main/asciidoc/investbook-forms.adoc) ввода информации или
+и Твой Брокер / Уралсиб (zip с xls). Если ваш счет открыт у другого брокера,
+напишите [нам](https://t.me/investbook_support). Также вы можете уже на вашей версии приложения воспользоваться
+[формами](src/main/asciidoc/investbook-forms.adoc) ввода информации или 
 [загрузить](src/main/asciidoc/investbook-input-format.adoc) данные из excel файла. Также поддержку вашего брокера могут 
 предложить сторонние разработчики через функционал расширений. Инструкция для установки расширений доступна для
 операционных систем [windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md) и [linux](docs/install-on-linux.md).
