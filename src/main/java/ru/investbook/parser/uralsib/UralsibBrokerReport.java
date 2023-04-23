@@ -38,15 +38,16 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static java.util.Objects.requireNonNull;
+import static org.spacious_team.table_wrapper.api.TableCellAddress.NOT_FOUND;
 
 @EqualsAndHashCode(callSuper = true)
 public class UralsibBrokerReport extends AbstractExcelBrokerReport {
     // "УРАЛСИБ Брокер" или "УРАЛСИБ Кэпитал - Финансовые услуги" (старый формат 2018 г)
     private static final String PORTFOLIO_MARKER = "Номер счета Клиента:";
     private final Predicate<Object> uralsibReportPredicate = cell ->
-            (cell instanceof String) && ((String) cell).contains("УРАЛСИБ");
+            (cell instanceof String value) && (value.contains("Твой Брокер") || value.contains("УРАЛСИБ"));
     private final Predicate<Object> dateMarkerPredicate = cell ->
-            (cell instanceof String) && ((String) cell).contains("за период");
+            (cell instanceof String value) && value.contains("за период");
     private final Workbook book;
 
     public UralsibBrokerReport(ZipInputStream zis, SecurityRegistrar securityRegistrar) {
@@ -79,8 +80,8 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
     }
 
     private void checkReportFormat(Path path, ReportPage reportPage) {
-        if (reportPage.find(0, 1, uralsibReportPredicate) == TableCellAddress.NOT_FOUND) {
-            throw new RuntimeException("В файле " + path + " не содержится отчет брокера Уралсиб");
+        if (reportPage.find(0, 1, uralsibReportPredicate) == NOT_FOUND) {
+            throw new RuntimeException("В файле " + path + " не содержится отчет брокера Твой Брокер (Уралсиб)");
         }
     }
 

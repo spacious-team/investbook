@@ -36,7 +36,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SqlDataExporter {
     private static final String EXPORT_FILE_NAME = "export-2022.9.sql";
-    private final List<String> expectedInvestbookVersionsForExport = List.of("2022.9", "2022.9.1");
+    private final List<String> expectedInvestbookVersionsForExport = List.of("2022.9", "2022.9.1", "2022.9.2");
     private final BuildProperties buildProperties;
     private final InvestbookProperties investbookProperties;
     private final JdbcTemplate jdbcTemplate;

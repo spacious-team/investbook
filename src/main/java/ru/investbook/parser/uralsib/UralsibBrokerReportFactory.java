@@ -42,7 +42,7 @@ public class UralsibBrokerReportFactory extends AbstractBrokerReportFactory {
     private final SecurityRegistrar securityRegistrar;
 
     @Getter
-    private final String brokerName = "Уралсиб";
+    private final String brokerName = "Твой Брокер (Уралсиб)";
     private final Pattern zippedExpectedFileNamePattern = Pattern.compile("^brok_rpt_.*\\.xls(x)?\\.zip$");
     private final Pattern expectedFileNamePattern = Pattern.compile("^brok_rpt_.*\\.xls(x)?$");
 
