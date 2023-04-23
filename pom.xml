@@ -425,9 +425,14 @@
                                 </tags>
                                 <publish>true</publish>
                                 <env>
-                                    <BP_JVM_VERSION>19</BP_JVM_VERSION> <!-- version >= ${java.version} -->
                                     <BPE_LANG>C.UTF-8</BPE_LANG>
                                 </env>
+                                <buildpacks>
+                                    <!-- Defines available bellsoft-liberica java versions from
+                                    https://github.com/paketo-buildpacks/java/releases
+                                    JRE with ${java.version} will be selected automatically when available -->
+                                    <buildpack>gcr.io/paketo-buildpacks/java:9.1.0</buildpack>
+                                </buildpacks>
                             </image>
                             <docker>
                                 <publishRegistry>
