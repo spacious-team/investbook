@@ -28,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2022.9.2</version>
+    <version>2022.9.3</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -62,7 +62,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>22.9.2</win.msi.version>
+        <win.msi.version>22.9.3</win.msi.version>
         <java.version>18</java.version>
         <!-- version 3.2.0 provided by Spring Boot 2.4.1 bugged, using version from Spring Boot 2.3.4
         https://stackoverflow.com/questions/65910112/maven-clean-install-failed-to-execute-goal-org-apache-maven-pluginsmaven-resou
