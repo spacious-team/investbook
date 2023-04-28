@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityType;
+import org.spacious_team.table_wrapper.api.OptionalTableColumn;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
@@ -167,16 +168,20 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
         SHORT_NAME("Сокращенное", "наименование", "актива"),
         CODE("Код", "актива"),
         COUNT("Исходящий", "остаток"),
-        PRICE("Рыночная", "цена"), // на одну бумагу
-        ACCRUED_INTEREST("НКД"), // на все бумаги исходящего остатка
-        CURRENCY("Валюта", "цены"),
-        VALUE("Рыночная", "стои", "мость"); // на все бумаги исходящего остатка с учетом НКД
+        PRICE(optional("Рыночная", "цена")), // на одну бумагу
+        ACCRUED_INTEREST(optional("НКД")), // на все бумаги исходящего остатка
+        CURRENCY(optional("Валюта", "цены")),
+        VALUE(optional("Рыночная", "стои", "мость")); // на все бумаги исходящего остатка с учетом НКД
 
         @Getter
         private final TableColumn column;
 
         SecurityQuoteTableHeader(String... words) {
             this.column = PatternTableColumn.of(words);
+        }
+
+        private static TableColumn optional(String... words) {
+            return OptionalTableColumn.of(PatternTableColumn.of(words));
         }
     }
 }
