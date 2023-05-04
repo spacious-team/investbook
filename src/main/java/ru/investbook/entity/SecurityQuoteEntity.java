@@ -29,6 +29,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
@@ -60,13 +61,13 @@ public class SecurityQuoteEntity {
 
     @Basic
     @Column(name = "price")
-    private BigDecimal price;
+    private @Nullable BigDecimal price;
 
     @Basic
     @Column(name = "accrued_interest")
-    private BigDecimal accruedInterest;
+    private @Nullable BigDecimal accruedInterest;
 
     @Basic
     @Column(name = "currency")
-    private String currency;
+    private @Nullable String currency;
 }

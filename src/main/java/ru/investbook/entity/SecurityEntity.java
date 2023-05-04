@@ -27,6 +27,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.annotations.GenericGenerator;
 import org.spacious_team.broker.pojo.SecurityType;
 
@@ -51,11 +52,11 @@ public class SecurityEntity {
     private SecurityType type;
 
     @Column(name = "isin")
-    private String isin;
+    private @Nullable String isin;
 
     @Column(name = "ticker")
-    private String ticker;
+    private @Nullable String ticker;
 
     @Column(name = "name")
-    private String name;
+    private @Nullable String name;
 }
