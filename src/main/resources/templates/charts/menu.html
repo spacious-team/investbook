@@ -24,12 +24,12 @@
 
     <span th:with="link='/charts/sectors-pie-chart'">
         <a th:href="${link}"
-           th:style="(${#httpServletRequest.requestURI} == ${link}) ? ${style} : ''">Секторальный состав</a>
+           th:style="(${request.requestURI} == ${link}) ? ${style} : ''">Секторальный состав</a>
     </span>
 
     <span th:with="link='/charts/securities-pie-chart'">
     <a th:href="${link}"
-       th:style="(${#httpServletRequest.requestURI} == ${link}) ? ${style} : ''">Состав бумаг</a>
+       th:style="(${request.requestURI} == ${link}) ? ${style} : ''">Состав бумаг</a>
     </span>
 
 </p>

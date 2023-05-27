@@ -18,6 +18,7 @@
 
 package ru.investbook.web;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -43,7 +44,7 @@ public class PortfolioCompositionController {
     private final AssetsAndCashService assetsAndCashService;
 
     @GetMapping("/sectors-pie-chart")
-    public String getSectorsProportionPage(Model model) {
+    public String getSectorsProportionPage(Model model, HttpServletRequest request) {
         try {
             Set<String> portfolios = assetsAndCashService.getActivePortfolios();
             Collection<Map<String, ?>> sectorsProportion = investmentProportionService.getSectorsProportion(portfolios)
@@ -56,6 +57,7 @@ public class PortfolioCompositionController {
                     .orElse(0);
             sectorsProportion.add(Map.of("sector", "Кеш", "investment", cash));
             model.addAttribute("sectorsProportion", sectorsProportion);
+            model.addAttribute("request", request);
             return "charts/sectors-pie-chart";
         } catch (Exception e) {
             model.addAttribute("title", "Ошибка");
@@ -67,7 +69,7 @@ public class PortfolioCompositionController {
     }
 
     @GetMapping("/securities-pie-chart")
-    public String getSecuritiesProportionPage(Model model) {
+    public String getSecuritiesProportionPage(Model model, HttpServletRequest request) {
         try {
             Set<String> portfolios = assetsAndCashService.getActivePortfolios();
             Collection<Map<String, ?>> securitiesProportion = investmentProportionService.getSecuritiesProportion(portfolios)
@@ -80,6 +82,7 @@ public class PortfolioCompositionController {
                     .orElse(0);
             securitiesProportion.add(Map.of("security", "Кеш", "investment", cash));
             model.addAttribute("securitiesProportion", securitiesProportion);
+            model.addAttribute("request", request);
             return "charts/securities-pie-chart";
         } catch (Exception e) {
             model.addAttribute("title", "Ошибка");
