@@ -26,6 +26,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import ru.investbook.InvestbookProperties;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.service.AssetsAndCashService;
 
@@ -33,15 +34,15 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-@Controller
-@RequiredArgsConstructor
-@RequestMapping("/")
 @Slf4j
+@Controller
+@RequestMapping("/")
+@RequiredArgsConstructor
 public class HomePageController {
-
     private final AssetsAndCashService assetsAndCashService;
     private final BuildProperties buildProperties;
     private final TransactionRepository transactionRepository;
+    private final InvestbookProperties properties;
 
     @GetMapping
     public String index(Model model) {
@@ -51,6 +52,10 @@ public class HomePageController {
         model.addAttribute("assets", assetsAndCashService.getTotalAssetsInRub(portfolios));
         model.addAttribute("cashBalance", assetsAndCashService.getTotalCashInRub(portfolios));
         model.addAttribute("buildProperties", buildProperties);
+        if (properties.isIndexLogoEnabled()) {
+            model.addAttribute("logoUrl",
+                    "https://github.com/spacious-team/investbook-index-logo/releases/download/v1/logo2.jpg");
+        }
         return "index";
     }
 

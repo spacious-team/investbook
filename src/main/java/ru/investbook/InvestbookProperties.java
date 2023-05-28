@@ -42,6 +42,8 @@ public class InvestbookProperties {
 
     private boolean openHomePageAfterStart = false;
 
+    private boolean indexLogoEnabled = true;
+
     /**
      * Configures extensions packages which provides TableFactory interfaces.
      * Do not configure {@link org.spacious_team.table_wrapper} package, because they are configured by default.
