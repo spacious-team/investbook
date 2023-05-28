@@ -52,9 +52,14 @@ public class HomePageController {
         model.addAttribute("assets", assetsAndCashService.getTotalAssetsInRub(portfolios));
         model.addAttribute("cashBalance", assetsAndCashService.getTotalCashInRub(portfolios));
         model.addAttribute("buildProperties", buildProperties);
-        if (properties.isIndexLogoEnabled()) {
-            model.addAttribute("logoUrl",
-                    "https://github.com/spacious-team/investbook-index-logo/releases/download/v1/logo2.jpg");
+        model.addAttribute("logoUrl",
+                "https://downloader.disk.yandex.ru/preview/" +
+                        "8d6ef729208f68abce6802f86198c8daef4e6f02544073723a734328e78c630c/647378f8/" +
+                        "24XCjZMG1QdDucRpwCJtPOvWCQS24UQHQPxUdPVuQiLWcbu1H_8YfwlCS7qzVFQgCE73iBR-PysTsGDBzQMjEQ%3D%3D" +
+                        "?uid=0&filename=logo2.jpg&disposition=inline&hash=&limit=0&content_type=image%2Fjpeg" +
+                        "&owner_uid=0&tknv=v2&size=38x38");
+        if (properties.isTryAltIndexLogoUrl()) {
+            model.addAttribute("altLogoUrl", "https://disk.yandex.ru/i/F7_F2K-eP7mnnQ");
         }
         return "index";
     }

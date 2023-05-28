@@ -42,7 +42,7 @@ public class InvestbookProperties {
 
     private boolean openHomePageAfterStart = false;
 
-    private boolean indexLogoEnabled = true;
+    private boolean tryAltIndexLogoUrl = true;
 
     /**
      * Configures extensions packages which provides TableFactory interfaces.
