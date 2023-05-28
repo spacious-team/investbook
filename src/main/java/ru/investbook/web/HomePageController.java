@@ -32,6 +32,7 @@ import ru.investbook.service.AssetsAndCashService;
 
 import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -53,11 +54,7 @@ public class HomePageController {
         model.addAttribute("cashBalance", assetsAndCashService.getTotalCashInRub(portfolios));
         model.addAttribute("buildProperties", buildProperties);
         model.addAttribute("logoUrl",
-                "https://downloader.disk.yandex.ru/preview/" +
-                        "8d6ef729208f68abce6802f86198c8daef4e6f02544073723a734328e78c630c/647378f8/" +
-                        "24XCjZMG1QdDucRpwCJtPOvWCQS24UQHQPxUdPVuQiLWcbu1H_8YfwlCS7qzVFQgCE73iBR-PysTsGDBzQMjEQ%3D%3D" +
-                        "?uid=0&filename=logo2.jpg&disposition=inline&hash=&limit=0&content_type=image%2Fjpeg" +
-                        "&owner_uid=0&tknv=v2&size=38x38");
+                "https://github.com/spacious-team/investbook/assets/11336712/97828ac2-c52f-4c6e-8c3a-8a16f2c3fa3a");
         if (properties.isTryAltIndexLogoUrl()) {
             model.addAttribute("altLogoUrl", "https://disk.yandex.ru/i/F7_F2K-eP7mnnQ");
         }
@@ -67,7 +64,9 @@ public class HomePageController {
     @GetMapping("shutdown")
     @ResponseBody
     public String shutdown() {
-        Executors.newSingleThreadScheduledExecutor().schedule(() -> System.exit(0), 3, TimeUnit.SECONDS);
-        return "Приложение остановлено";
+        try (ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor()) {
+            executor.schedule(() -> System.exit(0), 3, TimeUnit.SECONDS);
+            return "Приложение остановлено";
+        }
     }
 }
