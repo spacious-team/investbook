@@ -26,6 +26,7 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.SingularAttribute;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.PortfolioEntity_;
@@ -51,10 +52,9 @@ class SpecificationHelper {
         if (hasText(security)) {
             Path<SecurityEntity> securityPath = root.get(attribute);
             return builder.or(
-                    builder.equal(securityPath.get(SecurityEntity_.ticker), security),
-                    builder.equal(securityPath.get(SecurityEntity_.isin), security),
-                    builder.like(builder.lower(securityPath.get(SecurityEntity_.name)),
-                            "%" + security.toLowerCase() + "%"));
+                    filterByLike(builder, securityPath.get(SecurityEntity_.ticker), security),
+                    filterByLike(builder, securityPath.get(SecurityEntity_.isin), security),
+                    filterByLike(builder, securityPath.get(SecurityEntity_.name), security));
         }
         return null;
     }
@@ -73,10 +73,9 @@ class SpecificationHelper {
 
             Subquery<Integer> requestedSecurityIds = subQuery.select(securities.get(SecurityEntity_.id))
                     .where(builder.or(
-                            builder.equal(securities.get(SecurityEntity_.ticker), security),
-                            builder.equal(securities.get(SecurityEntity_.isin), security),
-                            builder.like(builder.lower(securities.get(SecurityEntity_.name)),
-                                    "%" + security.toLowerCase() + "%")));
+                            filterByLike(builder, securities.get(SecurityEntity_.ticker), security),
+                            filterByLike(builder, securities.get(SecurityEntity_.isin), security),
+                            filterByLike(builder, securities.get(SecurityEntity_.name), security)));
 
             Path<Integer> securityIdPath = root.get(attribute);
             return builder.in(securityIdPath)
@@ -140,7 +139,7 @@ class SpecificationHelper {
                                            SingularAttribute<T, PortfolioEntity> attribute,
                                            String portfolio) {
         if (hasText(portfolio)) {
-            Path<Object> path = root.get(attribute)
+            Path<String> path = root.get(attribute)
                     .get(PortfolioEntity_.ID);
             return builder.equal(path, portfolio);
         }
@@ -192,8 +191,12 @@ class SpecificationHelper {
                                       @Nullable String value) {
         if (hasText(value)) {
             Path<String> path = root.get(attribute);
-            return builder.like(builder.lower(path), value.toLowerCase() + "%");
+            return filterByLike(builder, path, value);
         }
         return null;
+    }
+
+    private static Predicate filterByLike(CriteriaBuilder builder, Path<String> path, @NonNull String value) {
+        return builder.like(builder.lower(path), "%" + value.toLowerCase() + "%");
     }
 }
