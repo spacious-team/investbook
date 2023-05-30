@@ -23,7 +23,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
@@ -32,7 +31,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import static java.time.ZoneId.systemDefault;
-import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
 
 @Data
 public class SecurityQuoteModel {
@@ -50,7 +48,6 @@ public class SecurityQuoteModel {
     private SecurityType securityType;
 
     @NotNull
-    @DateTimeFormat(iso = DATE_TIME)
     private Instant timestamp = LocalDate.now().atTime(LocalTime.NOON).atZone(systemDefault()).toInstant();
 
     @NotNull
