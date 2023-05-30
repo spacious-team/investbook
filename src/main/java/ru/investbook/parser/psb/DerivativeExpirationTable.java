@@ -82,7 +82,7 @@ class DerivativeExpirationTable extends SingleAbstractReportTable<DerivativeTran
         DATE_TIME("дата и время"),
         TRADE_ID("номер сделки"),
         TYPE("вид контракта"),
-        CONTRACT("контракт"),
+        CONTRACT("^контракт"),
         DIRECTION("покупка", "продажа"),
         COUNT("кол-во"),
         QUOTE("цена", "пункты"),

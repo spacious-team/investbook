@@ -96,7 +96,7 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
         DATE_TIME("дата включения в клиринг"),
         TRADE_ID("№"),
         TYPE("вид контракта"),
-        CONTRACT("контракт"),
+        CONTRACT("^контракт"),
         DIRECTION("покупка", "продажа"),
         COUNT("кол-во"),
         QUOTE("цена фьючерсного контракта", "цена исполнения опциона", "пункты"),
