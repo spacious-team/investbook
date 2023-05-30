@@ -25,7 +25,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import ru.investbook.InvestbookProperties;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.service.AssetsAndCashService;
@@ -62,11 +61,10 @@ public class HomePageController {
     }
 
     @GetMapping("shutdown")
-    @ResponseBody
     public String shutdown() {
-        try (ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor()) {
-            executor.schedule(() -> System.exit(0), 3, TimeUnit.SECONDS);
-            return "Приложение остановлено";
-        }
+        @SuppressWarnings("resource")
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.schedule(() -> System.exit(0), 3, TimeUnit.SECONDS);
+        return "shutdown-page";
     }
 }
