@@ -40,6 +40,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -135,14 +136,14 @@ public class BrokerReportParserServiceImpl implements BrokerReportParserService 
 
     @SneakyThrows
     private BrokerNameAndReport getReportOfUnknownBroker(ByteArrayInputStream inputStream, String fileName) {
-        BrokerReport brokerReport;
+        Optional<BrokerReport> brokerReport;
         // convert to mark supporting input stream
 
         for (BrokerReportFactory brokerReportFactory : brokerReportFactories) {
             if (!brokerReportFactory.canCreate(fileName, inputStream)) continue;
             brokerReport = brokerReportFactory.create(fileName, inputStream);
-            if (brokerReport != null) {
-                return new BrokerNameAndReport(brokerReportFactory.getBrokerName(), brokerReport);
+            if (brokerReport.isPresent()) {
+                return new BrokerNameAndReport(brokerReportFactory.getBrokerName(), brokerReport.get());
             }
         }
         throw new IllegalArgumentException("Неизвестный формат отчета '" + fileName + "'");
@@ -151,15 +152,9 @@ public class BrokerReportParserServiceImpl implements BrokerReportParserService 
     @SneakyThrows
     private BrokerNameAndReport getReportOfKnownBroker(ByteArrayInputStream inputStream, String fileName, String providedByBroker) {
         return findBrokerReportFactory(providedByBroker).stream()
-                .map(f -> {
-                    BrokerReport brokerReport = f.create(fileName, inputStream);
-                    if (brokerReport != null) {
-                        return new BrokerNameAndReport(f.getBrokerName(), brokerReport);
-                    } else {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
+                .flatMap(f -> f.create(fileName, inputStream)
+                        .map(report -> new BrokerNameAndReport(f.getBrokerName(), report))
+                        .stream())
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Файл " + fileName +
                         " не является отчетом брокера " + providedByBroker));

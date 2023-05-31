@@ -18,6 +18,7 @@
 
 package ru.investbook.parser;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
@@ -29,7 +30,6 @@ import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
 
-import javax.validation.ConstraintViolationException;
 import java.util.Optional;
 import java.util.function.Supplier;
 

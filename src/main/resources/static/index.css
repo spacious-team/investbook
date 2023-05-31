@@ -49,7 +49,7 @@ a:hover {
     cursor: default;
 }
 
-#logo {
+.logo {
     width: 38px;
     height: 38px;
 }

@@ -46,7 +46,7 @@ public enum PaymentTypePof {
             case AMORTIZATION -> BOND_AMORTIZATION;
             case REDEMPTION -> BOND_REDEMPTION;
             case DERIVATIVE_PROFIT -> VARIATION_MARGIN;
-            case COMMISSION -> FEE;
+            case FEE -> FEE;
             case TAX -> TAX;
             default -> OTHER;
         };
@@ -60,7 +60,7 @@ public enum PaymentTypePof {
             case BOND_AMORTIZATION -> CashFlowType.AMORTIZATION;
             case BOND_REDEMPTION -> CashFlowType.REDEMPTION;
             case VARIATION_MARGIN -> CashFlowType.DERIVATIVE_PROFIT;
-            case FEE -> CashFlowType.COMMISSION;
+            case FEE -> CashFlowType.FEE;
             case TAX -> CashFlowType.TAX;
         };
     }

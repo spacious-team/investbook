@@ -21,6 +21,7 @@ package ru.investbook.openformat.v1_1_0;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,7 +33,6 @@ import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.lang.Nullable;
 import ru.investbook.entity.TransactionEntity;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collection;
@@ -42,7 +42,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.spacious_team.broker.pojo.CashFlowType.COMMISSION;
+import static org.spacious_team.broker.pojo.CashFlowType.FEE;
 import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 
 @Jacksonized
@@ -137,7 +137,7 @@ public class TransferPof {
                                 .timestamp(Instant.ofEpochSecond(timestamp))
                                 .security(getSecurityId(assetToSecurityId))
                                 .count(count.intValueExact())
-                                .eventType(COMMISSION)
+                                .eventType(FEE)
                                 .value(fee.negate())
                                 .currency(getValidCurrencyOrNull(feeCurrency))
                                 .build());

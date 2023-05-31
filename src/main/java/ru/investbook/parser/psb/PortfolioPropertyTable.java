@@ -27,10 +27,10 @@ import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.ConstantPositionTableColumn;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleBrokerReport;
 import ru.investbook.parser.SingleInitializableReportTable;
@@ -88,15 +88,15 @@ public class PortfolioPropertyTable extends SingleInitializableReportTable<Portf
     }
 
     @RequiredArgsConstructor
-    public enum SummaryTableHeader implements TableColumnDescription {
+    public enum SummaryTableHeader implements TableHeaderColumn {
         DESCRIPTION(1),
         RUB(AnyOfTableColumn.of(
-                TableColumnImpl.of("RUB"),
-                TableColumnImpl.of("RUR"))), // for fx market reports since 7.2021
-        USD(OptionalTableColumn.of(TableColumnImpl.of("USD"))),
-        EUR(OptionalTableColumn.of(TableColumnImpl.of("EUR"))),
-        GBP(OptionalTableColumn.of(TableColumnImpl.of("GBP"))),
-        CHF(OptionalTableColumn.of(TableColumnImpl.of("CHF")));
+                PatternTableColumn.of("RUB"),
+                PatternTableColumn.of("RUR"))), // for fx market reports since 7.2021
+        USD(OptionalTableColumn.of(PatternTableColumn.of("USD"))),
+        EUR(OptionalTableColumn.of(PatternTableColumn.of("EUR"))),
+        GBP(OptionalTableColumn.of(PatternTableColumn.of("GBP"))),
+        CHF(OptionalTableColumn.of(PatternTableColumn.of("CHF")));
 
         @Getter
         private final TableColumn column;

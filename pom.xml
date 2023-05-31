@@ -23,12 +23,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.4</version>
+        <version>3.0.6</version> <!-- Обновлять с учетом https://github.com/spacious-team/investbook/issues/545 -->
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2022.9.3</version>
+    <version>2023.1</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -62,12 +62,8 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>22.9.3</win.msi.version>
-        <java.version>18</java.version>
-        <!-- version 3.2.0 provided by Spring Boot 2.4.1 bugged, using version from Spring Boot 2.3.4
-        https://stackoverflow.com/questions/65910112/maven-clean-install-failed-to-execute-goal-org-apache-maven-pluginsmaven-resou
-        TODO remove after fix -->
-        <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
+        <win.msi.version>23.1</win.msi.version>
+        <java.version>20</java.version>
     </properties>
 
     <repositories>
@@ -88,9 +84,10 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.github.spacious-team</groupId>
-                <artifactId>table-wrapper-api</artifactId>
-                <version>2022.4</version>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
+                <!-- version is same as for hibernate-jpamodelgen dep, just scope is changed -->
+                <scope>compile</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -99,22 +96,12 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>2022.4</version>
+            <version>2023.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
-            <artifactId>table-wrapper-excel-impl</artifactId>
-            <version>2022.7</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.spacious-team</groupId>
-            <artifactId>table-wrapper-xml-impl</artifactId>
-            <version>2022.4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.spacious-team</groupId>
-            <artifactId>table-wrapper-csv-impl</artifactId>
-            <version>2022.4</version>
+            <artifactId>table-wrapper-spring-boot-starter</artifactId>
+            <version>2023.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -178,18 +165,17 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-jpamodelgen</artifactId>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
-            <version>1.4.200</version>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -197,13 +183,18 @@
             <artifactId>flyway-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.11</version>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
+            <version>2.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.decampo</groupId>
@@ -213,11 +204,12 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.15.3</version>
+            <version>1.15.4</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>1.18.26</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -228,7 +220,7 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-scratchpad</artifactId>
-            <version>5.2.2</version>
+            <version>5.2.3</version>  <!-- use same version as table-wrapper-spring-boot-starter provides -->
         </dependency>
     </dependencies>
 
@@ -285,7 +277,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>2.5.0</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>xsd-to-java</id>
@@ -435,7 +427,7 @@
                                     <!-- Defines available bellsoft-liberica java versions from
                                     https://github.com/paketo-buildpacks/java/releases
                                     JRE with ${java.version} will be selected automatically when available -->
-                                    <buildpack>gcr.io/paketo-buildpacks/java:7.9.0</buildpack>
+                                    <buildpack>gcr.io/paketo-buildpacks/java:9.8.0</buildpack>
                                 </buildpacks>
                             </image>
                             <docker>

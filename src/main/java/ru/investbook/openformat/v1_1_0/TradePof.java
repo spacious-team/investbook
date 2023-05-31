@@ -21,6 +21,8 @@ package ru.investbook.openformat.v1_1_0;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,8 +40,6 @@ import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collection;
@@ -162,7 +162,7 @@ public class TradePof {
                 .findAny()
                 .ifPresent(e -> builder.quote(divide(e, count).abs()));
         transactionCashFlows.stream()
-                .filter(e -> e.getCashFlowType().getId() == COMMISSION.getId())
+                .filter(e -> e.getCashFlowType().getId() == FEE.getId())
                 .findAny()
                 .ifPresentOrElse(e -> builder
                         .fee(e.getValue().negate())
@@ -225,8 +225,8 @@ public class TradePof {
                     .security(getSecurityId(assetToSecurityId))
                     .count(count.intValueExact())
                     .timestamp(Instant.ofEpochSecond(ts))
-                    .commission((fee == null) ? null : fee.negate())
-                    .commissionCurrency(getValidCurrencyOrNull(feeCurrency))
+                    .fee((fee == null) ? null : fee.negate())
+                    .feeCurrency(getValidCurrencyOrNull(feeCurrency))
                     .build());
         } catch (Exception e) {
             log.error("Не могу распарсить {}", this, e);

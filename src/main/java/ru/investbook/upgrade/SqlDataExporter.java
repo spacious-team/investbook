@@ -18,6 +18,7 @@
 
 package ru.investbook.upgrade;
 
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.info.BuildProperties;
@@ -25,7 +26,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.investbook.InvestbookProperties;
 
-import javax.annotation.PreDestroy;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;

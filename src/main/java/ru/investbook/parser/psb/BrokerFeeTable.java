@@ -80,7 +80,7 @@ public class BrokerFeeTable extends SingleAbstractReportTable<EventCashFlow> {
         return EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .timestamp(getReport().getReportEndDateTime())
-                .eventType(CashFlowType.COMMISSION)
+                .eventType(CashFlowType.FEE)
                 .value(fee)
                 .currency(currency)
                 .description(description)

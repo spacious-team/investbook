@@ -142,12 +142,11 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         sheet.setColumnWidth(BUY_COUNT.ordinal(), 12 * 256);
         sheet.setColumnWidth(CELL_COUNT.ordinal(), 12 * 256);
         sheet.setColumnWidth(COUNT.ordinal(), 14 * 256);
-        sheet.setColumnWidth(AVERAGE_PRICE.ordinal(), 14 * 256);
+        sheet.setColumnWidth(AVERAGE_PRICE.ordinal(), 15 * 256);
         sheet.setColumnWidth(AVERAGE_ACCRUED_INTEREST.ordinal(), 14 * 256);
-        sheet.setColumnWidth(COMMISSION.ordinal(), 13 * 256);
+        sheet.setColumnWidth(COMMISSION.ordinal(), 14 * 256);
         sheet.setColumnWidth(LAST_EVENT_DATE.ordinal(), 14 * 256);
         sheet.setColumnWidth(AMORTIZATION.ordinal(), 16 * 256);
-        sheet.setColumnWidth(LAST_PRICE.ordinal(), 13 * 256);
         sheet.setColumnWidth(LAST_ACCRUED_INTEREST.ordinal(), 13 * 256);
         sheet.setColumnWidth(TAX.ordinal(), 19 * 256);
         sheet.setColumnWidth(INTERNAL_RATE_OF_RETURN.ordinal(), (int) (12.5 * 256));
@@ -178,7 +177,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     @Override
     protected void sheetPreCreate(Sheet sheet, Table table) {
         super.sheetPreCreate(sheet, table);
-        sheet.setZoom(82); // show all columns for 24-inch monitor for securities sheet
+        sheet.setZoom(81); // show all columns for 24-inch monitor for securities sheet
     }
 
     @Override

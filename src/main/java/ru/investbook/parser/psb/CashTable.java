@@ -21,9 +21,9 @@ package ru.investbook.parser.psb;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.PortfolioCash;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
@@ -52,7 +52,7 @@ public class CashTable extends SingleAbstractReportTable<PortfolioCash> {
                         .build();
     }
 
-    enum CashTableHeader implements TableColumnDescription {
+    enum CashTableHeader implements TableHeaderColumn {
         SECTION("сектор"),
         VALUE("плановый исходящий остаток"),
         CURRENCY("валюта");
@@ -60,7 +60,7 @@ public class CashTable extends SingleAbstractReportTable<PortfolioCash> {
         @Getter
         private final TableColumn column;
         CashTableHeader(String ... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

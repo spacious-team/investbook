@@ -18,6 +18,7 @@
 
 package ru.investbook.web;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -33,7 +34,6 @@ import ru.investbook.report.html.HtmlView;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.web.model.ViewFilterModel;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;

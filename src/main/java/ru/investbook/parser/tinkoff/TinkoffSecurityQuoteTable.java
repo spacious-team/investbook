@@ -25,9 +25,9 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.springframework.util.StringUtils;
 import ru.investbook.parser.SingleAbstractReportTable;
@@ -67,8 +67,8 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
                                      SecurityCodeAndIsinTable codeAndIsin,
                                      ForeignExchangeRateService foreignExchangeRateService) {
         super(report,
-                (cell) -> cell.startsWith(tableNamePrefix),
-                (cell) -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
+                cell -> cell.startsWith(tableNamePrefix),
+                cell -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
                 SecurityQuoteTableHeader.class);
         this.codeAndIsin = codeAndIsin;
         this.foreignExchangeRateService = foreignExchangeRateService;
@@ -164,7 +164,7 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
     }
 
     @RequiredArgsConstructor
-    protected enum SecurityQuoteTableHeader implements TableColumnDescription {
+    protected enum SecurityQuoteTableHeader implements TableHeaderColumn {
         SHORT_NAME("Сокращенное", "наименование", "актива"),
         CODE("Код", "актива"),
         COUNT("Исходящий", "остаток"),
@@ -177,11 +177,11 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
         private final TableColumn column;
 
         SecurityQuoteTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
 
         private static TableColumn optional(String... words) {
-            return OptionalTableColumn.of(TableColumnImpl.of(words));
+            return OptionalTableColumn.of(PatternTableColumn.of(words));
         }
     }
 }

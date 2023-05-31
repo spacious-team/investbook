@@ -19,7 +19,7 @@
 package ru.investbook.parser;
 
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 
 import java.time.Instant;
 import java.util.function.Predicate;
@@ -27,50 +27,77 @@ import java.util.function.Predicate;
 /**
  * Report table reading information from {@link SingleBrokerReport}
  */
-public abstract class SingleAbstractReportTable<T>  extends AbstractReportTable<T> {
+public abstract class SingleAbstractReportTable<R> extends AbstractReportTable<R> {
 
-    protected SingleAbstractReportTable(SingleBrokerReport report, String tableName, String tableFooter,
-                                        Class<? extends TableColumnDescription> headerDescription) {
+    protected <T extends Enum<T> & TableHeaderColumn>
+    SingleAbstractReportTable(SingleBrokerReport report,
+                              String tableName,
+                              String tableFooter,
+                              Class<T> headerDescription) {
         super(report, tableName, tableFooter, headerDescription);
     }
 
-    protected SingleAbstractReportTable(SingleBrokerReport report, String tableName, String tableFooter,
-                                        Class<? extends TableColumnDescription> headerDescription, int headersRowCount) {
+    protected <T extends Enum<T> & TableHeaderColumn>
+    SingleAbstractReportTable(SingleBrokerReport report,
+                              String tableName,
+                              String tableFooter,
+                              Class<T> headerDescription,
+                              int headersRowCount) {
         super(report, tableName, tableFooter, headerDescription, headersRowCount);
     }
 
-    protected SingleAbstractReportTable(SingleBrokerReport report, Predicate<String> tableNameFinder,
-                                        Predicate<String> tableFooterFinder,
-                                        Class<? extends TableColumnDescription> headerDescription) {
+    protected <T extends Enum<T> & TableHeaderColumn>
+    SingleAbstractReportTable(SingleBrokerReport report,
+                              Predicate<String> tableNameFinder,
+                              Predicate<String> tableFooterFinder,
+                              Class<T> headerDescription) {
         super(report, tableNameFinder, tableFooterFinder, headerDescription);
     }
 
-    protected SingleAbstractReportTable(SingleBrokerReport report, Predicate<String> tableNameFinder,
-                                        Predicate<String> tableFooterFinder,
-                                        Class<? extends TableColumnDescription> headerDescription, int headersRowCount) {
+    protected <T extends Enum<T> & TableHeaderColumn>
+    SingleAbstractReportTable(SingleBrokerReport report,
+                              Predicate<String> tableNameFinder,
+                              Predicate<String> tableFooterFinder,
+                              Class<T> headerDescription,
+                              int headersRowCount) {
         super(report, tableNameFinder, tableFooterFinder, headerDescription, headersRowCount);
     }
 
-    public SingleAbstractReportTable(SingleBrokerReport report, String providedTableName, String namelessTableFirstLine,
-                                     String tableFooter, Class<? extends TableColumnDescription> headerDescription) {
+    public <T extends Enum<T> & TableHeaderColumn>
+    SingleAbstractReportTable(SingleBrokerReport report,
+                              String providedTableName,
+                              String namelessTableFirstLine,
+                              String tableFooter,
+                              Class<T> headerDescription) {
         super(report, providedTableName, namelessTableFirstLine, tableFooter, headerDescription);
     }
 
-    public SingleAbstractReportTable(SingleBrokerReport report, String providedTableName, String namelessTableFirstLine,
-                                     String tableFooter, Class<? extends TableColumnDescription> headerDescription,
-                                     int headersRowCount) {
+    public <T extends Enum<T> & TableHeaderColumn>
+    SingleAbstractReportTable(SingleBrokerReport report,
+                              String providedTableName,
+                              String namelessTableFirstLine,
+                              String tableFooter,
+                              Class<T> headerDescription,
+                              int headersRowCount) {
         super(report, providedTableName, namelessTableFirstLine, tableFooter, headerDescription, headersRowCount);
     }
 
-    protected SingleAbstractReportTable(SingleBrokerReport report, String providedTableName,
-                                        Predicate<String> namelessTableFirstLineFinder, Predicate<String> tableFooterFinder,
-                                        Class<? extends TableColumnDescription> headerDescription) {
+    protected <T extends Enum<T> & TableHeaderColumn>
+    SingleAbstractReportTable(SingleBrokerReport report,
+                              String providedTableName,
+                              Predicate<String> namelessTableFirstLineFinder,
+                              Predicate<String> tableFooterFinder,
+                              Class<T> headerDescription) {
         super(report, providedTableName, namelessTableFirstLineFinder, tableFooterFinder, headerDescription);
     }
 
-    protected SingleAbstractReportTable(SingleBrokerReport report, String providedTableName,
-                                        Predicate<String> namelessTableFirstLineFinder, Predicate<String> tableFooterFinder,
-                                        Class<? extends TableColumnDescription> headerDescription, int headersRowCount) {
+    protected <T extends Enum<T> & TableHeaderColumn>
+    SingleAbstractReportTable(SingleBrokerReport report,
+                              String providedTableName,
+                              Predicate<String> namelessTableFirstLineFinder,
+                              Predicate<String> tableFooterFinder,
+                              Class<T> headerDescription,
+                              int headersRowCount) {
         super(report, providedTableName, namelessTableFirstLineFinder, tableFooterFinder, headerDescription, headersRowCount);
     }
 

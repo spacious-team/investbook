@@ -28,9 +28,9 @@ import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.broker.report_parser.api.WrappingReportTable;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.TransactionValueAndFeeParser;
@@ -65,8 +65,8 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
                                             SecurityCodeAndIsinTable codeAndIsin,
                                             TransactionValueAndFeeParser transactionValueAndFeeParser) {
         super(report,
-                (cell) -> cell.startsWith(tableNamePrefix),
-                (cell) -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
+                cell -> cell.startsWith(tableNamePrefix),
+                cell -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
                 TransactionTableHeader.class);
         this.codeAndIsin = codeAndIsin;
         this.transactionValueAndFeeParser = transactionValueAndFeeParser;
@@ -131,8 +131,8 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
                 .count(count)
                 .value(valueAndFee.value())
                 .valueCurrency(valueAndFee.valueCurrency())
-                .commission(valueAndFee.fee().negate())
-                .commissionCurrency(valueAndFee.feeCurrency())
+                .fee(valueAndFee.fee().negate())
+                .feeCurrency(valueAndFee.feeCurrency())
                 .build();
     }
 
@@ -146,7 +146,7 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
     }
 
     @RequiredArgsConstructor
-    protected enum TransactionTableHeader implements TableColumnDescription {
+    protected enum TransactionTableHeader implements TableHeaderColumn {
         TRADE_ID("номер", "сделки"),
         TRANSACTION_DATE("дата", "заклю", "чения"),
         TRANSACTION_TIME("время"),
@@ -162,20 +162,20 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
         BROKER_FEE("комис", "брокера"),
         BROKER_FEE_CURRENCY("валю", "комис"),
         MARKET_FEE(OptionalTableColumn.of(
-                TableColumnImpl.of("комиссия", "биржи"))),
+                PatternTableColumn.of("комиссия", "биржи"))),
         MARKET_FEE_CURRENCY(OptionalTableColumn.of(
-                TableColumnImpl.of("валюта", "комиссии", "биржи"))),
+                PatternTableColumn.of("валюта", "комиссии", "биржи"))),
         CLEARING_FEE(OptionalTableColumn.of(
-                TableColumnImpl.of("комиссия", "клир.", "центра"))),
+                PatternTableColumn.of("комиссия", "клир.", "центра"))),
         CLEARING_FEE_CURRENCY(OptionalTableColumn.of(
-                TableColumnImpl.of("валюта", "комиссии", "клир.", "центра"))),
+                PatternTableColumn.of("валюта", "комиссии", "клир.", "центра"))),
         SETTLEMENT_DATE("дата", "расчетов");
 
         @Getter
         private final TableColumn column;
 
         TransactionTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

@@ -21,9 +21,9 @@ package ru.investbook.parser.psb;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
@@ -72,17 +72,17 @@ class DerivativeExpirationTable extends SingleAbstractReportTable<DerivativeTran
                 .count((isBuy ? 1 : -1) * count)
                 .valueInPoints(valueInPoints)
                 .value(value)
-                .commission(commission)
+                .fee(commission)
                 .valueCurrency("RUB") // FORTS, only RUB
-                .commissionCurrency("RUB") // FORTS, only RUB
+                .feeCurrency("RUB") // FORTS, only RUB
                 .build();
     }
 
-    enum ExpirationTableHeader implements TableColumnDescription {
+    enum ExpirationTableHeader implements TableHeaderColumn {
         DATE_TIME("дата и время"),
         TRADE_ID("номер сделки"),
         TYPE("вид контракта"),
-        CONTRACT("контракт"),
+        CONTRACT("^контракт"),
         DIRECTION("покупка", "продажа"),
         COUNT("кол-во"),
         QUOTE("цена", "пункты"),
@@ -94,7 +94,7 @@ class DerivativeExpirationTable extends SingleAbstractReportTable<DerivativeTran
         private final TableColumn column;
 
         ExpirationTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

@@ -35,9 +35,9 @@ public class BrowserHomePageOpener {
         try {
             if (os.contains("win")) {
                 // this doesn't support showing urls in the form of "page.html#nameLink"
-                rt.exec("rundll32 url.dll,FileProtocolHandler " + url);
+                rt.exec(new String[]{"rundll32", "url.dll,FileProtocolHandler", url});
             } else if (os.contains("mac")) {
-                rt.exec("open " + url);
+                rt.exec(new String[]{"open", url});
             } else if (os.contains("nix") || os.contains("nux")) {
                 // Do the best guess on unix until we get a platform independent way
                 // Build a list of browsers to try, in this order.

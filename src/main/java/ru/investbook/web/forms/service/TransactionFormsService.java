@@ -86,7 +86,7 @@ public class TransactionFormsService {
             CashFlowType.ACCRUED_INTEREST.getId(),
             CashFlowType.DERIVATIVE_QUOTE.getId(),
             CashFlowType.DERIVATIVE_PRICE.getId(),
-            CashFlowType.COMMISSION.getId());
+            CashFlowType.FEE.getId());
 
     @Transactional(readOnly = true)
     public Optional<TransactionModel> getById(int id) {
@@ -156,8 +156,8 @@ public class TransactionFormsService {
 
             if (tr.getCommission() != null) {
                 builder
-                        .commission(tr.getCommission().negate())
-                        .commissionCurrency(tr.getCommissionCurrency());
+                        .fee(tr.getCommission().negate())
+                        .feeCurrency(tr.getCommissionCurrency());
             }
         } else {
             builder = switch (tr.getSecurityType()) {
@@ -273,7 +273,7 @@ public class TransactionFormsService {
                     m.setAccruedInterest(value.getValue().divide(cnt, 6, RoundingMode.HALF_UP).abs());
                     securityType.set(SecurityType.BOND);
                 }
-                case COMMISSION -> {
+                case FEE -> {
                     m.setCommission(value.getValue().abs());
                     m.setCommissionCurrency(value.getCurrency());
                 }

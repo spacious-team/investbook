@@ -24,9 +24,9 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.sber.SecurityHelper;
 
@@ -72,15 +72,15 @@ public class SberTrSecurityTransactionTable extends AbstractReportTable<Abstract
                 .count(row.getIntCellValue(COUNT) * (isBuy ? 1 : -1))
                 .value(value)
                 .accruedInterest(accruedInterest)
-                .commission(row.getBigDecimalCellValue(MARKET_COMMISSION)
+                .fee(row.getBigDecimalCellValue(MARKET_COMMISSION)
                         .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                         .negate())
                 .valueCurrency(currency)
-                .commissionCurrency(currency)
+                .feeCurrency(currency)
                 .build();
     }
 
-    public enum SberTransactionTableHeader implements TableColumnDescription {
+    public enum SberTransactionTableHeader implements TableHeaderColumn {
         PORTFOLIO("Номер договора"),
         TRADE_ID("Номер сделки"),
         DATE_TIME("Дата расчётов"),
@@ -100,7 +100,7 @@ public class SberTrSecurityTransactionTable extends AbstractReportTable<Abstract
         private final TableColumn column;
 
         SberTransactionTableHeader(String words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

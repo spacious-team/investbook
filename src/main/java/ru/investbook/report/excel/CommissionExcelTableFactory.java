@@ -50,7 +50,7 @@ public class CommissionExcelTableFactory implements TableFactory {
         List<EventCashFlow> cashFlows = eventCashFlowRepository
                 .findByPortfolioIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
                         singleton(portfolio.getId()),
-                        CashFlowType.COMMISSION.getId(),
+                        CashFlowType.FEE.getId(),
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate())
                 .stream()

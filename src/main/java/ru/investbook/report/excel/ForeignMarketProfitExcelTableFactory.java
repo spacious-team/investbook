@@ -107,7 +107,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
         row.put(OPEN_PRICE, getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount()));
         double multiplier = Math.abs(1d * position.getCount() / transaction.getCount());
         row.put(OPEN_AMOUNT, getTransactionCashFlow(transaction, CashFlowType.PRICE, multiplier));
-        row.put(OPEN_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multiplier));
+        row.put(OPEN_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.FEE, multiplier));
         return row;
     }
 
@@ -126,7 +126,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
                     " не может быть закрыта событием типа " + position.getClosingEvent());
         }
         row.put(CLOSE_AMOUNT, closeAmount);
-        row.put(CLOSE_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.COMMISSION, multiplier));
+        row.put(CLOSE_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.FEE, multiplier));
         boolean isLongPosition = isLongPosition(position);
         row.put(FORECAST_TAX, getForecastTax(isLongPosition));
         row.put(PROFIT, getClosedPositionProfit(isLongPosition));

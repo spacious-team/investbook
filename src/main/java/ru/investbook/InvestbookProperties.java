@@ -25,8 +25,8 @@ import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -38,13 +38,17 @@ public class InvestbookProperties {
 
     private Path reportBackupPath = dataPath.resolve("report-backups");
 
+    private List<Path> sqlImportFiles = List.of(dataPath.resolve("export-2022.9.sql"));
+
     private boolean openHomePageAfterStart = false;
+
+    private boolean tryAltIndexLogoUrl = true;
 
     /**
      * Configures extensions packages which provides TableFactory interfaces.
-     * Do not configure {@link org.spacious_team.table_wrapper} package, because it configured by default.
+     * Do not configure {@link org.spacious_team.table_wrapper} package, because they are configured by default.
      */
-    private Collection<String> tableParsers = Collections.emptyList();
+    private Set<String> tableParsers = Set.of();
 
     private boolean reportBackup = true;
 }

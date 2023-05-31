@@ -25,23 +25,24 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import ru.investbook.InvestbookProperties;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.service.AssetsAndCashService;
 
 import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-@Controller
-@RequiredArgsConstructor
-@RequestMapping("/")
 @Slf4j
+@Controller
+@RequestMapping("/")
+@RequiredArgsConstructor
 public class HomePageController {
-
     private final AssetsAndCashService assetsAndCashService;
     private final BuildProperties buildProperties;
     private final TransactionRepository transactionRepository;
+    private final InvestbookProperties properties;
 
     @GetMapping
     public String index(Model model) {
@@ -51,13 +52,19 @@ public class HomePageController {
         model.addAttribute("assets", assetsAndCashService.getTotalAssetsInRub(portfolios));
         model.addAttribute("cashBalance", assetsAndCashService.getTotalCashInRub(portfolios));
         model.addAttribute("buildProperties", buildProperties);
+        model.addAttribute("logoUrl",
+                "https://github.com/spacious-team/investbook/assets/11336712/97828ac2-c52f-4c6e-8c3a-8a16f2c3fa3a");
+        if (properties.isTryAltIndexLogoUrl()) {
+            model.addAttribute("altLogoUrl", "https://disk.yandex.ru/i/F7_F2K-eP7mnnQ");
+        }
         return "index";
     }
 
     @GetMapping("shutdown")
-    @ResponseBody
     public String shutdown() {
-        Executors.newSingleThreadScheduledExecutor().schedule(() -> System.exit(0), 3, TimeUnit.SECONDS);
-        return "Приложение остановлено";
+        @SuppressWarnings("resource")
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.schedule(() -> System.exit(0), 3, TimeUnit.SECONDS);
+        return "shutdown-page";
     }
 }

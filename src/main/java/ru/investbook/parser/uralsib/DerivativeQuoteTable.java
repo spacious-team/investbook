@@ -20,9 +20,9 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import org.spacious_team.broker.pojo.SecurityQuote;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
@@ -56,7 +56,7 @@ public class DerivativeQuoteTable extends SingleAbstractReportTable<SecurityQuot
                 .build();
     }
 
-    enum ContractCountTableHeader implements TableColumnDescription {
+    enum ContractCountTableHeader implements TableHeaderColumn {
         CONTRACT("наименование контракта"),
         INCOMING("входящий остаток"),
         OUTGOING("исходящий остаток"),
@@ -67,7 +67,7 @@ public class DerivativeQuoteTable extends SingleAbstractReportTable<SecurityQuot
         @Getter
         private final TableColumn column;
         ContractCountTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

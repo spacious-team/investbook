@@ -36,6 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Double.parseDouble;
+import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
 
@@ -45,9 +46,9 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
     private static final Pattern couponPerOneBondPattern = Pattern.compile("размер куп. на 1 обл\\.\\s+([0-9.]+)");
     private static final Pattern amortizationPerOneBondPattern = Pattern.compile("ном\\.на 1 обл\\.\\s+([0-9.]+)");
     private static final Pattern[] registrationNumberPatterns = new Pattern[]{
-            Pattern.compile("\\b([\\w]+-[\\w]+-[\\w]+-[\\w-]+)\\b"), // 3 or more dashed word
-            Pattern.compile("\\b([\\w]+).\\s+размер куп"),
-            Pattern.compile("\\b([\\w]+),\\s+частичное досроч")
+            Pattern.compile("\\b([\\w]+-[\\w]+-[\\w]+-[\\w-]+)\\b", UNICODE_CHARACTER_CLASS), // 3 or more dashed word
+            Pattern.compile("\\b([\\w]+).\\s+размер куп", UNICODE_CHARACTER_CLASS),
+            Pattern.compile("\\b([\\w]+),\\s+частичное досроч", UNICODE_CHARACTER_CLASS)
     };
     private final SecurityRegNumberRegistrar securityRegNumberRegistrar;
     private final VtbSecurityDepositAndWithdrawalTable vtbSecurityDepositAndWithdrawalTable;

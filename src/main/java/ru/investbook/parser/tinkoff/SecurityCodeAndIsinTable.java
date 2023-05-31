@@ -18,17 +18,17 @@
 
 package ru.investbook.parser.tinkoff;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.springframework.util.StringUtils;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,8 +46,8 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
 
     protected SecurityCodeAndIsinTable(BrokerReport report) {
         super(report,
-                (cell) -> cell.startsWith("4.1 Информация о ценных бумагах"),
-                (cell) -> tablesLastRowPattern.matcher(cell).lookingAt(),
+                cell -> cell.startsWith("4.1 Информация о ценных бумагах"),
+                cell -> tablesLastRowPattern.matcher(cell).lookingAt(),
                 SecurityAndCodeTableHeader.class);
     }
 
@@ -105,7 +105,7 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         return Objects.requireNonNull(shortNameToCode.get(shortName), "Не найден код бумаги");
     }
 
-    protected enum SecurityAndCodeTableHeader implements TableColumnDescription {
+    protected enum SecurityAndCodeTableHeader implements TableHeaderColumn {
         SHORT_NAME("Сокращенное", "наименование"),
         CODE("код", "актива"),
         ISIN("isin"),
@@ -116,7 +116,7 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         private final TableColumn column;
 
         SecurityAndCodeTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

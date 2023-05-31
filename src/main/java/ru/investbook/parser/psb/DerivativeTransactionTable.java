@@ -21,10 +21,10 @@ package ru.investbook.parser.psb;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
@@ -86,17 +86,17 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
                 .count((isBuy ? 1 : -1) * count)
                 .valueInPoints(valueInPoints)
                 .value(value)
-                .commission(commission)
+                .fee(commission)
                 .valueCurrency("RUB") // FORTS, only RUB
-                .commissionCurrency("RUB") // FORTS, only RUB
+                .feeCurrency("RUB") // FORTS, only RUB
                 .build();
     }
 
-    enum FortsTableHeader implements TableColumnDescription {
+    enum FortsTableHeader implements TableHeaderColumn {
         DATE_TIME("дата включения в клиринг"),
         TRADE_ID("№"),
         TYPE("вид контракта"),
-        CONTRACT("контракт"),
+        CONTRACT("^контракт"),
         DIRECTION("покупка", "продажа"),
         COUNT("кол-во"),
         QUOTE("цена фьючерсного контракта", "цена исполнения опциона", "пункты"),
@@ -109,7 +109,7 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
         @Getter
         private final TableColumn column;
         FortsTableHeader(String ... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 

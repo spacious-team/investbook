@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
+ * Copyright (C) 2023  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,24 +16,5 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.entity;
-
-import jakarta.persistence.Basic;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Data;
-
-@Entity
-@Table(name = "cash_flow_type")
-@Data
-public class CashFlowTypeEntity {
-    @Id
-    @Column(name = "id")
-    private int id;
-
-    @Basic
-    @Column(name = "name")
-    private String name;
-}
+-- H2 generated `CONSTRAINT_FFF` and related `CONSTRAINT_FFF_INDEX_E`
+ALTER TABLE `transaction` DROP CONSTRAINT IF EXISTS `CONSTRAINT_FFF`;

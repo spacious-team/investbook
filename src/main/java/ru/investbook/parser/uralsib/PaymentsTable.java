@@ -27,10 +27,10 @@ import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.AbstractTable;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.uralsib.SecuritiesTable.ReportSecurityInformation;
@@ -222,7 +222,7 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
                 .build();
     }
 
-    enum PaymentsTableHeader implements TableColumnDescription {
+    enum PaymentsTableHeader implements TableHeaderColumn {
         DATE("дата"),
         OPERATION("тип", "операции"),
         VALUE("сумма"),
@@ -233,7 +233,7 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
         private final TableColumn column;
 
         PaymentsTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

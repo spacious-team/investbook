@@ -24,10 +24,10 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.RelativePositionTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.springframework.lang.Nullable;
 import ru.investbook.parser.SingleAbstractReportTable;
@@ -109,14 +109,14 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(valueAndFee.value())
                 .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)
-                .commission(valueAndFee.fee().negate())
+                .fee(valueAndFee.fee().negate())
                 .valueCurrency(valueAndFee.valueCurrency())
-                .commissionCurrency(valueAndFee.feeCurrency())
+                .feeCurrency(valueAndFee.feeCurrency())
                 .build();
     }
 
     @Nullable
-    static String getTradeId(TableRow row, TableColumnDescription column) {
+    static String getTradeId(TableRow row, TableHeaderColumn column) {
         try {
             // some numbers (doubles) represented by string type cells
             return String.valueOf(row.getLongCellValue(column));
@@ -135,13 +135,13 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                 .orElse(null);
     }
 
-    enum TransactionTableHeader implements TableColumnDescription {
+    enum TransactionTableHeader implements TableHeaderColumn {
         DATE_TIME(
                 AnyOfTableColumn.of(
                         MultiLineTableColumn.of(                                // таблица "Специальные сделки РЕПО для переноса длинной позиции"
-                                TableColumnImpl.of("дата", "поставки"),
-                                TableColumnImpl.of("плановая")),
-                        TableColumnImpl.of("дата", "поставки"))),        // таблица "Биржевые сделки с ценными бумагами в отчетном периоде"
+                                PatternTableColumn.of("дата", "поставки"),
+                                PatternTableColumn.of("плановая")),
+                        PatternTableColumn.of("дата", "поставки"))),        // таблица "Биржевые сделки с ценными бумагами в отчетном периоде"
         TRADE_ID("номер сделки"),
         DIRECTION("вид", "сделки"),
         COUNT("количество", "цб"),
@@ -151,35 +151,35 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
         MARKET_COMMISSION(
                 AnyOfTableColumn.of(
                         MultiLineTableColumn.of(                               // old report
-                                TableColumnImpl.of("комиссия тс"),
-                                TableColumnImpl.of("всего")),
-                        TableColumnImpl.of("комиссия тс", "всего"))),   // new report
+                                PatternTableColumn.of("комиссия тс"),
+                                PatternTableColumn.of("всего")),
+                        PatternTableColumn.of("комиссия тс", "всего"))),   // new report
         MARKET_COMMISSION_CURRENCY(
                 AnyOfTableColumn.of(                                           // old report
                         MultiLineTableColumn.of(
-                                TableColumnImpl.of("комиссия тс"),
-                                TableColumnImpl.of("валюта списания")),
+                                PatternTableColumn.of("комиссия тс"),
+                                PatternTableColumn.of("валюта списания")),
                         VALUE_CURRENCY.getColumn())),                          // new report (fallback to value currency)
         BROKER_COMMISSION(
                 AnyOfTableColumn.of(
                         RelativePositionTableColumn.of(                        // old report
                                 MultiLineTableColumn.of(
-                                        TableColumnImpl.of("комиссия брокера"),
-                                        TableColumnImpl.of("валюта списания")),
+                                        PatternTableColumn.of("комиссия брокера"),
+                                        PatternTableColumn.of("валюта списания")),
                                 -1),
-                        TableColumnImpl.of("комиссия брокера", "всего"))),  // new report
+                        PatternTableColumn.of("комиссия брокера", "всего"))),  // new report
         BROKER_COMMISSION_CURRENCY(
                 AnyOfTableColumn.of(                                           // old report
                         MultiLineTableColumn.of(
-                                TableColumnImpl.of("комиссия брокера"),
-                                TableColumnImpl.of("валюта списания")),
+                                PatternTableColumn.of("комиссия брокера"),
+                                PatternTableColumn.of("валюта списания")),
                         VALUE_CURRENCY.getColumn()));                          // new report (fallback to value currency)
 
         @Getter
         private final TableColumn column;
 
         TransactionTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
 
         TransactionTableHeader(TableColumn column) {

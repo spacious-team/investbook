@@ -18,11 +18,11 @@
 
 package ru.investbook.web.forms.model;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_RUB;

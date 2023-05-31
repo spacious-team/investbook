@@ -22,8 +22,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentityGenerator;
 
-import java.io.Serializable;
-
 /**
  * {@code @GeneratedValue} doesn't work out of box for H2.
  * {@code @GeneratedValue(strategy = GenerationType.IDENTITY)} ignores entity id field set manually.
@@ -35,8 +33,8 @@ public class UseExistingOrGenerateIdGenerator extends IdentityGenerator {
     static final String STRATEGY = "ru.investbook.entity.UseExistingOrGenerateIdGenerator";
 
     @Override
-    public Serializable generate(SharedSessionContractImplementor session, Object object) throws HibernateException {
-        Serializable id = session.getEntityPersister(null, object)
+    public Object generate(SharedSessionContractImplementor session, Object object) throws HibernateException {
+        Object id = session.getEntityPersister(null, object)
                 .getClassMetadata()
                 .getIdentifier(object, session);
         return (id == null) ? super.generate(session, object) : id;

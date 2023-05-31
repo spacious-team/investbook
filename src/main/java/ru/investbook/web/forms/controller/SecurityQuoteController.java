@@ -18,6 +18,8 @@
 
 package ru.investbook.web.forms.controller;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -39,15 +41,12 @@ import ru.investbook.web.forms.model.SecurityQuoteModel;
 import ru.investbook.web.forms.model.filter.SecurityQuoteFormFilterModel;
 import ru.investbook.web.forms.service.SecurityQuoteFormsService;
 
-import javax.annotation.PostConstruct;
-import javax.validation.Valid;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
 
 @Controller
 @RequestMapping("/security-quotes")
@@ -111,14 +110,12 @@ public class SecurityQuoteController {
 
     public String updateQuoteFromMoexIssApi() throws InterruptedException, ExecutionException {
         long t0 = System.nanoTime();
-        ForkJoinPool pool = new ForkJoinPool(4 * Runtime.getRuntime().availableProcessors());
-        pool.submit(() -> securityRepository.findAll()
-                        .parallelStream()
-                        .forEach(moexIssSecurityQuoteService::updateQuote))
-                .get();
-        do {
-            pool.shutdown();
-        } while (!pool.awaitTermination(500, TimeUnit.MILLISECONDS));
+        try (ForkJoinPool pool = new ForkJoinPool(4 * Runtime.getRuntime().availableProcessors())) {
+            pool.submit(() -> securityRepository.findAll()
+                            .parallelStream()
+                            .forEach(moexIssSecurityQuoteService::updateQuote))
+                    .get();
+        }
         String message = securityQuoteRepository.findFirstByOrderByTimestampDesc()
                 .map(SecurityQuoteEntity::getTimestamp)
                 .map(instant -> LocalDate.ofInstant(instant, ZoneId.systemDefault()))

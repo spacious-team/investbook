@@ -24,10 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
@@ -109,7 +109,7 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
                 BigDecimal brokerFee = BigDecimal.valueOf(doubleValue).negate();
                 return singletonList(EventCashFlow.builder()
                         .portfolio(getReport().getPortfolio())
-                        .eventType(CashFlowType.COMMISSION)
+                        .eventType(CashFlowType.FEE)
                         .timestamp(getReport().getReportEndDateTime())
                         .value(brokerFee)
                         .currency("RUB")
@@ -132,19 +132,19 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
     }
 
     @RequiredArgsConstructor
-    enum FxCashFlowTableHeader implements TableColumnDescription {
+    enum FxCashFlowTableHeader implements TableHeaderColumn {
         DATE("дата"),
         OPERATION("вид"),
-        RUB(OptionalTableColumn.of(TableColumnImpl.of("RUB"))),  // old format
-        USD(OptionalTableColumn.of(TableColumnImpl.of("USD"))),  // old format
-        EUR(OptionalTableColumn.of(TableColumnImpl.of("EUR"))),  // old format
-        VALUE(OptionalTableColumn.of(TableColumnImpl.of("Сумма"))),     // new format
-        CURRENCY(OptionalTableColumn.of(TableColumnImpl.of("Валюта"))); // new format
+        RUB(OptionalTableColumn.of(PatternTableColumn.of("RUB"))),  // old format
+        USD(OptionalTableColumn.of(PatternTableColumn.of("USD"))),  // old format
+        EUR(OptionalTableColumn.of(PatternTableColumn.of("EUR"))),  // old format
+        VALUE(OptionalTableColumn.of(PatternTableColumn.of("Сумма"))),     // new format
+        CURRENCY(OptionalTableColumn.of(PatternTableColumn.of("Валюта"))); // new format
 
         @Getter
         private final TableColumn column;
         FxCashFlowTableHeader(String ... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }

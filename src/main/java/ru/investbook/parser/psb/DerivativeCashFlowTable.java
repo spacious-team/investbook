@@ -23,10 +23,10 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableColumn;
-import org.spacious_team.table_wrapper.api.TableColumnDescription;
-import org.spacious_team.table_wrapper.api.TableColumnImpl;
+import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
@@ -112,8 +112,8 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
         }
     }
 
-    enum ContractCountTableHeader implements TableColumnDescription {
-        CONTRACT("контракт"),
+    enum ContractCountTableHeader implements TableHeaderColumn {
+        CONTRACT("^контракт$"),
         INCOMING("входящий остаток"),
         OUTGOING("исходящий остаток"),
         BUY("зачислено"),
@@ -126,11 +126,11 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
         private final TableColumn column;
 
         ContractCountTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 
-    enum DerivativeCashFlowTableHeader implements TableColumnDescription {
+    enum DerivativeCashFlowTableHeader implements TableHeaderColumn {
         DATE("дата"),
         CONTRACT("№", "контракт"),
         OPERATION("вид операции"),
@@ -141,7 +141,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
         private final TableColumn column;
 
         DerivativeCashFlowTableHeader(String... words) {
-            this.column = TableColumnImpl.of(words);
+            this.column = PatternTableColumn.of(words);
         }
     }
 }
