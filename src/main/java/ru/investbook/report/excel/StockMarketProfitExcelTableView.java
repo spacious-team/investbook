@@ -85,6 +85,8 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
         sheet.setColumnWidth(SECURITY.ordinal(), 45 * 256);
         sheet.setColumnWidth(OPEN_AMOUNT.ordinal(), 16 * 256);
         sheet.setColumnWidth(CLOSE_AMOUNT.ordinal(), 16 * 256);
+        sheet.setColumnWidth(COUPON.ordinal(), 15 * 256);
+        sheet.setColumnWidth(PROFIT.ordinal(), 15 * 256);
     }
 
     @Override
@@ -108,6 +110,7 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
         if (table.stream().noneMatch(record -> record.containsKey(TAX_LIABILITY))) {
             // Брокеры являются агентами по акциям отечественных бумаг на мосбирже
             sheet.setColumnHidden(TAX_LIABILITY.ordinal(), true); // нет обязательств
+            sheet.setZoom(92);
         } else {
             sheet.setZoom(89); // show all columns for 24-inch monitor for securities sheet
         }

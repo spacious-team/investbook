@@ -57,7 +57,7 @@ public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
     protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         sheet.setColumnWidth(CONTRACT.ordinal(), 24 * 256);
-        sheet.setColumnWidth(AMOUNT.ordinal(), 16 * 256);
+        sheet.setColumnWidth(AMOUNT.ordinal(), 18 * 256);
         sheet.setColumnWidth(DERIVATIVE_PROFIT_DAY.ordinal(), 17 * 256);
         sheet.setColumnWidth(DERIVATIVE_PROFIT_TOTAL.ordinal(), 17 * 256);
         sheet.setColumnWidth(POSITION.ordinal(), 17 * 256);
