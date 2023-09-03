@@ -21,6 +21,7 @@ package ru.investbook.parser.tinkoff;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
@@ -39,37 +40,39 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 import static ru.investbook.parser.tinkoff.TinkoffSecurityTransactionTable.TransactionTableHeader.*;
-import static ru.investbook.parser.tinkoff.TinkoffSecurityTransactionTableHelper.getSecurityId;
-import static ru.investbook.parser.tinkoff.TinkoffSecurityTransactionTableHelper.getSecurityType;
 
 @Slf4j
 public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<AbstractTransaction> {
 
     private final SecurityCodeAndIsinTable codeAndIsin;
     private final TransactionValueAndFeeParser transactionValueAndFeeParser;
+    private final TinkoffSecurityTransactionTableHelper transactionTableHelper;
 
     public static ReportTable<AbstractTransaction> of(TinkoffBrokerReport report,
                                                       SecurityCodeAndIsinTable codeAndIsin,
-                                                      TransactionValueAndFeeParser transactionValueAndFeeParser) {
+                                                      TransactionValueAndFeeParser transactionValueAndFeeParser,
+                                                      TinkoffSecurityTransactionTableHelper transactionTableHelper) {
         return WrappingReportTable.of(
                 new TinkoffSecurityTransactionTable(
                         "1.1 Информация о совершенных и исполненных сделках",
-                        report, codeAndIsin, transactionValueAndFeeParser),
+                        report, codeAndIsin, transactionValueAndFeeParser, transactionTableHelper),
                 new TinkoffSecurityTransactionTable(
                         "1.2 Информация о неисполненных сделках на конец отчетного периода",
-                        report, codeAndIsin, transactionValueAndFeeParser));
+                        report, codeAndIsin, transactionValueAndFeeParser, transactionTableHelper));
     }
 
     private TinkoffSecurityTransactionTable(String tableNamePrefix,
                                             TinkoffBrokerReport report,
                                             SecurityCodeAndIsinTable codeAndIsin,
-                                            TransactionValueAndFeeParser transactionValueAndFeeParser) {
+                                            TransactionValueAndFeeParser transactionValueAndFeeParser,
+                                            TinkoffSecurityTransactionTableHelper transactionTableHelper) {
         super(report,
                 cell -> cell.startsWith(tableNamePrefix),
                 cell -> TinkoffBrokerReport.tablesLastRowPattern.matcher(cell).lookingAt(),
                 TransactionTableHeader.class);
         this.codeAndIsin = codeAndIsin;
         this.transactionValueAndFeeParser = transactionValueAndFeeParser;
+        this.transactionTableHelper = transactionTableHelper;
     }
 
     @Override
@@ -78,7 +81,7 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
         if (_tradeId == -1) return null;
         String tradeId = String.valueOf(_tradeId);
 
-        int securityId = getSecurityId(row, codeAndIsin, getReport().getSecurityRegistrar());
+        int securityId = transactionTableHelper.getSecurityId(row, codeAndIsin, getReport().getSecurityRegistrar());
         boolean isBuy = row.getStringCellValue(OPERATION).toLowerCase().contains("покупка");
         int count = Math.abs(row.getIntCellValue(COUNT));
         BigDecimal amount = row.getBigDecimalCellValue(AMOUNT).abs();
@@ -86,7 +89,8 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
         count = isBuy ? count : -count;
 
         Instant timestamp = null;
-        AbstractTransaction.AbstractTransactionBuilder<?, ?> builder = switch (getSecurityType(row)) {
+        SecurityType securityType = transactionTableHelper.getSecurityType(row);
+        AbstractTransaction.AbstractTransactionBuilder<?, ?> builder = switch (securityType) {
             case STOCK -> SecurityTransaction.builder()
                     .timestamp(timestamp = getStockAndBondTransactionInstant(row));
             case BOND, STOCK_OR_BOND -> {
@@ -137,7 +141,11 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
     }
 
     private Instant getStockAndBondTransactionInstant(TableRow row) {
-        return getReport().convertToInstant(row.getStringCellValue(SETTLEMENT_DATE));
+        String settlementDate = row.getStringCellValue(SETTLEMENT_DATE);
+        // В старых отчетах одна дата, с января 2023 две: план/факт
+        String[] dates = settlementDate.split("/");
+        String date = (dates.length == 1) ? dates[0] : dates[1];
+        return getReport().convertToInstant(date);
     }
 
     private Instant getDerivativeAndCurrencyPairTransactionInstant(TableRow row) {
@@ -150,7 +158,7 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
         TRADE_ID("номер", "сделки"),
         TRANSACTION_DATE("дата", "заклю", "чения"),
         TRANSACTION_TIME("время"),
-        TYPE("режим", "торгов"),
+        TYPE(optional("режим", "торгов")),
         OPERATION("вид", "сделки"),
         SHORT_NAME("сокращен", "наименова"),
         CODE("код", "актива"),
@@ -176,6 +184,10 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
 
         TransactionTableHeader(String... words) {
             this.column = PatternTableColumn.of(words);
+        }
+
+        static OptionalTableColumn optional(String... words) {
+            return OptionalTableColumn.of(PatternTableColumn.of(words));
         }
     }
 }
