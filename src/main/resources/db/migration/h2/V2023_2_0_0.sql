@@ -17,10 +17,10 @@
  */
 
 ALTER TABLE `event_cash_flow`
-    ALTER COLUMN `value` DECIMAL(12,6) NOT NULL COMMENT 'Размер';
+    ALTER COLUMN `value` DECIMAL(15,6) NOT NULL COMMENT 'Размер';
 
 ALTER TABLE `security_event_cash_flow`
-    ALTER COLUMN `value` DECIMAL(12,6) NOT NULL COMMENT 'Размер';
+    ALTER COLUMN `value` DECIMAL(15,6) NOT NULL COMMENT 'Размер';
 
 ALTER TABLE `transaction_cash_flow`
-    ALTER COLUMN `value` DECIMAL(12,6) NOT NULL COMMENT 'Размер';
+    ALTER COLUMN `value` DECIMAL(15,6) NOT NULL COMMENT 'Размер';
