@@ -40,10 +40,12 @@ public class TinkoffReportTables extends AbstractReportTables<TinkoffBrokerRepor
     private final TinkoffCashTable portfolioCashTable;
     @Getter
     private final TinkoffPortfolioPropertyTable portfolioPropertyTable;
+    private final TinkoffSecurityTransactionTableHelper tinkoffSecurityTransactionTableHelper;
 
     protected TinkoffReportTables(TinkoffBrokerReport report,
                                   TransactionValueAndFeeParser transactionValueAndFeeParser,
-                                  ForeignExchangeRateService foreignExchangeRateService) {
+                                  ForeignExchangeRateService foreignExchangeRateService,
+                                  TinkoffSecurityTransactionTableHelper tinkoffSecurityTransactionTableHelper) {
         super(report);
         this.transactionValueAndFeeParser = transactionValueAndFeeParser;
         this.securityCodeAndIsinTable = new SecurityCodeAndIsinTable(this.report);
@@ -53,6 +55,7 @@ public class TinkoffReportTables extends AbstractReportTables<TinkoffBrokerRepor
         this.securityQuoteTable = WrappingReportTable.of(securityQuoteTables);
         this.portfolioPropertyTable = new TinkoffPortfolioPropertyTable(report, foreignExchangeRateService,
                 portfolioCashTable, securityQuoteTables);
+        this.tinkoffSecurityTransactionTableHelper = tinkoffSecurityTransactionTableHelper;
     }
 
     @Override
@@ -68,7 +71,8 @@ public class TinkoffReportTables extends AbstractReportTables<TinkoffBrokerRepor
     @Override
     public ReportTable<AbstractTransaction> getTransactionTable() {
         ReportTable<AbstractTransaction> transactionTable =
-                TinkoffSecurityTransactionTable.of(report, securityCodeAndIsinTable, transactionValueAndFeeParser);
+                TinkoffSecurityTransactionTable.of(report, securityCodeAndIsinTable, transactionValueAndFeeParser,
+                        tinkoffSecurityTransactionTableHelper);
         TinkoffDepositAndWithdrawalTable depositAndWithdrawalTable =
                 new TinkoffDepositAndWithdrawalTable(report, transactionTable, securityCodeAndIsinTable);
         return WrappingReportTable.of(transactionTable, depositAndWithdrawalTable);

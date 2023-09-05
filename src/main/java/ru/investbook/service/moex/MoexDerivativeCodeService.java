@@ -38,9 +38,9 @@ import static java.util.Optional.empty;
  *
  * @see <a href="https://www.moex.com/s205">Specifications ticker codes for Futures and Options</a>
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class MoexDerivativeCodeService {
 
     private final Map<String, String> codeToShortnames = Stream.of(new String[][]{
