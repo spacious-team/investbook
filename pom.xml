@@ -28,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2023.1</version>
+    <version>2023.2</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -62,7 +62,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>23.1</win.msi.version>
+        <win.msi.version>23.2</win.msi.version>
         <java.version>20</java.version>
     </properties>
 
@@ -427,7 +427,7 @@
                                     <!-- Defines available bellsoft-liberica java versions from
                                     https://github.com/paketo-buildpacks/java/releases
                                     JRE with ${java.version} will be selected automatically when available -->
-                                    <buildpack>gcr.io/paketo-buildpacks/java:9.8.0</buildpack>
+                                    <buildpack>gcr.io/paketo-buildpacks/java:9.20.0</buildpack>
                                 </buildpacks>
                             </image>
                             <docker>
