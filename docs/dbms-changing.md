@@ -6,6 +6,7 @@
 Если у вас недостаточно опыта, то рекомендуется пропустить этот раздел.
 
 Возможен переход на [MariaDB](https://downloads.mariadb.org/).
+Поддерживаются версии, указанные в документации [Flyway](https://documentation.red-gate.com/fd/mariadb-184127600.html).
 После установки в файле `application-conf.properties` необходимо прописать
 ```
 spring.profiles.active=core,mariadb,conf

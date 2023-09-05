@@ -89,7 +89,7 @@ public class TransactionModel {
     private BigDecimal price;
 
     @Nullable
-    @Positive
+    @PositiveOrZero
     private BigDecimal accruedInterest;
 
     /**

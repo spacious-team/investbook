@@ -18,19 +18,25 @@
 
 package ru.investbook.parser.tinkoff;
 
+import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.table_wrapper.api.TableRow;
+import org.springframework.stereotype.Component;
 import ru.investbook.parser.SecurityRegistrar;
+import ru.investbook.service.moex.MoexDerivativeCodeService;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
 import static ru.investbook.parser.tinkoff.TinkoffSecurityTransactionTable.TransactionTableHeader.*;
 
-class TinkoffSecurityTransactionTableHelper {
+@Component
+@RequiredArgsConstructor
+public class TinkoffSecurityTransactionTableHelper {
+    private final MoexDerivativeCodeService moexDerivativeCodeService;
 
-    static int getSecurityId(TableRow row,
+    int getSecurityId(TableRow row,
                              SecurityCodeAndIsinTable codeAndIsin,
                              SecurityRegistrar registrar) {
         String code = row.getStringCellValue(CODE);
@@ -40,7 +46,7 @@ class TinkoffSecurityTransactionTableHelper {
         return declareSecurity(security, registrar);
     }
 
-    static SecurityType getSecurityType(TableRow row) {
+    SecurityType getSecurityType(TableRow row) {
         BigDecimal accruedInterest = row.getBigDecimalCellValueOrDefault(ACCRUED_INTEREST, BigDecimal.ZERO);
         if (accruedInterest.floatValue() > 1e-3) {
             return SecurityType.BOND;
@@ -56,6 +62,8 @@ class TinkoffSecurityTransactionTableHelper {
         String shortName = row.getStringCellValueOrDefault(SHORT_NAME, "");
         if (shortName != null && shortName.length() == 10 && shortName.charAt(6) == '_') { // USDRUB_TOM
             return SecurityType.CURRENCY_PAIR;
+        } else if (moexDerivativeCodeService.isFuturesCode(shortName) || moexDerivativeCodeService.isOption(shortName)) {
+            return SecurityType.DERIVATIVE;
         }
 
         return SecurityType.STOCK;

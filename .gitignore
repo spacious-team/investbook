@@ -24,6 +24,7 @@ investbook/
 !.idea/codeStyles
 !.idea/copyright
 !.idea/inspectionProfiles
+!.idea/encodings.xml
 
 ### NetBeans ###
 /nbproject/private/

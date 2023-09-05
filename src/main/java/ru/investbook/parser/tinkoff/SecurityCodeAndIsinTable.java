@@ -20,20 +20,22 @@ package ru.investbook.parser.tinkoff;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.spacious_team.table_wrapper.api.OptionalTableColumn;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
-import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.parser.tinkoff.SecurityCodeAndIsinTable.SecurityAndCodeTableHeader.*;
 import static ru.investbook.parser.tinkoff.TinkoffBrokerReport.tablesLastRowPattern;
 
@@ -54,8 +56,10 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
     @Override
     protected Void parseRow(TableRow row) {
         String code = row.getStringCellValueOrDefault(CODE, null);
-        if (StringUtils.hasLength(code) && !code.contains("Код актива")) { // exclude table's empty row
-            codeToIsin.put(code, row.getStringCellValue(ISIN));
+        if (hasLength(code) && !code.contains("Код актива")) { // exclude table's empty row
+            // если колонка ISIN отсутствует, то ISIN используется в отчете вместо кода (SBERP)
+            String isin = row.getStringCellValueOrDefault(ISIN, code);
+            codeToIsin.put(code, isin);
 
             String type = row.getStringCellValueOrDefault(TYPE, "").toLowerCase();
             SecurityType securityType;
@@ -74,7 +78,7 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
             }
 
             String shortName = row.getStringCellValueOrDefault(SHORT_NAME, null);
-            if (StringUtils.hasLength(shortName)) {
+            if (hasLength(shortName)) {
                 shortNameToCode.put(shortName, code);
             }
         }
@@ -105,10 +109,11 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         return Objects.requireNonNull(shortNameToCode.get(shortName), "Не найден код бумаги");
     }
 
+    @RequiredArgsConstructor
     protected enum SecurityAndCodeTableHeader implements TableHeaderColumn {
         SHORT_NAME("Сокращенное", "наименование"),
-        CODE("код", "актива"),
-        ISIN("isin"),
+        CODE("код", "актива"),  // код (SBERP) или ISIN
+        ISIN(optional("isin")), // может отсутствовать, если колонка CODE заполняется ISIN
         TYPE("^Тип$"),
         FACE_VALUE("Номинал");
 
@@ -117,6 +122,10 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
 
         SecurityAndCodeTableHeader(String... words) {
             this.column = PatternTableColumn.of(words);
+        }
+
+        static OptionalTableColumn optional(String... words) {
+            return OptionalTableColumn.of(PatternTableColumn.of(words));
         }
     }
 }
