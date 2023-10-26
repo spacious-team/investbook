@@ -1,4 +1,4 @@
-[![java-version](https://img.shields.io/badge/java-20-brightgreen?style=flat-square)](https://openjdk.org/)
+[![java-version](https://img.shields.io/badge/java-21-brightgreen?style=flat-square)](https://openjdk.org/)
 [![spring-boot-version](https://img.shields.io/badge/spring--boot-3.0.7-brightgreen?style=flat-square)](https://github.com/spring-projects/spring-boot/releases)
 [![hits-of-code](https://img.shields.io/badge/dynamic/json?style=flat-square&color=lightblue&label=hits-of-code&url=https://hitsofcode.com/github/spacious-team/investbook/json?branch=develop&query=$.count)](https://hitsofcode.com/github/spacious-team/investbook/view?branch=develop)
 [![github-closed-pull-requests](https://img.shields.io/github/issues-pr-closed/spacious-team/investbook?style=flat-square&color=brightgreen)](https://github.com/spacious-team/investbook/pulls?q=is%3Apr+is%3Aclosed)
