@@ -1,6 +1,6 @@
 #
 # InvestBook
-# Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
+# Copyright (C) 2023  Spacious Team <spacious-team@ya.ru>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 #
 
 # Задать путь к распакованному архиву с Java
-#export JAVA_HOME=/opt/jdk-20
+#export JAVA_HOME=/opt/jdk-21
 
 [ -n "$JAVA_HOME" ] && export PATH=$JAVA_HOME/bin:$PATH
 cd $(dirname $0)

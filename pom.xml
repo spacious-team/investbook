@@ -63,7 +63,7 @@
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
         <win.msi.version>23.2</win.msi.version>
-        <java.version>20</java.version>
+        <java.version>21</java.version>
     </properties>
 
     <repositories>
@@ -209,7 +209,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.26</version>
+            <version>1.18.30</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -427,7 +427,7 @@
                                     <!-- Defines available bellsoft-liberica java versions from
                                     https://github.com/paketo-buildpacks/java/releases
                                     JRE with ${java.version} will be selected automatically when available -->
-                                    <buildpack>gcr.io/paketo-buildpacks/java:9.20.0</buildpack>
+                                    <buildpack>gcr.io/paketo-buildpacks/java:10.2.1</buildpack>
                                 </buildpacks>
                             </image>
                             <docker>

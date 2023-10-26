@@ -1,6 +1,6 @@
 #
 # InvestBook
-# Copyright (C) 2020  Vitalii Ananev (spacious-team@ya.ru)
+# Copyright (C) 2023  Spacious Team <spacious-team@ya.ru>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 #
 
 # Задать путь к распакованному архиву с Java
-#set JAVA_HOME=C:\Program Files\Java\jdk-20
+#set JAVA_HOME=C:\Program Files\Java\jdk-21
 
 # Запуск приложения
 chcp 65001
