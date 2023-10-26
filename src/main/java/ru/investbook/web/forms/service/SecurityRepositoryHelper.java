@@ -132,11 +132,11 @@ public class SecurityRepositoryHelper {
                 security.setName(securityName);
             }
             case DERIVATIVE, CURRENCY -> {
-                Assert.isTrue(securityName != null, "Отсутствует тикер контракта");
+                Assert.notNull(securityName, "Отсутствует тикер контракта");
                 security.setTicker(moexDerivativeCodeService.convertDerivativeCode(securityName));
             }
             case ASSET -> {
-                Assert.isTrue(securityName != null, "Отсутствует наименование произвольного актива");
+                Assert.notNull(securityName, "Отсутствует наименование произвольного актива");
                 security.setName(securityName);
             }
         }
@@ -157,11 +157,11 @@ public class SecurityRepositoryHelper {
                         .or(() -> ofNullable(name).flatMap(securityRepository::findByName));
             }
             case DERIVATIVE, CURRENCY -> {
-                Assert.isTrue(securityName != null, "Отсутствует тикер контракта");
+                Assert.notNull(securityName, "Отсутствует тикер контракта");
                 yield securityRepository.findByTicker(securityName);
             }
             case ASSET -> {
-                Assert.isTrue(securityName != null, "Отсутствует наименование произвольного актива");
+                Assert.notNull(securityName, "Отсутствует наименование произвольного актива");
                 yield securityRepository.findByName(securityName);
             }
         };
