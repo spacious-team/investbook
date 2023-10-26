@@ -31,6 +31,8 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+import static org.spacious_team.table_wrapper.api.TableCellAddress.NOT_FOUND;
+
 @EqualsAndHashCode(callSuper = true)
 public class FinamBrokerReport extends AbstractExcelBrokerReport {
 
@@ -57,10 +59,8 @@ public class FinamBrokerReport extends AbstractExcelBrokerReport {
         try {
             return String.valueOf(reportPage.getNextColumnValue(PORTFOLIO_MARKER));
         } catch (Exception e) {
-            // TODO: Дейсствительно ли тут влетает исключение?
             throw new IllegalArgumentException(
-                    "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + "' XXX"
-            );
+                    "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + "' XXX");
         }
     }
 
@@ -75,19 +75,19 @@ public class FinamBrokerReport extends AbstractExcelBrokerReport {
                     .plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    "Не найдена дата отчета по заданному шаблону '" + REPORT_END_DATE_MARKER+ " XXX'"
+                    "Не найдена дата отчета по заданному шаблону '" + REPORT_END_DATE_MARKER + " XXX'"
             );
         }
     }
 
     public static void checkReportFormat(String excelFileName, ReportPage reportPage) {
-        if (reportPage.findByPrefix(UNIQ_TEXT, 2) == TableCellAddress.NOT_FOUND) {
+        if (reportPage.findByPrefix(UNIQ_TEXT, 2) == NOT_FOUND) {
             throw new RuntimeException("В файле " + excelFileName + " не содежится отчета брокера ФИНАМ");
         }
     }
 
     @Override
     public void close() throws Exception {
-        this.book.close();
+        book.close();
     }
 }

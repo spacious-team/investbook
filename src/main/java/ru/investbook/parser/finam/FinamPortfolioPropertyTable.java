@@ -56,7 +56,7 @@ public class FinamPortfolioPropertyTable  extends SingleInitializableReportTable
         return getSummaryTable(getReport(), ASSETS);
     }
 
-    public static Table getSummaryTable(BrokerReport report, String tableFooterString) {
+    private static Table getSummaryTable(BrokerReport report, String tableFooterString) {
         final Table table = report.getReportPage()
                 .createNameless("На начало периода", tableFooterString, FinamSummaryTableHeader.class);
         if (table.isEmpty()) {
