@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2023  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -22,7 +22,6 @@ import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.spacious_team.table_wrapper.api.ReportPage;
-import org.spacious_team.table_wrapper.api.TableCellAddress;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
 import ru.investbook.parser.AbstractExcelBrokerReport;
 import ru.investbook.parser.SecurityRegistrar;
@@ -34,6 +33,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+
+import static org.spacious_team.table_wrapper.api.TableCellAddress.NOT_FOUND;
 
 @EqualsAndHashCode(callSuper = true)
 public class AlfaCashflowBrokerReport extends AbstractExcelBrokerReport {
@@ -69,7 +70,7 @@ public class AlfaCashflowBrokerReport extends AbstractExcelBrokerReport {
                 throw new RuntimeException("В файле " + excelFileName + " не содержится отчет брокера Альфа-Инвестиции");
             }
 
-            if (reportPage.findByPrefix(UNIQ_TEXT, 11, 13) == TableCellAddress.NOT_FOUND) {
+            if (reportPage.findByPrefix(UNIQ_TEXT, 11, 13) == NOT_FOUND) {
                 throw new RuntimeException("В файле " + excelFileName + " не содержится отчет брокера Альфа-Инвестиции");
             }
         }
@@ -100,6 +101,6 @@ public class AlfaCashflowBrokerReport extends AbstractExcelBrokerReport {
 
     @Override
     public void close() throws IOException {
-        this.book.close();
+        book.close();
     }
 }

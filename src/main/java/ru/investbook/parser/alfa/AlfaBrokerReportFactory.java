@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Vitalii Ananev <spacious-team@ya.ru>
+ * Copyright (C) 2023  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Component
@@ -40,7 +41,7 @@ public class AlfaBrokerReportFactory extends AbstractBrokerReportFactory {
 
     @Getter
     private final String brokerName = "Альфа-Инвестиции";
-    private final Pattern expectedFileNamePattern = Pattern.compile("^[0-9]+\\([^()]+\\)[0-9\\-]+\\.xls(x)?$"); // FIXME - уточнить про регэксп
+    private final Pattern expectedFileNamePattern = Pattern.compile("^Брокерский.*(Альфа|[0-9]+\\([0-9.\\-]+\\)).xls(x)?$");
 
     @Override
     public boolean canCreate(String excelFileName, InputStream is) {
@@ -48,10 +49,10 @@ public class AlfaBrokerReportFactory extends AbstractBrokerReportFactory {
     }
 
     @Override
-    public BrokerReport create(String excelFileName, InputStream is) {
-        BrokerReport brokerReport = create(excelFileName, is,
+    public Optional<BrokerReport> create(String excelFileName, InputStream is) {
+        Optional<BrokerReport> brokerReport = create(excelFileName, is,
                 (fileName, stream) -> new AlfaCashflowBrokerReport(fileName, stream, securityRegistrar));
-        if (brokerReport != null) {
+        if (brokerReport.isPresent()) {
             log.info("Обнаружен отчет '{}' Альфа брокера", excelFileName);
         }
         return brokerReport;
