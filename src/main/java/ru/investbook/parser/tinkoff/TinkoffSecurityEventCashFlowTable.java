@@ -21,6 +21,7 @@ package ru.investbook.parser.tinkoff;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.springframework.util.Assert;
 import ru.investbook.parser.SingleAbstractReportTable;
@@ -118,12 +119,13 @@ public class TinkoffSecurityEventCashFlowTable extends SingleAbstractReportTable
         String[] parts = description.split("/");
         String shortName = (parts.length < 3) ? parts[0].trim() : parts[1].trim();
         String code = codeAndIsin.getCode(shortName);
-        String isin = (parts.length < 3) ? codeAndIsin.getIsin(code) : parts[0].trim();
+        String isin = (parts.length < 3) ? codeAndIsin.getIsin(code, shortName) : parts[0].trim();
+        SecurityType securityType = codeAndIsin.getSecurityType(code, shortName);
         Security security = getSecurity(
                 code,
                 isin,
                 shortName,
-                codeAndIsin.getSecurityType(code));
+                securityType);
         return declareSecurity(security, getReport().getSecurityRegistrar());
     }
 

@@ -98,9 +98,10 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
         boolean isBond = Math.abs(accruedInterest.floatValue()) > 1e-3;
         if (isBond) {
             String code = row.getStringCellValue(CODE);
+            String shortName = row.getStringCellValue(SHORT_NAME);
             int count = row.getIntCellValue(COUNT);
             BigDecimal quote = price.multiply(oneHundred)
-                    .divide(codeAndIsin.getFaceValue(code), 6, HALF_UP);
+                    .divide(codeAndIsin.getFaceValue(code, shortName), 6, HALF_UP);
             BigDecimal accruedInterestPerBond = accruedInterest.divide(BigDecimal.valueOf(count), 6, HALF_UP);
             builder
                     .price(price)
