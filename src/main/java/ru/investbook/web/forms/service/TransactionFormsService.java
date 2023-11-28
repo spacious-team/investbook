@@ -154,10 +154,10 @@ public class TransactionFormsService {
                         .valueCurrency(tr.getPriceCurrency());
             };
 
-            if (tr.getCommission() != null) {
+            if (tr.getFee() != null) {
                 builder
-                        .fee(tr.getCommission().negate())
-                        .feeCurrency(tr.getCommissionCurrency());
+                        .fee(tr.getFee().negate())
+                        .feeCurrency(tr.getFeeCurrency());
             }
         } else {
             builder = switch (tr.getSecurityType()) {
@@ -274,8 +274,8 @@ public class TransactionFormsService {
                     securityType.set(SecurityType.BOND);
                 }
                 case FEE -> {
-                    m.setCommission(value.getValue().abs());
-                    m.setCommissionCurrency(value.getCurrency());
+                    m.setFee(value.getValue().abs());
+                    m.setFeeCurrency(value.getCurrency());
                 }
             }
         });
