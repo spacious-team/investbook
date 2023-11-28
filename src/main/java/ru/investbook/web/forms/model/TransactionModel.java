@@ -114,10 +114,10 @@ public class TransactionModel {
      */
     @Nullable
     @PositiveOrZero
-    private BigDecimal commission;
+    private BigDecimal fee;
 
     @NotEmpty
-    private String commissionCurrency = "RUB";
+    private String feeCurrency = "RUB";
 
     public enum Action {
         BUY, CELL
@@ -133,8 +133,8 @@ public class TransactionModel {
         this.priceCurrency = priceCurrency.toUpperCase();
     }
 
-    public void setCommissionCurrency(String commissionCurrency) {
-        this.commissionCurrency = commissionCurrency.toUpperCase();
+    public void setFeeCurrency(String feeCurrency) {
+        this.feeCurrency = feeCurrency.toUpperCase();
     }
 
     public void setSecurity(String isin, String securityName, SecurityType securityType) {

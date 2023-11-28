@@ -79,9 +79,9 @@
         <td th:text="${(tr.accruedInterest != null) ? tr.accruedInterest.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}"
             class="value"/>
         <td th:text="${tr.priceCurrency}"/>
-        <td th:text="${(tr.commission != null) ? tr.commission.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}"
+        <td th:text="${(tr.fee != null) ? tr.fee.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}"
             class="value"/>
-        <td th:text="${tr.commissionCurrency}"/>
+        <td th:text="${tr.feeCurrency}"/>
         <td class="table-row-control">
             <a th:href="@{/transactions/delete(id=${tr.id})}" title="Удалить">&#x274c;</a>
         </td>
