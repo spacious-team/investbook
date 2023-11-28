@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 
 import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
 import static org.spacious_team.table_wrapper.api.TableCellAddress.NOT_FOUND;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 class TinkoffBrokerReportHelper {
     private static final Pattern tableNamePattern = Pattern.compile("^[0-9]+\\.[0-9]+\\s+\\b", UNICODE_CHARACTER_CLASS);
@@ -61,9 +62,14 @@ class TinkoffBrokerReportHelper {
     }
 
     private static boolean isTableHeader(ReportPage reportPage, int rowNum) {
-        return reportPage.find(rowNum, rowNum + 1, 0, 2,  cell -> (cell instanceof String) &&
+        return reportPage.find(rowNum, rowNum + 1, 0, 2,
+                TinkoffBrokerReportHelper::isCellContainsTableName) != NOT_FOUND;
+    }
+
+    private static boolean isCellContainsTableName(Object cell) {
+        return (cell instanceof String) &&
                 !cell.toString().isEmpty() &&
-                tableNamePattern.matcher(cell.toString()).lookingAt()) != NOT_FOUND;
+                tableNamePattern.matcher(cell.toString()).lookingAt();
     }
 
     private static boolean isPageRowNum(ReportPage excelSheet, int rowNum) {
@@ -84,12 +90,15 @@ class TinkoffBrokerReportHelper {
     }
 
     private static void removeRowMergedRegions(Sheet sheet, Collection<Integer> rowsForCut) {
-        for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
-            CellRangeAddress range = sheet.getMergedRegion(i);
+        if (isEmpty(rowsForCut)) {
+            return;
+        }
+        List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+        for (int n = mergedRegions.size(), i = n - 1; i >= 0; i--) {
+            CellRangeAddress range = mergedRegions.get(i);
             int firstRow = range.getFirstRow();
             if (firstRow == range.getLastRow() && rowsForCut.contains(firstRow)) {
                 sheet.removeMergedRegion(i);
-                i--;
             }
         }
     }
