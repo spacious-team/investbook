@@ -22,9 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 
@@ -33,9 +31,6 @@ import static org.testng.Assert.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 public class MoexDerivativeCodeServiceTest {
-
-    @Mock
-    RestTemplate restTemplate;
 
     @InjectMocks
     MoexDerivativeCodeService service;
@@ -142,6 +137,7 @@ public class MoexDerivativeCodeServiceTest {
                 {"BR50BE1", "BR-6.21M250521CA50"},
                 {"BR50BE1A", "BR-6.21M060521CA50"},
                 {"LK6200CL3", "LKOHP201223CE6200"},
+                {"GZ300CG2D", "GAZPP220722CE 300"},
                 {"Ri150000BS9B", null},
                 {"RI150000B9", null},
                 {"RI150000S9B", null},
