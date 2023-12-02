@@ -36,6 +36,7 @@ import static java.util.Optional.empty;
 /**
  * Converts derivative short names (for ex. Si-6.21) to secid (a.k.a ticker codes, for ex SiM1)
  *
+ * @See <a href="https://fs.moex.com/f/17282/onepager-dlja-klientov-opciony-na-akcii.pdf">Опционы на акции</a>
  * @see <a href="https://www.moex.com/s205">Specifications ticker codes for Futures and Options</a>
  */
 @Slf4j
@@ -247,7 +248,7 @@ public class MoexDerivativeCodeService {
     }
 
     /**
-     * @return true for option in format {@code BR10BF0} and {@code BR-10BF0}
+     * @return true for option in format {@code BR10BF0}, {@code BR-10BF0} (знак "-" это часть цены) and {@code GZ300CG2D}
      */
     public boolean isOptionCode(String contract) {
         if (contract == null) return false;
@@ -268,17 +269,19 @@ public class MoexDerivativeCodeService {
     }
 
     /**
-     * @return true for option in format {@code BR-7.20M250620СA10}, {@code BR-7.20M250620СA-10}
-     * and {@code BR-7.16M270616CA 50}
+     * @return true for option in format {@code BR-7.20M250620СA10}, {@code BR-7.20M250620СA-10},
+     * {@code BR-7.16M270616CA 50} and {@code GAZPP220722CE 300}
      */
     public boolean isOptionShortname(String contract) {
         if (contract == null) return false;
-        int dashIdx = contract.indexOf('-');
-        if (dashIdx == -1) {
-            return false;
+        int MIdx = contract.indexOf('M');  // тип расчетов (маржируемый)
+        if (MIdx == -1) {
+            MIdx = contract.indexOf('P');  // только для акций: тип расчетов (премиальный)
         }
-        int MIdx = contract.indexOf('M');
-        int AIdx = contract.indexOf('A');
+        int AIdx = contract.indexOf('A');  // тип экспирации (американский)
+        if (AIdx == -1) {
+            AIdx = contract.indexOf('E');  // только для акций: тип экспирации (европейский)
+        }
         if (MIdx == -1 || AIdx == -1) {
             return false;
         }
@@ -296,7 +299,9 @@ public class MoexDerivativeCodeService {
                         return false;
                     }
                 }
-                return isFuturesShortname(contract.substring(0, MIdx));
+                String shortName = contract.substring(0, MIdx);
+                return shortnameToCodes.containsKey(shortName) || // опцион на акции
+                        isFuturesShortname(shortName);
             }
         }
         return false;
@@ -382,7 +387,7 @@ public class MoexDerivativeCodeService {
         int typeIdx = monthIdx - 1;
         char type = code.charAt(typeIdx);
         int strikeIdx = typeIdx - 1;
-        if ((type == 'B' || type == 'A') && strikeIdx > 1) {
+        if ((type == 'C' || type == 'B' || type == 'A') && strikeIdx > 1) {
             for (; strikeIdx > 2; strikeIdx--) {
                 if (!isDigit(code.charAt(strikeIdx))) {
                     return false;

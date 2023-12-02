@@ -107,6 +107,7 @@ public class MoexDerivativeCodeServiceTest {
                 {"BR50BF6", "BR-7.16M270616CA 50"},
                 {"BR50BE1", "BR-6.21M250521CA50"},
                 {"BR50BE1A", "BR-6.21M060521CA50"},
+                {"LK6200CL3", "LKOHP201223CE6200"},
                 {"Ri150000BS9B", null},
                 {"RI150000B9", null},
                 {"RI150000S9B", null},
