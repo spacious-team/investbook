@@ -18,29 +18,30 @@
 
 package ru.investbook.service.moex;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.Character.isAlphabetic;
 import static java.lang.Character.isDigit;
 import static java.lang.Integer.parseInt;
 import static java.util.Optional.empty;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Converts derivative short names (for ex. Si-6.21) to secid (a.k.a ticker codes, for ex SiM1)
  *
+ * @See <a href="https://fs.moex.com/f/17282/onepager-dlja-klientov-opciony-na-akcii.pdf">Опционы на акции</a>
  * @see <a href="https://www.moex.com/s205">Specifications ticker codes for Futures and Options</a>
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class MoexDerivativeCodeService {
 
     private final Map<String, String> codeToShortnames = Stream.of(new String[][]{
@@ -62,7 +63,7 @@ public class MoexDerivativeCodeService {
             {"AL", "ALRS"}, // АК "АЛРОСА" (ПАО) (о.а.)
             {"CH", "CHMF"}, // ПАО "Северсталь" (о.а.)
             {"FS", "FEES"}, // ПАО "ФСК ЕЭС" (о.а.)
-            {"GZ", "GAZR"}, // ПАО "Газпром" (о.а.)
+            {"GZ", "GAZR"}, // ПАО "Газпром" (о.а.) - для фьючерса и маржируемого опциона
             {"GK", "GMKN"}, // ПАО ГМК "Норильский Никель" (о.а.)
             {"HY", "HYDR"}, // ПАО "РусГидро" (о.а.)
             {"LK", "LKOH"}, // ПАО НК "ЛУКОЙЛ" (о.а.)
@@ -178,11 +179,9 @@ public class MoexDerivativeCodeService {
             {"NG", "NG"},   // природный газ
             {"WH", "WH4"},  // пшеница
             {"W4", "WHEAT"} // Индекс пшеницы
-    }).collect(Collectors.toMap(a -> a[0], a -> a[1]));
+    }).collect(toMap(a -> a[0], a -> a[1]));
 
-    private final Map<String, String> shortnameToCodes = codeToShortnames.entrySet()
-            .stream()
-            .collect(Collectors.toMap(Entry::getValue, Entry::getKey));
+    private final Map<String, String> shortnameToCodes;
 
     private final Character[] futuresMonthCodes =
             new Character[]{'F', 'G', 'H', 'J', 'K', 'M', 'N', 'Q', 'U', 'V', 'X', 'Z'};
@@ -194,6 +193,19 @@ public class MoexDerivativeCodeService {
     private final int currentYear = LocalDate.now().getYear();
     // 2000-th, 2010-th, 2020-th and so on
     private final int currentYearDecade = currentYear / 10 * 10;
+
+    private MoexDerivativeCodeService() {
+        this.shortnameToCodes = codeToShortnames.entrySet()
+                .stream()
+                .collect(toMap(
+                        Entry::getValue,
+                        Entry::getKey,
+                        (e1, e2) -> {
+                            throw new RuntimeException();
+                        },
+                        HashMap::new));
+        this.shortnameToCodes.put("GAZP", "GZ");  // ПАО "Газпром" (о.а.) - для опциона на акции
+    }
 
     /**
      * @return true for futures contract (in {@code Si-6.21} or {@code SiM1} format)
@@ -208,7 +220,7 @@ public class MoexDerivativeCodeService {
     public boolean isFuturesCode(String contract) {
         return contract != null &&
                 contract.length() == 4 &&
-                shortnameToCodes.containsValue(contract.substring(0, 2)) &&
+                hasOnlyLetters(contract, 0, 2) && // smells like a futures code
                 getFuturesMonth(contract.charAt(2)) != -1 &&
                 isDigit(contract.charAt(3));
     }
@@ -229,13 +241,27 @@ public class MoexDerivativeCodeService {
             }
             boolean isYearSymbolsDigit = isDigit(contract.charAt(dotIdx + 1)) &&
                     isDigit(contract.charAt(dotIdx + 2));
-            if (isYearSymbolsDigit && shortnameToCodes.containsKey(contract.substring(0, dashIdx))) {
+            if (isYearSymbolsDigit && hasOnlyLetters(contract, 0, dashIdx)) {  // smells like a futures code
                 int month = parseInt(contract.substring(dashIdx + 1, dotIdx));
                 return month >= 1 && month <= 12;
             }
         } catch (Exception ignore) {
         }
         return false;
+    }
+
+    private boolean hasOnlyLetters(String string, int beginIndex, int endIndex) {
+        int i = Math.max(0, beginIndex);
+        i = Math.min(string.length(), i);
+        int cnt = Math.max(0, endIndex);
+        cnt = Math.min(string.length(), cnt);
+        for (; i < cnt; i++) {
+            int c = string.charAt(i);
+            if (!isAlphabetic(c)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -247,7 +273,7 @@ public class MoexDerivativeCodeService {
     }
 
     /**
-     * @return true for option in format {@code BR10BF0} and {@code BR-10BF0}
+     * @return true for option in format {@code BR10BF0}, {@code BR-10BF0} (знак "-" это часть цены) and {@code GZ300CG2D}
      */
     public boolean isOptionCode(String contract) {
         if (contract == null) return false;
@@ -259,8 +285,7 @@ public class MoexDerivativeCodeService {
                 int monthIdx = yearIdx - 1;
                 int month = getOptionMonth(contract.charAt(monthIdx));
                 if (month != -1 && isValidOptionTypeAndStrike(contract, monthIdx)) {
-                    String prefix = contract.substring(0, 2);
-                    return shortnameToCodes.containsValue(prefix);
+                    return hasOnlyLetters(contract, 0, 2);  // smells like a option code
                 }
             }
         }
@@ -268,38 +293,71 @@ public class MoexDerivativeCodeService {
     }
 
     /**
-     * @return true for option in format {@code BR-7.20M250620СA10}, {@code BR-7.20M250620СA-10}
-     * and {@code BR-7.16M270616CA 50}
+     * @return true for option in format {@code BR-7.20M250620СA10}, {@code BR-7.20M250620СA-10},
+     * {@code BR-7.16M270616CA 50} and {@code GAZPP220722CE 300}
      */
     public boolean isOptionShortname(String contract) {
         if (contract == null) return false;
-        int dashIdx = contract.indexOf('-');
-        if (dashIdx == -1) {
+        int EIdx = getOptionExpirationTypeCharPosition(contract);
+        if (EIdx == -1) {
             return false;
         }
-        int MIdx = contract.indexOf('M');
-        int AIdx = contract.indexOf('A');
-        if (MIdx == -1 || AIdx == -1) {
+        int AIdx = getOptionAccountTypeCharPosition(contract, EIdx);
+        if (AIdx == -1) {
             return false;
         }
-        char optionType = contract.charAt(AIdx - 1);
+        char optionType = contract.charAt(EIdx - 1);  // CALL or PUT
         if (optionType == 'C' || optionType == 'P') {
-            for (int i = MIdx + 1, cnt = MIdx + 7; i < cnt; i++) {
+            for (int i = AIdx + 1, cnt = AIdx + 7; i < cnt; i++) {
                 if (!isDigit(contract.charAt(i))) {
-                    return false;
+                    return false;  // date expected
                 }
             }
-            char signCharOrDigit = contract.charAt(AIdx + 1);
+            char signCharOrDigit = contract.charAt(EIdx + 1);
             if (isDigit(signCharOrDigit) || signCharOrDigit == '-' || signCharOrDigit == ' ') {
-                for (int i = AIdx + 2, cnt = contract.length(); i < cnt; i++) {
+                for (int i = EIdx + 2, cnt = contract.length(); i < cnt; i++) {
                     if (!isDigit(contract.charAt(i))) {
-                        return false;
+                        return false;  // price expected
                     }
                 }
-                return isFuturesShortname(contract.substring(0, MIdx));
+                return hasOnlyLetters(contract, 0, AIdx) || // похоже на код акции (значит это опцион на акции)
+                        isFuturesShortname(contract.substring(0, AIdx));
             }
         }
         return false;
+    }
+
+    /**
+     * Finds last 'A' or 'E' char in option short name ({@code BR-7.20M250620СA10}, {@code BR-7.20M250620СA-10},
+     * {@code GAZPP220722CE 300})
+     */
+    private int getOptionExpirationTypeCharPosition(String contract) {
+        int length = contract.length();
+        for (int i = length - 1; i >= 0; i--) {
+            char c = contract.charAt(i);
+            if (c == 'A' || c == 'E') {  // тип экспирации: американский или европейский
+                return i;
+            } else if (!isDigit(c) && c != '-' && c != ' ') {
+                return -1;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Finds 'M' or 'P' char in option short name ({@code BR-7.20M250620СA10}, {@code BR-7.20M250620СA-10},
+     * {@code GAZPP220722CE 300})
+     */
+    private int getOptionAccountTypeCharPosition(String contract, int expirationCharPosition) {
+        for (int i = expirationCharPosition - 2; i >= 0; i--) {
+            char c = contract.charAt(i);
+            if (c == 'M' || c == 'P') {  // тип расчетов: маржируемый или премиальный
+                return i;
+            } else if (!isDigit(c)) {
+                return -1;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -382,7 +440,7 @@ public class MoexDerivativeCodeService {
         int typeIdx = monthIdx - 1;
         char type = code.charAt(typeIdx);
         int strikeIdx = typeIdx - 1;
-        if ((type == 'B' || type == 'A') && strikeIdx > 1) {
+        if ((type == 'C' || type == 'B' || type == 'A') && strikeIdx > 1) {
             for (; strikeIdx > 2; strikeIdx--) {
                 if (!isDigit(code.charAt(strikeIdx))) {
                     return false;
