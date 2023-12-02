@@ -22,6 +22,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
+import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
@@ -38,8 +39,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toMap;
 import static ru.investbook.parser.tinkoff.TinkoffDepositAndWithdrawalTable.SecurityDepositAndWithdrawalTableHeader.*;
 import static ru.investbook.parser.tinkoff.TinkoffSecurityTransactionTableHelper.declareSecurity;
 
@@ -69,7 +70,7 @@ public class TinkoffDepositAndWithdrawalTable extends SingleAbstractReportTable<
         return transactions.getData()
                 .stream()
                 .filter(filter)
-                .collect(Collectors.toMap(
+                .collect(toMap(
                         AbstractTransaction::getSecurity,
                         t -> Math.abs(t.getCount()),
                         Integer::sum));
@@ -110,11 +111,13 @@ public class TinkoffDepositAndWithdrawalTable extends SingleAbstractReportTable<
 
     private int getSecurityId(TableRow row) {
         String code = row.getStringCellValue(CODE);
+        String shortName = row.getStringCellValue(SHORT_NAME);
+        SecurityType securityType = codeAndIsin.getSecurityType(code, shortName);
         Security security = TinkoffSecurityTransactionTableHelper.getSecurity(
                 code,
                 codeAndIsin,
-                row.getStringCellValue(SHORT_NAME),
-                codeAndIsin.getSecurityType(code));
+                shortName,
+                securityType);
         return declareSecurity(security, getReport().getSecurityRegistrar());
     }
 

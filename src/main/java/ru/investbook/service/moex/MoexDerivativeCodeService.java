@@ -207,6 +207,10 @@ public class MoexDerivativeCodeService {
         this.shortnameToCodes.put("GAZP", "GZ");  // ПАО "Газпром" (о.а.) - для опциона на акции
     }
 
+    public boolean isDerivative(String contract) {
+        return isFutures(contract) || isOption(contract);
+    }
+
     /**
      * @return true for futures contract (in {@code Si-6.21} or {@code SiM1} format)
      */

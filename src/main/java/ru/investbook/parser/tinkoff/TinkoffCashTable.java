@@ -45,12 +45,16 @@ public class TinkoffCashTable extends SingleAbstractReportTable<PortfolioCash>  
         if (value == null) {
             return null;
         }
+        String currency = row.getStringCellValue(CashTableHeader.CURRENCY);
+        if (currency == null || currency.length() != 3) {
+            return null; // неизвестный контракт GLD_MOEX указывается в качестве валюты
+        }
         return PortfolioCash.builder()
                 .portfolio(getReport().getPortfolio())
                 .timestamp(getReport().getReportEndDateTime())
                 .market("all")
                 .value(value)
-                .currency(row.getStringCellValue(CashTableHeader.CURRENCY))
+                .currency(currency)
                 .build();
     }
 
