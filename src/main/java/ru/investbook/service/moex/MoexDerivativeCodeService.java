@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.lang.Character.isAlphabetic;
 import static java.lang.Character.isDigit;
 import static java.lang.Integer.parseInt;
 import static java.util.Optional.empty;
@@ -219,7 +220,7 @@ public class MoexDerivativeCodeService {
     public boolean isFuturesCode(String contract) {
         return contract != null &&
                 contract.length() == 4 &&
-                shortnameToCodes.containsValue(contract.substring(0, 2)) &&
+                hasOnlyLetters(contract, 0, 2) && // smells like a futures code
                 getFuturesMonth(contract.charAt(2)) != -1 &&
                 isDigit(contract.charAt(3));
     }
@@ -240,13 +241,27 @@ public class MoexDerivativeCodeService {
             }
             boolean isYearSymbolsDigit = isDigit(contract.charAt(dotIdx + 1)) &&
                     isDigit(contract.charAt(dotIdx + 2));
-            if (isYearSymbolsDigit && shortnameToCodes.containsKey(contract.substring(0, dashIdx))) {
+            if (isYearSymbolsDigit && hasOnlyLetters(contract, 0, dashIdx)) {  // smells like a futures code
                 int month = parseInt(contract.substring(dashIdx + 1, dotIdx));
                 return month >= 1 && month <= 12;
             }
         } catch (Exception ignore) {
         }
         return false;
+    }
+
+    private boolean hasOnlyLetters(String string, int beginIndex, int endIndex) {
+        int i = Math.max(0, beginIndex);
+        i = Math.min(string.length(), i);
+        int cnt = Math.max(0, endIndex);
+        cnt = Math.min(string.length(), cnt);
+        for (; i < cnt; i++) {
+            int c = string.charAt(i);
+            if (!isAlphabetic(c)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -270,8 +285,7 @@ public class MoexDerivativeCodeService {
                 int monthIdx = yearIdx - 1;
                 int month = getOptionMonth(contract.charAt(monthIdx));
                 if (month != -1 && isValidOptionTypeAndStrike(contract, monthIdx)) {
-                    String prefix = contract.substring(0, 2);
-                    return shortnameToCodes.containsValue(prefix);
+                    return hasOnlyLetters(contract, 0, 2);  // smells like a option code
                 }
             }
         }
@@ -306,9 +320,8 @@ public class MoexDerivativeCodeService {
                         return false;  // price expected
                     }
                 }
-                String shortName = contract.substring(0, AIdx);
-                return shortnameToCodes.containsKey(shortName) || // опцион на акции
-                        isFuturesShortname(shortName);
+                return hasOnlyLetters(contract, 0, AIdx) || // похоже на код акции (значит это опцион на акции)
+                        isFuturesShortname(contract.substring(0, AIdx));
             }
         }
         return false;

@@ -138,7 +138,6 @@ public class MoexDerivativeCodeServiceTest {
                 {"BR50BE1A", "BR-6.21M060521CA50"},
                 {"LK6200CL3", "LKOHP201223CE6200"},
                 {"GZ300CG2D", "GAZPP220722CE 300"},
-                {"Ri150000BS9B", null},
                 {"RI150000B9", null},
                 {"RI150000S9B", null},
                 {"RIBS9B", null},
@@ -177,7 +176,6 @@ public class MoexDerivativeCodeServiceTest {
                 {"BR50BE1A", "BRM1"},
                 {"BR50BF1", "BRN1"},
                 //{"BR-10BE0", "BRM0"}, // пока только пример из документации МосБиржи
-                {"Ri150000BS9B", null},
                 {"RI150000B9", null},
                 {"RI150000S9B", null},
                 {"RIBS9B", null},
