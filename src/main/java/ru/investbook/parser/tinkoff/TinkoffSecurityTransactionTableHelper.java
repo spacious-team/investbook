@@ -60,9 +60,10 @@ public class TinkoffSecurityTransactionTableHelper {
         }
 
         String shortName = row.getStringCellValueOrDefault(SHORT_NAME, "");
+        String code = row.getStringCellValueOrDefault(CODE, "");
         if (shortName != null && shortName.length() == 10 && shortName.charAt(6) == '_') { // USDRUB_TOM
             return SecurityType.CURRENCY_PAIR;
-        } else if (moexDerivativeCodeService.isFutures(shortName) || moexDerivativeCodeService.isOption(shortName)) {
+        } else if (isDerivative(shortName) || isDerivative(code)) {
             return SecurityType.DERIVATIVE;
         } else if (shortName.length() > 1 && shortName.contains("-")) {
             // fix typos in report should be "Si-12.23" instead of "SI-12.23"
@@ -75,6 +76,10 @@ public class TinkoffSecurityTransactionTableHelper {
         }
 
         return SecurityType.STOCK;
+    }
+
+    private boolean isDerivative(String name) {
+        return moexDerivativeCodeService.isFutures(name) || moexDerivativeCodeService.isOption(name);
     }
 
     static Security getSecurity(String code,
