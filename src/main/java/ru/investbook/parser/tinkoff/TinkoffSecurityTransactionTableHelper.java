@@ -61,25 +61,21 @@ public class TinkoffSecurityTransactionTableHelper {
 
         String shortName = row.getStringCellValueOrDefault(SHORT_NAME, "");
         String code = row.getStringCellValueOrDefault(CODE, "");
-        if (shortName != null && shortName.length() == 10 && shortName.charAt(6) == '_') { // USDRUB_TOM
+        if (isCurrencyPair(shortName) || isCurrencyPair(code)) { // USDRUB_TOM
             return SecurityType.CURRENCY_PAIR;
-        } else if (isDerivative(shortName) || isDerivative(code)) {
+        } else if (isDerivative(shortName, code)) {
             return SecurityType.DERIVATIVE;
-        } else if (shortName.length() > 1 && shortName.contains("-")) {
-            // fix typos in report should be "Si-12.23" instead of "SI-12.23"
-            String derivativeShortName = shortName.substring(0, 1).toUpperCase() +
-                    shortName.substring(1).toLowerCase();
-            if (moexDerivativeCodeService.isFutures(derivativeShortName) ||
-                    moexDerivativeCodeService.isOption(derivativeShortName)) {
-                return SecurityType.DERIVATIVE;
-            }
         }
 
         return SecurityType.STOCK;
     }
 
-    private boolean isDerivative(String name) {
-        return moexDerivativeCodeService.isFutures(name) || moexDerivativeCodeService.isOption(name);
+    private static boolean isCurrencyPair(String contract) {
+        return contract != null && contract.length() == 10 && contract.charAt(6) == '_';
+    }
+
+    private boolean isDerivative(String shortName, String code) {
+        return moexDerivativeCodeService.isDerivative(shortName) || moexDerivativeCodeService.isDerivative(code);
     }
 
     static Security getSecurity(String code,
