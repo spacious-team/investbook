@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.tinkoff;
 
+import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
@@ -34,9 +35,11 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
 import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_RUB;
 import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_USD;
 
+@Slf4j
 public class TinkoffPortfolioPropertyTable extends InitializableReportTable<PortfolioProperty> {
 
     private final SingleBrokerReport report;
@@ -59,17 +62,22 @@ public class TinkoffPortfolioPropertyTable extends InitializableReportTable<Port
 
     @Override
     protected Collection<PortfolioProperty> parseTable() {
-        Collection<PortfolioProperty> result = new ArrayList<>(2);
+        try {
+            Collection<PortfolioProperty> result = new ArrayList<>(2);
 
-        getTotalAssets("RUB", TinkoffSecurityQuoteTable::getRubSecuritiesTotalValue)
-                .map(value -> value.add(getNonRubAndNonUsdCashInRub()))
-                .map(value -> toPortfolioProperty(TOTAL_ASSETS_RUB, value))
-                .ifPresent(result::add);
-        getTotalAssets("USD", TinkoffSecurityQuoteTable::getUsdSecuritiesTotalValue)
-                .map(value -> toPortfolioProperty(TOTAL_ASSETS_USD, value))
-                .ifPresent(result::add);
+            getTotalAssets("RUB", TinkoffSecurityQuoteTable::getRubSecuritiesTotalValue)
+                    .map(value -> value.add(getNonRubAndNonUsdCashInRub()))
+                    .map(value -> toPortfolioProperty(TOTAL_ASSETS_RUB, value))
+                    .ifPresent(result::add);
+            getTotalAssets("USD", TinkoffSecurityQuoteTable::getUsdSecuritiesTotalValue)
+                    .map(value -> toPortfolioProperty(TOTAL_ASSETS_USD, value))
+                    .ifPresent(result::add);
 
-        return result;
+            return result;
+        } catch (Exception e) {
+            log.warn("Не смог получить оценку стоимости портфеля из отчета: " + getReport(), e);
+            return emptyList();
+        }
     }
 
     private BigDecimal getNonRubAndNonUsdCashInRub() {
@@ -79,7 +87,7 @@ public class TinkoffPortfolioPropertyTable extends InitializableReportTable<Port
                         !cash.getCurrency().equalsIgnoreCase("USD") &&
                         Math.abs(cash.getValue().floatValue()) > 1e-3)
                 .map(cash -> cash.getValue().multiply(foreignExchangeRateService
-                                .getExchangeRateOrDefault(cash.getCurrency(), "RUB", date)))
+                        .getExchangeRateOrDefault(cash.getCurrency(), "RUB", date)))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

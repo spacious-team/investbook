@@ -37,8 +37,8 @@ public class TinkoffSecurityTransactionTableHelper {
     private final MoexDerivativeCodeService moexDerivativeCodeService;
 
     int getSecurityId(TableRow row,
-                             SecurityCodeAndIsinTable codeAndIsin,
-                             SecurityRegistrar registrar) {
+                      SecurityCodeAndIsinTable codeAndIsin,
+                      SecurityRegistrar registrar) {
         String code = row.getStringCellValue(CODE);
         String shortName = row.getStringCellValue(SHORT_NAME);
         SecurityType securityType = getSecurityType(row);
@@ -60,13 +60,22 @@ public class TinkoffSecurityTransactionTableHelper {
         }
 
         String shortName = row.getStringCellValueOrDefault(SHORT_NAME, "");
-        if (shortName != null && shortName.length() == 10 && shortName.charAt(6) == '_') { // USDRUB_TOM
+        String code = row.getStringCellValueOrDefault(CODE, "");
+        if (isCurrencyPair(shortName) || isCurrencyPair(code)) { // USDRUB_TOM
             return SecurityType.CURRENCY_PAIR;
-        } else if (moexDerivativeCodeService.isFuturesCode(shortName) || moexDerivativeCodeService.isOption(shortName)) {
+        } else if (isDerivative(shortName, code)) {
             return SecurityType.DERIVATIVE;
         }
 
         return SecurityType.STOCK;
+    }
+
+    private static boolean isCurrencyPair(String contract) {
+        return contract != null && contract.length() == 10 && contract.charAt(6) == '_';
+    }
+
+    private boolean isDerivative(String shortName, String code) {
+        return moexDerivativeCodeService.isDerivative(shortName) || moexDerivativeCodeService.isDerivative(code);
     }
 
     static Security getSecurity(String code,
@@ -74,7 +83,7 @@ public class TinkoffSecurityTransactionTableHelper {
                                 String shortName,
                                 SecurityType securityType) {
         String isin = switch (securityType) {
-            case STOCK, BOND, STOCK_OR_BOND -> codeAndIsin.getIsin(code);
+            case STOCK, BOND, STOCK_OR_BOND -> codeAndIsin.getIsin(code, shortName);
             default -> null;
         };
         return getSecurity(code, isin, shortName, securityType);

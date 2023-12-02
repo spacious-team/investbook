@@ -72,7 +72,7 @@
             <span th:case="COUPON">Купон</span>
             <span th:case="AMORTIZATION">Амортизация облигации</span>
             <span th:case="REDEMPTION">Погашение облигации</span>
-            <span th:case="COMMISSION">Комиссия</span>
+            <span th:case="FEE">Комиссия</span>
             <span th:case="TAX">Налог</span>
             <span th:text="Пополнение" th:if="${e.type.name == 'CASH' && e.value >= 0}"/>
             <span th:text="Снятие" th:if="${e.type.name == 'CASH' && e.value < 0}"/>

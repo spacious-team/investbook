@@ -33,8 +33,8 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
 import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.parser.tinkoff.SecurityCodeAndIsinTable.SecurityAndCodeTableHeader.*;
 import static ru.investbook.parser.tinkoff.TinkoffBrokerReport.tablesLastRowPattern;
@@ -86,27 +86,42 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
     }
 
     @NotNull
-    public String getIsin(String code) {
+    public String getIsin(String code, String shortName) {
         initializeIfNeed();
-        return Objects.requireNonNull(codeToIsin.get(code), "Не найден ISIN");
+        String isin = codeToIsin.get(code);
+        if (isin == null) {
+            code = shortNameToCode.get(shortName);
+            isin = codeToIsin.get(code);
+        }
+        return requireNonNull(isin, "Не найден ISIN");
     }
 
     @NotNull
-    public SecurityType getSecurityType(String code) {
+    public SecurityType getSecurityType(String code, String shortName) {
         initializeIfNeed();
-        return Objects.requireNonNull(codeToType.get(code), "Не найден тип ценной бумаги");
+        SecurityType type = codeToType.get(code);
+        if (type == null) {
+            code = shortNameToCode.get(shortName);
+            type = codeToType.get(code);
+        }
+        return requireNonNull(type, "Не найден тип ценной бумаги");
     }
 
     @NotNull
-    public BigDecimal getFaceValue(String code) {
+    public BigDecimal getFaceValue(String code, String shortName) {
         initializeIfNeed();
-        return Objects.requireNonNull(codeToFaceValue.get(code), "Не найдена номинальная стоимость облигации");
+        BigDecimal faceValue = codeToFaceValue.get(code);
+        if (faceValue == null) {
+            code = shortNameToCode.get(shortName);
+            faceValue = codeToFaceValue.get(code);
+        }
+        return requireNonNull(faceValue, "Не найдена номинальная стоимость облигации");
     }
 
     @NotNull
     public String getCode(String shortName) {
         initializeIfNeed();
-        return Objects.requireNonNull(shortNameToCode.get(shortName), "Не найден код бумаги");
+        return requireNonNull(shortNameToCode.get(shortName), "Не найден код бумаги");
     }
 
     @RequiredArgsConstructor
@@ -115,7 +130,7 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         CODE("код", "актива"),  // код (SBERP) или ISIN
         ISIN(optional("isin")), // может отсутствовать, если колонка CODE заполняется ISIN
         TYPE("^Тип$"),
-        FACE_VALUE("Номинал");
+        FACE_VALUE(optional("Номинал"));
 
         @Getter
         private final TableColumn column;
