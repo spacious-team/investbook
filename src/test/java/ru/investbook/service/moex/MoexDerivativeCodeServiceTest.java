@@ -26,7 +26,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Optional;
+
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 public class MoexDerivativeCodeServiceTest {
@@ -37,8 +40,8 @@ public class MoexDerivativeCodeServiceTest {
     @InjectMocks
     MoexDerivativeCodeService service;
 
-    static Object[][] getFuturesCodes() {
-        return new Object[][] {
+    static Object[][] contractToFuturesCode() {
+        return new Object[][]{
                 {"Si-6.21", "SiM1"},
                 {"RTS-12.19", "RIZ9"},
                 {"SiM1", "SiM1"},
@@ -55,15 +58,36 @@ public class MoexDerivativeCodeServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getFuturesCodes")
-    void getFuturesCode(String shortName, String code) {
-        if (shortName != null) {
-            assertEquals(service.getFuturesCode(shortName).orElse(null), code);
+    @MethodSource("contractToFuturesCode")
+    void getFuturesCode(String contract, String expectedCode) {
+        Optional<String> code = service.getFuturesCode(contract);
+
+        if (expectedCode == null) {
+            assertTrue(code.isEmpty());
+        } else {
+            assertTrue(code.isPresent());
+            assertEquals(code.get(), expectedCode);
         }
     }
 
-    static Object[][] getFuturesShortnames() {
-        return new Object[][] {
+
+    @ParameterizedTest
+    @MethodSource("contractToFuturesCode")
+    void isFutures1(String contract, String code) {
+        boolean isFuturesContract = (code != null);
+        assertEquals(service.isFutures(contract), isFuturesContract);
+    }
+
+    @ParameterizedTest
+    @MethodSource("contractToFuturesCode")
+    void isFuturesCode(String contract, String code) {
+        boolean isFuturesContract = (code != null);
+        //noinspection ConstantConditions
+        assertEquals(service.isFuturesCode(code), isFuturesContract);
+    }
+
+    static Object[][] contractToFuturesShortName() {
+        return new Object[][]{
                 {"SiM1", "Si-6.21"},
                 {"RIZ9", "RTS-12.19"},
                 {"SRX1", "SBRF-11.21"},
@@ -84,25 +108,35 @@ public class MoexDerivativeCodeServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getFuturesShortnames")
-    void getFuturesShortname(String code, String shortName) {
-        assertEquals(service.getFuturesShortname(code).orElse(null), shortName);
+    @MethodSource("contractToFuturesShortName")
+    void getFuturesShortname(String contract, String expectedShortName) {
+        Optional<String> shortName = service.getFuturesShortname(contract);
+
+        if (expectedShortName == null) {
+            assertTrue(shortName.isEmpty());
+        } else {
+            assertTrue(shortName.isPresent());
+            assertEquals(shortName.get(), expectedShortName);
+        }
     }
 
     @ParameterizedTest
-    @MethodSource("getFuturesCodes")
-    void isFuturesTest1(String shortName, String code) {
-        assertEquals(service.isFutures(shortName), code != null);
+    @MethodSource("contractToFuturesShortName")
+    void isFutures2(String contract, String shortName) {
+        boolean isFuturesContract = (shortName != null);
+        assertEquals(service.isFutures(contract), isFuturesContract);
     }
 
     @ParameterizedTest
-    @MethodSource("getFuturesShortnames")
-    void isFuturesTest2(String code, String shortName) {
-        assertEquals(service.isFutures(code), shortName != null);
+    @MethodSource("contractToFuturesShortName")
+    void isFuturesShortName(String contract, String shortName) {
+        boolean isFuturesContract = (shortName != null);
+        //noinspection ConstantConditions
+        assertEquals(service.isFuturesShortname(shortName), isFuturesContract);
     }
 
-    static Object[][] getOptionShortnames() {
-        return new Object[][] {
+    static Object[][] contractToOptionShortName() {
+        return new Object[][]{
                 {"BR-7.16M270616CA 50", "BR-7.16M270616CA 50"},
                 {"BR50BF6", "BR-7.16M270616CA 50"},
                 {"BR50BE1", "BR-6.21M250521CA50"},
@@ -119,14 +153,23 @@ public class MoexDerivativeCodeServiceTest {
         };
     }
 
-//    @ParameterizedTest
-//    @MethodSource("getOptionShortnames")
-//    void getOptionShortnamesTest(String contract, String shortname) {
-//        assertEquals(moexIssClient.getOptionShortname(contract).orElse(null), shortname);
-//    }
+    @ParameterizedTest
+    @MethodSource("contractToOptionShortName")
+    void isOption1(String contract, String shortname) {
+        boolean isOptionContract = (shortname != null);
+        assertEquals(service.isOption(contract), isOptionContract);
+    }
 
-    static Object[][] getOptionUnderlingFutures() {
-        return new Object[][] {
+    @ParameterizedTest
+    @MethodSource("contractToOptionShortName")
+    void isOptionShortName(String contract, String shortname) {
+        boolean isOptionContract = (shortname != null);
+        //noinspection ConstantConditions
+        assertEquals(service.isOptionShortname(shortname), isOptionContract);
+    }
+
+    static Object[][] optionCodeToFuturesCode() {
+        return new Object[][]{
                 {"Si75000BL1", "SiZ1"},
                 {"Si75000BL0D", "SiH1"},
                 {"RI150000BG9", "RIU9"},
@@ -149,22 +192,17 @@ public class MoexDerivativeCodeServiceTest {
         };
     }
 
-//    Requires internet connection
-//    @ParameterizedTest
-//    @MethodSource("getOptionUnderlingFutures")
-//    void getOptionUnderlingFuturesTest(String optionCode, String futuresCode) {
-//        assertEquals(moexIssClient.getOptionUnderlingFutures(optionCode).orElse(null), futuresCode);
-//    }
-
     @ParameterizedTest
-    @MethodSource("getOptionShortnames")
-    void isOptionTest1(String shortName, String code) {
-        assertEquals(service.isOption(shortName), code != null);
+    @MethodSource("optionCodeToFuturesCode")
+    void isOption2(String optionCode, String futuresCode) {
+        boolean isOptionCode = (futuresCode != null);
+        assertEquals(service.isOption(optionCode), isOptionCode);
     }
 
     @ParameterizedTest
-    @MethodSource("getOptionUnderlingFutures")
-    void isOptionTest2(String code, String shortName) {
-        assertEquals(service.isOption(code), shortName != null);
+    @MethodSource("optionCodeToFuturesCode")
+    void isOptionCode(String optionCode, String futuresCode) {
+        boolean isOptionCode = (futuresCode != null);
+        assertEquals(service.isOptionCode(optionCode), isOptionCode);
     }
 }
