@@ -63,11 +63,13 @@ public class TransactionValueAndFeeParser {
         BigDecimal brokerFee = getFee(arg.row, arg.brokerFeeColumn).orElse(null);
         BigDecimal marketFee = getFee(arg.row, arg.marketFeeColumn).orElse(null);
         BigDecimal clearingFee = getFee(arg.row, arg.clearingFeeColumn).orElse(null);
+        BigDecimal stampDuty = getFee(arg.row, arg.stampDutyColumn).orElse(null);
+
 
         BigDecimal value = arg.value;
         String valueCurrency = filterCurrency(arg.row.getStringCellValue(arg.valueCurrencyColumn));
         BigDecimal totalFee = BigDecimal.ZERO;
-        String totalFeeCurrency = getTotalFeeCurrency(arg, valueCurrency, brokerFee, marketFee, clearingFee);
+        String totalFeeCurrency = getTotalFeeCurrency(arg, valueCurrency, brokerFee, marketFee, clearingFee, stampDuty);
 
         try {
             totalFee = addToTotalFee(totalFee, totalFeeCurrency,
@@ -90,6 +92,13 @@ public class TransactionValueAndFeeParser {
             value = subtractFromValue(value, valueCurrency, clearingFee, arg.clearingFeeCurrencyColumn, arg);
         }
 
+        try {
+            totalFee = addToTotalFee(totalFee, totalFeeCurrency,
+                    stampDuty, arg.stampDutyCurrencyColumn, arg);
+        } catch (Exception ignore) {
+            value = subtractFromValue(value, valueCurrency, stampDuty, arg.stampDutyCurrencyColumn, arg);
+        }
+
         return new Result(value, valueCurrency, totalFee, totalFeeCurrency);
     }
 
@@ -100,12 +109,15 @@ public class TransactionValueAndFeeParser {
     }
 
     private String getTotalFeeCurrency(Arguments arg, String valueCurrency,
-                                       BigDecimal brokerFee, BigDecimal marketFee, BigDecimal clearingFee) {
+                                       BigDecimal brokerFee, BigDecimal marketFee, BigDecimal clearingFee,
+                                       BigDecimal stampDuty) {
+        //noinspection ConstantConditions
         List<String> feeCurrencies =
                 Stream.of(
                                 (brokerFee == null) ? null : arg.brokerFeeCurrencyColumn,
                                 (marketFee == null) ? null : arg.marketFeeCurrencyColumn,
-                                (clearingFee == null) ? null : arg.clearingFeeCurrencyColumn)
+                                (clearingFee == null) ? null : arg.clearingFeeCurrencyColumn,
+                                (stampDuty == null) ? null : arg.stampDutyCurrencyColumn)
                         .filter(Objects::nonNull)
                         .map(col -> arg.row.getStringCellValueOrDefault(col, null))
                         .filter(Objects::nonNull)
@@ -123,7 +135,7 @@ public class TransactionValueAndFeeParser {
         if (currencies.size() == 1) {
             return currencies.get(0);
         }
-        throw new IllegalArgumentException("Три валюты при проведении сделки не поддерживаются");
+        throw new IllegalArgumentException("Три разные валюты при проведении сделки не поддерживаются");
     }
 
     private String filterCurrency(String currency) {
@@ -199,6 +211,10 @@ public class TransactionValueAndFeeParser {
         TableHeaderColumn clearingFeeColumn; // положительное значение для списания комиссии
         @Nullable
         TableHeaderColumn clearingFeeCurrencyColumn;
+        @Nullable
+        TableHeaderColumn stampDutyColumn; // Гербовый сбор Гонконгской биржи, положительное значение для списания комиссии
+        @Nullable
+        TableHeaderColumn stampDutyCurrencyColumn;
     }
 
     public interface ExchangeRateProvider {

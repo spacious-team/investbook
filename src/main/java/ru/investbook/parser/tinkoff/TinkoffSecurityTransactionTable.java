@@ -126,6 +126,8 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
                         .marketFeeCurrencyColumn(MARKET_FEE_CURRENCY)
                         .clearingFeeColumn(CLEARING_FEE)
                         .clearingFeeCurrencyColumn(CLEARING_FEE_CURRENCY)
+                        .stampDutyColumn(STAMP_DUTY)
+                        .stampDutyCurrencyColumn(STAMP_DUTY_CURRENCY)
                         .build());
 
         return builder
@@ -169,14 +171,12 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
         CURRENCY("валюта", "расчетов"),
         BROKER_FEE("комис", "брокера"),
         BROKER_FEE_CURRENCY("валю", "комис"),
-        MARKET_FEE(OptionalTableColumn.of(
-                PatternTableColumn.of("комиссия", "биржи"))),
-        MARKET_FEE_CURRENCY(OptionalTableColumn.of(
-                PatternTableColumn.of("валюта", "комиссии", "биржи"))),
-        CLEARING_FEE(OptionalTableColumn.of(
-                PatternTableColumn.of("комиссия", "клир.", "центра"))),
-        CLEARING_FEE_CURRENCY(OptionalTableColumn.of(
-                PatternTableColumn.of("валюта", "комиссии", "клир.", "центра"))),
+        MARKET_FEE(optional("комиссия", "биржи")),
+        MARKET_FEE_CURRENCY(optional("валюта", "комиссии", "биржи")),
+        CLEARING_FEE(optional("комиссия", "клир.", "центра")),
+        CLEARING_FEE_CURRENCY(optional("валюта", "комиссии", "клир.", "центра")),
+        STAMP_DUTY(optional("гербовый", "сбор")),
+        STAMP_DUTY_CURRENCY(optional("валюта", "гербового", "сбора")),
         SETTLEMENT_DATE("дата", "расчетов");
 
         @Getter
