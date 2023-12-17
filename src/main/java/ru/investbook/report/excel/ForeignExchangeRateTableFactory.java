@@ -31,7 +31,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class ForeignExchangeRateTableFactory {
-    private final List<String> currencies = Arrays.asList("USD", "EUR", "GBP", "CHF");
+    private final List<String> currencies = Arrays.asList("USD", "EUR", "GBP", "CHF", "CNY", "HKD");
     private final int FIRST_CURRENCY_ROW = 3; // 2 rows = header + total
     private final ForeignExchangeRateService foreignExchangeRateService;
 

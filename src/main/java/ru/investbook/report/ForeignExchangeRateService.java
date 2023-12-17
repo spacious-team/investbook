@@ -44,6 +44,7 @@ import static org.spacious_team.broker.pojo.SecurityType.*;
 @Slf4j
 public class ForeignExchangeRateService {
     public static final String RUB = "RUB";
+    private static final BigDecimal _13 = BigDecimal.valueOf(13);
     private static final BigDecimal _15 = BigDecimal.valueOf(15);
     private static final BigDecimal _80 = BigDecimal.valueOf(80);
     private static final BigDecimal _100 = BigDecimal.valueOf(100);
@@ -231,10 +232,11 @@ public class ForeignExchangeRateService {
         BigDecimal exchangeRate;
         exchangeRate = switch (currency) {
             case "RUR" -> BigDecimal.ONE;
-            case "USD" -> _100;
+            case "USD", "CHF" -> _100;
             case "EUR" -> _110;
             case "GBP" -> _120;
             case "CNY" -> _15;
+            case "HKD" -> _13;
             default -> _80;
         };
         log.debug("Не могу в БД найти курс валюты {}, использую значение по умолчанию = {}",
