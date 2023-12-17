@@ -46,10 +46,10 @@ public class ForeignExchangeRateService {
     public static final String RUB = "RUB";
     private static final BigDecimal _13 = BigDecimal.valueOf(13);
     private static final BigDecimal _15 = BigDecimal.valueOf(15);
-    private static final BigDecimal _80 = BigDecimal.valueOf(80);
     private static final BigDecimal _100 = BigDecimal.valueOf(100);
     private static final BigDecimal _110 = BigDecimal.valueOf(110);
     private static final BigDecimal _120 = BigDecimal.valueOf(120);
+    private static final BigDecimal _6000 = BigDecimal.valueOf(6000);
     private final ForeignExchangeRateRepository foreignExchangeRateRepository;
     // base-currency -> quote-currency -> exchange-rate
     private final Map<String, Map<String, BigDecimal>> cache = new ConcurrentHashMap<>();
@@ -237,7 +237,8 @@ public class ForeignExchangeRateService {
             case "GBP" -> _120;
             case "CNY" -> _15;
             case "HKD" -> _13;
-            default -> _80;
+            case "GLD" -> _6000;
+            default -> _100;
         };
         log.debug("Не могу в БД найти курс валюты {}, использую значение по умолчанию = {}",
                 currency, exchangeRate);
