@@ -60,7 +60,7 @@ class InvestbookApplicationTest {
     })
     @SneakyThrows
     void shouldHaveActuatorHandler(String actuatorPath, String jsonPath, String expected) {
-        mvc.perform(get("http://localhost/actuator/" + actuatorPath))
+        mvc.perform(get("http://localhost:2030/actuator/" + actuatorPath))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$." + jsonPath).value(expected));

@@ -7,8 +7,6 @@
 
 #### Настройка приложения, установленного из архива .zip
 Эта секция применима к любой операционной системе. Перейдите в директорию установки приложения и измените
-настроечный файл `application-conf.properties`. Например, можно изменить порт с 80 на 8080.
-Поддерживаются другие настройки
-[Spring](https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html).
+настроечный файл `application-conf.properties`.
 
   

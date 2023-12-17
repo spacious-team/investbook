@@ -31,18 +31,18 @@ mkdir ~/investbook
 #### Запуск Investbook
 1. Если используется Windows, запустите Powershell и запустите
    ```shell
-   docker run --rm -d -p 80:80 -v /c/users/<имя-windows-пользователя>/investbook:/home/cnb/investbook spaciousteam/investbook
+   docker run --rm -d -p 2030:2030 -v /c/users/<имя-windows-пользователя>/investbook:/home/cnb/investbook spaciousteam/investbook
    ```
    где вместо `<имя-windows-пользователя>` нужно подставить имя вашего пользователя в Windows.
 1. Если используется MacOS или Linux, запустите в терминале
    ```shell
-   docker run --rm -d -p 80:80 -v ~/investbook:/home/cnb/investbook spaciousteam/investbook
+   docker run --rm -d -p 2030:2030 -v ~/investbook:/home/cnb/investbook spaciousteam/investbook
    ```
 Будет загружена и запущена последняя версия Investbook. Далее переходите в браузер и открывайте Investbook
-по адресу http://localhost
+по адресу http://localhost:2030
 
 #### Обновление Investbook
-Если Investbook запущен, остановите его. Для этого откройте http://localhost и сверху-справа нажмите кнопку выхода. 
+Если Investbook запущен, остановите его. Для этого откройте http://localhost:2030 и сверху-справа нажмите кнопку выхода. 
 Запустите терминал и удалите текущую версию
 ```shell
 docker rmi spaciousteam/investbook
