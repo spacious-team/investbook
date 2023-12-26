@@ -46,14 +46,14 @@
     </label>
     <span>&nbsp;</span>
     <label>
-        <input type="text" th:field="*{baseCurrency}" list="currencies" required/>
+        <input type="text" th:field="*{baseCurrency}" list="currencies" placeholder="USD" required/>
     </label>
     <span>&#10562;</span>
     <label>
-        <input type="number" step="0.0001" th:field="*{rate}" required/>
+        <input type="number" step="0.0001" th:field="*{rate}" placeholder="100" required/>
     </label>
     <label>
-        <input type="text" th:field="*{quoteCurrency}" list="currencies" size="3" required/>
+        <input type="text" th:field="*{quoteCurrency}" list="currencies" size="3" placeholder="RUB" required/>
     </label>
     <span>&emsp;</span>
     <input type="submit" value="Сохранить"/>
@@ -64,6 +64,8 @@
         <option>EUR</option>
         <option>GBP</option>
         <option>CHF</option>
+        <option>CNY</option>
+        <option>HKD</option>
     </datalist>
 </form>
 
