@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Issuer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +41,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@SuppressWarnings("unused")
 @Tag(name = "Эмитенты", description = "Информация об эмитентах")
 @RequestMapping("/api/v1/issuers")
 public class IssuerRestController extends AbstractRestController<Integer, Issuer, IssuerEntity> {
@@ -60,14 +62,14 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     @Operation(summary = "Отобразить одного", description = "Отобразить информацию об эмитенте по его номеру")
     public ResponseEntity<Issuer> get(@PathVariable("id")
                                       @Parameter(description = "Внутренний идентификатор эмитента")
-                                              Integer id) {
+                                      Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить")
-    public ResponseEntity<Void> post(@Valid @RequestBody Issuer issuer) {
+    public ResponseEntity<Void> post(@RequestBody @Valid Issuer issuer) {
         return super.post(issuer);
     }
 
@@ -76,9 +78,8 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     @Operation(summary = "Обновить сведения")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор эмитента")
-                                            Integer id,
-                                    @Valid @RequestBody
-                                            Issuer issuer) {
+                                    Integer id,
+                                    @RequestBody @Valid Issuer issuer) {
         return super.put(id, issuer);
     }
 
@@ -87,7 +88,7 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     @Operation(summary = "Удалить", description = "Удаляет сведения об эмитенте из БД")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор эмитента")
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 
@@ -97,7 +98,7 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     }
 
     @Override
-    protected Integer getId(Issuer object) {
+    protected @Nullable Integer getId(Issuer object) {
         return object.getId();
     }
 

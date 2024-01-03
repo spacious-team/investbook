@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
@@ -61,14 +62,14 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @Operation(summary = "Отобразить один", description = "Отображает информацию по идентификатору")
     public ResponseEntity<PortfolioProperty> get(@PathVariable("id")
                                                  @Parameter(description = "Внутренний идентификатор записи")
-                                                         Integer id) {
+                                                 Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Добавить информацию для конкретного счета")
-    public ResponseEntity<Void> post(@Valid @RequestBody PortfolioProperty property) {
+    public ResponseEntity<Void> post(@RequestBody @Valid PortfolioProperty property) {
         return super.post(property);
     }
 
@@ -77,8 +78,8 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @Operation(summary = "Обновить", description = "Обновить информацию для счета")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор записи")
-                                            Integer id,
-                                    @Valid @RequestBody PortfolioProperty property) {
+                                    Integer id,
+                                    @RequestBody @Valid PortfolioProperty property) {
         return super.put(id, property);
     }
 
@@ -87,7 +88,7 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @Operation(summary = "Удалить")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор записи")
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 
@@ -97,7 +98,7 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     }
 
     @Override
-    protected Integer getId(PortfolioProperty object) {
+    protected @Nullable Integer getId(PortfolioProperty object) {
         return object.getId();
     }
 

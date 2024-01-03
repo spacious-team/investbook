@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
@@ -62,14 +63,14 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @Operation(summary = "Отобразить одну", description = "Отобразить котировку по номеру записи в БД")
     public ResponseEntity<SecurityQuote> get(@PathVariable("id")
                                              @Parameter(description = "Номер записи о котировке")
-                                                     Integer id) {
+                                             Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить")
-    public ResponseEntity<Void> post(@Valid @RequestBody SecurityQuote quote) {
+    public ResponseEntity<Void> post(@RequestBody @Valid SecurityQuote quote) {
         return super.post(quote);
     }
 
@@ -78,8 +79,8 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @Operation(summary = "Изменить")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер записи о котировке")
-                                            Integer id,
-                                    @Valid @RequestBody SecurityQuote quote) {
+                                    Integer id,
+                                    @RequestBody @Valid SecurityQuote quote) {
         return super.put(id, quote);
     }
 
@@ -88,7 +89,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @Operation(summary = "Удалить")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Номер записи о котировке")
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 
@@ -98,7 +99,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     }
 
     @Override
-    protected Integer getId(SecurityQuote object) {
+    protected @Nullable Integer getId(SecurityQuote object) {
         return object.getId();
     }
 

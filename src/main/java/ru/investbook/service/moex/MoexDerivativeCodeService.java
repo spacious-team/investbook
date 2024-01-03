@@ -19,6 +19,7 @@
 package ru.investbook.service.moex;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -37,7 +38,7 @@ import static java.util.stream.Collectors.toMap;
 /**
  * Converts derivative short names (for ex. Si-6.21) to secid (a.k.a ticker codes, for ex SiM1)
  *
- * @See <a href="https://fs.moex.com/f/17282/onepager-dlja-klientov-opciony-na-akcii.pdf">Опционы на акции</a>
+ * @see <a href="https://fs.moex.com/f/17282/onepager-dlja-klientov-opciony-na-akcii.pdf">Опционы на акции</a>
  * @see <a href="https://www.moex.com/s205">Specifications ticker codes for Futures and Options</a>
  */
 @Slf4j
@@ -221,7 +222,7 @@ public class MoexDerivativeCodeService {
     /**
      * @return true for futures in format {@code SiM1}
      */
-    public boolean isFuturesCode(String contract) {
+    public boolean isFuturesCode(@Nullable String contract) {
         return contract != null &&
                 contract.length() == 4 &&
                 hasOnlyLetters(contract, 0, 2) && // smells like a futures code
@@ -232,7 +233,7 @@ public class MoexDerivativeCodeService {
     /**
      * @return true for futures in format {@code Si-3.21}
      */
-    public boolean isFuturesShortname(String contract) {
+    public boolean isFuturesShortname(@Nullable String contract) {
         try {
             if (contract == null) return false;
             int dotIdx = contract.length() - 3;
@@ -254,7 +255,7 @@ public class MoexDerivativeCodeService {
         return false;
     }
 
-    private boolean hasOnlyLetters(String string, int beginIndex, int endIndex) {
+    private boolean hasOnlyLetters(String string, @SuppressWarnings("SameParameterValue") int beginIndex, int endIndex) {
         int i = Math.max(0, beginIndex);
         i = Math.min(string.length(), i);
         int cnt = Math.max(0, endIndex);
@@ -279,7 +280,7 @@ public class MoexDerivativeCodeService {
     /**
      * @return true for option in format {@code BR10BF0}, {@code BR-10BF0} (знак "-" это часть цены) and {@code GZ300CG2D}
      */
-    public boolean isOptionCode(String contract) {
+    public boolean isOptionCode(@Nullable String contract) {
         if (contract == null) return false;
         int length = contract.length();
         if (length > 5) {
@@ -300,7 +301,7 @@ public class MoexDerivativeCodeService {
      * @return true for option in format {@code BR-7.20M250620СA10}, {@code BR-7.20M250620СA-10},
      * {@code BR-7.16M270616CA 50} and {@code GAZPP220722CE 300}
      */
-    public boolean isOptionShortname(String contract) {
+    public boolean isOptionShortname(@Nullable String contract) {
         if (contract == null) return false;
         int EIdx = getOptionExpirationTypeCharPosition(contract);
         if (EIdx == -1) {
@@ -367,7 +368,7 @@ public class MoexDerivativeCodeService {
     /**
      * @return {@code SiM1} for futures contract in {@code Si-6.21} or {@code SiM1} format
      */
-    public Optional<String> getFuturesCode(String contract) {
+    public Optional<String> getFuturesCode(@Nullable String contract) {
         try {
             if (contract == null) return empty();
             int dashIdx = contract.indexOf('-');
@@ -390,8 +391,10 @@ public class MoexDerivativeCodeService {
     /**
      * @return {@code Si-6.21} for futures contract in {@code Si-6.21} or {@code SiM1} format
      */
-    public Optional<String> getFuturesShortname(String contract) {
-        if (isFuturesShortname(contract)) {
+    public Optional<String> getFuturesShortname(@Nullable String contract) {
+        if (contract == null) {
+            return Optional.empty();
+        } else if (isFuturesShortname(contract)) {
             return Optional.of(contract);
         } else if (contract.length() != 4) {
             return empty();
@@ -415,7 +418,7 @@ public class MoexDerivativeCodeService {
     /**
      * Convert derivative codes before storing to DB if you need
      */
-    public String convertDerivativeCode(String code) {
+    public @Nullable String convertDerivativeCode(@Nullable String code) {
         return isFuturesCode(code) ?
                 getFuturesShortname(code).orElse(code) :
                 code;

@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
@@ -69,14 +70,14 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @Operation(summary = "Отобразить одну", description = "Отобразить выплату по идентификатору")
     public ResponseEntity<SecurityEventCashFlow> get(@PathVariable("id")
                                                      @Parameter(description = "Внутренний идентификатор выплаты в БД")
-                                                             Integer id) {
+                                                     Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Сохранить информацию о выплате в БД")
-    public ResponseEntity<Void> post(@Valid @RequestBody SecurityEventCashFlow event) {
+    public ResponseEntity<Void> post(@RequestBody @Valid SecurityEventCashFlow event) {
         if (event.getEventType() == REDEMPTION) positionsFactory.invalidateCache();
         return super.post(event);
     }
@@ -86,8 +87,8 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @Operation(summary = "Изменить", description = "Модифицировать информацию о выплате в БД")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор выплаты в БД")
-                                            Integer id,
-                                    @Valid @RequestBody SecurityEventCashFlow event) {
+                                    Integer id,
+                                    @RequestBody @Valid SecurityEventCashFlow event) {
         if (event.getEventType() == REDEMPTION) positionsFactory.invalidateCache();
         return super.put(id, event);
     }
@@ -97,7 +98,7 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @Operation(summary = "Удалить", description = "Удалить информацию о выплате из БД")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор выплаты в БД")
-                               Integer id) {
+                       Integer id) {
         positionsFactory.invalidateCache();
         super.delete(id);
     }
@@ -108,7 +109,7 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     }
 
     @Override
-    protected Integer getId(SecurityEventCashFlow object) {
+    protected @Nullable Integer getId(SecurityEventCashFlow object) {
         return object.getId();
     }
 

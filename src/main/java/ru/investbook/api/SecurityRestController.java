@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -64,7 +65,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
             description = "Отобразить биржевой инструмент по идентификатору (ISIN,  коду дериватива, валютной пары)")
     public ResponseEntity<Security> get(@PathVariable("id")
                                         @Parameter(description = "Идентификатор", example = "123", required = true)
-                                                Integer id) {
+                                        Integer id) {
         return super.get(id);
     }
 
@@ -72,7 +73,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре")
-    public ResponseEntity<Void> post(@Valid @RequestBody Security security) {
+    public ResponseEntity<Void> post(@RequestBody @Valid Security security) {
         return super.post(security);
     }
 
@@ -81,8 +82,8 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Operation(summary = "Обновить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Идентификатор", example = "123", required = true)
-                                            Integer id,
-                                    @Valid @RequestBody Security security) {
+                                    Integer id,
+                                    @RequestBody @Valid Security security) {
         return super.put(id, security);
     }
 
@@ -91,7 +92,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Operation(summary = "Удалить", description = "Удалить сведения о биржевом инструменте и всех его сделках по всем счетам")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Идентификатор", example = "123", required = true)
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 
@@ -101,7 +102,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     }
 
     @Override
-    protected Integer getId(Security object) {
+    protected @Nullable Integer getId(Security object) {
         return object.getId();
     }
 

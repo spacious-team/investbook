@@ -20,11 +20,11 @@ package ru.investbook.api;
 
 import jakarta.persistence.GeneratedValue;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.util.UriUtils;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.UseExistingOrGenerateIdGenerator;
 
@@ -33,9 +33,10 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.requireNonNull;
+import static org.springframework.web.util.UriUtils.encodePath;
 
 @RequiredArgsConstructor
 public abstract class AbstractRestController<ID, Pojo, Entity> {
@@ -46,7 +47,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
         return repository.findAll()
                 .stream()
                 .map(converter::fromEntity)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -76,7 +77,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
     @Transactional
     protected ResponseEntity<Void> post(Pojo object) {
         try {
-            ID id = getId(object);
+            @Nullable ID id = getId(object);
             if (id == null) {
                 return createEntity(object);
             }
@@ -94,7 +95,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
         }
     }
 
-    protected abstract ID getId(Pojo object);
+    protected abstract @Nullable ID getId(Pojo object);
 
     /**
      * Update or create a new entity.
@@ -110,11 +111,12 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
     @Transactional
     public ResponseEntity<Void> put(ID id, Pojo object) {
         try {
-            if (getId(object) == null) {
+            @Nullable ID objectId = getId(object);
+            if (objectId == null) {
                 object = updateId(id, object);
-            } else if (!Objects.equals(id, getId(object))) {
+            } else if (!Objects.equals(id, objectId)) {
                 throw new BadRequestException("Идентификатор объекта, переданный в URI [" + id + "] и в теле " +
-                        "запроса [" + getId(object) + "] не совпадают");
+                        "запроса [" + objectId + "] не совпадают");
             }
             Optional<Entity> result = getById(id);
             if (result.isPresent()) {
@@ -145,7 +147,11 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
     }
 
     protected URI getLocationURI(Pojo object) throws URISyntaxException {
-        return new URI(UriUtils.encodePath(getLocation() + "/" + getId(object), UTF_8));
+        @SuppressWarnings({"nullness", "ConstantConditions"})
+        ID id = requireNonNull(getId(object), "ID is required");
+        String path = getLocation() + "/" + id;
+        String encodedPath = encodePath(path, UTF_8);
+        return new URI(encodedPath);
     }
 
     protected abstract String getLocation();

@@ -21,6 +21,8 @@ package ru.investbook.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
@@ -40,8 +42,10 @@ import ru.investbook.repository.TransactionCashFlowRepository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @Tag(name = "Движения ДС по сделкам", description = "Уплаченные и вырученные суммы в сделках")
@@ -62,34 +66,45 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
 
     @GetMapping
     @Operation(summary = "Отобразить по фильтру", description = "Отобразить информацию о сделках")
-    protected List<TransactionCashFlow> get(
+    public List<TransactionCashFlow> get(
             @RequestParam(value = "portfolio", required = false)
             @Parameter(description = "Номер счета")
-                    String portfolio,
+            @Nullable
+            String portfolio,
+
             @RequestParam(value = "trade-id", required = false)
             @Parameter(description = "Номер сделки в системе учета брокера")
-                    String tradeId,
+            @Nullable
+            String tradeId,
+
             @RequestParam(value = "event-type", required = false)
             @Parameter(description = "Тип (стоимость/комиссия/НКД)", example = "Смотреть API \"Типы событий\"")
-                    Integer eventType
+            @Nullable
+            Integer eventType
     ) {
         if (portfolio == null && tradeId == null && eventType == null) {
             return super.get();
         }
+        List<Transaction> transactions = transactionRestController.get(portfolio, tradeId);
         return filterByEventType(
-                transactionRestController.get(portfolio, tradeId),
+                transactions,
                 eventType);
     }
 
     private List<TransactionCashFlow> filterByEventType(Collection<Transaction> transactions,
-                                                        Integer eventType) {
+                                                        @Nullable Integer eventType) {
         return transactions.stream()
-                .flatMap(transaction -> eventType == null ?
-                        repository.findByTransactionId(transaction.getId()).stream() :
-                        repository.findByTransactionIdAndCashFlowType(transaction.getId(), CashFlowType.valueOf(eventType))
-                                .stream())
+                .flatMap(transaction -> filterByEventType(transaction, eventType))
                 .map(converter::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    private Stream<TransactionCashFlowEntity> filterByEventType(Transaction transaction, @Nullable Integer eventType) {
+        @SuppressWarnings({"nullness", "ConstantConditions"})
+        int id = Objects.requireNonNull(transaction.getId(), "ID is required");
+        return (eventType == null) ?
+                repository.findByTransactionId(id).stream() :
+                repository.findByTransactionIdAndCashFlowType(id, CashFlowType.valueOf(eventType)).stream();
     }
 
     @Override
@@ -97,14 +112,14 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     @Operation(summary = "Отобразить одну", description = "Отобразить информацию о конкретной сделке")
     public ResponseEntity<TransactionCashFlow> get(@PathVariable("id")
                                                    @Parameter(description = "Внутренний идентификатор сделки")
-                                                           Integer id) {
+                                                   Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Добавить информацию об об объемах движения ДС по сделке")
-    public ResponseEntity<Void> post(@RequestBody TransactionCashFlow object) {
+    public ResponseEntity<Void> post(@RequestBody @Valid TransactionCashFlow object) {
         return super.post(object);
     }
 
@@ -116,8 +131,8 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     @Operation(summary = "Обновить", description = "Обновить информацию об об объемах движения ДС по сделке")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор сделки")
-                                            Integer id,
-                                    @RequestBody TransactionCashFlow object) {
+                                    Integer id,
+                                    @RequestBody @Valid TransactionCashFlow object) {
         return super.put(id, object);
     }
 
@@ -131,7 +146,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
             """)
     public void delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор сделки")
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 
@@ -141,7 +156,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     }
 
     @Override
-    protected Integer getId(TransactionCashFlow object) {
+    protected @Nullable Integer getId(TransactionCashFlow object) {
         return object.getId();
     }
 
