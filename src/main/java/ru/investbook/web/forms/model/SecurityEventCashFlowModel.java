@@ -24,7 +24,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

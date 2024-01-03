@@ -29,7 +29,7 @@ import org.spacious_team.table_wrapper.api.RelativePositionTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.TransactionValueAndFeeParser;
 

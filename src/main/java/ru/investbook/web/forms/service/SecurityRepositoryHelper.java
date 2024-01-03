@@ -19,7 +19,7 @@
 package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
