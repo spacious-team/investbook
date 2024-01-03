@@ -27,7 +27,7 @@ import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.SingularAttribute;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.PortfolioEntity_;
 import ru.investbook.entity.SecurityEntity;

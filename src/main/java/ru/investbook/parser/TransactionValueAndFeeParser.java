@@ -25,7 +25,7 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.stereotype.Component;
 import ru.investbook.report.ForeignExchangeRateService;
 
