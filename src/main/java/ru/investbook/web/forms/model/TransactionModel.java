@@ -25,7 +25,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.xml.bind.DatatypeConverter;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;

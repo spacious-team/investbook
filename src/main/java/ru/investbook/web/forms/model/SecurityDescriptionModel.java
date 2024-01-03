@@ -21,7 +21,7 @@ package ru.investbook.web.forms.model;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Data
 public class SecurityDescriptionModel {
