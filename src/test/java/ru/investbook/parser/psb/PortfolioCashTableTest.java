@@ -35,8 +35,7 @@ public class PortfolioCashTableTest {
     @Mock
     SecurityRegistrar securityRegistrar;
 
-    @DataProvider(name = "cash_in")
-    Object[][] getData() {
+    static Object[][] cashIn() {
         return new Object[][] {{"E:\\1.xlsx", BigDecimal.valueOf(350.37)}};
     }
 
