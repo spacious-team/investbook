@@ -63,9 +63,9 @@
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
         <win.msi.version>23.4</win.msi.version>
-        <java.version>21</java.version>
+        <maven.compiler.release>21</maven.compiler.release>
         <lombok.version>1.18.30</lombok.version>
-        <checkerframework.version>3.34.0</checkerframework.version>
+        <checkerframework.version>3.42.0</checkerframework.version>
     </properties>
 
     <repositories>
@@ -281,9 +281,9 @@
                         <annotationProcessor>
                             lombok.launch.AnnotationProcessorHider$AnnotationProcessor
                         </annotationProcessor>
-                        <compilerArguments>
+                        <annotationProcessor>
                             org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor
-                        </compilerArguments>
+                        </annotationProcessor>
                         <annotationProcessor>
                             org.checkerframework.checker.nullness.NullnessChecker
                         </annotationProcessor>

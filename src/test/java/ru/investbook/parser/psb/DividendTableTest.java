@@ -36,7 +36,7 @@ public class DividendTableTest {
     @Mock
     SecurityRegistrar securityRegistrar;
 
-    static Object[][] getData() {
+    static Object[][] cashFisinlow() {
         return new Object[][] {{"E:\\1.xlsx", "RU000A0JRKT8", "RU000A0JRKT8" }};
     }
 
@@ -45,7 +45,9 @@ public class DividendTableTest {
     void testIsin(String report, String firstIsin, String lastIsin) throws IOException {
         PsbBrokerReport psbBrokerReport = new PsbBrokerReport(report, securityRegistrar);
         List<SecurityEventCashFlow> data = new DividendTable(psbBrokerReport).getData();
+        //noinspection AssertBetweenInconvertibleTypes
         assertEquals(data.get(0).getSecurity(), firstIsin);
+        //noinspection AssertBetweenInconvertibleTypes
         assertEquals(data.get(data.size() - 1).getSecurity(), lastIsin);
     }
 }
