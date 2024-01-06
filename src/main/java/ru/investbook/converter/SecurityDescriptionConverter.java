@@ -19,6 +19,7 @@
 package ru.investbook.converter;
 
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityDescription;
 import org.springframework.stereotype.Component;
 import ru.investbook.entity.IssuerEntity;
@@ -33,7 +34,7 @@ public class SecurityDescriptionConverter implements EntityConverter<SecurityDes
 
     @Override
     public SecurityDescriptionEntity toEntity(SecurityDescription security) {
-        IssuerEntity issuerEntity = null;
+        @Nullable IssuerEntity issuerEntity = null;
         if (security.getIssuer() != null) {
             issuerEntity = issuerRepository.getReferenceById(security.getIssuer());
         }

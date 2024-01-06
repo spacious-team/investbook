@@ -19,21 +19,23 @@
 package ru.investbook.web.forms.model;
 
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.xml.bind.DatatypeConverter;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.springframework.util.StringUtils;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.requireNonNull;
+import static org.springframework.util.StringUtils.hasText;
 
 @Data
 public class TransactionModel {
@@ -48,82 +50,59 @@ public class TransactionModel {
         }
     }
 
-    @Nullable
-    private Integer id;
+    private @Nullable Integer id;
 
-    @Nullable
-    private String tradeId;
+    private @Nullable String tradeId;
 
-    @NotEmpty
-    private String portfolio;
+    private @NotEmpty String portfolio;
 
-    @NotNull
     private Action action;
 
-    @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date = LocalDate.now();
 
-    @NotNull
     @DateTimeFormat(pattern = "HH:mm:ss")
     private LocalTime time = LocalTime.NOON;
 
     /**
      * In "name (isin)" or "contract-name" format
      */
-    @NotEmpty
-    private String security;
+    private @NotEmpty String security;
 
-    @NotNull
     private SecurityType securityType;
 
-    @NotNull
-    @Positive
-    private int count;
+    private @Positive int count;
 
     /**
      * Equals to null for security deposit and withdrawal
      */
-    @Nullable
-    @Positive
-    private BigDecimal price;
+    private @Nullable @Positive BigDecimal price;
 
-    @Nullable
-    @PositiveOrZero
-    private BigDecimal accruedInterest;
+    private @Nullable @PositiveOrZero BigDecimal accruedInterest;
 
     /**
      * Price and accrued interest currency
      */
-    @NotEmpty
-    private String priceCurrency = "RUB";
+    private @NotEmpty String priceCurrency = "RUB";
 
-    @Nullable
-    @Positive
-    private BigDecimal priceTick;
+    private @Nullable @Positive BigDecimal priceTick;
 
-    @Nullable
-    @Positive
-    private BigDecimal priceTickValue;
+    private @Nullable @Positive BigDecimal priceTickValue;
 
-    @Nullable
-    private String priceTickValueCurrency = "RUB";
+    private @Nullable String priceTickValueCurrency = "RUB";
 
     /**
      * May be null for security deposit and withdrawal
      */
-    @Nullable
-    @PositiveOrZero
-    private BigDecimal fee;
+    private @Nullable @PositiveOrZero BigDecimal fee;
 
-    @NotEmpty
-    private String feeCurrency = "RUB";
+    private @NotEmpty String feeCurrency = "RUB";
 
     public enum Action {
         BUY, CELL
     }
 
-    public void setPriceTickValueCurrency(String priceTickValueCurrency) {
+    public void setPriceTickValueCurrency(@Nullable String priceTickValueCurrency) {
         if (priceTickValueCurrency != null) {
             this.priceTickValueCurrency = priceTickValueCurrency.toUpperCase();
         }
@@ -137,7 +116,7 @@ public class TransactionModel {
         this.feeCurrency = feeCurrency.toUpperCase();
     }
 
-    public void setSecurity(String isin, String securityName, SecurityType securityType) {
+    public void setSecurity(@Nullable String isin, @Nullable String securityName, SecurityType securityType) {
         this.security = SecurityHelper.getSecurityDescription(isin, securityName, securityType);
         this.securityType = securityType;
     }
@@ -152,21 +131,23 @@ public class TransactionModel {
     /**
      * Returns ISIN if description in "Name (ISIN)" format, null otherwise
      */
-    public String getSecurityIsin() {
+    public @Nullable String getSecurityIsin() {
         return SecurityHelper.getSecurityIsin(security);
     }
 
     public String getTradeId() {
-        if (!StringUtils.hasText(tradeId)) {
+        if (!hasText(tradeId)) {
             setTradeId(createTradeId());
         }
-        return tradeId;
+        @SuppressWarnings("nullness")
+        String nonNullTradeId = requireNonNull(tradeId, "Не задан trade-id");
+        return nonNullTradeId;
     }
 
     private String createTradeId() {
-        if (portfolio == null || security == null || date == null || action == null) {
-            return null;
-        }
+        //noinspection ConstantValue
+        Assert.isTrue(portfolio != null && security != null && date != null && action != null,
+                "Невалидные данные, ошибка вычисления trade-id");
         String string = portfolio.replaceAll(" ", "") +
                 security.replaceAll(" ", "") +
                 date +
@@ -174,7 +155,7 @@ public class TransactionModel {
                 count;
         synchronized (TransactionModel.class) {
             try {
-                md.update(string.getBytes(StandardCharsets.UTF_8));
+                md.update(string.getBytes(UTF_8));
                 return DatatypeConverter.printHexBinary(md.digest()).toLowerCase();
             } finally {
                 md.reset();
@@ -183,8 +164,8 @@ public class TransactionModel {
     }
 
     public boolean hasDerivativeTickValue() {
-        return getPriceTick() != null && getPriceTick().floatValue() > 0.000001 &&
-                getPriceTickValue() != null && getPriceTickValue().floatValue() > 0.000001 &&
-                StringUtils.hasText(getPriceTickValueCurrency());
+        return priceTick != null && priceTick.floatValue() > 0.000001 &&
+                priceTickValue != null && priceTickValue.floatValue() > 0.000001 &&
+                hasText(priceTickValueCurrency);
     }
 }
