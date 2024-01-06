@@ -40,6 +40,7 @@ public class TransactionConverter implements EntityConverter<TransactionEntity, 
                 .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ID не найдена: " + transaction.getSecurity()));
 
         TransactionEntity entity = new TransactionEntity();
+        //noinspection DataFlowIssue
         entity.setId(transaction.getId());
         entity.setTradeId(transaction.getTradeId());
         entity.setPortfolio(transaction.getPortfolio());

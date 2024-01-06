@@ -34,8 +34,10 @@ import ru.investbook.web.forms.model.SecurityQuoteModel;
 import ru.investbook.web.forms.model.SecurityType;
 import ru.investbook.web.forms.model.filter.SecurityQuoteFormFilterModel;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.springframework.data.domain.Sort.Order.asc;
 import static org.springframework.data.domain.Sort.Order.desc;
@@ -69,12 +71,14 @@ public class SecurityQuoteFormsService {
     @Transactional
     public void save(SecurityQuoteModel e) {
         int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(e);
+        @SuppressWarnings("nullness")
+        BigDecimal quote = requireNonNull(e.getQuote());
         SecurityQuoteEntity entity = securityQuoteRepository.saveAndFlush(
                 securityQuoteConverter.toEntity(SecurityQuote.builder()
                         .id(e.getId())
                         .security(savedSecurityId)
                         .timestamp(e.getTimestamp())
-                        .quote(e.getQuote())
+                        .quote(quote)
                         .price(e.getPrice())
                         .accruedInterest(e.getAccruedInterest())
                         .currency(hasLength(e.getCurrency()) ? e.getCurrency() : null)

@@ -19,10 +19,9 @@
 package ru.investbook.web.forms.model;
 
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -30,17 +29,13 @@ import java.time.LocalTime;
 @Data
 public abstract class PortfolioPropertyModel {
 
-    @Nullable
-    private Integer id;
+    private @Nullable Integer id;
 
-    @NotEmpty
-    private String portfolio;
+    private @NotEmpty String portfolio;
 
-    @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date = LocalDate.now();
 
-    @NotNull
     @DateTimeFormat(pattern = "HH:mm:ss")
     private LocalTime time = LocalTime.NOON;
 }

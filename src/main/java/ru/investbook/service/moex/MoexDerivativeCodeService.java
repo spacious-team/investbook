@@ -403,7 +403,7 @@ public class MoexDerivativeCodeService {
         if (month != -1) {
             char yearChar = contract.charAt(3);
             if (isDigit(yearChar)) {
-                String prefix = codeToShortnames.get(contract.substring(0, 2));
+                @Nullable String prefix = codeToShortnames.get(contract.substring(0, 2));
                 if (prefix != null) {
                     int year = getShortnameYear(yearChar);
                     if (year != -1) {
