@@ -19,12 +19,11 @@
 package ru.investbook.web.forms.model;
 
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -33,47 +32,34 @@ import java.time.LocalTime;
 @Data
 public class SecurityEventCashFlowModel {
 
-    @Nullable
-    private Integer id;
+    private @Nullable Integer id;
 
-    @Nullable
-    private Integer taxId;
+    private @Nullable Integer taxId;
 
-    @NotEmpty
-    private String portfolio;
+    private @NotEmpty String portfolio;
 
-    @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date = LocalDate.now();
 
-    @NotNull
     @DateTimeFormat(pattern = "HH:mm:ss")
     private LocalTime time = LocalTime.NOON;
 
     /**
      * In "name (isin)" or "contract-name" format
      */
-    @NotEmpty
-    private String security;
+    private @NotEmpty String security;
 
-    @NotNull
     private int count;
 
-    @NotNull
     private CashFlowType type;
 
-    @NotNull
     private BigDecimal value;
 
-    @NotEmpty
-    private String valueCurrency = "RUB";
+    private @NotEmpty String valueCurrency = "RUB";
 
-    @Nullable
-    @PositiveOrZero
-    private BigDecimal tax;
+    private @Nullable @PositiveOrZero BigDecimal tax;
 
-    @Nullable
-    private String taxCurrency = "RUB";
+    private @Nullable String taxCurrency = "RUB";
 
     public void setValueCurrency(String currency) {
         this.valueCurrency = currency.toUpperCase();
@@ -83,7 +69,7 @@ public class SecurityEventCashFlowModel {
         this.taxCurrency = currency.toUpperCase();
     }
 
-    public void setSecurity(String isin, String securityName, SecurityType securityType) {
+    public void setSecurity(@Nullable String isin, @Nullable String securityName, SecurityType securityType) {
         this.security = SecurityHelper.getSecurityDescription(isin, securityName, securityType);
     }
 
@@ -97,12 +83,12 @@ public class SecurityEventCashFlowModel {
     /**
      * Returns ISIN if description in "Name (ISIN)" format, null otherwise
      */
-    public String getSecurityIsin() {
+    public @Nullable String getSecurityIsin() {
         return SecurityHelper.getSecurityIsin(security);
     }
 
     public SecurityType getSecurityType() {
-        return switch(type) {
+        return switch (type) {
             case DIVIDEND -> SecurityType.SHARE;
             case ACCRUED_INTEREST, AMORTIZATION, REDEMPTION, COUPON -> SecurityType.BOND;
             case DERIVATIVE_PROFIT, DERIVATIVE_PRICE, DERIVATIVE_QUOTE -> SecurityType.DERIVATIVE;

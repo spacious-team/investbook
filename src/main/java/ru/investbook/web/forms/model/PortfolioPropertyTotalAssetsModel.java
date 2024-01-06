@@ -18,7 +18,6 @@
 
 package ru.investbook.web.forms.model;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
@@ -32,10 +31,8 @@ import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_U
 @EqualsAndHashCode(callSuper = true)
 public class PortfolioPropertyTotalAssetsModel extends PortfolioPropertyModel {
 
-    @NotNull
     private BigDecimal totalAssets;
 
-    @NotNull
     private Currency totalAssetsCurrency;
 
     public enum Currency {

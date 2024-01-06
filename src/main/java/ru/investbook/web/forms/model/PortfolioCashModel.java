@@ -19,11 +19,10 @@
 package ru.investbook.web.forms.model;
 
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -33,26 +32,19 @@ import java.time.LocalTime;
 @EqualsAndHashCode
 public class PortfolioCashModel {
 
-    @Nullable
-    private Integer id;
+    private @Nullable Integer id;
 
-    @NotEmpty
-    private String portfolio;
+    private @NotEmpty String portfolio;
 
-    @Nullable
-    private String market;
+    private @Nullable String market;
 
-    @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date = LocalDate.now();
 
-    @NotNull
     @DateTimeFormat(pattern = "HH:mm:ss")
     private LocalTime time = LocalTime.NOON;
 
-    @NotNull
     private BigDecimal cash = BigDecimal.ZERO;
 
-    @NotNull
     private String currency = "RUB";
 }

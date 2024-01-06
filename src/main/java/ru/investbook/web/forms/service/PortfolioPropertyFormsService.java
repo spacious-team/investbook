@@ -42,11 +42,9 @@ import ru.investbook.web.forms.model.filter.PortfolioPropertyFormFilterModel;
 import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 
-import static org.spacious_team.broker.pojo.PortfolioPropertyType.*;
+import static org.spacious_team.broker.pojo.PortfolioPropertyType.valueOf;
 import static org.springframework.data.domain.Sort.Order.asc;
 import static org.springframework.data.domain.Sort.Order.desc;
 
@@ -59,7 +57,6 @@ public class PortfolioPropertyFormsService {
     private final PortfolioRepository portfolioRepository;
     private final PortfolioPropertyConverter portfolioPropertyConverter;
     private final PortfolioConverter portfolioConverter;
-    private final Collection<String> properties = Set.of(TOTAL_ASSETS_RUB.name(), TOTAL_ASSETS_USD.name());
 
     @Transactional(readOnly = true)
     public Optional<PortfolioPropertyModel> getById(Integer id) {
