@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.SecurityDescriptionConverter;
 import ru.investbook.entity.SecurityDescriptionEntity;
@@ -50,11 +51,21 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
         this.repository = repository;
     }
 
-    @Override
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отобразить информацию по всем инструментам")
-    public List<SecurityDescription> get() {
-        return super.get();
+    public List<SecurityDescription> get(@RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
+                                             @Parameter(description = "номер страницы")
+                                             int pageNo,
+                                         @RequestParam(value = "size", defaultValue = ApiUtil.DEFAULT_PAGE_SIZE, required = false)
+                                             @Parameter(description = "количество записей на странице")
+                                             int pageSize,
+                                         @RequestParam(value = "sortBy", defaultValue = ApiUtil.DEFAULT_SECURITY_DESCRIPTION_SORT_BY, required = false)
+                                             @Parameter(description = "атрибут сортировки")
+                                             String sortBy,
+                                         @RequestParam(value = "sortDir", defaultValue = ApiUtil.DEFAULT_SORT_DIRECTION, required = false)
+                                             @Parameter(description = "направление сортировки")
+                                             String sortDir) {
+        return super.get(pageNo, pageSize, sortBy, sortDir);
     }
 
 

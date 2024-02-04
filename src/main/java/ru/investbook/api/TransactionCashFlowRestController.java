@@ -71,13 +71,25 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
                     String tradeId,
             @RequestParam(value = "event-type", required = false)
             @Parameter(description = "Тип (стоимость/комиссия/НКД)", example = "Смотреть API \"Типы событий\"")
-                    Integer eventType
+                    Integer eventType,
+            @RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
+            @Parameter(description = "Номер страницы")
+                    int pageNo,
+            @RequestParam(value = "size", defaultValue = ApiUtil.DEFAULT_PAGE_SIZE, required = false)
+            @Parameter(description = "Количество записей на страницы")
+                    int pageSize,
+            @RequestParam(value = "sortBy", defaultValue = ApiUtil.DEFAULT_TRANSACTION_CASH_FLOW_SORT_BY, required = false)
+            @Parameter(description = "атрибут сортировки")
+                    String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = ApiUtil.DEFAULT_SORT_DIRECTION, required = false)
+            @Parameter(description = "направление сортировки")
+                    String sortDir
     ) {
         if (portfolio == null && tradeId == null && eventType == null) {
-            return super.get();
+            return super.get(pageNo, pageSize, sortBy, sortDir);
         }
         return filterByEventType(
-                transactionRestController.get(portfolio, tradeId),
+                transactionRestController.get(portfolio, tradeId, pageNo, pageSize, sortBy, sortDir),
                 eventType);
     }
 

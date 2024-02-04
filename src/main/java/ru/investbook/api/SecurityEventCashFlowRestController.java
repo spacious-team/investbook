@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
@@ -57,11 +58,21 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
         this.positionsFactory = positionsFactory;
     }
 
-    @Override
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам")
-    public List<SecurityEventCashFlow> get() {
-        return super.get();
+    public List<SecurityEventCashFlow> get(@RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
+                                               @Parameter(description = "номер страницы")
+                                               int pageNo,
+                                           @RequestParam(value = "size", defaultValue = ApiUtil.DEFAULT_PAGE_SIZE, required = false)
+                                               @Parameter(description = "количество записей на странице")
+                                               int pageSize,
+                                           @RequestParam(value = "sortBy", defaultValue = ApiUtil.DEFAULT_SECURITY_EVENT_CASH_FLOW_SORT_BY, required = false)
+                                               @Parameter(description = "атрибут сортировки")
+                                               String sortBy,
+                                           @RequestParam(value = "sortDir", defaultValue = ApiUtil.DEFAULT_SORT_DIRECTION, required = false)
+                                               @Parameter(description = "направление сортировки")
+                                               String sortDir) {
+        return super.get(pageNo, pageSize, sortBy, sortDir);
     }
 
     @Override

@@ -31,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.PortfolioPropertyConverter;
 import ru.investbook.entity.PortfolioPropertyEntity;
-import ru.investbook.entity.PortfolioPropertyEntity_;
 import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.specs.PortfolioPropertySearchSpecification;
@@ -72,7 +71,7 @@ public class PortfolioPropertyFormsService {
         PortfolioPropertySearchSpecification spec = PortfolioPropertySearchSpecification.of(
                 filter.getPortfolio(), filter.getDate(), filter.getProperty());
 
-        Sort sort = Sort.by(asc(PortfolioPropertyEntity_.PORTFOLIO), desc(PortfolioPropertyEntity_.TIMESTAMP));
+        Sort sort = Sort.by(asc(PortfolioPropertyEntity_.PROPERTY), desc(PortfolioPropertyEntity_.TIMESTAMP));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
         return portfolioPropertyRepository.findAll(spec, page)

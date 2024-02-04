@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.ForeignExchangeRateConverter;
 import ru.investbook.entity.ForeignExchangeRateEntity;
@@ -60,11 +61,21 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
         this.foreignExchangeRateService = foreignExchangeRateService;
     }
 
-    @Override
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отображает все загруженные в БД информацию по обменным курсам")
-    protected List<ForeignExchangeRate> get() {
-        return super.get();
+    protected List<ForeignExchangeRate> get(@RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
+                                            @Parameter(description = "номер страницы")
+                                                int pageNo,
+                                            @RequestParam(value = "size", defaultValue = ApiUtil.DEFAULT_PAGE_SIZE, required = false)
+                                            @Parameter(description = "количество записей на странице")
+                                                int pageSize,
+                                            @RequestParam(value = "sortBy", defaultValue = ApiUtil.DEFAULT_FOREIGN_EXCHANGE_RATE_SORT_BY, required = false)
+                                            @Parameter(description = "атрибут сортировки")
+                                                String sortBy,
+                                            @RequestParam(value = "sortDir", defaultValue = ApiUtil.DEFAULT_SORT_DIRECTION, required = false)
+                                            @Parameter(description = "направление сортировки")
+                                                String sortDir) {
+        return super.get(pageNo, pageSize, sortBy, sortDir);
     }
 
     @GetMapping("/currency-pairs/{currency-pair}")

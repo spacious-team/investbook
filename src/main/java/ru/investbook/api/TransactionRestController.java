@@ -23,6 +23,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.Transaction;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -62,32 +66,46 @@ public class TransactionRestController extends AbstractRestController<Integer, T
 
     @GetMapping
     @Operation(summary = "Отобразить по фильтру", description = "Отображает сделки по счетам")
-    public List<Transaction> get(@RequestParam(value = "portfolio", required = false)
+    public List<Transaction> get(@QuerydslPredicate(root = Transaction.class) @RequestParam(value = "portfolio", required = false)
                                         @Parameter(description = "Идентификатор счета брокера")
                                                 String portfolio,
                                     @RequestParam(value = "trade-id", required = false)
                                         @Parameter(description = "Номер сделки в системе учета брокера")
-                                                String tradeId) {
+                                                String tradeId,
+                                    @RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
+                                        @Parameter(description = "Номер страницы")
+                                                int pageNo,
+                                    @RequestParam(value = "size", defaultValue = ApiUtil.DEFAULT_PAGE_SIZE, required = false)
+                                        @Parameter(description = "Количество записей на страницы")
+                                                int pageSize,
+                                    @RequestParam(value = "sortBy", defaultValue = ApiUtil.DEFAULT_TRANSACTION_SORT_BY, required = false)
+                                        @Parameter(description = "атрибут сортировки")
+                                                String sortBy,
+                                    @RequestParam(value = "sortDir", defaultValue = ApiUtil.DEFAULT_SORT_DIRECTION, required = false)
+                                        @Parameter(description = "направление сортировки")
+                                                String sortDir) {
         if (portfolio != null && tradeId != null) {
             return getByPortfolioAndTradeId(portfolio, tradeId);
         } else if (portfolio != null) {
-            return getByPortfolio(portfolio);
+            return getByPortfolio(portfolio, getPage(pageNo, pageSize, sortBy, sortDir));
         } else if (tradeId != null) {
-            return getByTradeId(tradeId);
+            return getByTradeId(tradeId, getPage(pageNo, pageSize, sortBy, sortDir));
         } else {
-            return super.get();
+            return super.get(pageNo, pageSize, sortBy, sortDir);
         }
     }
 
-    private List<Transaction> getByPortfolio(String portfolio) {
-        return repository.findByPortfolio(portfolio)
+    private List<Transaction> getByPortfolio(String portfolio, Pageable pageable) {
+        return repository.findByPortfolio(portfolio, pageable)
+                .getContent()
                 .stream()
                 .map(converter::fromEntity)
                 .collect(Collectors.toList());
     }
 
-    private List<Transaction> getByTradeId(String tradeId) {
-        return repository.findByTradeId(tradeId)
+    private List<Transaction> getByTradeId(String tradeId, Pageable pageable) {
+        return repository.findByTradeId(tradeId, pageable)
+                .getContent()
                 .stream()
                 .map(converter::fromEntity)
                 .collect(Collectors.toList());
@@ -167,5 +185,11 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @Override
     protected String getLocation() {
         return "/transactions";
+    }
+
+    private Pageable getPage(int pageNo, int pageSize, String sortBy, String sortDir){
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+        return PageRequest.of(pageNo, pageSize, sort);
     }
 }

@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.IssuerEntity;
@@ -48,11 +49,21 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
         super(repository, converter);
     }
 
-    @Override
     @GetMapping
     @Operation(summary = "Отобразить всех")
-    public List<Issuer> get() {
-        return super.get();
+    public List<Issuer> get(@RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
+                                @Parameter(description = "номер страницы")
+                                int pageNo,
+                            @RequestParam(value = "size", defaultValue = ApiUtil.DEFAULT_PAGE_SIZE, required = false)
+                                @Parameter(description = "количество записей на странице")
+                                int pageSize,
+                            @RequestParam(value = "sortBy", defaultValue = ApiUtil.DEFAULT_ISSUER_SORT_BY, required = false)
+                                @Parameter(description = "атрибут сортировки")
+                                String sortBy,
+                            @RequestParam(value = "sortDir", defaultValue = ApiUtil.DEFAULT_SORT_DIRECTION, required = false)
+                                @Parameter(description = "направление сортировки")
+                                String sortDir) {
+        return super.get(pageNo, pageSize, sortBy, sortDir);
     }
 
     @Override
