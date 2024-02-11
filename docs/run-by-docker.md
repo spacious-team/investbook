@@ -1,3 +1,10 @@
+#### Оглавление
+- [Установка на Windows x64](install-on-windows.md)
+- [Установка на Windows x86](install-on-windows-by-zip.md)
+- [Установка на Mac](install-on-linux.md)
+- [Установка на Linux](install-on-linux.md)
+- [Запуск в Docker](#запуск-investbook)
+
 ### Запуск в Docker контейнере
 
 Способ является альтернативой установке Investbook на [windows](install-on-windows.md), [mac](install-on-linux.md)
@@ -13,6 +20,12 @@
 1. Скачайте пакет "Docker Desktop" с официального [сайта](https://docs.docker.com/desktop/windows/install/).
 2. Установите пакет и запустите "Docker Desktop" из списка приложений.
 3. Если "Docker Desktop" предложит обновление по ссылке https://aka.ms/wsl2kernel, можете также скачать и установить его.
+4. Если вы работаете не под администратором, то для работы с "Docker Desktop" под текущим пользователем запустите
+   командную строку под администратором и выполните
+```shell
+net localgroup "docker-users" "{User}" /add
+```
+где вместо "{User}" нужно подставить имя своего пользователя.
 
 ##### Установка на MacOS
 Требуется версия MacOS 10.15 или новее.

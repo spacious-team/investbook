@@ -1,3 +1,10 @@
+#### Оглавление
+- [Установка на Windows x64](install-on-windows.md)
+- [Установка на Windows x86](install-on-windows-by-zip.md)
+- [Установка на Mac](#установка-и-работа-на-mac-и-linux)
+- [Установка на Linux](#установка-и-работа-на-mac-и-linux)
+- [Запуск в Docker](run-by-docker.md)
+
 ### Установка и работа на Mac и Linux
 
 Поддерживаетcя любая версия Mac и Linux.

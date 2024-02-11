@@ -1,3 +1,10 @@
+#### Оглавление
+- [Установка на Windows x64](install-on-windows.md)
+- [Установка на Windows x86](#установка-и-работа-на-windows-из-zip-архива)
+- [Установка на Mac](install-on-linux.md)
+- [Установка на Linux](install-on-linux.md)
+- [Запуск в Docker](run-by-docker.md)
+
 ### Установка и работа на Windows из zip архива
 
 Данная инструкция поддерживает все версии Windows. Если у вас 64 битная Windows, рекомендуем устанавливать по
