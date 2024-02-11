@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.model;
 
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -35,18 +36,22 @@ public class PageableWrapperModel<T> {
         return page.getTotalPages();
     }
 
+    @SuppressWarnings("unused")
     public int getCurrent() {
         return page.getNumber();
     }
 
-    public Integer getNext() {
+    @SuppressWarnings("unused")
+    public @Nullable Integer getNext() {
         return page.hasNext() ? page.nextPageable().getPageNumber() : null;
     }
 
-    public Integer getPrevious() {
+    @SuppressWarnings("unused")
+    public  @Nullable Integer getPrevious() {
         return page.hasPrevious() ? page.previousPageable().getPageNumber(): null;
     }
 
+    @SuppressWarnings("unused")
     public boolean isLast() {
         return page.isLast();
     }

@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
@@ -63,14 +64,14 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     @Operation(summary = "Отобразить одну", description = "Отобразить выплату по ее номеру")
     public ResponseEntity<EventCashFlow> get(@PathVariable("id")
                                              @Parameter(description = "Номер события")
-                                                     Integer id) {
+                                             Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Сохранить информацию в БД")
-    public ResponseEntity<Void> post(@Valid @RequestBody EventCashFlow event) {
+    public ResponseEntity<Void> post(@RequestBody @Valid EventCashFlow event) {
         return super.post(event);
     }
 
@@ -79,8 +80,8 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     @Operation(summary = "Изменить", description = "Модифицировать информацию в БД")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер события")
-                                            Integer id,
-                                    @Valid @RequestBody EventCashFlow event) {
+                                    Integer id,
+                                    @RequestBody @Valid EventCashFlow event) {
         return super.put(id, event);
     }
 
@@ -89,7 +90,7 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     @Operation(summary = "Удалить", description = "Удалить информацию из БД")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Номер события")
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 
@@ -99,7 +100,7 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     }
 
     @Override
-    protected Integer getId(EventCashFlow object) {
+    protected @Nullable Integer getId(EventCashFlow object) {
         return object.getId();
     }
 

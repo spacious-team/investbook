@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,7 +42,6 @@ import ru.investbook.repository.TransactionRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Сделки", description = "Операции купли/продажи биржевых инструментов")
@@ -63,11 +63,14 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @GetMapping
     @Operation(summary = "Отобразить по фильтру", description = "Отображает сделки по счетам")
     public List<Transaction> get(@RequestParam(value = "portfolio", required = false)
-                                        @Parameter(description = "Идентификатор счета брокера")
-                                                String portfolio,
-                                    @RequestParam(value = "trade-id", required = false)
-                                        @Parameter(description = "Номер сделки в системе учета брокера")
-                                                String tradeId) {
+                                 @Parameter(description = "Идентификатор счета брокера")
+                                 @Nullable
+                                 String portfolio,
+
+                                 @RequestParam(value = "trade-id", required = false)
+                                 @Parameter(description = "Номер сделки в системе учета брокера")
+                                 @Nullable
+                                 String tradeId) {
         if (portfolio != null && tradeId != null) {
             return getByPortfolioAndTradeId(portfolio, tradeId);
         } else if (portfolio != null) {
@@ -83,14 +86,14 @@ public class TransactionRestController extends AbstractRestController<Integer, T
         return repository.findByPortfolio(portfolio)
                 .stream()
                 .map(converter::fromEntity)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<Transaction> getByTradeId(String tradeId) {
         return repository.findByTradeId(tradeId)
                 .stream()
                 .map(converter::fromEntity)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<Transaction> getByPortfolioAndTradeId(String portfolio, String tradeId) {
@@ -108,14 +111,14 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @Operation(summary = "Отобразить одну", description = "Отображает одну сделку")
     public ResponseEntity<Transaction> get(@PathVariable("id")
                                            @Parameter(description = "Внутренний идентификатор сделки")
-                                                   Integer id) {
+                                           Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Сохраняет новую сделку в БД")
-    public ResponseEntity<Void> post(@Valid @RequestBody Transaction object) {
+    public ResponseEntity<Void> post(@RequestBody @Valid Transaction object) {
         positionsFactory.invalidateCache();
         return super.post(object);
     }
@@ -128,8 +131,8 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @Operation(summary = "Обновить параметры", description = "Обновляет параметры указанной сделки")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор сделки")
-                                            Integer id,
-                                    @Valid @RequestBody Transaction object) {
+                                    Integer id,
+                                    @RequestBody @Valid Transaction object) {
         positionsFactory.invalidateCache();
         return super.put(id, object);
     }
@@ -142,7 +145,7 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @Operation(summary = "Удалить", description = "Удаляет указанную сделку")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор сделки")
-                               Integer id) {
+                       Integer id) {
         positionsFactory.invalidateCache();
         super.delete(id);
     }
@@ -153,7 +156,7 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     }
 
     @Override
-    protected Integer getId(Transaction object) {
+    protected @Nullable Integer getId(Transaction object) {
         return object.getId();
     }
 

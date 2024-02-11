@@ -62,14 +62,14 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @Operation(summary = "Отобразить один")
     public ResponseEntity<Portfolio> get(@PathVariable("id")
                                          @Parameter(description = "Номер счета")
-                                                 String id) {
+                                         String id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить")
-    public ResponseEntity<Void> post(@Valid @RequestBody Portfolio object) {
+    public ResponseEntity<Void> post(@RequestBody @Valid Portfolio object) {
         return super.post(object);
     }
 
@@ -78,8 +78,8 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @Operation(summary = "Добавить")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер счета")
-                                            String id,
-                                    @Valid @RequestBody Portfolio object) {
+                                    String id,
+                                    @RequestBody @Valid Portfolio object) {
         return super.put(id, object);
     }
 
@@ -88,7 +88,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @Operation(summary = "Удалить", description = "Удалить счет и все связанные с ним данные")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Номер счета")
-                               String id) {
+                       String id) {
         super.delete(id);
     }
 

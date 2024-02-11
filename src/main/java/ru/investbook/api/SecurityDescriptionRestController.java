@@ -65,7 +65,7 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     public ResponseEntity<SecurityDescription> get(@PathVariable("id")
                                                    @Parameter(description = "Идентификатор",
                                                            example = "123", required = true)
-                                                           Integer id) {
+                                                   Integer id) {
         return super.get(id);
     }
 
@@ -73,7 +73,7 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре")
-    public ResponseEntity<Void> post(@Valid @RequestBody SecurityDescription security) {
+    public ResponseEntity<Void> post(@RequestBody @Valid SecurityDescription security) {
         return super.post(security);
     }
 
@@ -82,8 +82,8 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     @Operation(summary = "Обновить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Идентификатор", example = "123", required = true)
-                                            Integer id,
-                                    @Valid @RequestBody SecurityDescription security) {
+                                    Integer id,
+                                    @RequestBody @Valid SecurityDescription security) {
         return super.put(id, security);
     }
 
@@ -92,7 +92,7 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     @Operation(summary = "Удалить", description = "Удалить информацию по инструменту")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Идентификатор", example = "123", required = true)
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 

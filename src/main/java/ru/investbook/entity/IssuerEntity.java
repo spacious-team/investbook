@@ -24,6 +24,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
@@ -37,7 +38,7 @@ public class IssuerEntity {
     private Integer id;
 
     @Column(name = "taxpayer_id")
-    private String taxpayerId;
+    private @Nullable String taxpayerId;
 
     @Column(name = "name", nullable = false)
     private String name;

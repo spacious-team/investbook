@@ -18,31 +18,39 @@
 
 package ru.investbook.parser.psb;
 
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Ignore;
-import org.testng.annotations.Test;
+import org.spacious_team.broker.pojo.EventCashFlow;
 import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Ignore
-public class PortfolioCashTableTest {
+@Disabled
+public class CashFlowTableTest {
 
     @Mock
     SecurityRegistrar securityRegistrar;
 
-    @DataProvider(name = "cash_in")
-    Object[][] getData() {
-        return new Object[][] {{"E:\\1.xlsx", BigDecimal.valueOf(350.37)}};
+    static Object[][] cash() {
+        return new Object[][]{{"E:\\1.xlsx", BigDecimal.valueOf(400 - 760.77)},
+                {"E:\\Налог.xlsx", BigDecimal.valueOf(-542.0)}};
     }
 
-    @Test(dataProvider = "cash_in")
-    void testIsin(String report, BigDecimal expectedCash) throws IOException {
-        PsbBrokerReport psbBrokerReport = new PsbBrokerReport(report, securityRegistrar);
-        assertEquals(new CashTable(psbBrokerReport).getData().get(0).getValue(), expectedCash);
+    @ParameterizedTest
+    @MethodSource("cash")
+    void testIsin(String reportFile, BigDecimal expectedCashIn) throws IOException {
+        PsbBrokerReport report = new PsbBrokerReport(reportFile, securityRegistrar);
+        List<EventCashFlow> data = new CashFlowTable(report).getData();
+        BigDecimal sum = BigDecimal.ZERO;
+        for (EventCashFlow r : data) {
+            sum = sum.add(r.getValue());
+        }
+        assertEquals(sum, expectedCashIn);
     }
 }

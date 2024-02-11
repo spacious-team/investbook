@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2021  Spacious Team <spacious-team@ya.ru>
+ * Copyright (C) 2023  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,34 +18,33 @@
 
 package ru.investbook.parser.psb;
 
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
-import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Ignore;
-import org.testng.annotations.Test;
+import org.spacious_team.broker.pojo.Security;
 import ru.investbook.parser.SecurityRegistrar;
 
 import java.io.IOException;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Ignore
-public class DerivativeTransactionTableTest {
+@Disabled
+public class PortfolioSecuritiesTableTest {
 
     @Mock
     SecurityRegistrar securityRegistrar;
 
-    @DataProvider(name = "isin")
-    Object[][] getData() {
-        return new Object[][] {{"E:\\Исполнение фьючерса.xlsx", "Si-12.19M191219CA65500", "Si-12.19" }};
+    static Object[][] isin() {
+        return new Object[][] {{"E:\\1.xlsx", "RU000A0ZZDQ8", "RU000A0JV7J9" }};
     }
 
-    @Test(dataProvider = "isin")
+    @ParameterizedTest
+    @MethodSource("isin")
     void testIsin(String report, String firstIsin, String lastIsin) throws IOException {
-        PsbBrokerReport psbBrokerReport = new PsbBrokerReport(report, securityRegistrar);
-        List<DerivativeTransaction> data = new DerivativeTransactionTable(psbBrokerReport).getData();
-        assertEquals(data.get(0).getSecurity(), firstIsin);
-        assertEquals(data.get(data.size() - 1).getSecurity(), lastIsin);
+        List<Security> data = new SecuritiesTable(new PsbBrokerReport(report, securityRegistrar)).getData();
+        assertEquals(data.get(0).getId(), firstIsin);
+        assertEquals(data.get(data.size() - 1).getId(), lastIsin);
     }
 }
