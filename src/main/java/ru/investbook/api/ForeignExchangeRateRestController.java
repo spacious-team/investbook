@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -63,19 +64,19 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
 
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отображает все загруженные в БД информацию по обменным курсам")
-    protected List<ForeignExchangeRate> get(@RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
-                                            @Parameter(description = "номер страницы")
+    protected Page<ForeignExchangeRate> get(@RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
+                                            @Parameter(description = "Номер страницы")
                                                 int pageNo,
                                             @RequestParam(value = "size", defaultValue = ApiUtil.DEFAULT_PAGE_SIZE, required = false)
-                                            @Parameter(description = "количество записей на странице")
+                                            @Parameter(description = "Количество записей на странице")
                                                 int pageSize,
                                             @RequestParam(value = "sortBy", defaultValue = ApiUtil.DEFAULT_FOREIGN_EXCHANGE_RATE_SORT_BY, required = false)
-                                            @Parameter(description = "атрибут сортировки")
+                                            @Parameter(description = "Атрибут сортировки")
                                                 String sortBy,
                                             @RequestParam(value = "sortDir", defaultValue = ApiUtil.DEFAULT_SORT_DIRECTION, required = false)
-                                            @Parameter(description = "направление сортировки")
+                                            @Parameter(description = "Направление сортировки")
                                                 String sortDir) {
-        return super.get(pageNo, pageSize, sortBy, sortDir);
+        return super.get(ApiUtil.getPage(pageNo, pageSize, sortBy, sortDir));
     }
 
     @GetMapping("/currency-pairs/{currency-pair}")

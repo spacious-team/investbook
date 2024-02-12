@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.Issuer;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,7 +38,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.IssuerEntity;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -51,19 +51,19 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
 
     @GetMapping
     @Operation(summary = "Отобразить всех")
-    public List<Issuer> get(@RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
-                                @Parameter(description = "номер страницы")
+    public Page<Issuer> get(@RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
+                                @Parameter(description = "Номер страницы")
                                 int pageNo,
                             @RequestParam(value = "size", defaultValue = ApiUtil.DEFAULT_PAGE_SIZE, required = false)
-                                @Parameter(description = "количество записей на странице")
+                                @Parameter(description = "Количество записей на странице")
                                 int pageSize,
                             @RequestParam(value = "sortBy", defaultValue = ApiUtil.DEFAULT_ISSUER_SORT_BY, required = false)
-                                @Parameter(description = "атрибут сортировки")
+                                @Parameter(description = "Атрибут сортировки")
                                 String sortBy,
                             @RequestParam(value = "sortDir", defaultValue = ApiUtil.DEFAULT_SORT_DIRECTION, required = false)
-                                @Parameter(description = "направление сортировки")
+                                @Parameter(description = "Направление сортировки")
                                 String sortDir) {
-        return super.get(pageNo, pageSize, sortBy, sortDir);
+        return super.get(ApiUtil.getPage(pageNo, pageSize, sortBy, sortDir));
     }
 
     @Override

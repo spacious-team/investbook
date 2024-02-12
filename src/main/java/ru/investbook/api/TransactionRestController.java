@@ -23,9 +23,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.Transaction;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -42,10 +42,8 @@ import ru.investbook.entity.TransactionEntity;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.repository.TransactionRepository;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Сделки", description = "Операции купли/продажи биржевых инструментов")
@@ -66,56 +64,51 @@ public class TransactionRestController extends AbstractRestController<Integer, T
 
     @GetMapping
     @Operation(summary = "Отобразить по фильтру", description = "Отображает сделки по счетам")
-    public List<Transaction> get(@QuerydslPredicate(root = Transaction.class) @RequestParam(value = "portfolio", required = false)
+    public Page<Transaction> get(@QuerydslPredicate(root = Transaction.class) @RequestParam(value = "portfolio", required = false)
                                         @Parameter(description = "Идентификатор счета брокера")
                                                 String portfolio,
-                                    @RequestParam(value = "trade-id", required = false)
+                                 @RequestParam(value = "trade-id", required = false)
                                         @Parameter(description = "Номер сделки в системе учета брокера")
                                                 String tradeId,
-                                    @RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
+                                 @RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
                                         @Parameter(description = "Номер страницы")
                                                 int pageNo,
-                                    @RequestParam(value = "size", defaultValue = ApiUtil.DEFAULT_PAGE_SIZE, required = false)
+                                 @RequestParam(value = "size", defaultValue = ApiUtil.DEFAULT_PAGE_SIZE, required = false)
                                         @Parameter(description = "Количество записей на страницы")
                                                 int pageSize,
-                                    @RequestParam(value = "sortBy", defaultValue = ApiUtil.DEFAULT_TRANSACTION_SORT_BY, required = false)
-                                        @Parameter(description = "атрибут сортировки")
+                                 @RequestParam(value = "sortBy", defaultValue = ApiUtil.DEFAULT_TRANSACTION_SORT_BY, required = false)
+                                        @Parameter(description = "Атрибут сортировки")
                                                 String sortBy,
-                                    @RequestParam(value = "sortDir", defaultValue = ApiUtil.DEFAULT_SORT_DIRECTION, required = false)
-                                        @Parameter(description = "направление сортировки")
+                                 @RequestParam(value = "sortDir", defaultValue = ApiUtil.DEFAULT_SORT_DIRECTION, required = false)
+                                        @Parameter(description = "Направление сортировки")
                                                 String sortDir) {
         if (portfolio != null && tradeId != null) {
             return getByPortfolioAndTradeId(portfolio, tradeId);
         } else if (portfolio != null) {
-            return getByPortfolio(portfolio, getPage(pageNo, pageSize, sortBy, sortDir));
+            return getByPortfolio(portfolio, ApiUtil.getPage(pageNo, pageSize, sortBy, sortDir));
         } else if (tradeId != null) {
-            return getByTradeId(tradeId, getPage(pageNo, pageSize, sortBy, sortDir));
+            return getByTradeId(tradeId, ApiUtil.getPage(pageNo, pageSize, sortBy, sortDir));
         } else {
-            return super.get(pageNo, pageSize, sortBy, sortDir);
+            return super.get(ApiUtil.getPage(pageNo, pageSize, sortBy, sortDir));
         }
     }
 
-    private List<Transaction> getByPortfolio(String portfolio, Pageable pageable) {
+    private Page<Transaction> getByPortfolio(String portfolio, Pageable pageable) {
         return repository.findByPortfolio(portfolio, pageable)
-                .getContent()
-                .stream()
-                .map(converter::fromEntity)
-                .collect(Collectors.toList());
+                .map(converter::fromEntity);
     }
 
-    private List<Transaction> getByTradeId(String tradeId, Pageable pageable) {
+    private Page<Transaction> getByTradeId(String tradeId, Pageable pageable) {
         return repository.findByTradeId(tradeId, pageable)
-                .getContent()
-                .stream()
-                .map(converter::fromEntity)
-                .collect(Collectors.toList());
+                .map(converter::fromEntity);
     }
 
-    private List<Transaction> getByPortfolioAndTradeId(String portfolio, String tradeId) {
-        return repository.findByPortfolioAndTradeId(portfolio, tradeId)
+    private Page<Transaction> getByPortfolioAndTradeId(String portfolio, String tradeId) {
+        List<Transaction> transactions = repository.findByPortfolioAndTradeId(portfolio, tradeId)
+                .stream()
                 .map(converter::fromEntity)
-                .map(Collections::singletonList)
-                .orElseGet(Collections::emptyList);
+                .toList();
+        return new PageImpl<>(transactions);
     }
 
     /**
@@ -187,9 +180,4 @@ public class TransactionRestController extends AbstractRestController<Integer, T
         return "/transactions";
     }
 
-    private Pageable getPage(int pageNo, int pageSize, String sortBy, String sortDir){
-        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-        return PageRequest.of(pageNo, pageSize, sort);
-    }
 }

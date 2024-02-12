@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.Security;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +38,7 @@ import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 
-import java.util.List;
+
 import java.util.Optional;
 
 @RestController
@@ -53,19 +54,19 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
 
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отобразить все биржевые инструменты")
-    public List<Security> get(@RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
-                                  @Parameter(description = "номер страницы")
+    public Page<Security> get(@RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
+                                  @Parameter(description = "Номер страницы")
                                   int pageNo,
                               @RequestParam(value = "size", defaultValue = ApiUtil.DEFAULT_PAGE_SIZE, required = false)
-                                  @Parameter(description = "количество записей на странице")
+                                  @Parameter(description = "Количество записей на странице")
                                   int pageSize,
                               @RequestParam(value = "sortBy", defaultValue = ApiUtil.DEFAULT_SECURITY_SORT_BY, required = false)
-                                  @Parameter(description = "атрибут сортировки")
+                                  @Parameter(description = "Атрибут сортировки")
                                   String sortBy,
                               @RequestParam(value = "sortDir", defaultValue = ApiUtil.DEFAULT_SORT_DIRECTION, required = false)
-                                  @Parameter(description = "направление сортировки")
+                                  @Parameter(description = "Направление сортировки")
                                   String sortDir){
-        return super.get(pageNo, pageSize, sortBy, sortDir);
+        return super.get(ApiUtil.getPage(pageNo, pageSize, sortBy, sortDir));
     }
 
 

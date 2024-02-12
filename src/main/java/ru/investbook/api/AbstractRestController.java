@@ -49,14 +49,9 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
 
 
 
-    protected List<Pojo> get(int page, int size, String sortBy, String sortDir) {
-        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-        return repository.findAll(PageRequest.of(page, size, sort))
-                .getContent()
-                .stream()
-                .map(converter :: fromEntity)
-                .collect(Collectors.toList());
+    protected Page<Pojo> get(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(converter :: fromEntity);
     }
 
     /**

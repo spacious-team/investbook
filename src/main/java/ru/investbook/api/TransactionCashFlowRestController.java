@@ -24,6 +24,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,10 +40,8 @@ import ru.investbook.converter.TransactionCashFlowConverter;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.repository.TransactionCashFlowRepository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Движения ДС по сделкам", description = "Уплаченные и вырученные суммы в сделках")
@@ -62,7 +62,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
 
     @GetMapping
     @Operation(summary = "Отобразить по фильтру", description = "Отобразить информацию о сделках")
-    protected List<TransactionCashFlow> get(
+    protected Page<TransactionCashFlow> get(
             @RequestParam(value = "portfolio", required = false)
             @Parameter(description = "Номер счета")
                     String portfolio,
@@ -79,29 +79,32 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
             @Parameter(description = "Количество записей на страницы")
                     int pageSize,
             @RequestParam(value = "sortBy", defaultValue = ApiUtil.DEFAULT_TRANSACTION_CASH_FLOW_SORT_BY, required = false)
-            @Parameter(description = "атрибут сортировки")
+            @Parameter(description = "Атрибут сортировки")
                     String sortBy,
             @RequestParam(value = "sortDir", defaultValue = ApiUtil.DEFAULT_SORT_DIRECTION, required = false)
-            @Parameter(description = "направление сортировки")
+            @Parameter(description = "Направление сортировки")
                     String sortDir
     ) {
         if (portfolio == null && tradeId == null && eventType == null) {
-            return super.get(pageNo, pageSize, sortBy, sortDir);
+            return super.get(ApiUtil.getPage(pageNo, pageSize, sortBy, sortDir));
         }
         return filterByEventType(
                 transactionRestController.get(portfolio, tradeId, pageNo, pageSize, sortBy, sortDir),
                 eventType);
     }
 
-    private List<TransactionCashFlow> filterByEventType(Collection<Transaction> transactions,
+    private Page<TransactionCashFlow> filterByEventType(Page<Transaction> transactions,
                                                         Integer eventType) {
-        return transactions.stream()
+        List<TransactionCashFlow> transactionCashFlows = transactions
+                .stream()
                 .flatMap(transaction -> eventType == null ?
                         repository.findByTransactionId(transaction.getId()).stream() :
-                        repository.findByTransactionIdAndCashFlowType(transaction.getId(), CashFlowType.valueOf(eventType))
-                                .stream())
+                        repository.findByTransactionIdAndCashFlowType(transaction.getId(), CashFlowType.valueOf(eventType)).stream())
                 .map(converter::fromEntity)
-                .collect(Collectors.toList());
+                .toList();
+        return new PageImpl<>(transactionCashFlows);
+
+
     }
 
     @Override

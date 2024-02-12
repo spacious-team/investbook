@@ -46,7 +46,6 @@ public interface TransactionRepository extends
 
     Optional<TransactionEntity> findFirstBySecurityIdOrderByTimestampDesc(Integer securityId);
 
-
     Page<TransactionEntity> findByPortfolio(String portfolio, Pageable pageable);
 
     Page<TransactionEntity> findByTradeId(String tradeId, Pageable pageable);
