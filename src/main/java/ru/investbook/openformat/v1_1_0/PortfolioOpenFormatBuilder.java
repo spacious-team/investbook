@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.boot.info.BuildProperties;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.investbook.api.PortfolioCashRestController;
 import ru.investbook.api.PortfolioPropertyRestController;
@@ -226,10 +227,10 @@ public class PortfolioOpenFormatBuilder {
     private VndInvestbookPof getVndInvestbook() {
         return VndInvestbookPof.builder()
                 .version(buildProperties.getVersion())
-                .portfolioCash(portfolioCashRestController.get())
-                .portfolioProperties(portfolioPropertyRestController.get())
-                .securityDescriptions(securityDescriptionRestController.get())
-                .securityQuotes(securityQuoteRestController.get())
+                .portfolioCash(portfolioCashRestController.get(PageRequest.ofSize(Integer.MAX_VALUE)).getContent())
+                .portfolioProperties(portfolioPropertyRestController.get(PageRequest.ofSize(Integer.MAX_VALUE)).getContent())
+                .securityDescriptions(securityDescriptionRestController.get(PageRequest.ofSize(Integer.MAX_VALUE)).getContent())
+                .securityQuotes(securityQuoteRestController.get(PageRequest.ofSize(Integer.MAX_VALUE)).getContent())
                 .build();
     }
 }

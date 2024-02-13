@@ -26,6 +26,10 @@ import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -72,29 +76,19 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
             @RequestParam(value = "event-type", required = false)
             @Parameter(description = "Тип (стоимость/комиссия/НКД)", example = "Смотреть API \"Типы событий\"")
                     Integer eventType,
-            @RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
-            @Parameter(description = "Номер страницы")
-                    int pageNo,
-            @RequestParam(value = "size", defaultValue = ApiUtil.DEFAULT_PAGE_SIZE, required = false)
-            @Parameter(description = "Количество записей на страницы")
-                    int pageSize,
-            @RequestParam(value = "sortBy", defaultValue = ApiUtil.DEFAULT_TRANSACTION_CASH_FLOW_SORT_BY, required = false)
-            @Parameter(description = "Атрибут сортировки")
-                    String sortBy,
-            @RequestParam(value = "sortDir", defaultValue = ApiUtil.DEFAULT_SORT_DIRECTION, required = false)
-            @Parameter(description = "Направление сортировки")
-                    String sortDir
+            @PageableDefault(sort = ApiUtil.DEFAULT_TRANSACTION_CASH_FLOW_SORT_BY, direction = Sort.Direction.DESC)
+            Pageable pageable
     ) {
         if (portfolio == null && tradeId == null && eventType == null) {
-            return super.get(ApiUtil.getPage(pageNo, pageSize, sortBy, sortDir));
+            return super.get(pageable);
         }
         return filterByEventType(
-                transactionRestController.get(portfolio, tradeId, pageNo, pageSize, sortBy, sortDir),
-                eventType);
+                transactionRestController.get(portfolio, tradeId, pageable),
+                eventType, PageRequest.ofSize(Integer.MAX_VALUE));
     }
 
     private Page<TransactionCashFlow> filterByEventType(Page<Transaction> transactions,
-                                                        Integer eventType) {
+                                                        Integer eventType, Pageable pageable) {
         List<TransactionCashFlow> transactionCashFlows = transactions
                 .stream()
                 .flatMap(transaction -> eventType == null ?
@@ -102,9 +96,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
                         repository.findByTransactionIdAndCashFlowType(transaction.getId(), CashFlowType.valueOf(eventType)).stream())
                 .map(converter::fromEntity)
                 .toList();
-        return new PageImpl<>(transactionCashFlows);
-
-
+        return new PageImpl<>(transactionCashFlows, pageable, Integer.MAX_VALUE);
     }
 
     @Override

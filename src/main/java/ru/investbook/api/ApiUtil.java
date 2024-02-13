@@ -18,17 +18,8 @@
 
 package ru.investbook.api;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-
 public class ApiUtil {
-
     private ApiUtil(){}
-
-    public static final String DEFAULT_PAGE = "1";
-
-    public static final String DEFAULT_PAGE_SIZE = "10";
     public static final String DEFAULT_EVENT_CASH_FLOW_SORT_BY = "portfolio";
     public static final String DEFAULT_FOREIGN_EXCHANGE_RATE_SORT_BY = "rate";
     public static final String DEFAULT_ISSUER_SORT_BY = "taxpayerId";
@@ -41,13 +32,4 @@ public class ApiUtil {
     public static final String DEFAULT_TRANSACTION_CASH_FLOW_SORT_BY = "transactionId";
     public static final String DEFAULT_TRANSACTION_SORT_BY = "tradeId";
     public static final String DEFAULT_PORTFOLIO_SORT_BY = "id";
-
-    public static final String DEFAULT_SORT_DIRECTION = "desc";
-
-    public static Pageable getPage(int pageNo, int pageSize, String sortBy, String sortDir){
-        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-        return PageRequest.of(pageNo, pageSize, sort);
-    }
-
 }

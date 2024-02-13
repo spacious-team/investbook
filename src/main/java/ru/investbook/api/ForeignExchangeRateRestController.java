@@ -23,6 +23,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,7 +35,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.ForeignExchangeRateConverter;
 import ru.investbook.entity.ForeignExchangeRateEntity;
@@ -62,21 +64,12 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
         this.foreignExchangeRateService = foreignExchangeRateService;
     }
 
+    @Override
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отображает все загруженные в БД информацию по обменным курсам")
-    protected Page<ForeignExchangeRate> get(@RequestParam(value = "page", defaultValue = ApiUtil.DEFAULT_PAGE, required = false)
-                                            @Parameter(description = "Номер страницы")
-                                                int pageNo,
-                                            @RequestParam(value = "size", defaultValue = ApiUtil.DEFAULT_PAGE_SIZE, required = false)
-                                            @Parameter(description = "Количество записей на странице")
-                                                int pageSize,
-                                            @RequestParam(value = "sortBy", defaultValue = ApiUtil.DEFAULT_FOREIGN_EXCHANGE_RATE_SORT_BY, required = false)
-                                            @Parameter(description = "Атрибут сортировки")
-                                                String sortBy,
-                                            @RequestParam(value = "sortDir", defaultValue = ApiUtil.DEFAULT_SORT_DIRECTION, required = false)
-                                            @Parameter(description = "Направление сортировки")
-                                                String sortDir) {
-        return super.get(ApiUtil.getPage(pageNo, pageSize, sortBy, sortDir));
+    protected Page<ForeignExchangeRate> get(@PageableDefault(sort = ApiUtil.DEFAULT_FOREIGN_EXCHANGE_RATE_SORT_BY, direction = Sort.Direction.DESC)
+                                                Pageable pageable) {
+        return super.get(pageable);
     }
 
     @GetMapping("/currency-pairs/{currency-pair}")

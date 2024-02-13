@@ -112,7 +112,7 @@ public class TransactionFormsService {
     @NonNull
     private Page<TransactionModel> getTransactionModels(Specification<TransactionEntity> spec,
                                                         TransactionFormFilterModel filter) {
-        Sort sort = Sort.by(asc(TransactionEntity_.PORTFOLIO), desc(TransactionEntity_.TIMESTAMP), asc("security.id"));
+        Sort sort = Sort.by(asc("portfolio"), desc("timestamp"), asc("security.id"));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
         return transactionRepository.findAll(spec, page)
