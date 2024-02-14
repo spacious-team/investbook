@@ -23,11 +23,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.EventCashFlow;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,8 +55,9 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
 
     @Override
     @GetMapping
+    @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам")
-    public Page<EventCashFlow> get(@PageableDefault(sort = ApiUtil.DEFAULT_EVENT_CASH_FLOW_SORT_BY, direction = Sort.Direction.DESC)
+    public Page<EventCashFlow> get(@Parameter(hidden = true)
                                    Pageable pageable) {
         return super.get(pageable);
     }

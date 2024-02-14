@@ -25,6 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.SecurityDescriptionEntity;
+import ru.investbook.entity.SecurityDescriptionEntity_;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityDescriptionRepository;
 import ru.investbook.repository.SecurityRepository;
@@ -57,7 +58,7 @@ public class SecurityDescriptionFormsService {
         SecurityDescriptionSearchSpecification spec = SecurityDescriptionSearchSpecification.of(
                 filter.getSecurity(), filter.getSecuritySector());
 
-        Sort sort = Sort.by(asc("sector"));
+        Sort sort = Sort.by(asc(SecurityDescriptionEntity_.SECTOR));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
         return securityDescriptionRepository.findAll(spec, page)

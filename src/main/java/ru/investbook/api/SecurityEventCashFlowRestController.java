@@ -25,9 +25,7 @@ import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,7 +61,7 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @Override
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам")
-    public Page<SecurityEventCashFlow> get(@PageableDefault(sort = ApiUtil.DEFAULT_SECURITY_EVENT_CASH_FLOW_SORT_BY, direction = Sort.Direction.DESC)
+    public Page<SecurityEventCashFlow> get(@Parameter(hidden = true)
                                                Pageable pageable) {
         return super.get(pageable);
     }

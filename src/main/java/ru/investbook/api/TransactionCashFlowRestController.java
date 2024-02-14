@@ -24,12 +24,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,6 +63,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     }
 
     @GetMapping
+    @PageableAsQueryParam
     @Operation(summary = "Отобразить по фильтру", description = "Отобразить информацию о сделках")
     protected Page<TransactionCashFlow> get(
             @RequestParam(value = "portfolio", required = false)
@@ -76,19 +75,19 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
             @RequestParam(value = "event-type", required = false)
             @Parameter(description = "Тип (стоимость/комиссия/НКД)", example = "Смотреть API \"Типы событий\"")
                     Integer eventType,
-            @PageableDefault(sort = ApiUtil.DEFAULT_TRANSACTION_CASH_FLOW_SORT_BY, direction = Sort.Direction.DESC)
-            Pageable pageable
+            @Parameter(hidden = true)
+                    Pageable pageable
     ) {
         if (portfolio == null && tradeId == null && eventType == null) {
             return super.get(pageable);
         }
         return filterByEventType(
-                transactionRestController.get(portfolio, tradeId, pageable),
-                eventType, PageRequest.ofSize(Integer.MAX_VALUE));
+                transactionRestController.get(portfolio, tradeId, Pageable.unpaged()),
+                eventType);
     }
 
     private Page<TransactionCashFlow> filterByEventType(Page<Transaction> transactions,
-                                                        Integer eventType, Pageable pageable) {
+                                                        Integer eventType) {
         List<TransactionCashFlow> transactionCashFlows = transactions
                 .stream()
                 .flatMap(transaction -> eventType == null ?
@@ -96,7 +95,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
                         repository.findByTransactionIdAndCashFlowType(transaction.getId(), CashFlowType.valueOf(eventType)).stream())
                 .map(converter::fromEntity)
                 .toList();
-        return new PageImpl<>(transactionCashFlows, pageable, Integer.MAX_VALUE);
+        return new PageImpl<>(transactionCashFlows);
     }
 
     @Override

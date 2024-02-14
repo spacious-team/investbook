@@ -40,6 +40,7 @@ import ru.investbook.converter.TransactionConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
+import ru.investbook.entity.TransactionEntity_;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.report.FifoPositionsFilter;
@@ -112,7 +113,7 @@ public class TransactionFormsService {
     @NonNull
     private Page<TransactionModel> getTransactionModels(Specification<TransactionEntity> spec,
                                                         TransactionFormFilterModel filter) {
-        Sort sort = Sort.by(asc("portfolio"), desc("timestamp"), asc("security.id"));
+        Sort sort = Sort.by(asc(TransactionEntity_.PORTFOLIO), desc(TransactionEntity_.TIMESTAMP), asc("security.id"));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
         return transactionRepository.findAll(spec, page)

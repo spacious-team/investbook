@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.SecurityQuoteConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityQuoteEntity;
+import ru.investbook.entity.SecurityQuoteEntity_;
 import ru.investbook.repository.SecurityQuoteRepository;
 import ru.investbook.repository.specs.SecurityQuoteSearchSpecification;
 import ru.investbook.web.forms.model.SecurityQuoteModel;
@@ -59,7 +60,7 @@ public class SecurityQuoteFormsService {
         SecurityQuoteSearchSpecification spec = SecurityQuoteSearchSpecification.of(
                 filter.getSecurity(), filter.getCurrency(), filter.getDate());
 
-        Sort sort = Sort.by(desc("timestamp"), asc("security.name"));
+        Sort sort = Sort.by(desc(SecurityQuoteEntity_.TIMESTAMP), asc("security.name"));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
         return securityQuoteRepository.findAll(spec, page)

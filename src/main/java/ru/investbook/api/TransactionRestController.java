@@ -23,12 +23,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.Transaction;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.querydsl.binding.QuerydslPredicate;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,15 +63,16 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     }
 
     @GetMapping
+    @PageableAsQueryParam
     @Operation(summary = "Отобразить по фильтру", description = "Отображает сделки по счетам")
-    public Page<Transaction> get(@QuerydslPredicate(root = Transaction.class) @RequestParam(value = "portfolio", required = false)
+    public Page<Transaction> get(@RequestParam(value = "portfolio", required = false)
                                         @Parameter(description = "Идентификатор счета брокера")
                                                 String portfolio,
                                  @RequestParam(value = "trade-id", required = false)
                                         @Parameter(description = "Номер сделки в системе учета брокера")
                                                 String tradeId,
-                                 @PageableDefault(sort = ApiUtil.DEFAULT_TRANSACTION_SORT_BY, direction = Sort.Direction.DESC)
-                                     Pageable pageable) {
+                                        @Parameter(hidden = true)
+                                                Pageable pageable) {
         if (portfolio != null && tradeId != null) {
             return getByPortfolioAndTradeId(portfolio, tradeId);
         } else if (portfolio != null) {
