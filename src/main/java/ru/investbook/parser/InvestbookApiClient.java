@@ -34,7 +34,7 @@ import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -120,7 +120,7 @@ public class InvestbookApiClient {
     }
 
     private Optional<Integer> getSavedTransactionId(AbstractTransaction transaction) {
-        return Optional.of(transactionRestController.get(transaction.getPortfolio(), transaction.getTradeId(), PageRequest.ofSize(Integer.MAX_VALUE)).getContent())
+        return Optional.of(transactionRestController.get(transaction.getPortfolio(), transaction.getTradeId(), Pageable.unpaged()).getContent())
                 .filter(result -> result.size() == 1)
                 .map(List::getFirst)
                 .map(Transaction::getId);

@@ -25,16 +25,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 
 @Entity
 @Table(name = "portfolio")
 @Data
 @EqualsAndHashCode(of = "id")
 public class PortfolioEntity {
+
     @Id
     @Column(name = "id")
-    @Getter
     private String id;
 
     @Basic
