@@ -39,7 +39,6 @@ import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 
-
 import java.util.Optional;
 
 @RestController
@@ -58,7 +57,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отобразить все биржевые инструменты")
     public Page<Security> get(@Parameter(hidden = true)
-                                  Pageable pageable){
+                              Pageable pageable) {
         return super.get(pageable);
     }
 
@@ -69,7 +68,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
             description = "Отобразить биржевой инструмент по идентификатору (ISIN,  коду дериватива, валютной пары)")
     public ResponseEntity<Security> get(@PathVariable("id")
                                         @Parameter(description = "Идентификатор", example = "123", required = true)
-                                                Integer id) {
+                                        Integer id) {
         return super.get(id);
     }
 
@@ -86,8 +85,10 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Operation(summary = "Обновить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Идентификатор", example = "123", required = true)
-                                            Integer id,
-                                    @Valid @RequestBody Security security) {
+                                    Integer id,
+                                    @Valid
+                                    @RequestBody
+                                    Security security) {
         return super.put(id, security);
     }
 
@@ -96,7 +97,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Operation(summary = "Удалить", description = "Удалить сведения о биржевом инструменте и всех его сделках по всем счетам")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Идентификатор", example = "123", required = true)
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 

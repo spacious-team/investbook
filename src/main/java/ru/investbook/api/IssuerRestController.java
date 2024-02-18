@@ -55,7 +55,7 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     @PageableAsQueryParam
     @Operation(summary = "Отобразить всех")
     public Page<Issuer> get(@Parameter(hidden = true)
-                                Pageable pageable) {
+                            Pageable pageable) {
         return super.get(pageable);
     }
 
@@ -64,7 +64,7 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     @Operation(summary = "Отобразить одного", description = "Отобразить информацию об эмитенте по его номеру")
     public ResponseEntity<Issuer> get(@PathVariable("id")
                                       @Parameter(description = "Внутренний идентификатор эмитента")
-                                              Integer id) {
+                                      Integer id) {
         return super.get(id);
     }
 
@@ -80,9 +80,10 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     @Operation(summary = "Обновить сведения")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор эмитента")
-                                            Integer id,
-                                    @Valid @RequestBody
-                                            Issuer issuer) {
+                                    Integer id,
+                                    @Valid
+                                    @RequestBody
+                                    Issuer issuer) {
         return super.put(id, issuer);
     }
 
@@ -91,7 +92,7 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     @Operation(summary = "Удалить", description = "Удаляет сведения об эмитенте из БД")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор эмитента")
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 

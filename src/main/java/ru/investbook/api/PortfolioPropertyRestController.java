@@ -56,7 +56,7 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отображает всю имеющуюся информацию обо всех счетах")
     public Page<PortfolioProperty> get(@Parameter(hidden = true)
-                                           Pageable pageable) {
+                                       Pageable pageable) {
         return super.get(pageable);
     }
 
@@ -65,7 +65,7 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @Operation(summary = "Отобразить один", description = "Отображает информацию по идентификатору")
     public ResponseEntity<PortfolioProperty> get(@PathVariable("id")
                                                  @Parameter(description = "Внутренний идентификатор записи")
-                                                         Integer id) {
+                                                 Integer id) {
         return super.get(id);
     }
 
@@ -81,8 +81,10 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @Operation(summary = "Обновить", description = "Обновить информацию для счета")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор записи")
-                                            Integer id,
-                                    @Valid @RequestBody PortfolioProperty property) {
+                                    Integer id,
+                                    @Valid
+                                    @RequestBody
+                                    PortfolioProperty property) {
         return super.put(id, property);
     }
 
@@ -91,7 +93,7 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @Operation(summary = "Удалить")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор записи")
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 

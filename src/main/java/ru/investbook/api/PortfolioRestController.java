@@ -57,7 +57,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @PageableAsQueryParam
     @Operation(summary = "Отобразить все")
     public Page<Portfolio> get(@Parameter(hidden = true)
-                                   Pageable pageable) {
+                               Pageable pageable) {
         return super.get(pageable);
     }
 
@@ -66,7 +66,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @Operation(summary = "Отобразить один")
     public ResponseEntity<Portfolio> get(@PathVariable("id")
                                          @Parameter(description = "Номер счета")
-                                                 String id) {
+                                         String id) {
         return super.get(id);
     }
 
@@ -82,8 +82,10 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @Operation(summary = "Добавить")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер счета")
-                                            String id,
-                                    @Valid @RequestBody Portfolio object) {
+                                    String id,
+                                    @Valid
+                                    @RequestBody
+                                    Portfolio object) {
         return super.put(id, object);
     }
 
@@ -92,7 +94,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @Operation(summary = "Удалить", description = "Удалить счет и все связанные с ним данные")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Номер счета")
-                               String id) {
+                       String id) {
         super.delete(id);
     }
 

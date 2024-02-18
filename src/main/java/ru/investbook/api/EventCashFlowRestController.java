@@ -67,7 +67,7 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     @Operation(summary = "Отобразить одну", description = "Отобразить выплату по ее номеру")
     public ResponseEntity<EventCashFlow> get(@PathVariable("id")
                                              @Parameter(description = "Номер события")
-                                                     Integer id) {
+                                             Integer id) {
         return super.get(id);
     }
 
@@ -83,8 +83,10 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     @Operation(summary = "Изменить", description = "Модифицировать информацию в БД")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер события")
-                                            Integer id,
-                                    @Valid @RequestBody EventCashFlow event) {
+                                    Integer id,
+                                    @Valid
+                                    @RequestBody
+                                    EventCashFlow event) {
         return super.put(id, event);
     }
 
@@ -93,7 +95,7 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     @Operation(summary = "Удалить", description = "Удалить информацию из БД")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Номер события")
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 

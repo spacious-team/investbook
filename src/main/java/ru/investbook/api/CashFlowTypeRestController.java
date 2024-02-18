@@ -56,7 +56,7 @@ public class CashFlowTypeRestController {
     @Operation(summary = "Отобразить по идентификатору")
     public ResponseEntity<CashFlowType> getCashFlowType(@PathVariable("id")
                                                         @Parameter(description = "Идентификатор типа")
-                                                                Integer id) {
+                                                        Integer id) {
         Optional<CashFlowType> result = cashFlowTypeRepository.findById(id)
                 .map(cashFlowTypeConverter::fromEntity);
         return result

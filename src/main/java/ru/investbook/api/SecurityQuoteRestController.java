@@ -56,7 +56,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отобразить всю историю котировок по всем инструментам")
     public Page<SecurityQuote> get(@Parameter(hidden = true)
-                                       Pageable pageable) {
+                                   Pageable pageable) {
         return super.get(pageable);
     }
 
@@ -66,7 +66,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @Operation(summary = "Отобразить одну", description = "Отобразить котировку по номеру записи в БД")
     public ResponseEntity<SecurityQuote> get(@PathVariable("id")
                                              @Parameter(description = "Номер записи о котировке")
-                                                     Integer id) {
+                                             Integer id) {
         return super.get(id);
     }
 
@@ -82,8 +82,10 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @Operation(summary = "Изменить")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер записи о котировке")
-                                            Integer id,
-                                    @Valid @RequestBody SecurityQuote quote) {
+                                    Integer id,
+                                    @Valid
+                                    @RequestBody
+                                    SecurityQuote quote) {
         return super.put(id, quote);
     }
 
@@ -92,7 +94,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @Operation(summary = "Удалить")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Номер записи о котировке")
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 

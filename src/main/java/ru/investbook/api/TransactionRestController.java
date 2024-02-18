@@ -66,13 +66,13 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @PageableAsQueryParam
     @Operation(summary = "Отобразить по фильтру", description = "Отображает сделки по счетам")
     public Page<Transaction> get(@RequestParam(value = "portfolio", required = false)
-                                        @Parameter(description = "Идентификатор счета брокера")
-                                                String portfolio,
+                                 @Parameter(description = "Идентификатор счета брокера")
+                                 String portfolio,
                                  @RequestParam(value = "trade-id", required = false)
-                                        @Parameter(description = "Номер сделки в системе учета брокера")
-                                                String tradeId,
-                                        @Parameter(hidden = true)
-                                                Pageable pageable) {
+                                 @Parameter(description = "Номер сделки в системе учета брокера")
+                                 String tradeId,
+                                 @Parameter(hidden = true)
+                                 Pageable pageable) {
         if (portfolio != null && tradeId != null) {
             return getByPortfolioAndTradeId(portfolio, tradeId);
         } else if (portfolio != null) {
@@ -110,7 +110,7 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @Operation(summary = "Отобразить одну", description = "Отображает одну сделку")
     public ResponseEntity<Transaction> get(@PathVariable("id")
                                            @Parameter(description = "Внутренний идентификатор сделки")
-                                                   Integer id) {
+                                           Integer id) {
         return super.get(id);
     }
 
@@ -130,8 +130,10 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @Operation(summary = "Обновить параметры", description = "Обновляет параметры указанной сделки")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор сделки")
-                                            Integer id,
-                                    @Valid @RequestBody Transaction object) {
+                                    Integer id,
+                                    @Valid
+                                    @RequestBody
+                                    Transaction object) {
         positionsFactory.invalidateCache();
         return super.put(id, object);
     }
@@ -144,7 +146,7 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @Operation(summary = "Удалить", description = "Удаляет указанную сделку")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор сделки")
-                               Integer id) {
+                       Integer id) {
         positionsFactory.invalidateCache();
         super.delete(id);
     }

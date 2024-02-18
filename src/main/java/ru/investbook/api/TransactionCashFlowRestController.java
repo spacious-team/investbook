@@ -21,6 +21,7 @@ package ru.investbook.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
@@ -68,15 +69,15 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     protected Page<TransactionCashFlow> get(
             @RequestParam(value = "portfolio", required = false)
             @Parameter(description = "Номер счета")
-                    String portfolio,
+            String portfolio,
             @RequestParam(value = "trade-id", required = false)
             @Parameter(description = "Номер сделки в системе учета брокера")
-                    String tradeId,
+            String tradeId,
             @RequestParam(value = "event-type", required = false)
             @Parameter(description = "Тип (стоимость/комиссия/НКД)", example = "Смотреть API \"Типы событий\"")
-                    Integer eventType,
+            Integer eventType,
             @Parameter(hidden = true)
-                    Pageable pageable
+            Pageable pageable
     ) {
         if (portfolio == null && tradeId == null && eventType == null) {
             return super.get(pageable);
@@ -103,14 +104,14 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     @Operation(summary = "Отобразить одну", description = "Отобразить информацию о конкретной сделке")
     public ResponseEntity<TransactionCashFlow> get(@PathVariable("id")
                                                    @Parameter(description = "Внутренний идентификатор сделки")
-                                                           Integer id) {
+                                                   Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Добавить информацию об об объемах движения ДС по сделке")
-    public ResponseEntity<Void> post(@RequestBody TransactionCashFlow object) {
+    public ResponseEntity<Void> post(@Valid @RequestBody TransactionCashFlow object) {
         return super.post(object);
     }
 
@@ -122,8 +123,10 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     @Operation(summary = "Обновить", description = "Обновить информацию об об объемах движения ДС по сделке")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор сделки")
-                                            Integer id,
-                                    @RequestBody TransactionCashFlow object) {
+                                    Integer id,
+                                    @Valid
+                                    @RequestBody
+                                    TransactionCashFlow object) {
         return super.put(id, object);
     }
 
@@ -137,7 +140,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
             """)
     public void delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор сделки")
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 

@@ -57,7 +57,7 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отобразить информацию по всем инструментам")
     public Page<SecurityDescription> get(@Parameter(hidden = true)
-                                             Pageable pageable) {
+                                         Pageable pageable) {
         return super.get(pageable);
     }
 
@@ -69,7 +69,7 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     public ResponseEntity<SecurityDescription> get(@PathVariable("id")
                                                    @Parameter(description = "Идентификатор",
                                                            example = "123", required = true)
-                                                           Integer id) {
+                                                   Integer id) {
         return super.get(id);
     }
 
@@ -86,8 +86,10 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     @Operation(summary = "Обновить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Идентификатор", example = "123", required = true)
-                                            Integer id,
-                                    @Valid @RequestBody SecurityDescription security) {
+                                    Integer id,
+                                    @Valid
+                                    @RequestBody
+                                    SecurityDescription security) {
         return super.put(id, security);
     }
 
@@ -96,7 +98,7 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     @Operation(summary = "Удалить", description = "Удалить информацию по инструменту")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Идентификатор", example = "123", required = true)
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 
