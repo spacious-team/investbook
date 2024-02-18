@@ -23,6 +23,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,7 +39,6 @@ import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.FifoPositionsFactory;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.spacious_team.broker.pojo.CashFlowType.REDEMPTION;
@@ -60,8 +61,9 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @Override
     @GetMapping
     @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам")
-    public List<SecurityEventCashFlow> get() {
-        return super.get();
+    public Page<SecurityEventCashFlow> get(@Parameter(hidden = true)
+                                               Pageable pageable) {
+        return super.get(pageable);
     }
 
     @Override

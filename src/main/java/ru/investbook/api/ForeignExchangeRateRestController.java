@@ -22,6 +22,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -62,9 +65,11 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
 
     @Override
     @GetMapping
+    @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отображает все загруженные в БД информацию по обменным курсам")
-    protected List<ForeignExchangeRate> get() {
-        return super.get();
+    protected Page<ForeignExchangeRate> get(@Parameter(hidden = true)
+                                                Pageable pageable) {
+        return super.get(pageable);
     }
 
     @GetMapping("/currency-pairs/{currency-pair}")

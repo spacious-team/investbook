@@ -23,6 +23,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.Security;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +39,7 @@ import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 
-import java.util.List;
+
 import java.util.Optional;
 
 @RestController
@@ -52,9 +55,11 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
 
     @Override
     @GetMapping
+    @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отобразить все биржевые инструменты")
-    public List<Security> get() {
-        return super.get();
+    public Page<Security> get(@Parameter(hidden = true)
+                                  Pageable pageable){
+        return super.get(pageable);
     }
 
 

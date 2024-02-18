@@ -23,6 +23,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.PortfolioProperty;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,7 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.PortfolioPropertyEntity;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -51,9 +53,11 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
 
     @Override
     @GetMapping
+    @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отображает всю имеющуюся информацию обо всех счетах")
-    public List<PortfolioProperty> get() {
-        return super.get();
+    public Page<PortfolioProperty> get(@Parameter(hidden = true)
+                                           Pageable pageable) {
+        return super.get(pageable);
     }
 
     @Override
