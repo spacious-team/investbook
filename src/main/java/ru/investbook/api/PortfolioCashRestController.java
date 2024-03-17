@@ -23,6 +23,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.PortfolioCash;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,7 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.PortfolioCashEntity;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -51,9 +53,11 @@ public class PortfolioCashRestController extends AbstractRestController<Integer,
 
     @Override
     @GetMapping
+    @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отображает всю имеющуюся информацию обо всех счетах")
-    public List<PortfolioCash> get() {
-        return super.get();
+    public Page<PortfolioCash> get(@Parameter(hidden = true)
+                                   Pageable pageable) {
+        return super.get(pageable);
     }
 
     @Override
@@ -61,7 +65,7 @@ public class PortfolioCashRestController extends AbstractRestController<Integer,
     @Operation(summary = "Отобразить один", description = "Отображает информацию по идентификатору")
     public ResponseEntity<PortfolioCash> get(@PathVariable("id")
                                              @Parameter(description = "Внутренний идентификатор записи")
-                                                     Integer id) {
+                                             Integer id) {
         return super.get(id);
     }
 
@@ -77,8 +81,10 @@ public class PortfolioCashRestController extends AbstractRestController<Integer,
     @Operation(summary = "Обновить", description = "Обновить информацию для счета")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор записи")
-                                            Integer id,
-                                    @Valid @RequestBody PortfolioCash property) {
+                                    Integer id,
+                                    @Valid
+                                    @RequestBody
+                                    PortfolioCash property) {
         return super.put(id, property);
     }
 
@@ -87,7 +93,7 @@ public class PortfolioCashRestController extends AbstractRestController<Integer,
     @Operation(summary = "Удалить")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор записи")
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 

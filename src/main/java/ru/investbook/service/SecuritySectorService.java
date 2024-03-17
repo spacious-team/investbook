@@ -147,12 +147,9 @@ public class SecuritySectorService {
         sector = sector.or(() -> ofNullable(security.getId())
                         .filter(id -> security.getType().isStockOrBond())
                         .map($ -> UNKNOWN_SECTOR));
-        if (sector.isEmpty()) {
-            return empty();
-        }
-        return Optional.of(SecurityDescription.builder()
+        return sector.map(s -> SecurityDescription.builder()
                 .security(security.getId())
-                .sector(sector.get())
+                .sector(s)
                 .build());
     }
 }

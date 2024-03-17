@@ -1,6 +1,6 @@
 <!--
   ~ InvestBook
-  ~ Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+  ~ Copyright (C) 2021  Spacious Team <spacious-team@ya.ru>
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU Affero General Public License as
@@ -83,7 +83,7 @@
     <br>
     <div id="security-attach-elements">
         <label>
-            Привязать к бумаге
+            Привязать к бумаге<span class="hint">*</span>
             <input type="text" th:field="*{attachedSecurity.security}" list="securities" class="security" id="security"
                    pattern="^.*(\s+\([A-Z0-9]+\)\s*)?$"/>
         </label>
@@ -93,14 +93,14 @@
             </svg>
         </a>
         <label>
-            Количество, шт
+            Количество<span class="hint">*</span>, шт
             <input type="number" min="1" th:field="*{attachedSecurity.count}" class="input-width"/>
         </label>
         <br>
     </div>
     <label>
         Сумма
-        <input type="number" step="0.000001" min="0.000001" th:field="*{value}" id="value" required/>
+        <input type="number" step="0.000001" th:field="*{value}" id="value" required/>  <!-- don't set min="0.000001", negative values is use by algorithm -->
     </label>
     <label>
         Валюта
@@ -177,6 +177,10 @@
         document.getElementById('security-attach-elements').style.display = display
     }
 </script>
+
+<p class="hint">
+    * Опциональные поля.
+</p>
 
 <p class="hint">
     Сумма для купонов и дивидендов указывается до вычета налога.

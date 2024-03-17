@@ -31,6 +31,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(of = "id")
 public class PortfolioEntity {
+
     @Id
     @Column(name = "id")
     private String id;

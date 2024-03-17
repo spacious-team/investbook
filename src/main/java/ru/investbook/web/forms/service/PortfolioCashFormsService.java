@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
 import ru.investbook.converter.PortfolioCashConverter;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.entity.PortfolioCashEntity;
+import ru.investbook.entity.PortfolioCashEntity_;
 import ru.investbook.repository.PortfolioCashRepository;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.specs.PortfolioCashSearchSpecification;
@@ -65,7 +66,7 @@ public class PortfolioCashFormsService {
         PortfolioCashSearchSpecification spec = PortfolioCashSearchSpecification.of(
                 filter.getPortfolio(), filter.getDateFrom(), filter.getDateTo(), filter.getCurrency());
 
-        Sort sort = Sort.by(asc("portfolio"), desc("timestamp"));
+        Sort sort = Sort.by(asc(PortfolioCashEntity_.PORTFOLIO), desc(PortfolioCashEntity_.TIMESTAMP));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
         return portfolioCashRepository.findAll(spec, page)

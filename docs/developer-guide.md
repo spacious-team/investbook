@@ -17,6 +17,12 @@ git clone https://github.com/spacious-team/investbook.git
 Скачайте java под свою ОС, например с сайта [OpenJDK](https://openjdk.org/install/), и установите переменные
 окружения `JAVA_HOME` и `PATH`, например для Windows 10 по этой [инструкции](https://csharpcoderr.com/5351/).
 
+### Установка Wix
+Для сборки пакета для установки Investbook требуется Wix 3.
+Скачать Wix 3 можно по ссылке с официального сайта [Wix](https://wixtoolset.org/docs/wix3/)
+(пакет для установки расположен на [GitHub](https://github.com/wixtoolset/wix3/releases)).
+Wix в свою очередь потребует установки [.NET](https://dotnet.microsoft.com/en-us/download/dotnet).
+
 ### Компиляция
 Компиляция запускается командой:
 ```

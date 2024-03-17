@@ -34,6 +34,7 @@ import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,7 @@ import ru.investbook.api.TransactionCashFlowRestController;
 import ru.investbook.api.TransactionRestController;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -118,9 +120,9 @@ public class InvestbookApiClient {
     }
 
     private Optional<Integer> getSavedTransactionId(AbstractTransaction transaction) {
-        return Optional.of(transactionRestController.get(transaction.getPortfolio(), transaction.getTradeId()))
+        return Optional.of(transactionRestController.get(transaction.getPortfolio(), transaction.getTradeId(), Pageable.unpaged()).getContent())
                 .filter(result -> result.size() == 1)
-                .map(result -> result.get(0))
+                .map(List::getFirst)
                 .map(Transaction::getId);
     }
 

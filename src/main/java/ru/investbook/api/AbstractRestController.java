@@ -20,6 +20,8 @@ package ru.investbook.api;
 
 import jakarta.persistence.GeneratedValue;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +32,8 @@ import ru.investbook.entity.UseExistingOrGenerateIdGenerator;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -42,11 +42,10 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
     protected final JpaRepository<Entity, ID> repository;
     protected final EntityConverter<Entity, Pojo> converter;
 
-    protected List<Pojo> get() {
-        return repository.findAll()
-                .stream()
-                .map(converter::fromEntity)
-                .collect(Collectors.toList());
+
+    protected Page<Pojo> get(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(converter::fromEntity);
     }
 
     /**

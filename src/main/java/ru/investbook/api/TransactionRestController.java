@@ -23,6 +23,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.Transaction;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,10 +42,8 @@ import ru.investbook.entity.TransactionEntity;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.repository.TransactionRepository;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "Сделки", description = "Операции купли/продажи биржевых инструментов")
@@ -61,43 +63,43 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     }
 
     @GetMapping
+    @PageableAsQueryParam
     @Operation(summary = "Отобразить по фильтру", description = "Отображает сделки по счетам")
-    public List<Transaction> get(@RequestParam(value = "portfolio", required = false)
-                                        @Parameter(description = "Идентификатор счета брокера")
-                                                String portfolio,
-                                    @RequestParam(value = "trade-id", required = false)
-                                        @Parameter(description = "Номер сделки в системе учета брокера")
-                                                String tradeId) {
+    public Page<Transaction> get(@RequestParam(value = "portfolio", required = false)
+                                 @Parameter(description = "Идентификатор счета брокера")
+                                 String portfolio,
+                                 @RequestParam(value = "trade-id", required = false)
+                                 @Parameter(description = "Номер сделки в системе учета брокера")
+                                 String tradeId,
+                                 @Parameter(hidden = true)
+                                 Pageable pageable) {
         if (portfolio != null && tradeId != null) {
             return getByPortfolioAndTradeId(portfolio, tradeId);
         } else if (portfolio != null) {
-            return getByPortfolio(portfolio);
+            return getByPortfolio(portfolio, pageable);
         } else if (tradeId != null) {
-            return getByTradeId(tradeId);
+            return getByTradeId(tradeId, pageable);
         } else {
-            return super.get();
+            return super.get(pageable);
         }
     }
 
-    private List<Transaction> getByPortfolio(String portfolio) {
-        return repository.findByPortfolio(portfolio)
-                .stream()
-                .map(converter::fromEntity)
-                .collect(Collectors.toList());
+    private Page<Transaction> getByPortfolio(String portfolio, Pageable pageable) {
+        return repository.findByPortfolio(portfolio, pageable)
+                .map(converter::fromEntity);
     }
 
-    private List<Transaction> getByTradeId(String tradeId) {
-        return repository.findByTradeId(tradeId)
-                .stream()
-                .map(converter::fromEntity)
-                .collect(Collectors.toList());
+    private Page<Transaction> getByTradeId(String tradeId, Pageable pageable) {
+        return repository.findByTradeId(tradeId, pageable)
+                .map(converter::fromEntity);
     }
 
-    private List<Transaction> getByPortfolioAndTradeId(String portfolio, String tradeId) {
-        return repository.findByPortfolioAndTradeId(portfolio, tradeId)
+    private Page<Transaction> getByPortfolioAndTradeId(String portfolio, String tradeId) {
+        List<Transaction> transactions = repository.findByPortfolioAndTradeId(portfolio, tradeId)
+                .stream()
                 .map(converter::fromEntity)
-                .map(Collections::singletonList)
-                .orElseGet(Collections::emptyList);
+                .toList();
+        return new PageImpl<>(transactions);
     }
 
     /**
@@ -108,7 +110,7 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @Operation(summary = "Отобразить одну", description = "Отображает одну сделку")
     public ResponseEntity<Transaction> get(@PathVariable("id")
                                            @Parameter(description = "Внутренний идентификатор сделки")
-                                                   Integer id) {
+                                           Integer id) {
         return super.get(id);
     }
 
@@ -128,8 +130,10 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @Operation(summary = "Обновить параметры", description = "Обновляет параметры указанной сделки")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор сделки")
-                                            Integer id,
-                                    @Valid @RequestBody Transaction object) {
+                                    Integer id,
+                                    @Valid
+                                    @RequestBody
+                                    Transaction object) {
         positionsFactory.invalidateCache();
         return super.put(id, object);
     }
@@ -142,7 +146,7 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @Operation(summary = "Удалить", description = "Удаляет указанную сделку")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор сделки")
-                               Integer id) {
+                       Integer id) {
         positionsFactory.invalidateCache();
         super.delete(id);
     }

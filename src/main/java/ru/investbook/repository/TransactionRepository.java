@@ -20,6 +20,8 @@ package ru.investbook.repository;
 
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -34,7 +36,9 @@ import java.util.Optional;
 import java.util.Set;
 
 @Transactional(readOnly = true)
-public interface TransactionRepository extends JpaRepository<TransactionEntity, Integer>, JpaSpecificationExecutor<TransactionEntity> {
+public interface TransactionRepository extends
+        JpaRepository<TransactionEntity, Integer>,
+        JpaSpecificationExecutor<TransactionEntity> {
 
     Optional<TransactionEntity> findFirstByOrderByTimestampAsc();
 
@@ -42,9 +46,9 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
 
     Optional<TransactionEntity> findFirstBySecurityIdOrderByTimestampDesc(Integer securityId);
 
-    List<TransactionEntity> findByPortfolio(String portfolio);
+    Page<TransactionEntity> findByPortfolio(String portfolio, Pageable pageable);
 
-    List<TransactionEntity> findByTradeId(String tradeId);
+    Page<TransactionEntity> findByTradeId(String tradeId, Pageable pageable);
 
     Optional<TransactionEntity> findByPortfolioAndTradeId(String portfolio, String tradeId);
 

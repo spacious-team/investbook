@@ -23,6 +23,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.SecurityQuote;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,7 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.SecurityQuoteEntity;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -51,9 +53,11 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
 
     @Override
     @GetMapping
+    @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отобразить всю историю котировок по всем инструментам")
-    public List<SecurityQuote> get() {
-        return super.get();
+    public Page<SecurityQuote> get(@Parameter(hidden = true)
+                                   Pageable pageable) {
+        return super.get(pageable);
     }
 
 
@@ -62,7 +66,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @Operation(summary = "Отобразить одну", description = "Отобразить котировку по номеру записи в БД")
     public ResponseEntity<SecurityQuote> get(@PathVariable("id")
                                              @Parameter(description = "Номер записи о котировке")
-                                                     Integer id) {
+                                             Integer id) {
         return super.get(id);
     }
 
@@ -78,8 +82,10 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @Operation(summary = "Изменить")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер записи о котировке")
-                                            Integer id,
-                                    @Valid @RequestBody SecurityQuote quote) {
+                                    Integer id,
+                                    @Valid
+                                    @RequestBody
+                                    SecurityQuote quote) {
         return super.put(id, quote);
     }
 
@@ -88,7 +94,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @Operation(summary = "Удалить")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Номер записи о котировке")
-                               Integer id) {
+                       Integer id) {
         super.delete(id);
     }
 

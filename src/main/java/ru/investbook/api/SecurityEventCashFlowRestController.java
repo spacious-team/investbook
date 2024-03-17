@@ -23,6 +23,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,7 +40,6 @@ import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.FifoPositionsFactory;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.spacious_team.broker.pojo.CashFlowType.REDEMPTION;
@@ -59,9 +61,11 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
 
     @Override
     @GetMapping
+    @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам")
-    public List<SecurityEventCashFlow> get() {
-        return super.get();
+    public Page<SecurityEventCashFlow> get(@Parameter(hidden = true)
+                                           Pageable pageable) {
+        return super.get(pageable);
     }
 
     @Override
@@ -69,7 +73,7 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @Operation(summary = "Отобразить одну", description = "Отобразить выплату по идентификатору")
     public ResponseEntity<SecurityEventCashFlow> get(@PathVariable("id")
                                                      @Parameter(description = "Внутренний идентификатор выплаты в БД")
-                                                             Integer id) {
+                                                     Integer id) {
         return super.get(id);
     }
 
@@ -86,8 +90,10 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @Operation(summary = "Изменить", description = "Модифицировать информацию о выплате в БД")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор выплаты в БД")
-                                            Integer id,
-                                    @Valid @RequestBody SecurityEventCashFlow event) {
+                                    Integer id,
+                                    @Valid
+                                    @RequestBody
+                                    SecurityEventCashFlow event) {
         if (event.getEventType() == REDEMPTION) positionsFactory.invalidateCache();
         return super.put(id, event);
     }
@@ -97,7 +103,7 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @Operation(summary = "Удалить", description = "Удалить информацию о выплате из БД")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор выплаты в БД")
-                               Integer id) {
+                       Integer id) {
         positionsFactory.invalidateCache();
         super.delete(id);
     }

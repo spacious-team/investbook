@@ -32,6 +32,7 @@ import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
+import ru.investbook.entity.SecurityEventCashFlowEntity_;
 import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.specs.SecurityEventCashFlowEntitySearchSpecification;
@@ -69,7 +70,7 @@ public class SecurityEventCashFlowFormsService {
                 SecurityEventCashFlowEntitySearchSpecification.of(
                         filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo());
 
-        Sort sort = Sort.by(asc("portfolio.id"), desc("timestamp"), asc("security.id"));
+        Sort sort = Sort.by(asc("portfolio.id"), desc(SecurityEventCashFlowEntity_.TIMESTAMP), asc("security.id"));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
         return securityEventCashFlowRepository.findAll(spec, page)

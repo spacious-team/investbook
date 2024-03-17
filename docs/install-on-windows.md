@@ -1,3 +1,10 @@
+#### Оглавление
+- [Установка на Windows x64](#установка-и-работа-на-windows)
+- [Установка на Windows x86](install-on-windows-by-zip.md)
+- [Установка на Mac](install-on-linux.md)
+- [Установка на Linux](install-on-linux.md)
+- [Запуск в Docker](run-by-docker.md)
+
 ### Установка и работа на Windows
 
 Данная инструкция поддерживает версию Windows x64. Если у вас 32 битная Windows, рекомендуем устанавливать по

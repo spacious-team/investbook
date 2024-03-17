@@ -23,6 +23,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.Portfolio;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +39,6 @@ import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.repository.PortfolioRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -52,9 +54,11 @@ public class PortfolioRestController extends AbstractRestController<String, Port
 
     @Override
     @GetMapping
+    @PageableAsQueryParam
     @Operation(summary = "Отобразить все")
-    public List<Portfolio> get() {
-        return super.get();
+    public Page<Portfolio> get(@Parameter(hidden = true)
+                               Pageable pageable) {
+        return super.get(pageable);
     }
 
     @Override
@@ -62,7 +66,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @Operation(summary = "Отобразить один")
     public ResponseEntity<Portfolio> get(@PathVariable("id")
                                          @Parameter(description = "Номер счета")
-                                                 String id) {
+                                         String id) {
         return super.get(id);
     }
 
@@ -78,8 +82,10 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @Operation(summary = "Добавить")
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер счета")
-                                            String id,
-                                    @Valid @RequestBody Portfolio object) {
+                                    String id,
+                                    @Valid
+                                    @RequestBody
+                                    Portfolio object) {
         return super.put(id, object);
     }
 
@@ -88,7 +94,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @Operation(summary = "Удалить", description = "Удалить счет и все связанные с ним данные")
     public void delete(@PathVariable("id")
                        @Parameter(description = "Номер счета")
-                               String id) {
+                       String id) {
         super.delete(id);
     }
 

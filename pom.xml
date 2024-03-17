@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ InvestBook
-  ~ Copyright (C) 2021  Vitalii Ananev <spacious-team@ya.ru>
+  ~ Copyright (C) 2021  Spacious Team <spacious-team@ya.ru>
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2023.4</version>
+    <version>2024.1</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -62,7 +62,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>23.4</win.msi.version>
+        <win.msi.version>24.1</win.msi.version>
         <java.version>21</java.version>
     </properties>
 
@@ -174,8 +174,8 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -352,7 +352,7 @@
                         </executions>
                     </plugin>
                     <plugin>
-                        <!-- jpackage requires https://wixtoolset.org/releases/ (only Wix, Toolset not required) -->
+                        <!-- jpackage requires Wix 3: https://wixtoolset.org/docs/wix3/ (only Wix, Toolset not required) -->
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
                         <version>1.2.1</version>
