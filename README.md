@@ -1,3 +1,6 @@
+[<img src="https://github.com/spacious-team/investbook/assets/11336712/7b16c124-5230-403e-8df9-7652132e76dd" style="float: right"/>](README-en.md)
+[<img src="https://github.com/spacious-team/investbook/assets/11336712/14847ff5-827e-4d0f-a4e9-882cb0d1397c" style="float: right"/>](README.md)<br/>
+
 [![java-version](https://img.shields.io/badge/java-21-brightgreen?style=flat-square)](https://openjdk.org/)
 [![spring-boot-version](https://img.shields.io/badge/spring--boot-3.0.7-brightgreen?style=flat-square)](https://github.com/spring-projects/spring-boot/releases)
 [![hits-of-code](https://img.shields.io/badge/dynamic/json?style=flat-square&color=lightblue&label=hits-of-code&url=https://hitsofcode.com/github/spacious-team/investbook/json?branch=develop&query=$.count)](https://hitsofcode.com/github/spacious-team/investbook/view?branch=develop)
