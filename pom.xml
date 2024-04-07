@@ -64,6 +64,7 @@
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
         <win.msi.version>24.2</win.msi.version>
         <java.version>21</java.version>
+        <hibernate.version>6.4.4.Final</hibernate.version>
     </properties>
 
     <repositories>

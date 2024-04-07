@@ -41,8 +41,8 @@ public class SecurityEntity {
     public static final Pattern isinPattern = Pattern.compile("^[A-Z]{2}[A-Z0-9]{9}[0-9]$");
 
     @Id
-    @GeneratedValue(generator = UseExistingOrGenerateIdGenerator.NAME)
-    @GenericGenerator(name = UseExistingOrGenerateIdGenerator.NAME, strategy = UseExistingOrGenerateIdGenerator.STRATEGY)
+    @GeneratedValue(generator = AssignedOrIdentityGenerator.NAME)
+    @GenericGenerator(name = AssignedOrIdentityGenerator.NAME, type = AssignedOrIdentityGenerator.class)
     @Column(name = "id")
     private Integer id;
 
