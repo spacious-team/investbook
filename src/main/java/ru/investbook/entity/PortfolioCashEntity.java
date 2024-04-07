@@ -21,11 +21,9 @@ package ru.investbook.entity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -36,8 +34,7 @@ import java.time.Instant;
 public class PortfolioCashEntity {
 
     @Id
-    @GeneratedValue(generator = AssignedOrIdentityGenerator.NAME)
-    @GenericGenerator(name = AssignedOrIdentityGenerator.NAME, type = AssignedOrIdentityGenerator.class)
+    @AssignedOrGeneratedValue
     @Column(name = "id")
     private Integer id;
 

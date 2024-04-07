@@ -22,12 +22,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.annotations.GenericGenerator;
 import org.spacious_team.broker.pojo.SecurityType;
 
 import java.util.regex.Pattern;
@@ -41,8 +39,7 @@ public class SecurityEntity {
     public static final Pattern isinPattern = Pattern.compile("^[A-Z]{2}[A-Z0-9]{9}[0-9]$");
 
     @Id
-    @GeneratedValue(generator = AssignedOrIdentityGenerator.NAME)
-    @GenericGenerator(name = AssignedOrIdentityGenerator.NAME, type = AssignedOrIdentityGenerator.class)
+    @AssignedOrGeneratedValue
     @Column(name = "id")
     private Integer id;
 
