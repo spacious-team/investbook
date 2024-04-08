@@ -18,7 +18,6 @@
 
 package ru.investbook.entity;
 
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import org.hibernate.annotations.IdGeneratorType;
 
@@ -32,13 +31,14 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * Provides ID generation strategy for the values of primary keys.
  * The annotation may be applied to a primary key property with the {@link Id} annotation.
- * Behaves like {@link GeneratedValue} if primary key is null or use assigned value otherwise.
+ * Annotation behaves like {@code @GeneratedValue(strategy = IDENTITY)} if primary key is null.
+ * If primary key value is not null it will be inserted to DB.
  * <p/>
  * Annotation helps to replace code snippet
  * <pre>
  *     &#64;Id
- *     &#64;GeneratedValue(generator = "generator-name")
- *     &#64;GenericGenerator(name = "generator-name", type = AssignedOrIdentityGenerator.class)
+ *     &#64;GeneratedValue(generator = "use-assigned-if-present")
+ *     &#64;GenericGenerator(name = "use-assigned-if-present", type = AssignedOrIdentityGenerator.class)
  *     Integer id;
  * </pre>
  * with shorter one
@@ -50,6 +50,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * </p>
  *
  * @see jakarta.persistence.GeneratedValue
+ * @see AssignedOrIdentityGenerator
  */
 @Retention(RUNTIME)
 @Target({METHOD, FIELD})
