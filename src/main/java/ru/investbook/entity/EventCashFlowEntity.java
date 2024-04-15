@@ -23,14 +23,12 @@ import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -42,8 +40,7 @@ import java.time.Instant;
 @EqualsAndHashCode(of = "id")
 public class EventCashFlowEntity {
     @Id
-    @GeneratedValue(generator = UseExistingOrGenerateIdGenerator.NAME)
-    @GenericGenerator(name = UseExistingOrGenerateIdGenerator.NAME, strategy = UseExistingOrGenerateIdGenerator.STRATEGY)
+    @AssignedOrGeneratedValue
     @Column(name = "id")
     private Integer id;
 
