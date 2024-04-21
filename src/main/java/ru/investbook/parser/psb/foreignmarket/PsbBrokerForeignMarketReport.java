@@ -60,14 +60,14 @@ public class PsbBrokerForeignMarketReport extends AbstractBrokerReport {
     private static Workbook getWorkbook(InputStream is) {
         try {
             ExcelReader reader = new ExcelReader();
-            is = skeepNewLines(is); // required by ExcelReader
+            is = skipNewLines(is); // required by ExcelReader
             return reader.getWorkbook(new InputSource(is));
         } catch (Exception e) {
             throw new RuntimeException("Не смог открыть xml файл", e);
         }
     }
 
-    private static InputStream skeepNewLines(InputStream is) throws IOException {
+    private static InputStream skipNewLines(InputStream is) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(is.readAllBytes());
         int symbol;
         do {
