@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.7</version> <!-- Обновлять с учетом https://github.com/spacious-team/investbook/issues/545 -->
+        <version>3.2.5</version> <!-- Обновлять с учетом https://github.com/spacious-team/investbook/issues/545 -->
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.investbook</groupId>
@@ -64,7 +64,6 @@
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
         <win.msi.version>24.2</win.msi.version>
         <java.version>21</java.version>
-        <hibernate.version>6.4.4.Final</hibernate.version>  <!-- remove if Spring Boot updated to >= 3.2.4 -->
     </properties>
 
     <repositories>
