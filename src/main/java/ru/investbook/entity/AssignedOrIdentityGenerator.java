@@ -31,7 +31,7 @@ import org.hibernate.id.IdentityGenerator;
  * <p>
  * Applicable only for INSERT operations.
  */
-class AssignedOrIdentityGenerator extends BeforeOrOnExecutionGenerator {
+public class AssignedOrIdentityGenerator extends BeforeOrOnExecutionGenerator {
 
     @SuppressWarnings("unused")
     public AssignedOrIdentityGenerator() {
