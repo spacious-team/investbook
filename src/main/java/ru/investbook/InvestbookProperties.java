@@ -38,7 +38,9 @@ public class InvestbookProperties {
 
     private Path reportBackupPath = dataPath.resolve("report-backups");
 
-    private List<Path> sqlImportFiles = List.of(dataPath.resolve("export-2022.9.sql"));
+    private List<Path> sqlImportFiles = List.of(
+            dataPath.resolve("export-2022.9.sql"),
+            dataPath.resolve("export-2024.1.x.sql"));
 
     private boolean openHomePageAfterStart = false;
 
