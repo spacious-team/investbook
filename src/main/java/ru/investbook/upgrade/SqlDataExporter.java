@@ -34,8 +34,8 @@ import java.time.Instant;
 @Service
 @RequiredArgsConstructor
 public class SqlDataExporter {
-    private static final String EXPORT_FILE_NAME = "export-2022.9.sql";
-    private final String expectedInvestbookVersionsForExport = "2022.9";
+    private static final String EXPECTED_INVESTBOOK_VERSIONS_FOR_EXPORT = "2024.1.";
+    private static final String EXPORT_FILE_NAME = "export-2024.1.x.sql";
     private final BuildProperties buildProperties;
     private final InvestbookProperties investbookProperties;
     private final JdbcTemplate jdbcTemplate;
@@ -43,7 +43,7 @@ public class SqlDataExporter {
     @PreDestroy
     public void preDestroy() {
         String version = buildProperties.getVersion();
-        if (version.startsWith(expectedInvestbookVersionsForExport)) {
+        if (version.startsWith(EXPECTED_INVESTBOOK_VERSIONS_FOR_EXPORT)) {
             Path file = investbookProperties.getDataPath()
                     .resolve(EXPORT_FILE_NAME)
                     .toAbsolutePath();
