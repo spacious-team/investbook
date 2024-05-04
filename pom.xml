@@ -28,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2024.1</version>
+    <version>2024.1.1</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -62,7 +62,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>24.1</win.msi.version>
+        <win.msi.version>24.1.1</win.msi.version>
         <java.version>21</java.version>
     </properties>
 
@@ -96,12 +96,12 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>2023.1</version>
+            <version>2024.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-spring-boot-starter</artifactId>
-            <version>2023.1</version>
+            <version>2024.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
