@@ -171,7 +171,6 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.1.214</version> <!-- TODO migrate DB to actual H2 format -->
             <scope>runtime</scope>
         </dependency>
         <dependency>
