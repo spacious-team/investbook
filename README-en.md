@@ -169,16 +169,15 @@ But the license also allows any developer to improve their own copy of the appli
 will be open on the Internet).
 
 ### Why is the application code open source
-The idea of open source is the freedom to develop and use software.
-Many famous brands use open source, [Instagram](https://github.com/Instagram) for example,
+For some areas, open source solutions are better suited than others, for example in the fields of finance and data
+encryption, because these solutions can be trusted because you or anyone else can look at the code and see
+in the security of the program. Many famous brands use open source, [Instagram](https://github.com/Instagram) for example,
 [Android](https://ru.wikipedia.org/wiki/Android#%D0%98%D1%81%D1%85%D0%BE%D0%B4%D0%BD%D1%8B%D0%B9_%D0%BA%D0%BE%D0%B4),
 [Telegram](https://ru.wikipedia.org/wiki/Telegram), [Twitter](https://opensource.twitter.dev/),
 [Google Chrome](https://ru.wikipedia.org/wiki/Google_Chrome),
 [Mozilla Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Developer_guide/Source_Code/Downloading_Source_Archives),
 sites with a secure [https](https://ru.wikipedia.org/wiki/OpenSSL) connection, such as https://vk.com, etc.
-For some areas, open source solutions are better suited than others, for example in the fields of finance and data 
-encryption, because these solutions can be trusted because you or anyone else can look at the code and see
-in the security of the program.
+The idea of open source is the freedom to develop and use software.
 
 <details>
 <summary>Elon Musk's opinion on open source.</summary>
