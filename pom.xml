@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.7</version> <!-- Обновлять с учетом https://github.com/spacious-team/investbook/issues/545 -->
+        <version>3.2.5</version> <!-- Обновлять с учетом https://github.com/spacious-team/investbook/issues/545 -->
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.investbook</groupId>
@@ -96,12 +96,12 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>2023.1</version>
+            <version>2024.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-spring-boot-starter</artifactId>
-            <version>2023.1</version>
+            <version>2024.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -209,7 +209,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>1.18.32</version>
             <optional>true</optional>
         </dependency>
         <dependency>

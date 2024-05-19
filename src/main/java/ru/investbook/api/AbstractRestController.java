@@ -28,7 +28,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriUtils;
 import ru.investbook.converter.EntityConverter;
-import ru.investbook.entity.UseExistingOrGenerateIdGenerator;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -66,8 +65,8 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
      * If entity has ID and record with this ID already exists in DB, CONFLICT http status and Location header was returned.
      * Otherwise, CREATE http status will be returned with Location header.
      * When creating new object, ID may be passed, but that ID only used when no {@link GeneratedValue} set
-     * on Entity ID field or if {@link GeneratedValue#generator} set to {@link UseExistingOrGenerateIdGenerator}
-     * or similar generator impl; otherwise ID, passed in object, will be ignored (see JPA impl).
+     * on Entity ID field or if {@link GeneratedValue#generator} set to {@link org.hibernate.generator.BeforeExecutionGenerator},
+     * generator impl; otherwise ID, passed in object, will be ignored (see JPA impl).
      *
      * @param object new entity (ID may be missed)
      * @throws InternalServerErrorException if object not created or updated
