@@ -28,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2024.1.1</version>
+    <version>2024.1.2</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -62,7 +62,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>24.1.1</win.msi.version>
+        <win.msi.version>24.1.2</win.msi.version>
         <java.version>21</java.version>
     </properties>
 
@@ -101,7 +101,7 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-spring-boot-starter</artifactId>
-            <version>2024.1</version>
+            <version>2024.1</version>  <!-- if changed, update the version of poi-scratchpad -->
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -220,7 +220,7 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-scratchpad</artifactId>
-            <version>5.2.3</version>  <!-- use same version as table-wrapper-spring-boot-starter provides -->
+            <version>5.2.5</version>  <!-- use same version as table-wrapper-spring-boot-starter provides -->
         </dependency>
     </dependencies>
 
