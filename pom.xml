@@ -427,8 +427,7 @@
                                     <!-- Defines available bellsoft-liberica java versions from
                                     https://github.com/paketo-buildpacks/java/releases
                                     JRE with ${java.version} will be selected automatically when available -->
-                                    <!-- TODO update buildbpack for java 22 -->
-                                    <buildpack>gcr.io/paketo-buildpacks/java:10.2.1</buildpack>
+                                    <buildpack>gcr.io/paketo-buildpacks/java:14.0.0</buildpack>
                                 </buildpacks>
                             </image>
                             <docker>
