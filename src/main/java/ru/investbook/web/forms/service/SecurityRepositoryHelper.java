@@ -52,8 +52,8 @@ public class SecurityRepositoryHelper {
      * Generate securityId if needed, save security to DB, update securityId for model if needed
      * @return saved security id
      */
-    public int saveAndFlushSecurity(SecurityDescriptionModel m) {
-        int savedSecurityId = saveAndFlush(m.getSecurityId(), m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
+    public int saveSecurity(SecurityDescriptionModel m) {
+        int savedSecurityId = saveSecurity(m.getSecurityId(), m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
         m.setSecurityId(savedSecurityId);
         return savedSecurityId;
     }
@@ -62,62 +62,62 @@ public class SecurityRepositoryHelper {
      * Generate securityId if needed, save security to DB, update securityId for model if needed
      * @return saved security id
      */
-    public int saveAndFlushSecurity(EventCashFlowModel.AttachedSecurity s) {
+    public int saveSecurity(EventCashFlowModel.AttachedSecurity s) {
         // EventCashFlowModel. AttachToSecurity может содержать только SHARE или BOND.
         // Тип SHARE захардкожен, тип может быть ошибочен, но для текущего алгоритма сохранения ЦБ этого типа достаточно
-        return saveAndFlush(s.getSecurityIsin(), s.getSecurityName(), SecurityType.SHARE);
+        return saveSecurity(s.getSecurityIsin(), s.getSecurityName(), SecurityType.SHARE);
     }
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
      * @return saved security id
      */
-    public int saveAndFlushSecurity(SecurityEventCashFlowModel m) {
-        return saveAndFlush(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
+    public int saveSecurity(SecurityEventCashFlowModel m) {
+        return saveSecurity(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
     }
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
      * @return saved security id
      */
-    public int saveAndFlushSecurity(SecurityQuoteModel m) {
-        return saveAndFlush(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
+    public int saveSecurity(SecurityQuoteModel m) {
+        return saveSecurity(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
     }
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
      * @return saved security id
      */
-    public int saveAndFlushSecurity(TransactionModel m) {
-        return saveAndFlush(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
+    public int saveSecurity(TransactionModel m) {
+        return saveSecurity(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
     }
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
      * @return saved security id
      */
-    public int saveAndFlushSecurity(SplitModel m) {
-        return saveAndFlush(m.getSecurityIsin(), m.getSecurityName(), SecurityType.SHARE);
+    public int saveSecurity(SplitModel m) {
+        return saveSecurity(m.getSecurityIsin(), m.getSecurityName(), SecurityType.SHARE);
     }
 
     /**
      * @return securityId from DB
      */
-    private int saveAndFlush(Integer securityId, String isin, String securityName, SecurityType securityType) {
+    private int saveSecurity(Integer securityId, String isin, String securityName, SecurityType securityType) {
         SecurityEntity security = ofNullable(securityId)
                 .flatMap(securityRepository::findById)
                 .or(() -> findSecurity(isin, securityName, securityType))
                 .orElseGet(SecurityEntity::new);
-        return saveAndFlush(security, isin, securityName, securityType, true);
+        return saveSecurity(security, isin, securityName, securityType, true);
     }
 
-    private int saveAndFlush(String isin, String securityName, SecurityType securityType) {
+    private int saveSecurity(String isin, String securityName, SecurityType securityType) {
         SecurityEntity security = findSecurity(isin, securityName, securityType)
                 .orElseGet(SecurityEntity::new);
-        return saveAndFlush(security, isin, securityName, securityType, false);
+        return saveSecurity(security, isin, securityName, securityType, false);
     }
 
-    private int saveAndFlush(SecurityEntity security, String isin, String securityName,
+    private int saveSecurity(SecurityEntity security, String isin, String securityName,
                              SecurityType securityType, boolean forceRewriteByEmptyIsin) {
         isin = validateIsin(isin);
         if (isin == null && !forceRewriteByEmptyIsin) {
@@ -140,7 +140,7 @@ public class SecurityRepositoryHelper {
                 security.setName(securityName);
             }
         }
-        security = securityRepository.saveAndFlush(security);
+        security = securityRepository.save(security);
         return security.getId();
     }
 

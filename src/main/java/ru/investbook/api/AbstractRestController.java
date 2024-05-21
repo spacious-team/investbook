@@ -76,7 +76,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
         try {
             ID id = getId(object);
             if (id == null) {
-                return createOrUpdateEntity(object);
+                return createOrUpdateEntityAndReturnCreateStatus(object);
             }
             if (existsById(id)) {
                 return ResponseEntity
@@ -87,7 +87,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
                 // Если убрать @Transactional над методом, то следующая строка может обновить объект по ошибке.
                 // Это возможно, если объект был создан другим потоком после проверки существования строки по ID.
                 // По этой причине @Transactional убирать не нужно.
-                return createOrUpdateEntity(object);
+                return createOrUpdateEntityAndReturnCreateStatus(object);
             }
         } catch (Exception e) {
             throw new InternalServerErrorException("Не могу создать объект", e);
@@ -117,10 +117,10 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
                         "запроса [" + getId(object) + "] не совпадают");
             }
             if (existsById(id)) {
-                saveAndFlush(object);
+                createOrUpdateEntity(object);
                 return ResponseEntity.ok().build();
             } else {
-                return createOrUpdateEntity(object);
+                return createOrUpdateEntityAndReturnCreateStatus(object);
             }
         } catch (Exception e) {
             throw new InternalServerErrorException("Не могу создать объект", e);
@@ -133,16 +133,16 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
 
     protected abstract Pojo updateId(ID id, Pojo object);
 
-    private Entity saveAndFlush(Pojo object) {
+    private Entity createOrUpdateEntity(Pojo object) {
         Entity entity = converter.toEntity(object);
-        return repository.saveAndFlush(entity);
+        return repository.save(entity);
     }
 
     /**
      * @return response entity with http CREATE status, Location http header and body
      */
-    private ResponseEntity<Void> createOrUpdateEntity(Pojo object) throws URISyntaxException {
-        Entity entity = saveAndFlush(object);
+    private ResponseEntity<Void> createOrUpdateEntityAndReturnCreateStatus(Pojo object) throws URISyntaxException {
+        Entity entity = createOrUpdateEntity(object);
         Pojo savedObject = converter.fromEntity(entity);
         URI locationURI = getLocationURI(savedObject);
         return ResponseEntity

@@ -69,7 +69,7 @@ public class ForeignExchangeRateFormsService {
 
     @Transactional
     public void save(ForeignExchangeRateModel m) {
-        foreignExchangeRateRepository.saveAndFlush(
+        foreignExchangeRateRepository.save(
                 foreignExchangeRateConverter.toEntity(ForeignExchangeRate.builder()
                         .date(m.getDate())
                         .currencyPair((m.getBaseCurrency() + m.getQuoteCurrency()).toUpperCase())
