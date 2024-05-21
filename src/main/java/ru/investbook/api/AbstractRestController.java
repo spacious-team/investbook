@@ -76,16 +76,18 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
         try {
             ID id = getId(object);
             if (id == null) {
-                return createEntity(object);
+                return createOrUpdateEntity(object);
             }
-            Optional<Entity> result = getById(id);
-            if (result.isPresent()) {
+            if (existsById(id)) {
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
                         .location(getLocationURI(object))
                         .build();
             } else {
-                return createEntity(object);
+                // Если убрать @Transactional над методом, то следующая строка может обновить объект по ошибке.
+                // Это возможно, если объект был создан другим потоком после проверки существования строки по ID.
+                // По этой причине @Transactional убирать не нужно.
+                return createOrUpdateEntity(object);
             }
         } catch (Exception e) {
             throw new InternalServerErrorException("Не могу создать объект", e);
@@ -114,31 +116,37 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
                 throw new BadRequestException("Идентификатор объекта, переданный в URI [" + id + "] и в теле " +
                         "запроса [" + getId(object) + "] не совпадают");
             }
-            Optional<Entity> result = getById(id);
-            if (result.isPresent()) {
+            if (existsById(id)) {
                 saveAndFlush(object);
                 return ResponseEntity.ok().build();
             } else {
-                return createEntity(object);
+                return createOrUpdateEntity(object);
             }
         } catch (Exception e) {
             throw new InternalServerErrorException("Не могу создать объект", e);
         }
     }
 
+    private boolean existsById(ID id) {
+        return repository.existsById(id);
+    }
+
     protected abstract Pojo updateId(ID id, Pojo object);
 
     private Entity saveAndFlush(Pojo object) {
-        return repository.saveAndFlush(converter.toEntity(object));
+        Entity entity = converter.toEntity(object);
+        return repository.saveAndFlush(entity);
     }
 
     /**
      * @return response entity with http CREATE status, Location http header and body
      */
-    private ResponseEntity<Void> createEntity(Pojo object) throws URISyntaxException {
+    private ResponseEntity<Void> createOrUpdateEntity(Pojo object) throws URISyntaxException {
         Entity entity = saveAndFlush(object);
+        Pojo savedObject = converter.fromEntity(entity);
+        URI locationURI = getLocationURI(savedObject);
         return ResponseEntity
-                .created(getLocationURI(converter.fromEntity(entity)))
+                .created(locationURI)
                 .build();
     }
 
@@ -152,6 +160,6 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
      * Delete object from storage. Always return OK http status with empty body.
      */
     public void delete(ID id) {
-        getById(id).ifPresent(repository::delete);
+        repository.deleteById(id);
     }
 }

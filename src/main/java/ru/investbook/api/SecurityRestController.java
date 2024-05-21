@@ -65,7 +65,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Override
     @GetMapping("{id}")
     @Operation(summary = "Отобразить один",
-            description = "Отобразить биржевой инструмент по идентификатору (ISIN,  коду дериватива, валютной пары)")
+            description = "Отобразить биржевой инструмент по внутреннему идентификатору")
     public ResponseEntity<Security> get(@PathVariable("id")
                                         @Parameter(description = "Идентификатор", example = "123", required = true)
                                         Integer id) {
@@ -102,8 +102,8 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     }
 
     @Override
-    protected Optional<SecurityEntity> getById(Integer isin) {
-        return repository.findById(isin);
+    protected Optional<SecurityEntity> getById(Integer id) {
+        return repository.findById(id);
     }
 
     @Override
