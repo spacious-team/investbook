@@ -62,7 +62,7 @@ For each account separately and summing up a single total for all accounts, the 
   <img src="https://user-images.githubusercontent.com/11336712/149419132-cad11fc3-fdaa-4572-882b-4ed49b937afe.png" width="32%"/>
   <img src="https://user-images.githubusercontent.com/11336712/102419341-9a75d500-4010-11eb-817a-a9b322237dd2.png" width="32%"/>
 - [portfolio](src/main/asciidoc/portfolio-status.adoc) of securities with information about the current position, 
-  average price purchases and yield of securities (CHISTVNDOH/XIRR), taking into account hedging positions in the derivatives 
+  average price purchases and yield of securities (XIRR), taking into account hedging positions in the derivatives 
   market and the average purchase price of currency;  
   ![portfolio](https://user-images.githubusercontent.com/11336712/104820094-af2dce80-5843-11eb-8083-6521ea537334.png)
 - share of a security in a [portfolio](src/main/asciidoc/portfolio-status.adoc);  
@@ -85,7 +85,7 @@ For each account separately and summing up a single total for all accounts, the 
   ![foreign-market](https://user-images.githubusercontent.com/11336712/84881751-fa59e600-b096-11ea-8b83-19d1c1229d73.png)
 - [input and output](src/main/asciidoc/securities-deposit-and-withdrawal.adoc) of securities from/to other accounts, conversion, split of shares (AAPL, TSLA, etc.);  
   <img src="https://user-images.githubusercontent.com/11336712/87883425-f3185600-ca0f-11ea-9677-4689aa6a4ee5.png" width="40%"/>
-- [profitability](src/main/asciidoc/cash-flow.adoc) of portfolio (CHISTVNDOH/XIRR), replenishments, write-offs, transfers from/to other accounts, 
+- [profitability](src/main/asciidoc/cash-flow.adoc) of portfolio (XIRR), replenishments, write-offs, transfers from/to other accounts, 
 - current cash balance;  
   ![cash-in](https://user-images.githubusercontent.com/11336712/100395491-3172f100-3052-11eb-9652-cd5730ac2e6f.png)
 - [tax](src/main/asciidoc/tax.adoc) burden, including the
