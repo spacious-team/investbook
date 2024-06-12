@@ -24,7 +24,7 @@ import org.hibernate.id.IdentityGenerator;
 
 /**
  * If Entity ID is not null, then this ID is stored to DB.
- * If Entity ID is null, then RDBM should generate ID itself.
+ * If Entity ID is null, then RDBMS should generate ID itself.
  * <p>
  * In other words: this generator behaves like {@link org.hibernate.id.Assigned} generator if entity's field,
  * marked by {@link Id} annotation, is not null, or like {@link org.hibernate.id.IdentityGenerator} if this field is null.
