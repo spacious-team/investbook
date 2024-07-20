@@ -39,8 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.EventCashFlowEntity;
 
-import java.util.Optional;
-
 @RestController
 @Tag(name = "Движения ДС по счету", description = """
         Ввод, вывод ДС, налоги, комиссии, а также дивиденды, купоны, амортизации по бумагам другого счета
@@ -97,11 +95,6 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
                        @Parameter(description = "Номер события")
                        Integer id) {
         super.delete(id);
-    }
-
-    @Override
-    protected Optional<EventCashFlowEntity> getById(Integer id) {
-        return repository.findById(id);
     }
 
     @Override

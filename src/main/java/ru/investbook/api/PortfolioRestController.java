@@ -39,8 +39,6 @@ import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.repository.PortfolioRepository;
 
-import java.util.Optional;
-
 @RestController
 @Tag(name = "Счета")
 @RequestMapping("/api/v1/portfolios")
@@ -96,11 +94,6 @@ public class PortfolioRestController extends AbstractRestController<String, Port
                        @Parameter(description = "Номер счета")
                        String id) {
         super.delete(id);
-    }
-
-    @Override
-    protected Optional<PortfolioEntity> getById(String id) {
-        return repository.findById(id);
     }
 
     @Override

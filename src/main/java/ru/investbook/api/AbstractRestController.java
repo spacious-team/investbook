@@ -19,9 +19,7 @@
 package ru.investbook.api;
 
 import jakarta.persistence.GeneratedValue;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import lombok.SneakyThrows;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,38 +28,28 @@ import org.springframework.web.util.UriUtils;
 import ru.investbook.converter.EntityConverter;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Objects;
-import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-@RequiredArgsConstructor
-public abstract class AbstractRestController<ID, Pojo, Entity> {
-    protected final JpaRepository<Entity, ID> repository;
-    protected final EntityConverter<Entity, Pojo> converter;
+public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractEntityRepositoryService<ID, Pojo, Entity> {
 
-
-    protected Page<Pojo> get(Pageable pageable) {
-        return repository.findAll(pageable)
-                .map(converter::fromEntity);
+    protected AbstractRestController(JpaRepository<Entity, ID> repository, EntityConverter<Entity, Pojo> converter) {
+        super(repository, converter);
     }
 
     /**
-     * Get the entity.
+     * Gets the entity.
      * If entity not exists NOT_FOUND http status will be returned.
      */
     public ResponseEntity<Pojo> get(ID id) {
         return getById(id)
-                .map(converter::fromEntity)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    protected abstract Optional<Entity> getById(ID id);
-
     /**
-     * Create a new entity.
+     * Creates a new entity.
      * If entity has ID and record with this ID already exists in DB, CONFLICT http status and Location header was returned.
      * Otherwise, CREATE http status will be returned with Location header.
      * When creating new object, ID may be passed, but that ID only used when no {@link GeneratedValue} set
@@ -74,30 +62,19 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
     @Transactional
     protected ResponseEntity<Void> post(Pojo object) {
         try {
-            ID id = getId(object);
-            if (id == null) {
-                return createOrUpdateEntityAndReturnCreateStatus(object);
-            }
-            if (existsById(id)) {
-                return ResponseEntity
-                        .status(HttpStatus.CONFLICT)
-                        .location(getLocationURI(object))
-                        .build();
-            } else {
-                // Если убрать @Transactional над методом, то следующая строка может обновить объект по ошибке.
-                // Это возможно, если объект был создан другим потоком после проверки существования строки по ID.
-                // По этой причине @Transactional убирать не нужно.
-                return createOrUpdateEntityAndReturnCreateStatus(object);
-            }
+            return createAndGet(object)
+                    .map(this::createResponseWithLocationHeader)
+                    .orElseGet(() -> ResponseEntity
+                            .status(HttpStatus.CONFLICT)
+                            .location(getLocationURI(object))
+                            .build());
         } catch (Exception e) {
             throw new InternalServerErrorException("Не могу создать объект", e);
         }
     }
 
-    protected abstract ID getId(Pojo object);
-
     /**
-     * Update or create a new entity.
+     * Updates or creates a new entity.
      * In update case method returns OK http status.
      * In create case method returns CREATE http status and Location header.
      * When creating new object, ID may be passed in the object, but it should be same as {@code id} argument.
@@ -116,50 +93,44 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
                 throw new BadRequestException("Идентификатор объекта, переданный в URI [" + id + "] и в теле " +
                         "запроса [" + getId(object) + "] не совпадают");
             }
-            if (existsById(id)) {
-                createOrUpdateEntity(object);
-                return ResponseEntity.ok().build();
+            if (create(object)) {
+                return ResponseEntity.ok().build();  // todo no content
             } else {
-                return createOrUpdateEntityAndReturnCreateStatus(object);
+                Pojo savedObject = createOrUpdateAndGet(object);
+                return createResponseWithLocationHeader(savedObject); // todo change http status?
             }
         } catch (Exception e) {
             throw new InternalServerErrorException("Не могу создать объект", e);
         }
     }
 
-    private boolean existsById(ID id) {
-        return repository.existsById(id);
-    }
-
-    protected abstract Pojo updateId(ID id, Pojo object);
-
-    private Entity createOrUpdateEntity(Pojo object) {
-        Entity entity = converter.toEntity(object);
-        return repository.save(entity);
+    /**
+     * Deletes object from storage. Always return OK http status with empty body.
+     */
+    // TODO should impl 404 status? https://stackoverflow.com/questions/4088350/is-rest-delete-really-idempotent
+    public void delete(ID id) {
+        deleteById(id);
     }
 
     /**
      * @return response entity with http CREATE status, Location http header and body
      */
-    private ResponseEntity<Void> createOrUpdateEntityAndReturnCreateStatus(Pojo object) throws URISyntaxException {
-        Entity entity = createOrUpdateEntity(object);
-        Pojo savedObject = converter.fromEntity(entity);
-        URI locationURI = getLocationURI(savedObject);
+    private ResponseEntity<Void> createResponseWithLocationHeader(Pojo object) {
+        URI locationURI = getLocationURI(object);
         return ResponseEntity
                 .created(locationURI)
                 .build();
     }
 
-    protected URI getLocationURI(Pojo object) throws URISyntaxException {
+    @SneakyThrows
+    protected URI getLocationURI(Pojo object) {
         return new URI(UriUtils.encodePath(getLocation() + "/" + getId(object), UTF_8));
     }
 
     protected abstract String getLocation();
 
     /**
-     * Delete object from storage. Always return OK http status with empty body.
+     * Returns new object with updated ID
      */
-    public void delete(ID id) {
-        repository.deleteById(id);
-    }
+    protected abstract Pojo updateId(ID id, Pojo object);
 }

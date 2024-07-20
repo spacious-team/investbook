@@ -39,8 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.PortfolioCashEntity;
 
-import java.util.Optional;
-
 @RestController
 @Tag(name = "Информация по остатку денежных средств на счете")
 @RequestMapping("/api/v1/portfolio-cash")
@@ -95,11 +93,6 @@ public class PortfolioCashRestController extends AbstractRestController<Integer,
                        @Parameter(description = "Внутренний идентификатор записи")
                        Integer id) {
         super.delete(id);
-    }
-
-    @Override
-    protected Optional<PortfolioCashEntity> getById(Integer id) {
-        return repository.findById(id);
     }
 
     @Override

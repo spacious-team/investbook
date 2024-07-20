@@ -44,7 +44,6 @@ import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.repository.TransactionCashFlowRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @Tag(name = "Движения ДС по сделкам", description = "Уплаченные и вырученные суммы в сделках")
@@ -142,11 +141,6 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
                        @Parameter(description = "Внутренний идентификатор сделки")
                        Integer id) {
         super.delete(id);
-    }
-
-    @Override
-    protected Optional<TransactionCashFlowEntity> getById(Integer id) {
-        return repository.findById(id);
     }
 
     @Override

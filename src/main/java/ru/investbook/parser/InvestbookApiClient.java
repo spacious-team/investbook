@@ -120,6 +120,7 @@ public class InvestbookApiClient {
     }
 
     private Optional<Integer> getSavedTransactionId(AbstractTransaction transaction) {
+        // todo replace RestController with EntityRepositoryService
         return Optional.of(transactionRestController.get(transaction.getPortfolio(), transaction.getTradeId(), Pageable.unpaged()).getContent())
                 .filter(result -> result.size() == 1)
                 .map(List::getFirst)
@@ -196,6 +197,7 @@ public class InvestbookApiClient {
     /**
      * @return true if new row was added, or it was already exists in DB, false - or error
      */
+    // todo replace RestController with EntityRepositoryService
     private <T> boolean handlePost(T object, Function<T, ResponseEntity<?>> saver, String errorPrefix) {
         try {
             validator.validate(object);

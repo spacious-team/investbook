@@ -39,8 +39,6 @@ import ru.investbook.converter.SecurityDescriptionConverter;
 import ru.investbook.entity.SecurityDescriptionEntity;
 import ru.investbook.repository.SecurityDescriptionRepository;
 
-import java.util.Optional;
-
 @RestController
 @Tag(name = "Информация по инструментам", description = "Сектор экономики, эмитент")
 @RequestMapping("/api/v1/security-descriptions")
@@ -100,11 +98,6 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
                        @Parameter(description = "Идентификатор", example = "123", required = true)
                        Integer id) {
         super.delete(id);
-    }
-
-    @Override
-    protected Optional<SecurityDescriptionEntity> getById(Integer isin) {
-        return repository.findById(isin);
     }
 
     @Override

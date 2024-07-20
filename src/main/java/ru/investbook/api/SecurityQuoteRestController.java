@@ -39,8 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.SecurityQuoteEntity;
 
-import java.util.Optional;
-
 @RestController
 @Tag(name = "Котировки", description = "Котировки биржевых инструментов")
 @RequestMapping("/api/v1/security-quotes")
@@ -96,11 +94,6 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
                        @Parameter(description = "Номер записи о котировке")
                        Integer id) {
         super.delete(id);
-    }
-
-    @Override
-    protected Optional<SecurityQuoteEntity> getById(Integer id) {
-        return repository.findById(id);
     }
 
     @Override

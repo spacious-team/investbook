@@ -40,8 +40,6 @@ import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.FifoPositionsFactory;
 
-import java.util.Optional;
-
 import static org.spacious_team.broker.pojo.CashFlowType.REDEMPTION;
 
 @RestController
@@ -106,11 +104,6 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
                        Integer id) {
         positionsFactory.invalidateCache();
         super.delete(id);
-    }
-
-    @Override
-    protected Optional<SecurityEventCashFlowEntity> getById(Integer id) {
-        return repository.findById(id);
     }
 
     @Override

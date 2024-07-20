@@ -39,8 +39,6 @@ import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 
-import java.util.Optional;
-
 @RestController
 @Tag(name = "Инструменты", description = "Акции, облигации, деривативы и валютные пары")
 @RequestMapping("/api/v1/securities")
@@ -99,11 +97,6 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
                        @Parameter(description = "Идентификатор", example = "123", required = true)
                        Integer id) {
         super.delete(id);
-    }
-
-    @Override
-    protected Optional<SecurityEntity> getById(Integer id) {
-        return repository.findById(id);
     }
 
     @Override

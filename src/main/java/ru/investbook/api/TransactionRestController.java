@@ -43,7 +43,6 @@ import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.repository.TransactionRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @Tag(name = "Сделки", description = "Операции купли/продажи биржевых инструментов")
@@ -149,11 +148,6 @@ public class TransactionRestController extends AbstractRestController<Integer, T
                        Integer id) {
         positionsFactory.invalidateCache();
         super.delete(id);
-    }
-
-    @Override
-    protected Optional<TransactionEntity> getById(Integer id) {
-        return repository.findById(id);
     }
 
     @Override

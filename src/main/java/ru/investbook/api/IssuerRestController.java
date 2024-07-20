@@ -39,8 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.IssuerEntity;
 
-import java.util.Optional;
-
 @RestController
 @Tag(name = "Эмитенты", description = "Информация об эмитентах")
 @RequestMapping("/api/v1/issuers")
@@ -94,11 +92,6 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
                        @Parameter(description = "Внутренний идентификатор эмитента")
                        Integer id) {
         super.delete(id);
-    }
-
-    @Override
-    protected Optional<IssuerEntity> getById(Integer id) {
-        return repository.findById(id);
     }
 
     @Override
