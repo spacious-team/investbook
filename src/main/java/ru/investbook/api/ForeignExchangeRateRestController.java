@@ -133,7 +133,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
      */
     @DeleteMapping("/currency-pairs/{currency-pair}/dates/{date}")
     @Operation(summary = "Удалить", description = "Удаляет информацию о курсе из БД")
-    public void delete(@PathVariable("currency-pair")
+    public ResponseEntity<Void> delete(@PathVariable("currency-pair")
                        @Parameter(description = "Валютная пара", example = "USDRUB")
                        String currencyPair,
                        @PathVariable("date")
@@ -141,7 +141,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
                        @DateTimeFormat(pattern = "yyyy-MM-dd")
                        LocalDate date) {
         foreignExchangeRateService.invalidateCache();
-        super.delete(getId(currencyPair, date));
+        return super.delete(getId(currencyPair, date));
     }
 
     @Override

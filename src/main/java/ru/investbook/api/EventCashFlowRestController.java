@@ -91,10 +91,10 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     @Override
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = "Удалить информацию из БД")
-    public void delete(@PathVariable("id")
+    public ResponseEntity<Void> delete(@PathVariable("id")
                        @Parameter(description = "Номер события")
                        Integer id) {
-        super.delete(id);
+        return super.delete(id);
     }
 
     @Override

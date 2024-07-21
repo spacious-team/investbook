@@ -94,10 +94,10 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     @Override
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = "Удалить информацию по инструменту")
-    public void delete(@PathVariable("id")
+    public ResponseEntity<Void> delete(@PathVariable("id")
                        @Parameter(description = "Идентификатор", example = "123", required = true)
                        Integer id) {
-        super.delete(id);
+        return super.delete(id);
     }
 
     @Override

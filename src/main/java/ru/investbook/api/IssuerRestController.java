@@ -88,10 +88,10 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     @Override
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = "Удаляет сведения об эмитенте из БД")
-    public void delete(@PathVariable("id")
+    public ResponseEntity<Void> delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор эмитента")
                        Integer id) {
-        super.delete(id);
+        return super.delete(id);
     }
 
     @Override

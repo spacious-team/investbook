@@ -106,11 +106,11 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
     }
 
     /**
-     * Deletes object from storage. Always return OK http status with empty body.
+     * Deletes object from storage. Always return "204 No Content" http status with empty body.
      */
-    // TODO should impl 404 status? https://stackoverflow.com/questions/4088350/is-rest-delete-really-idempotent
-    public void delete(ID id) {
+    public ResponseEntity<Void> delete(ID id) {
         deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     /**

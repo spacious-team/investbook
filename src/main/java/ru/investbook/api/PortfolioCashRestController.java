@@ -89,10 +89,10 @@ public class PortfolioCashRestController extends AbstractRestController<Integer,
     @Override
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить")
-    public void delete(@PathVariable("id")
+    public ResponseEntity<Void> delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор записи")
                        Integer id) {
-        super.delete(id);
+        return super.delete(id);
     }
 
     @Override

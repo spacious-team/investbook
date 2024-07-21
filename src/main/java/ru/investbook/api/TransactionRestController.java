@@ -143,11 +143,11 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @Override
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = "Удаляет указанную сделку")
-    public void delete(@PathVariable("id")
+    public ResponseEntity<Void> delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор сделки")
                        Integer id) {
         positionsFactory.invalidateCache();
-        super.delete(id);
+        return super.delete(id);
     }
 
     @Override

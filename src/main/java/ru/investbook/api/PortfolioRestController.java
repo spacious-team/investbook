@@ -90,10 +90,10 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @Override
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = "Удалить счет и все связанные с ним данные")
-    public void delete(@PathVariable("id")
+    public ResponseEntity<Void> delete(@PathVariable("id")
                        @Parameter(description = "Номер счета")
                        String id) {
-        super.delete(id);
+        return super.delete(id);
     }
 
     @Override
