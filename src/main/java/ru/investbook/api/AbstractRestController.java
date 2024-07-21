@@ -31,6 +31,7 @@ import java.net.URI;
 import java.util.Objects;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.nonNull;
 
 public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractEntityRepositoryService<ID, Pojo, Entity> {
 
@@ -50,8 +51,8 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
 
     /**
      * Creates a new entity.
-     * If entity has ID and record with this ID already exists in DB, CONFLICT http status and Location header was returned.
-     * Otherwise, CREATE http status will be returned with Location header.
+     * If entity has ID and record with this ID already exists in DB, "409 Conflict" http status and Location header was returned.
+     * Otherwise, "201 Created" http status will be returned with Location header.
      * When creating new object, ID may be passed, but that ID only used when no {@link GeneratedValue} set
      * on Entity ID field or if {@link GeneratedValue#generator} set to {@link org.hibernate.generator.BeforeExecutionGenerator},
      * generator impl; otherwise ID, passed in object, will be ignored (see JPA impl).
@@ -75,8 +76,8 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
 
     /**
      * Updates or creates a new entity.
-     * In update case method returns OK http status.
-     * In create case method returns CREATE http status and Location header.
+     * In create case method returns "201 Created" http status and Location header.
+     * In update case method returns "204 No Content" http status.
      * When creating new object, ID may be passed in the object, but it should be same as {@code id} argument.
      *
      * @param id     updating or creating entity id
@@ -87,18 +88,18 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
     @Transactional
     public ResponseEntity<Void> put(ID id, Pojo object) {
         try {
-            if (getId(object) == null) {
-                object = updateId(id, object);
-            } else if (!Objects.equals(id, getId(object))) {
+            ID objectId = getId(object);
+            if (nonNull(objectId) && !Objects.equals(id, objectId)) {
                 throw new BadRequestException("Идентификатор объекта, переданный в URI [" + id + "] и в теле " +
-                        "запроса [" + getId(object) + "] не совпадают");
+                        "запроса [" + objectId + "] не совпадают");
             }
-            if (create(object)) {
-                return ResponseEntity.ok().build();  // todo no content
-            } else {
-                Pojo savedObject = createOrUpdateAndGet(object);
-                return createResponseWithLocationHeader(savedObject); // todo change http status?
-            }
+            Pojo objectWithId = nonNull(objectId) ? object : updateId(id, object);
+            return createAndGet(objectWithId)
+                    .map(this::createResponseWithLocationHeader)
+                    .orElseGet(() -> {
+                        createOrUpdate(objectWithId);
+                        return ResponseEntity.noContent().build();
+                    });
         } catch (Exception e) {
             throw new InternalServerErrorException("Не могу создать объект", e);
         }
