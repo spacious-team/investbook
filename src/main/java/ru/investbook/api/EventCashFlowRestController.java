@@ -20,6 +20,9 @@ package ru.investbook.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.EventCashFlow;
@@ -39,6 +42,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.EventCashFlowEntity;
 
+import static org.springframework.http.HttpHeaders.LOCATION;
+
 @RestController
 @Tag(name = "Движения ДС по счету", description = """
         Ввод, вывод ДС, налоги, комиссии, а также дивиденды, купоны, амортизации по бумагам другого счета
@@ -54,7 +59,9 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам")
+    @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public Page<EventCashFlow> get(@Parameter(hidden = true)
                                    Pageable pageable) {
         return super.get(pageable);
@@ -62,7 +69,9 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить одну", description = "Отобразить выплату по ее номеру")
+    @Operation(summary = "Отобразить одну", description = "Отобразить выплату по ее номеру", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<EventCashFlow> get(@PathVariable("id")
                                              @Parameter(description = "Номер события")
                                              Integer id) {
@@ -71,14 +80,20 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Сохранить информацию в БД")
+    @Operation(summary = "Добавить", description = "Сохранить информацию", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "409"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> post(@Valid @RequestBody EventCashFlow event) {
         return super.post(event);
     }
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Изменить", description = "Модифицировать информацию в БД")
+    @Operation(summary = "Обновить", description = "Модифицировать информацию", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер события")
                                     Integer id,
@@ -90,10 +105,12 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удалить информацию из БД")
+    @Operation(summary = "Удалить", description = "Удалить информацию из БД", responses = {
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
-                       @Parameter(description = "Номер события")
-                       Integer id) {
+                                       @Parameter(description = "Номер события")
+                                       Integer id) {
         return super.delete(id);
     }
 

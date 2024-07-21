@@ -20,6 +20,9 @@ package ru.investbook.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.Security;
@@ -39,6 +42,8 @@ import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 
+import static org.springframework.http.HttpHeaders.LOCATION;
+
 @RestController
 @Tag(name = "Инструменты", description = "Акции, облигации, деривативы и валютные пары")
 @RequestMapping("/api/v1/securities")
@@ -53,7 +58,10 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отобразить все биржевые инструменты")
+    @Operation(summary = "Отобразить все", description = "Отобразить все биржевые инструменты",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public Page<Security> get(@Parameter(hidden = true)
                               Pageable pageable) {
         return super.get(pageable);
@@ -62,8 +70,10 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить один",
-            description = "Отобразить биржевой инструмент по внутреннему идентификатору")
+    @Operation(summary = "Отобразить один", description = "Отобразить биржевой инструмент по внутреннему идентификатору",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Security> get(@PathVariable("id")
                                         @Parameter(description = "Идентификатор", example = "123", required = true)
                                         Integer id) {
@@ -73,14 +83,22 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре")
+    @Operation(summary = "Добавить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре",
+            responses = {
+                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+                    @ApiResponse(responseCode = "409"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> post(@Valid @RequestBody Security security) {
         return super.post(security);
     }
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре")
+    @Operation(summary = "Обновить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре",
+            responses = {
+                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Идентификатор", example = "123", required = true)
                                     Integer id,
@@ -92,10 +110,13 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удалить сведения о биржевом инструменте и всех его сделках по всем счетам")
+    @Operation(summary = "Удалить", description = "Удалить сведения о биржевом инструменте и всех его сделках по всем счетам",
+            responses = {
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
-                       @Parameter(description = "Идентификатор", example = "123", required = true)
-                       Integer id) {
+                                       @Parameter(description = "Идентификатор", example = "123", required = true)
+                                       Integer id) {
         return super.delete(id);
     }
 

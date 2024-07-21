@@ -20,6 +20,9 @@ package ru.investbook.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.CashFlowType;
@@ -45,6 +48,8 @@ import ru.investbook.repository.TransactionCashFlowRepository;
 
 import java.util.List;
 
+import static org.springframework.http.HttpHeaders.LOCATION;
+
 @RestController
 @Tag(name = "Движения ДС по сделкам", description = "Уплаченные и вырученные суммы в сделках")
 @RequestMapping("/api/v1/transaction-cash-flows")
@@ -64,7 +69,10 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
 
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить по фильтру", description = "Отобразить информацию о сделках")
+    @Operation(summary = "Отобразить по фильтру", description = "Отобразить информацию о сделках",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     protected Page<TransactionCashFlow> get(
             @RequestParam(value = "portfolio", required = false)
             @Parameter(description = "Номер счета")
@@ -100,7 +108,10 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить одну", description = "Отобразить информацию о конкретной сделке")
+    @Operation(summary = "Отобразить одну", description = "Отобразить информацию о конкретной сделке",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<TransactionCashFlow> get(@PathVariable("id")
                                                    @Parameter(description = "Внутренний идентификатор сделки")
                                                    Integer id) {
@@ -109,7 +120,11 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Добавить информацию об об объемах движения ДС по сделке")
+    @Operation(summary = "Добавить", description = "Добавить информацию об об объемах движения ДС по сделке",
+            responses = {
+                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+                    @ApiResponse(responseCode = "409"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> post(@Valid @RequestBody TransactionCashFlow object) {
         return super.post(object);
     }
@@ -119,7 +134,11 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
      */
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", description = "Обновить информацию об об объемах движения ДС по сделке")
+    @Operation(summary = "Обновить", description = "Обновить информацию об об объемах движения ДС по сделке",
+            responses = {
+                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор сделки")
                                     Integer id,
@@ -136,10 +155,13 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = """
             Удалить информацию об об объемах движения ДС по сделке. Сама сделка не удаляется, ее нужно удалить своим API
-            """)
+            """,
+            responses = {
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
-                       @Parameter(description = "Внутренний идентификатор сделки")
-                       Integer id) {
+                                       @Parameter(description = "Внутренний идентификатор сделки")
+                                       Integer id) {
         return super.delete(id);
     }
 

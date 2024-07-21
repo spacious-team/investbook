@@ -20,6 +20,9 @@ package ru.investbook.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.PortfolioProperty;
@@ -39,6 +42,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.PortfolioPropertyEntity;
 
+import static org.springframework.http.HttpHeaders.LOCATION;
+
 @RestController
 @Tag(name = "Информация по счетам")
 @RequestMapping("/api/v1/portfolio-properties")
@@ -52,7 +57,10 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отображает всю имеющуюся информацию обо всех счетах")
+    @Operation(summary = "Отобразить все", description = "Отображает всю имеющуюся информацию обо всех счетах",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public Page<PortfolioProperty> get(@Parameter(hidden = true)
                                        Pageable pageable) {
         return super.get(pageable);
@@ -60,7 +68,10 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить один", description = "Отображает информацию по идентификатору")
+    @Operation(summary = "Отобразить один", description = "Отображает информацию по идентификатору",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<PortfolioProperty> get(@PathVariable("id")
                                                  @Parameter(description = "Внутренний идентификатор записи")
                                                  Integer id) {
@@ -69,14 +80,22 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Добавить информацию для конкретного счета")
+    @Operation(summary = "Добавить", description = "Добавить информацию для конкретного счета",
+            responses = {
+                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+                    @ApiResponse(responseCode = "409"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> post(@Valid @RequestBody PortfolioProperty property) {
         return super.post(property);
     }
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", description = "Обновить информацию для счета")
+    @Operation(summary = "Обновить", description = "Обновить информацию для счета",
+            responses = {
+                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор записи")
                                     Integer id,
@@ -88,10 +107,13 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить")
+    @Operation(summary = "Удалить",
+            responses = {
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
-                       @Parameter(description = "Внутренний идентификатор записи")
-                       Integer id) {
+                                       @Parameter(description = "Внутренний идентификатор записи")
+                                       Integer id) {
         return super.delete(id);
     }
 
