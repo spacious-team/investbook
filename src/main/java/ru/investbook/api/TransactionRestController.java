@@ -151,7 +151,7 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     }
 
     @Override
-    protected Integer getId(Transaction object) {
+    public Integer getId(Transaction object) {
         return object.getId();
     }
 

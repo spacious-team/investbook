@@ -145,7 +145,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
     }
 
     @Override
-    protected ForeignExchangeRateEntityPk getId(ForeignExchangeRate object) {
+    public ForeignExchangeRateEntityPk getId(ForeignExchangeRate object) {
         return getId(object.getCurrencyPair(), object.getDate());
     }
 

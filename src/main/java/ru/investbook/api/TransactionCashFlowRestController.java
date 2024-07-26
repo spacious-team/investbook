@@ -144,7 +144,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     }
 
     @Override
-    protected Integer getId(TransactionCashFlow object) {
+    public Integer getId(TransactionCashFlow object) {
         return object.getId();
     }
 

@@ -96,7 +96,7 @@ public class PortfolioCashRestController extends AbstractRestController<Integer,
     }
 
     @Override
-    protected Integer getId(PortfolioCash object) {
+    public Integer getId(PortfolioCash object) {
         return object.getId();
     }
 

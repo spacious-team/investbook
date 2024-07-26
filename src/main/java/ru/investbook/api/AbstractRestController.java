@@ -20,6 +20,8 @@ package ru.investbook.api;
 
 import jakarta.persistence.GeneratedValue;
 import lombok.SneakyThrows;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +39,10 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
 
     protected AbstractRestController(JpaRepository<Entity, ID> repository, EntityConverter<Entity, Pojo> converter) {
         super(repository, converter);
+    }
+
+    public Page<Pojo> get(Pageable pageable) {
+        return getPage(pageable);
     }
 
     /**

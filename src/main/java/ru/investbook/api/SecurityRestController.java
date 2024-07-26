@@ -100,7 +100,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     }
 
     @Override
-    protected Integer getId(Security object) {
+    public Integer getId(Security object) {
         return object.getId();
     }
 

@@ -101,7 +101,7 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     }
 
     @Override
-    protected Integer getId(SecurityDescription object) {
+    public Integer getId(SecurityDescription object) {
         return object.getSecurity();
     }
 

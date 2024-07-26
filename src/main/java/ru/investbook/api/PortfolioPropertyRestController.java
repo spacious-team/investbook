@@ -96,7 +96,7 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     }
 
     @Override
-    protected Integer getId(PortfolioProperty object) {
+    public Integer getId(PortfolioProperty object) {
         return object.getId();
     }
 

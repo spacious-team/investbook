@@ -97,7 +97,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     }
 
     @Override
-    protected String getId(Portfolio object) {
+    public String getId(Portfolio object) {
         return object.getId();
     }
 

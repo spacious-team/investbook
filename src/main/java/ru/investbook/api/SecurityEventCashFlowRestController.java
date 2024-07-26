@@ -107,7 +107,7 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     }
 
     @Override
-    protected Integer getId(SecurityEventCashFlow object) {
+    public Integer getId(SecurityEventCashFlow object) {
         return object.getId();
     }
 

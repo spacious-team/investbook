@@ -95,7 +95,7 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     }
 
     @Override
-    protected Integer getId(Issuer object) {
+    public Integer getId(Issuer object) {
         return object.getId();
     }
 

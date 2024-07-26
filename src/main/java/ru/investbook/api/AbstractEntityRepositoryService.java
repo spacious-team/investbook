@@ -68,7 +68,7 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
     }
 
     @Override
-    public Page<Pojo> get(Pageable pageable) {
+    public Page<Pojo> getPage(Pageable pageable) {
         return repository.findAll(pageable)
                 .map(converter::fromEntity);
     }
@@ -146,6 +146,4 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
     public void deleteById(ID id) {
         repository.deleteById(id);
     }
-
-    protected abstract ID getId(Pojo object);
 }
