@@ -35,11 +35,10 @@ public interface EntityRepositoryService<ID, Pojo> {
 
     /**
      * Creates a new object with direct INSERT into DB (without prior SELECT call) if possible,
-     * calls {@link #create(Object)} otherwise.
+     * calls {@link #createIfAbsent(Object)} otherwise.
      *
      * @return true if object is created, false if object with ID already exists
-     * @throws RuntimeException if an INSERT error occurs
-     * @implNote Method performance is the same as {@link #create(Object)} for H2 2.2.224 and MariaDB 11.2
+     * @throws RuntimeException if object not exists and an INSERT error occurs
      */
     boolean insert(Pojo object);
 
@@ -48,21 +47,21 @@ public interface EntityRepositoryService<ID, Pojo> {
      * Calls SELECT to check if object's ID exists in DB.
      *
      * @return true if object was created, false if object with ID already exists
-     * @throws RuntimeException if an INSERT error occurs
+     * @throws RuntimeException if object not exists and an INSERT error occurs
      * @see #insert(Object)
      */
-    boolean create(Pojo object);
+    boolean createIfAbsent(Pojo object);
 
     /**
      * Creates new object, doesn't update.
      * Calls SELECT to check if object's ID exists in DB.
-     * Use faster {@link #create(Object)} method if saved object is not required
+     * Use faster {@link #createIfAbsent(Object)} method if saved object is not required
      *
      * @return created object or empty Optional if object with ID already exists
-     * @throws RuntimeException if an INSERT error occurs
-     * @see #create(Object)
+     * @throws RuntimeException if object not exists and an INSERT error occurs
+     * @see #createIfAbsent(Object)
      */
-    Optional<Pojo> createAndGet(Pojo object);
+    Optional<Pojo> createAndGetIfAbsent(Pojo object);
 
     /**
      * Create new or update existing object in DB.

@@ -73,12 +73,16 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
                 .map(converter::fromEntity);
     }
 
+    /**
+     * @implNote Method performance is the same as {@link #createIfAbsent(Object)} for H2 2.2.224 and MariaDB 11.2
+     */
     @Override
     @SuppressWarnings("deprecation")
     public boolean insert(Pojo object) {
         if (entityManager instanceof Session hibernateSpecificSession) {
             try {
                 Entity entity = converter.toEntity(object);
+                // Hibernate save() method does sql INSERT
                 transactionTemplateRequiresNew.executeWithoutResult(_ -> hibernateSpecificSession.save(entity));
                 return true;
             } catch (Exception e) {
@@ -88,21 +92,21 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
                 log.error("Can't INSERT by optimized deprecated Hibernate method save(): {}", object, e);
             }
         }
-        Boolean result = transactionTemplateRequired.execute(_ -> create(object));
+        Boolean result = transactionTemplateRequired.execute(_ -> createIfAbsent(object));
         return Boolean.TRUE.equals(result);
     }
 
     @Override
     @Transactional
-    public boolean create(Pojo object) {
-        return createInternal(object)
+    public boolean createIfAbsent(Pojo object) {
+        return createIfAbsentInternal(object)
                 .isPresent();
     }
 
     @Override
     @Transactional
-    public Optional<Pojo> createAndGet(Pojo object) {
-        return createInternal(object)
+    public Optional<Pojo> createAndGetIfAbsent(Pojo object) {
+        return createIfAbsentInternal(object)
                 .map(converter::fromEntity);
     }
 
@@ -112,7 +116,7 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
      * @return created entity if object is created or empty Optional otherwise
      * @implSpec Should be called in transaction
      */
-    private Optional<Entity> createInternal(Pojo object) {
+    private Optional<Entity> createIfAbsentInternal(Pojo object) {
         ID id = getId(object);
         if (id != null && existsById(id)) {
             return Optional.empty();

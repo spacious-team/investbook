@@ -69,7 +69,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
     @Transactional
     protected ResponseEntity<Void> post(Pojo object) {
         try {
-            return createAndGet(object)
+            return createAndGetIfAbsent(object)
                     .map(this::createResponseWithLocationHeader)
                     .orElseGet(() -> ResponseEntity
                             .status(HttpStatus.CONFLICT)
@@ -100,7 +100,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
                         "запроса [" + objectId + "] не совпадают");
             }
             Pojo objectWithId = nonNull(objectId) ? object : updateId(id, object);
-            return createAndGet(objectWithId)
+            return createAndGetIfAbsent(objectWithId)
                     .map(this::createResponseWithLocationHeader)
                     .orElseGet(() -> {
                         createOrUpdate(objectWithId);

@@ -54,6 +54,7 @@ import ru.investbook.service.moex.MoexDerivativeCodeService;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
@@ -78,17 +79,17 @@ public class InvestbookApiClient {
     private final ValidatorService validator;
 
     public boolean addPortfolio(Portfolio portfolio) {
-        return handlePost(
+        return saveWithoutUpdate(
                 portfolio,
-                portfolioRestController::post,
+                portfolioRestController::createIfAbsent,
                 "Не могу сохранить Портфель");
     }
 
     public void addSecurity(Security security) {
         security = convertDerivativeSecurityId(security);
-        handlePost(
+        saveWithoutUpdate(
                 security,
-                securityRestController::post,
+                securityRestController::createIfAbsent,
                 "Не могу добавить ЦБ ");
     }
 
@@ -101,7 +102,7 @@ public class InvestbookApiClient {
     }
 
     public void addSecurityDescription(SecurityDescription securityDescription) {
-        handlePost(
+        saveWithoutUpdate(
                 securityDescription,
                 securityDescriptionRestController::post,
                 "Не могу добавить метаинформацию о ЦБ ");
@@ -136,23 +137,23 @@ public class InvestbookApiClient {
     }
 
     public boolean addTransaction(Transaction transaction) {
-        return handlePost(
+        return saveWithoutUpdate(
                 transaction,
-                transactionRestController::post,
+                transactionRestController::createIfAbsent,
                 "Не могу добавить транзакцию");
     }
 
     public void addTransactionCashFlow(TransactionCashFlow transactionCashFlow) {
-        handlePost(
+        saveWithoutUpdate(
                 transactionCashFlow,
-                transactionCashFlowRestController::post,
+                transactionCashFlowRestController::createIfAbsent,
                 "Не могу добавить информацию о передвижении средств");
     }
 
     public void addEventCashFlow(EventCashFlow eventCashFlow) {
-        handlePost(
+        saveWithoutUpdate(
                 eventCashFlow,
-                eventCashFlowRestController::post,
+                eventCashFlowRestController::createIfAbsent,
                 "Не могу добавить информацию о движении денежных средств");
     }
 
@@ -160,65 +161,61 @@ public class InvestbookApiClient {
         if (cf.getCount() == null && cf.getEventType() == DERIVATIVE_PROFIT) {
             cf = cf.toBuilder().count(0).build(); // count is optional for derivatives
         }
-        handlePost(
+        saveWithoutUpdate(
                 cf,
-                securityEventCashFlowRestController::post,
+                securityEventCashFlowRestController::createIfAbsent,
                 "Не могу добавить информацию о движении денежных средств");
     }
 
     public void addPortfolioCash(PortfolioCash cash) {
-        handlePost(
+        saveWithoutUpdate(
                 cash,
-                portfolioCashRestController::post,
+                portfolioCashRestController::createIfAbsent,
                 "Не могу добавить информацию об остатках денежных средств портфеля");
     }
 
     public void addPortfolioProperty(PortfolioProperty property) {
-        handlePost(
+        saveWithoutUpdate(
                 property,
-                portfolioPropertyRestController::post,
+                portfolioPropertyRestController::createIfAbsent,
                 "Не могу добавить информацию о свойствах портфеля");
     }
 
     public void addSecurityQuote(SecurityQuote securityQuote) {
-        handlePost(
+        saveWithoutUpdate(
                 securityQuote,
-                securityQuoteRestController::post,
+                securityQuoteRestController::createIfAbsent,
                 "Не могу добавить информацию о котировке финансового инструмента");
     }
 
     public void addForeignExchangeRate(ForeignExchangeRate exchangeRate) {
-        handlePost(
+        saveWithoutUpdate(
                 exchangeRate,
-                foreignExchangeRateRestController::post,
+                foreignExchangeRateRestController::createIfAbsent,
                 "Не могу добавить информацию о курсе валюты");
     }
 
     /**
-     * @return true if new row was added, or it was already exists in DB, false - or error
+     * @return true - if object was created, or it was already exists in DB,
+     * false - if object not exists and create error was occurred
      */
-    // todo replace RestController with EntityRepositoryService
-    private <T> boolean handlePost(T object, Function<T, ResponseEntity<?>> saver, String errorPrefix) {
+    private <T> boolean saveWithoutUpdate(T object, Consumer<T> persistFunction, String errorMsg) {
         try {
             validator.validate(object);
-            HttpStatusCode status = saver.apply(object).getStatusCode();
-            if (!status.is2xxSuccessful() && status != HttpStatus.CONFLICT) {
-                log.warn(errorPrefix + " " + object);
-                return false;
-            }
+            persistFunction.accept(object);
+            return true;
         } catch (ConstraintViolationException e) {
-            log.warn("{} {}: {}", errorPrefix, object, e.getMessage());
+            log.warn("{} {}: {}", errorMsg, object, e.getMessage());
             return false;
         } catch (Exception e) {
             if (isUniqIndexViolationException(e)) {
-                log.debug("Дублирование информации: {} {}", errorPrefix, object);
+                log.debug("Дублирование информации: {} {}", errorMsg, object);
                 log.trace("Дублирование вызвано исключением", e);
-                return true; // same as above status == HttpStatus.CONFLICT
+                return true;  // object already exists
             } else {
-                log.warn("{} {}", errorPrefix, object, e);
+                log.warn("{} {}", errorMsg, object, e);
                 return false;
             }
         }
-        return true;
     }
 }

@@ -49,11 +49,11 @@ class AbstractEntityRepositoryServiceTest {
     }
 
     @Test
-    void create() {
-        test("create()", service::create, false);
-        test("create()", service::create, false);
-        test("create()", service::create, true);
-        test("create()", service::create, true);
+    void createIfAbsent() {
+        test("createIfAbsent()", service::createIfAbsent, false);
+        test("createIfAbsent()", service::createIfAbsent, false);
+        test("createIfAbsent()", service::createIfAbsent, true);
+        test("createIfAbsent()", service::createIfAbsent, true);
     }
 
     void test(String name, Consumer<Security> consumer, boolean isIdNull) {
