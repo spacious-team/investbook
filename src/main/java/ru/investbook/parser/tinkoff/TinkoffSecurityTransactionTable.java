@@ -39,6 +39,7 @@ import ru.investbook.parser.TransactionValueAndFeeParser;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.parser.tinkoff.TinkoffSecurityTransactionTable.TransactionTableHeader.*;
 
 @Slf4j
@@ -77,9 +78,8 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
 
     @Override
     protected AbstractTransaction parseRow(TableRow row) {
-        long _tradeId = row.getLongCellValueOrDefault(TRADE_ID, -1);
-        if (_tradeId == -1) return null;
-        String tradeId = String.valueOf(_tradeId);
+        String tradeId = row.getStringCellValueOrDefault(TRADE_ID, "");
+        if (!hasLength(tradeId)) return null;
 
         int securityId = transactionTableHelper.getSecurityId(row, codeAndIsin, getReport().getSecurityRegistrar());
         boolean isBuy = row.getStringCellValue(OPERATION).toLowerCase().contains("покупка");
