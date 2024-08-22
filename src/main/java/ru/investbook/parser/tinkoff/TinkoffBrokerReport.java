@@ -43,6 +43,8 @@ public class TinkoffBrokerReport extends AbstractExcelBrokerReport {
     private static final String PORTFOLIO_MARKER = "Инвестор:";
     private static final Predicate<Object> tinkoffReportPredicate = cell ->
             (cell instanceof String) && ((String) cell).contains("Тинькофф");
+    private static final Predicate<Object> tbankReportPredicate = cell ->
+            (cell instanceof String) && ((String) cell).contains("ТБанк");
     private static final Predicate<Object> dateMarkerPredicate = cell ->
             (cell instanceof String) && ((String) cell).contains("за период");
 
@@ -61,8 +63,9 @@ public class TinkoffBrokerReport extends AbstractExcelBrokerReport {
     }
 
     public static void checkReportFormat(String excelFileName, ReportPage reportPage) {
-        if (reportPage.find(0, 2, tinkoffReportPredicate) == TableCellAddress.NOT_FOUND) {
-            throw new RuntimeException("В файле " + excelFileName + " не содержится отчет брокера Тинькофф");
+        if (reportPage.find(0, 2, tbankReportPredicate) == TableCellAddress.NOT_FOUND &&
+                reportPage.find(0, 2, tinkoffReportPredicate) == TableCellAddress.NOT_FOUND) {
+            throw new RuntimeException("В файле " + excelFileName + " не содержится отчет брокера ТБанк (Тинькофф)");
         }
     }
 
