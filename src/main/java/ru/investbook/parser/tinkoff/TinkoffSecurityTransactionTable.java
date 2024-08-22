@@ -39,6 +39,7 @@ import ru.investbook.parser.TransactionValueAndFeeParser;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.parser.tinkoff.TinkoffSecurityTransactionTable.TransactionTableHeader.*;
 
 @Slf4j
@@ -77,12 +78,20 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
 
     @Override
     protected AbstractTransaction parseRow(TableRow row) {
-        long _tradeId = row.getLongCellValueOrDefault(TRADE_ID, -1);
-        if (_tradeId == -1) return null;
-        String tradeId = String.valueOf(_tradeId);
+        String tradeId = row.getStringCellValueOrDefault(TRADE_ID, "");
+        if (!hasLength(tradeId)) return null;
+        String operation = row.getStringCellValue(OPERATION).toLowerCase();
+        boolean isBuy = operation.contains("покупка");
+        boolean isRepo = operation.contains("репо");
+        if (isRepo) {
+            // Сделки переноса РЕПО "РЕПО 1 Покупка" и "РЕПО 2 Продажа" имеют одинаковый tradeId и timestamp.
+            // Это синтетические сделки, но эти сделки имеют комиссии, поэтому их нужно иметь возможность сохранить в БД.
+            // Требуется уникальный tradeId для обоих РЕПО сделок.
+            String tradeIdSuffix = isBuy ? "repobuy" : "reposell";
+            tradeId += tradeIdSuffix;
+        }
 
         int securityId = transactionTableHelper.getSecurityId(row, codeAndIsin, getReport().getSecurityRegistrar());
-        boolean isBuy = row.getStringCellValue(OPERATION).toLowerCase().contains("покупка");
         int count = Math.abs(row.getIntCellValue(COUNT));
         BigDecimal amount = row.getBigDecimalCellValue(AMOUNT).abs();
         amount = isBuy ? amount.negate() : amount;
