@@ -31,6 +31,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import ru.investbook.converter.EntityConverter;
+import ru.investbook.repository.ConstraintAwareRepository;
 
 import java.util.Optional;
 
@@ -110,6 +111,11 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
                 .map(converter::fromEntity);
     }
 
+    @Override
+    public CreateResult<Pojo> createIfAbsentAndGet(Pojo object) {
+        return createIfAbsentAndGetInternal(object);
+    }
+
     /**
      * Creates a new object (with SELECT check)
      *
@@ -117,15 +123,62 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
      * @implSpec Should be called in transaction
      */
     private Optional<Entity> createIfAbsentInternal(Pojo object) {
-        ID id = getId(object);
-        if (id != null && existsById(id)) {
-            return Optional.empty();
+        Entity entity = null;
+        if (repository instanceof ConstraintAwareRepository<Entity, ID> caRepository) {
+            entity = converter.toEntity(object);
+            if (caRepository.exists(entity)) {
+                return Optional.empty();
+            }
+        } else {
+            ID id = getId(object);
+            if (id != null && existsById(id)) {
+                return Optional.empty();
+            }
         }
-        // Если работать не в транзакции, то следующая строка может повторно создать объект.
-        // Это возможно, если объект был создан другим потоком после проверки существования строки по ID.
+
+        // Если работать не в транзакции, то следующие строки могут повторно создать объект.
+        // Это возможно, если объект был создан другим потоком после проверки существования строки.
         // Метод должен работать в транзакции.
-        Entity savedEntity = createOrUpdateInternal(object);
+        if (entity == null) {
+            entity = converter.toEntity(object);
+        }
+        Entity savedEntity = repository.save(entity);
         return Optional.of(savedEntity);
+    }
+
+    /**
+     * Creates a new object (with SELECT check)
+     *
+     * @return created entity if object is created or existing object otherwise
+     * @implSpec Should be called in transaction
+     */
+    private CreateResult<Pojo> createIfAbsentAndGetInternal(Pojo object) {
+        Entity entity = null;
+        Optional<Entity> selectedEntity;
+        if (repository instanceof ConstraintAwareRepository<Entity, ID> caRepository) {
+            entity = converter.toEntity(object);
+            selectedEntity = caRepository.findBy(entity);
+        } else {
+            ID id = getId(object);
+            selectedEntity = Optional.ofNullable(id)
+                    .flatMap(repository::findById);
+        }
+        if (selectedEntity.isPresent()) {
+            return selectedEntity
+                    .map(converter::fromEntity)
+                    .map(CreateResult::selected)
+                    .orElseThrow();
+        }
+
+        // Если работать не в транзакции, то следующие строки могут повторно создать объект.
+        // Это возможно, если объект был создан другим потоком после проверки существования строки.
+        // Метод должен работать в транзакции.
+        if (entity == null) {
+            entity = converter.toEntity(object);
+        }
+        Entity savedEntity = repository.save(entity);
+        Pojo savedObject = converter.fromEntity(savedEntity);
+        return CreateResult.created(savedObject);
     }
 
     @Override

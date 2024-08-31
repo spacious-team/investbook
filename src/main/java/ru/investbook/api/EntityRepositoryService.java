@@ -64,6 +64,17 @@ public interface EntityRepositoryService<ID, Pojo> {
     Optional<Pojo> createAndGetIfAbsent(Pojo object);
 
     /**
+     * Creates new object, doesn't update.
+     * Calls SELECT to check if object's ID exists in DB.
+     * Use faster {@link #createIfAbsent(Object)} method if saved object is not required
+     *
+     * @return created object or existing object without update if object with ID already exists
+     * @throws RuntimeException if object not exists and an INSERT error occurs
+     * @see #createIfAbsent(Object)
+     */
+    CreateResult<Pojo> createIfAbsentAndGet(Pojo object);
+
+    /**
      * Create new or update existing object in DB.
      * Use instead of the slower method {@link #createOrUpdateAndGet(Object)}
      * if saved object is not required

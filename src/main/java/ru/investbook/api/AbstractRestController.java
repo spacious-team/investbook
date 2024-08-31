@@ -69,12 +69,16 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
     @Transactional
     protected ResponseEntity<Void> post(Pojo object) {
         try {
-            return createAndGetIfAbsent(object)
-                    .map(this::createResponseWithLocationHeader)
-                    .orElseGet(() -> ResponseEntity
-                            .status(HttpStatus.CONFLICT)
-                            .location(getLocationURI(object))
-                            .build());
+            CreateResult<Pojo> result = createIfAbsentAndGet(object);
+            Pojo savedObject = result.object();
+            if (result.created()) {
+                return createResponseWithLocationHeader(savedObject);
+            } else {
+                return ResponseEntity
+                        .status(HttpStatus.CONFLICT)
+                        .location(getLocationURI(savedObject))
+                        .build();
+            }
         } catch (Exception e) {
             throw new InternalServerErrorException("Не могу создать объект", e);
         }
