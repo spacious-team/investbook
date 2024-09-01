@@ -217,7 +217,8 @@ public class InvestbookApiClient {
             validator.validate(object);
             CreateResult<T> result = persistFunction.apply(object);
             return Optional.of(result.object());
-        } catch (Exception e) {  // jakarta.validation, not SQL constraint
+        } catch (Exception e) {
+            // should not be thrown for duplicate
             log.warn("{} {}: {}", errorMsg, object, e.getMessage());
             return Optional.empty();
         }
