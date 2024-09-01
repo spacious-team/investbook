@@ -44,8 +44,8 @@ public class SecurityEventCashFlowEntity {
     @Column(name = "id")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "portfolio", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "portfolio", referencedColumnName = "id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private PortfolioEntity portfolio;
 
@@ -53,8 +53,8 @@ public class SecurityEventCashFlowEntity {
     @Column(name = "timestamp")
     private Instant timestamp;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "security", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "security", referencedColumnName = "id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private SecurityEntity security;
 
@@ -62,8 +62,8 @@ public class SecurityEventCashFlowEntity {
     @Column(name = "count")
     private Integer count;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "type", referencedColumnName = "id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private CashFlowTypeEntity cashFlowType;
 

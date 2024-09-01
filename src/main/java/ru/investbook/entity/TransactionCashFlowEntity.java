@@ -45,7 +45,7 @@ public class TransactionCashFlowEntity {
     @Column(name = "transaction_id")
     private int transactionId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "type", referencedColumnName = "id", nullable = false)
     private CashFlowTypeEntity cashFlowType;
 
@@ -61,7 +61,7 @@ public class TransactionCashFlowEntity {
     /*
     Nowadays not used, commented due to perf issue
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumns({
             @JoinColumn(name = "transaction_id", referencedColumnName = "id", insertable = false, updatable = false),
             @JoinColumn(name = "portfolio", referencedColumnName = "portfolio", insertable = false, updatable = false)
