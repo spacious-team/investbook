@@ -34,11 +34,8 @@ import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import ru.investbook.api.CreateResult;
 import ru.investbook.api.EventCashFlowRestController;
 import ru.investbook.api.ForeignExchangeRateRestController;
 import ru.investbook.api.PortfolioCashRestController;
@@ -52,7 +49,6 @@ import ru.investbook.api.TransactionCashFlowRestController;
 import ru.investbook.api.TransactionRestController;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -109,23 +105,15 @@ public class InvestbookApiClient {
     }
 
     public void addTransaction(AbstractTransaction transaction) {
-        boolean isAdded = addTransaction(transaction.getTransaction());
-        if (isAdded) {
-            Optional.ofNullable(transaction.getId())
-                    .or(() -> getSavedTransactionId(transaction))
-                    .ifPresentOrElse(
-                            transactionId -> addCashTransactionFlows(transaction, transactionId),
-                            () -> log.warn("Не могу добавить транзакцию в БД, " +
-                                    "не задан внутренний идентификатор записи: {}", transaction));
-        }
-    }
-
-    private Optional<Integer> getSavedTransactionId(AbstractTransaction transaction) {
-        // todo replace RestController with EntityRepositoryService
-        return Optional.of(transactionRestController.get(transaction.getPortfolio(), transaction.getTradeId(), Pageable.unpaged()).getContent())
-                .filter(result -> result.size() == 1)
-                .map(List::getFirst)
-                .map(Transaction::getId);
+        saveWithoutUpdateAndGet(
+                transaction.getTransaction(),
+                transactionRestController::createIfAbsentAndGet,
+                "Не могу добавить транзакцию")
+                .map(Transaction::getId)
+                .ifPresentOrElse(
+                        transactionId -> addCashTransactionFlows(transaction, transactionId),
+                        () -> log.warn("Не могу добавить транзакцию в БД, " +
+                                "не задан внутренний идентификатор записи: {}", transaction));
     }
 
     private void addCashTransactionFlows(AbstractTransaction transaction, int transactionId) {
@@ -136,8 +124,8 @@ public class InvestbookApiClient {
                 .forEach(this::addTransactionCashFlow);
     }
 
-    public boolean addTransaction(Transaction transaction) {
-        return saveWithoutUpdate(
+    public void addTransaction(Transaction transaction) {
+        saveWithoutUpdate(
                 transaction,
                 transactionRestController::createIfAbsent,
                 "Не могу добавить транзакцию");
@@ -204,7 +192,7 @@ public class InvestbookApiClient {
             validator.validate(object);
             persistFunction.accept(object);
             return true;
-        } catch (ConstraintViolationException e) {
+        } catch (ConstraintViolationException e) {  // jakarta.validation, not SQL constraint
             log.warn("{} {}: {}", errorMsg, object, e.getMessage());
             return false;
         } catch (Exception e) {
@@ -216,6 +204,22 @@ public class InvestbookApiClient {
                 log.warn("{} {}", errorMsg, object, e);
                 return false;
             }
+        }
+    }
+
+    /**
+     * @return true - if object was created, or it was already exists in DB,
+     * false - if object not exists and create error was occurred
+     */
+    private <T> Optional<T> saveWithoutUpdateAndGet(T object, Function<T, CreateResult<T>> persistFunction,
+                                                    @SuppressWarnings("SameParameterValue") String errorMsg) {
+        try {
+            validator.validate(object);
+            CreateResult<T> result = persistFunction.apply(object);
+            return Optional.of(result.object());
+        } catch (Exception e) {  // jakarta.validation, not SQL constraint
+            log.warn("{} {}: {}", errorMsg, object, e.getMessage());
+            return Optional.empty();
         }
     }
 }
