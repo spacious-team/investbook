@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriUtils;
 import ru.investbook.converter.EntityConverter;
@@ -57,7 +58,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
 
     /**
      * Creates a new entity.
-     * If entity has ID and record with this ID already exists in DB, "409 Conflict" http status and Location header was returned.
+     * If entity has ID and record with this ID already exists in DB, "409 Conflict" http status and optional Location header was returned.
      * Otherwise, "201 Created" http status will be returned with Location header.
      * When creating new object, ID may be passed, but that ID only used when no {@link GeneratedValue} set
      * on Entity ID field or if {@link GeneratedValue#generator} set to {@link org.hibernate.generator.BeforeExecutionGenerator},
@@ -74,14 +75,21 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
             if (result.created()) {
                 return createResponseWithLocationHeader(savedObject);
             } else {
-                return ResponseEntity
-                        .status(HttpStatus.CONFLICT)
-                        .location(getLocationURI(savedObject))
-                        .build();
+                return createConflictResponse(savedObject);
             }
         } catch (Exception e) {
             throw new InternalServerErrorException("Не могу создать объект", e);
         }
+    }
+
+    @NonNull
+    private ResponseEntity<Void> createConflictResponse(Pojo object) {
+        ResponseEntity.BodyBuilder response = ResponseEntity.status(HttpStatus.CONFLICT);
+        if (getId(object) != null) {
+            URI locationURI = getLocationURI(object);
+            response.location(locationURI);
+        }
+        return response.build();
     }
 
     /**
