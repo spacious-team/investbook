@@ -23,21 +23,16 @@ import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.TransactionEntity;
-import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 
 @Component
 @RequiredArgsConstructor
 public class TransactionConverter implements EntityConverter<TransactionEntity, Transaction> {
-    private final PortfolioRepository portfolioRepository;
     private final SecurityRepository securityRepository;
 
     @Override
     public TransactionEntity toEntity(Transaction transaction) {
-        portfolioRepository.findById(transaction.getPortfolio())
-                .orElseThrow(() -> new IllegalArgumentException("В справочнике не найден брокерский счет: " + transaction.getPortfolio()));
-        SecurityEntity securityEntity = securityRepository.findById(transaction.getSecurity())
-                .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ID не найдена: " + transaction.getSecurity()));
+        SecurityEntity securityEntity = securityRepository.getReferenceById(transaction.getSecurity());
 
         TransactionEntity entity = new TransactionEntity();
         entity.setId(transaction.getId());

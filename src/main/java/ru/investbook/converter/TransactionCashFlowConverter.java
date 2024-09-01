@@ -35,11 +35,7 @@ public class TransactionCashFlowConverter implements EntityConverter<Transaction
 
     @Override
     public TransactionCashFlowEntity toEntity(TransactionCashFlow cash) {
-        if (!transactionRepository.existsById(cash.getTransactionId())) {
-            throw new IllegalArgumentException("Транзакция с номером не найдена: " + cash.getTransactionId());
-        }
-        CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.findById(cash.getEventType().getId())
-                .orElseThrow(() -> new IllegalArgumentException("В справочнике не найдено событие с типом: " + cash.getEventType().getId()));
+        CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.getReferenceById(cash.getEventType().getId());
 
         TransactionCashFlowEntity entity = new TransactionCashFlowEntity();
         entity.setId(cash.getId());
