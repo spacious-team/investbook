@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
+ * Copyright (C) 2024  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,26 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.entity;
+package ru.investbook.repository;
 
-import jakarta.persistence.Basic;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.Table;
-import lombok.Data;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.NoRepositoryBean;
 
-import java.io.Serializable;
-import java.time.LocalDate;
+import java.util.Optional;
 
-@Embeddable
-@Table(name = "foreign_exchange_rate")
-@Data
-public class ForeignExchangeRateEntityPk implements Serializable {
+/**
+ * JpaRepository that knows about UNIQUE KEYS
+ */
+@NoRepositoryBean
+public interface ConstraintAwareRepository<T, ID> extends JpaRepository<T, ID> {
 
-    @Column(name = "date", nullable = false)
-    private LocalDate date;
+    /**
+     * Checks entity existence by UNIQUE KEY fields, other fields is ignored
+     */
+    boolean exists(T probe);
 
-    @Basic
-    @Column(name = "currency_pair", nullable = false)
-    private String currencyPair;
+    /**
+     * Selects entity by UNIQUE KEY fields, other fields is ignored
+     */
+    Optional<T> findBy(T probe);
 }

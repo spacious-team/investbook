@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.SneakyThrows;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
@@ -43,10 +44,8 @@ import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.repository.ForeignExchangeRateRepository;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -54,6 +53,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/foreign-exchange-rates")
 public class ForeignExchangeRateRestController extends AbstractRestController<ForeignExchangeRateEntityPk, ForeignExchangeRate, ForeignExchangeRateEntity> {
     private final ForeignExchangeRateRepository foreignExchangeRateRepository;
+    private final ForeignExchangeRateConverter foreignExchangeRateConverter;
     private final ForeignExchangeRateService foreignExchangeRateService;
 
     public ForeignExchangeRateRestController(ForeignExchangeRateRepository repository,
@@ -61,6 +61,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
                                              ForeignExchangeRateService foreignExchangeRateService) {
         super(repository, converter);
         this.foreignExchangeRateRepository = repository;
+        this.foreignExchangeRateConverter = converter;
         this.foreignExchangeRateService = foreignExchangeRateService;
     }
 
@@ -68,8 +69,8 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
     @GetMapping
     @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отображает все загруженные в БД информацию по обменным курсам")
-    protected Page<ForeignExchangeRate> get(@Parameter(hidden = true)
-                                            Pageable pageable) {
+    public Page<ForeignExchangeRate> get(@Parameter(hidden = true)
+                                         Pageable pageable) {
         return super.get(pageable);
     }
 
@@ -81,7 +82,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
                                             String currencyPair) {
         return foreignExchangeRateRepository.findByPkCurrencyPairOrderByPkDateDesc(currencyPair)
                 .stream()
-                .map(converter::fromEntity)
+                .map(foreignExchangeRateConverter::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -132,7 +133,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
      */
     @DeleteMapping("/currency-pairs/{currency-pair}/dates/{date}")
     @Operation(summary = "Удалить", description = "Удаляет информацию о курсе из БД")
-    public void delete(@PathVariable("currency-pair")
+    public ResponseEntity<Void> delete(@PathVariable("currency-pair")
                        @Parameter(description = "Валютная пара", example = "USDRUB")
                        String currencyPair,
                        @PathVariable("date")
@@ -140,16 +141,11 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
                        @DateTimeFormat(pattern = "yyyy-MM-dd")
                        LocalDate date) {
         foreignExchangeRateService.invalidateCache();
-        super.delete(getId(currencyPair, date));
+        return super.delete(getId(currencyPair, date));
     }
 
     @Override
-    protected Optional<ForeignExchangeRateEntity> getById(ForeignExchangeRateEntityPk id) {
-        return repository.findById(id);
-    }
-
-    @Override
-    protected ForeignExchangeRateEntityPk getId(ForeignExchangeRate object) {
+    public ForeignExchangeRateEntityPk getId(ForeignExchangeRate object) {
         return getId(object.getCurrencyPair(), object.getDate());
     }
 
@@ -169,7 +165,8 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
     }
 
     @Override
-    protected URI getLocationURI(ForeignExchangeRate object) throws URISyntaxException {
+    @SneakyThrows
+    protected URI getLocationURI(ForeignExchangeRate object) {
         return new URI(getLocation() + "/currency-pairs/" + object.getCurrencyPair() + "/dates/" + object.getDate());
     }
 

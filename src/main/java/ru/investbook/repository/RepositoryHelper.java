@@ -20,15 +20,35 @@ package ru.investbook.repository;
 
 import org.hibernate.exception.ConstraintViolationException;
 
+import java.sql.SQLException;
+import java.util.Objects;
+
 public class RepositoryHelper {
 
     /**
-     * May return false positive result if NOT NULL column set by NULL
+     * May return false positive result if NOT NULL column set by NULL (or for other constraint violations)
+     * for not H2 or MariaDB RDBMS
      */
     public static boolean isUniqIndexViolationException(Throwable t) {
         do {
             if (t instanceof ConstraintViolationException) {
-                return true;
+                // todo Не точное условие, нужно выбирать
+                Throwable cause = t.getCause();
+                if (cause instanceof SQLException sqlException) {
+                    int errorCode = sqlException.getErrorCode();
+                    String sqlState = sqlException.getSQLState();
+                    String packageName = cause.getClass().getPackageName();
+                    // https://www.h2database.com/javadoc/org/h2/api/ErrorCode.html#DUPLICATE_KEY_1
+                    if (errorCode == 23505 && Objects.equals(packageName, "org.h2.jdbc")) {
+                        return true;  // H2
+                    } else if (errorCode == 1062 &&
+                            Objects.equals(sqlState, "23000") &&
+                            Objects.equals(packageName, "java.sql")) {
+                        // https://mariadb.com/kb/en/mariadb-error-code-reference/
+                        return true;  // MariaDB
+                    }
+                }
+                return true;  // other databases
             }
         } while ((t = t.getCause()) != null);
         return false;

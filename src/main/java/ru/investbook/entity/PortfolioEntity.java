@@ -33,10 +33,10 @@ import lombok.EqualsAndHashCode;
 public class PortfolioEntity {
 
     @Id
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
     private String id;
 
     @Basic
-    @Column(name = "enabled")
+    @Column(name = "enabled", nullable = false)
     private boolean enabled;
 }

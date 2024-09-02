@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
+ * Copyright (C) 2024  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,26 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.entity;
+package ru.investbook.api;
 
-import jakarta.persistence.Basic;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.Table;
-import lombok.Data;
+/**
+ * @param created true is new object was created, false if existing object is returned
+ */
+public record CreateResult<T>(T object, boolean created) {
 
-import java.io.Serializable;
-import java.time.LocalDate;
+    public static <T> CreateResult<T> created(T object) {
+        return new CreateResult<>(object, true);
+    }
 
-@Embeddable
-@Table(name = "foreign_exchange_rate")
-@Data
-public class ForeignExchangeRateEntityPk implements Serializable {
-
-    @Column(name = "date", nullable = false)
-    private LocalDate date;
-
-    @Basic
-    @Column(name = "currency_pair", nullable = false)
-    private String currencyPair;
+    public static <T> CreateResult<T> selected(T object) {
+        return new CreateResult<>(object, false);
+    }
 }

@@ -122,7 +122,7 @@ public class TransactionFormsService {
 
     @Transactional
     public void save(TransactionModel tr) {
-        int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(tr);
+        int savedSecurityId = securityRepositoryHelper.saveSecurity(tr);
         int direction = ((tr.getAction() == TransactionModel.Action.BUY) ? 1 : -1);
         BigDecimal multiplier = BigDecimal.valueOf(-direction * tr.getCount());
 
@@ -176,16 +176,16 @@ public class TransactionFormsService {
                 .count(abs(tr.getCount()) * direction)
                 .build();
 
-        saveAndFlush(tr.getPortfolio());
-        int transactionId = saveAndFlush(transaction);
+        savePortfolio(tr.getPortfolio());
+        int transactionId = saveTransaction(transaction);
         tr.setId(transactionId); // used by view
     }
 
     /**
      * @return saved transaction id
      */
-    private int saveAndFlush(AbstractTransaction transaction) {
-        TransactionEntity transactionEntity = transactionRepository.saveAndFlush(
+    private int saveTransaction(AbstractTransaction transaction) {
+        TransactionEntity transactionEntity = transactionRepository.save(
                 transactionConverter.toEntity(transaction.getTransaction()));
 
         Optional.ofNullable(transactionEntity.getId()).ifPresent(transactionCashFlowRepository::deleteByTransactionId);
@@ -200,9 +200,9 @@ public class TransactionFormsService {
         return transactionEntity.getId();
     }
 
-    private void saveAndFlush(String portfolio) {
+    private void savePortfolio(String portfolio) {
         if (!portfolioRepository.existsById(portfolio)) {
-            portfolioRepository.saveAndFlush(
+            portfolioRepository.save(
                     portfolioConverter.toEntity(Portfolio.builder()
                             .id(portfolio)
                             .build()));
@@ -210,7 +210,7 @@ public class TransactionFormsService {
     }
 
     public void save(SplitModel split) {
-        int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(split);
+        int savedSecurityId = securityRepositoryHelper.saveSecurity(split);
 
         Instant splitInstant = split.getDate().atTime(split.getTime()).atZone(zoneId).toInstant();
         checkWithdrawalCount(split, savedSecurityId, splitInstant);
@@ -220,12 +220,12 @@ public class TransactionFormsService {
                 .timestamp(splitInstant)
                 .security(savedSecurityId);
 
-        saveAndFlush(split.getPortfolio());
-        saveAndFlush(builder
+        savePortfolio(split.getPortfolio());
+        saveTransaction(builder
                 .tradeId(split.getTradeId(savedSecurityId) + "w")
                 .count(-Math.abs(split.getWithdrawalCount()))
                 .build());
-        saveAndFlush(builder
+        saveTransaction(builder
                 .tradeId(split.getTradeId(savedSecurityId) + "d")
                 .count(Math.abs(split.getDepositCount()))
                 .build());

@@ -33,8 +33,7 @@ public class PortfolioPropertyConverter implements EntityConverter<PortfolioProp
 
     @Override
     public PortfolioPropertyEntity toEntity(PortfolioProperty property) {
-        PortfolioEntity portfolioEntity = portfolioRepository.findById(property.getPortfolio())
-                .orElseThrow(() -> new IllegalArgumentException("В справочнике не найден брокерский счет: " + property.getPortfolio()));
+        PortfolioEntity portfolioEntity = portfolioRepository.getReferenceById(property.getPortfolio());
 
         PortfolioPropertyEntity entity = new PortfolioPropertyEntity();
         entity.setId(property.getId());

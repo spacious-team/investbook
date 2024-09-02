@@ -42,26 +42,26 @@ public class TransactionCashFlowEntity {
     private Integer id;
 
     @Basic(optional = false)
-    @Column(name = "transaction_id")
+    @Column(name = "transaction_id", nullable = false)
     private int transactionId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "type", referencedColumnName = "id", nullable = false)
     private CashFlowTypeEntity cashFlowType;
 
     @Basic(optional = false)
-    @Column(name = "value")
+    @Column(name = "value", nullable = false)
     private BigDecimal value;
 
     @Basic(optional = false)
-    @Column(name = "currency")
+    @Column(name = "currency", nullable = false)
     private String currency = "RUR";
 
 
     /*
     Nowadays not used, commented due to perf issue
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumns({
             @JoinColumn(name = "transaction_id", referencedColumnName = "id", insertable = false, updatable = false),
             @JoinColumn(name = "portfolio", referencedColumnName = "portfolio", insertable = false, updatable = false)

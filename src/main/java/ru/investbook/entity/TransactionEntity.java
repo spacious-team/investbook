@@ -46,29 +46,30 @@ public class TransactionEntity {
     private Integer id;
 
     @Basic(optional = false)
-    @Column(name = "trade_id")
+    @Column(name = "trade_id", nullable = false)
     private String tradeId;
 
     @Basic(optional = false)
-    @Column(name = "portfolio")
+    @Column(name = "portfolio", nullable = false)
     private String portfolio;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "portfolio", referencedColumnName = "id")
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "portfolio", referencedColumnName = "id", nullable = false)
 //    @JsonIgnoreProperties({"hibernateLazyInitializer"})
 //    private PortfolioEntity portfolio;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "security", referencedColumnName = "id")
+    // https://stackoverflow.com/questions/17987638/hibernate-one-to-one-lazy-loading-optional-false
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "security", referencedColumnName = "id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private SecurityEntity security;
 
     @Basic(optional = false)
-    @Column(name = "timestamp")
+    @Column(name = "timestamp", nullable = false)
     private Instant timestamp;
 
     @Basic(optional = false)
-    @Column(name = "count")
+    @Column(name = "count", nullable = false)
     private int count;
 
     /*

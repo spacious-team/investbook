@@ -41,6 +41,7 @@ import java.time.LocalDate;
 public class StockMarketIndexEntity {
 
     @Id
+    @Column(name = "date", nullable = false)
     private LocalDate date;
 
     @Basic

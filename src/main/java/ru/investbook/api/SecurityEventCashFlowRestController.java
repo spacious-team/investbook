@@ -40,8 +40,6 @@ import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.FifoPositionsFactory;
 
-import java.util.Optional;
-
 import static org.spacious_team.broker.pojo.CashFlowType.REDEMPTION;
 
 @RestController
@@ -101,20 +99,15 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @Override
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = "Удалить информацию о выплате из БД")
-    public void delete(@PathVariable("id")
+    public ResponseEntity<Void> delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор выплаты в БД")
                        Integer id) {
         positionsFactory.invalidateCache();
-        super.delete(id);
+        return super.delete(id);
     }
 
     @Override
-    protected Optional<SecurityEventCashFlowEntity> getById(Integer id) {
-        return repository.findById(id);
-    }
-
-    @Override
-    protected Integer getId(SecurityEventCashFlow object) {
+    public Integer getId(SecurityEventCashFlow object) {
         return object.getId();
     }
 

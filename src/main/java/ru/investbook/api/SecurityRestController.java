@@ -39,8 +39,6 @@ import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 
-import java.util.Optional;
-
 @RestController
 @Tag(name = "Инструменты", description = "Акции, облигации, деривативы и валютные пары")
 @RequestMapping("/api/v1/securities")
@@ -65,7 +63,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Override
     @GetMapping("{id}")
     @Operation(summary = "Отобразить один",
-            description = "Отобразить биржевой инструмент по идентификатору (ISIN,  коду дериватива, валютной пары)")
+            description = "Отобразить биржевой инструмент по внутреннему идентификатору")
     public ResponseEntity<Security> get(@PathVariable("id")
                                         @Parameter(description = "Идентификатор", example = "123", required = true)
                                         Integer id) {
@@ -95,19 +93,14 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Override
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = "Удалить сведения о биржевом инструменте и всех его сделках по всем счетам")
-    public void delete(@PathVariable("id")
+    public ResponseEntity<Void> delete(@PathVariable("id")
                        @Parameter(description = "Идентификатор", example = "123", required = true)
                        Integer id) {
-        super.delete(id);
+        return super.delete(id);
     }
 
     @Override
-    protected Optional<SecurityEntity> getById(Integer isin) {
-        return repository.findById(isin);
-    }
-
-    @Override
-    protected Integer getId(Security object) {
+    public Integer getId(Security object) {
         return object.getId();
     }
 

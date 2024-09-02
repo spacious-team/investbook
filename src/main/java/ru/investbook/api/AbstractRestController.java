@@ -19,51 +19,47 @@
 package ru.investbook.api;
 
 import jakarta.persistence.GeneratedValue;
-import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriUtils;
 import ru.investbook.converter.EntityConverter;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Objects;
-import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.nonNull;
 
-@RequiredArgsConstructor
-public abstract class AbstractRestController<ID, Pojo, Entity> {
-    protected final JpaRepository<Entity, ID> repository;
-    protected final EntityConverter<Entity, Pojo> converter;
+public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractEntityRepositoryService<ID, Pojo, Entity> {
 
+    protected AbstractRestController(JpaRepository<Entity, ID> repository, EntityConverter<Entity, Pojo> converter) {
+        super(repository, converter);
+    }
 
-    protected Page<Pojo> get(Pageable pageable) {
-        return repository.findAll(pageable)
-                .map(converter::fromEntity);
+    public Page<Pojo> get(Pageable pageable) {
+        return getPage(pageable);
     }
 
     /**
-     * Get the entity.
+     * Gets the entity.
      * If entity not exists NOT_FOUND http status will be returned.
      */
     public ResponseEntity<Pojo> get(ID id) {
         return getById(id)
-                .map(converter::fromEntity)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    protected abstract Optional<Entity> getById(ID id);
-
     /**
-     * Create a new entity.
-     * If entity has ID and record with this ID already exists in DB, CONFLICT http status and Location header was returned.
-     * Otherwise, CREATE http status will be returned with Location header.
+     * Creates a new entity.
+     * If entity has ID and record with this ID already exists in DB, "409 Conflict" http status and optional Location header was returned.
+     * Otherwise, "201 Created" http status will be returned with Location header.
      * When creating new object, ID may be passed, but that ID only used when no {@link GeneratedValue} set
      * on Entity ID field or if {@link GeneratedValue#generator} set to {@link org.hibernate.generator.BeforeExecutionGenerator},
      * generator impl; otherwise ID, passed in object, will be ignored (see JPA impl).
@@ -74,30 +70,32 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
     @Transactional
     protected ResponseEntity<Void> post(Pojo object) {
         try {
-            ID id = getId(object);
-            if (id == null) {
-                return createEntity(object);
-            }
-            Optional<Entity> result = getById(id);
-            if (result.isPresent()) {
-                return ResponseEntity
-                        .status(HttpStatus.CONFLICT)
-                        .location(getLocationURI(object))
-                        .build();
+            CreateResult<Pojo> result = createIfAbsentAndGet(object);
+            Pojo savedObject = result.object();
+            if (result.created()) {
+                return createResponseWithLocationHeader(savedObject);
             } else {
-                return createEntity(object);
+                return createConflictResponse(savedObject);
             }
         } catch (Exception e) {
             throw new InternalServerErrorException("Не могу создать объект", e);
         }
     }
 
-    protected abstract ID getId(Pojo object);
+    @NonNull
+    private ResponseEntity<Void> createConflictResponse(Pojo object) {
+        ResponseEntity.BodyBuilder response = ResponseEntity.status(HttpStatus.CONFLICT);
+        if (getId(object) != null) {
+            URI locationURI = getLocationURI(object);
+            response.location(locationURI);
+        }
+        return response.build();
+    }
 
     /**
-     * Update or create a new entity.
-     * In update case method returns OK http status.
-     * In create case method returns CREATE http status and Location header.
+     * Updates or creates a new entity.
+     * In create case method returns "201 Created" http status and Location header.
+     * In update case method returns "204 No Content" http status.
      * When creating new object, ID may be passed in the object, but it should be same as {@code id} argument.
      *
      * @param id     updating or creating entity id
@@ -108,50 +106,50 @@ public abstract class AbstractRestController<ID, Pojo, Entity> {
     @Transactional
     public ResponseEntity<Void> put(ID id, Pojo object) {
         try {
-            if (getId(object) == null) {
-                object = updateId(id, object);
-            } else if (!Objects.equals(id, getId(object))) {
+            ID objectId = getId(object);
+            if (nonNull(objectId) && !Objects.equals(id, objectId)) {
                 throw new BadRequestException("Идентификатор объекта, переданный в URI [" + id + "] и в теле " +
-                        "запроса [" + getId(object) + "] не совпадают");
+                        "запроса [" + objectId + "] не совпадают");
             }
-            Optional<Entity> result = getById(id);
-            if (result.isPresent()) {
-                saveAndFlush(object);
-                return ResponseEntity.ok().build();
-            } else {
-                return createEntity(object);
-            }
+            Pojo objectWithId = nonNull(objectId) ? object : updateId(id, object);
+            return createAndGetIfAbsent(objectWithId)
+                    .map(this::createResponseWithLocationHeader)
+                    .orElseGet(() -> {
+                        createOrUpdate(objectWithId);
+                        return ResponseEntity.noContent().build();
+                    });
         } catch (Exception e) {
             throw new InternalServerErrorException("Не могу создать объект", e);
         }
     }
 
-    protected abstract Pojo updateId(ID id, Pojo object);
-
-    private Entity saveAndFlush(Pojo object) {
-        return repository.saveAndFlush(converter.toEntity(object));
+    /**
+     * Deletes object from storage. Always return "204 No Content" http status with empty body.
+     */
+    public ResponseEntity<Void> delete(ID id) {
+        deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     /**
      * @return response entity with http CREATE status, Location http header and body
      */
-    private ResponseEntity<Void> createEntity(Pojo object) throws URISyntaxException {
-        Entity entity = saveAndFlush(object);
+    private ResponseEntity<Void> createResponseWithLocationHeader(Pojo object) {
+        URI locationURI = getLocationURI(object);
         return ResponseEntity
-                .created(getLocationURI(converter.fromEntity(entity)))
+                .created(locationURI)
                 .build();
     }
 
-    protected URI getLocationURI(Pojo object) throws URISyntaxException {
+    @SneakyThrows
+    protected URI getLocationURI(Pojo object) {
         return new URI(UriUtils.encodePath(getLocation() + "/" + getId(object), UTF_8));
     }
 
     protected abstract String getLocation();
 
     /**
-     * Delete object from storage. Always return OK http status with empty body.
+     * Returns new object with updated ID
      */
-    public void delete(ID id) {
-        getById(id).ifPresent(repository::delete);
-    }
+    protected abstract Pojo updateId(ID id, Pojo object);
 }

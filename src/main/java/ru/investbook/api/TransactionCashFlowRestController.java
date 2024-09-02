@@ -44,7 +44,6 @@ import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.repository.TransactionCashFlowRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @Tag(name = "Движения ДС по сделкам", description = "Уплаченные и вырученные суммы в сделках")
@@ -138,19 +137,14 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     @Operation(summary = "Удалить", description = """
             Удалить информацию об об объемах движения ДС по сделке. Сама сделка не удаляется, ее нужно удалить своим API
             """)
-    public void delete(@PathVariable("id")
+    public ResponseEntity<Void> delete(@PathVariable("id")
                        @Parameter(description = "Внутренний идентификатор сделки")
                        Integer id) {
-        super.delete(id);
+        return super.delete(id);
     }
 
     @Override
-    protected Optional<TransactionCashFlowEntity> getById(Integer id) {
-        return repository.findById(id);
-    }
-
-    @Override
-    protected Integer getId(TransactionCashFlow object) {
+    public Integer getId(TransactionCashFlow object) {
         return object.getId();
     }
 

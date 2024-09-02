@@ -41,20 +41,20 @@ public class PortfolioPropertyEntity {
     @Column(name = "id")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "portfolio", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "portfolio", referencedColumnName = "id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private PortfolioEntity portfolio;
 
     @Basic
-    @Column(name = "timestamp")
+    @Column(name = "timestamp", nullable = false)
     private Instant timestamp;
 
     @Basic
-    @Column(name = "property")
+    @Column(name = "property", nullable = false)
     private String property;
 
     @Basic
-    @Column(name = "value")
+    @Column(name = "value", nullable = false)
     private String value;
 }
