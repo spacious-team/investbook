@@ -20,6 +20,9 @@ package ru.investbook.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.SneakyThrows;
@@ -48,6 +51,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.springframework.http.HttpHeaders.LOCATION;
+
 @RestController
 @Tag(name = "Официальные обменные курсы", description = "История обменных курсов валют")
 @RequestMapping("/api/v1/foreign-exchange-rates")
@@ -68,7 +73,10 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отображает все загруженные в БД информацию по обменным курсам")
+    @Operation(summary = "Отобразить все", description = "Отображает всю имеющуюся информацию по обменным курсам",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public Page<ForeignExchangeRate> get(@Parameter(hidden = true)
                                          Pageable pageable) {
         return super.get(pageable);
@@ -76,7 +84,10 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
 
     @GetMapping("/currency-pairs/{currency-pair}")
     @Operation(summary = "Отобразить по валюте",
-            description = "Отображает всю загруженные в БД информацию по обменному курсу одной валюте")
+            description = "Отображает всю имеющуюся информацию по обменному курсу заданной валютной пары",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     protected List<ForeignExchangeRate> get(@PathVariable("currency-pair")
                                             @Parameter(description = "Валютная пара")
                                             String currencyPair) {
@@ -90,7 +101,9 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
      * see {@link AbstractRestController#get(Object)}
      */
     @GetMapping("/currency-pairs/{currency-pair}/dates/{date}")
-    @Operation(summary = "Отобразить по валюте и дате")
+    @Operation(summary = "Отобразить по валюте и дате", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     protected ResponseEntity<ForeignExchangeRate> get(@PathVariable("currency-pair")
                                                       @Parameter(description = "Валютная пара", example = "USDRUB")
                                                       String currencyPair,
@@ -103,7 +116,10 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить")
+    @Operation(summary = "Добавить", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "409"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> post(@Valid @RequestBody ForeignExchangeRate object) {
         foreignExchangeRateService.invalidateCache();
         return super.post(object);
@@ -113,7 +129,11 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
      * see {@link AbstractRestController#put(Object, Object)}
      */
     @PutMapping("/currency-pairs/{currency-pair}/dates/{date}")
-    @Operation(summary = "Обновить", description = "Обновляет информацию о курсе валюты за заданную дату")
+    @Operation(summary = "Обновить", description = "Обновляет информацию о курсе валюты за заданную дату",
+            responses = {
+                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("currency-pair")
                                     @Parameter(description = "Валютная пара", example = "USDRUB")
                                     String currencyPair,
@@ -132,14 +152,17 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
      * see {@link AbstractRestController#delete(Object)}
      */
     @DeleteMapping("/currency-pairs/{currency-pair}/dates/{date}")
-    @Operation(summary = "Удалить", description = "Удаляет информацию о курсе из БД")
+    @Operation(summary = "Удалить", description = "Удаляет информацию о курсе из БД",
+            responses = {
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("currency-pair")
-                       @Parameter(description = "Валютная пара", example = "USDRUB")
-                       String currencyPair,
-                       @PathVariable("date")
-                       @Parameter(description = "Дата", example = "2021-01-23")
-                       @DateTimeFormat(pattern = "yyyy-MM-dd")
-                       LocalDate date) {
+                                       @Parameter(description = "Валютная пара", example = "USDRUB")
+                                       String currencyPair,
+                                       @PathVariable("date")
+                                       @Parameter(description = "Дата", example = "2021-01-23")
+                                       @DateTimeFormat(pattern = "yyyy-MM-dd")
+                                       LocalDate date) {
         foreignExchangeRateService.invalidateCache();
         return super.delete(getId(currencyPair, date));
     }
