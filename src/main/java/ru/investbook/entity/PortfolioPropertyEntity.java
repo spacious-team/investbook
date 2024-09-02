@@ -47,14 +47,14 @@ public class PortfolioPropertyEntity {
     private PortfolioEntity portfolio;
 
     @Basic
-    @Column(name = "timestamp")
+    @Column(name = "timestamp", nullable = false)
     private Instant timestamp;
 
     @Basic
-    @Column(name = "property")
+    @Column(name = "property", nullable = false)
     private String property;
 
     @Basic
-    @Column(name = "value")
+    @Column(name = "value", nullable = false)
     private String value;
 }

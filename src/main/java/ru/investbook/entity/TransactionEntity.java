@@ -46,11 +46,11 @@ public class TransactionEntity {
     private Integer id;
 
     @Basic(optional = false)
-    @Column(name = "trade_id")
+    @Column(name = "trade_id", nullable = false)
     private String tradeId;
 
     @Basic(optional = false)
-    @Column(name = "portfolio")
+    @Column(name = "portfolio", nullable = false)
     private String portfolio;
 
 //    @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -65,11 +65,11 @@ public class TransactionEntity {
     private SecurityEntity security;
 
     @Basic(optional = false)
-    @Column(name = "timestamp")
+    @Column(name = "timestamp", nullable = false)
     private Instant timestamp;
 
     @Basic(optional = false)
-    @Column(name = "count")
+    @Column(name = "count", nullable = false)
     private int count;
 
     /*

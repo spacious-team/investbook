@@ -59,11 +59,11 @@ public class EventCashFlowEntity {
     private CashFlowTypeEntity cashFlowType;
 
     @Basic
-    @Column(name = "value")
+    @Column(name = "value", nullable = false)
     private BigDecimal value;
 
     @Basic
-    @Column(name = "currency")
+    @Column(name = "currency", nullable = false)
     private String currency = "RUR";
 
     @Basic

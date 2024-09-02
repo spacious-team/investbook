@@ -48,11 +48,11 @@ public class SecurityQuoteEntity {
     private SecurityEntity security;
 
     @Basic
-    @Column(name = "timestamp")
+    @Column(name = "timestamp", nullable = false)
     private Instant timestamp;
 
     @Basic
-    @Column(name = "quote")
+    @Column(name = "quote", nullable = false)
     private BigDecimal quote;
 
     @Basic

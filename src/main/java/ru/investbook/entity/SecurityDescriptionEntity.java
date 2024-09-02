@@ -35,7 +35,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(of = "security")
 public class SecurityDescriptionEntity {
     @Id
-    @Column(name = "security")
+    @Column(name = "security", nullable = false)
     private int security;
 
     @Column(name = "sector")

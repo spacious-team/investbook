@@ -42,7 +42,7 @@ public class TransactionCashFlowEntity {
     private Integer id;
 
     @Basic(optional = false)
-    @Column(name = "transaction_id")
+    @Column(name = "transaction_id", nullable = false)
     private int transactionId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -50,11 +50,11 @@ public class TransactionCashFlowEntity {
     private CashFlowTypeEntity cashFlowType;
 
     @Basic(optional = false)
-    @Column(name = "value")
+    @Column(name = "value", nullable = false)
     private BigDecimal value;
 
     @Basic(optional = false)
-    @Column(name = "currency")
+    @Column(name = "currency", nullable = false)
     private String currency = "RUR";
 
 

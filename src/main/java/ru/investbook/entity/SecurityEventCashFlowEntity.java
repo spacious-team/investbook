@@ -50,7 +50,7 @@ public class SecurityEventCashFlowEntity {
     private PortfolioEntity portfolio;
 
     @Basic
-    @Column(name = "timestamp")
+    @Column(name = "timestamp", nullable = false)
     private Instant timestamp;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -59,7 +59,7 @@ public class SecurityEventCashFlowEntity {
     private SecurityEntity security;
 
     @Basic
-    @Column(name = "count")
+    @Column(name = "count", nullable = false)
     private Integer count;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -68,10 +68,10 @@ public class SecurityEventCashFlowEntity {
     private CashFlowTypeEntity cashFlowType;
 
     @Basic
-    @Column(name = "value")
+    @Column(name = "value", nullable = false)
     private BigDecimal value;
 
     @Basic
-    @Column(name = "currency")
+    @Column(name = "currency", nullable = false)
     private String currency = "RUR";
 }
