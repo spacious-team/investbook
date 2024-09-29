@@ -65,7 +65,7 @@
         <win.msi.version>24.2</win.msi.version>
         <java.version>22</java.version>
         <lombok.version>1.18.34</lombok.version>
-        <checkerframework.version>3.42.0</checkerframework.version>
+        <checkerframework.version>3.47.0</checkerframework.version>
     </properties>
 
     <repositories>
@@ -262,7 +262,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
                 <configuration>
                     <fork>true</fork> <!-- Must fork or else JVM arguments are ignored. -->
                     <showDeprecation>true</showDeprecation>
