@@ -1,5 +1,8 @@
-[![java-version](https://img.shields.io/badge/java-21-brightgreen?style=flat-square)](https://openjdk.org/)
-[![spring-boot-version](https://img.shields.io/badge/spring--boot-3.0.7-brightgreen?style=flat-square)](https://github.com/spring-projects/spring-boot/releases)
+[<img src="https://github.com/spacious-team/investbook/assets/11336712/7b16c124-5230-403e-8df9-7652132e76dd" align="right"/>](README-en.md)
+[<img src="https://github.com/spacious-team/investbook/assets/11336712/14847ff5-827e-4d0f-a4e9-882cb0d1397c" align="right"/>](README.md)<br/>
+
+[![java-version](https://img.shields.io/badge/java-22-brightgreen?style=flat-square)](https://openjdk.org/)
+[![spring-boot-version](https://img.shields.io/badge/spring--boot-3.3.4-brightgreen?style=flat-square)](https://github.com/spring-projects/spring-boot/releases)
 [![hits-of-code](https://img.shields.io/badge/dynamic/json?style=flat-square&color=lightblue&label=hits-of-code&url=https://hitsofcode.com/github/spacious-team/investbook/json?branch=develop&query=$.count)](https://hitsofcode.com/github/spacious-team/investbook/view?branch=develop)
 [![github-closed-pull-requests](https://img.shields.io/github/issues-pr-closed/spacious-team/investbook?style=flat-square&color=brightgreen)](https://github.com/spacious-team/investbook/pulls?q=is%3Apr+is%3Aclosed)
 [![github-workflow-status](https://img.shields.io/github/actions/workflow/status/spacious-team/investbook/publish-docker.yml?style=flat-square&branch=master)](https://github.com/spacious-team/investbook/actions/workflows/publish-docker.yml)
@@ -156,16 +159,15 @@ Investbook также может быть запущен в [docker](docs/run-by
 будет открыт в сети интернет).
 
 ### Почему код приложения открыт
-Идея открытого исходного кода (open source) заключается в свободе разработки и использования программного обеспечения.
-Многие известные бренды используют open source, например [Instagram](https://github.com/Instagram),
+Для некоторых сфер решения с открытым исходным кодом подходят лучше других, например в сферах финансов и шифрования данных,
+т.к. этим решениям можно доверять вследствие того, что вы или любой другой желающий может посмотреть код и убедиться
+в безопасности программы. Многие известные бренды используют open source, например [Instagram](https://github.com/Instagram),
 [Android](https://ru.wikipedia.org/wiki/Android#%D0%98%D1%81%D1%85%D0%BE%D0%B4%D0%BD%D1%8B%D0%B9_%D0%BA%D0%BE%D0%B4),
 [Telegram](https://ru.wikipedia.org/wiki/Telegram), [Twitter](https://opensource.twitter.dev/),
 [Google Chrome](https://ru.wikipedia.org/wiki/Google_Chrome),
 [Mozilla Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Developer_guide/Source_Code/Downloading_Source_Archives),
 сайты с защищенным соединением [https](https://ru.wikipedia.org/wiki/OpenSSL), такие как https://vk.com и др.
-Для некоторых сфер решения с открытым исходным кодом подходят лучше других, например в сферах финансов и шифрования данных,
-т.к. этим решениям можно доверять вследствие того, что вы или любой другой желающий может посмотреть код и убедиться
-в безопасности программы.
+Идея открытого исходного кода (open source) заключается в свободе разработки и использования программного обеспечения.
 
 <details>
 <summary>Мнение Илона Маска об открытом исходном коде.</summary>

@@ -127,7 +127,7 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
         return repository.findByIsin(isin)
                 .or(() -> Optional.of(supplier.get())
                         .map(builder -> buildSecurity(builder, defaultType))
-                        .map(security -> saveAndFlush(security, () -> repository.findByIsin(isin))))
+                        .map(security -> save(security, () -> repository.findByIsin(isin))))
                 .map(SecurityEntity::getId)
                 .orElseThrow(() -> new RuntimeException("Не смог сохранить ЦБ с ISIN = " + isin));
     }
@@ -136,7 +136,7 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
         return repository.findByName(name)
                 .or(() -> Optional.of(supplier.get())
                         .map(builder -> buildSecurity(builder, defaultType))
-                        .map(security -> saveAndFlush(security, () -> repository.findByName(name))))
+                        .map(security -> save(security, () -> repository.findByName(name))))
                 .map(SecurityEntity::getId)
                 .orElseThrow(() -> new RuntimeException("Не смог сохранить актив с наименованием = " + name));
     }
@@ -145,7 +145,7 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
         return repository.findByTicker(ticker)
                 .or(() -> Optional.of(supplier.get())
                         .map(builder -> buildSecurity(builder, defaultType))
-                        .map(security -> saveAndFlush(security, () -> repository.findByTicker(ticker))))
+                        .map(security -> save(security, () -> repository.findByTicker(ticker))))
                 .map(SecurityEntity::getId)
                 .orElseThrow(() -> new RuntimeException("Не смог сохранить актив с тикером = " + ticker));
     }
@@ -153,7 +153,7 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
     private Integer declareContractByTicker(String contract, SecurityType contractType) {
         return repository.findByTicker(contract)
                 .or(() -> Optional.of(Security.builder().ticker(contract).type(contractType).build())
-                        .map(security -> saveAndFlush(security, () -> repository.findByTicker(contract))))
+                        .map(security -> save(security, () -> repository.findByTicker(contract))))
                 .map(SecurityEntity::getId)
                 .orElseThrow(() -> new RuntimeException("Не смог сохранить контракт = " + contract));
     }
@@ -166,10 +166,10 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
         return security;
     }
 
-    private SecurityEntity saveAndFlush(Security security, Supplier<Optional<SecurityEntity>> supplier) {
+    private SecurityEntity save(Security security, Supplier<Optional<SecurityEntity>> supplier) {
         try {
             validator.validate(security);
-            return repository.saveAndFlush(converter.toEntity(security));
+            return repository.save(converter.toEntity(security));
         } catch (ConstraintViolationException e) {
             throw new RuntimeException("Не смог сохранить ценную бумагу в БД: " + security + ", " + e.getMessage());
         } catch (Exception e) {

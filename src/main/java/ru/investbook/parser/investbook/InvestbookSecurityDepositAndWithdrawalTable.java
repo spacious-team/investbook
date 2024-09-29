@@ -78,6 +78,6 @@ public class InvestbookSecurityDepositAndWithdrawalTable extends AbstractSecurit
                 .type(SecurityType.STOCK_OR_BOND)
                 .name(securityTickerNameOrIsin)
                 .build();
-        return securityRepository.saveAndFlush(securityConverter.toEntity(security));
+        return securityRepository.save(securityConverter.toEntity(security));
     }
 }

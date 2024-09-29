@@ -67,7 +67,7 @@ public class SecurityDescriptionFormsService {
 
     @Transactional
     public void save(SecurityDescriptionModel m) {
-        int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(m);
+        int savedSecurityId = securityRepositoryHelper.saveSecurity(m);
         securityDescriptionRepository.createOrUpdateSector(savedSecurityId, m.getSector());
     }
 

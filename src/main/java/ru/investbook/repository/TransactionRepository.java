@@ -38,7 +38,8 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public interface TransactionRepository extends
         JpaRepository<TransactionEntity, Integer>,
-        JpaSpecificationExecutor<TransactionEntity> {
+        JpaSpecificationExecutor<TransactionEntity>,
+        ConstraintAwareRepository<TransactionEntity, Integer> {
 
     Optional<TransactionEntity> findFirstByOrderByTimestampAsc();
 
@@ -336,4 +337,18 @@ public interface TransactionRepository extends
             @Param("to") Instant toDate);
 
     int countByPortfolioIn(Set<String> portfolio);
+
+    @Override
+    default boolean exists(TransactionEntity probe) {
+        return countByIdOrPortfolioAndTradeId(probe.getId(), probe.getPortfolio(), probe.getTradeId()) > 0;
+    }
+
+    long countByIdOrPortfolioAndTradeId(Integer id, String portfolio, String tradeId);
+
+    @Override
+    default Optional<TransactionEntity> findBy(TransactionEntity probe) {
+        return findByIdOrPortfolioAndTradeId(probe.getId(), probe.getPortfolio(), probe.getTradeId());
+    }
+
+    Optional<TransactionEntity> findByIdOrPortfolioAndTradeId(Integer id, String portfolio, String tradeId);
 }

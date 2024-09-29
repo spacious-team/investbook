@@ -81,7 +81,7 @@ public class PortfolioPropertyFormsService {
 
     @Transactional
     public void save(PortfolioPropertyModel m) {
-        saveAndFlush(m.getPortfolio());
+        savePortfolio(m.getPortfolio());
         PortfolioProperty.PortfolioPropertyBuilder builder = PortfolioProperty.builder()
                 .id(m.getId())
                 .portfolio(m.getPortfolio())
@@ -100,9 +100,9 @@ public class PortfolioPropertyFormsService {
         portfolioPropertyRepository.flush();
     }
 
-    private void saveAndFlush(String portfolio) {
+    private void savePortfolio(String portfolio) {
         if (!portfolioRepository.existsById(portfolio)) {
-            portfolioRepository.saveAndFlush(
+            portfolioRepository.save(
                     portfolioConverter.toEntity(Portfolio.builder()
                             .id(portfolio)
                             .build()));

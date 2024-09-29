@@ -20,6 +20,9 @@ package ru.investbook.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.Transaction;
@@ -43,7 +46,8 @@ import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.repository.TransactionRepository;
 
 import java.util.List;
-import java.util.Optional;
+
+import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Сделки", description = "Операции купли/продажи биржевых инструментов")
@@ -64,7 +68,10 @@ public class TransactionRestController extends AbstractRestController<Integer, T
 
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить по фильтру", description = "Отображает сделки по счетам")
+    @Operation(summary = "Отобразить по фильтру", description = "Отображает сделки по счетам",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public Page<Transaction> get(@RequestParam(value = "portfolio", required = false)
                                  @Parameter(description = "Идентификатор счета брокера")
                                  String portfolio,
@@ -107,7 +114,10 @@ public class TransactionRestController extends AbstractRestController<Integer, T
      */
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить одну", description = "Отображает одну сделку")
+    @Operation(summary = "Отобразить одну", description = "Отображает одну сделку",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Transaction> get(@PathVariable("id")
                                            @Parameter(description = "Внутренний идентификатор сделки")
                                            Integer id) {
@@ -116,7 +126,11 @@ public class TransactionRestController extends AbstractRestController<Integer, T
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Сохраняет новую сделку в БД")
+    @Operation(summary = "Добавить", description = "Сохраняет новую сделку",
+            responses = {
+                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+                    @ApiResponse(responseCode = "409"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> post(@Valid @RequestBody Transaction object) {
         positionsFactory.invalidateCache();
         return super.post(object);
@@ -127,7 +141,11 @@ public class TransactionRestController extends AbstractRestController<Integer, T
      */
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить параметры", description = "Обновляет параметры указанной сделки")
+    @Operation(summary = "Обновить параметры", description = "Обновляет параметры указанной сделки",
+            responses = {
+                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор сделки")
                                     Integer id,
@@ -143,21 +161,19 @@ public class TransactionRestController extends AbstractRestController<Integer, T
      */
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удаляет указанную сделку")
-    public void delete(@PathVariable("id")
-                       @Parameter(description = "Внутренний идентификатор сделки")
-                       Integer id) {
+    @Operation(summary = "Удалить", description = "Удаляет указанную сделку",
+            responses = {
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
+    public ResponseEntity<Void> delete(@PathVariable("id")
+                                       @Parameter(description = "Внутренний идентификатор сделки")
+                                       Integer id) {
         positionsFactory.invalidateCache();
-        super.delete(id);
+        return super.delete(id);
     }
 
     @Override
-    protected Optional<TransactionEntity> getById(Integer id) {
-        return repository.findById(id);
-    }
-
-    @Override
-    protected Integer getId(Transaction object) {
+    public Integer getId(Transaction object) {
         return object.getId();
     }
 

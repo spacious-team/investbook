@@ -30,10 +30,10 @@ import lombok.Data;
 @Data
 public class CashFlowTypeEntity {
     @Id
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
     private int id;
 
     @Basic
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 }

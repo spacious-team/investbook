@@ -36,6 +36,6 @@ public class ForeignExchangeRateEntity {
     private ForeignExchangeRateEntityPk pk;
 
     @Basic
-    @Column(name = "rate")
+    @Column(name = "rate", nullable = false)
     private BigDecimal rate;
 }

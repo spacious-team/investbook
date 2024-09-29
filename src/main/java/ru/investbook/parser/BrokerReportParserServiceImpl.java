@@ -31,7 +31,6 @@ import org.springframework.util.StringUtils;
 import ru.investbook.InvestbookProperties;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -58,19 +57,18 @@ public class BrokerReportParserServiceImpl implements BrokerReportParserService 
     @SneakyThrows
     @Override
     public void parseReport(InputStream inputStream, String fileName, String broker) {
-        try (ByteArrayInputStream is = castToByteArrayInputStream(inputStream)) {
-            long t0 = System.nanoTime();
-            is.mark(Integer.MAX_VALUE);
-            String brokerName = parseReport0(is, fileName, broker);
-            if (investbookProperties.isReportBackup()) {
-                is.reset();
-                Path path = saveToBackup(is, fileName, brokerName);
-                log.info("Загрузка отчета {} завершена за {}, бекап отчета сохранен в {}",
-                        fileName, Duration.ofNanos(System.nanoTime() - t0), path.toAbsolutePath());
-            } else {
-                log.info("Загрузка отчета {} завершена за {}, бекап отключен конфигурацией",
-                        fileName, Duration.ofNanos(System.nanoTime() - t0));
-            }
+        ByteArrayInputStream is = castToByteArrayInputStream(inputStream);
+        long t0 = System.nanoTime();
+        is.mark(Integer.MAX_VALUE);
+        String brokerName = parseReport0(is, fileName, broker);
+        if (investbookProperties.isReportBackup()) {
+            is.reset();
+            Path path = saveToBackup(is, fileName, brokerName);
+            log.info("Загрузка отчета {} завершена за {}, бекап отчета сохранен в {}",
+                    fileName, Duration.ofNanos(System.nanoTime() - t0), path.toAbsolutePath());
+        } else {
+            log.info("Загрузка отчета {} завершена за {}, бекап отключен конфигурацией",
+                    fileName, Duration.ofNanos(System.nanoTime() - t0));
         }
     }
 
@@ -78,9 +76,8 @@ public class BrokerReportParserServiceImpl implements BrokerReportParserService 
         if (inputStream instanceof ByteArrayInputStream) {
             return (ByteArrayInputStream) inputStream;
         } else {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            inputStream.transferTo(out);
-            return new ByteArrayInputStream(out.toByteArray());
+            byte[] bytes = inputStream.readAllBytes();
+            return new ByteArrayInputStream(bytes);
         }
     }
 

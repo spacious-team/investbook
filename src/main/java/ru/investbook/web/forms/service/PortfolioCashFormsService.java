@@ -75,7 +75,7 @@ public class PortfolioCashFormsService {
 
     @Transactional
     public void save(PortfolioCashModel m) {
-        saveAndFlush(m.getPortfolio());
+        savePortfolio(m.getPortfolio());
         PortfolioCash cash = PortfolioCash.builder()
                 .id(m.getId())
                 .portfolio(m.getPortfolio())
@@ -91,9 +91,9 @@ public class PortfolioCashFormsService {
         portfolioCashRepository.flush();
     }
 
-    private void saveAndFlush(String portfolio) {
+    private void savePortfolio(String portfolio) {
         if (!portfolioRepository.existsById(portfolio)) {
-            portfolioRepository.saveAndFlush(
+            portfolioRepository.save(
                     portfolioConverter.toEntity(Portfolio.builder()
                             .id(portfolio)
                             .build()));

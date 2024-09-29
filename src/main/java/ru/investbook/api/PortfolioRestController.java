@@ -20,6 +20,9 @@ package ru.investbook.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.spacious_team.broker.pojo.Portfolio;
@@ -39,7 +42,7 @@ import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.repository.PortfolioRepository;
 
-import java.util.Optional;
+import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Счета")
@@ -55,7 +58,9 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все")
+    @Operation(summary = "Отобразить все", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public Page<Portfolio> get(@Parameter(hidden = true)
                                Pageable pageable) {
         return super.get(pageable);
@@ -63,7 +68,9 @@ public class PortfolioRestController extends AbstractRestController<String, Port
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить один")
+    @Operation(summary = "Отобразить один", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Portfolio> get(@PathVariable("id")
                                          @Parameter(description = "Номер счета")
                                          String id) {
@@ -72,14 +79,20 @@ public class PortfolioRestController extends AbstractRestController<String, Port
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить")
+    @Operation(summary = "Добавить", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "409"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> post(@Valid @RequestBody Portfolio object) {
         return super.post(object);
     }
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Добавить")
+    @Operation(summary = "Обновить", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер счета")
                                     String id,
@@ -91,20 +104,17 @@ public class PortfolioRestController extends AbstractRestController<String, Port
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удалить счет и все связанные с ним данные")
-    public void delete(@PathVariable("id")
-                       @Parameter(description = "Номер счета")
-                       String id) {
-        super.delete(id);
+    @Operation(summary = "Удалить", description = "Удалить счет и все связанные с ним данные", responses = {
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
+    public ResponseEntity<Void> delete(@PathVariable("id")
+                                       @Parameter(description = "Номер счета")
+                                       String id) {
+        return super.delete(id);
     }
 
     @Override
-    protected Optional<PortfolioEntity> getById(String id) {
-        return repository.findById(id);
-    }
-
-    @Override
-    protected String getId(Portfolio object) {
+    public String getId(Portfolio object) {
         return object.getId();
     }
 

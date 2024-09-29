@@ -78,7 +78,7 @@ public abstract class AbstractCbrForeignExchangeRateService implements CbrForeig
             ForeignExchangeRateEntity entity = foreignExchangeRateConverter.toEntity(fxRate);
             foreignExchangeRateRepository.save(entity);
         } catch (Exception e) {
-            log.debug("Ошибка сохранения {}, может быть запись уже существует?", fxRate);
+            log.debug("Ошибка сохранения {}", fxRate);
         }
     }
 }

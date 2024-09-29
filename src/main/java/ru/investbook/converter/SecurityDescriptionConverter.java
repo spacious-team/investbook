@@ -35,8 +35,7 @@ public class SecurityDescriptionConverter implements EntityConverter<SecurityDes
     public SecurityDescriptionEntity toEntity(SecurityDescription security) {
         IssuerEntity issuerEntity = null;
         if (security.getIssuer() != null) {
-            issuerEntity = issuerRepository.findById(security.getIssuer())
-                    .orElseThrow(() -> new IllegalArgumentException("Эмитент c идентификатором не найден: " + security.getIssuer()));
+            issuerEntity = issuerRepository.getReferenceById(security.getIssuer());
         }
 
         SecurityDescriptionEntity entity = new SecurityDescriptionEntity();

@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.investbook.web.model.MailboxDescriptor;
 
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -140,7 +141,9 @@ public class MailboxReportParserService {
             if (bodyPart.getFileName() != null) {
                 DataHandler dataHandler = bodyPart.getDataHandler();
                 DataSource dataSource = dataHandler.getDataSource();
-                brokerReportParserService.parseReport(dataSource.getInputStream(), dataSource.getName(), mailbox.getBroker());
+                try (InputStream inputStream = dataSource.getInputStream()) {
+                    brokerReportParserService.parseReport(inputStream, dataSource.getName(), mailbox.getBroker());
+                }
                 return true;
             }
         } catch (Exception e) {

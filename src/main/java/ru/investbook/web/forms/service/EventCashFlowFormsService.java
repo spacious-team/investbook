@@ -81,7 +81,7 @@ public class EventCashFlowFormsService {
 
     @Transactional
     public void save(EventCashFlowModel e) {
-        saveAndFlush(e.getPortfolio());
+        savePortfolio(e.getPortfolio());
         if (e.isAttachedToSecurity()) {
             saveSecurityEventCashFlow(e);
         } else {
@@ -90,7 +90,7 @@ public class EventCashFlowFormsService {
     }
 
     private void saveSecurityEventCashFlow(EventCashFlowModel e) {
-        int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(requireNonNull(e.getAttachedSecurity()));
+        int savedSecurityId = securityRepositoryHelper.saveSecurity(requireNonNull(e.getAttachedSecurity()));
         SecurityEventCashFlowEntity entity = securityEventCashFlowRepository.save(
                 securityEventCashFlowConverter.toEntity(SecurityEventCashFlow.builder()
                         // no id(), it is always the new object
@@ -123,9 +123,9 @@ public class EventCashFlowFormsService {
         eventCashFlowRepository.flush();
     }
 
-    private void saveAndFlush(String portfolio) {
+    private void savePortfolio(String portfolio) {
         if (!portfolioRepository.existsById(portfolio)) {
-            portfolioRepository.saveAndFlush(
+            portfolioRepository.save(
                     portfolioConverter.toEntity(Portfolio.builder()
                             .id(portfolio)
                             .build()));

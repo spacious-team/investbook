@@ -23,13 +23,11 @@ import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -40,22 +38,21 @@ import java.time.Instant;
 public class SecurityQuoteEntity {
 
     @Id
-    @GeneratedValue(generator = UseExistingOrGenerateIdGenerator.NAME)
-    @GenericGenerator(name = UseExistingOrGenerateIdGenerator.NAME, strategy = UseExistingOrGenerateIdGenerator.STRATEGY)
+    @AssignedOrGeneratedValue
     @Column(name = "id")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "security", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "security", referencedColumnName = "id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private SecurityEntity security;
 
     @Basic
-    @Column(name = "timestamp")
+    @Column(name = "timestamp", nullable = false)
     private Instant timestamp;
 
     @Basic
-    @Column(name = "quote")
+    @Column(name = "quote", nullable = false)
     private BigDecimal quote;
 
     @Basic
