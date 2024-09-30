@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
@@ -85,7 +86,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "409"),
             @ApiResponse(responseCode = "500", content = @Content)})
-    public ResponseEntity<Void> post(@Valid @RequestBody SecurityQuote quote) {
+    public ResponseEntity<Void> post(@RequestBody @Valid SecurityQuote quote) {
         return super.post(quote);
     }
 
@@ -98,8 +99,8 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер записи о котировке")
                                     Integer id,
-                                    @Valid
                                     @RequestBody
+                                    @Valid
                                     SecurityQuote quote) {
         return super.put(id, quote);
     }
@@ -116,7 +117,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     }
 
     @Override
-    public Integer getId(SecurityQuote object) {
+    public @Nullable Integer getId(SecurityQuote object) {
         return object.getId();
     }
 
