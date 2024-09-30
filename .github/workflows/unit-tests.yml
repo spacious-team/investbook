@@ -30,7 +30,9 @@ jobs:
         run: mvn --batch-mode clean test
 
       - name: Test Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: SonarCloud Analyze
         run: >
