@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityType;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.openformat.OpenFormatHelper;
 

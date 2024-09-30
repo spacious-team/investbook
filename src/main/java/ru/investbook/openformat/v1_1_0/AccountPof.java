@@ -31,7 +31,7 @@ import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioProperty.PortfolioPropertyBuilder;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import ru.investbook.entity.PortfolioEntity;
 
 import java.math.BigDecimal;

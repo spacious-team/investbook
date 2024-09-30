@@ -29,6 +29,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -68,5 +70,5 @@ public class EventCashFlowEntity {
 
     @Basic
     @Column(name = "description")
-    private String description;
+    private @Nullable String description;
 }

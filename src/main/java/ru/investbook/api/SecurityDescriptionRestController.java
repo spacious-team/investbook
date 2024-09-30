@@ -48,11 +48,9 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 @Tag(name = "Информация по инструментам", description = "Сектор экономики, эмитент")
 @RequestMapping("/api/v1/security-descriptions")
 public class SecurityDescriptionRestController extends AbstractRestController<Integer, SecurityDescription, SecurityDescriptionEntity> {
-    private final SecurityDescriptionRepository repository;
 
     public SecurityDescriptionRestController(SecurityDescriptionRepository repository, SecurityDescriptionConverter converter) {
         super(repository, converter);
-        this.repository = repository;
     }
 
     @Override
@@ -89,7 +87,7 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
                     @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
                     @ApiResponse(responseCode = "409"),
                     @ApiResponse(responseCode = "500", content = @Content)})
-    public ResponseEntity<Void> post(@Valid @RequestBody SecurityDescription security) {
+    public ResponseEntity<Void> post(@RequestBody @Valid SecurityDescription security) {
         return super.post(security);
     }
 
@@ -103,8 +101,8 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Идентификатор", example = "123", required = true)
                                     Integer id,
-                                    @Valid
                                     @RequestBody
+                                    @Valid
                                     SecurityDescription security) {
         return super.put(id, security);
     }

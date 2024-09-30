@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
@@ -74,9 +75,11 @@ public class TransactionRestController extends AbstractRestController<Integer, T
                     @ApiResponse(responseCode = "500", content = @Content)})
     public Page<Transaction> get(@RequestParam(value = "portfolio", required = false)
                                  @Parameter(description = "Идентификатор счета брокера")
+                                 @Nullable
                                  String portfolio,
                                  @RequestParam(value = "trade-id", required = false)
                                  @Parameter(description = "Номер сделки в системе учета брокера")
+                                 @Nullable
                                  String tradeId,
                                  @Parameter(hidden = true)
                                  Pageable pageable) {
@@ -131,7 +134,7 @@ public class TransactionRestController extends AbstractRestController<Integer, T
                     @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
                     @ApiResponse(responseCode = "409"),
                     @ApiResponse(responseCode = "500", content = @Content)})
-    public ResponseEntity<Void> post(@Valid @RequestBody Transaction object) {
+    public ResponseEntity<Void> post(@RequestBody @Valid Transaction object) {
         positionsFactory.invalidateCache();
         return super.post(object);
     }
@@ -149,8 +152,8 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор сделки")
                                     Integer id,
-                                    @Valid
                                     @RequestBody
+                                    @Valid
                                     Transaction object) {
         positionsFactory.invalidateCache();
         return super.put(id, object);
@@ -173,7 +176,7 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     }
 
     @Override
-    public Integer getId(Transaction object) {
+    public @Nullable Integer getId(Transaction object) {
         return object.getId();
     }
 
