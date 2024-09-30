@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
@@ -47,9 +48,7 @@ import static org.spacious_team.broker.pojo.CashFlowType.REDEMPTION;
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
-@Tag(name = "События по бумаге", description = """
-        Дивиденды, купоны, амортизации, вариационная маржа, комиссии, налоги
-        """)
+@Tag(name = "События по бумаге", description = "Дивиденды, купоны, амортизации, вариационная маржа, комиссии, налоги")
 @RequestMapping("/api/v1/security-event-cash-flows")
 public class SecurityEventCashFlowRestController extends AbstractRestController<Integer, SecurityEventCashFlow, SecurityEventCashFlowEntity> {
     private final FifoPositionsFactory positionsFactory;
@@ -89,7 +88,7 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "409"),
             @ApiResponse(responseCode = "500", content = @Content)})
-    public ResponseEntity<Void> post(@Valid @RequestBody SecurityEventCashFlow event) {
+    public ResponseEntity<Void> post(@RequestBody @Valid SecurityEventCashFlow event) {
         if (event.getEventType() == REDEMPTION) positionsFactory.invalidateCache();
         return super.post(event);
     }
@@ -103,8 +102,8 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор выплаты")
                                     Integer id,
-                                    @Valid
                                     @RequestBody
+                                    @Valid
                                     SecurityEventCashFlow event) {
         if (event.getEventType() == REDEMPTION) positionsFactory.invalidateCache();
         return super.put(id, event);
@@ -123,7 +122,7 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     }
 
     @Override
-    public Integer getId(SecurityEventCashFlow object) {
+    public @Nullable Integer getId(SecurityEventCashFlow object) {
         return object.getId();
     }
 

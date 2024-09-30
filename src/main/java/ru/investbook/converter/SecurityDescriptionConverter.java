@@ -35,8 +35,9 @@ public class SecurityDescriptionConverter implements EntityConverter<SecurityDes
     @Override
     public SecurityDescriptionEntity toEntity(SecurityDescription security) {
         @Nullable IssuerEntity issuerEntity = null;
-        if (security.getIssuer() != null) {
-            issuerEntity = issuerRepository.getReferenceById(security.getIssuer());
+        @Nullable Integer issuer = security.getIssuer();
+        if (issuer != null) {
+            issuerEntity = issuerRepository.getReferenceById(issuer);
         }
 
         SecurityDescriptionEntity entity = new SecurityDescriptionEntity();
@@ -48,10 +49,11 @@ public class SecurityDescriptionConverter implements EntityConverter<SecurityDes
 
     @Override
     public SecurityDescription fromEntity(SecurityDescriptionEntity entity) {
+        @Nullable IssuerEntity issuer = entity.getIssuer();
         return SecurityDescription.builder()
                 .security(entity.getSecurity())
                 .sector(entity.getSector())
-                .issuer((entity.getIssuer() != null) ? entity.getIssuer().getId() : null)
+                .issuer((issuer != null) ? issuer.getId() : null)
                 .build();
     }
 }

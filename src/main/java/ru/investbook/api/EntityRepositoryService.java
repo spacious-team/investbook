@@ -18,6 +18,7 @@
 
 package ru.investbook.api;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -25,6 +26,7 @@ import java.util.Optional;
 
 public interface EntityRepositoryService<ID, Pojo> {
 
+    @Nullable
     ID getId(Pojo object);
 
     boolean existsById(ID id);
