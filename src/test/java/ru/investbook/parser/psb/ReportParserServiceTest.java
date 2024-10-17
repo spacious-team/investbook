@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2020  Spacious Team <spacious-team@ya.ru>
+ * Copyright (C) 2023  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,13 +18,12 @@
 
 package ru.investbook.parser.psb;
 
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Ignore;
-import org.testng.annotations.Test;
 import ru.investbook.InvestbookApplication;
 import ru.investbook.parser.ReportParserService;
 import ru.investbook.parser.SecurityRegistrar;
@@ -32,9 +31,9 @@ import ru.investbook.parser.SecurityRegistrar;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-@Ignore
+@Disabled
 @SpringBootTest(classes = InvestbookApplication.class)
-public class ReportParserServiceTest extends AbstractTestNGSpringContextTests {
+public class ReportParserServiceTest {
 
     @Mock
     SecurityRegistrar securityRegistrar;
@@ -42,15 +41,15 @@ public class ReportParserServiceTest extends AbstractTestNGSpringContextTests {
     @Autowired
     private ReportParserService reportParserService;
 
-    @DataProvider(name = "report")
-    Object[][] getData() {
+    static Object[][] report() {
         return new Object[][] {{"E:\\1.xlsx"},
                 {"E:\\2.xlsx"},
                 {"E:\\Исполнение фьючерса.xlsx"},
                 {"E:\\Налог.xlsx"}};
     }
 
-    @Test(dataProvider = "report")
+    @ParameterizedTest
+    @MethodSource("report")
     void testParse(String report) throws IOException {
         PsbBrokerReport brokerReport = new PsbBrokerReport(Paths.get(report), securityRegistrar);
         PsbReportTables reportTableFactory = new PsbReportTables(brokerReport, null);

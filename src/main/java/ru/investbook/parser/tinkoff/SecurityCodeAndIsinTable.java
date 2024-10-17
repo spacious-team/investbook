@@ -21,6 +21,7 @@ package ru.investbook.parser.tinkoff;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
@@ -54,8 +55,8 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
     }
 
     @Override
-    protected Void parseRow(TableRow row) {
-        String code = row.getStringCellValueOrDefault(CODE, null);
+    protected @Nullable Void parseRow(TableRow row) {
+        @Nullable String code = row.getStringCellValueOrDefault(CODE, null);
         if (hasLength(code) && !code.contains("Код актива")) { // exclude table's empty row
             // если колонка ISIN отсутствует, то ISIN используется в отчете вместо кода (SBERP)
             String isin = row.getStringCellValueOrDefault(ISIN, code);
@@ -72,12 +73,12 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
             }
             codeToType.put(code, securityType);
 
-            BigDecimal faceValue = row.getBigDecimalCellValueOrDefault(FACE_VALUE, null);
+            @Nullable BigDecimal faceValue = row.getBigDecimalCellValueOrDefault(FACE_VALUE, null);
             if (faceValue != null) {
                 codeToFaceValue.put(code, faceValue);
             }
 
-            String shortName = row.getStringCellValueOrDefault(SHORT_NAME, null);
+            @Nullable String shortName = row.getStringCellValueOrDefault(SHORT_NAME, null);
             if (hasLength(shortName)) {
                 shortNameToCode.put(shortName, code);
             }

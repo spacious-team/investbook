@@ -94,7 +94,7 @@ public class SecurityEventCashFlowFormsService {
                         .currency(e.getValueCurrency())
                         .build()));
         e.setId(entity.getId()); // used in view
-        if (e.getTax() != null && e.getTax().floatValue() > 0.001) {
+        if (e.getTax() != null && e.getTaxCurrency() != null && e.getTax().floatValue() > 0.001) {
             entity = securityEventCashFlowRepository.save(securityEventCashFlowConverter.toEntity(
                     builder
                             .id(e.getTaxId())

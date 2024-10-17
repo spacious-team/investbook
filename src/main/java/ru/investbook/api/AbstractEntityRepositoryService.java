@@ -22,6 +22,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -93,7 +94,7 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
                 log.error("Can't INSERT by optimized deprecated Hibernate method save(): {}", object, e);
             }
         }
-        Boolean result = transactionTemplateRequired.execute(_ -> createIfAbsent(object));
+        @Nullable Boolean result = transactionTemplateRequired.execute(_ -> createIfAbsent(object));
         return Boolean.TRUE.equals(result);
     }
 
@@ -123,14 +124,14 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
      * @implSpec Should be called in transaction
      */
     private Optional<Entity> createIfAbsentInternal(Pojo object) {
-        Entity entity = null;
+        @Nullable Entity entity = null;
         if (repository instanceof ConstraintAwareRepository<Entity, ID> caRepository) {
             entity = converter.toEntity(object);
             if (caRepository.exists(entity)) {
                 return Optional.empty();
             }
         } else {
-            ID id = getId(object);
+            @Nullable ID id = getId(object);
             if (id != null && existsById(id)) {
                 return Optional.empty();
             }
@@ -153,13 +154,13 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
      * @implSpec Should be called in transaction
      */
     private CreateResult<Pojo> createIfAbsentAndGetInternal(Pojo object) {
-        Entity entity = null;
+        @Nullable Entity entity = null;
         Optional<Entity> selectedEntity;
         if (repository instanceof ConstraintAwareRepository<Entity, ID> caRepository) {
             entity = converter.toEntity(object);
             selectedEntity = caRepository.findBy(entity);
         } else {
-            ID id = getId(object);
+            @Nullable ID id = getId(object);
             selectedEntity = Optional.ofNullable(id)
                     .flatMap(repository::findById);
         }

@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
@@ -137,7 +138,7 @@ public class TransactionFormsService {
                                 .map(v -> v.multiply(multiplier))
                                 .orElse(null));
                 case DERIVATIVE -> {
-                    BigDecimal value = null;
+                    @Nullable BigDecimal value = null;
                     BigDecimal valueInPoints = tr.getPrice().multiply(multiplier);
                     if (tr.hasDerivativeTickValue()) {
                         value = valueInPoints
@@ -167,6 +168,7 @@ public class TransactionFormsService {
             };
         }
 
+        @SuppressWarnings("DataFlowIssue")
         AbstractTransaction transaction = builder
                 .id(tr.getId())
                 .tradeId(tr.getTradeId())
@@ -188,6 +190,7 @@ public class TransactionFormsService {
         TransactionEntity transactionEntity = transactionRepository.save(
                 transactionConverter.toEntity(transaction.getTransaction()));
 
+        //noinspection OptionalOfNullableMisuse
         Optional.ofNullable(transactionEntity.getId()).ifPresent(transactionCashFlowRepository::deleteByTransactionId);
         transactionCashFlowRepository.flush();
         transaction.toBuilder()

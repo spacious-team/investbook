@@ -20,6 +20,7 @@ package ru.investbook.parser.sber.cash_security;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
@@ -49,7 +50,7 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Ab
     }
 
     @Override
-    protected SecurityTransaction parseRow(TableRow row) {
+    protected @Nullable SecurityTransaction parseRow(TableRow row) {
         if (!"Исполнено".equalsIgnoreCase(row.getStringCellValueOrDefault(STATUS, null))) {
             return null;
         } else if ("Погашение ценной бумаги".equalsIgnoreCase(row.getStringCellValueOrDefault(DESCRIPTION, null))) {

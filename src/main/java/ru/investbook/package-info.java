@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
+ * Copyright (C) 2024  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,26 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.web.forms.model;
+@DefaultQualifier(NonNull.class)
+package ru.investbook;
 
-import jakarta.validation.constraints.NotEmpty;
-import lombok.Data;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-
-@Data
-public abstract class PortfolioPropertyModel {
-
-    private @Nullable Integer id;
-
-    private @NotEmpty String portfolio;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date = LocalDate.now();
-
-    @DateTimeFormat(pattern = "HH:mm:ss")
-    private LocalTime time = LocalTime.NOON;
-}
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.framework.qual.DefaultQualifier;
