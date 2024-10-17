@@ -28,9 +28,9 @@ import lombok.Getter;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.Transaction;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import ru.investbook.entity.TransactionEntity;
 
 import java.math.BigDecimal;
@@ -52,52 +52,52 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Slf4j
 public class TransferPof {
-    @NotNull
     @JsonProperty("id")
+    @NotNull
     int id;
 
     /**
      * Если описывается сплит акций, то может иметь одинаковое значение для нескольких объектов, которое разрешается
      * {@link PortfolioOpenFormatPersister}
      */
-    @Nullable
     @JsonProperty("transfer-id")
+    @Nullable
     String transferId;
 
-    @NotNull
     @JsonProperty("account")
+    @NotNull
     int account;
 
-    @NotNull
     @JsonProperty("timestamp")
+    @NotNull
     long timestamp;
 
-    @NotNull
     @JsonProperty("asset")
     @Getter(AccessLevel.NONE)
+    @NotNull
     int asset;
 
     /**
      * Поддерживаются дробные акции
      */
-    @NotNull
     @JsonProperty("count")
+    @NotNull
     BigDecimal count;
 
-    @Nullable
     @JsonProperty("fee-account")
+    @Nullable
     Integer feeAccount;
 
-    @Nullable
     @JsonProperty("fee")
+    @Nullable
     BigDecimal fee;
 
-    @Nullable
     @JsonProperty("fee-currency")
+    @Nullable
     String feeCurrency;
 
-    @Nullable
     @JsonProperty("description")
+    @Nullable
     String description;
 
     static TransferPof of(TransactionEntity transaction) {
