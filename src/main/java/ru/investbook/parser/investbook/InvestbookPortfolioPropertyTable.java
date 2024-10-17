@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.investbook;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
@@ -32,7 +33,7 @@ public class InvestbookPortfolioPropertyTable extends AbstractInvestbookTable<Po
     }
 
     @Override
-    protected PortfolioProperty parseRow(TableRow row) {
+    protected @Nullable PortfolioProperty parseRow(TableRow row) {
         String operation = row.getStringCellValue(OPERATION).toLowerCase();
         if (!operation.contains("актив")) { // Оценка стоимости активов
             return null;

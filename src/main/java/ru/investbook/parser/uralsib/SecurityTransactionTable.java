@@ -20,6 +20,7 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
@@ -29,7 +30,6 @@ import org.spacious_team.table_wrapper.api.RelativePositionTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.TransactionValueAndFeeParser;
 
@@ -70,7 +70,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
     @Nullable
     @Override
     protected SecurityTransaction parseRow(TableRow row) {
-        String tradeId = getTradeId(row, TRADE_ID);
+        @Nullable String tradeId = getTradeId(row, TRADE_ID);
         if (tradeId == null) {
             security = getSecurity(row);
             return null;
@@ -115,8 +115,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                 .build();
     }
 
-    @Nullable
-    static String getTradeId(TableRow row, TableHeaderColumn column) {
+    static @Nullable String getTradeId(TableRow row, TableHeaderColumn column) {
         try {
             // some numbers (doubles) represented by string type cells
             return String.valueOf(row.getLongCellValue(column));
@@ -125,8 +124,8 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
         }
     }
 
-    @Nullable
-    private Security getSecurity(TableRow row) {
+    private @Nullable Security getSecurity(TableRow row) {
+        //noinspection DataFlowIssue
         return Optional.ofNullable(row.getStringCellValueOrDefault(TRADE_ID, null))
                 .filter(securityDescription -> !securityDescription.startsWith("Итого"))
                 .map(securityDescription -> securityDescription.split(" "))
@@ -135,6 +134,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                 .orElse(null);
     }
 
+    @Getter
     enum TransactionTableHeader implements TableHeaderColumn {
         DATE_TIME(
                 AnyOfTableColumn.of(
@@ -175,7 +175,6 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                                 PatternTableColumn.of("валюта списания")),
                         VALUE_CURRENCY.getColumn()));                          // new report (fallback to value currency)
 
-        @Getter
         private final TableColumn column;
 
         TransactionTableHeader(String... words) {

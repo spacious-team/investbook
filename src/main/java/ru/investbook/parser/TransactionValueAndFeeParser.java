@@ -18,14 +18,13 @@
 
 package ru.investbook.parser;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.stereotype.Component;
 import ru.investbook.report.ForeignExchangeRateService;
 
@@ -60,10 +59,14 @@ public class TransactionValueAndFeeParser {
      */
     public Result parse(Arguments arg) {
 
-        BigDecimal brokerFee = getFee(arg.row, arg.brokerFeeColumn).orElse(null);
-        BigDecimal marketFee = getFee(arg.row, arg.marketFeeColumn).orElse(null);
-        BigDecimal clearingFee = getFee(arg.row, arg.clearingFeeColumn).orElse(null);
-        BigDecimal stampDuty = getFee(arg.row, arg.stampDutyColumn).orElse(null);
+        @SuppressWarnings("DataFlowIssue")
+        @Nullable BigDecimal brokerFee = getFee(arg.row, arg.brokerFeeColumn).orElse(null);
+        @SuppressWarnings("DataFlowIssue")
+        @Nullable BigDecimal marketFee = getFee(arg.row, arg.marketFeeColumn).orElse(null);
+        @SuppressWarnings("DataFlowIssue")
+        @Nullable BigDecimal clearingFee = getFee(arg.row, arg.clearingFeeColumn).orElse(null);
+        @SuppressWarnings("DataFlowIssue")
+        @Nullable BigDecimal stampDuty = getFee(arg.row, arg.stampDutyColumn).orElse(null);
 
 
         BigDecimal value = arg.value;
@@ -102,15 +105,18 @@ public class TransactionValueAndFeeParser {
         return new Result(value, valueCurrency, totalFee, totalFeeCurrency);
     }
 
-    private Optional<BigDecimal> getFee(TableRow row, TableHeaderColumn feeColumn) {
+    private Optional<BigDecimal> getFee(TableRow row, @Nullable TableHeaderColumn feeColumn) {
+        //noinspection DataFlowIssue,ReturnOfNull
         return Optional.ofNullable(feeColumn)
                 .map(col -> row.getBigDecimalCellValueOrDefault(col, null))
                 .map(v -> Math.abs(v.floatValue()) > 1e-3 ? v : null);
     }
 
     private String getTotalFeeCurrency(Arguments arg, String valueCurrency,
-                                       BigDecimal brokerFee, BigDecimal marketFee, BigDecimal clearingFee,
-                                       BigDecimal stampDuty) {
+                                       @Nullable BigDecimal brokerFee,
+                                       @Nullable BigDecimal marketFee,
+                                       @Nullable BigDecimal clearingFee,
+                                       @Nullable BigDecimal stampDuty) {
         //noinspection ConstantConditions
         List<String> feeCurrencies =
                 Stream.of(
@@ -127,13 +133,13 @@ public class TransactionValueAndFeeParser {
         if (feeCurrencies.isEmpty()) {
             return valueCurrency;
         } else if (feeCurrencies.size() == 1) {
-            return feeCurrencies.get(0);
+            return feeCurrencies.getFirst();
         }
         List<String> currencies = feeCurrencies.stream()
                 .filter(currency -> !Objects.equals(currency, valueCurrency))
                 .toList();
         if (currencies.size() == 1) {
-            return currencies.get(0);
+            return currencies.getFirst();
         }
         throw new IllegalArgumentException("Три разные валюты при проведении сделки не поддерживаются");
     }
@@ -146,9 +152,9 @@ public class TransactionValueAndFeeParser {
      * @throws NoSuchElementException если обменный курс не известен
      */
     private BigDecimal addToTotalFee(BigDecimal totalFee, String totalFeeCurrency,
-                                     BigDecimal fee, TableHeaderColumn feeCurrencyColumn,
+                                     @Nullable BigDecimal fee, @Nullable TableHeaderColumn feeCurrencyColumn,
                                      Arguments arg) {
-        if (fee != null) {
+        if (fee != null && feeCurrencyColumn != null) {
             String feeCurrency = filterCurrency(arg.row.getStringCellValue(feeCurrencyColumn));
             BigDecimal exchangeRate = arg.exchangeRateProvider
                     .getExchangeRate(feeCurrency, totalFeeCurrency, arg.transactionInstant);
@@ -158,9 +164,9 @@ public class TransactionValueAndFeeParser {
     }
 
     private BigDecimal subtractFromValue(BigDecimal value, String valueCurrency,
-                                         BigDecimal fee, TableHeaderColumn feeCurrencyColumn,
+                                         @Nullable BigDecimal fee, @Nullable TableHeaderColumn feeCurrencyColumn,
                                          Arguments arg) {
-        if (fee == null) {
+        if (fee == null || feeCurrencyColumn == null) {
             return value;
         }
         String feeCurrency = filterCurrency(arg.row.getStringCellValue(feeCurrencyColumn));
@@ -184,20 +190,13 @@ public class TransactionValueAndFeeParser {
 
     @Value
     @Builder
-    private static class Arguments {
-        @NotNull
+    public static class Arguments {
         TableRow row;
-        @NotNull
         String portfolio;
-        @NotNull
         String tradeId;
-        @NotNull
         Instant transactionInstant;
-        @NotNull
         ExchangeRateProvider exchangeRateProvider;
-        @NotNull
         BigDecimal value; // отрицательное - для покупки, положительное - для продажи
-        @NotNull
         TableHeaderColumn valueCurrencyColumn;
         @Nullable
         TableHeaderColumn brokerFeeColumn; // положительное значение для списания комиссии

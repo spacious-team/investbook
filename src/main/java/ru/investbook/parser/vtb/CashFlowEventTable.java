@@ -22,6 +22,7 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
@@ -48,8 +49,8 @@ public class CashFlowEventTable extends SingleAbstractReportTable<CashFlowEventT
     }
 
     @Override
-    protected CashFlowEvent parseRow(TableRow row) {
-        String operation = row.getStringCellValueOrDefault(OPERATION, null);
+    protected @Nullable CashFlowEvent parseRow(TableRow row) {
+        @Nullable String operation = row.getStringCellValueOrDefault(OPERATION, null);
         if (operation == null) {
             return null;
         }
@@ -85,7 +86,7 @@ public class CashFlowEventTable extends SingleAbstractReportTable<CashFlowEventT
     @Slf4j
     @Builder
     @EqualsAndHashCode
-    static class CashFlowEvent {
+    public static class CashFlowEvent {
         private static final String duplicateOperation = "Перераспределение дохода между субсчетами / торговыми площадками";
         private final Instant date;
         private final BigDecimal value;

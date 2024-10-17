@@ -62,10 +62,10 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>24.2</win.msi.version>
+        <win.msi.version>24.2</win.msi.version> <!-- TODO: remove dependencyManagement table-wrapper-api before release -->
         <java.version>22</java.version>
         <lombok.version>1.18.34</lombok.version>
-        <checkerframework.version>3.47.0</checkerframework.version>
+        <checkerframework.version>3.48.1</checkerframework.version>
     </properties>
 
     <repositories>
@@ -90,6 +90,12 @@
                 <artifactId>jaxb-runtime</artifactId>
                 <!-- version is same as for hibernate-jpamodelgen dep, just scope is changed -->
                 <scope>compile</scope>
+            </dependency>
+            <!-- TODO: remove before release -->
+            <dependency>
+                <groupId>com.github.spacious-team</groupId>
+                <artifactId>table-wrapper-api</artifactId>
+                <version>f4572e7848</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -244,7 +250,7 @@
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>3.14.1</version>
+            <version>3.17.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -254,7 +260,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.2</version> <!-- JUnit 5 requirement -->
+                    <version>3.5.1</version> <!-- JUnit 5 requirement -->
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -297,6 +303,8 @@
                     <compilerArgs combine.children="append">
                         <arg>-Awarns</arg> <!-- TODO Comment after warns fix-->
                         <arg>-AskipDefs=.*Test</arg>
+                        <arg>-AskipDefs=V2022_1_0_1</arg>
+                        <arg>-AsuppressWarnings=type.anno.before.modifier</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>

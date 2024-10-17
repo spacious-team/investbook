@@ -68,6 +68,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<A
                 .build();
     }
 
+    @Getter
     enum FxTransactionTableHeader implements TableHeaderColumn {
         TRADE_ID("номер сделки"),
         DATE_TIME("дата", "заключения сделки"), // учет по дате сделки, а не дате исполнения, чтобы учесть неисполненные сделки
@@ -78,7 +79,6 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<A
         MARKET_COMMISSION("комиссия", "биржи", "руб"),
         POSITION_SWAP("перенос", "позиции");
 
-        @Getter
         private final TableColumn column;
 
         FxTransactionTableHeader(String... words) {
