@@ -19,6 +19,7 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.table_wrapper.api.TableRow;
@@ -43,9 +44,10 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
     }
 
     @Override
-    protected EventCashFlow parseRow(TableRow row) {
-        String action = row.getStringCellValue(OPERATION);
-        action = String.valueOf(action).toLowerCase().trim();
+    protected @Nullable EventCashFlow parseRow(TableRow row) {
+        String action = row.getStringCellValue(OPERATION)
+                .toLowerCase()
+                .trim();
         String description = row.getStringCellValueOrDefault(DESCRIPTION, "");
         CashFlowType type;
         switch (action) {

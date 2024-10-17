@@ -19,6 +19,7 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.table_wrapper.api.TableRow;
@@ -39,9 +40,10 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
         super(report, PaymentsTable.TABLE_NAME, "", PaymentsTable.PaymentsTableHeader.class);
     }
 
-    protected SecurityEventCashFlow parseRow(TableRow row) {
-        String action = row.getStringCellValue(OPERATION);
-        action = String.valueOf(action).toLowerCase().trim();
+    protected @Nullable SecurityEventCashFlow parseRow(TableRow row) {
+        String action = row.getStringCellValue(OPERATION)
+                .toLowerCase()
+                .trim();
         if (!action.equalsIgnoreCase("вариационная маржа")) {
             return null;
         }

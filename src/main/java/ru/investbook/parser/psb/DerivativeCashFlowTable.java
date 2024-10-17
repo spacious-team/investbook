@@ -21,6 +21,7 @@ package ru.investbook.parser.psb;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
@@ -80,7 +81,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
     }
 
     @Override
-    protected SecurityEventCashFlow parseRow(TableRow row) {
+    protected @Nullable SecurityEventCashFlow parseRow(TableRow row) {
         BigDecimal value = row.getBigDecimalCellValue(DerivativeCashFlowTableHeader.INCOMING)
                 .subtract(row.getBigDecimalCellValue(DerivativeCashFlowTableHeader.OUTGOING));
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
@@ -112,6 +113,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
         }
     }
 
+    @Getter
     enum ContractCountTableHeader implements TableHeaderColumn {
         CONTRACT("^контракт$"),
         INCOMING("входящий остаток"),
@@ -122,7 +124,6 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
         PRICE_TICK("шаг цены"),
         PRICE_TICK_VALUE("стоимость шага цены");
 
-        @Getter
         private final TableColumn column;
 
         ContractCountTableHeader(String... words) {
@@ -130,6 +131,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
         }
     }
 
+    @Getter
     enum DerivativeCashFlowTableHeader implements TableHeaderColumn {
         DATE("дата"),
         CONTRACT("№", "контракт"),
@@ -137,7 +139,6 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
         INCOMING("зачислено"),
         OUTGOING("списано");
 
-        @Getter
         private final TableColumn column;
 
         DerivativeCashFlowTableHeader(String... words) {

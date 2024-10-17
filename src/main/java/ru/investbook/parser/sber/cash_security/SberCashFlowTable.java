@@ -20,6 +20,7 @@ package ru.investbook.parser.sber.cash_security;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
@@ -43,7 +44,7 @@ public class SberCashFlowTable extends AbstractReportTable<EventCashFlow> {
     }
 
     @Override
-    protected EventCashFlow parseRow(TableRow row) {
+    protected @Nullable EventCashFlow parseRow(TableRow row) {
         if (!"Исполнено".equalsIgnoreCase(row.getStringCellValueOrDefault(STATUS, null))) {
             return null;
         }
@@ -88,6 +89,7 @@ public class SberCashFlowTable extends AbstractReportTable<EventCashFlow> {
                 .build();
     }
 
+    @Getter
     enum SberCashFlowTableHeader implements TableHeaderColumn {
         PORTFOLIO("Номер договора"),
         DATE_TIME("Дата исполнения поручения"),
@@ -99,8 +101,8 @@ public class SberCashFlowTable extends AbstractReportTable<EventCashFlow> {
         DESCRIPTION("Содержание операции"),
         STATUS("Статус");
 
-        @Getter
         private final TableColumn column;
+
         SberCashFlowTableHeader(String words) {
             this.column = PatternTableColumn.of(words);
         }

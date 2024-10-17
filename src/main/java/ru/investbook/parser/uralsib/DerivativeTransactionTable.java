@@ -21,6 +21,7 @@ package ru.investbook.parser.uralsib;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
@@ -55,7 +56,7 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
     }
 
     @Override
-    protected DerivativeTransaction parseRow(TableRow row) {
+    protected @Nullable DerivativeTransaction parseRow(TableRow row) {
         if (expirationTableReached) return null;
         String tradeId = SecurityTransactionTable.getTradeId(row, TRANSACTION);
         if (tradeId == null) {

@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.investbook;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableRow;
@@ -31,7 +32,7 @@ public class InvestbookPortfolioCashTable extends AbstractInvestbookTable<Portfo
     }
 
     @Override
-    protected PortfolioCash parseRow(TableRow row) {
+    protected @Nullable PortfolioCash parseRow(TableRow row) {
         String operation = row.getStringCellValue(OPERATION).toLowerCase();
         if (!operation.contains("остаток")) { // Остаток денежных средств
             return null;

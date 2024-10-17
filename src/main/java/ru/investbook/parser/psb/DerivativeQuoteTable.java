@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.psb;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
@@ -37,7 +38,7 @@ public class DerivativeQuoteTable extends SingleAbstractReportTable<SecurityQuot
     }
 
     @Override
-    protected SecurityQuote parseRow(TableRow row) {
+    protected @Nullable SecurityQuote parseRow(TableRow row) {
         BigDecimal price = row.getBigDecimalCellValue(PRICE);
         BigDecimal tickValue = row.getBigDecimalCellValue(PRICE_TICK_VALUE);
         if (price.compareTo(minValue) < 0 || tickValue.compareTo(minValue) < 0) {

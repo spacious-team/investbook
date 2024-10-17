@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.investbook;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityType;
@@ -77,7 +78,7 @@ public class InvestbookSecurityEventCashFowTable extends AbstractSecurityAwareIn
                 .value(row.getBigDecimalCellValue(PRICE))
                 .currency(row.getStringCellValue(CURRENCY));
         result.add(builder.build());
-        BigDecimal tax = row.getBigDecimalCellValueOrDefault(FEE, null);
+        @Nullable BigDecimal tax = row.getBigDecimalCellValueOrDefault(FEE, null);
         if (tax != null && Math.abs(tax.floatValue()) > 0.001) {
             result.add(builder
                     .eventType(CashFlowType.TAX)
