@@ -67,6 +67,7 @@ public class SecuritiesTable extends SingleAbstractReportTable<ReportSecurityInf
                 .orElseThrow(() -> new RuntimeException("ЦБ с номером гос. регистрации/CFI не найден: " + cfi));
     }
 
+    @Getter
     enum SecuritiesTableHeader implements TableHeaderColumn {
         NAME("наименование"),
         ISIN("isin"),
@@ -77,7 +78,6 @@ public class SecuritiesTable extends SingleAbstractReportTable<ReportSecurityInf
         AMOUNT("Стоимость позиции по цене закрытия"), // в рублях для СПБ биржи
         ACCRUED_INTEREST("^нкд$"); // в валюте для валютных облигаций
 
-        @Getter
         private final TableColumn column;
 
         SecuritiesTableHeader(String... words) {
@@ -89,7 +89,7 @@ public class SecuritiesTable extends SingleAbstractReportTable<ReportSecurityInf
     @ToString
     @Builder(toBuilder = true)
     @EqualsAndHashCode
-    static class ReportSecurityInformation {
+    public static class ReportSecurityInformation {
         private final Security security;
         private final String cfi;
         private final int incomingCount;

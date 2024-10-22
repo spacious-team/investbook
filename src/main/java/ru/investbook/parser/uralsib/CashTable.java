@@ -50,13 +50,14 @@ public class CashTable extends SingleAbstractReportTable<PortfolioCash> {
                 .build();
     }
 
+    @Getter
     enum CashTableHeader implements TableHeaderColumn {
         VALUE("исходящий остаток"),
         CURRENCY("код валюты");
 
-        @Getter
         private final TableColumn column;
-        CashTableHeader(String ... words) {
+
+        CashTableHeader(String... words) {
             this.column = PatternTableColumn.of(words);
         }
     }

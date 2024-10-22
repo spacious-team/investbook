@@ -49,6 +49,7 @@ import ru.investbook.repository.ForeignExchangeRateRepository;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpHeaders.LOCATION;
@@ -120,7 +121,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "409"),
             @ApiResponse(responseCode = "500", content = @Content)})
-    public ResponseEntity<Void> post(@Valid @RequestBody ForeignExchangeRate object) {
+    public ResponseEntity<Void> post(@RequestBody @Valid ForeignExchangeRate object) {
         foreignExchangeRateService.invalidateCache();
         return super.post(object);
     }
@@ -141,8 +142,8 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
                                     @Parameter(description = "Дата", example = "2021-01-23")
                                     @DateTimeFormat(pattern = "yyyy-MM-dd")
                                     LocalDate date,
-                                    @Valid
                                     @RequestBody
+                                    @Valid
                                     ForeignExchangeRate object) {
         foreignExchangeRateService.invalidateCache();
         return super.put(getId(currencyPair, date), object);
@@ -189,8 +190,9 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
 
     @Override
     @SneakyThrows
-    protected URI getLocationURI(ForeignExchangeRate object) {
-        return new URI(getLocation() + "/currency-pairs/" + object.getCurrencyPair() + "/dates/" + object.getDate());
+    protected Optional<URI> getLocationURI(ForeignExchangeRate object) {
+        URI uri = new URI(getLocation() + "/currency-pairs/" + object.getCurrencyPair() + "/dates/" + object.getDate());
+        return Optional.of(uri);
     }
 
     @Override

@@ -21,6 +21,7 @@ package ru.investbook.parser.tinkoff;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
 import org.springframework.util.StringUtils;
@@ -66,7 +67,7 @@ class TinkoffBrokerReportHelper {
                 TinkoffBrokerReportHelper::isCellContainsTableName) != NOT_FOUND;
     }
 
-    private static boolean isCellContainsTableName(Object cell) {
+    private static boolean isCellContainsTableName(@Nullable Object cell) {
         return (cell instanceof String) &&
                 !cell.toString().isEmpty() &&
                 tableNamePattern.matcher(cell.toString()).lookingAt();

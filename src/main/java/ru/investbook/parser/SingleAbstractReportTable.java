@@ -18,6 +18,7 @@
 
 package ru.investbook.parser;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 
@@ -32,7 +33,7 @@ public abstract class SingleAbstractReportTable<R> extends AbstractReportTable<R
     protected <T extends Enum<T> & TableHeaderColumn>
     SingleAbstractReportTable(SingleBrokerReport report,
                               String tableName,
-                              String tableFooter,
+                              @Nullable String tableFooter,
                               Class<T> headerDescription) {
         super(report, tableName, tableFooter, headerDescription);
     }
@@ -40,7 +41,7 @@ public abstract class SingleAbstractReportTable<R> extends AbstractReportTable<R
     protected <T extends Enum<T> & TableHeaderColumn>
     SingleAbstractReportTable(SingleBrokerReport report,
                               String tableName,
-                              String tableFooter,
+                              @Nullable String tableFooter,
                               Class<T> headerDescription,
                               int headersRowCount) {
         super(report, tableName, tableFooter, headerDescription, headersRowCount);
@@ -49,7 +50,7 @@ public abstract class SingleAbstractReportTable<R> extends AbstractReportTable<R
     protected <T extends Enum<T> & TableHeaderColumn>
     SingleAbstractReportTable(SingleBrokerReport report,
                               Predicate<String> tableNameFinder,
-                              Predicate<String> tableFooterFinder,
+                              @Nullable Predicate<String> tableFooterFinder,
                               Class<T> headerDescription) {
         super(report, tableNameFinder, tableFooterFinder, headerDescription);
     }
@@ -57,7 +58,7 @@ public abstract class SingleAbstractReportTable<R> extends AbstractReportTable<R
     protected <T extends Enum<T> & TableHeaderColumn>
     SingleAbstractReportTable(SingleBrokerReport report,
                               Predicate<String> tableNameFinder,
-                              Predicate<String> tableFooterFinder,
+                              @Nullable Predicate<String> tableFooterFinder,
                               Class<T> headerDescription,
                               int headersRowCount) {
         super(report, tableNameFinder, tableFooterFinder, headerDescription, headersRowCount);
@@ -67,7 +68,7 @@ public abstract class SingleAbstractReportTable<R> extends AbstractReportTable<R
     SingleAbstractReportTable(SingleBrokerReport report,
                               String providedTableName,
                               String namelessTableFirstLine,
-                              String tableFooter,
+                              @Nullable String tableFooter,
                               Class<T> headerDescription) {
         super(report, providedTableName, namelessTableFirstLine, tableFooter, headerDescription);
     }
@@ -76,7 +77,7 @@ public abstract class SingleAbstractReportTable<R> extends AbstractReportTable<R
     SingleAbstractReportTable(SingleBrokerReport report,
                               String providedTableName,
                               String namelessTableFirstLine,
-                              String tableFooter,
+                              @Nullable String tableFooter,
                               Class<T> headerDescription,
                               int headersRowCount) {
         super(report, providedTableName, namelessTableFirstLine, tableFooter, headerDescription, headersRowCount);
@@ -86,7 +87,7 @@ public abstract class SingleAbstractReportTable<R> extends AbstractReportTable<R
     SingleAbstractReportTable(SingleBrokerReport report,
                               String providedTableName,
                               Predicate<String> namelessTableFirstLineFinder,
-                              Predicate<String> tableFooterFinder,
+                              @Nullable Predicate<String> tableFooterFinder,
                               Class<T> headerDescription) {
         super(report, providedTableName, namelessTableFirstLineFinder, tableFooterFinder, headerDescription);
     }
@@ -95,7 +96,7 @@ public abstract class SingleAbstractReportTable<R> extends AbstractReportTable<R
     SingleAbstractReportTable(SingleBrokerReport report,
                               String providedTableName,
                               Predicate<String> namelessTableFirstLineFinder,
-                              Predicate<String> tableFooterFinder,
+                              @Nullable Predicate<String> tableFooterFinder,
                               Class<T> headerDescription,
                               int headersRowCount) {
         super(report, providedTableName, namelessTableFirstLineFinder, tableFooterFinder, headerDescription, headersRowCount);

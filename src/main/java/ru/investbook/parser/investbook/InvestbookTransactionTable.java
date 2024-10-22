@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.investbook;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction.AbstractTransactionBuilder;
@@ -45,7 +46,7 @@ public class InvestbookTransactionTable extends AbstractSecurityAwareInvestbookT
     }
 
     @Override
-    protected AbstractTransaction parseRow(TableRow row) {
+    protected @Nullable AbstractTransaction parseRow(TableRow row) {
         String operation = row.getStringCellValue(OPERATION).toLowerCase();
         boolean isBuy;
         if (operation.contains("покупка")) {
@@ -58,7 +59,7 @@ public class InvestbookTransactionTable extends AbstractSecurityAwareInvestbookT
 
         BigDecimal price = row.getBigDecimalCellValue(PRICE).abs();
         int count = Math.abs(row.getIntCellValue(COUNT));
-        BigDecimal value = getOptionalAmount(price, count, isBuy);
+        @Nullable BigDecimal value = getOptionalAmount(price, count, isBuy);
 
         String securityTickerNameOrIsin = row.getStringCellValue(TICKER_NAME_ISIN);
         SecurityType securityType = getSecurityTypeForTransaction(row, securityTickerNameOrIsin);
@@ -97,7 +98,7 @@ public class InvestbookTransactionTable extends AbstractSecurityAwareInvestbookT
                 .build();
     }
 
-    private BigDecimal getOptionalAmount(BigDecimal price, int count, boolean isBuy) {
+    private @Nullable BigDecimal getOptionalAmount(@Nullable BigDecimal price, int count, boolean isBuy) {
         if (price == null) return null;
         BigDecimal value = price.multiply(BigDecimal.valueOf(count));
         return isBuy ? value.negate() : value;
@@ -105,7 +106,7 @@ public class InvestbookTransactionTable extends AbstractSecurityAwareInvestbookT
 
     private SecurityType getSecurityTypeForTransaction(TableRow row, String securityTickerNameOrIsin) {
         SecurityType securityType;
-        String derivativePrice = row.getStringCellValueOrDefault(DERIVATIVE_PRICE_IN_CURRENCY, null);
+        @Nullable String derivativePrice = row.getStringCellValueOrDefault(DERIVATIVE_PRICE_IN_CURRENCY, null);
         if (derivativePrice != null) {
             securityType = SecurityType.DERIVATIVE;
         } else if (isCurrencyPair(securityTickerNameOrIsin)) {

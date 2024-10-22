@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.investbook;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
@@ -42,7 +43,7 @@ public class InvestbookSecurityDepositAndWithdrawalTable extends AbstractSecurit
     }
 
     @Override
-    protected SecurityTransaction parseRow(TableRow row) {
+    protected @Nullable SecurityTransaction parseRow(TableRow row) {
         boolean negate;
         String operation = row.getStringCellValue(OPERATION).toLowerCase();
         if (operation.contains("зачисление")) { // Зачисление ЦБ

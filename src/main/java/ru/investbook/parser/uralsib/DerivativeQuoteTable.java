@@ -19,6 +19,7 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
@@ -42,8 +43,8 @@ public class DerivativeQuoteTable extends SingleAbstractReportTable<SecurityQuot
     }
 
     @Override
-    protected SecurityQuote parseRow(TableRow row) {
-        BigDecimal quote = row.getBigDecimalCellValueOrDefault(QUOTE, null);
+    protected @Nullable SecurityQuote parseRow(TableRow row) {
+        @Nullable BigDecimal quote = row.getBigDecimalCellValueOrDefault(QUOTE, null);
         if (quote == null || quote.compareTo(minValue) < 0) {
             return null;
         }
@@ -56,6 +57,7 @@ public class DerivativeQuoteTable extends SingleAbstractReportTable<SecurityQuot
                 .build();
     }
 
+    @Getter
     enum ContractCountTableHeader implements TableHeaderColumn {
         CONTRACT("наименование контракта"),
         INCOMING("входящий остаток"),
@@ -64,8 +66,8 @@ public class DerivativeQuoteTable extends SingleAbstractReportTable<SecurityQuot
         CELL("списано"),
         QUOTE("расчетная цена");
 
-        @Getter
         private final TableColumn column;
+
         ContractCountTableHeader(String... words) {
             this.column = PatternTableColumn.of(words);
         }

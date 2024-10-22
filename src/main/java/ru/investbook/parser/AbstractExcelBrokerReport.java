@@ -28,8 +28,11 @@ import java.io.InputStream;
 
 public abstract class AbstractExcelBrokerReport extends AbstractBrokerReport {
 
-    public AbstractExcelBrokerReport(SecurityRegistrar securityRegistrar) {
-        super(securityRegistrar);
+    private final Workbook workbook;
+
+    public AbstractExcelBrokerReport(ExcelAttributes attributes, SecurityRegistrar securityRegistrar) {
+        super(attributes.attributes(), securityRegistrar);
+        this.workbook = attributes.workbook();
     }
 
     public static Workbook getWorkBook(String excelFileName, InputStream is) {
@@ -45,4 +48,11 @@ public abstract class AbstractExcelBrokerReport extends AbstractBrokerReport {
         }
     }
 
+    @Override
+    public void close() throws IOException {
+        workbook.close();
+    }
+
+    public record ExcelAttributes(Workbook workbook, Attributes attributes) {
+    }
 }

@@ -35,6 +35,7 @@ public class TransactionConverter implements EntityConverter<TransactionEntity, 
         SecurityEntity securityEntity = securityRepository.getReferenceById(transaction.getSecurity());
 
         TransactionEntity entity = new TransactionEntity();
+        //noinspection DataFlowIssue
         entity.setId(transaction.getId());
         entity.setTradeId(transaction.getTradeId());
         entity.setPortfolio(transaction.getPortfolio());

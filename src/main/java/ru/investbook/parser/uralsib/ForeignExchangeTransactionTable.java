@@ -20,6 +20,8 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
@@ -29,22 +31,23 @@ import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 
+import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.parser.uralsib.ForeignExchangeTransactionTable.FxTransactionTableHeader.*;
 
 @Slf4j
 public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<ForeignExchangeTransaction> {
     private static final String TABLE_NAME = "Биржевые валютные сделки, совершенные в отчетном периоде";
     private static final String CONTRACT_PREFIX = "Инструмент:";
-    private String instrument = null;
+    private @MonotonicNonNull String instrument = null;
 
     public ForeignExchangeTransactionTable(UralsibBrokerReport report) {
         super(report, TABLE_NAME, "", FxTransactionTableHeader.class, 2);
     }
 
     @Override
-    protected ForeignExchangeTransaction parseRow(TableRow row) {
+    protected @Nullable ForeignExchangeTransaction parseRow(TableRow row) {
         String tradeId;
-        Object cellValue = row.getCellValue(TRADE_ID);
+        @Nullable Object cellValue = row.getCellValue(TRADE_ID);
         if (cellValue instanceof String) {
             String stringValue = cellValue.toString();
             try {
@@ -62,7 +65,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
         } else {
             return null;
         }
-        if (instrument == null || instrument.isEmpty()) {
+        if (!hasLength(instrument)) {
             return null;
         }
 

@@ -20,6 +20,7 @@ package ru.investbook.report;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityQuote.SecurityQuoteBuilder;
 import org.spacious_team.broker.pojo.SecurityType;
@@ -56,6 +57,7 @@ public class ForeignExchangeRateService {
     // base-currency -> quote-currency -> local date -> exchange-rate
     private final Map<String, Map<String, Map<LocalDate, BigDecimal>>> cacheByDate = new ConcurrentHashMap<>();
     @Value("${server.port}")
+    @SuppressWarnings("unused")
     private int serverPort;
 
     /**
@@ -69,7 +71,7 @@ public class ForeignExchangeRateService {
         if (baseCurrency.equalsIgnoreCase(quoteCurrency)) {
             return BigDecimal.ONE;
         }
-        BigDecimal exchangeRate = getFromCache(baseCurrency, quoteCurrency);
+        @Nullable BigDecimal exchangeRate = getFromCache(baseCurrency, quoteCurrency);
         if (exchangeRate != null) {
             return exchangeRate;
         } else if (baseCurrency.equalsIgnoreCase("RUB")) {
@@ -141,7 +143,7 @@ public class ForeignExchangeRateService {
         if (baseCurrency.equalsIgnoreCase(quoteCurrency)) {
             return BigDecimal.ONE;
         }
-        BigDecimal exchangeRate = getFromCache(baseCurrency, quoteCurrency, atDate);
+        @Nullable BigDecimal exchangeRate = getFromCache(baseCurrency, quoteCurrency, atDate);
         if (exchangeRate != null) {
             return exchangeRate;
         } else if (baseCurrency.equalsIgnoreCase("RUB")) {
@@ -216,12 +218,12 @@ public class ForeignExchangeRateService {
                 .putIfAbsent(localDate, exchangeRate);
     }
 
-    private BigDecimal getFromCache(String baseCurrency, String quoteCurrency) {
+    private @Nullable BigDecimal getFromCache(String baseCurrency, String quoteCurrency) {
         return this.cache.computeIfAbsent(baseCurrency, k -> new ConcurrentHashMap<>())
                 .get(quoteCurrency);
     }
 
-    private BigDecimal getFromCache(String baseCurrency, String quoteCurrency, LocalDate localDate) {
+    private @Nullable BigDecimal getFromCache(String baseCurrency, String quoteCurrency, LocalDate localDate) {
         return this.cacheByDate.computeIfAbsent(baseCurrency, k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(quoteCurrency, k -> new ConcurrentHashMap<>())
                 .get(localDate);
@@ -263,7 +265,7 @@ public class ForeignExchangeRateService {
      * курсу по-умолчанию, если официальный курс не известен.
      */
     public SecurityQuote convertQuoteToCurrency(SecurityQuote quote, String toCurrency, SecurityType securityType) {
-        String fromCurrency = quote.getCurrency();
+        @Nullable String fromCurrency = quote.getCurrency();
         if (fromCurrency == null || fromCurrency.equalsIgnoreCase(toCurrency)) {
             return quote;
         } else {
@@ -277,13 +279,15 @@ public class ForeignExchangeRateService {
                                                                Supplier<BigDecimal> exchangeRateSupplier,
                                                                SecurityType securityType) {
         BigDecimal exchangeRate = exchangeRateSupplier.get();
-        BigDecimal accruedInterest = quote.getAccruedInterest();
+        BigDecimal quoteValue = quote.getQuote();
+        @Nullable BigDecimal price = quote.getPrice();
+        @Nullable BigDecimal accruedInterest = quote.getAccruedInterest();
         boolean nonCurrencyQuote = (securityType == BOND) ||
                 ((securityType == STOCK_OR_BOND) && (accruedInterest != null)) ||
                 (securityType == DERIVATIVE);
         return quote.toBuilder()
-                .quote(nonCurrencyQuote ? quote.getQuote() : quote.getQuote().multiply(exchangeRate))
-                .price((quote.getPrice() == null) ? null : quote.getPrice().multiply(exchangeRate))
+                .quote(nonCurrencyQuote ? quoteValue : quoteValue.multiply(exchangeRate))
+                .price((price == null) ? null : price.multiply(exchangeRate))
                 .accruedInterest((accruedInterest == null) ? null : accruedInterest.multiply(exchangeRate));
     }
 }

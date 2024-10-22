@@ -19,6 +19,7 @@
 package ru.investbook.parser.sber;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.util.StringUtils;
@@ -30,8 +31,9 @@ import static ru.investbook.entity.SecurityEntity.isinPattern;
 @Slf4j
 public class SecurityHelper {
 
-    public static Security getSecurity(String code, String securityName, String section, String type, SecurityRegistrar securityRegistrar) {
-        String securityId = getSecurityId(code, section);
+    public static Security getSecurity(String code, @Nullable String securityName, String section, @Nullable String type,
+                                       SecurityRegistrar securityRegistrar) {
+        @Nullable String securityId = getSecurityId(code, section);
         SecurityType securityType = getSecurityType(section, type);
         Security.SecurityBuilder security = Security.builder().type(securityType);
         int id = -1;
@@ -64,7 +66,7 @@ public class SecurityHelper {
      * @param nameAndIsin in format "<name>\s*(<isin>)"
      * @return isin for stock or bond, nameAndIsin for others
      */
-    private static String getSecurityId(String nameAndIsin, String section) {
+    private static @Nullable String getSecurityId(String nameAndIsin, String section) {
         int start = nameAndIsin.indexOf('(') + 1;
         int end = nameAndIsin.indexOf(')');
         String id = nameAndIsin.substring(start, (end == -1) ? nameAndIsin.length() : end);
@@ -74,7 +76,7 @@ public class SecurityHelper {
         return id;
     }
 
-    private static String getValidIsinOrNull(String isin) {
+    private static @Nullable String getValidIsinOrNull(String isin) {
         return StringUtils.hasLength(isin) && isinPattern.matcher(isin).matches() ?
                 isin :
                 null;
@@ -85,7 +87,7 @@ public class SecurityHelper {
         return (start == -1) ? nameAndIsin : nameAndIsin.substring(0, start).trim();
     }
 
-    public static SecurityType getSecurityType(String section, String securityType) {
+    public static SecurityType getSecurityType(String section, @Nullable String securityType) {
         if ("Фондовый рынок".equalsIgnoreCase(section)) {
             if (securityType == null) return SecurityType.STOCK_OR_BOND;
             return switch (securityType.toLowerCase()) {

@@ -20,6 +20,7 @@ package ru.investbook.api;
 
 import jakarta.persistence.GeneratedValue;
 import lombok.SneakyThrows;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,9 +33,12 @@ import ru.investbook.converter.EntityConverter;
 
 import java.net.URI;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.springframework.http.HttpStatus.CREATED;
 
 public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractEntityRepositoryService<ID, Pojo, Entity> {
 
@@ -73,7 +77,7 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
             CreateResult<Pojo> result = createIfAbsentAndGet(object);
             Pojo savedObject = result.object();
             if (result.created()) {
-                return createResponseWithLocationHeader(savedObject);
+                return createResponseWithOptionalLocationHeader(savedObject);
             } else {
                 return createConflictResponse(savedObject);
             }
@@ -85,10 +89,8 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
     @NonNull
     private ResponseEntity<Void> createConflictResponse(Pojo object) {
         ResponseEntity.BodyBuilder response = ResponseEntity.status(HttpStatus.CONFLICT);
-        if (getId(object) != null) {
-            URI locationURI = getLocationURI(object);
-            response.location(locationURI);
-        }
+        getLocationURI(object)
+                .ifPresent(response::location);
         return response.build();
     }
 
@@ -106,14 +108,14 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
     @Transactional
     public ResponseEntity<Void> put(ID id, Pojo object) {
         try {
-            ID objectId = getId(object);
+            @Nullable ID objectId = getId(object);
             if (nonNull(objectId) && !Objects.equals(id, objectId)) {
                 throw new BadRequestException("Идентификатор объекта, переданный в URI [" + id + "] и в теле " +
                         "запроса [" + objectId + "] не совпадают");
             }
             Pojo objectWithId = nonNull(objectId) ? object : updateId(id, object);
             return createAndGetIfAbsent(objectWithId)
-                    .map(this::createResponseWithLocationHeader)
+                    .map(this::createResponseWithOptionalLocationHeader)
                     .orElseGet(() -> {
                         createOrUpdate(objectWithId);
                         return ResponseEntity.noContent().build();
@@ -134,16 +136,21 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
     /**
      * @return response entity with http CREATE status, Location http header and body
      */
-    private ResponseEntity<Void> createResponseWithLocationHeader(Pojo object) {
-        URI locationURI = getLocationURI(object);
-        return ResponseEntity
-                .created(locationURI)
+    private ResponseEntity<Void> createResponseWithOptionalLocationHeader(Pojo object) {
+        return getLocationURI(object)
+                .map(ResponseEntity::created)
+                .orElseGet(() -> ResponseEntity.status(CREATED))
                 .build();
     }
 
     @SneakyThrows
-    protected URI getLocationURI(Pojo object) {
-        return new URI(UriUtils.encodePath(getLocation() + "/" + getId(object), UTF_8));
+    protected Optional<URI> getLocationURI(Pojo object) {
+        @Nullable ID id = getId(object);
+        if (isNull(id)) {
+            return Optional.empty();
+        }
+        URI uri = new URI(UriUtils.encodePath(getLocation() + "/" + id, UTF_8));
+        return Optional.of(uri);
     }
 
     protected abstract String getLocation();

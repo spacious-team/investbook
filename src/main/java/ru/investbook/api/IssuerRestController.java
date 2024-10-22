@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Issuer;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
@@ -83,7 +84,7 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "409"),
             @ApiResponse(responseCode = "500", content = @Content)})
-    public ResponseEntity<Void> post(@Valid @RequestBody Issuer issuer) {
+    public ResponseEntity<Void> post(@RequestBody @Valid Issuer issuer) {
         return super.post(issuer);
     }
 
@@ -96,8 +97,8 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор эмитента")
                                     Integer id,
-                                    @Valid
                                     @RequestBody
+                                    @Valid
                                     Issuer issuer) {
         return super.put(id, issuer);
     }
@@ -114,7 +115,7 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     }
 
     @Override
-    public Integer getId(Issuer object) {
+    public @Nullable Integer getId(Issuer object) {
         return object.getId();
     }
 

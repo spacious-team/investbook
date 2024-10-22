@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
@@ -48,11 +49,9 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 @Tag(name = "Инструменты", description = "Акции, облигации, деривативы и валютные пары")
 @RequestMapping("/api/v1/securities")
 public class SecurityRestController extends AbstractRestController<Integer, Security, SecurityEntity> {
-    private final SecurityRepository repository;
 
     public SecurityRestController(SecurityRepository repository, SecurityConverter converter) {
         super(repository, converter);
-        this.repository = repository;
     }
 
     @Override
@@ -88,7 +87,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
                     @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
                     @ApiResponse(responseCode = "409"),
                     @ApiResponse(responseCode = "500", content = @Content)})
-    public ResponseEntity<Void> post(@Valid @RequestBody Security security) {
+    public ResponseEntity<Void> post(@RequestBody @Valid Security security) {
         return super.post(security);
     }
 
@@ -102,8 +101,8 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Идентификатор", example = "123", required = true)
                                     Integer id,
-                                    @Valid
                                     @RequestBody
+                                    @Valid
                                     Security security) {
         return super.put(id, security);
     }
@@ -121,7 +120,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     }
 
     @Override
-    public Integer getId(Security object) {
+    public @Nullable Integer getId(Security object) {
         return object.getId();
     }
 
