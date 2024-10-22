@@ -20,6 +20,7 @@ package ru.investbook.parser.uralsib;
 
 import lombok.EqualsAndHashCode;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.api.TableCell;
 import org.spacious_team.table_wrapper.api.TableCellAddress;
@@ -27,70 +28,67 @@ import org.spacious_team.table_wrapper.excel.ExcelSheet;
 import ru.investbook.parser.AbstractExcelBrokerReport;
 import ru.investbook.parser.SecurityRegistrar;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.function.Predicate;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static java.util.Objects.requireNonNull;
+import static java.time.temporal.ChronoUnit.HOURS;
 import static org.spacious_team.table_wrapper.api.TableCellAddress.NOT_FOUND;
 
 @EqualsAndHashCode(callSuper = true)
 public class UralsibBrokerReport extends AbstractExcelBrokerReport {
     // "УРАЛСИБ Брокер" или "УРАЛСИБ Кэпитал - Финансовые услуги" (старый формат 2018 г)
     private static final String PORTFOLIO_MARKER = "Номер счета Клиента:";
-    private final Predicate<Object> uralsibReportPredicate = cell ->
+    private static final Predicate<Object> uralsibReportPredicate = cell ->
             (cell instanceof String value) && (value.contains("Твой Брокер") || value.contains("УРАЛСИБ"));
-    private final Predicate<Object> dateMarkerPredicate = cell ->
+    private static final Predicate<Object> dateMarkerPredicate = cell ->
             (cell instanceof String value) && value.contains("за период");
-    private final Workbook book;
 
     public UralsibBrokerReport(ZipInputStream zis, SecurityRegistrar securityRegistrar) {
-        super(securityRegistrar);
+        this(getFileName(zis), zis, securityRegistrar);
+    }
+
+    public UralsibBrokerReport(String excelFileName, InputStream is, SecurityRegistrar securityRegistrar) {
+        super(getBrokerReportAttributes(excelFileName, is), securityRegistrar);
+    }
+
+    @SuppressWarnings("DataFlowIssue")
+    private static String getFileName(ZipInputStream zis) {
         try {
-            ZipEntry zipEntry = requireNonNull(zis.getNextEntry());
-            Path path = Paths.get(zipEntry.getName());
-            this.book = getWorkBook(path.getFileName().toString(), zis);
-            ReportPage reportPage = new ExcelSheet(book.getSheetAt(0));
-            checkReportFormat(path, reportPage);
-            setPath(path);
-            setReportPage(reportPage);
-            setPortfolio(getPortfolio(reportPage));
-            setReportEndDateTime(getReportEndDateTime(reportPage));
+            return zis.getNextEntry()
+                    .getName();
         } catch (Exception e) {
             throw new RuntimeException("Не смог открыть excel файл", e);
         }
     }
 
-    public UralsibBrokerReport(String excelFileName, InputStream is, SecurityRegistrar securityRegistrar) {
-        super(securityRegistrar);
-        this.book = getWorkBook(excelFileName, is);
-        ReportPage reportPage = new ExcelSheet(book.getSheetAt(0));
-        Path path = Paths.get(excelFileName);
-        checkReportFormat(path, reportPage);
-        setPath(path);
-        setReportPage(reportPage);
-        setPortfolio(getPortfolio(reportPage));
-        setReportEndDateTime(getReportEndDateTime(reportPage));
+    private static ExcelAttributes getBrokerReportAttributes(String excelFileName, InputStream is) {
+        Workbook workbook = getWorkBook(excelFileName, is);
+        ReportPage reportPage = new ExcelSheet(workbook.getSheetAt(0));
+        checkReportFormat(excelFileName, reportPage);
+        Attributes attributes = new Attributes(
+                reportPage,
+                excelFileName,
+                getReportEndDateTime(reportPage),
+                getPortfolio(reportPage));
+        return new ExcelAttributes(workbook, attributes);
     }
 
-    private void checkReportFormat(Path path, ReportPage reportPage) {
+    private static void checkReportFormat(String excelFileName, ReportPage reportPage) {
         if (reportPage.find(0, 1, uralsibReportPredicate) == NOT_FOUND) {
-            throw new RuntimeException("В файле " + path + " не содержится отчет брокера Твой Брокер (Уралсиб)");
+            throw new RuntimeException("В файле " + excelFileName + " не содержится отчет брокера Твой Брокер (Уралсиб)");
         }
     }
 
     private static String getPortfolio(ReportPage reportPage) {
         try {
             TableCellAddress address = reportPage.findByPrefix(PORTFOLIO_MARKER);
-            for (TableCell cell : reportPage.getRow(address.getRow())) {
+            //noinspection DataFlowIssue
+            for (@Nullable TableCell cell : reportPage.getRow(address.getRow())) {
                 if (cell != null && cell.getColumnIndex() > address.getColumn()) {
-                    Object value = cell.getValue();
+                    @SuppressWarnings("DataFlowIssue")
+                    @Nullable Object value = cell.getValue();
                     if (value instanceof String) {
                         return value.toString()
                                 .replace("_invest", "")
@@ -107,14 +105,16 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
         }
     }
 
-    private Instant getReportEndDateTime(ReportPage reportPage) {
+    private static Instant getReportEndDateTime(ReportPage reportPage) {
         try {
             TableCellAddress address = reportPage.find(0, dateMarkerPredicate);
+            @SuppressWarnings({"nullness", "DataFlowIssue"})
             String[] words = reportPage.getCell(address)
                     .getStringValue()
                     .split(" ");
-            return convertToInstant(words[words.length - 1])
-                    .plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);
+            String date = words[words.length - 1];
+            return convertToInstantWithRussianFormatAndMoscowZoneId(date)
+                    .plus(LAST_TRADE_HOUR, HOURS);
         } catch (Exception e) {
             throw new RuntimeException("Ошибка поиска даты отчета");
         }
@@ -122,10 +122,5 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
 
     public static String convertToCurrency(String value) {
         return value.replace("RUR", "RUB"); // uralsib uses RUR (used till 1998) code in reports
-    }
-
-    @Override
-    public void close() throws IOException {
-        this.book.close();
     }
 }

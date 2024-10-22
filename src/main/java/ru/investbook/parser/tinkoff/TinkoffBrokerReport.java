@@ -26,14 +26,12 @@ import org.spacious_team.table_wrapper.excel.ExcelSheet;
 import ru.investbook.parser.AbstractExcelBrokerReport;
 import ru.investbook.parser.SecurityRegistrar;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import static java.time.temporal.ChronoUnit.HOURS;
 import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
 import static ru.investbook.parser.tinkoff.TinkoffBrokerReportHelper.removePageNumRows;
 
@@ -48,18 +46,21 @@ public class TinkoffBrokerReport extends AbstractExcelBrokerReport {
     private static final Predicate<Object> dateMarkerPredicate = cell ->
             (cell instanceof String) && ((String) cell).contains("за период");
 
-    private final Workbook book;
-
     public TinkoffBrokerReport(String excelFileName, InputStream is, SecurityRegistrar securityRegistrar) {
-        super(securityRegistrar);
-        this.book = getWorkBook(excelFileName, is);
-        ExcelSheet reportPage = new ExcelSheet(book.getSheetAt(0));
+        super(getBrokerReportAttributes(excelFileName, is), securityRegistrar);
+    }
+
+    private static ExcelAttributes getBrokerReportAttributes(String excelFileName, InputStream is) {
+        Workbook workbook = getWorkBook(excelFileName, is);
+        ExcelSheet reportPage = new ExcelSheet(workbook.getSheetAt(0));
         checkReportFormat(excelFileName, reportPage);
-        setPath(Paths.get(excelFileName));
-        setReportPage(reportPage);
-        setPortfolio(getPortfolio(reportPage));
-        setReportEndDateTime(getReportEndDateTime(reportPage));
         removePageNumRows(reportPage);
+        Attributes attributes = new Attributes(
+                reportPage,
+                excelFileName,
+                getReportEndDateTime(reportPage),
+                getPortfolio(reportPage));
+        return new ExcelAttributes(workbook, attributes);
     }
 
     public static void checkReportFormat(String excelFileName, ReportPage reportPage) {
@@ -69,34 +70,32 @@ public class TinkoffBrokerReport extends AbstractExcelBrokerReport {
         }
     }
 
+    @SuppressWarnings({"nullness", "DataFlowIssue"})
     private static String getPortfolio(ReportPage reportPage) {
         try {
             return reportPage.getCell(reportPage.findByPrefix(PORTFOLIO_MARKER))
                     .getStringValue()
                     .split("/")[1]
                     .trim()
-                    .split("\s+")[0];
+                    .split("\\s+")[0];
         } catch (Exception e) {
             throw new IllegalArgumentException(
                     "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER);
         }
     }
 
-    private Instant getReportEndDateTime(ReportPage reportPage) {
+    private static Instant getReportEndDateTime(ReportPage reportPage) {
         try {
             TableCellAddress address = reportPage.find(0, 10, dateMarkerPredicate);
+            @SuppressWarnings({"nullness", "DataFlowIssue"})
             String[] words = reportPage.getCell(address)
                     .getStringValue()
                     .split("-");
             String value = words[words.length - 1].trim();
-            return convertToInstant(value).plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);
+            return convertToInstantWithRussianFormatAndMoscowZoneId(value)
+                    .plus(LAST_TRADE_HOUR, HOURS);
         } catch (Exception e) {
             throw new IllegalArgumentException("Не найдена дата отчета по заданному шаблону");
         }
-    }
-
-    @Override
-    public void close() throws IOException {
-        this.book.close();
     }
 }

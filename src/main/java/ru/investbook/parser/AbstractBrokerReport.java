@@ -18,14 +18,12 @@
 
 package ru.investbook.parser;
 
-import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.ToString;
 import org.spacious_team.table_wrapper.api.ReportPage;
 
-import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,32 +31,49 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 @RequiredArgsConstructor
-@EqualsAndHashCode(of = "path")
+@ToString(of = "reportName")
+@EqualsAndHashCode(of = "reportName")
 public abstract class AbstractBrokerReport implements SingleBrokerReport {
 
     protected static final int LAST_TRADE_HOUR = 19;
+    protected static final ZoneId MOSCOW_ZONEID = ZoneId.of("Europe/Moscow");
+    private static final DateTimeFormatter RUSSIAN_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter RUSSIAN_DATETIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+
+    private final DateTimeFormatter dateFormatter = RUSSIAN_DATE_FORMATTER;
+    private final DateTimeFormatter dateTimeFormatter = RUSSIAN_DATETIME_FORMATTER;
+    @Getter
+    private final ZoneId reportZoneId = MOSCOW_ZONEID;
+    @Getter
+    private final ReportPage reportPage;
+    private final String reportName;
+    @Getter
+    private final Instant reportEndDateTime;
+    @Getter
+    private final String portfolio;
     @Getter
     private final SecurityRegistrar securityRegistrar;
-    @Setter(AccessLevel.PROTECTED)
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    @Setter(AccessLevel.PROTECTED)
-    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
-    @Setter(AccessLevel.PROTECTED)
-    private Path path;
-    @Getter
-    @Setter(AccessLevel.PROTECTED)
-    private String portfolio;
-    @Getter
-    @Setter(AccessLevel.PROTECTED)
-    private ReportPage reportPage;
-    @Getter
-    @Setter(AccessLevel.PROTECTED)
-    private Instant reportEndDateTime;
-    @Getter
-    private final ZoneId reportZoneId = ZoneId.of("Europe/Moscow");
+    public AbstractBrokerReport(Attributes attributes, SecurityRegistrar securityRegistrar) {
+        this.reportPage = attributes.reportPage();
+        this.reportName = attributes.reportName();
+        this.reportEndDateTime = attributes.reportEndDateTime();
+        this.portfolio = attributes.portfolio();
+        this.securityRegistrar = securityRegistrar;
+    }
 
     public Instant convertToInstant(String value) {
+        return convertToInstant(value, dateFormatter, dateTimeFormatter, reportZoneId);
+    }
+
+    protected static Instant convertToInstantWithRussianFormatAndMoscowZoneId(String value) {
+        return convertToInstant(value, RUSSIAN_DATE_FORMATTER, RUSSIAN_DATETIME_FORMATTER, MOSCOW_ZONEID);
+    }
+
+    protected static Instant convertToInstant(String value,
+                                              DateTimeFormatter dateFormatter,
+                                              DateTimeFormatter dateTimeFormatter,
+                                              ZoneId reportZoneId) {
         value = value.trim();
         if (value.contains(":")) {
             return LocalDateTime.parse(value, dateTimeFormatter).atZone(reportZoneId).toInstant();
@@ -67,8 +82,9 @@ public abstract class AbstractBrokerReport implements SingleBrokerReport {
         }
     }
 
-    @Override
-    public String toString() {
-        return path.getFileName().toString();
+    public record Attributes(ReportPage reportPage,
+                             String reportName,
+                             Instant reportEndDateTime,
+                             String portfolio) {
     }
 }
