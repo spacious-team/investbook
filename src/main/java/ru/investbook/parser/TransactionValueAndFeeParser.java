@@ -59,13 +59,9 @@ public class TransactionValueAndFeeParser {
      */
     public Result parse(Arguments arg) {
 
-        @SuppressWarnings("DataFlowIssue")
         @Nullable BigDecimal brokerFee = getFee(arg.row, arg.brokerFeeColumn).orElse(null);
-        @SuppressWarnings("DataFlowIssue")
         @Nullable BigDecimal marketFee = getFee(arg.row, arg.marketFeeColumn).orElse(null);
-        @SuppressWarnings("DataFlowIssue")
         @Nullable BigDecimal clearingFee = getFee(arg.row, arg.clearingFeeColumn).orElse(null);
-        @SuppressWarnings("DataFlowIssue")
         @Nullable BigDecimal stampDuty = getFee(arg.row, arg.stampDutyColumn).orElse(null);
 
 
