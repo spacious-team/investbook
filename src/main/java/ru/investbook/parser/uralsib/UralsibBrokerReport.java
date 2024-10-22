@@ -87,7 +87,6 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
             //noinspection DataFlowIssue
             for (@Nullable TableCell cell : reportPage.getRow(address.getRow())) {
                 if (cell != null && cell.getColumnIndex() > address.getColumn()) {
-                    @SuppressWarnings("DataFlowIssue")
                     @Nullable Object value = cell.getValue();
                     if (value instanceof String) {
                         return value.toString()
