@@ -51,6 +51,7 @@ public class SecurityRepositoryHelper {
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
     public int saveSecurity(SecurityDescriptionModel m) {
@@ -61,6 +62,7 @@ public class SecurityRepositoryHelper {
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
     public int saveSecurity(EventCashFlowModel.AttachedSecurity s) {
@@ -71,6 +73,7 @@ public class SecurityRepositoryHelper {
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
     public int saveSecurity(SecurityEventCashFlowModel m) {
@@ -79,6 +82,7 @@ public class SecurityRepositoryHelper {
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
     public int saveSecurity(SecurityQuoteModel m) {
@@ -87,6 +91,7 @@ public class SecurityRepositoryHelper {
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
     public int saveSecurity(TransactionModel m) {
@@ -95,6 +100,7 @@ public class SecurityRepositoryHelper {
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
     public int saveSecurity(SplitModel m) {
@@ -158,14 +164,12 @@ public class SecurityRepositoryHelper {
                         .or(() -> ofNullable(name).flatMap(securityRepository::findByName));
             }
             case DERIVATIVE, CURRENCY -> {
-                @SuppressWarnings("nullness")
-                String nonNullSecurityName = requireNonNull(securityName, "Отсутствует тикер контракта");
-                yield securityRepository.findByTicker(nonNullSecurityName);
+                requireNonNull(securityName, "Отсутствует тикер контракта");
+                yield securityRepository.findByTicker(securityName);
             }
             case ASSET -> {
-                @SuppressWarnings("nullness")
-                String nonNullSecurityName = requireNonNull(securityName, "Отсутствует наименование произвольного актива");
-                yield securityRepository.findByName(nonNullSecurityName);
+                requireNonNull(securityName, "Отсутствует наименование произвольного актива");
+                yield securityRepository.findByName(securityName);
             }
         };
     }

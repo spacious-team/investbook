@@ -94,7 +94,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
             case "вариационная маржа":
                 String contract = row.getStringCellValue(DerivativeCashFlowTableHeader.CONTRACT)
                         .split("/")[1].trim();
-                Integer count = getContractCount().get(contract);
+                @Nullable Integer count = getContractCount().get(contract);
                 if (count == null) {
                     throw new IllegalArgumentException("Открытых контрактов не найдено");
                 }

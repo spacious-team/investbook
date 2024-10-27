@@ -118,8 +118,12 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
                     .or(() -> ofNullable(security.getName())
                             .map(name -> declareSecurityByName(name, security.getType(), security::toBuilder)))
                     .orElseThrow();
-            case DERIVATIVE, CURRENCY_PAIR -> declareContractByTicker(security.getTicker(), security.getType());
-            case ASSET -> declareAsset(security.getName(), security::toBuilder);
+            case DERIVATIVE, CURRENCY_PAIR -> Optional.ofNullable(security.getTicker())
+                    .map(tiker -> declareContractByTicker(tiker, security.getType()))
+                    .orElseThrow();
+            case ASSET -> Optional.ofNullable(security.getName())
+                    .map(name -> declareAsset(name, security::toBuilder))
+                    .orElseThrow();
         };
     }
 
@@ -160,6 +164,7 @@ public class SecurityRegistrarImpl implements SecurityRegistrar {
 
     private Security buildSecurity(SecurityBuilder builder, SecurityType defaultType) {
         Security security = builder.build();
+        //noinspection ConstantValue
         if (security.getType() == null) {
             security = builder.type(defaultType).build();
         }

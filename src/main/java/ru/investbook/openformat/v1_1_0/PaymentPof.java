@@ -142,7 +142,7 @@ public class PaymentPof {
                     .value(amount)
                     .currency(getValidCurrencyOrNull(currency))
                     .build();
-            if (tax != null && Math.abs(tax.floatValue()) > 0.0001) {
+            if (tax != null && taxCurrency != null && Math.abs(tax.floatValue()) > 0.0001) {
                 return Set.of(cashFlow,
                         cashFlow.toBuilder()
                                 .eventType(CashFlowType.TAX)

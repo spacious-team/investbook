@@ -20,6 +20,7 @@ package ru.investbook.service.moex;
 
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -201,7 +202,7 @@ public class MoexDerivativeCodeService {
                 .collect(toMap(
                         Entry::getValue,
                         Entry::getKey,
-                        (e1, e2) -> {
+                        (_, _) -> {
                             throw new RuntimeException();
                         },
                         HashMap::new));
@@ -418,7 +419,7 @@ public class MoexDerivativeCodeService {
     /**
      * Convert derivative codes before storing to DB if you need
      */
-    public @Nullable String convertDerivativeCode(@Nullable String code) {
+    public @PolyNull String convertDerivativeCode(@PolyNull String code) {
         return isFuturesCode(code) ?
                 getFuturesShortname(code).orElse(code) :
                 code;

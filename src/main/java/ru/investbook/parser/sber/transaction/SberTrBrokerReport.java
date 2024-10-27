@@ -53,9 +53,12 @@ public class SberTrBrokerReport implements BrokerReport {
     }
 
     public static void checkReportFormat(String excelFileName, ExcelSheet reportPage) {
-        if (reportPage.getSheet().getSheetName().equals("Сделки") &&
-                reportPage.getRow(0).getCell(0).getStringValue().equals("Номер договора")) {
-            return;
+        if (reportPage.getSheet().getSheetName().equals("Сделки")) {
+            @SuppressWarnings({"nullable", "DataFlowIssue"})
+            String string = reportPage.getRow(0).getCell(0).getStringValue();
+            if (string.equals("Номер договора")) {
+                return;
+            }
         }
         throw new RuntimeException("В файле " + excelFileName + " не содержится отчета сделок брокера Сбербанк");
     }

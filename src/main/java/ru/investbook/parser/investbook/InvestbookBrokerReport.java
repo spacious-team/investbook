@@ -29,6 +29,7 @@ import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.csv.CsvReportPage;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
@@ -41,7 +42,7 @@ public class InvestbookBrokerReport implements BrokerReport {
 
     @Getter
     private final ReportPage reportPage;
-    private Workbook workbook;
+    private @Nullable Workbook workbook;
 
     @SneakyThrows
     public InvestbookBrokerReport(String fileName, InputStream is) {
@@ -55,8 +56,9 @@ public class InvestbookBrokerReport implements BrokerReport {
         } else {
             this.workbook = getWorkBook(fileName, is);
             this.reportPage = new ExcelSheet(workbook.getSheetAt(0));
-            Assert.isTrue(reportPage.getRow(0).getCell(0).getStringValue().toLowerCase().contains("событие"),
-                    "Не отчет в формате Investbook");
+            @SuppressWarnings({"nullable", "DataFlowIssue"})
+            String string = reportPage.getRow(0).getCell(0).getStringValue();
+            Assert.isTrue(string.toLowerCase().contains("событие"), "Не отчет в формате Investbook");
         }
     }
 

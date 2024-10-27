@@ -126,9 +126,8 @@ public class EventCashFlowModel {
          * Returns ISIN if description in "Name (ISIN)" format, null otherwise
          */
         public @Nullable String getSecurityIsin() {
-            @SuppressWarnings("nullness")
-            String securityDescription = requireNonNull(security);
-            return SecurityHelper.getSecurityIsin(securityDescription);
+            requireNonNull(security);
+            return SecurityHelper.getSecurityIsin(security);
         }
 
         /**
@@ -144,9 +143,7 @@ public class EventCashFlowModel {
                 case TAX -> SecurityType.SHARE; // для TAX выдает не верный тип бумаги
                 default -> throw new IllegalArgumentException("Не смог получить тип ЦБ по типу выплаты: " + type);
             };
-            @SuppressWarnings("nullness")
-            String securityDescription = requireNonNull(security);
-            return SecurityHelper.getSecurityName(securityDescription, securityType);
+            return SecurityHelper.getSecurityName(requireNonNull(security), securityType);
         }
     }
 }

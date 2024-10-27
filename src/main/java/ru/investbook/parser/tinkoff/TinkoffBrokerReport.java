@@ -20,6 +20,7 @@ package ru.investbook.parser.tinkoff;
 
 import lombok.EqualsAndHashCode;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.api.TableCellAddress;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
@@ -39,11 +40,11 @@ import static ru.investbook.parser.tinkoff.TinkoffBrokerReportHelper.removePageN
 public class TinkoffBrokerReport extends AbstractExcelBrokerReport {
     static final Pattern tablesLastRowPattern = Pattern.compile("^[0-9]+\\.[0-9]+\\s+\\b", UNICODE_CHARACTER_CLASS);
     private static final String PORTFOLIO_MARKER = "Инвестор:";
-    private static final Predicate<Object> tinkoffReportPredicate = cell ->
+    private static final Predicate<@Nullable Object> tinkoffReportPredicate = cell ->
             (cell instanceof String) && ((String) cell).contains("Тинькофф");
-    private static final Predicate<Object> tbankReportPredicate = cell ->
+    private static final Predicate<@Nullable Object> tbankReportPredicate = cell ->
             (cell instanceof String) && ((String) cell).contains("ТБанк");
-    private static final Predicate<Object> dateMarkerPredicate = cell ->
+    private static final Predicate<@Nullable Object> dateMarkerPredicate = cell ->
             (cell instanceof String) && ((String) cell).contains("за период");
 
     public TinkoffBrokerReport(String excelFileName, InputStream is, SecurityRegistrar securityRegistrar) {

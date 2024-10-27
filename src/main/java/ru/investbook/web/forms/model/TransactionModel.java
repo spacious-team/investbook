@@ -139,9 +139,7 @@ public class TransactionModel {
         if (!hasText(tradeId)) {
             setTradeId(createTradeId());
         }
-        @SuppressWarnings("nullness")
-        String nonNullTradeId = requireNonNull(tradeId, "Не задан trade-id");
-        return nonNullTradeId;
+        return requireNonNull(tradeId, "Не задан trade-id");
     }
 
     private String createTradeId() {

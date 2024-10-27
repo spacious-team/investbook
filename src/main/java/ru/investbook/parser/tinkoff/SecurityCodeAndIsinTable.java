@@ -18,7 +18,6 @@
 
 package ru.investbook.parser.tinkoff;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -86,45 +85,42 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         return null;
     }
 
-    @NotNull
     public String getIsin(String code, String shortName) {
         initializeIfNeed();
-        String isin = codeToIsin.get(code);
+        @Nullable String isin = codeToIsin.get(code);
         if (isin == null) {
-            code = shortNameToCode.get(shortName);
-            isin = codeToIsin.get(code);
+            String codeFromName = shortNameToCode.get(shortName);
+            isin = codeToIsin.get(codeFromName);
         }
         return requireNonNull(isin, "Не найден ISIN");
     }
 
-    @NotNull
     public SecurityType getSecurityType(String code, String shortName) {
         initializeIfNeed();
-        SecurityType type = codeToType.get(code);
+        @Nullable SecurityType type = codeToType.get(code);
         if (type == null) {
-            code = shortNameToCode.get(shortName);
-            type = codeToType.get(code);
+            String codeFromName = shortNameToCode.get(shortName);
+            type = codeToType.get(codeFromName);
         }
         return requireNonNull(type, "Не найден тип ценной бумаги");
     }
 
-    @NotNull
     public BigDecimal getFaceValue(String code, String shortName) {
         initializeIfNeed();
         BigDecimal faceValue = codeToFaceValue.get(code);
         if (faceValue == null) {
-            code = shortNameToCode.get(shortName);
-            faceValue = codeToFaceValue.get(code);
+            String codeFromName = shortNameToCode.get(shortName);
+            faceValue = codeToFaceValue.get(codeFromName);
         }
         return requireNonNull(faceValue, "Не найдена номинальная стоимость облигации");
     }
 
-    @NotNull
     public String getCode(String shortName) {
         initializeIfNeed();
         return requireNonNull(shortNameToCode.get(shortName), "Не найден код бумаги");
     }
 
+    @Getter
     @RequiredArgsConstructor
     protected enum SecurityAndCodeTableHeader implements TableHeaderColumn {
         SHORT_NAME("Сокращенное", "наименование"),
@@ -133,7 +129,6 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         TYPE("^Тип$"),
         FACE_VALUE(optional("Номинал"));
 
-        @Getter
         private final TableColumn column;
 
         SecurityAndCodeTableHeader(String... words) {

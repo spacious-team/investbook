@@ -18,7 +18,7 @@
 
 package ru.investbook.openformat;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 
 import java.util.Objects;
 
@@ -27,13 +27,13 @@ import static ru.investbook.entity.SecurityEntity.isinPattern;
 
 public class OpenFormatHelper {
 
-    public static @Nullable String getValidCurrencyOrNull(@Nullable String currency) {
+    public static @PolyNull String getValidCurrencyOrNull(@PolyNull String currency) {
         if (currency == null) return null;
         currency = currency.toUpperCase();
         return Objects.equals(currency, "RUR") ? "RUB" : currency;
     }
 
-    public static @Nullable String getValidIsinOrNull(@Nullable String isin) {
+    public static @PolyNull String getValidIsinOrNull(@PolyNull String isin) {
         return hasLength(isin) && isinPattern.matcher(isin).matches() ?
                 isin :
                 null;

@@ -22,9 +22,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
-import org.springframework.util.StringUtils;
 import ru.investbook.parser.SecurityRegistrar;
 
+import java.util.Optional;
+
+import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.entity.SecurityEntity.isinPattern;
 
 
@@ -42,21 +44,31 @@ public class SecurityHelper {
                 security
                         .isin(securityId)
                         .name(securityName);
-                id = (securityId == null) ?
-                        securityRegistrar.declareStockOrBondByName(securityName, () -> security) :
-                        securityRegistrar.declareStockOrBondByIsin(securityId, () -> security);
+                if (securityId == null) {
+                    id = Optional.ofNullable(securityName)
+                            .map(name -> securityRegistrar.declareStockOrBondByName(name, () -> security))
+                            .orElseThrow();
+                } else {
+                    id = securityRegistrar.declareStockOrBondByIsin(securityId, () -> security);
+                }
             }
             case DERIVATIVE -> {
                 security.ticker(securityId);
-                id = securityRegistrar.declareDerivative(securityId);
+                id = Optional.ofNullable(securityId)
+                        .map(securityRegistrar::declareDerivative)
+                        .orElseThrow();
             }
             case CURRENCY_PAIR -> {
                 security.ticker(securityId);
-                id = securityRegistrar.declareCurrencyPair(securityId);
+                id = Optional.ofNullable(securityId)
+                        .map(securityRegistrar::declareCurrencyPair)
+                        .orElseThrow();
             }
             case ASSET -> {
                 security.name(securityId);
-                id = securityRegistrar.declareAsset(securityId, () -> security);
+                id = Optional.ofNullable(securityId)
+                        .map(asset -> securityRegistrar.declareAsset(asset, () -> security))
+                        .orElseThrow();
             }
         }
         return security.id(id).build();
@@ -77,7 +89,7 @@ public class SecurityHelper {
     }
 
     private static @Nullable String getValidIsinOrNull(String isin) {
-        return StringUtils.hasLength(isin) && isinPattern.matcher(isin).matches() ?
+        return hasLength(isin) && isinPattern.matcher(isin).matches() ?
                 isin :
                 null;
     }

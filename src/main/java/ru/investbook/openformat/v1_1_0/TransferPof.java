@@ -115,7 +115,7 @@ public class TransferPof {
                                         Map<Integer, Integer> assetToSecurityId) {
         try {
             return Optional.of(Transaction.builder()
-                    .tradeId(transferId)
+                    .tradeId(Objects.requireNonNull(transferId))
                     .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .security(getSecurityId(assetToSecurityId))
@@ -130,7 +130,7 @@ public class TransferPof {
     Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId,
                                                                Map<Integer, Integer> assetToSecurityId) {
         try {
-            if (fee != null) {
+            if (fee != null && feeCurrency != null) {
                 return Set.of(
                         SecurityEventCashFlow.builder()
                                 .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))

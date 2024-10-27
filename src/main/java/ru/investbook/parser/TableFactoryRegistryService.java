@@ -19,6 +19,7 @@
 package ru.investbook.parser;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.table_wrapper.api.TableFactory;
 import org.spacious_team.table_wrapper.api.TableFactoryRegistry;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -31,7 +32,6 @@ import java.lang.reflect.Constructor;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static java.lang.System.nanoTime;
 
@@ -52,7 +52,7 @@ public class TableFactoryRegistryService {
                 Duration.ofNanos(nanoTime() - t0),
                 factories.stream()
                         .map(TableFactory::getClass)
-                        .collect(Collectors.toList()));
+                        .toList());
     }
 
     private static Collection<TableFactory> findTableFactories(String basePackage) {
@@ -63,10 +63,10 @@ public class TableFactoryRegistryService {
                 .map(BeanDefinition::getBeanClassName)
                 .map(TableFactoryRegistryService::getInstance)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    private static TableFactory getInstance(String className) {
+    private static @Nullable TableFactory getInstance(String className) {
         try {
             Class<?> clazz = Class.forName(className);
             Constructor<?> constructor = clazz.getConstructor();

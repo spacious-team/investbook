@@ -21,6 +21,7 @@ package ru.investbook.openformat.v1_1_0;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityDescription;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityType;
@@ -107,7 +108,7 @@ public class PortfolioOpenFormatPersister {
                 .flatMap(Optional::stream)
                 .forEach(api::addEventCashFlow));
 
-        VndInvestbookPof vndInvestbook = object.getVndInvestbook();
+        @Nullable VndInvestbookPof vndInvestbook = object.getVndInvestbook();
         if (vndInvestbook != null) {
             tasks.add(() -> vndInvestbook.getPortfolioCash().forEach(api::addPortfolioCash));
             tasks.add(() -> vndInvestbook.getPortfolioProperties().forEach(api::addPortfolioProperty));
@@ -126,14 +127,11 @@ public class PortfolioOpenFormatPersister {
 
     @SneakyThrows
     private void runTasks(Collection<Runnable> tasks) {
-        ExecutorService executorService = newWorkStealingPool(4 * Runtime.getRuntime().availableProcessors());
-        try {
+        try (ExecutorService executorService = newWorkStealingPool(4 * Runtime.getRuntime().availableProcessors())) {
             Collection<Callable<Object>> callables = tasks.stream()
                     .map(Executors::callable)
                     .toList();
             executorService.invokeAll(callables);
-        } finally {
-            executorService.shutdown();
         }
     }
 
