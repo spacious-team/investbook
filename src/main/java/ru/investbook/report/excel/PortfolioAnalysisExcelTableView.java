@@ -88,7 +88,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
+    protected <T extends Enum<T> & TableHeader> void writeHeader(Sheet sheet, Class<T> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         sheet.setColumnWidth(INVESTMENT_CURRENCY.ordinal(), 17 * 256);
         sheet.setColumnWidth(ASSETS_RUB.ordinal(), 17 * 256);

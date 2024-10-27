@@ -20,6 +20,7 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.stereotype.Component;
@@ -127,7 +128,7 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
         }
     }
 
-    private static String getPaymentType(SecurityEventCashFlow cash) {
+    private static @Nullable String getPaymentType(SecurityEventCashFlow cash) {
         return switch (cash.getEventType()) {
             case DIVIDEND -> "Дивиденды";
             case COUPON -> "Купоны";

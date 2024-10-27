@@ -76,7 +76,7 @@ public class CashFlowExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
+    protected <T extends Enum<T> & TableHeader> void writeHeader(Sheet sheet, Class<T> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         sheet.setColumnWidth(CASH.ordinal(), 17 * 256);
         sheet.setColumnWidth(CASH_RUB.ordinal(), 22 * 256);

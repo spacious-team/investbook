@@ -84,9 +84,10 @@ public class TinkoffSecurityTransactionTableHelper {
                                 SecurityCodeAndIsinTable codeAndIsin,
                                 String shortName,
                                 SecurityType securityType) {
+        @SuppressWarnings("switch.expression")
         @Nullable String isin = switch (securityType) {
             case STOCK, BOND, STOCK_OR_BOND -> codeAndIsin.getIsin(code, shortName);
-            default -> null;
+            case DERIVATIVE, CURRENCY_PAIR, ASSET -> null;
         };
         return getSecurity(code, isin, shortName, securityType);
     }

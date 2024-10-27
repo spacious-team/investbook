@@ -51,6 +51,7 @@ import java.util.function.UnaryOperator;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 import static ru.investbook.report.excel.DerivativesMarketTotalProfitExcelTableHeader.*;
@@ -133,9 +134,10 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
+    protected <T extends Enum<T> & TableHeader> void writeHeader(Sheet sheet, Class<T> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
-        for (TableHeader header : headerType.getEnumConstants()) {
+        TableHeader[] tableHeader = requireNonNull(headerType.getEnumConstants());
+        for (TableHeader header : tableHeader) {
             sheet.setColumnWidth(header.ordinal(), 16 * 256);
         }
         sheet.setColumnWidth(CONTRACT_GROUP.ordinal(), 24 * 256);

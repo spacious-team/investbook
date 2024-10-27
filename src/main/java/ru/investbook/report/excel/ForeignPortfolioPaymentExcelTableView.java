@@ -53,7 +53,7 @@ public class ForeignPortfolioPaymentExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
+    protected <T extends Enum<T> & TableHeader> void writeHeader(Sheet sheet, Class<T> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         sheet.setColumnWidth(CASH_RUB.ordinal(), 18 * 256);
         sheet.setColumnWidth(DESCRIPTION.ordinal(), 120 * 256);
