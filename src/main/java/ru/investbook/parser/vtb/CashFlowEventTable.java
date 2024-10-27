@@ -112,6 +112,7 @@ public class CashFlowEventTable extends SingleAbstractReportTable<CashFlowEventT
             return lowercaseDescription;
         }
 
+        @Nullable
         CashFlowType getEventType() {
             String lowercaseDescription = getLowercaseDescription();
             return switch (operation) {

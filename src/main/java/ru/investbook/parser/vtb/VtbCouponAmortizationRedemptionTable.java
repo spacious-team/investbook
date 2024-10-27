@@ -19,6 +19,7 @@
 package ru.investbook.parser.vtb;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Security;
@@ -64,7 +65,7 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
 
     @Override
     protected Collection<SecurityEventCashFlow> getRow(CashFlowEventTable.CashFlowEvent event) {
-        CashFlowType eventType = event.getEventType();
+        @Nullable CashFlowType eventType = event.getEventType();
         if (eventType != COUPON && eventType != AMORTIZATION && eventType != REDEMPTION) {
             return Collections.emptyList();
         }

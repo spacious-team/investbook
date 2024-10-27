@@ -71,14 +71,14 @@ public class VtbDerivativeCashFlowTable extends AbstractVtbCashFlowTable<Securit
 
     @Override
     protected Collection<SecurityEventCashFlow> getRow(CashFlowEventTable.CashFlowEvent event) {
-        CashFlowType eventType = event.getEventType();
+        @Nullable CashFlowType eventType = event.getEventType();
         if (eventType != DERIVATIVE_PROFIT) {
             return Collections.emptyList();
         }
         return singletonList(SecurityEventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .timestamp(event.getDate())
-                .security(contractId)
+                .security(requireNonNull(contractId))
                 .eventType(eventType)
                 .value(event.getValue())
                 .currency(event.getCurrency())

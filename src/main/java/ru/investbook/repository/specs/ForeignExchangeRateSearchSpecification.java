@@ -24,8 +24,8 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.ForeignExchangeRateEntity;
 import ru.investbook.entity.ForeignExchangeRateEntityPk_;
 import ru.investbook.entity.ForeignExchangeRateEntity_;
@@ -34,6 +34,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
 import static org.springframework.util.StringUtils.hasText;
 
 
@@ -43,7 +44,8 @@ public class ForeignExchangeRateSearchSpecification implements Specification<For
     private final LocalDate date;
 
     @Override
-    public Predicate toPredicate(Root<ForeignExchangeRateEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+    public Predicate toPredicate(Root<ForeignExchangeRateEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
+        requireNonNull(query);
         return Stream.of(
                         filterByCurrency(root, builder),
                         filterByDate(root, builder))

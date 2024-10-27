@@ -19,6 +19,7 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
@@ -43,7 +44,7 @@ public class SecurityRedemptionTable extends SingleAbstractReportTable<Entry<Str
     }
 
     @Override
-    protected Entry<String, Instant> parseRow(TableRow row) {
+    protected @Nullable Entry<String, Instant> parseRow(TableRow row) {
         return row.getStringCellValue(OPERATION).equalsIgnoreCase(REDEMPTION_DESCRIPTION) ?
                 new AbstractMap.SimpleEntry<>(
                         row.getStringCellValue(NAME),
@@ -51,6 +52,7 @@ public class SecurityRedemptionTable extends SingleAbstractReportTable<Entry<Str
                 null;
     }
 
+    @Getter
     enum SecurityFlowTableHeader implements TableHeaderColumn {
         ID("№", "операции"),
         OPERATION("тип операции"),
@@ -59,7 +61,6 @@ public class SecurityRedemptionTable extends SingleAbstractReportTable<Entry<Str
         CFI("номер гос. регистрации"),
         COUNT("количество цб");
 
-        @Getter
         private final TableColumn column;
 
         SecurityFlowTableHeader(String... words) {

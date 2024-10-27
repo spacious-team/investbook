@@ -19,6 +19,7 @@
 package ru.investbook.parser.vtb;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.springframework.util.StringUtils;
@@ -46,7 +47,7 @@ public class VtbDividendTable extends AbstractVtbCashFlowTable<EventCashFlow> {
 
     @Override
     protected Collection<EventCashFlow> getRow(CashFlowEventTable.CashFlowEvent event) {
-        CashFlowType eventType = event.getEventType();
+        @Nullable CashFlowType eventType = event.getEventType();
         if (eventType != DIVIDEND) { // предположение
             return Collections.emptyList();
         }

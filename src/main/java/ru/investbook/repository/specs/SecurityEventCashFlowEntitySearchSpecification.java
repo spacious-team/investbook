@@ -24,6 +24,7 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.CashFlowTypeEntity_;
@@ -34,6 +35,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 
@@ -46,8 +48,9 @@ public class SecurityEventCashFlowEntitySearchSpecification implements Specifica
 
     @Override
     public Predicate toPredicate(Root<SecurityEventCashFlowEntity> root,
-                                 CriteriaQuery<?> query,
+                                 @Nullable CriteriaQuery<?> query,
                                  CriteriaBuilder builder) {
+        requireNonNull(query);
         return Stream.of(
                         filterByPortfolio(root, builder, SecurityEventCashFlowEntity_.portfolio, portfolio),
                         filterByDateFrom(root, builder, SecurityEventCashFlowEntity_.timestamp, dateFrom),

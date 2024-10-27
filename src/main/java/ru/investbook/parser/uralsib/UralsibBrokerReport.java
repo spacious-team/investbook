@@ -22,6 +22,7 @@ import lombok.EqualsAndHashCode;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.table_wrapper.api.ReportPage;
+import org.spacious_team.table_wrapper.api.ReportPageRow;
 import org.spacious_team.table_wrapper.api.TableCell;
 import org.spacious_team.table_wrapper.api.TableCellAddress;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
@@ -34,6 +35,7 @@ import java.util.function.Predicate;
 import java.util.zip.ZipInputStream;
 
 import static java.time.temporal.ChronoUnit.HOURS;
+import static java.util.Objects.requireNonNull;
 import static org.spacious_team.table_wrapper.api.TableCellAddress.NOT_FOUND;
 
 @EqualsAndHashCode(callSuper = true)
@@ -84,8 +86,8 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
     private static String getPortfolio(ReportPage reportPage) {
         try {
             TableCellAddress address = reportPage.findByPrefix(PORTFOLIO_MARKER);
-            //noinspection DataFlowIssue
-            for (@Nullable TableCell cell : reportPage.getRow(address.getRow())) {
+            ReportPageRow row = requireNonNull(reportPage.getRow(address.getRow()));
+            for (@Nullable TableCell cell : row) {
                 if (cell != null && cell.getColumnIndex() > address.getColumn()) {
                     @Nullable Object value = cell.getValue();
                     if (value instanceof String) {

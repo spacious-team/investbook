@@ -23,6 +23,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.PortfolioPropertyEntity;
@@ -32,6 +33,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 
@@ -39,11 +41,12 @@ import static ru.investbook.repository.specs.SpecificationHelper.*;
 public class PortfolioPropertySearchSpecification implements Specification<PortfolioPropertyEntity> {
     private final String portfolio;
     private final LocalDate date;
-    private final PortfolioPropertyType property;
+    private final @Nullable PortfolioPropertyType property;
 
     @Override
-    public Predicate toPredicate(Root<PortfolioPropertyEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
-        String propertyName = (property == null) ? null : property.name();
+    public Predicate toPredicate(Root<PortfolioPropertyEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
+        requireNonNull(query);
+        @Nullable String propertyName = (property == null) ? null : property.name();
         return Stream.of(
                         filterByPortfolio(root, builder, PortfolioPropertyEntity_.portfolio, portfolio),
                         filterByInstantBelongsToDate(root, builder, PortfolioPropertyEntity_.timestamp, date),
