@@ -41,6 +41,7 @@ import static java.util.Objects.isNull;
  * returns not null ID, when this ID will be stored to DB. In another case, the DBMS must generate ID itself
  * based on the strategy implemented by {@link OnExecutionGenerator}.
  */
+@SuppressWarnings("removal")
 class BeforeOrOnExecutionGenerator implements BeforeExecutionGenerator, OnExecutionGenerator {
 
     private final BeforeExecutionGenerator beforeExecutionGenerator;
