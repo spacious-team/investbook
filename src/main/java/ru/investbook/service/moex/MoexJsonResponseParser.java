@@ -51,7 +51,7 @@ public class MoexJsonResponseParser {
             return unmodifiableList(namedItems);
         } catch (Exception e) {
             log.info("Can't parse Moex ISS response: {}", indicesResponse, e);
-            return null;
+            return List.of();
         }
     }
 }

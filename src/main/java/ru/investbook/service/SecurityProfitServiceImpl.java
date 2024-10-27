@@ -19,6 +19,7 @@
 package ru.investbook.service;
 
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
@@ -237,7 +238,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
     }
 
     @Override
-    public SecurityQuote getSecurityQuote(Security security, String toCurrency, Instant to) {
+    public @Nullable SecurityQuote getSecurityQuote(Security security, String toCurrency, Instant to) {
         if (security.getType() == CURRENCY_PAIR) {
             String currencyPair = securityRepository.findCurrencyPair(security.getId()).orElseThrow();
             String baseCurrency = currencyPair.substring(0, 3);

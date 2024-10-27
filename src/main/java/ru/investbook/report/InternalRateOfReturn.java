@@ -20,6 +20,7 @@ package ru.investbook.report;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.decampo.xirr.NewtonRaphson;
 import org.decampo.xirr.Xirr;
 import org.spacious_team.broker.pojo.Security;
@@ -73,7 +74,7 @@ public class InternalRateOfReturn {
      * @param quote may be null only if current security position is zero
      * @return internal rate of return if can be calculated or null otherwise
      */
-    public Double calc(
+    public @Nullable Double calc(
             Collection<String> portfolios, Security security, SecurityQuote quote, Instant fromDate, Instant toDate) {
 
         try {

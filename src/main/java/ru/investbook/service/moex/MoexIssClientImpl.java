@@ -239,6 +239,7 @@ public class MoexIssClientImpl implements MoexIssClient {
                 .flatMap(moexDerivativeCodeService::getFuturesCode);
     }
 
+    @SuppressWarnings("return")
     private Optional<String> getContractDescriptionFromMoex(String contract, String key) {
         try {
             return Optional.ofNullable(restTemplate.getForObject(contractDescription, Map.class, contract))

@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.vtb;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.TableRow;
@@ -45,7 +46,7 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
     }
 
     @Override
-    protected SecurityTransaction parseRow(TableRow row) {
+    protected @Nullable SecurityTransaction parseRow(TableRow row) {
         String operation = row.getStringCellValueOrDefault(OPERATION, "").toLowerCase().trim();
         switch (operation) {
             case "перевод цб": // перевод между субсчетами

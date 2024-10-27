@@ -21,6 +21,8 @@ package ru.investbook.web.forms.model;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.util.Assert;
 
+import static java.util.Objects.requireNonNull;
+
 public class SecurityHelper {
     public static String NULL_SECURITY_NAME = "<unknown>";
 
@@ -36,7 +38,7 @@ public class SecurityHelper {
             }
             case DERIVATIVE, CURRENCY, ASSET -> {
                 Assert.notNull(securityName, "Отсутствует тикер контракта или наименование произвольного актива");
-                yield securityName;
+                yield requireNonNull(securityName);
             }
         };
     }

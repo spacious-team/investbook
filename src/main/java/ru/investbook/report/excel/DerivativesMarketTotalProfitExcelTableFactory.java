@@ -20,6 +20,7 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
@@ -148,6 +149,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
             row.put(LAST_TRANSACTION_DATE, ofNullable(transactions.peekLast())
                     .map(Transaction::getTimestamp)
                     .orElse(null));
+            //noinspection DataFlowIssue
             row.put(LAST_EVENT_DATE, getLastEventDate(portfolios, contracts));
             row.put(BUY_COUNT, transactions
                     .stream()
@@ -188,7 +190,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
                 .collect(toCollection(LinkedList::new));
     }
 
-    private Instant getLastEventDate(Collection<String> portfolios, Collection<Security> contracts) {
+    private @Nullable Instant getLastEventDate(Collection<String> portfolios, Collection<Security> contracts) {
         ViewFilter filter = ViewFilter.get();
         return contracts.stream()
                 .map(contract -> securityProfitService.getLastEventTimestamp(

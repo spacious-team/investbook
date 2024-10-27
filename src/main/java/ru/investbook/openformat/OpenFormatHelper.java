@@ -28,11 +28,14 @@ import static ru.investbook.entity.SecurityEntity.isinPattern;
 public class OpenFormatHelper {
 
     public static @PolyNull String getValidCurrencyOrNull(@PolyNull String currency) {
-        if (currency == null) return null;
+        if (currency == null) {
+            return null;
+        }
         currency = currency.toUpperCase();
         return Objects.equals(currency, "RUR") ? "RUB" : currency;
     }
 
+    @SuppressWarnings("return")
     public static @PolyNull String getValidIsinOrNull(@PolyNull String isin) {
         return hasLength(isin) && isinPattern.matcher(isin).matches() ?
                 isin :

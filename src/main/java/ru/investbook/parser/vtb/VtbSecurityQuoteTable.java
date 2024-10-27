@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.vtb;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.table_wrapper.api.TableRow;
@@ -39,7 +40,7 @@ public class VtbSecurityQuoteTable extends SingleAbstractReportTable<SecurityQuo
     }
 
     @Override
-    protected SecurityQuote parseRow(TableRow row) {
+    protected @Nullable SecurityQuote parseRow(TableRow row) {
         BigDecimal quote = row.getBigDecimalCellValueOrDefault(QUOTE, null);
         if (quote == null) {
             return null;
@@ -48,7 +49,7 @@ public class VtbSecurityQuoteTable extends SingleAbstractReportTable<SecurityQuo
                 .filter(faceValue -> faceValue.compareTo(minValue) > 0)
                 .map(faceValue -> faceValue.multiply(quote).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP))
                 .orElse(null);
-        BigDecimal accruedInterest = null;
+        @Nullable BigDecimal accruedInterest = null;
         if (price != null) {
             // имеет смысл только для облигаций, для акций price = null
             accruedInterest = ofNullable(row.getBigDecimalCellValueOrDefault(ACCRUED_INTEREST, null))

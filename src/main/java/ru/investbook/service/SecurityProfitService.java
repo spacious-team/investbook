@@ -18,6 +18,7 @@
 
 package ru.investbook.service;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
@@ -57,7 +58,7 @@ public interface SecurityProfitService {
     BigDecimal sumPaymentsForType(
             Collection<String> portfolios, Security security, CashFlowType cashFlowType, String toCurrency);
 
-    SecurityQuote getSecurityQuote(Security security, String toCurrency, Instant to);
+    @Nullable SecurityQuote getSecurityQuote(Security security, String toCurrency, Instant to);
 
     /**
      * Возвращает котировку по последней сделке

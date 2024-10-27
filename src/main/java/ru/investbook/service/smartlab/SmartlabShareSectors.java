@@ -19,6 +19,7 @@
 package ru.investbook.service.smartlab;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -110,7 +111,7 @@ public class SmartlabShareSectors {
         return Stream.empty();
     }
 
-    private static String convertToSmartlabShareId(Element shareElement) {
+    private static @Nullable String convertToSmartlabShareId(Element shareElement) {
         try {
             String href = shareElement.attr("href");
             int pos = href.lastIndexOf('/');

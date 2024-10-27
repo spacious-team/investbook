@@ -20,6 +20,7 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioCash;
@@ -232,7 +233,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                             .mapToInt(SecurityEventCashFlow::getCount)
                             .sum());
 
-            SecurityQuote quote = null;
+            @Nullable SecurityQuote quote = null;
             int count = positions.getCurrentOpenedPositionsCount();
             row.put(COUNT, count);
             if (count == 0) {
@@ -269,6 +270,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 row.put(TAX, securityProfitService.sumPaymentsForType(portfolios, security, CashFlowType.TAX, toCurrency).abs());
             }
             row.put(PROFIT, PROFIT_FORMULA);
+            //noinspection DataFlowIssue
             row.put(INTERNAL_RATE_OF_RETURN, internalRateOfReturn.calc(
                     portfolios, security, quote, filter.getFromDate(), filter.getToDate()));
             row.put(PROFIT_PROPORTION, PROFIT_PROPORTION_FORMULA);

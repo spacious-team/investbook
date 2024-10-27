@@ -20,6 +20,7 @@ package ru.investbook.parser.vtb;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
@@ -46,7 +47,7 @@ public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
     }
 
     @Override
-    protected Security parseRow(TableRow row) {
+    protected @Nullable Security parseRow(TableRow row) {
         if (row.getCellValue(SECTION) == null) {
             return null; // sub-header row
         }

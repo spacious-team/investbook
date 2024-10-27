@@ -30,6 +30,7 @@ public class SecurityRegNumberRegistrarImpl implements SecurityRegNumberRegistra
     private final VtbSecuritiesTable vtbSecuritiesTable;
     private final VtbSecurityFlowTable vtbSecurityFlowTable;
 
+    @SuppressWarnings("return")
     @Override
     public Optional<Security> getSecurityByRegistrationNumber(String registrationNumber) {
         return ofNullable(registrationNumber)

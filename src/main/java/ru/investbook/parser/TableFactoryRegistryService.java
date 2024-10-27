@@ -55,6 +55,7 @@ public class TableFactoryRegistryService {
                         .toList());
     }
 
+    @SuppressWarnings("return")
     private static Collection<TableFactory> findTableFactories(String basePackage) {
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
         scanner.addIncludeFilter(new AssignableTypeFilter(TableFactory.class));
