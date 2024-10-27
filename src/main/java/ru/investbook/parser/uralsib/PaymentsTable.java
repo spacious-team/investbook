@@ -20,6 +20,7 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Security;
@@ -61,7 +62,7 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
     private final List<SecurityTransaction> securityTransactions;
     private final Collection<EventCashFlow> eventCashFlows = new ArrayList<>();
     private final Pattern taxInformationPattern = Pattern.compile("налог в размере ([0-9.]+) удержан");
-    private String currentRowDescription = "";
+    private @Nullable String currentRowDescription = "";
 
     public PaymentsTable(UralsibBrokerReport report,
                          SecuritiesTable securitiesTable,
@@ -86,7 +87,7 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
     /**
      * @return security if found, null otherwise
      */
-    protected Security getSecurity(TableRow row, CashFlowType cashEventIfSecurityNotFound) {
+    protected @Nullable Security getSecurity(TableRow row, CashFlowType cashEventIfSecurityNotFound) {
         try {
             return getSecurityIfCan(row);
         } catch (Exception e) {

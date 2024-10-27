@@ -40,9 +40,9 @@ import static org.spacious_team.table_wrapper.api.TableCellAddress.NOT_FOUND;
 public class UralsibBrokerReport extends AbstractExcelBrokerReport {
     // "УРАЛСИБ Брокер" или "УРАЛСИБ Кэпитал - Финансовые услуги" (старый формат 2018 г)
     private static final String PORTFOLIO_MARKER = "Номер счета Клиента:";
-    private static final Predicate<Object> uralsibReportPredicate = cell ->
+    private static final Predicate<@Nullable Object> uralsibReportPredicate = cell ->
             (cell instanceof String value) && (value.contains("Твой Брокер") || value.contains("УРАЛСИБ"));
-    private static final Predicate<Object> dateMarkerPredicate = cell ->
+    private static final Predicate<@Nullable Object> dateMarkerPredicate = cell ->
             (cell instanceof String value) && value.contains("за период");
 
     public UralsibBrokerReport(ZipInputStream zis, SecurityRegistrar securityRegistrar) {

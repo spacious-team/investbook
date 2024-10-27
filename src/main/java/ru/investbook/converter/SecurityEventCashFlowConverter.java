@@ -37,6 +37,7 @@ public class SecurityEventCashFlowConverter implements EntityConverter<SecurityE
     private final SecurityRepository securityRepository;
     private final CashFlowTypeRepository cashFlowTypeRepository;
 
+    @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override
     public SecurityEventCashFlowEntity toEntity(SecurityEventCashFlow eventCashFlow) {
         SecurityEntity securityEntity = securityRepository.getReferenceById(eventCashFlow.getSecurity());
@@ -51,6 +52,7 @@ public class SecurityEventCashFlowConverter implements EntityConverter<SecurityE
         entity.setCount(eventCashFlow.getCount());
         entity.setCashFlowType(cashFlowTypeEntity);
         entity.setValue(eventCashFlow.getValue());
+        //noinspection ConstantValue
         if (eventCashFlow.getCurrency() != null) entity.setCurrency(eventCashFlow.getCurrency());
         return entity;
     }

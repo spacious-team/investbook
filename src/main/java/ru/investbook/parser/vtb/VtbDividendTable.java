@@ -31,6 +31,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Double.parseDouble;
+import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.CashFlowType.DIVIDEND;
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
 
@@ -76,7 +77,8 @@ public class VtbDividendTable extends AbstractVtbCashFlowTable<EventCashFlow> {
         Matcher matcher = taxInformationPattern.matcher(description);
         if (matcher.find()) {
             try {
-                return BigDecimal.valueOf(parseDouble(matcher.group(2)));
+                String number = requireNonNull(matcher.group(2));
+                return BigDecimal.valueOf(parseDouble(number));
             } catch (Exception e) {
                 log.info("Не смогу выделить сумму налога из описания: {}", description);
             }

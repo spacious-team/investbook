@@ -31,6 +31,7 @@ import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 
+import static java.util.Objects.requireNonNull;
 import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.parser.uralsib.ForeignExchangeTransactionTable.FxTransactionTableHeader.*;
 
@@ -78,7 +79,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<F
                 .add(row.getBigDecimalCellValue(BROKER_COMMISSION))
                 .negate();
 
-        int securityId = getReport().getSecurityRegistrar().declareCurrencyPair(instrument);
+        int securityId = getReport().getSecurityRegistrar().declareCurrencyPair(requireNonNull(instrument));
         return ForeignExchangeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .tradeId(tradeId)

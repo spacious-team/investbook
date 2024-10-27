@@ -25,6 +25,7 @@ import ru.investbook.entity.IssuerEntity;
 @Component
 public class IssuerConverter implements EntityConverter<IssuerEntity, Issuer>  {
 
+    @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override
     public IssuerEntity toEntity(Issuer issuer) {
         IssuerEntity entity = new IssuerEntity();

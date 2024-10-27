@@ -26,6 +26,7 @@ import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.SecurityRedemptionTable.SecurityFlowTableHeader.*;
 
 /**
@@ -52,7 +53,7 @@ public class SecurityDepositAndWithdrawalTable extends SingleAbstractReportTable
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                 .tradeId(row.getStringCellValue(ID))
                 .portfolio(getReport().getPortfolio())
-                .security(getSecurity(row).getId())
+                .security(requireNonNull(getSecurity(row).getId()))
                 .count(row.getIntCellValue(COUNT))
                 .value(BigDecimal.ZERO)
                 .accruedInterest(BigDecimal.ZERO)

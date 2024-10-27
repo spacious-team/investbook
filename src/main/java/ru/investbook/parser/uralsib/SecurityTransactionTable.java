@@ -35,9 +35,9 @@ import ru.investbook.parser.TransactionValueAndFeeParser;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.*;
 
 @Slf4j
@@ -67,16 +67,15 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
         this.transactionValueAndFeeParser = transactionValueAndFeeParser;
     }
 
-    @Nullable
     @Override
-    protected SecurityTransaction parseRow(TableRow row) {
+    protected @Nullable SecurityTransaction parseRow(TableRow row) {
         @Nullable String tradeId = getTradeId(row, TRADE_ID);
         if (tradeId == null) {
             security = getSecurity(row);
             return null;
         }
 
-        Objects.requireNonNull(security, "Не известная ЦБ");
+        requireNonNull(security, "Не известная ЦБ");
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         BigDecimal value = row.getBigDecimalCellValue(VALUE);
         BigDecimal accruedInterest = row.getBigDecimalCellValue(ACCRUED_INTEREST);
@@ -105,7 +104,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                 .timestamp(timestamp)
                 .tradeId(tradeId)
                 .portfolio(getReport().getPortfolio())
-                .security(security.getId())
+                .security(requireNonNull(security.getId()))
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(valueAndFee.value())
                 .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)

@@ -20,17 +20,20 @@ package ru.investbook.parser.vtb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
+import ru.investbook.parser.SingleBrokerReport;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
 import static ru.investbook.parser.vtb.VtbDerivativeCashFlowTable.OpenContractsTableHeader.CONTRACT;
 
@@ -38,22 +41,24 @@ import static ru.investbook.parser.vtb.VtbDerivativeCashFlowTable.OpenContractsT
 public class VtbDerivativeCashFlowTable extends AbstractVtbCashFlowTable<SecurityEventCashFlow> {
 
     private static final String TABLE_NAME = "Открытые позиции по Производным финансовым инструментам";
-    private final Integer contractId;
+    private final @Nullable Integer contractId;
 
     public VtbDerivativeCashFlowTable(CashFlowEventTable cashFlowEventTable) {
         super(cashFlowEventTable);
-        List<String> contracts = getReport().getReportPage()
+        @SuppressWarnings("initialization")
+        SingleBrokerReport report = getReport();
+        List<String> contracts = report.getReportPage()
                 .create(TABLE_NAME, OpenContractsTableHeader.class)
                 .getData(row -> row.getStringCellValue(CONTRACT));
         this.contractId = (contracts.size() == 1) ?
-                getReport().getSecurityRegistrar().declareDerivative(contracts.get(0)) :
+                report.getSecurityRegistrar().declareDerivative(requireNonNull(contracts.getFirst())) :
                 null;
         if (contracts.size() > 1) {
             log.warn("""
                     Отчет {} содержит информацию о вариационной марже разных контрактов, \
                     ВТБ не указывает вариационную маржу с привязкой к контракту, \
                     вариационная маржа не может быть извлечена
-                    """, getReport());
+                    """, report);
         }
     }
 
