@@ -88,7 +88,7 @@
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
-                <!-- version is same as for hibernate-jpamodelgen dep, just scope is changed -->
+                <!-- scope is changed, CbrForeignExchangeRateServiceXmlImpl.class requires -->
                 <scope>compile</scope>
             </dependency>
             <!-- TODO: remove before release -->
@@ -171,10 +171,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-jpamodelgen</artifactId>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
