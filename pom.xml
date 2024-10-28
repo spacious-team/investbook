@@ -309,7 +309,7 @@
                         <!-- TODO Remove suppressions, кроме:
                               - methodref (Checker Framework не корректно выводит типы ссылок на методы)
                               -->
-                        <arg>-AsuppressWarnings=dereference.of.nullable,unboxing.of.nullable,argument,assignment,type.anno.before.decl.anno,method.invocation,methodref,type.arguments.not.inferred,lambda.param,expression.unparsable,initialization.field.uninitialized,initialization.static.field.uninitialized</arg>
+                        <arg>-AsuppressWarnings=dereference.of.nullable,unboxing.of.nullable,argument,assignment,method.invocation,methodref,type.arguments.not.inferred,lambda.param,expression.unparsable,initialization.field.uninitialized,initialization.static.field.uninitialized</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>

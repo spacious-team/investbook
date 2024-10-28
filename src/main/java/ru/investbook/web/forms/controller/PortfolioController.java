@@ -55,7 +55,7 @@ public class PortfolioController {
     }
 
     @PostMapping("/archive")
-    public String postEventCashFlow(@Valid @ModelAttribute("archive") ArchivedPortfolioModel archive) {
+    public String postEventCashFlow(@ModelAttribute("archive") @Valid ArchivedPortfolioModel archive) {
         getPortfolios(portfolioRepository)
                 .forEach(portfolio -> {
                     boolean isEnabled = !archive.getPortfolios().contains(portfolio);

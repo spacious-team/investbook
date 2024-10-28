@@ -93,7 +93,7 @@ public class EventCashFlowController {
     }
 
     @PostMapping
-    public String postEventCashFlow(@Valid @ModelAttribute("event") EventCashFlowModel event) {
+    public String postEventCashFlow(@ModelAttribute("event") @Valid EventCashFlowModel event) {
         selectedPortfolio = event.getPortfolio();
         eventCashFlowFormsService.save(event);
         return "events/view-single";
