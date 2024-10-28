@@ -20,11 +20,11 @@ package ru.investbook.report;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -39,10 +39,8 @@ public class DerivativeEvents {
     @Getter
     @Builder
     public static class DerivativeDailyEvents {
-        @Nullable
-        private final SecurityEventCashFlow dailyProfit;
-        @Nullable
-        private final LinkedHashMap<Transaction, Map<CashFlowType, TransactionCashFlow>> dailyTransactions;
+        private final @Nullable SecurityEventCashFlow dailyProfit;
+        private final @Nullable LinkedHashMap<Transaction, Map<CashFlowType, TransactionCashFlow>> dailyTransactions;
         private final BigDecimal totalProfit;
         private final int position;
     }

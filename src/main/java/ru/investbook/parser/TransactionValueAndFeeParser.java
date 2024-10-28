@@ -186,6 +186,7 @@ public class TransactionValueAndFeeParser {
 
     @Value
     @Builder
+    @SuppressWarnings("type.anno.before.modifier")
     public static class Arguments {
         TableRow row;
         String portfolio;

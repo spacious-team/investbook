@@ -53,8 +53,8 @@ public class PortfolioOpenFormatV1_1_0 {
     @JsonProperty("end")
     long end;
 
-    @Nullable
     @JsonProperty("start")
+    @Nullable
     Long start;
 
     @Builder.Default
@@ -85,7 +85,7 @@ public class PortfolioOpenFormatV1_1_0 {
     @JsonProperty("cash-flows")
     Collection<CashFlowPof> cashFlows = emptySet();
 
-    @Nullable
     @JsonProperty("vnd-investbook")
+    @Nullable
     VndInvestbookPof vndInvestbook;
 }

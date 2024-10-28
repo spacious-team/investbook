@@ -26,8 +26,8 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.SingularAttribute;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.springframework.lang.NonNull;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.PortfolioEntity_;
 import ru.investbook.entity.SecurityEntity;
@@ -44,11 +44,10 @@ import static org.springframework.util.StringUtils.hasText;
 @NoArgsConstructor(access = PRIVATE)
 class SpecificationHelper {
 
-    @Nullable
-    static <T> Predicate filterBySecurity(Root<T> root,
-                                          CriteriaBuilder builder,
-                                          SingularAttribute<T, SecurityEntity> attribute,
-                                          String security) {
+    static <T> @Nullable Predicate filterBySecurity(Root<T> root,
+                                                    CriteriaBuilder builder,
+                                                    SingularAttribute<T, SecurityEntity> attribute,
+                                                    String security) {
         if (hasText(security)) {
             Path<SecurityEntity> securityPath = root.get(attribute);
             return builder.or(
@@ -59,12 +58,11 @@ class SpecificationHelper {
         return null;
     }
 
-    @Nullable
-    static <T> Predicate filterBySecurityId(Root<T> root,
-                                            CriteriaBuilder builder,
-                                            SingularAttribute<T, Integer> attribute,
-                                            String security,
-                                            CriteriaQuery<?> query) {
+    static <T> @Nullable Predicate filterBySecurityId(Root<T> root,
+                                                      CriteriaBuilder builder,
+                                                      SingularAttribute<T, Integer> attribute,
+                                                      String security,
+                                                      CriteriaQuery<?> query) {
         if (hasText(security)) {
             // Do sub-query because SecurityEntity is not related to SecurityDescriptionEntity in Java model, so
             // can not do join query in Criteria API
@@ -84,11 +82,10 @@ class SpecificationHelper {
         return null;
     }
 
-    @Nullable
-    static <T> Predicate filterByDateFrom(Root<T> root,
-                                          CriteriaBuilder builder,
-                                          SingularAttribute<T, Instant> attribute,
-                                          LocalDate dateFrom) {
+    static <T> @Nullable Predicate filterByDateFrom(Root<T> root,
+                                                    CriteriaBuilder builder,
+                                                    SingularAttribute<T, Instant> attribute,
+                                                    @Nullable LocalDate dateFrom) {
         if (dateFrom == null) {
             return null;
         }
@@ -99,11 +96,10 @@ class SpecificationHelper {
                 startOfDay);
     }
 
-    @Nullable
-    static <T> Predicate filterByDateTo(Root<T> root,
-                                        CriteriaBuilder builder,
-                                        SingularAttribute<T, Instant> attribute,
-                                        LocalDate dateTo) {
+    static <T> @Nullable Predicate filterByDateTo(Root<T> root,
+                                                  CriteriaBuilder builder,
+                                                  SingularAttribute<T, Instant> attribute,
+                                                  @Nullable LocalDate dateTo) {
         if (dateTo == null) {
             return null;
         }
@@ -115,11 +111,10 @@ class SpecificationHelper {
                 endOfDay);
     }
 
-    @Nullable
-    static <T> Predicate filterByInstantBelongsToDate(Root<T> root,
-                                                      CriteriaBuilder builder,
-                                                      SingularAttribute<T, Instant> attribute,
-                                                      LocalDate date) {
+    static <T> @Nullable Predicate filterByInstantBelongsToDate(Root<T> root,
+                                                                CriteriaBuilder builder,
+                                                                SingularAttribute<T, Instant> attribute,
+                                                                @Nullable LocalDate date) {
         if (date == null) {
             return null;
         }
@@ -172,8 +167,7 @@ class SpecificationHelper {
                 .value(enabledPortfolioIds);
     }
 
-    @Nullable
-    static <X, T> Predicate filterByEquals(Root<X> root,
+    static <X, T> @Nullable Predicate filterByEquals(Root<X> root,
                                            CriteriaBuilder builder,
                                            SingularAttribute<X, T> attribute,
                                            @Nullable String value) {
@@ -184,8 +178,7 @@ class SpecificationHelper {
         return null;
     }
 
-    @Nullable
-    static <X> Predicate filterByLike(Root<X> root,
+    static <X> @Nullable Predicate filterByLike(Root<X> root,
                                       CriteriaBuilder builder,
                                       SingularAttribute<X, String> attribute,
                                       @Nullable String value) {

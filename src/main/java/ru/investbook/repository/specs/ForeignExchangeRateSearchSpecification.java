@@ -41,7 +41,7 @@ import static org.springframework.util.StringUtils.hasText;
 @RequiredArgsConstructor(staticName = "of")
 public class ForeignExchangeRateSearchSpecification implements Specification<ForeignExchangeRateEntity> {
     private final String currency;
-    private final LocalDate date;
+    private final @Nullable LocalDate date;
 
     @Override
     public Predicate toPredicate(Root<ForeignExchangeRateEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
@@ -54,8 +54,7 @@ public class ForeignExchangeRateSearchSpecification implements Specification<For
                 .orElseGet(builder::conjunction);
     }
 
-    @Nullable
-    private Predicate filterByCurrency(Root<ForeignExchangeRateEntity> root, CriteriaBuilder builder) {
+    private @Nullable Predicate filterByCurrency(Root<ForeignExchangeRateEntity> root, CriteriaBuilder builder) {
         if (hasText(currency)) {
             Path<String> path = root.get(ForeignExchangeRateEntity_.pk)
                     .get(ForeignExchangeRateEntityPk_.CURRENCY_PAIR);
@@ -64,8 +63,7 @@ public class ForeignExchangeRateSearchSpecification implements Specification<For
         return null;
     }
 
-    @Nullable
-    private Predicate filterByDate(Root<ForeignExchangeRateEntity> root, CriteriaBuilder builder) {
+    private @Nullable Predicate filterByDate(Root<ForeignExchangeRateEntity> root, CriteriaBuilder builder) {
         if (date == null) {
             return null;
         }

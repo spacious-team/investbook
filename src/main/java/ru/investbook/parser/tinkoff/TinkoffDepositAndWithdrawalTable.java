@@ -18,7 +18,6 @@
 
 package ru.investbook.parser.tinkoff;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.pojo.Security;
@@ -64,7 +63,6 @@ public class TinkoffDepositAndWithdrawalTable extends SingleAbstractReportTable<
         this.transactionWithdrawal = getCounter(transactions, t -> t.getCount() < 0);
     }
 
-    @NotNull
     private static Map<Integer, Integer> getCounter(ReportTable<AbstractTransaction> transactions,
                                                     Predicate<AbstractTransaction> filter) {
         return transactions.getData()
