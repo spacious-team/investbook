@@ -21,11 +21,11 @@ package ru.investbook;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
 
 @SpringBootApplication
 @Component
@@ -33,9 +33,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class InvestbookApplication {
 
-    private final InvestbookProperties properties;
+    private static final LoadingPageServer loadingPageServer = new LoadingPageServer();
 
     public static void main(String[] args) {
+        try {
+            loadingPageServer.start();
+        } catch (IOException _) {}
+
         try {
             SpringApplication app = new SpringApplication(InvestbookApplication.class);
             app.addListeners(new ApplicationFailedRunListener());
@@ -43,14 +47,8 @@ public class InvestbookApplication {
         } catch (ApplicationContextException e) {
             // gh-81 do not show "Failed to launch JVM"
             System.exit(0);
-        }
-    }
-
-    @EventListener
-    public void onApplicationEvent(ServletWebServerInitializedEvent event) {
-        if (properties.isOpenHomePageAfterStart()) {
-            int port = event.getWebServer().getPort();
-            BrowserHomePageOpener.open("http://localhost:" + port);
+        } finally {
+            loadingPageServer.stopAfter(5);
         }
     }
 }
