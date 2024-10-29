@@ -18,17 +18,22 @@
 
 package ru.investbook.service;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.function.Supplier;
 
 public class Suppliers {
 
+    /**
+     * Returns result caching Supplier
+     */
     public static <T> Supplier<T> memorize(Supplier<T> supplier) {
         return new Supplier<>() {
-            private T value;
+            private @Nullable T value = null;
 
             @Override
             public T get() {
-                return value == null ?
+                return (value == null) ?
                         value = supplier.get() :
                         value;
             }
