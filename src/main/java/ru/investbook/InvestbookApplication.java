@@ -25,24 +25,19 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-
 @SpringBootApplication
 @Component
 @EnableCaching
 @RequiredArgsConstructor
 public class InvestbookApplication {
 
-    private static final LoadingPageServer loadingPageServer = new LoadingPageServer();
-
     public static void main(String[] args) {
+        LoadingPageServer loadingPageServer = new LoadingPageServer();
         try {
             loadingPageServer.start();
-        } catch (IOException _) {}
 
-        try {
             SpringApplication app = new SpringApplication(InvestbookApplication.class);
-            app.addListeners(new ApplicationFailedRunListener());
+            app.addListeners(new ApplicationFailedRunListener(loadingPageServer));
             app.run(args);
         } catch (ApplicationContextException e) {
             // gh-81 do not show "Failed to launch JVM"

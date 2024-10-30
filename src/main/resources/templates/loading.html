@@ -44,17 +44,34 @@
         }
     </style>
     <script>
-        function checkMainApp() {
-            fetch('http://localhost:2030').then(response => {
-                if (response && response.ok) {
-                    window.location.href = 'http://localhost:2030';
-                }
-            }).catch(error => {
-                console.error("Error checking main app:", error);
+        let mainAppPort = "2030";
+
+        function getMainAppPort() {
+            fetch('/port')
+                .then(response => response.text())
+                .then(port => {
+                    mainAppPort = port;
+                }).catch(error => {
+                console.error("Error fetching port:", error);
             });
         }
 
-        setInterval(checkMainApp, 2000);
+        function checkMainApp() {
+            if (mainAppPort) {
+                fetch(`http://localhost:${mainAppPort}`)
+                    .then(response => {
+                        if (response && response.ok) {
+                            window.location.href = `http://localhost:${mainAppPort}`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error checking main app:", error);
+                    });
+            }
+        }
+
+        getMainAppPort();
+        setInterval(checkMainApp, 500);
     </script>
 </head>
 <body>

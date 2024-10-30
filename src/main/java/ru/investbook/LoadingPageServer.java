@@ -21,43 +21,85 @@ package ru.investbook;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import lombok.extern.slf4j.Slf4j;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Properties;
 
+import static java.nio.charset.StandardCharsets.*;
+
+@Slf4j
 public class LoadingPageServer {
     public static final int SERVER_PORT = 2031;
 
     private HttpServer server;
 
+    public void start() {
+        try {
+            server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
+            server.createContext("/", new LoadingPageHandler());
+            server.createContext("/port", new PortHandler());
 
-    public void start() throws IOException {
-        server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
-        server.createContext("/", new LoadingPageHandler());
-        server.setExecutor(null);
-        server.start();
-        BrowserHomePageOpener.open("http://localhost:%d/loading".formatted(SERVER_PORT));
+            server.start();
+
+            String loadingPageUrl = "http://localhost:" + SERVER_PORT + "/loading";
+            BrowserHomePageOpener.open(loadingPageUrl);
+        } catch (IOException e) {
+            log.warn("Loading page warn: {}", e.toString());
+        }
     }
 
     public void stopAfter(int delayInSec) {
         if (server != null) {
             server.stop(delayInSec);
+            server = null;
         }
+    }
+
+    public boolean isRunning() {
+        return server != null;
     }
 
     static class LoadingPageHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            String response = Files.readString(Path.of("src/main/resources/templates/loading.html"), StandardCharsets.ISO_8859_1);
-            exchange.sendResponseHeaders(200, response.length());
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes(StandardCharsets.ISO_8859_1));
-            os.close();
+            Path loadingPage = Path.of("src/main/resources/templates/loading.html");
+            String response = Files.readString(loadingPage, UTF_8);
+
+            exchange.sendResponseHeaders(200, response.getBytes(UTF_8).length);
+
+            try (OutputStream os = exchange.getResponseBody()) {
+                byte[] data = response.getBytes(UTF_8);
+                os.write(data);
+            }
         }
     }
 
+    static class PortHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            Properties properties = new Properties();
+            String mainServerPort;
+            try (InputStream input = new FileInputStream("src/main/resources/application-core.properties")) {
+                properties.load(input);
+                mainServerPort = properties.getProperty("server.port", "8080");
+            } catch (IOException e) {
+                mainServerPort = "2030";
+                log.warn("Failed to load properties file: {}", e.getMessage());
+            }
+
+            exchange.sendResponseHeaders(200, mainServerPort.length());
+
+            try (OutputStream os = exchange.getResponseBody()) {
+                byte[] data = mainServerPort.getBytes(UTF_8);
+                os.write(data);
+            }
+        }
+    }
 }
