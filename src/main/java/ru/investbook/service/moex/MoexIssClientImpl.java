@@ -87,10 +87,10 @@ public class MoexIssClientImpl implements MoexIssClient {
             "securities.columns=SECID,PREVDATE,PREVADMITTEDQUOTE,PREVSETTLEPRICE,PREVPRICE,ACCRUEDINT,LOTSIZE,LOTVALUE,MINSTEP,STEPPRICE";
     private static final String contractDescription = "http://iss.moex.com/iss/securities/{secId}.json?" +
             "iss.meta=off&iss.only=description&description.columns=name,value";
+    private static volatile int currentYear = getCurrentYear();
+    private static volatile long fastCoarseDayCounter = getFastCoarseDayCounter();
     private final MoexDerivativeCodeService moexDerivativeCodeService;
     private final RestTemplate restTemplate;
-    private int currentYear = getCurrentYear();
-    private long fastCoarseDayCounter = getFastCoarseDayCounter();
     private final Map<String, Optional<String>> optionCodeToShortNames = new ConcurrentHashMap<>();
     private final Map<String, Optional<String>> optionUnderlingFutures = new ConcurrentHashMap<>();
 
@@ -205,7 +205,7 @@ public class MoexIssClientImpl implements MoexIssClient {
         return false;
     }
 
-    private int getCurrentYear() {
+    private static int getCurrentYear() {
         if (fastCoarseDayCounter != getFastCoarseDayCounter()) {
             fastCoarseDayCounter = getFastCoarseDayCounter();
             currentYear = LocalDate.now().getYear();

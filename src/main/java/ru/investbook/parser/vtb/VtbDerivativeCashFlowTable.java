@@ -45,7 +45,7 @@ public class VtbDerivativeCashFlowTable extends AbstractVtbCashFlowTable<Securit
 
     public VtbDerivativeCashFlowTable(CashFlowEventTable cashFlowEventTable) {
         super(cashFlowEventTable);
-        @SuppressWarnings("initialization")
+        @SuppressWarnings("method.invocation")
         SingleBrokerReport report = getReport();
         List<String> contracts = report.getReportPage()
                 .create(TABLE_NAME, OpenContractsTableHeader.class)

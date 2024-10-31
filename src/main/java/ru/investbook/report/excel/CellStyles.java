@@ -38,6 +38,7 @@ public class CellStyles {
     private final CellStyle intStyle;
     private final CellStyle percentStyle;
 
+    @SuppressWarnings("method.invocation")
     public CellStyles(Workbook book) {
         this.defaultStyle = createDefaultStyle(book);
         this.headerStyle = createHeaderStyle(book);
