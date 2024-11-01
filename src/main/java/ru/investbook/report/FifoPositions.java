@@ -20,6 +20,7 @@ package ru.investbook.report;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.Transaction;
@@ -101,8 +102,7 @@ public class FifoPositions {
     }
 
     private static boolean isIncreasePosition(Transaction transaction, Deque<OpenedPosition> openedPositions) {
-        @SuppressWarnings("DataFlowIssue")
-        OpenedPosition position = openedPositions.peek();
+        @Nullable OpenedPosition position = openedPositions.peek();
         return position == null ||
                 position.getUnclosedPositions() == 0 ||
                 (signum(transaction.getCount()) == signum(position.getUnclosedPositions()));
@@ -117,7 +117,7 @@ public class FifoPositions {
                                 Deque<ClosedPosition> closedPositions) {
         int closingCount = abs(closing.getCount());
         while (!openedPositions.isEmpty() && closingCount > 0) {
-            OpenedPosition opening = openedPositions.peek();
+            @Nullable OpenedPosition opening = openedPositions.peek();
             int openedCount = abs(opening.getUnclosedPositions());
             if (openedCount <= closingCount) {
                 openedPositions.remove();

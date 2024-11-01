@@ -28,6 +28,7 @@ import ru.investbook.parser.SingleBrokerReport;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
 import static ru.investbook.parser.vtb.VtbSecuritiesTable.VtbSecuritiesTableHeader.*;
@@ -41,11 +42,11 @@ public class VtbSecurityQuoteTable extends SingleAbstractReportTable<SecurityQuo
 
     @Override
     protected @Nullable SecurityQuote parseRow(TableRow row) {
-        BigDecimal quote = row.getBigDecimalCellValueOrDefault(QUOTE, null);
+        @Nullable BigDecimal quote = row.getBigDecimalCellValueOrDefault(QUOTE, null);
         if (quote == null) {
             return null;
         }
-        BigDecimal price = ofNullable(row.getBigDecimalCellValueOrDefault(FACE_VALUE, null))
+        @Nullable BigDecimal price = ofNullable(row.getBigDecimalCellValueOrDefault(FACE_VALUE, null))
                 .filter(faceValue -> faceValue.compareTo(minValue) > 0)
                 .map(faceValue -> faceValue.multiply(quote).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP))
                 .orElse(null);
@@ -56,15 +57,17 @@ public class VtbSecurityQuoteTable extends SingleAbstractReportTable<SecurityQuo
                     .filter(interest -> interest.compareTo(minValue) > 0) // otherwise outgoing count may be = 0
                     .map(interest -> {
                         int count = row.getIntCellValueOrDefault(OUTGOING, -1);
+                        //noinspection ReturnOfNull
                         return (count <= 0) ? null : interest.divide(BigDecimal.valueOf(count), 2, RoundingMode.HALF_UP);
                     }).orElse(null);
         }
-        String currency = ofNullable(row.getStringCellValueOrDefault(CURRENCY, null))
+        @Nullable String currency = ofNullable(row.getStringCellValueOrDefault(CURRENCY, null))
                 .map(VtbBrokerReport::convertToCurrency)
                 .orElse(null);
         String description = row.getStringCellValue(NAME_REGNUMBER_ISIN);
         Security security = VtbReportHelper.getSecurity(description);
-        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(security.getIsin(), security::toBuilder);
+        String isin = requireNonNull(security.getIsin());
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(isin, security::toBuilder);
         return SecurityQuote.builder()
                 .security(securityId)
                 .timestamp(getReport().getReportEndDateTime())

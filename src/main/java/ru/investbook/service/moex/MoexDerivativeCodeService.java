@@ -19,6 +19,7 @@
 package ru.investbook.service.moex;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.KeyFor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.springframework.stereotype.Component;
@@ -183,7 +184,7 @@ public class MoexDerivativeCodeService {
             {"W4", "WHEAT"} // Индекс пшеницы
     }).collect(toMap(a -> a[0], a -> a[1]));
 
-    private final Map<String, String> shortnameToCodes;
+    private final Map<String, @KeyFor("codeToShortnames") String> shortnameToCodes;
 
     private final Character[] futuresMonthCodes =
             new Character[]{'F', 'G', 'H', 'J', 'K', 'M', 'N', 'Q', 'U', 'V', 'X', 'Z'};

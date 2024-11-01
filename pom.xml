@@ -305,7 +305,7 @@
                         <arg>-Astubs=permit-nullness-assertion-exception.astub</arg>
                         <!-- TODO Remove suppressions, кроме:
                                   methodref (Checker Framework не корректно выводит типы ссылок на методы) -->
-                        <arg>-AsuppressWarnings=dereference.of.nullable,unboxing.of.nullable,argument,assignment,methodref,type.arguments.not.inferred,lambda.param,expression.unparsable</arg>
+                        <arg>-AsuppressWarnings=dereference.of.nullable,unboxing.of.nullable,argument,methodref,type.arguments.not.inferred,lambda.param,expression.unparsable</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>

@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
@@ -58,10 +59,12 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
     }
 
     private int getSecurityId(TableRow row) {
+        @SuppressWarnings("DataFlowIssue")
         String description = row.getStringCellValueOrDefault(DESCRIPTION, "");
+        @SuppressWarnings("DataFlowIssue")
         Matcher matcher = contractPattern.matcher(description);
         if (matcher.find()) {
-            String code = matcher.group(1);
+            String code = requireNonNull(matcher.group(1));
             return getReport().getSecurityRegistrar().declareDerivative(code);
         }
         throw new RuntimeException("Не могу найти наименование контракта в отчете брокера по событию:" + description);

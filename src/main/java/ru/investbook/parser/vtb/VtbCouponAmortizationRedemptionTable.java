@@ -37,6 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Double.parseDouble;
+import static java.util.Objects.requireNonNull;
 import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
@@ -118,7 +119,7 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
         for (Pattern pattern : registrationNumberPatterns) {
             Matcher matcher = pattern.matcher(description);
             if (matcher.find()) {
-                String regNumber = matcher.group(1);
+                String regNumber = requireNonNull(matcher.group(1));
                 Optional<Security> security = securityRegNumberRegistrar.getSecurityByRegistrationNumber(regNumber);
                 if (security.isPresent()) {
                     return security.get();

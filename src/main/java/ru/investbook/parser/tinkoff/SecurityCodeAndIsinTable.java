@@ -89,7 +89,7 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         initializeIfNeed();
         @Nullable String isin = codeToIsin.get(code);
         if (isin == null) {
-            String codeFromName = shortNameToCode.get(shortName);
+            @Nullable String codeFromName = shortNameToCode.get(shortName);
             isin = codeToIsin.get(codeFromName);
         }
         return requireNonNull(isin, "Не найден ISIN");
@@ -99,7 +99,7 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         initializeIfNeed();
         @Nullable SecurityType type = codeToType.get(code);
         if (type == null) {
-            String codeFromName = shortNameToCode.get(shortName);
+            @Nullable String codeFromName = shortNameToCode.get(shortName);
             type = codeToType.get(codeFromName);
         }
         return requireNonNull(type, "Не найден тип ценной бумаги");
@@ -107,9 +107,9 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
 
     public BigDecimal getFaceValue(String code, String shortName) {
         initializeIfNeed();
-        BigDecimal faceValue = codeToFaceValue.get(code);
+        @Nullable BigDecimal faceValue = codeToFaceValue.get(code);
         if (faceValue == null) {
-            String codeFromName = shortNameToCode.get(shortName);
+            @Nullable String codeFromName = shortNameToCode.get(shortName);
             faceValue = codeToFaceValue.get(codeFromName);
         }
         return requireNonNull(faceValue, "Не найдена номинальная стоимость облигации");

@@ -59,8 +59,8 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
                 Matcher matcherFrom = moneyTransferFromDescriptionPattern.matcher(description);
                 Matcher matcherTo = moneyTransferToDescriptionPattern.matcher(description);
                 if (matcherFrom.find() && matcherTo.find()) {
-                    String to = matcherTo.group(1);
-                    String from = matcherFrom.group(1);
+                    @Nullable String to = matcherTo.group(1);
+                    @Nullable String from = matcherFrom.group(1);
                     if (isCurrentPortfolioAccount(to) != isCurrentPortfolioAccount(from)) {
                         if (isExternalAccount(from) && isExternalAccount(to)) {
                             type = CashFlowType.CASH;
@@ -89,7 +89,10 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
                 .build();
     }
 
-    private boolean isCurrentPortfolioAccount(String account) {
+    private boolean isCurrentPortfolioAccount(@Nullable String account) {
+        if (account == null) {
+            return false;
+        }
         String portfolio = getReport().getPortfolio();
         boolean isIIS = portfolio.endsWith("I");
         if (account.startsWith("SPBFUT")) {
@@ -102,8 +105,11 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
         }
     }
 
-    private boolean isExternalAccount(String account) {
+    private boolean isExternalAccount(@Nullable String account) {
         try {
+            if (account == null) {
+                return false;
+            }
             return getClientCode(account) != 0;
         } catch (Exception ignore) {
             return true;  // current account != "00000[^0-9]*"
@@ -113,6 +119,7 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
     private Integer getClientCode(String account) {
         try {
             Matcher matcher = clientCodePattern.matcher(account);
+            //noinspection ResultOfMethodCallIgnored
             matcher.find();
             return Integer.parseInt(matcher.group(1));
         } catch (Exception e) {

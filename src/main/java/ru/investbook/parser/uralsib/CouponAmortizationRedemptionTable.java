@@ -19,6 +19,7 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
+import static java.util.Objects.*;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
@@ -52,7 +54,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
     }
 
     protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
-        CashFlowType event;
+        @Nullable CashFlowType event;
         String action = row.getStringCellValue(OPERATION);
         action = String.valueOf(action).toLowerCase().trim();
         if (action.equalsIgnoreCase("погашение купона")) {
@@ -63,7 +65,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
             return emptyList();
         }
 
-        Security security = getSecurity(row, CashFlowType.AMORTIZATION);
+        @Nullable Security security = getSecurity(row, CashFlowType.AMORTIZATION);
         if (security == null) return emptyList();
         Instant timestamp = convertToInstant(row.getStringCellValue(DATE));
 
@@ -79,7 +81,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
         BigDecimal value = row.getBigDecimalCellValue(VALUE)
                 .add(tax.abs());
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
-                .security(security.getId())
+                .security(requireNonNull(security.getId()))
                 .portfolio(getReport().getPortfolio())
                 .count(getSecurityCount(security, timestamp))
                 .eventType(event)
@@ -98,14 +100,17 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
         return data;
     }
 
-    private boolean isRedemption(String securityName, Instant amortizationDay) {
-        LocalDate redemptionDate = redemptionDates.stream()
+    private boolean isRedemption(@Nullable String securityName, Instant amortizationDay) {
+        if (isNull(securityName)) {
+            return false;
+        }
+        @Nullable LocalDate redemptionDate = redemptionDates.stream()
                 .filter(e -> securityName.equalsIgnoreCase(e.getKey()))
                 .map(Map.Entry::getValue)
                 .map(instant -> LocalDate.ofInstant(instant, getReport().getReportZoneId()))
                 .findAny()
                 .orElse(null);
-        return (redemptionDate != null) && redemptionDate.equals(LocalDate.ofInstant(amortizationDay, getReport().getReportZoneId()));
+        return nonNull(redemptionDate) && redemptionDate.equals(LocalDate.ofInstant(amortizationDay, getReport().getReportZoneId()));
     }
 
     protected BigDecimal getTax(Table table, TableRow row) {
