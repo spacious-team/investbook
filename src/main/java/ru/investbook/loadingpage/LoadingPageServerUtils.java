@@ -19,43 +19,45 @@
 package ru.investbook.loadingpage;
 
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.Properties;
 
+@Slf4j
 @UtilityClass
 public class LoadingPageServerUtils {
 
-    public static final String CONF_PROPERTIES = "src/main/resources/application-conf.properties";
-
-    public static Properties loadProperties(Path filePath) throws IOException {
-        Properties properties = new Properties();
-        try (InputStream input = new FileInputStream(filePath.toFile())) {
-            properties.load(input);
-        }
-        return properties;
-    }
+    private static final String CONF_PROPERTIES = "application-conf.properties";
 
     public static int getMainAppPort() {
-        Properties properties;
         try {
-            properties = loadProperties(Path.of(CONF_PROPERTIES));
+            Properties properties = loadProperties();
+            String value = properties.getProperty("server.port", "2030");
+            return Integer.parseInt(value);
         } catch (IOException e) {
+            log.warn("Can't find 'server.port' property, fallback to default value: 2030");
             return 2030;
         }
-        return Integer.parseInt(properties.getProperty("server.port", "2030"));
     }
 
     public static boolean shouldOpenHomePageAfterStart() {
-        Properties properties;
         try {
-            properties = loadProperties(Path.of(CONF_PROPERTIES));
+            Properties properties = loadProperties();
+            String value = properties.getProperty("investbook.open-home-page-after-start", "true");
+            return Boolean.parseBoolean(value);
         } catch (IOException e) {
+            log.warn("Can't find 'investbook.open-home-page-after-start' fallback to default value: true");
             return true;
         }
-        return Boolean.parseBoolean(properties.getProperty("investbook.open-home-page-after-start", "true"));
+    }
+
+    private static Properties loadProperties() throws IOException {
+        Properties properties = new Properties();
+        try (InputStream input = LoadingPageServerUtils.class.getClassLoader().getResourceAsStream(CONF_PROPERTIES)) {
+            properties.load(input);
+        }
+        return properties;
     }
 }

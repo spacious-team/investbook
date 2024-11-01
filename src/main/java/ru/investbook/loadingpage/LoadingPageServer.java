@@ -24,11 +24,11 @@ import com.sun.net.httpserver.HttpServer;
 import lombok.extern.slf4j.Slf4j;
 import ru.investbook.BrowserHomePageOpener;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import static java.nio.charset.StandardCharsets.*;
 
@@ -73,13 +73,16 @@ public class LoadingPageServer implements AutoCloseable{
     static class LoadingPageHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            Path loadingPage = Path.of("src/main/resources/templates/loading.html");
-            String response = Files.readString(loadingPage, UTF_8);
+            byte[] data;
+            try (InputStream in = getClass().getResourceAsStream("/templates/loading.html")) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                in.transferTo(out);
+                data = out.toByteArray();
+            }
 
-            exchange.sendResponseHeaders(200, response.getBytes(UTF_8).length);
+            exchange.sendResponseHeaders(200, data.length);
 
             try (OutputStream os = exchange.getResponseBody()) {
-                byte[] data = response.getBytes(UTF_8);
                 os.write(data);
             }
         }
