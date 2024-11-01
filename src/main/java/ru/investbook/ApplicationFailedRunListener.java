@@ -23,12 +23,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationFailedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.ConfigurableEnvironment;
+import ru.investbook.loadingpage.LoadingPageServer;
 
 @Slf4j
 @RequiredArgsConstructor
 public class ApplicationFailedRunListener implements ApplicationListener<ApplicationFailedEvent> {
-
-    private final LoadingPageServer loadingPageServer;
 
     @Override
     public void onApplicationEvent(ApplicationFailedEvent event) {
@@ -36,7 +35,7 @@ public class ApplicationFailedRunListener implements ApplicationListener<Applica
         if (environment.getProperty("investbook.open-home-page-after-start", Boolean.class, false)) {
             log.info("Application run failed. May be application was run a second time, trying to open the application page...");
 
-            if (loadingPageServer != null && !loadingPageServer.isRunning()) {
+            try (LoadingPageServer loadingPageServer = new LoadingPageServer()) {
                 loadingPageServer.start();
             }
         }

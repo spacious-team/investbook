@@ -47,7 +47,7 @@
         let mainAppPort = "2030";
 
         function getMainAppPort() {
-            fetch('/port')
+            fetch('/main-app-port')
                 .then(response => response.text())
                 .then(port => {
                     mainAppPort = port;

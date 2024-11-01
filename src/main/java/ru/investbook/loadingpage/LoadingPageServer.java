@@ -16,27 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook;
+package ru.investbook.loadingpage;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import lombok.extern.slf4j.Slf4j;
+import ru.investbook.BrowserHomePageOpener;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Properties;
 
 import static java.nio.charset.StandardCharsets.*;
 
 @Slf4j
-public class LoadingPageServer {
+public class LoadingPageServer implements AutoCloseable{
     public static final int SERVER_PORT = 2031;
+    public static final int DEFAULT_CLOSE_DELAY_SEC = 120;
 
     private HttpServer server;
 
@@ -44,19 +43,19 @@ public class LoadingPageServer {
         try {
             server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
             server.createContext("/", new LoadingPageHandler());
-            server.createContext("/port", new PortHandler());
+            server.createContext("/main-app-port", new PortHandler());
 
             server.start();
 
             String loadingPageUrl = "http://localhost:" + SERVER_PORT + "/loading";
             BrowserHomePageOpener.open(loadingPageUrl);
         } catch (IOException e) {
-            log.warn("Loading page warn: {}", e.toString());
+            log.warn("Can't open /loading page", e);
         }
     }
 
     public void stopAfter(int delayInSec) {
-        if (server != null) {
+        if (isRunning()) {
             server.stop(delayInSec);
             server = null;
         }
@@ -64,6 +63,11 @@ public class LoadingPageServer {
 
     public boolean isRunning() {
         return server != null;
+    }
+
+    @Override
+    public void close() {
+        stopAfter(DEFAULT_CLOSE_DELAY_SEC);
     }
 
     static class LoadingPageHandler implements HttpHandler {
@@ -84,15 +88,7 @@ public class LoadingPageServer {
     static class PortHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            Properties properties = new Properties();
-            String mainServerPort;
-            try (InputStream input = new FileInputStream("src/main/resources/application-core.properties")) {
-                properties.load(input);
-                mainServerPort = properties.getProperty("server.port", "8080");
-            } catch (IOException e) {
-                mainServerPort = "2030";
-                log.warn("Failed to load properties file: {}", e.getMessage());
-            }
+            String mainServerPort = String.valueOf(LoadingPageServerUtils.getMainAppPort());
 
             exchange.sendResponseHeaders(200, mainServerPort.length());
 

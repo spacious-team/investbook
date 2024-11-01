@@ -24,6 +24,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.stereotype.Component;
+import ru.investbook.loadingpage.LoadingPageServer;
+import ru.investbook.loadingpage.LoadingPageServerUtils;
 
 @SpringBootApplication
 @Component
@@ -32,18 +34,17 @@ import org.springframework.stereotype.Component;
 public class InvestbookApplication {
 
     public static void main(String[] args) {
-        LoadingPageServer loadingPageServer = new LoadingPageServer();
-        try {
-            loadingPageServer.start();
+        try(LoadingPageServer loadingPageServer = new LoadingPageServer()) {
+            if (LoadingPageServerUtils.shouldOpenHomePageAfterStart()) {
+                loadingPageServer.start();
+            }
 
             SpringApplication app = new SpringApplication(InvestbookApplication.class);
-            app.addListeners(new ApplicationFailedRunListener(loadingPageServer));
+            app.addListeners(new ApplicationFailedRunListener());
             app.run(args);
         } catch (ApplicationContextException e) {
             // gh-81 do not show "Failed to launch JVM"
             System.exit(0);
-        } finally {
-            loadingPageServer.stopAfter(5);
         }
     }
 }
