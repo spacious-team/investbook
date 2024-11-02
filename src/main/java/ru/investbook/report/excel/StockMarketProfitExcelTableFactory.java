@@ -56,6 +56,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singleton;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 import static ru.investbook.report.excel.StockMarketProfitExcelTableHeader.*;
@@ -223,7 +224,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             return null;
         }
         return transactionCashFlowRepository
-                .findByTransactionIdAndCashFlowType(transaction.getId(), type)
+                .findByTransactionIdAndCashFlowType(requireNonNull(transaction.getId()), type)
                 .map(cash -> {
                     BigDecimal value = cash.getValue()
                             .multiply(BigDecimal.valueOf(multiplier))
@@ -264,12 +265,13 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             return fallbackCurrency;
         }
         return transactionCashFlowRepository
-                .findByTransactionIdAndCashFlowType(transaction.getId(), CashFlowType.PRICE)
+                .findByTransactionIdAndCashFlowType(requireNonNull(transaction.getId()), CashFlowType.PRICE)
                 .map(TransactionCashFlowEntity::getCurrency)
                 .orElse(fallbackCurrency);
     }
 
     private @Nullable String convertPaidInterestToExcelFormula(List<SecurityEventCashFlow> pays, String toCurrency) {
+        //noinspection ConstantValue
         if (pays == null || pays.isEmpty()) {
             return null;
         }

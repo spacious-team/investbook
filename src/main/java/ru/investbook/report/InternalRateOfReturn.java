@@ -43,6 +43,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toCollection;
@@ -116,7 +117,7 @@ public class InternalRateOfReturn {
     private String getTransactionCurrency(FifoPositions positions) {
         return positions.getTransactions()
                 .stream()
-                .map(t -> transactionCashFlowRepository.findByTransactionIdAndCashFlowType(t.getId(), PRICE))
+                .map(t -> transactionCashFlowRepository.findByTransactionIdAndCashFlowType(requireNonNull(t.getId()), PRICE))
                 .flatMap(Optional::stream)
                 .map(TransactionCashFlowEntity::getCurrency)
                 .findAny()
@@ -149,9 +150,10 @@ public class InternalRateOfReturn {
     }
 
     private Optional<BigDecimal> getTransactionValue(Transaction t, String toCurrency) {
-       @Nullable BigDecimal value = null;
-        if (t.getId() != null) { // bond redemption, accounted by other way, skipping
-            value = transactionCashFlowRepository.findByTransactionId(t.getId())
+        @Nullable BigDecimal value = null;
+        @Nullable Integer transactionId = t.getId();
+        if (transactionId != null) { // bond redemption, accounted by other way, skipping
+            value = transactionCashFlowRepository.findByTransactionId(transactionId)
                     .stream()
                     .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -165,14 +167,14 @@ public class InternalRateOfReturn {
         return portfolios.isEmpty() ?
                 securityEventCashFlowRepository
                         .findBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
-                                security.getId(),
+                                requireNonNull(security.getId()),
                                 cashFlowTypes,
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate()) :
                 securityEventCashFlowRepository
                         .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
                                 portfolios,
-                                security.getId(),
+                                requireNonNull(security.getId()),
                                 cashFlowTypes,
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate());

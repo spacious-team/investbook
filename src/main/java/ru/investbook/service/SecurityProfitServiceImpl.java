@@ -53,6 +53,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.lang.Math.signum;
+import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.SecurityType.CURRENCY_PAIR;
 import static org.springframework.util.StringUtils.hasLength;
 
@@ -143,7 +144,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
     }
 
     private boolean isStockSplit(Transaction transaction) {
-        if (!transactionCashFlowRepository.isDepositOrWithdrawal(transaction.getId())) {
+        if (!transactionCashFlowRepository.isDepositOrWithdrawal(requireNonNull(transaction.getId()))) {
             return false;
         }
         LocalDate transactionDay = LocalDate.ofInstant(transaction.getTimestamp(), zoneId);
@@ -182,7 +183,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
             return Optional.empty();
         }
         return transactionCashFlowRepository
-                .findByTransactionIdAndCashFlowType(t.getId(), type)
+                .findByTransactionIdAndCashFlowType(requireNonNull(t.getId()), type)
                 .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency));
     }
 
@@ -239,22 +240,23 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
 
     @Override
     public @Nullable SecurityQuote getSecurityQuote(Security security, String toCurrency, Instant to) {
+        Integer securityId = requireNonNull(security.getId());
         if (security.getType() == CURRENCY_PAIR) {
-            String currencyPair = securityRepository.findCurrencyPair(security.getId()).orElseThrow();
+            String currencyPair = securityRepository.findCurrencyPair(securityId).orElseThrow();
             String baseCurrency = currencyPair.substring(0, 3);
             LocalDate toDate = LocalDate.ofInstant(to, ZoneId.systemDefault());
             BigDecimal lastPrice = toDate.isBefore(LocalDate.now()) ?
                     foreignExchangeRateService.getExchangeRateOrDefault(baseCurrency, toCurrency, toDate) :
                     foreignExchangeRateService.getExchangeRate(baseCurrency, toCurrency);
             return SecurityQuote.builder()
-                    .security(security.getId())
+                    .security(securityId)
                     .timestamp(to)
                     .quote(lastPrice)
                     .currency(toCurrency)
                     .build();
         }
         return securityQuoteRepository
-                .findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(security.getId(), to)
+                .findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(securityId, to)
                 .map(securityQuoteConverter::fromEntity)
                 .map(_quote -> foreignExchangeRateService.convertQuoteToCurrency(_quote, toCurrency, security.getType()))
                 .map(_quote -> hasLength(_quote.getCurrency()) ? _quote : _quote.toBuilder()

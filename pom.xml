@@ -302,10 +302,10 @@
                         <!-- Классы Entity(Pk)?_ сгенерированы hibernate-jpamodelgen -->
                         <arg>-AskipDefs=(V2022_1_0_1|Entity(Pk)?_$|generated.ValCurs)</arg>
                         <!-- Checker framework inner file https://github.com/typetools/checker-framework/blob/master/checker/src/main/java/org/checkerframework/checker/nullness/permit-nullness-assertion-exception.astub -->
-                        <arg>-Astubs=permit-nullness-assertion-exception.astub</arg>
+                        <arg>-Astubs=permit-nullness-assertion-exception.astub</arg> <!-- collection-object-parameters-may-be-null.astub -->
                         <!-- TODO Remove suppressions, кроме:
                                   methodref (Checker Framework не корректно выводит типы ссылок на методы) -->
-                        <arg>-AsuppressWarnings=dereference.of.nullable,unboxing.of.nullable,argument,methodref,type.arguments.not.inferred,lambda.param,expression.unparsable</arg>
+                        <arg>-AsuppressWarnings=dereference.of.nullable,argument,methodref,type.arguments.not.inferred,lambda.param,expression.unparsable</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>

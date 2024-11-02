@@ -144,11 +144,12 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
     }
 
     private @Nullable BigDecimal getTransactionCashFlow(Transaction transaction, CashFlowType type, double multiplier) {
-        if (transaction.getId() == null) {
+        @Nullable Integer transactionId = transaction.getId();
+        if (transactionId == null) {
             return null;
         }
         return transactionCashFlowRepository
-                .findByTransactionIdAndCashFlowType(transaction.getId(), type)
+                .findByTransactionIdAndCashFlowType(transactionId, type)
                 .map(cash -> cash.getValue()
                         .multiply(BigDecimal.valueOf(multiplier))
                         .abs()

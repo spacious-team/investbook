@@ -108,7 +108,6 @@ public class InvestmentProportionService {
 
     public Optional<BigDecimal> getOpenedPositionsCostByCurrentOrLastTransactionQuoteInRub(Security security,
                                                                                            FifoPositionsFilter filter) {
-        //noinspection OptionalOfNullableMisuse
         return ofNullable(securityProfitService.getSecurityQuote(security, RUB, filter.getToDate()))
                 .map(quote -> quote.getDirtyPriceInCurrency(security.getType() == SecurityType.DERIVATIVE))
                 .or(() -> securityProfitService.getSecurityQuoteFromLastTransaction(security, RUB))
