@@ -128,7 +128,7 @@ public abstract class ExcelTableView {
                 Row row = sheet.createRow(++rowNum);
                 TableHeader[] tableHeader = requireNonNull(headerType.getEnumConstants());
                 for (TableHeader header : tableHeader) {
-                    Object value = tableRow.get(header);
+                    @Nullable Object value = tableRow.get(header);
                     if (value == null) {
                         continue;
                     }

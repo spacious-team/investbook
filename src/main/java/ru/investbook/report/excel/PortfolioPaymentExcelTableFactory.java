@@ -86,7 +86,7 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
             table.add(new Table.Record());
             Table.Record monthTotalRecord = new Table.Record();
             table.add(monthTotalRecord);
-            Month month = null;
+            @Nullable Month month = null;
             int sumRowCount = 0;
             for (SecurityEventCashFlow cash : cashFlows) {
                 Instant timestamp = cash.getTimestamp();

@@ -41,6 +41,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutionException;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.report.html.ExcelFormulaEvaluatorHelper.evaluateFormulaCells;
 
 @Component
@@ -101,8 +102,9 @@ public class HtmlView {
     }
 
     private void addReportFileDownloadLink(Document htmlDocument) {
-        Node body = htmlDocument.getFirstChild() // html
-                .getLastChild(); // body
+        Node body = requireNonNull(
+                htmlDocument.getFirstChild() // html
+                        .getLastChild()); // body
 
         Element div = htmlDocument.createElement("div");
         div.setAttribute("style", "float: right");
@@ -124,8 +126,9 @@ public class HtmlView {
     }
 
     private void addHomeLink(Document htmlDocument) {
-        Node body = htmlDocument.getFirstChild() // html
-                .getLastChild(); // body
+        Node body = requireNonNull(
+                htmlDocument.getFirstChild() // html
+                        .getLastChild()); // body
 
         Element doc = htmlDocument.createElement("a");
         doc.setTextContent("[Описание таблиц]");

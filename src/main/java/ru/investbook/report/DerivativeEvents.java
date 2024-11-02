@@ -40,7 +40,7 @@ public class DerivativeEvents {
     @Builder
     public static class DerivativeDailyEvents {
         private final @Nullable SecurityEventCashFlow dailyProfit;
-        private final @Nullable LinkedHashMap<Transaction, Map<CashFlowType, TransactionCashFlow>> dailyTransactions;
+        private final LinkedHashMap<Transaction, Map<CashFlowType, TransactionCashFlow>> dailyTransactions;
         private final BigDecimal totalProfit;
         private final int position;
     }

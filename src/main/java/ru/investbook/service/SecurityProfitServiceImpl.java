@@ -116,10 +116,10 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                 .flatMap(Optional::stream)
                 .reduce(BigDecimal.ZERO, BigDecimal::add); // если ценная бумага не вводилась на счет, а была куплена (есть цена покупки)
         for (ClosedPosition closedPosition : positions.getClosedPositions()) {
-            BigDecimal openAmount = getTransactionValue(closedPosition.getOpenTransaction(), CashFlowType.PRICE, toCurrency)
+            @Nullable BigDecimal openAmount = getTransactionValue(closedPosition.getOpenTransaction(), CashFlowType.PRICE, toCurrency)
                     .map(value -> getOpenAmount(value, closedPosition))
                     .orElse(null);
-            BigDecimal closeAmount = getTransactionValue(closedPosition.getCloseTransaction(), CashFlowType.PRICE, toCurrency)
+            @Nullable BigDecimal closeAmount = getTransactionValue(closedPosition.getCloseTransaction(), CashFlowType.PRICE, toCurrency)
                     .map(value -> getClosedAmount(value, closedPosition))
                     .orElse(null);
             if (openAmount != null && closeAmount != null) {

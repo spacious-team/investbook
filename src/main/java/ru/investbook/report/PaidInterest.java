@@ -20,6 +20,7 @@ package ru.investbook.report;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.Transaction;
@@ -49,7 +50,7 @@ public class PaidInterest {
     }
 
     public List<SecurityEventCashFlow> get(CashFlowType payType, Position position) {
-        List<SecurityEventCashFlow> value = this.get(payType).get(position);
+        @Nullable List<SecurityEventCashFlow> value = this.get(payType).get(position);
         return (value != null) ? value : Collections.emptyList();
     }
 

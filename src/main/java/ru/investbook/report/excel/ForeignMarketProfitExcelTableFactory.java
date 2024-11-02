@@ -122,9 +122,8 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
         Transaction transaction = position.getCloseTransaction();
         double multiplier = Math.abs(1d * position.getCount() / transaction.getCount());
         row.put(CLOSE_DATE, transaction.getTimestamp());
-        BigDecimal closeAmount;
+        @Nullable BigDecimal closeAmount;
         if (position.getClosingEvent() == CashFlowType.PRICE) {
-            //noinspection DataFlowIssue
             closeAmount = getTransactionCashFlow(transaction, CashFlowType.PRICE, multiplier);
         } else {
             throw new IllegalArgumentException("ЦБ " + transaction.getSecurity() +

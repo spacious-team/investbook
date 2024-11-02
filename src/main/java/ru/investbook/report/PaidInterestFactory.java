@@ -20,6 +20,7 @@ package ru.investbook.report;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
@@ -125,7 +126,7 @@ public class PaidInterestFactory {
         Iterator<PositionHistory> it = positionHistories.descendingIterator();
         // дата перечисления дивидендов/купонов Эмитентом (дата фиксации реестра акционеров)
         // с точностью до временного интервала между 2-мя соседними транзакции
-        Instant bookClosureDate = null;
+        @Nullable Instant bookClosureDate = null;
         while (it.hasNext()) {
             PositionHistory positionHistory = it.next();
             Instant pastInstant = positionHistory.getInstant();

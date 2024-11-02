@@ -20,6 +20,7 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Portfolio;
@@ -86,7 +87,7 @@ public class ForeignPortfolioPaymentExcelTableFactory implements TableFactory {
             table.add(new Table.Record());
             Table.Record monthTotalRecord = new Table.Record();
             table.add(monthTotalRecord);
-            Month month = null;
+            @Nullable Month month = null;
             int sumRowCount = 0;
             for (EventCashFlow cash : cashFlows) {
                 Instant timestamp = cash.getTimestamp();

@@ -149,7 +149,7 @@ public class InternalRateOfReturn {
     }
 
     private Optional<BigDecimal> getTransactionValue(Transaction t, String toCurrency) {
-        BigDecimal value = null;
+       @Nullable BigDecimal value = null;
         if (t.getId() != null) { // bond redemption, accounted by other way, skipping
             value = transactionCashFlowRepository.findByTransactionId(t.getId())
                     .stream()

@@ -21,6 +21,7 @@ package ru.investbook.service.moex;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 
@@ -35,13 +36,13 @@ class MoexMarketDescription {
     private final String market;
     private final String board;
     @Getter
-    private final String currency; // may be null (exactly null for futures, options, currency pairs)
+    private final @Nullable String currency; // may be null (exactly null for futures, options, currency pairs)
 
     static MoexMarketDescription of(Map<String, Object> description) {
         String engine = valueOf(requireNonNull(description.get("engine")));
         String market = valueOf(requireNonNull(description.get("market")));
         String board = valueOf(requireNonNull(description.get("boardid")));
-        String currency = ofNullable(description.get("currencyid"))
+        @Nullable String currency = ofNullable(description.get("currencyid"))
                 .map(String::valueOf)
                 .orElse(null);
         return new MoexMarketDescription(engine, market, board, currency);

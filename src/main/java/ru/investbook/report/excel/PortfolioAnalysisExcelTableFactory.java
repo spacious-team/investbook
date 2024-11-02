@@ -20,6 +20,7 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioCash;
@@ -174,12 +175,12 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     private void addAssetsGrowthColumn(Table table) {
         try {
             double usdToRubExchangeRate = foreignExchangeRateService.getExchangeRateToRub("USD").doubleValue();
-            Double divider = null;
+            @Nullable Double divider = null;
             double investmentUsd = 0;
-            Double prevAssetsGrownValue = null;
+            @Nullable Double prevAssetsGrownValue = null;
             for (Table.Record record : table) {
                 investmentUsd += getInvestmentUsd(record, usdToRubExchangeRate);
-                Number assetsRub = (Number) record.get(ASSETS_RUB);
+                @Nullable Number assetsRub = (Number) record.get(ASSETS_RUB);
                 if (assetsRub != null) {
                     double assetsUsd = assetsRub.doubleValue() / usdToRubExchangeRate;
                     divider = updateDivider(divider, assetsUsd, investmentUsd, prevAssetsGrownValue);
@@ -196,7 +197,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     }
 
     private double getInvestmentUsd(Table.Record record, double usdToRubExchangeRate) {
-        BigDecimal investment = (BigDecimal) record.get(INVESTMENT_AMOUNT);
+        @Nullable BigDecimal investment = (BigDecimal) record.get(INVESTMENT_AMOUNT);
         if (investment != null) {
             String fromCurrency = record.get(INVESTMENT_CURRENCY).toString();
             if (Objects.equals(fromCurrency, "RUB")) {
@@ -211,7 +212,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         return 0;
     }
 
-    private Double updateDivider(Double divider, double assetsUsd, double investmentUsd, Double prevAssetsGrowth) {
+    private @Nullable Double updateDivider(@Nullable Double divider, double assetsUsd, double investmentUsd, @Nullable Double prevAssetsGrowth) {
         if (divider == null) {
             if (prevAssetsGrowth == null) {
                 // начинаем график роста активов с нулевой отметки
@@ -232,8 +233,8 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     private static void addSp500GrowthColumn(Map<LocalDate, BigDecimal> sp500, Table table) {
         boolean isSp500ValueKnown = false;
         for (Table.Record record : table) {
-            LocalDate date = (LocalDate) record.get(DATE);
-            BigDecimal value = sp500.get(date);
+            @Nullable LocalDate date = (LocalDate) record.get(DATE);
+            @Nullable BigDecimal value = sp500.get(date);
             if (value != null) {
                 isSp500ValueKnown = true;
                 record.put(SP500, value);
