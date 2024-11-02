@@ -23,7 +23,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Slf4j
 @UtilityClass
@@ -55,8 +61,15 @@ public class LoadingPageServerUtils {
 
     private static Properties loadProperties() throws IOException {
         Properties properties = new Properties();
-        try (InputStream input = LoadingPageServerUtils.class.getClassLoader().getResourceAsStream(CONF_PROPERTIES)) {
-            properties.load(input);
+        Path path = Path.of(CONF_PROPERTIES);
+        try (Reader reader = Files.newBufferedReader(path)) {  // default is UTF_8
+            properties.load(reader);
+        } catch (Exception e) {
+            // Properties file is not found in app installation path, read default file from class path
+            try (InputStream in = LoadingPageServerUtils.class.getClassLoader().getResourceAsStream(CONF_PROPERTIES);
+                 Reader reader = new InputStreamReader(in, UTF_8)) {
+                properties.load(reader);
+            }
         }
         return properties;
     }
