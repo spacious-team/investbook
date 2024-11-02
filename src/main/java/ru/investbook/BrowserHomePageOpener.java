@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class BrowserHomePageOpener {
 
-    static void open(String url) {
+    public static void open(String url) {
         Logger log = LoggerFactory.getLogger(BrowserHomePageOpener.class);
         log.debug("Opening browser with home page \"{}\" ...", url);
         String os = System.getProperty("os.name").toLowerCase();
