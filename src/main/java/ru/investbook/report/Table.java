@@ -18,6 +18,8 @@
 
 package ru.investbook.report;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -37,7 +39,7 @@ public class Table extends LinkedList<Table.Record> {
         return new Record();
     }
 
-    public static class Record extends HashMap<TableHeader, Object> {
+    public static class Record extends HashMap<TableHeader, @Nullable Object> {
         public static Record EMPTY = new Record();
 
         public Record() {
