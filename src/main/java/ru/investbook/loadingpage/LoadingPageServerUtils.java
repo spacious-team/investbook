@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.util.Properties;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.requireNonNull;
 
 @Slf4j
 @UtilityClass
@@ -42,7 +43,7 @@ public class LoadingPageServerUtils {
             Properties properties = loadProperties();
             String value = properties.getProperty("server.port", "2030");
             return Integer.parseInt(value);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.warn("Can't find 'server.port' property, fallback to default value: 2030");
             return 2030;
         }
@@ -53,7 +54,7 @@ public class LoadingPageServerUtils {
             Properties properties = loadProperties();
             String value = properties.getProperty("investbook.open-home-page-after-start", "true");
             return Boolean.parseBoolean(value);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.warn("Can't find 'investbook.open-home-page-after-start' fallback to default value: true");
             return true;
         }
@@ -66,7 +67,7 @@ public class LoadingPageServerUtils {
             properties.load(reader);
         } catch (Exception e) {
             // Properties file is not found in app installation path, read default file from class path
-            try (InputStream in = LoadingPageServerUtils.class.getClassLoader().getResourceAsStream(CONF_PROPERTIES);
+            try (InputStream in = requireNonNull(LoadingPageServerUtils.class.getResourceAsStream(CONF_PROPERTIES));
                  Reader reader = new InputStreamReader(in, UTF_8)) {
                 properties.load(reader);
             }
