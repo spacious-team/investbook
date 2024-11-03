@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -60,6 +61,7 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 public class TradePof {
 
     @JsonProperty("id")
+    @NotNull
     int id;
 
     @JsonProperty("trade-id")
@@ -83,10 +85,12 @@ public class TradePof {
     Long settlement;
 
     @JsonProperty("account")
+    @NotNull
     int account;
 
     @Getter(AccessLevel.NONE)
     @JsonProperty("asset")
+    @NotNull
     int asset;
 
     /**
@@ -94,6 +98,7 @@ public class TradePof {
      * Поддерживаются дробные акции
      */
     @JsonProperty("count")
+    @NotNull
     BigDecimal count;
 
     /**
@@ -127,6 +132,7 @@ public class TradePof {
      * Комиссия. Если отрицательное значение, значит возврат комиссии
      */
     @JsonProperty("fee")
+    @NotNull
     BigDecimal fee;
 
     @JsonProperty("fee-currency")

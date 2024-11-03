@@ -38,10 +38,10 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.CashFlowType.FEE;
 import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 
@@ -115,8 +115,8 @@ public class TransferPof {
                                         Map<Integer, Integer> assetToSecurityId) {
         try {
             return Optional.of(Transaction.builder()
-                    .tradeId(Objects.requireNonNull(transferId))
-                    .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
+                    .tradeId(requireNonNull(transferId))
+                    .portfolio(requireNonNull(accountToPortfolioId.get(account)))
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .security(getSecurityId(assetToSecurityId))
                     .count(count.intValueExact())
@@ -133,7 +133,7 @@ public class TransferPof {
             if (fee != null && feeCurrency != null) {
                 return Set.of(
                         SecurityEventCashFlow.builder()
-                                .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
+                                .portfolio(requireNonNull(accountToPortfolioId.get(account)))
                                 .timestamp(Instant.ofEpochSecond(timestamp))
                                 .security(getSecurityId(assetToSecurityId))
                                 .count(count.intValueExact())
@@ -151,6 +151,6 @@ public class TransferPof {
     }
 
     int getSecurityId(Map<Integer, Integer> assetToSecurityId) {
-        return Objects.requireNonNull(assetToSecurityId.get(asset));
+        return requireNonNull(assetToSecurityId.get(asset));
     }
 }

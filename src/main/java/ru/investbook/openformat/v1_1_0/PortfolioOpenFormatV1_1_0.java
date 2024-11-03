@@ -21,6 +21,7 @@ package ru.investbook.openformat.v1_1_0;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
@@ -40,17 +41,21 @@ public class PortfolioOpenFormatV1_1_0 {
 
     @Builder.Default
     @JsonProperty("version")
+    @NotNull
     String version = "1.1.0";
 
     @Builder.Default
     @JsonProperty("generated-by")
+    @NotNull
     String generatedBy = GENERATED_BY_INVESTBOOK;
 
     @Builder.Default
     @JsonProperty("generated")
+    @NotNull
     long generated = System.currentTimeMillis() / 1000;
 
     @JsonProperty("end")
+    @NotNull
     long end;
 
     @JsonProperty("start")
@@ -59,30 +64,37 @@ public class PortfolioOpenFormatV1_1_0 {
 
     @Builder.Default
     @JsonProperty("accounts")
+    @NotNull
     Collection<AccountPof> accounts = emptySet();
 
     @Builder.Default
     @JsonProperty("cash-balances")
+    @NotNull
     Collection<CashBalancesPof> cashBalances = emptySet();
 
     @Builder.Default
     @JsonProperty("assets")
+    @NotNull
     Collection<AssetPof> assets = emptySet();
 
     @Builder.Default
     @JsonProperty("trades")
+    @NotNull
     Collection<TradePof> trades = emptySet();
 
     @Builder.Default
     @JsonProperty("transfers")
+    @NotNull
     Collection<TransferPof> transfer = emptySet();
 
     @Builder.Default
     @JsonProperty("payments")
+    @NotNull
     Collection<PaymentPof> payments = emptySet();
 
     @Builder.Default
     @JsonProperty("cash-flows")
+    @NotNull
     Collection<CashFlowPof> cashFlows = emptySet();
 
     @JsonProperty("vnd-investbook")
