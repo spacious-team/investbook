@@ -71,11 +71,11 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
     protected @Nullable SecurityTransaction parseRow(TableRow row) {
         @Nullable String tradeId = getTradeId(row, TRADE_ID);
         if (tradeId == null) {
-            security = getSecurity(row);
+            this.security = getSecurity(row);
             return null;
         }
 
-        requireNonNull(security, "Не известная ЦБ");
+        Security security = requireNonNull(this.security, "Не известная ЦБ");
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         BigDecimal value = row.getBigDecimalCellValue(VALUE);
         BigDecimal accruedInterest = row.getBigDecimalCellValue(ACCRUED_INTEREST);

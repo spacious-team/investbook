@@ -134,7 +134,9 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     private void addInvestmentColumns(List<EventCashFlow> cashFlows, Table table) {
         for (EventCashFlow cashFlow : cashFlows) {
             Table.Record record = recordOf(table, cashFlow.getTimestamp(), cashFlow.getCurrency());
-            record.merge(INVESTMENT_AMOUNT, cashFlow.getValue(), (v1, v2) -> ((BigDecimal) v1).add(requireNonNull(((BigDecimal) v2))));
+            record.merge(INVESTMENT_AMOUNT, cashFlow.getValue(), (v1, v2) ->
+                    requireNonNull((BigDecimal) v1)
+                            .add(requireNonNull(((BigDecimal) v2))));
             record.computeIfAbsent(INVESTMENT_AMOUNT_USD, _ -> foreignExchangeRateTableFactory
                     .cashConvertToUsdExcelFormula(cashFlow.getCurrency(), INVESTMENT_AMOUNT, EXCHANGE_RATE));
             record.computeIfAbsent(TOTAL_INVESTMENT_USD, _ ->
@@ -200,7 +202,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     private double getInvestmentUsd(Table.Record record, double usdToRubExchangeRate) {
         @Nullable BigDecimal investment = (BigDecimal) record.get(INVESTMENT_AMOUNT);
         if (investment != null) {
-            String fromCurrency = record.get(INVESTMENT_CURRENCY).toString();
+            String fromCurrency = requireNonNull(record.get(INVESTMENT_CURRENCY)).toString();
             if (Objects.equals(fromCurrency, "RUB")) {
                 // используем тот же коэффициент-курс для приведения, что и в вызывающем цикле
                 return investment.doubleValue() / usdToRubExchangeRate;

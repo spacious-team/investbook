@@ -232,6 +232,7 @@ public abstract class ExcelTableView {
     }
 
     protected void sheetPostCreate(Sheet sheet, Class<? extends TableHeader> headerType, CellStyles styles) {
-        sheet.setAutoFilter(new CellRangeAddress(0, sheet.getLastRowNum(), 0, (headerType.getEnumConstants().length - 1)));
+        TableHeader[] tableHeader = requireNonNull(headerType.getEnumConstants());
+        sheet.setAutoFilter(new CellRangeAddress(0, sheet.getLastRowNum(), 0, (tableHeader.length - 1)));
     }
 }

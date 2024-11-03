@@ -138,6 +138,7 @@ public class InternalRateOfReturn {
                 toLocalDate(cashFlowEntity.getTimestamp()));
     }
 
+    @SuppressWarnings("dereference.of.nullable")
     private Optional<org.decampo.xirr.Transaction> castToXirrTransaction(@Nullable SecurityQuote quote,
                                                                          String toCurrency, int positionCount,
                                                                          SecurityType securityType) {

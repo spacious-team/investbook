@@ -96,12 +96,14 @@ public class HtmlView {
                 @page { size: 1980px 1400px landscape; }
                 tr { border-bottom: 1pt solid #eee; }
                 """);
-        htmlDocument.getFirstChild() // html
-                .getFirstChild()     // head
-                .appendChild(style);
+        @SuppressWarnings({"assignment", "dereference.of.nullable"})
+        Node head = htmlDocument.getFirstChild() // html
+                .getFirstChild(); // head
+        head.appendChild(style);
     }
 
     private void addReportFileDownloadLink(Document htmlDocument) {
+        @SuppressWarnings("dereference.of.nullable")
         Node body = requireNonNull(
                 htmlDocument.getFirstChild() // html
                         .getLastChild()); // body
@@ -126,6 +128,7 @@ public class HtmlView {
     }
 
     private void addHomeLink(Document htmlDocument) {
+        @SuppressWarnings("dereference.of.nullable")
         Node body = requireNonNull(
                 htmlDocument.getFirstChild() // html
                         .getLastChild()); // body

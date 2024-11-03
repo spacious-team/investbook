@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
@@ -39,6 +40,7 @@ import ru.investbook.repository.specs.SecurityEventCashFlowEntitySearchSpecifica
 import ru.investbook.web.forms.model.SecurityEventCashFlowModel;
 import ru.investbook.web.forms.model.filter.SecurityEventCashFlowFormFilterModel;
 
+import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -96,12 +98,13 @@ public class SecurityEventCashFlowFormsService {
                         .currency(e.getValueCurrency())
                         .build()));
         e.setId(entity.getId()); // used in view
-        if (e.getTax() != null && e.getTaxCurrency() != null && e.getTax().floatValue() > 0.001) {
+        @Nullable BigDecimal tax = e.getTax();
+        if (nonNull(tax) && nonNull(e.getTaxCurrency()) && tax.floatValue() > 0.001) {
             entity = securityEventCashFlowRepository.save(securityEventCashFlowConverter.toEntity(
                     builder
                             .id(e.getTaxId())
                             .eventType(CashFlowType.TAX)
-                            .value(e.getTax().negate())
+                            .value(tax.negate())
                             .currency(requireNonNull(e.getTaxCurrency()))
                             .build()));
             e.setTaxId(entity.getId());

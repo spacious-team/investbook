@@ -39,6 +39,7 @@ import java.util.Objects;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.AssetsTable.SummaryTableHeader.RUB;
 
 /**
@@ -73,7 +74,7 @@ public class AssetsTable extends SingleInitializableReportTable<PortfolioPropert
 
             @Nullable TableRow row = table.stream()
                     .filter(Objects::nonNull)
-                    .filter(tableRow -> tableRow.rowContains(ASSETS))
+                    .filter(tableRow -> requireNonNull(tableRow).rowContains(ASSETS))
                     .findAny()
                     .orElse(null);
 

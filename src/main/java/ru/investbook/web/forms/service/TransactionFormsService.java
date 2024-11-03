@@ -131,17 +131,18 @@ public class TransactionFormsService {
 
         AbstractTransactionBuilder<?, ?> builder;
 
-        if (tr.getPrice() != null) {
+        @Nullable BigDecimal price = tr.getPrice();
+        if (nonNull(price)) {
             builder = switch (tr.getSecurityType()) {
                 case SHARE, BOND, ASSET -> SecurityTransaction.builder()
-                        .value(tr.getPrice().multiply(multiplier))
+                        .value(price.multiply(multiplier))
                         .valueCurrency(tr.getPriceCurrency())
                         .accruedInterest(ofNullable(tr.getAccruedInterest())
                                 .map(v -> v.multiply(multiplier))
                                 .orElse(null));
                 case DERIVATIVE -> {
                     @Nullable BigDecimal value = null;
-                    BigDecimal valueInPoints = tr.getPrice().multiply(multiplier);
+                    BigDecimal valueInPoints = price.multiply(multiplier);
                     if (tr.hasDerivativeTickValue()) {
                         value = valueInPoints
                                 .multiply(requireNonNull(tr.getPriceTickValue()))
@@ -153,11 +154,11 @@ public class TransactionFormsService {
                             .valueCurrency(tr.getPriceTickValueCurrency());
                 }
                 case CURRENCY -> ForeignExchangeTransaction.builder()
-                        .value(tr.getPrice().multiply(multiplier))
+                        .value(price.multiply(multiplier))
                         .valueCurrency(tr.getPriceCurrency());
             };
 
-            if (tr.getFee() != null) {
+            if (nonNull(tr.getFee())) {
                 builder
                         .fee(tr.getFee().negate())
                         .feeCurrency(tr.getFeeCurrency());
@@ -291,7 +292,7 @@ public class TransactionFormsService {
                 ofNullable(securityEntity.getName()).orElse(securityEntity.getTicker()),
                 securityType.get());
         if (m.getSecurityType() == DERIVATIVE &&
-                m.getPrice() != null && m.getPrice().floatValue() > 0.000001) {
+                nonNull(m.getPrice()) && m.getPrice().floatValue() > 0.000001) {
             cashFlows.stream()
                     .filter(value -> CashFlowType.valueOf(value.getCashFlowType().getId()) == CashFlowType.DERIVATIVE_PRICE)
                     .forEach(value -> {

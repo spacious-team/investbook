@@ -37,6 +37,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.String.valueOf;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static org.spacious_team.broker.pojo.SecurityType.*;
 
@@ -163,7 +164,7 @@ public class MoexIssClientImpl implements MoexIssClient {
                     .filter(moexDerivativeCodeService::isFutures)
                     .flatMap(underlyingSecid -> getMarket(underlyingSecid)
                             .flatMap(underlyingMarket -> getQuote(underlyingSecid, underlyingMarket)))
-                    .map(futuresContract -> futuresContract.getPrice()
+                    .map(futuresContract -> requireNonNull(futuresContract.getPrice())
                             .divide(futuresContract.getQuote(), 6, RoundingMode.HALF_UP))
                     .map(oneUnitPrice -> quote.get().getQuote().multiply(oneUnitPrice))
                     .map(optionalPrice -> quote.get().toBuilder()

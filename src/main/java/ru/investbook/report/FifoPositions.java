@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import static java.lang.Integer.min;
 import static java.lang.Integer.signum;
 import static java.lang.Math.abs;
+import static java.util.Objects.nonNull;
 
 @Getter
 @Slf4j
@@ -75,7 +76,7 @@ public class FifoPositions {
                                     Deque<OpenedPosition> openedPositions,
                                     Deque<ClosedPosition> closedPositions) {
         //noinspection ConstantValue
-        if (!redemptions.isEmpty() && (redemptions.peek() != null)) {
+        if (!redemptions.isEmpty() && nonNull(redemptions.peek())) {
             int security = redemptions.peek().getSecurity();
             LinkedList<Transaction> redemptionTransactions = redemptions.stream()
                     .map(FifoPositions::convertBondRedemptionToTransaction)
@@ -94,7 +95,8 @@ public class FifoPositions {
     }
 
     private static void updateSecuritiesPastPositions(Queue<Transaction> transactions, Deque<PositionHistory> positionHistories) {
-        int openedPosition = (!positionHistories.isEmpty()) ? positionHistories.peekLast().getOpenedPositions() : 0;
+        @SuppressWarnings("dereference.of.nullable")  // is never null for not empty deque
+        int openedPosition = !positionHistories.isEmpty() ? positionHistories.peekLast().getOpenedPositions() : 0;
         for (Transaction transaction : transactions) {
             openedPosition += transaction.getCount();
             positionHistories.add(new PositionHistory(transaction, openedPosition));
@@ -117,7 +119,8 @@ public class FifoPositions {
                                 Deque<ClosedPosition> closedPositions) {
         int closingCount = abs(closing.getCount());
         while (!openedPositions.isEmpty() && closingCount > 0) {
-            @Nullable OpenedPosition opening = openedPositions.peek();
+            @SuppressWarnings("assignment")
+            OpenedPosition opening = openedPositions.peek();  // is never null for not empty deque
             int openedCount = abs(opening.getUnclosedPositions());
             if (openedCount <= closingCount) {
                 openedPositions.remove();

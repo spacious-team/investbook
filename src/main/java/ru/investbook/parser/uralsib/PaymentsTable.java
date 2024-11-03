@@ -164,7 +164,7 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
 
     protected Integer getSecurityCount(Security security, Instant atInstant) {
         int count = securitiesIncomingCount.stream()
-                .filter(i -> i.getSecurity().getId().equals(security.getId()))
+                .filter(i -> Objects.equals(i.getSecurity().getId(), security.getId()))
                 .map(ReportSecurityInformation::getIncomingCount)
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("Не найдено количество на начало периода отчета для ЦБ " + security));

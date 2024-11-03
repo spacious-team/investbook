@@ -90,22 +90,22 @@ public class EventCashFlowFormsService {
     }
 
     private void saveSecurityEventCashFlow(EventCashFlowModel e) {
-        int savedSecurityId = securityRepositoryHelper.saveSecurity(requireNonNull(e.getAttachedSecurity()));
+        EventCashFlowModel.AttachedSecurity attachedSecurity = requireNonNull(e.getAttachedSecurity());
+        int savedSecurityId = securityRepositoryHelper.saveSecurity(attachedSecurity);
         SecurityEventCashFlowEntity entity = securityEventCashFlowRepository.save(
                 securityEventCashFlowConverter.toEntity(SecurityEventCashFlow.builder()
                         // no id(), it is always the new object
                         .portfolio(e.getPortfolio())
                         .timestamp(e.getDate().atTime(e.getTime()).atZone(zoneId).toInstant())
                         .security(savedSecurityId)
-                        .count(requireNonNull(e.getAttachedSecurity().getCount()))
+                        .count(requireNonNull(attachedSecurity.getCount()))
                         .eventType(e.getType())
                         .value(e.getValue())
                         .currency(e.getValueCurrency())
                         .build()));
         Optional.ofNullable(e.getId()).ifPresent(this::delete);
         e.setId(null);
-        requireNonNull(e.getAttachedSecurity())
-                .setSecurityEventCashFlowId(entity.getId()); // used in view
+        attachedSecurity.setSecurityEventCashFlowId(entity.getId()); // used in view
         securityEventCashFlowRepository.flush();
     }
 

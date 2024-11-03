@@ -57,7 +57,7 @@ public class SqlDataImporter {
             Instant t0 = Instant.now();
             Path absolutePath = path.toAbsolutePath().normalize();
             String command = "RUNSCRIPT FROM '" + absolutePath + "' CHARSET 'UTF-8'";
-            boolean isH2v1_xFile = path.getFileName().toString().contains("2022.9");
+            boolean isH2v1_xFile = String.valueOf(path.getFileName()).contains("2022.9");
             if (isH2v1_xFile) {
                 command += " FROM_1X";
             }

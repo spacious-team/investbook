@@ -30,6 +30,7 @@ import java.util.Optional;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
+import static java.util.Objects.requireNonNull;
 
 @Slf4j
 public class MoexJsonResponseParser {
@@ -46,8 +47,7 @@ public class MoexJsonResponseParser {
             for (List<Object> obj : dataObjects) {
                 HashMap<String, Object> namedObject = new HashMap<>();
                 for (int i = 0, cnt = obj.size(); i < cnt; i++) {
-                    //noinspection DataFlowIssue
-                    namedObject.put(columnNames.get(i), obj.get(i));
+                    namedObject.put(requireNonNull(columnNames).get(i), obj.get(i));
                 }
                 namedItems.add(unmodifiableMap(namedObject));
             }
