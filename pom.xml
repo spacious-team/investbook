@@ -302,7 +302,7 @@
                         <!-- Классы Entity(Pk)?_ сгенерированы hibernate-jpamodelgen -->
                         <arg>-AskipDefs=(Test$|V2022_1_0_1|Entity(Pk)?_$|generated.ValCurs)</arg>
                         <!-- Checker framework inner file https://github.com/typetools/checker-framework/blob/master/checker/src/main/java/org/checkerframework/checker/nullness/permit-nullness-assertion-exception.astub -->
-                        <arg>-Astubs=permit-nullness-assertion-exception.astub${path.separator}checkerframework.astub</arg>
+                        <arg>-Astubs=permit-nullness-assertion-exception.astub${path.separator}${project.basedir}/checkerframework.astub</arg>
                         <arg>-AsuppressWarnings=methodref,type.arguments.not.inferred,lambda.param,expression.unparsable</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
