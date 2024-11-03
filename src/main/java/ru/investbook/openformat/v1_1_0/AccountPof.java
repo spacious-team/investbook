@@ -54,7 +54,9 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 @Slf4j
 public class AccountPof {
 
+    @SuppressWarnings("type.argument")
     private static final ThreadLocal<AtomicInteger> idGenerator = ThreadLocal.withInitial(AtomicInteger::new);
+    @SuppressWarnings("type.argument")
     private static final ThreadLocal<Map<String, Integer>> accountNumberToIdMap = ThreadLocal.withInitial(HashMap::new);
 
     @JsonProperty("id")

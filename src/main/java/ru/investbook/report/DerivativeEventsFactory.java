@@ -52,6 +52,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singleton;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 @Component
@@ -78,7 +79,8 @@ public class DerivativeEventsFactory {
         BigDecimal totalProfit = BigDecimal.ZERO;
         int currentPosition = 0;
         @Nullable LocalDate currentDay = firstEventDate;
-        while (currentDay != null && currentDay.compareTo(lastEventDate) <= 0) {
+        //noinspection ConstantValue
+        while (nonNull(currentDay) && nonNull(lastEventDate) && currentDay.compareTo(lastEventDate) <= 0) {
             Deque<Transaction> dailyTransactions = getDailyTransactions(transactions, currentDay);
             @Nullable SecurityEventCashFlow cash = securityEventCashFlows.get(currentDay);
             //noinspection ConstantValue

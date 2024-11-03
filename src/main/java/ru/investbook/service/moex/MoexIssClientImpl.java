@@ -20,6 +20,7 @@ package ru.investbook.service.moex;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityQuote.SecurityQuoteBuilder;
 import org.spacious_team.broker.pojo.SecurityType;
@@ -173,7 +174,7 @@ public class MoexIssClientImpl implements MoexIssClient {
         return quote;
     }
 
-    public boolean isDerivativeAndExpired(String shortnameOrSecid, SecurityType securityType) {
+    public boolean isDerivativeAndExpired(@Nullable String shortnameOrSecid, SecurityType securityType) {
         try {
             if (securityType == DERIVATIVE && shortnameOrSecid != null) {
                 int currentYear = getCurrentYear();

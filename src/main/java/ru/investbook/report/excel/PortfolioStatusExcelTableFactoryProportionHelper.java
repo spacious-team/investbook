@@ -94,7 +94,7 @@ public class PortfolioStatusExcelTableFactoryProportionHelper {
                 .multiply(toBigDecimal(record.get(COUNT)));
     }
 
-    private static BigDecimal toBigDecimal(Object value) {
+    private static BigDecimal toBigDecimal(@Nullable Object value) {
         if (value instanceof BigDecimal n) {
             return n;
         }

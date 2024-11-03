@@ -48,7 +48,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
@@ -106,7 +105,7 @@ public abstract class ExcelTableView {
      *
      * @param portfolio accept null or portfolio
      */
-    public <T extends Enum<T> & TableHeader> void createSheet(Portfolio portfolio,
+    public <T extends Enum<T> & TableHeader> void createSheet(@Nullable Portfolio portfolio,
                                                               Workbook book,
                                                               String sheetName,
                                                               Table table,
@@ -124,7 +123,7 @@ public abstract class ExcelTableView {
                 table.addFirst(totalRow);
             }
             int rowNum = 0;
-            for (Map<? extends TableHeader, Object> tableRow : table) {
+            for (Table.Record tableRow : table) {
                 Row row = sheet.createRow(++rowNum);
                 TableHeader[] tableHeader = requireNonNull(headerType.getEnumConstants());
                 for (TableHeader header : tableHeader) {

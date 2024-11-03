@@ -92,7 +92,7 @@ public class MoexSecurityQuoteHelper {
         }
     }
 
-    private static BigDecimal toBigDecimal(Object value) {
+    private static BigDecimal toBigDecimal(@Nullable Object value) {
         return BigDecimal.valueOf(
                 Double.parseDouble(
                         String.valueOf(

@@ -63,6 +63,7 @@ import static java.lang.Double.isFinite;
 import static java.lang.Double.parseDouble;
 import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
 import static org.spacious_team.broker.pojo.CashFlowType.CASH;
 import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_RUB;
@@ -133,10 +134,10 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     private void addInvestmentColumns(List<EventCashFlow> cashFlows, Table table) {
         for (EventCashFlow cashFlow : cashFlows) {
             Table.Record record = recordOf(table, cashFlow.getTimestamp(), cashFlow.getCurrency());
-            record.merge(INVESTMENT_AMOUNT, cashFlow.getValue(), (v1, v2) -> ((BigDecimal) v1).add(((BigDecimal) v2)));
-            record.computeIfAbsent(INVESTMENT_AMOUNT_USD, $ -> foreignExchangeRateTableFactory
+            record.merge(INVESTMENT_AMOUNT, cashFlow.getValue(), (v1, v2) -> ((BigDecimal) v1).add(requireNonNull(((BigDecimal) v2))));
+            record.computeIfAbsent(INVESTMENT_AMOUNT_USD, _ -> foreignExchangeRateTableFactory
                     .cashConvertToUsdExcelFormula(cashFlow.getCurrency(), INVESTMENT_AMOUNT, EXCHANGE_RATE));
-            record.computeIfAbsent(TOTAL_INVESTMENT_USD, $ ->
+            record.computeIfAbsent(TOTAL_INVESTMENT_USD, _ ->
                     "=SUM(" + INVESTMENT_AMOUNT_USD.getColumnIndex() + "3:" + INVESTMENT_AMOUNT_USD.getCellAddr() + ")");
         }
     }
@@ -234,6 +235,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         boolean isSp500ValueKnown = false;
         for (Table.Record record : table) {
             @Nullable LocalDate date = (LocalDate) record.get(DATE);
+            @SuppressWarnings("argument")
             @Nullable BigDecimal value = sp500.get(date);
             if (value != null) {
                 isSp500ValueKnown = true;

@@ -143,6 +143,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
         plotChart("Остаток денежных средств, USD", sheet, PortfolioAnalysisExcelTableView::addCashBalanceGraph);
     }
 
+    @SuppressWarnings("argument")
     private static void addInvestmentAndAssetsGraph(String name, Sheet sheet) {
         int rowCount = sheet.getLastRowNum();
         XSSFSheet _sheet = (XSSFSheet) sheet;
@@ -166,6 +167,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
         chart.plot(chartData);
     }
 
+    @SuppressWarnings("argument")
     private static void addPortfolioGrowthGraph(String name, Sheet sheet) {
         int rowCount = sheet.getLastRowNum();
         XSSFSheet _sheet = (XSSFSheet) sheet;

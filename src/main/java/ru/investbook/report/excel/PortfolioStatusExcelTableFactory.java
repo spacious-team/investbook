@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singleton;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.spacious_team.broker.pojo.SecurityType.*;
 import static ru.investbook.report.excel.PortfolioStatusExcelTableFactoryProportionHelper.setCurrentProportionFormula;
@@ -197,7 +198,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         SecurityType securityType = security.getType();
         row.put(SECURITY,
                 securityType == CURRENCY_PAIR ?
-                        getCurrencyPair(security.getTicker()) :
+                        getCurrencyPair(requireNonNull(security.getTicker())) :
                         ofNullable(security.getName())
                                 .or(() -> ofNullable(security.getTicker()))
                                 .orElse(security.getIsin()));
@@ -270,7 +271,6 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 row.put(TAX, securityProfitService.sumPaymentsForType(portfolios, security, CashFlowType.TAX, toCurrency).abs());
             }
             row.put(PROFIT, PROFIT_FORMULA);
-            //noinspection DataFlowIssue
             row.put(INTERNAL_RATE_OF_RETURN, internalRateOfReturn.calc(
                     portfolios, security, quote, filter.getFromDate(), filter.getToDate()));
             row.put(PROFIT_PROPORTION, PROFIT_PROPORTION_FORMULA);

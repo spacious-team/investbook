@@ -43,6 +43,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
 import static org.springframework.data.domain.Sort.Order.asc;
@@ -100,10 +102,10 @@ public class SecurityEventCashFlowFormsService {
                             .id(e.getTaxId())
                             .eventType(CashFlowType.TAX)
                             .value(e.getTax().negate())
-                            .currency(e.getTaxCurrency())
+                            .currency(requireNonNull(e.getTaxCurrency()))
                             .build()));
             e.setTaxId(entity.getId());
-        } else if (e.getTaxId() != null) { // taxId exists in db, but no tax value in edited version
+        } else if (nonNull(e.getTaxId())) { // taxId exists in db, but no tax value in edited version
             securityEventCashFlowRepository.deleteById(e.getTaxId());
         }
         securityEventCashFlowRepository.flush();

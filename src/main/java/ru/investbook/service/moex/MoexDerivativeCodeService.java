@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 import static java.lang.Character.isAlphabetic;
 import static java.lang.Character.isDigit;
 import static java.lang.Integer.parseInt;
+import static java.util.Objects.isNull;
 import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toMap;
 
@@ -197,6 +198,7 @@ public class MoexDerivativeCodeService {
     // 2000-th, 2010-th, 2020-th and so on
     private final int currentYearDecade = currentYear / 10 * 10;
 
+    @SuppressWarnings("argument")
     private MoexDerivativeCodeService() {
         this.shortnameToCodes = codeToShortnames.entrySet()
                 .stream()
@@ -431,8 +433,10 @@ public class MoexDerivativeCodeService {
      * For example for {@code MXI-6.21}, {@code MMM1}, {@code MXI-6.21M170621CA3000} and {@code MM3000BF1} returns "MM".
      * Returns empty optional if argument is not futures or optional.
      */
-    public Optional<String> getContractGroup(String contract) {
-        if (isFuturesShortname(contract) || isOptionShortname(contract)) {
+    public Optional<String> getContractGroup(@Nullable String contract) {
+        if (isNull(contract)) {
+            return empty();
+        } else if (isFuturesShortname(contract) || isOptionShortname(contract)) {
             String shortname = contract.substring(0, contract.indexOf('-'));
             return Optional.ofNullable(shortnameToCodes.get(shortname));
         } else if (isFuturesCode(contract) || isOptionCode(contract)) {

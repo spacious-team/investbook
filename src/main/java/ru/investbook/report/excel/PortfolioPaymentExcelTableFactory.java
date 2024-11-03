@@ -44,6 +44,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static ru.investbook.report.excel.PortfolioPaymentExcelTableHeader.*;
 
@@ -113,7 +114,7 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
                 table.add(record);
                 sumRowCount++;
             }
-            calcTotalRecord(monthTotalRecord, month, sumRowCount);
+            calcTotalRecord(monthTotalRecord, requireNonNull(month), sumRowCount);
             if (!cashFlows.isEmpty()) {
                 foreignExchangeRateTableFactory.appendExchangeRates(table, CURRENCY_NAME, EXCHANGE_RATE);
             }

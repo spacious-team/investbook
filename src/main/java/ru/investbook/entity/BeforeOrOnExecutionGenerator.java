@@ -74,6 +74,7 @@ class BeforeOrOnExecutionGenerator implements BeforeExecutionGenerator, OnExecut
     public boolean generatedOnExecution(Object entity, SharedSessionContractImplementor session) {
         try {
             EventType eventType = beforeExecutionGenerator.getEventTypes().iterator().next();
+            @SuppressWarnings("argument")
             Object id = beforeExecutionGenerator.generate(session, entity, null, eventType);
             return isNull(id);
         } catch (Exception e) {

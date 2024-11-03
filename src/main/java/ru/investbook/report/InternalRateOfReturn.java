@@ -72,11 +72,11 @@ public class InternalRateOfReturn {
      * Возвращает внутреннюю норму доходности вложений. Не рассчитывается для срочных инструментов, т.к.
      * вложение (гарантийное обеспечение) не хранится на данный момент в БД.
      *
-     * @param quote may be null only if current security position is zero
-     * @return internal rate of return if can be calculated or null otherwise
+     * @param quote may be null, if current security position equals to 0. Otherwise, null result is returned
+     * @return internal rate of return, if it can be calculated, or null otherwise
      */
     public @Nullable Double calc(
-            Collection<String> portfolios, Security security, SecurityQuote quote, Instant fromDate, Instant toDate) {
+            Collection<String> portfolios, Security security, @Nullable SecurityQuote quote, Instant fromDate, Instant toDate) {
 
         try {
             boolean isDerivative = (security.getType() == DERIVATIVE);
@@ -138,12 +138,12 @@ public class InternalRateOfReturn {
                 toLocalDate(cashFlowEntity.getTimestamp()));
     }
 
-    private Optional<org.decampo.xirr.Transaction> castToXirrTransaction(SecurityQuote quote,
+    private Optional<org.decampo.xirr.Transaction> castToXirrTransaction(@Nullable SecurityQuote quote,
                                                                          String toCurrency, int positionCount,
                                                                          SecurityType securityType) {
         return ofNullable(quote)
                 .map(_quote -> _quote.getDirtyPriceInCurrency(securityType == DERIVATIVE))
-                .map(dirtyPrice -> convertToCurrency(dirtyPrice, quote.getCurrency(), toCurrency))
+                .map(dirtyPrice -> convertToCurrency(dirtyPrice, requireNonNull(quote.getCurrency()), toCurrency))
                 .map(dirtyPrice -> new org.decampo.xirr.Transaction(
                         positionCount * dirtyPrice.doubleValue(),
                         toLocalDate(quote.getTimestamp())));

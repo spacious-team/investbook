@@ -193,7 +193,7 @@ public class InvestbookApiClient {
             persistFunction.accept(object);
             return true;
         } catch (ConstraintViolationException e) {  // jakarta.validation, not SQL constraint
-            log.warn("{} {}: {}", errorMsg, object, e.getMessage());
+            log.warn("{}, {}: {}", errorMsg, e.getMessage(), object);
             return false;
         } catch (Exception e) {
             if (isUniqIndexViolationException(e)) {
@@ -219,7 +219,7 @@ public class InvestbookApiClient {
             return Optional.of(result.object());
         } catch (Exception e) {
             // should not be thrown for duplicate
-            log.warn("{} {}: {}", errorMsg, object, e.getMessage());
+            log.warn("{}, {}: {}", errorMsg, e.getMessage(), object);
             return Optional.empty();
         }
     }

@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
@@ -121,7 +122,8 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
             Matcher matcher = clientCodePattern.matcher(account);
             //noinspection ResultOfMethodCallIgnored
             matcher.find();
-            return Integer.parseInt(matcher.group(1));
+            String value = requireNonNull(matcher.group(1));
+            return Integer.parseInt(value);
         } catch (Exception e) {
             throw new RuntimeException("Не могу найти код клиента для субсчета " + account);
         }

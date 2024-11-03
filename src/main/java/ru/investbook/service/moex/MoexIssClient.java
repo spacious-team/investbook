@@ -18,6 +18,7 @@
 
 package ru.investbook.service.moex;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityType;
 
@@ -38,7 +39,7 @@ public interface MoexIssClient {
      *
      * @return true if Moex hasn't quotes
      */
-    boolean isDerivativeAndExpired(String shortnameOrSecid, SecurityType securityType);
+    boolean isDerivativeAndExpired(@Nullable String shortnameOrSecid, SecurityType securityType);
 
     /**
      * @param contract option's code (moex secid) in {@code Si65000BC9}, {@code Si65000BC9D}, {@code RI180000BD1} or

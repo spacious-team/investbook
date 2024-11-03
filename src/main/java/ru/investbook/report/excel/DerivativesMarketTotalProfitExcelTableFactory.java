@@ -53,6 +53,7 @@ import java.util.Set;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.*;
 import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
@@ -184,7 +185,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
         ViewFilter filter = ViewFilter.get();
         FifoPositionsFilter pf = FifoPositionsFilter.of(portfolios, filter.getFromDate(), filter.getToDate());
         return contracts.stream()
-                .map(contract -> positionsFactory.getTransactions(contract.getId(), pf))
+                .map(contract -> positionsFactory.getTransactions(requireNonNull(contract.getId()), pf))
                 .flatMap(Collection::stream)
                 .sorted(Comparator.comparing(Transaction::getTimestamp))
                 .collect(toCollection(LinkedList::new));

@@ -49,6 +49,7 @@ import java.util.regex.Pattern;
 
 import static java.lang.Character.isLetterOrDigit;
 import static java.lang.Double.parseDouble;
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 import static ru.investbook.parser.uralsib.UralsibBrokerReport.convertToCurrency;
 
@@ -133,7 +134,7 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
         throw new RuntimeException("Не могу найти ISIN ценной бумаги в отчете брокера по событию:" + description);
     }
 
-    private boolean contains(String description, String securityParameter) {
+    private boolean contains(String description, @Nullable String securityParameter) {
         if (securityParameter == null) {
             return false;
         }
@@ -152,7 +153,8 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
         Matcher matcher = taxInformationPattern.matcher(description.toLowerCase());
         if (matcher.find()) {
             try {
-                return BigDecimal.valueOf(parseDouble(matcher.group(1)));
+                String value = requireNonNull(matcher.group(1));
+                return BigDecimal.valueOf(parseDouble(value));
             } catch (Exception e) {
                 log.info("Не смогу выделить сумму налога из описания: {}", description);
             }

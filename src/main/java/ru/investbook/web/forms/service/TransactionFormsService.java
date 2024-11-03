@@ -66,6 +66,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.Math.abs;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.springframework.data.domain.Sort.Order.asc;
 import static org.springframework.data.domain.Sort.Order.desc;
@@ -142,8 +144,8 @@ public class TransactionFormsService {
                     BigDecimal valueInPoints = tr.getPrice().multiply(multiplier);
                     if (tr.hasDerivativeTickValue()) {
                         value = valueInPoints
-                                .multiply(tr.getPriceTickValue())
-                                .divide(tr.getPriceTick(), 6, RoundingMode.HALF_UP);
+                                .multiply(requireNonNull(tr.getPriceTickValue()))
+                                .divide(requireNonNull(tr.getPriceTick()), 6, RoundingMode.HALF_UP);
                     }
                     yield DerivativeTransaction.builder()
                             .valueInPoints(valueInPoints)
@@ -168,9 +170,11 @@ public class TransactionFormsService {
             };
         }
 
-        @SuppressWarnings("DataFlowIssue")
+        if (nonNull(tr.getId())) {  // is null for new object
+            builder.id(tr.getId());
+        }
+
         AbstractTransaction transaction = builder
-                .id(tr.getId())
                 .tradeId(tr.getTradeId())
                 .portfolio(tr.getPortfolio())
                 .timestamp(tr.getDate().atTime(tr.getTime()).atZone(zoneId).toInstant())
@@ -294,7 +298,7 @@ public class TransactionFormsService {
                         m.setPriceTick(BigDecimal.ONE); // information not stored in db, normalizing
                         m.setPriceTickValue(value.getValue()
                                 .divide(BigDecimal.valueOf(m.getCount()), 6, RoundingMode.HALF_UP)
-                                .divide(m.getPrice(), 6, RoundingMode.HALF_UP)
+                                .divide(requireNonNull(m.getPrice()), 6, RoundingMode.HALF_UP)
                                 .abs());
                         m.setPriceTickValueCurrency(value.getCurrency());
                     });

@@ -77,7 +77,7 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
                 codeToFaceValue.put(code, faceValue);
             }
 
-            @Nullable String shortName = row.getStringCellValueOrDefault(SHORT_NAME, null);
+            String shortName = row.getStringCellValueOrDefault(SHORT_NAME, "");
             if (hasLength(shortName)) {
                 shortNameToCode.put(shortName, code);
             }
@@ -89,7 +89,7 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         initializeIfNeed();
         @Nullable String isin = codeToIsin.get(code);
         if (isin == null) {
-            @Nullable String codeFromName = shortNameToCode.get(shortName);
+            String codeFromName = shortNameToCode.getOrDefault(shortName, "");
             isin = codeToIsin.get(codeFromName);
         }
         return requireNonNull(isin, "Не найден ISIN");
@@ -99,7 +99,7 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         initializeIfNeed();
         @Nullable SecurityType type = codeToType.get(code);
         if (type == null) {
-            @Nullable String codeFromName = shortNameToCode.get(shortName);
+            String codeFromName = shortNameToCode.getOrDefault(shortName, "");
             type = codeToType.get(codeFromName);
         }
         return requireNonNull(type, "Не найден тип ценной бумаги");
@@ -109,7 +109,7 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         initializeIfNeed();
         @Nullable BigDecimal faceValue = codeToFaceValue.get(code);
         if (faceValue == null) {
-            @Nullable String codeFromName = shortNameToCode.get(shortName);
+            String codeFromName = shortNameToCode.getOrDefault(shortName, "");
             faceValue = codeToFaceValue.get(codeFromName);
         }
         return requireNonNull(faceValue, "Не найдена номинальная стоимость облигации");

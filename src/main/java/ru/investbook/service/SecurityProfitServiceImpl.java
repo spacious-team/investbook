@@ -75,13 +75,14 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
     public Optional<Instant> getLastEventTimestamp(
             Collection<String> portfolios, Security security, Set<Integer> events, Instant from, Instant to) {
 
+        Integer securityId = requireNonNull(security.getId());
         Optional<SecurityEventCashFlowEntity> optional = portfolios.isEmpty() ?
                 securityEventCashFlowRepository
                         .findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                security.getId(), events, from, to) :
+                                securityId, events, from, to) :
                 securityEventCashFlowRepository
                         .findFirstByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                portfolios, security.getId(), events, from, to);
+                                portfolios, securityId, events, from, to);
         return optional.map(SecurityEventCashFlowEntity::getTimestamp);
     }
 
@@ -222,17 +223,18 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
     private List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
                                                                                Security security,
                                                                                CashFlowType cashFlowType) {
+        Integer securityId = requireNonNull(security.getId());
         return portfolios.isEmpty() ?
                 securityEventCashFlowRepository
                         .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                security.getId(),
+                                securityId,
                                 cashFlowType.getId(),
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate()) :
                 securityEventCashFlowRepository
                         .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                                 portfolios,
-                                security.getId(),
+                                securityId,
                                 cashFlowType.getId(),
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate());
@@ -267,7 +269,8 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
 
     @Override
     public Optional<BigDecimal> getSecurityQuoteFromLastTransaction(Security security, String toCurrency) {
-        return transactionRepository.findFirstBySecurityIdOrderByTimestampDesc(security.getId())
+        //noinspection ReturnOfNull
+        return transactionRepository.findFirstBySecurityIdOrderByTimestampDesc(requireNonNull(security.getId()))
                 .map(t -> transactionCashFlowRepository
                         .findByTransactionIdAndCashFlowTypeIn(t.getId(), priceAndAccruedInterestTypes)
                         .stream()

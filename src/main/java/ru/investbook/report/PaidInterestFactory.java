@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singleton;
+import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
 
 @Component
@@ -69,7 +70,7 @@ public class PaidInterestFactory {
         for (CashFlowType type : PAY_TYPES) {
             paidInterest.get(type)
                     .putAll(getPositionWithPayments(
-                            portfolio, security.getId(), positions, type, fromDate, toDate));
+                            portfolio, requireNonNull(security.getId()), positions, type, fromDate, toDate));
         }
         return paidInterest;
     }
@@ -103,12 +104,12 @@ public class PaidInterestFactory {
 
                 getPayments(cash, paidPositions).forEach((position, cashs) ->
                         cashs.forEach(securityCash ->
-                                payments.computeIfAbsent(position, p -> new ArrayList<>())
+                                payments.computeIfAbsent(position, _ -> new ArrayList<>())
                                         .add(securityCash)));
             } catch (Exception e) {
                 log.warn("{}, выплата будет отображена в отчете по фиктивной позиции покупки ЦБ от даты {}",
                         e.getMessage(), PaidInterest.fictitiousPositionInstant);
-                payments.computeIfAbsent(PaidInterest.getFictitiousPositionPayment(cash), key -> new ArrayList<>())
+                payments.computeIfAbsent(PaidInterest.getFictitiousPositionPayment(cash), _ -> new ArrayList<>())
                         .add(cash);
             }
         }
@@ -165,7 +166,7 @@ public class PaidInterestFactory {
             BigDecimal pay = payPerOne
                     .multiply(BigDecimal.valueOf(count))
                     .setScale(6, RoundingMode.HALF_UP);
-            payments.computeIfAbsent(position, key -> new ArrayList<>())
+            payments.computeIfAbsent(position, _ -> new ArrayList<>())
                     .add(cash.toBuilder()
                             .count(count)
                             .value(pay)

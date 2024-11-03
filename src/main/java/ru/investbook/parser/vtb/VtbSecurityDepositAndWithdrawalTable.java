@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.vtb.VtbSecurityFlowTable.VtbSecurityFlowTableHeader.*;
 
 public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportTable<SecurityTransaction> {
@@ -69,8 +70,9 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
         String description = row.getStringCellValue(NAME_REGNUMBER_ISIN);
         Security security = VtbReportHelper.getSecurity(description);
         Instant timestamp = row.getInstantCellValue(DATE);
-        String tradeId = generateTradeId(portfolio, timestamp, security.getIsin());
-        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(security.getIsin(), security::toBuilder);
+        String isin = requireNonNull(security.getIsin());
+        String tradeId = generateTradeId(portfolio, timestamp, isin);
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(isin, security::toBuilder);
 
         return SecurityTransaction.builder()
                         .tradeId(tradeId)

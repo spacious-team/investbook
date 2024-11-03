@@ -1,0 +1,76 @@
+/*
+ * InvestBook
+ * Copyright (C) 2024  Spacious Team <spacious-team@ya.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
+
+package java.util;
+public class Objects {
+
+    @EnsuresNonNull("#1")
+    static <T> T requireNonNull(@Nullable T obj);
+
+    @EnsuresNonNull("#1")
+    static <T> T requireNonNull(@Nullable T obj, String message);
+
+    @EnsuresNonNull("#1")
+    static <T> T requireNonNull(@Nullable T obj, Supplier<String> messageSupplier);
+
+    @EnsuresNonNullIf(expression="#1", result=true)
+    static boolean nonNull(@Nullable Object obj);
+
+    @EnsuresNonNullIf(expression="#1", result=false)
+    static boolean isNull(@Nullable Object obj);
+}
+
+
+package org.springframework.util;
+class StringUtils {
+
+    @EnsuresNonNullIf(expression="#1", result=true)
+    static boolean hasText(@Nullable CharSequence str);
+
+    @EnsuresNonNullIf(expression="#1", result=true)
+    static boolean hasText(@Nullable String str);
+
+    @EnsuresNonNullIf(expression="#1", result=true)
+    static boolean hasLength(@Nullable CharSequence str);
+
+    @EnsuresNonNullIf(expression="#1", result=true)
+    static boolean hasLength(@Nullable String str);
+}
+
+
+package org.springframework.util;
+class CollectionUtils {
+
+    @EnsuresNonNullIf(expression="#1", result=false)
+    static boolean isEmpty(@Nullable Collection<?> collection);
+
+    @EnsuresNonNullIf(expression="#1", result=false)
+    static boolean isEmpty(@Nullable Map<?, ?> map);
+}
+
+
+package org.slf4j;
+interface Logger {
+
+    void warn(String format, @Nullable Object arg1, @Nullable Object arg2);
+
+    void warn(String format, @Nullable Object... arguments);
+}

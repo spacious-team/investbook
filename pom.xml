@@ -304,10 +304,10 @@
                         <!-- Checker framework inner file https://github.com/typetools/checker-framework/blob/master/checker/src/main/java/org/checkerframework/checker/nullness/permit-nullness-assertion-exception.astub -->
                         <!-- Append ${path.separator}collection-object-parameters-may-be-null.astub
                              for https://checkerframework.org/manual/#nullness-collection-arguments -->
-                        <arg>-Astubs=permit-nullness-assertion-exception.astub</arg>
+                        <arg>-Astubs=permit-nullness-assertion-exception.astub${path.separator}checkerframework.astub</arg>
                         <!-- TODO Remove suppressions, кроме:
                                   methodref (Checker Framework не корректно выводит типы ссылок на методы) -->
-                        <arg>-AsuppressWarnings=dereference.of.nullable,argument,methodref,type.arguments.not.inferred,lambda.param,expression.unparsable</arg>
+                        <arg>-AsuppressWarnings=dereference.of.nullable,methodref,type.arguments.not.inferred,lambda.param,expression.unparsable</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>

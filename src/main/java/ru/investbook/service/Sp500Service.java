@@ -41,6 +41,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 
 @Service
@@ -71,11 +72,12 @@ public class Sp500Service {
     }
 
     private void updateBy(@Nullable Resource resource) throws IOException {
-        Objects.requireNonNull(resource, () -> "Не удалось скачать S&P 500 с адреса " + uri);
+        requireNonNull(resource, () -> "Не удалось скачать S&P 500 с адреса " + uri);
         Workbook book = new HSSFWorkbook(resource.getInputStream());
         new ExcelSheet(book.getSheetAt(0))
                 .createNameless("Effective date", TableHeader.class)
                 .stream()
+                .filter(Objects::nonNull)
                 .map(Sp500Service::getIndexValue)
                 .forEach(this::save);
     }

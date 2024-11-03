@@ -27,7 +27,6 @@ import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.SingularAttribute;
 import lombok.NoArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.springframework.lang.NonNull;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.PortfolioEntity_;
 import ru.investbook.entity.SecurityEntity;
@@ -189,7 +188,7 @@ class SpecificationHelper {
         return null;
     }
 
-    private static Predicate filterByLike(CriteriaBuilder builder, Path<String> path, @NonNull String value) {
+    private static Predicate filterByLike(CriteriaBuilder builder, Path<String> path, String value) {
         return builder.like(builder.lower(path), "%" + value.toLowerCase() + "%");
     }
 }

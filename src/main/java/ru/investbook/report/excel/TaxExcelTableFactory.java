@@ -19,6 +19,7 @@
 package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Portfolio;
@@ -82,7 +83,7 @@ public class TaxExcelTableFactory implements TableFactory {
         table.add(record);
     }
 
-    static boolean isDividendOrCouponTax(String description) {
+    static boolean isDividendOrCouponTax(@Nullable String description) {
         if (description == null) {
             return false;
         }

@@ -41,6 +41,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
+
 public class CbrForeignExchangeRateServiceExcelImpl extends AbstractCbrForeignExchangeRateService {
     private static final String uri = "https://www.cbr.ru/Queries/UniDbQuery/DownloadExcel/98956?" +
             "VAL_NM_RQ={currency}&" +
@@ -71,13 +73,13 @@ public class CbrForeignExchangeRateServiceExcelImpl extends AbstractCbrForeignEx
     }
 
     private void updateBy(@Nullable Resource resource, String currencyPair) throws IOException {
-        Objects.requireNonNull(resource, () -> "Не удалось скачать курсы валют");
+        requireNonNull(resource, "Не удалось скачать курсы валют");
         Workbook book = new XSSFWorkbook(resource.getInputStream());
         new ExcelSheet(book.getSheetAt(0))
                 .createNameless("data", TableHeader.class)
                 .stream()
                 .filter(Objects::nonNull)
-                .map(row -> getRate(row, currencyPair))
+                .map(row -> getRate(requireNonNull(row), currencyPair))
                 .forEach(this::save);
     }
 

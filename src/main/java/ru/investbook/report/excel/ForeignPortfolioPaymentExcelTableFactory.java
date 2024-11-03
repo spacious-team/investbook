@@ -20,7 +20,7 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Portfolio;
@@ -36,7 +36,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
-import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,6 +43,8 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.time.format.TextStyle.FULL_STANDALONE;
+import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static ru.investbook.report.excel.ForeignPortfolioPaymentExcelTableHeader.*;
 import static ru.investbook.report.excel.TaxExcelTableFactory.isDividendOrCouponTax;
@@ -87,7 +88,7 @@ public class ForeignPortfolioPaymentExcelTableFactory implements TableFactory {
             table.add(new Table.Record());
             Table.Record monthTotalRecord = new Table.Record();
             table.add(monthTotalRecord);
-            @Nullable Month month = null;
+            @MonotonicNonNull Month month = null;
             int sumRowCount = 0;
             for (EventCashFlow cash : cashFlows) {
                 Instant timestamp = cash.getTimestamp();
@@ -112,7 +113,7 @@ public class ForeignPortfolioPaymentExcelTableFactory implements TableFactory {
                 table.add(record);
                 sumRowCount++;
             }
-            calcTotalRecord(monthTotalRecord, month, sumRowCount);
+            calcTotalRecord(monthTotalRecord, requireNonNull(month), sumRowCount);
             if (!cashFlows.isEmpty()) {
                 foreignExchangeRateTableFactory.appendExchangeRates(table, CURRENCY_NAME, EXCHANGE_RATE);
             }
@@ -122,7 +123,7 @@ public class ForeignPortfolioPaymentExcelTableFactory implements TableFactory {
 
     private void calcTotalRecord(Table.Record monthTotalRecord, Month month, int sumRowCount) {
         if (sumRowCount != 0) {
-            monthTotalRecord.put(DATE, StringUtils.capitalize(month.getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault())));
+            monthTotalRecord.put(DATE, StringUtils.capitalize(month.getDisplayName(FULL_STANDALONE, Locale.getDefault())));
             monthTotalRecord.put(CASH_RUB, "=SUM(OFFSET(" + CASH_RUB.getCellAddr() + ",1,0," + sumRowCount + ",1))");
         }
     }
