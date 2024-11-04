@@ -39,7 +39,8 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static java.math.RoundingMode.HALF_UP;
-import static java.util.Objects.requireNonNull;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.parser.tinkoff.TinkoffSecurityQuoteTable.SecurityQuoteTableHeader.*;
 import static ru.investbook.parser.tinkoff.TinkoffSecurityTransactionTableHelper.declareSecurity;
@@ -81,8 +82,10 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
     protected @Nullable SecurityQuote parseRow(TableRow row) {
         adjustSecuritiesValueEstimate(row);
 
+        @SuppressWarnings("DataFlowIssue")
         @Nullable BigDecimal price = row.getBigDecimalCellValueOrDefault(PRICE, null);
-        if (price == null) {
+        //noinspection ConstantValue
+        if (isNull(price)) {
             return null;
         }
 
@@ -118,8 +121,10 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
 
     private void adjustSecuritiesValueEstimate(TableRow row) {
         try {
+            @SuppressWarnings("DataFlowIssue")
             @Nullable BigDecimal value = row.getBigDecimalCellValueOrDefault(VALUE, null);
-            if (value != null) {
+            //noinspection ConstantValue
+            if (nonNull(value)) {
                 String currency = row.getStringCellValue(CURRENCY);
                 if (currency.equalsIgnoreCase("RUB")) {
                     rubSecuritiesTotalValue = rubSecuritiesTotalValue.add(value);
@@ -140,12 +145,13 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
 
     private Optional<Security> getSecurityId(TableRow row) {
         try {
+            @SuppressWarnings("DataFlowIssue")
             @Nullable String code = row.getStringCellValueOrDefault(CODE, null);
             if (hasLength(code)) {
                 BigDecimal accruedInterest = row.getBigDecimalCellValueOrDefault(ACCRUED_INTEREST, BigDecimal.ZERO);
                 boolean isBond = accruedInterest.floatValue() > 1e-3;
                 Security security = TinkoffSecurityTransactionTableHelper.getSecurity(
-                        requireNonNull(code),
+                        code,
                         codeAndIsin,
                         row.getStringCellValue(SHORT_NAME),
                         isBond ? SecurityType.BOND : SecurityType.STOCK);
@@ -166,6 +172,7 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
         return usdSecuritiesTotalValue;
     }
 
+    @Getter
     @RequiredArgsConstructor
     protected enum SecurityQuoteTableHeader implements TableHeaderColumn {
         SHORT_NAME("Сокращенное", "наименование", "актива"),
@@ -176,7 +183,6 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
         CURRENCY(optional("Валюта", "цены")),
         VALUE(optional("Рыночная", "стои", "мость")); // на все бумаги исходящего остатка с учетом НКД
 
-        @Getter
         private final TableColumn column;
 
         SecurityQuoteTableHeader(String... words) {
