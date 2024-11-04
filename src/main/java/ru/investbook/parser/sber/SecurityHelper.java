@@ -38,39 +38,38 @@ public class SecurityHelper {
         @Nullable String securityId = getSecurityId(code, section);
         SecurityType securityType = getSecurityType(section, type);
         Security.SecurityBuilder security = Security.builder().type(securityType);
-        int id = -1;
-        switch (securityType) {
+        int id = switch (securityType) {
             case STOCK, BOND, STOCK_OR_BOND -> {
                 security
                         .isin(securityId)
                         .name(securityName);
                 if (securityId == null) {
-                    id = Optional.ofNullable(securityName)
+                    yield Optional.ofNullable(securityName)
                             .map(name -> securityRegistrar.declareStockOrBondByName(name, () -> security))
                             .orElseThrow();
                 } else {
-                    id = securityRegistrar.declareStockOrBondByIsin(securityId, () -> security);
+                    yield securityRegistrar.declareStockOrBondByIsin(securityId, () -> security);
                 }
             }
             case DERIVATIVE -> {
                 security.ticker(securityId);
-                id = Optional.ofNullable(securityId)
+                yield Optional.ofNullable(securityId)
                         .map(securityRegistrar::declareDerivative)
                         .orElseThrow();
             }
             case CURRENCY_PAIR -> {
                 security.ticker(securityId);
-                id = Optional.ofNullable(securityId)
+                yield Optional.ofNullable(securityId)
                         .map(securityRegistrar::declareCurrencyPair)
                         .orElseThrow();
             }
             case ASSET -> {
                 security.name(securityId);
-                id = Optional.ofNullable(securityId)
+                yield Optional.ofNullable(securityId)
                         .map(asset -> securityRegistrar.declareAsset(asset, () -> security))
                         .orElseThrow();
             }
-        }
+        };
         return security.id(id).build();
     }
 
