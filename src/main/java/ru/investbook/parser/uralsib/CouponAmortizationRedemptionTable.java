@@ -25,7 +25,6 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
@@ -37,7 +36,8 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
-import static java.util.Objects.*;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
@@ -110,7 +110,8 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
         return nonNull(redemptionDate) && redemptionDate.equals(LocalDate.ofInstant(amortizationDay, getReport().getReportZoneId()));
     }
 
-    protected BigDecimal getTax(Table table, TableRow row) {
+    @Override
+    protected BigDecimal getTax(TableRow row) {
         // информация о налоге по купонам облигаций не выводится в отчет брокера
         return BigDecimal.ZERO;
     }
