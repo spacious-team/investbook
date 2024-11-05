@@ -56,7 +56,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
     protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
         @Nullable CashFlowType event;
         String action = row.getStringCellValue(OPERATION);
-        action = String.valueOf(action).toLowerCase().trim();
+        action = action.toLowerCase().trim();
         if (action.equalsIgnoreCase("погашение купона")) {
             event = CashFlowType.COUPON;
         } else if (action.equalsIgnoreCase("погашение номинала")) { // и амортизация и погашение
@@ -70,7 +70,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
         Instant timestamp = convertToInstant(row.getStringCellValue(DATE));
 
         if (event == null) {
-            if (isRedemption(security.getName(), timestamp)) {
+            if (isRedemption(requireNonNull(security.getName()), timestamp)) {
                 event = CashFlowType.REDEMPTION;
             } else {
                 event = CashFlowType.AMORTIZATION;
@@ -100,10 +100,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
         return data;
     }
 
-    private boolean isRedemption(@Nullable String securityName, Instant amortizationDay) {
-        if (isNull(securityName)) {
-            return false;
-        }
+    private boolean isRedemption(String securityName, Instant amortizationDay) {
         @Nullable LocalDate redemptionDate = redemptionDates.stream()
                 .filter(e -> securityName.equalsIgnoreCase(e.getKey()))
                 .map(Map.Entry::getValue)
