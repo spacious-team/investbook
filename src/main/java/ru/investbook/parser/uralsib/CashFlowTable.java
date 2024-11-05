@@ -60,8 +60,8 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
                 Matcher matcherFrom = moneyTransferFromDescriptionPattern.matcher(description);
                 Matcher matcherTo = moneyTransferToDescriptionPattern.matcher(description);
                 if (matcherFrom.find() && matcherTo.find()) {
-                    @Nullable String to = matcherTo.group(1);
-                    @Nullable String from = matcherFrom.group(1);
+                    String to = requireNonNull(matcherTo.group(1));
+                    String from = requireNonNull(matcherFrom.group(1));
                     if (isCurrentPortfolioAccount(to) != isCurrentPortfolioAccount(from)) {
                         if (isExternalAccount(from) && isExternalAccount(to)) {
                             type = CashFlowType.CASH;
@@ -90,10 +90,7 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
                 .build();
     }
 
-    private boolean isCurrentPortfolioAccount(@Nullable String account) {
-        if (account == null) {
-            return false;
-        }
+    private boolean isCurrentPortfolioAccount(String account) {
         String portfolio = getReport().getPortfolio();
         boolean isIIS = portfolio.endsWith("I");
         if (account.startsWith("SPBFUT")) {
@@ -106,11 +103,8 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
         }
     }
 
-    private boolean isExternalAccount(@Nullable String account) {
+    private boolean isExternalAccount(String account) {
         try {
-            if (account == null) {
-                return false;
-            }
             return getClientCode(account) != 0;
         } catch (Exception ignore) {
             return true;  // current account != "00000[^0-9]*"
