@@ -35,7 +35,7 @@ import java.util.Set;
 import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.vtb.VtbSecurityFlowTable.VtbSecurityFlowTableHeader.*;
 
-public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportTable<SecurityTransaction> {
+public class VtbSecurityDepositAndWithdrawalTable extends SingleAbstractReportTable<SecurityTransaction> {
 
     static final String TABLE_NAME = "Движение ценных бумаг";
 
@@ -75,12 +75,12 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
         int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(isin, security::toBuilder);
 
         return SecurityTransaction.builder()
-                        .tradeId(tradeId)
-                        .timestamp(timestamp)
-                        .portfolio(portfolio)
-                        .security(securityId)
-                        .count(row.getIntCellValue(COUNT))
-                        .build();
+                .tradeId(tradeId)
+                .timestamp(timestamp)
+                .portfolio(portfolio)
+                .security(securityId)
+                .count(row.getIntCellValue(COUNT))
+                .build();
     }
 
     private String generateTradeId(String portfolio, Instant instant, String isin) {
@@ -95,8 +95,9 @@ public class VtbSecurityDepositAndWithdrawalTable  extends SingleAbstractReportT
         throw new RuntimeException("Can't generate trade id");
     }
 
-    public Optional<Integer> getBondRedemptionCount(String isin) {
+    public Optional<Integer> getBondRedemptionCount(@Nullable String isin) {
         initializeIfNeed();
-        return Optional.ofNullable(bondRedemptions.get(isin));
+        return Optional.ofNullable(isin)
+                .map(bondRedemptions::get);
     }
 }

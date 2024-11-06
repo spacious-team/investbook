@@ -81,7 +81,7 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
                         .intValueExact();
                 case AMORTIZATION -> value.divide(getAmortizationPerOneBond(lowercaseDescription), 2, RoundingMode.HALF_UP)
                         .intValueExact();
-                case REDEMPTION -> vtbSecurityDepositAndWithdrawalTable.getBondRedemptionCount(requireNonNull(security.getIsin()))
+                case REDEMPTION -> vtbSecurityDepositAndWithdrawalTable.getBondRedemptionCount(security.getIsin())
                         .orElseThrow(() -> new IllegalArgumentException("Не удалось определить количество погашенных облигаций " + security.getIsin()));
                 default -> throw new UnsupportedOperationException();
             };
