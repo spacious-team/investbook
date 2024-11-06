@@ -34,7 +34,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
 import static org.springframework.util.StringUtils.hasText;
 
 
@@ -45,7 +44,6 @@ public class ForeignExchangeRateSearchSpecification implements Specification<For
 
     @Override
     public Predicate toPredicate(Root<ForeignExchangeRateEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
-        requireNonNull(query);
         return Stream.of(
                         filterByCurrency(root, builder),
                         filterByDate(root, builder))

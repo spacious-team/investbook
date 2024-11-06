@@ -33,7 +33,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
 import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 
@@ -45,7 +44,6 @@ public class PortfolioPropertySearchSpecification implements Specification<Portf
 
     @Override
     public Predicate toPredicate(Root<PortfolioPropertyEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
-        requireNonNull(query);
         @Nullable String propertyName = (property == null) ? null : property.name();
         return Stream.of(
                         filterByPortfolio(root, builder, PortfolioPropertyEntity_.portfolio, portfolio),

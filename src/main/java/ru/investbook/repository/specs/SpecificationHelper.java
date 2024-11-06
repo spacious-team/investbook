@@ -167,9 +167,9 @@ class SpecificationHelper {
     }
 
     static <X, T> @Nullable Predicate filterByEquals(Root<X> root,
-                                           CriteriaBuilder builder,
-                                           SingularAttribute<X, T> attribute,
-                                           @Nullable String value) {
+                                                     CriteriaBuilder builder,
+                                                     SingularAttribute<X, T> attribute,
+                                                     @Nullable String value) {
         if (hasText(value)) {
             Path<T> path = root.get(attribute);
             return builder.equal(path, value);
@@ -178,9 +178,9 @@ class SpecificationHelper {
     }
 
     static <X> @Nullable Predicate filterByLike(Root<X> root,
-                                      CriteriaBuilder builder,
-                                      SingularAttribute<X, String> attribute,
-                                      @Nullable String value) {
+                                                CriteriaBuilder builder,
+                                                SingularAttribute<X, String> attribute,
+                                                @Nullable String value) {
         if (hasText(value)) {
             Path<String> path = root.get(attribute);
             return filterByLike(builder, path, value);

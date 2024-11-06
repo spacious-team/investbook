@@ -32,7 +32,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
 import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 
@@ -44,7 +43,6 @@ public class EventCashFlowEntitySearchSpecification implements Specification<Eve
 
     @Override
     public Predicate toPredicate(Root<EventCashFlowEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
-        requireNonNull(query);
         return Stream.of(
                         filterByPortfolio(root, builder, EventCashFlowEntity_.portfolio, portfolio),
                         filterByDateFrom(root, builder, EventCashFlowEntity_.timestamp, dateFrom),
