@@ -20,6 +20,7 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Portfolio;
@@ -100,13 +101,13 @@ public class CashFlowExcelTableFactory implements TableFactory {
 
     public void appendCashBalance(Portfolio portfolio, Table table) {
         Map<String, BigDecimal> currencyToValues = getCashBalances(portfolio);
-        Table.Record rubCashBalanceRecord = null;
+        Table.@Nullable Record rubCashBalanceRecord = null;
         for (Table.Record record : table) {
-            String currency = Optional.ofNullable((String) record.get(CURRENCY_NAME))
+            @Nullable String currency = Optional.ofNullable((String) record.get(CURRENCY_NAME))
                     .map(String::toUpperCase)
                     .orElse(null);
             if (currency != null) {
-                BigDecimal value = currencyToValues.get(currency);
+                @Nullable BigDecimal value = currencyToValues.get(currency);
                 record.put(CASH_BALANCE, value);
             } else {
                 rubCashBalanceRecord = record;
@@ -114,7 +115,7 @@ public class CashFlowExcelTableFactory implements TableFactory {
             }
         }
         // print RUB after all already printed currencies
-        BigDecimal rubCash = currencyToValues.get("RUB");
+        @Nullable BigDecimal rubCash = currencyToValues.get("RUB");
         if (rubCash != null) {
             if (rubCashBalanceRecord == null) {
                 rubCashBalanceRecord = new Table.Record();

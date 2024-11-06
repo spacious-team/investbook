@@ -21,6 +21,7 @@ package ru.investbook.parser.tinkoff;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityType;
@@ -29,7 +30,6 @@ import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
-import org.springframework.util.StringUtils;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.SingleBrokerReport;
 import ru.investbook.report.ForeignExchangeRateService;
@@ -39,6 +39,9 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static java.math.RoundingMode.HALF_UP;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.parser.tinkoff.TinkoffSecurityQuoteTable.SecurityQuoteTableHeader.*;
 import static ru.investbook.parser.tinkoff.TinkoffSecurityTransactionTableHelper.declareSecurity;
 
@@ -76,11 +79,13 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
     }
 
     @Override
-    protected SecurityQuote parseRow(TableRow row) {
+    protected @Nullable SecurityQuote parseRow(TableRow row) {
         adjustSecuritiesValueEstimate(row);
 
-        BigDecimal price = row.getBigDecimalCellValueOrDefault(PRICE, null);
-        if (price == null) {
+        @SuppressWarnings("DataFlowIssue")
+        @Nullable BigDecimal price = row.getBigDecimalCellValueOrDefault(PRICE, null);
+        //noinspection ConstantValue
+        if (isNull(price)) {
             return null;
         }
 
@@ -116,8 +121,10 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
 
     private void adjustSecuritiesValueEstimate(TableRow row) {
         try {
-            BigDecimal value = row.getBigDecimalCellValueOrDefault(VALUE, null);
-            if (value != null) {
+            @SuppressWarnings("DataFlowIssue")
+            @Nullable BigDecimal value = row.getBigDecimalCellValueOrDefault(VALUE, null);
+            //noinspection ConstantValue
+            if (nonNull(value)) {
                 String currency = row.getStringCellValue(CURRENCY);
                 if (currency.equalsIgnoreCase("RUB")) {
                     rubSecuritiesTotalValue = rubSecuritiesTotalValue.add(value);
@@ -138,8 +145,9 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
 
     private Optional<Security> getSecurityId(TableRow row) {
         try {
-            String code = row.getStringCellValueOrDefault(CODE, null);
-            if (StringUtils.hasLength(code)) {
+            @SuppressWarnings("DataFlowIssue")
+            @Nullable String code = row.getStringCellValueOrDefault(CODE, null);
+            if (hasLength(code)) {
                 BigDecimal accruedInterest = row.getBigDecimalCellValueOrDefault(ACCRUED_INTEREST, BigDecimal.ZERO);
                 boolean isBond = accruedInterest.floatValue() > 1e-3;
                 Security security = TinkoffSecurityTransactionTableHelper.getSecurity(
@@ -164,6 +172,7 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
         return usdSecuritiesTotalValue;
     }
 
+    @Getter
     @RequiredArgsConstructor
     protected enum SecurityQuoteTableHeader implements TableHeaderColumn {
         SHORT_NAME("Сокращенное", "наименование", "актива"),
@@ -174,7 +183,6 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
         CURRENCY(optional("Валюта", "цены")),
         VALUE(optional("Рыночная", "стои", "мость")); // на все бумаги исходящего остатка с учетом НКД
 
-        @Getter
         private final TableColumn column;
 
         SecurityQuoteTableHeader(String... words) {

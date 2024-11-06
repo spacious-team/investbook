@@ -34,6 +34,7 @@ import ru.investbook.repository.PortfolioRepository;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.report.excel.ExcelFormulaHelper.sumAbsValues;
 import static ru.investbook.report.excel.ForeignMarketProfitExcelTableHeader.*;
 
@@ -54,9 +55,10 @@ public class ForeignMarketProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
+    protected <T extends Enum<T> & TableHeader> void writeHeader(Sheet sheet, Class<T> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
-        for (TableHeader header : headerType.getEnumConstants()) {
+        TableHeader[] tableHeader = requireNonNull(headerType.getEnumConstants());
+        for (TableHeader header : tableHeader) {
             sheet.setColumnWidth(header.ordinal(), 18 * 256);
         }
         sheet.setColumnWidth(CURRENCY_PAIR.ordinal(), 20 * 256);

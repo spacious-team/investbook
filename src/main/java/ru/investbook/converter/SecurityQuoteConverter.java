@@ -30,6 +30,7 @@ import ru.investbook.repository.SecurityRepository;
 public class SecurityQuoteConverter implements EntityConverter<SecurityQuoteEntity, SecurityQuote> {
     private final SecurityRepository securityRepository;
 
+    @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override
     public SecurityQuoteEntity toEntity(SecurityQuote quote) {
         SecurityEntity securityEntity = securityRepository.getReferenceById(quote.getSecurity());

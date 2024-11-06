@@ -22,9 +22,9 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.lang.Nullable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -37,47 +37,41 @@ import static org.springframework.util.StringUtils.hasLength;
 @Data
 public class EventCashFlowModel {
 
-    @Nullable
-    private Integer id;
+    private @Nullable Integer id;
 
-    @NotEmpty
-    private String portfolio;
+    private @NotEmpty String portfolio;
 
-    @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date = LocalDate.now();
+    private @NotNull LocalDate date = LocalDate.now();
 
-    @NotNull
     @DateTimeFormat(pattern = "HH:mm:ss")
-    private LocalTime time = LocalTime.NOON;
+    private @NotNull LocalTime time = LocalTime.NOON;
 
-    @NotNull
-    private CashFlowType type;
+    private @NotNull CashFlowType type;
 
     /**
      * Negative value for cash out, otherwise - positive
      */
-    @NotNull
-    private BigDecimal value;
+    private @NotNull BigDecimal value;
 
-    @NotEmpty
-    private String valueCurrency = "RUB";
+    private @NotEmpty String valueCurrency = "RUB";
 
-    @Nullable
-    private String description;
+    private @Nullable String description;
 
     /**
      * Используется для привязки выплаты к бумаге из того же или другого счета
      */
-    @Nullable
-    private AttachedSecurity attachedSecurity = new AttachedSecurity();
+    private @Nullable AttachedSecurity attachedSecurity = new AttachedSecurity();
 
     public void setValueCurrency(String currency) {
         this.valueCurrency = currency.toUpperCase();
     }
 
+    /**
+     * Used by templates/events/edit-form.html
+     */
+    @SuppressWarnings("unused")
     public String getStringType() {
-        if (type == null)  return null;
         return switch (type) {
             case DIVIDEND, COUPON, REDEMPTION, AMORTIZATION, ACCRUED_INTEREST -> type.name();
             case CASH -> {
@@ -87,13 +81,14 @@ public class EventCashFlowModel {
                 }
                 yield type.name() + (isValuePositive() ? "_IN" : "_OUT");
             }
-            default ->  type.name() + (isValuePositive() ? "_IN" : "_OUT");
+            default -> type.name() + (isValuePositive() ? "_IN" : "_OUT");
         };
     }
 
     /**
      * Used by templates/events/edit-form.html
      */
+    @SuppressWarnings("unused")
     public void setStringType(String value) {
         if (value.equals("TAX_IIS_A")) {
             type = CashFlowType.CASH;
@@ -113,18 +108,14 @@ public class EventCashFlowModel {
     @Data
     public class AttachedSecurity {
 
-        @Nullable
-        private Integer securityEventCashFlowId;
+        private @Nullable Integer securityEventCashFlowId;
 
         /**
          * In "name (isin)" or "contract-name" format
          */
-        @Nullable
-        private String security;
+        private @Nullable String security;
 
-        @Nullable
-        @Positive
-        private Integer count;
+        private @Nullable @Positive Integer count;
 
         public boolean isValid() {
             return hasLength(security) &&
@@ -135,8 +126,9 @@ public class EventCashFlowModel {
         /**
          * Returns ISIN if description in "Name (ISIN)" format, null otherwise
          */
-        public String getSecurityIsin() {
-            return SecurityHelper.getSecurityIsin(requireNonNull(security));
+        public @Nullable String getSecurityIsin() {
+            requireNonNull(security);
+            return SecurityHelper.getSecurityIsin(security);
         }
 
         /**
@@ -145,14 +137,14 @@ public class EventCashFlowModel {
         public String getSecurityName() {
             // Для Типа выплаты TAX может выдавать неверный тип бумаги,
             // но для текущего алгоритма SecurityHelper.getSecurityName() типа достаточно
-            SecurityType securityType = switch(type) {
+            SecurityType securityType = switch (type) {
                 case DIVIDEND -> SecurityType.SHARE;
                 case ACCRUED_INTEREST, AMORTIZATION, REDEMPTION, COUPON -> SecurityType.BOND;
                 case DERIVATIVE_PROFIT, DERIVATIVE_PRICE, DERIVATIVE_QUOTE -> SecurityType.DERIVATIVE;
                 case TAX -> SecurityType.SHARE; // для TAX выдает не верный тип бумаги
                 default -> throw new IllegalArgumentException("Не смог получить тип ЦБ по типу выплаты: " + type);
             };
-            return SecurityHelper.getSecurityName(security, securityType);
+            return SecurityHelper.getSecurityName(requireNonNull(security), securityType);
         }
     }
 }

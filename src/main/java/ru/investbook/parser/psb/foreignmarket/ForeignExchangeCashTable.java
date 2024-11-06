@@ -19,6 +19,7 @@
 package ru.investbook.parser.psb.foreignmarket;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
@@ -47,13 +48,13 @@ public class ForeignExchangeCashTable extends SingleInitializableReportTable<Por
     @Override
     protected Collection<PortfolioCash> parseTable() {
         Table table = getSummaryTable();
-        TableRow row = table.findRowByPrefix(ASSETS);
+        @Nullable TableRow row = table.findRowByPrefix(ASSETS);
         if (row == null) {
             return emptyList();
         }
         Collection<PortfolioCash> cashes = new ArrayList<>();
         for (PortfolioPropertyTable.SummaryTableHeader currency : CURRENCIES) {
-            BigDecimal cash = row.getBigDecimalCellValueOrDefault(currency, null);
+            @Nullable BigDecimal cash = row.getBigDecimalCellValueOrDefault(currency, null);
             if (cash != null) {
                 cashes.add(PortfolioCash.builder()
                         .portfolio(getReport().getPortfolio())

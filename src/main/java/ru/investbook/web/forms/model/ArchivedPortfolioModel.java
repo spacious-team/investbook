@@ -18,7 +18,6 @@
 
 package ru.investbook.web.forms.model;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.Set;
@@ -26,7 +25,6 @@ import java.util.Set;
 @Data
 public class ArchivedPortfolioModel {
 
-    @NotNull
     private Set<String> portfolios;
 
 }

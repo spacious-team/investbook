@@ -24,8 +24,8 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.Nullable;
 import ru.investbook.entity.ForeignExchangeRateEntity;
 import ru.investbook.entity.ForeignExchangeRateEntityPk_;
 import ru.investbook.entity.ForeignExchangeRateEntity_;
@@ -40,10 +40,10 @@ import static org.springframework.util.StringUtils.hasText;
 @RequiredArgsConstructor(staticName = "of")
 public class ForeignExchangeRateSearchSpecification implements Specification<ForeignExchangeRateEntity> {
     private final String currency;
-    private final LocalDate date;
+    private final @Nullable LocalDate date;
 
     @Override
-    public Predicate toPredicate(Root<ForeignExchangeRateEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+    public Predicate toPredicate(Root<ForeignExchangeRateEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
         return Stream.of(
                         filterByCurrency(root, builder),
                         filterByDate(root, builder))
@@ -52,8 +52,7 @@ public class ForeignExchangeRateSearchSpecification implements Specification<For
                 .orElseGet(builder::conjunction);
     }
 
-    @Nullable
-    private Predicate filterByCurrency(Root<ForeignExchangeRateEntity> root, CriteriaBuilder builder) {
+    private @Nullable Predicate filterByCurrency(Root<ForeignExchangeRateEntity> root, CriteriaBuilder builder) {
         if (hasText(currency)) {
             Path<String> path = root.get(ForeignExchangeRateEntity_.pk)
                     .get(ForeignExchangeRateEntityPk_.CURRENCY_PAIR);
@@ -62,8 +61,7 @@ public class ForeignExchangeRateSearchSpecification implements Specification<For
         return null;
     }
 
-    @Nullable
-    private Predicate filterByDate(Root<ForeignExchangeRateEntity> root, CriteriaBuilder builder) {
+    private @Nullable Predicate filterByDate(Root<ForeignExchangeRateEntity> root, CriteriaBuilder builder) {
         if (date == null) {
             return null;
         }

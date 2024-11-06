@@ -30,6 +30,7 @@ import ru.investbook.repository.SecurityRepository;
 public class TransactionConverter implements EntityConverter<TransactionEntity, Transaction> {
     private final SecurityRepository securityRepository;
 
+    @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override
     public TransactionEntity toEntity(Transaction transaction) {
         SecurityEntity securityEntity = securityRepository.getReferenceById(transaction.getSecurity());

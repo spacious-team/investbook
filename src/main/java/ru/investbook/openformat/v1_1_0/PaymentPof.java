@@ -29,10 +29,10 @@ import lombok.Getter;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityType;
-import org.springframework.lang.Nullable;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.openformat.OpenFormatHelper;
 
@@ -55,56 +55,56 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 @Slf4j
 public class PaymentPof {
 
-    @NotNull
     @JsonProperty("id")
+    @NotNull
     int id;
 
-    @Nullable
     @JsonProperty("payment-id")
+    @Nullable
     String paymentId;
 
-    @NotNull
     @JsonProperty("account")
+    @NotNull
     int account;
 
-    @NotNull
     @Getter(AccessLevel.NONE)
     @JsonProperty("asset")
+    @NotNull
     int asset;
 
-    @NotNull
     @JsonProperty("type")
+    @NotNull
     PaymentTypePof type;
 
     /**
      * Поддерживаются дробные акции
      */
-    @NotNull
     @JsonProperty("count")
+    @NotNull
     BigDecimal count;
 
-    @NotNull
     @JsonProperty("timestamp")
+    @NotNull
     long timestamp;
 
-    @NotNull
     @JsonProperty("amount")
+    @NotNull
     BigDecimal amount;
 
-    @NotEmpty
     @JsonProperty("currency")
+    @NotEmpty
     String currency;
 
-    @Nullable
     @JsonProperty("tax")
+    @Nullable
     BigDecimal tax;
 
-    @Nullable
     @JsonProperty("tax-currency")
+    @Nullable
     String taxCurrency;
 
-    @Nullable
     @JsonProperty("description")
+    @Nullable
     String description;
 
     static PaymentPof of(SecurityEventCashFlowEntity cashFlow, Optional<SecurityEventCashFlowEntity> tax) {
@@ -142,7 +142,7 @@ public class PaymentPof {
                     .value(amount)
                     .currency(getValidCurrencyOrNull(currency))
                     .build();
-            if (tax != null && Math.abs(tax.floatValue()) > 0.0001) {
+            if (tax != null && taxCurrency != null && Math.abs(tax.floatValue()) > 0.0001) {
                 return Set.of(cashFlow,
                         cashFlow.toBuilder()
                                 .eventType(CashFlowType.TAX)

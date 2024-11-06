@@ -22,6 +22,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -33,30 +34,22 @@ import java.time.LocalTime;
 @Data
 public class SplitModel {
 
-    @NotEmpty
-    private String portfolio;
+    private @NotEmpty String portfolio;
 
-    @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date = LocalDate.now();
+    private @NotNull LocalDate date = LocalDate.now();
 
-    @NotNull
     @DateTimeFormat(pattern = "HH:mm")
-    private LocalTime time = LocalTime.NOON;
+    private @NotNull LocalTime time = LocalTime.NOON;
 
     /**
      * In "name (isin)" format
      */
-    @NotEmpty
-    private String security;
+    private @NotEmpty String security;
 
-    @NotNull
-    @Positive
-    private int withdrawalCount;
+    private @Positive int withdrawalCount;
 
-    @NotNull
-    @Positive
-    private int depositCount;
+    private @Positive int depositCount;
 
     /**
      * Returns Name from template "Name (ISIN)" for stock and bond, code for derivative, securityName for asset
@@ -68,7 +61,7 @@ public class SplitModel {
     /**
      * Returns ISIN if description in "Name (ISIN)" format, null otherwise
      */
-    public String getSecurityIsin() {
+    public @Nullable String getSecurityIsin() {
         return SecurityHelper.getSecurityIsin(security);
     }
 

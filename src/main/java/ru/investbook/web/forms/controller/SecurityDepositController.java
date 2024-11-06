@@ -86,13 +86,13 @@ public class SecurityDepositController extends TransactionController {
      */
     @PostMapping
     @Override
-    public String postTransaction(@Valid @ModelAttribute("transaction") TransactionModel transaction) {
+    public String postTransaction(@ModelAttribute("transaction") @Valid TransactionModel transaction) {
         super.postTransaction(transaction);
         return "security-deposit/view-single";
     }
 
     @PostMapping("split")
-    public String postSplit(@Valid @ModelAttribute("split") SplitModel splitModel) {
+    public String postSplit(@ModelAttribute("split") @Valid SplitModel splitModel) {
         selectedPortfolio = splitModel.getPortfolio();
         transactionFormsService.save(splitModel);
         fifoPositionsFactory.invalidateCache();

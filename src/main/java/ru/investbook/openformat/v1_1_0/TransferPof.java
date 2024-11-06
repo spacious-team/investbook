@@ -28,9 +28,9 @@ import lombok.Getter;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.Transaction;
-import org.springframework.lang.Nullable;
 import ru.investbook.entity.TransactionEntity;
 
 import java.math.BigDecimal;
@@ -38,10 +38,10 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.CashFlowType.FEE;
 import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 
@@ -52,52 +52,52 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Slf4j
 public class TransferPof {
-    @NotNull
     @JsonProperty("id")
+    @NotNull
     int id;
 
     /**
      * Если описывается сплит акций, то может иметь одинаковое значение для нескольких объектов, которое разрешается
      * {@link PortfolioOpenFormatPersister}
      */
-    @Nullable
     @JsonProperty("transfer-id")
+    @Nullable
     String transferId;
 
-    @NotNull
     @JsonProperty("account")
+    @NotNull
     int account;
 
-    @NotNull
     @JsonProperty("timestamp")
+    @NotNull
     long timestamp;
 
-    @NotNull
     @JsonProperty("asset")
     @Getter(AccessLevel.NONE)
+    @NotNull
     int asset;
 
     /**
      * Поддерживаются дробные акции
      */
-    @NotNull
     @JsonProperty("count")
+    @NotNull
     BigDecimal count;
 
-    @Nullable
     @JsonProperty("fee-account")
+    @Nullable
     Integer feeAccount;
 
-    @Nullable
     @JsonProperty("fee")
+    @Nullable
     BigDecimal fee;
 
-    @Nullable
     @JsonProperty("fee-currency")
+    @Nullable
     String feeCurrency;
 
-    @Nullable
     @JsonProperty("description")
+    @Nullable
     String description;
 
     static TransferPof of(TransactionEntity transaction) {
@@ -115,8 +115,8 @@ public class TransferPof {
                                         Map<Integer, Integer> assetToSecurityId) {
         try {
             return Optional.of(Transaction.builder()
-                    .tradeId(transferId)
-                    .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
+                    .tradeId(requireNonNull(transferId))
+                    .portfolio(requireNonNull(accountToPortfolioId.get(account)))
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .security(getSecurityId(assetToSecurityId))
                     .count(count.intValueExact())
@@ -130,10 +130,10 @@ public class TransferPof {
     Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId,
                                                                Map<Integer, Integer> assetToSecurityId) {
         try {
-            if (fee != null) {
+            if (fee != null && feeCurrency != null) {
                 return Set.of(
                         SecurityEventCashFlow.builder()
-                                .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
+                                .portfolio(requireNonNull(accountToPortfolioId.get(account)))
                                 .timestamp(Instant.ofEpochSecond(timestamp))
                                 .security(getSecurityId(assetToSecurityId))
                                 .count(count.intValueExact())
@@ -151,6 +151,6 @@ public class TransferPof {
     }
 
     int getSecurityId(Map<Integer, Integer> assetToSecurityId) {
-        return Objects.requireNonNull(assetToSecurityId.get(asset));
+        return requireNonNull(assetToSecurityId.get(asset));
     }
 }

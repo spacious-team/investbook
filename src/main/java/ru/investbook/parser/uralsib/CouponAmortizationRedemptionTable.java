@@ -19,12 +19,12 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
-import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
@@ -52,9 +54,9 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
     }
 
     protected Collection<SecurityEventCashFlow> parseRowToCollection(TableRow row) {
-        CashFlowType event;
+        @Nullable CashFlowType event;
         String action = row.getStringCellValue(OPERATION);
-        action = String.valueOf(action).toLowerCase().trim();
+        action = action.toLowerCase().trim();
         if (action.equalsIgnoreCase("погашение купона")) {
             event = CashFlowType.COUPON;
         } else if (action.equalsIgnoreCase("погашение номинала")) { // и амортизация и погашение
@@ -63,12 +65,12 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
             return emptyList();
         }
 
-        Security security = getSecurity(row, CashFlowType.AMORTIZATION);
+        @Nullable Security security = getSecurity(row, CashFlowType.AMORTIZATION);
         if (security == null) return emptyList();
         Instant timestamp = convertToInstant(row.getStringCellValue(DATE));
 
         if (event == null) {
-            if (isRedemption(security.getName(), timestamp)) {
+            if (isRedemption(requireNonNull(security.getName()), timestamp)) {
                 event = CashFlowType.REDEMPTION;
             } else {
                 event = CashFlowType.AMORTIZATION;
@@ -79,7 +81,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
         BigDecimal value = row.getBigDecimalCellValue(VALUE)
                 .add(tax.abs());
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
-                .security(security.getId())
+                .security(requireNonNull(security.getId()))
                 .portfolio(getReport().getPortfolio())
                 .count(getSecurityCount(security, timestamp))
                 .eventType(event)
@@ -99,16 +101,17 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
     }
 
     private boolean isRedemption(String securityName, Instant amortizationDay) {
-        LocalDate redemptionDate = redemptionDates.stream()
+        @Nullable LocalDate redemptionDate = redemptionDates.stream()
                 .filter(e -> securityName.equalsIgnoreCase(e.getKey()))
                 .map(Map.Entry::getValue)
                 .map(instant -> LocalDate.ofInstant(instant, getReport().getReportZoneId()))
                 .findAny()
                 .orElse(null);
-        return (redemptionDate != null) && redemptionDate.equals(LocalDate.ofInstant(amortizationDay, getReport().getReportZoneId()));
+        return nonNull(redemptionDate) && redemptionDate.equals(LocalDate.ofInstant(amortizationDay, getReport().getReportZoneId()));
     }
 
-    protected BigDecimal getTax(Table table, TableRow row) {
+    @Override
+    protected BigDecimal getTax(TableRow row) {
         // информация о налоге по купонам облигаций не выводится в отчет брокера
         return BigDecimal.ZERO;
     }

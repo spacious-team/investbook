@@ -20,6 +20,7 @@ package ru.investbook.web;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spacious_team.broker.report_parser.api.BrokerReportFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,7 +46,7 @@ public class BrokerEmailReportController {
 
     private final Collection<BrokerReportFactory> brokerReportFactories;
     private final MailboxReportParserService mailboxReportParserService;
-    private MailboxDescriptor defaultMailboxDescriptor;
+    private volatile @MonotonicNonNull MailboxDescriptor defaultMailboxDescriptor;
 
     @GetMapping
     public String getPage(Model model) {
@@ -64,7 +65,7 @@ public class BrokerEmailReportController {
                     "из почтового ящика " + mailbox.getLogin() + " на " + mailbox.getServer());
             modelAndView.setViewName("success");
             defaultMailboxDescriptor = mailbox;
-            defaultMailboxDescriptor.setPassword(null);
+            defaultMailboxDescriptor.setPassword("");  // do not store pass in RAM
             return modelAndView;
         } catch (Exception e) {
             return errorPage(

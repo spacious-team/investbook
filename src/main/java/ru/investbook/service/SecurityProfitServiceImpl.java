@@ -19,6 +19,7 @@
 package ru.investbook.service;
 
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
@@ -52,6 +53,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.lang.Math.signum;
+import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.SecurityType.CURRENCY_PAIR;
 import static org.springframework.util.StringUtils.hasLength;
 
@@ -73,13 +75,14 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
     public Optional<Instant> getLastEventTimestamp(
             Collection<String> portfolios, Security security, Set<Integer> events, Instant from, Instant to) {
 
+        Integer securityId = requireNonNull(security.getId());
         Optional<SecurityEventCashFlowEntity> optional = portfolios.isEmpty() ?
                 securityEventCashFlowRepository
                         .findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                security.getId(), events, from, to) :
+                                securityId, events, from, to) :
                 securityEventCashFlowRepository
                         .findFirstByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                portfolios, security.getId(), events, from, to);
+                                portfolios, securityId, events, from, to);
         return optional.map(SecurityEventCashFlowEntity::getTimestamp);
     }
 
@@ -115,10 +118,10 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                 .flatMap(Optional::stream)
                 .reduce(BigDecimal.ZERO, BigDecimal::add); // если ценная бумага не вводилась на счет, а была куплена (есть цена покупки)
         for (ClosedPosition closedPosition : positions.getClosedPositions()) {
-            BigDecimal openAmount = getTransactionValue(closedPosition.getOpenTransaction(), CashFlowType.PRICE, toCurrency)
+            @Nullable BigDecimal openAmount = getTransactionValue(closedPosition.getOpenTransaction(), CashFlowType.PRICE, toCurrency)
                     .map(value -> getOpenAmount(value, closedPosition))
                     .orElse(null);
-            BigDecimal closeAmount = getTransactionValue(closedPosition.getCloseTransaction(), CashFlowType.PRICE, toCurrency)
+            @Nullable BigDecimal closeAmount = getTransactionValue(closedPosition.getCloseTransaction(), CashFlowType.PRICE, toCurrency)
                     .map(value -> getClosedAmount(value, closedPosition))
                     .orElse(null);
             if (openAmount != null && closeAmount != null) {
@@ -142,7 +145,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
     }
 
     private boolean isStockSplit(Transaction transaction) {
-        if (!transactionCashFlowRepository.isDepositOrWithdrawal(transaction.getId())) {
+        if (!transactionCashFlowRepository.isDepositOrWithdrawal(requireNonNull(transaction.getId()))) {
             return false;
         }
         LocalDate transactionDay = LocalDate.ofInstant(transaction.getTimestamp(), zoneId);
@@ -181,7 +184,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
             return Optional.empty();
         }
         return transactionCashFlowRepository
-                .findByTransactionIdAndCashFlowType(t.getId(), type)
+                .findByTransactionIdAndCashFlowType(requireNonNull(t.getId()), type)
                 .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency));
     }
 
@@ -220,40 +223,42 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
     private List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
                                                                                Security security,
                                                                                CashFlowType cashFlowType) {
+        Integer securityId = requireNonNull(security.getId());
         return portfolios.isEmpty() ?
                 securityEventCashFlowRepository
                         .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                security.getId(),
+                                securityId,
                                 cashFlowType.getId(),
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate()) :
                 securityEventCashFlowRepository
                         .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                                 portfolios,
-                                security.getId(),
+                                securityId,
                                 cashFlowType.getId(),
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate());
     }
 
     @Override
-    public SecurityQuote getSecurityQuote(Security security, String toCurrency, Instant to) {
+    public @Nullable SecurityQuote getSecurityQuote(Security security, String toCurrency, Instant to) {
+        Integer securityId = requireNonNull(security.getId());
         if (security.getType() == CURRENCY_PAIR) {
-            String currencyPair = securityRepository.findCurrencyPair(security.getId()).orElseThrow();
+            String currencyPair = securityRepository.findCurrencyPair(securityId).orElseThrow();
             String baseCurrency = currencyPair.substring(0, 3);
             LocalDate toDate = LocalDate.ofInstant(to, ZoneId.systemDefault());
             BigDecimal lastPrice = toDate.isBefore(LocalDate.now()) ?
                     foreignExchangeRateService.getExchangeRateOrDefault(baseCurrency, toCurrency, toDate) :
                     foreignExchangeRateService.getExchangeRate(baseCurrency, toCurrency);
             return SecurityQuote.builder()
-                    .security(security.getId())
+                    .security(securityId)
                     .timestamp(to)
                     .quote(lastPrice)
                     .currency(toCurrency)
                     .build();
         }
         return securityQuoteRepository
-                .findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(security.getId(), to)
+                .findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(securityId, to)
                 .map(securityQuoteConverter::fromEntity)
                 .map(_quote -> foreignExchangeRateService.convertQuoteToCurrency(_quote, toCurrency, security.getType()))
                 .map(_quote -> hasLength(_quote.getCurrency()) ? _quote : _quote.toBuilder()
@@ -264,7 +269,8 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
 
     @Override
     public Optional<BigDecimal> getSecurityQuoteFromLastTransaction(Security security, String toCurrency) {
-        return transactionRepository.findFirstBySecurityIdOrderByTimestampDesc(security.getId())
+        //noinspection ReturnOfNull
+        return transactionRepository.findFirstBySecurityIdOrderByTimestampDesc(requireNonNull(security.getId()))
                 .map(t -> transactionCashFlowRepository
                         .findByTransactionIdAndCashFlowTypeIn(t.getId(), priceAndAccruedInterestTypes)
                         .stream()

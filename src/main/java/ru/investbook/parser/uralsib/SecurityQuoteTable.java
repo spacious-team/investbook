@@ -19,6 +19,7 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityQuote.SecurityQuoteBuilder;
 import org.spacious_team.table_wrapper.api.TableRow;
@@ -52,8 +53,8 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
     }
 
     @Override
-    protected SecurityQuote parseRow(TableRow row) {
-        BigDecimal amountInRub = row.getBigDecimalCellValueOrDefault(AMOUNT, null);
+    protected @Nullable SecurityQuote parseRow(TableRow row) {
+        @Nullable BigDecimal amountInRub = row.getBigDecimalCellValueOrDefault(AMOUNT, null);
         if (amountInRub == null || amountInRub.compareTo(minValue) < 0) {
             return null;
         }

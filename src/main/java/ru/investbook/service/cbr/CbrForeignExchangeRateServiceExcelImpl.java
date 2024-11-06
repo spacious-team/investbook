@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
@@ -39,6 +40,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
+
+import static java.util.Objects.requireNonNull;
 
 public class CbrForeignExchangeRateServiceExcelImpl extends AbstractCbrForeignExchangeRateService {
     private static final String uri = "https://www.cbr.ru/Queries/UniDbQuery/DownloadExcel/98956?" +
@@ -60,7 +63,7 @@ public class CbrForeignExchangeRateServiceExcelImpl extends AbstractCbrForeignEx
     @SneakyThrows
     @Override
     protected void updateCurrencyRate(String currencyPair, String currencyId, LocalDate fromDate) {
-        Resource resource = restTemplate.getForObject(
+        @Nullable Resource resource = restTemplate.getForObject(
                 uri,
                 Resource.class,
                 Map.of("currency", currencyId,
@@ -69,13 +72,14 @@ public class CbrForeignExchangeRateServiceExcelImpl extends AbstractCbrForeignEx
         updateBy(resource, currencyPair);
     }
 
-    private void updateBy(Resource resource, String currencyPair) throws IOException {
-        Objects.requireNonNull(resource, () -> "Не удалось скачать курсы валют");
+    private void updateBy(@Nullable Resource resource, String currencyPair) throws IOException {
+        requireNonNull(resource, "Не удалось скачать курсы валют");
         Workbook book = new XSSFWorkbook(resource.getInputStream());
         new ExcelSheet(book.getSheetAt(0))
                 .createNameless("data", TableHeader.class)
                 .stream()
-                .map(row -> getRate(row, currencyPair))
+                .filter(Objects::nonNull)
+                .map(row -> getRate(requireNonNull(row), currencyPair))
                 .forEach(this::save);
     }
 

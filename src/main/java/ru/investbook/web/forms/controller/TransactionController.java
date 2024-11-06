@@ -100,7 +100,7 @@ public class TransactionController {
      * @param transaction transaction attribute for save, same model attribute used for display in view
      */
     @PostMapping
-    public String postTransaction(@Valid @ModelAttribute("transaction") TransactionModel transaction) {
+    public String postTransaction(@ModelAttribute("transaction") @Valid TransactionModel transaction) {
         selectedPortfolio = transaction.getPortfolio();
         transactionFormsService.save(transaction);
         fifoPositionsFactory.invalidateCache();

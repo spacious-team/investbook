@@ -18,15 +18,17 @@
 
 package ru.investbook.web.forms.model.filter;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
+@Data
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class PortfolioPropertyFormFilterModel extends AbstractFormFilterModel {
     private String portfolio;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)

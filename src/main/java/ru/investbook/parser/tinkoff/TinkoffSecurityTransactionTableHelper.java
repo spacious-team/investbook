@@ -19,6 +19,7 @@
 package ru.investbook.parser.tinkoff;
 
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.table_wrapper.api.TableRow;
@@ -29,6 +30,7 @@ import ru.investbook.service.moex.MoexDerivativeCodeService;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.tinkoff.TinkoffSecurityTransactionTable.TransactionTableHeader.*;
 
 @Component
@@ -82,15 +84,16 @@ public class TinkoffSecurityTransactionTableHelper {
                                 SecurityCodeAndIsinTable codeAndIsin,
                                 String shortName,
                                 SecurityType securityType) {
-        String isin = switch (securityType) {
+        @SuppressWarnings("switch.expression")
+        @Nullable String isin = switch (securityType) {
             case STOCK, BOND, STOCK_OR_BOND -> codeAndIsin.getIsin(code, shortName);
-            default -> null;
+            case DERIVATIVE, CURRENCY_PAIR, ASSET -> null;
         };
         return getSecurity(code, isin, shortName, securityType);
     }
 
     static Security getSecurity(String code,
-                                String isin,
+                                @Nullable String isin,
                                 String shortName,
                                 SecurityType securityType) {
         return switch (securityType) {
@@ -113,11 +116,11 @@ public class TinkoffSecurityTransactionTableHelper {
 
     static int declareSecurity(Security security, SecurityRegistrar registrar) {
         return switch (security.getType()) {
-            case STOCK -> registrar.declareStockByIsin(security.getIsin(), security::toBuilder);
-            case BOND -> registrar.declareBondByIsin(security.getIsin(), security::toBuilder);
-            case STOCK_OR_BOND -> registrar.declareStockOrBondByIsin(security.getIsin(), security::toBuilder);
-            case DERIVATIVE -> registrar.declareDerivative(security.getTicker());
-            case CURRENCY_PAIR -> registrar.declareCurrencyPair(security.getTicker());
+            case STOCK -> registrar.declareStockByIsin(requireNonNull(security.getIsin()), security::toBuilder);
+            case BOND -> registrar.declareBondByIsin(requireNonNull(security.getIsin()), security::toBuilder);
+            case STOCK_OR_BOND -> registrar.declareStockOrBondByIsin(requireNonNull(security.getIsin()), security::toBuilder);
+            case DERIVATIVE -> registrar.declareDerivative(requireNonNull(security.getTicker()));
+            case CURRENCY_PAIR -> registrar.declareCurrencyPair(requireNonNull(security.getTicker()));
             case ASSET -> throw new IllegalArgumentException("Тип ASSET не поддерживается");
         };
     }

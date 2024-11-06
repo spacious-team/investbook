@@ -48,11 +48,9 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 @Tag(name = "Счета")
 @RequestMapping("/api/v1/portfolios")
 public class PortfolioRestController extends AbstractRestController<String, Portfolio, PortfolioEntity> {
-    private final PortfolioRepository repository;
 
     public PortfolioRestController(PortfolioRepository repository, PortfolioConverter converter) {
         super(repository, converter);
-        this.repository = repository;
     }
 
     @Override
@@ -83,7 +81,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "409"),
             @ApiResponse(responseCode = "500", content = @Content)})
-    public ResponseEntity<Void> post(@Valid @RequestBody Portfolio object) {
+    public ResponseEntity<Void> post(@RequestBody @Valid Portfolio object) {
         return super.post(object);
     }
 
@@ -96,8 +94,8 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер счета")
                                     String id,
-                                    @Valid
                                     @RequestBody
+                                    @Valid
                                     Portfolio object) {
         return super.put(id, object);
     }

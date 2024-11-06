@@ -20,6 +20,7 @@ package ru.investbook.parser.tinkoff;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
@@ -42,8 +43,8 @@ public class TinkoffDerivativeCashFlowTable extends SingleAbstractReportTable<Se
     }
 
     @Override
-    protected SecurityEventCashFlow parseRow(TableRow row) {
-        String contract = row.getStringCellValueOrDefault(CONTRACT, null);
+    protected @Nullable SecurityEventCashFlow parseRow(TableRow row) {
+        @Nullable String contract = row.getStringCellValueOrDefault(CONTRACT, null);
         if (!hasLength(contract) || contract.contains("Наименование")) {
             return null;
         }
@@ -61,6 +62,7 @@ public class TinkoffDerivativeCashFlowTable extends SingleAbstractReportTable<Se
                 .build();
     }
 
+    @Getter
     @RequiredArgsConstructor
     protected enum DerivativeCashFlowTableHeader implements TableHeaderColumn {
         DATE("Дата"),
@@ -69,7 +71,6 @@ public class TinkoffDerivativeCashFlowTable extends SingleAbstractReportTable<Se
         OUTGOING_COUNT("Позиция", "на", "конец", "дня"),
         VARIATION_MARGIN("Вар", "маржа", "на", "конец", "дня");
 
-        @Getter
         private final TableColumn column;
 
         DerivativeCashFlowTableHeader(String... words) {

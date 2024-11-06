@@ -116,7 +116,7 @@ public class SecurityDescriptionController {
     }
 
     @PostMapping
-    public String postTransaction(@Valid @ModelAttribute("securityDescription") SecurityDescriptionModel securityDescription) {
+    public String postTransaction(@ModelAttribute("securityDescription") @Valid SecurityDescriptionModel securityDescription) {
         securityDescriptionFormsService.save(securityDescription);
         return "security-descriptions/view-single";
     }

@@ -93,7 +93,7 @@ public class PortfolioPropertyController {
     }
 
     @PostMapping("/total-assets")
-    public String postCash(@Valid @ModelAttribute("property") PortfolioPropertyTotalAssetsModel property) {
+    public String postCash(@ModelAttribute("property") @Valid PortfolioPropertyTotalAssetsModel property) {
         selectedPortfolio = property.getPortfolio();
         portfolioPropertyFormsService.save(property);
         return "portfolio-properties/total-assets-view-single";

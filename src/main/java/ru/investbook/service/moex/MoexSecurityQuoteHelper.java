@@ -21,6 +21,7 @@ package ru.investbook.service.moex;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityQuote.SecurityQuoteBuilder;
 
@@ -66,10 +67,10 @@ public class MoexSecurityQuoteHelper {
                     .or(() -> ofNullable(description.get("PREVPRICE"))) // currency, share/bond, forts
                     .map(MoexSecurityQuoteHelper::toBigDecimal)
                     .orElseThrow();
-            BigDecimal accruedInterest = ofNullable(description.get("ACCRUEDINT"))
+            @Nullable BigDecimal accruedInterest = ofNullable(description.get("ACCRUEDINT"))
                     .map(MoexSecurityQuoteHelper::toBigDecimal)
                     .orElse(null);
-            BigDecimal price = null; // share
+            @Nullable BigDecimal price = null; // share
             if (accruedInterest != null) { // bond
                 price = toBigDecimal(description.get("LOTVALUE"))
                         .divide(toBigDecimal(description.get("LOTSIZE")), 4, RoundingMode.HALF_UP)
@@ -91,7 +92,7 @@ public class MoexSecurityQuoteHelper {
         }
     }
 
-    private static BigDecimal toBigDecimal(Object value) {
+    private static BigDecimal toBigDecimal(@Nullable Object value) {
         return BigDecimal.valueOf(
                 Double.parseDouble(
                         String.valueOf(

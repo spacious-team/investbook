@@ -21,6 +21,7 @@ package ru.investbook.parser.uralsib;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
@@ -34,9 +35,11 @@ import ru.investbook.parser.SingleBrokerReport;
 import ru.investbook.parser.SingleInitializableReportTable;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.AssetsTable.SummaryTableHeader.RUB;
 
 /**
@@ -69,8 +72,9 @@ public class AssetsTable extends SingleInitializableReportTable<PortfolioPropert
                 return emptyList();
             }
 
-            TableRow row = table.stream()
-                    .filter(tableRow -> tableRow.rowContains(ASSETS))
+            @Nullable TableRow row = table.stream()
+                    .filter(Objects::nonNull)
+                    .filter(tableRow -> requireNonNull(tableRow).rowContains(ASSETS))
                     .findAny()
                     .orElse(null);
 

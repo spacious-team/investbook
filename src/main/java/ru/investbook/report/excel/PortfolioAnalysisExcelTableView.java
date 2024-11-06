@@ -88,7 +88,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
+    protected <T extends Enum<T> & TableHeader> void writeHeader(Sheet sheet, Class<T> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         sheet.setColumnWidth(INVESTMENT_CURRENCY.ordinal(), 17 * 256);
         sheet.setColumnWidth(ASSETS_RUB.ordinal(), 17 * 256);
@@ -143,6 +143,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
         plotChart("Остаток денежных средств, USD", sheet, PortfolioAnalysisExcelTableView::addCashBalanceGraph);
     }
 
+    @SuppressWarnings("argument")
     private static void addInvestmentAndAssetsGraph(String name, Sheet sheet) {
         int rowCount = sheet.getLastRowNum();
         XSSFSheet _sheet = (XSSFSheet) sheet;
@@ -166,6 +167,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
         chart.plot(chartData);
     }
 
+    @SuppressWarnings("argument")
     private static void addPortfolioGrowthGraph(String name, Sheet sheet) {
         int rowCount = sheet.getLastRowNum();
         XSSFSheet _sheet = (XSSFSheet) sheet;

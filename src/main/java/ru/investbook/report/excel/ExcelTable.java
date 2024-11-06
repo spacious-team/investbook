@@ -23,6 +23,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Portfolio;
 import ru.investbook.report.Table;
 
@@ -30,7 +31,7 @@ import ru.investbook.report.Table;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public class ExcelTable {
-    private final Portfolio portfolio;
+    private final @Nullable Portfolio portfolio;
     private final String sheetName;
     private final Table table;
     private final ExcelTableView creator;

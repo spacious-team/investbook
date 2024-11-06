@@ -19,10 +19,9 @@
 package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
@@ -38,7 +37,9 @@ import ru.investbook.web.forms.model.TransactionModel;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
+import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.entity.SecurityEntity.isinPattern;
 
 
@@ -50,6 +51,7 @@ public class SecurityRepositoryHelper {
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
     public int saveSecurity(SecurityDescriptionModel m) {
@@ -60,6 +62,7 @@ public class SecurityRepositoryHelper {
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
     public int saveSecurity(EventCashFlowModel.AttachedSecurity s) {
@@ -70,6 +73,7 @@ public class SecurityRepositoryHelper {
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
     public int saveSecurity(SecurityEventCashFlowModel m) {
@@ -78,6 +82,7 @@ public class SecurityRepositoryHelper {
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
     public int saveSecurity(SecurityQuoteModel m) {
@@ -86,6 +91,7 @@ public class SecurityRepositoryHelper {
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
     public int saveSecurity(TransactionModel m) {
@@ -94,6 +100,7 @@ public class SecurityRepositoryHelper {
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
     public int saveSecurity(SplitModel m) {
@@ -103,7 +110,7 @@ public class SecurityRepositoryHelper {
     /**
      * @return securityId from DB
      */
-    private int saveSecurity(Integer securityId, String isin, String securityName, SecurityType securityType) {
+    private int saveSecurity(@Nullable Integer securityId, @Nullable String isin, String securityName, SecurityType securityType) {
         SecurityEntity security = ofNullable(securityId)
                 .flatMap(securityRepository::findById)
                 .or(() -> findSecurity(isin, securityName, securityType))
@@ -111,13 +118,13 @@ public class SecurityRepositoryHelper {
         return saveSecurity(security, isin, securityName, securityType, true);
     }
 
-    private int saveSecurity(String isin, String securityName, SecurityType securityType) {
+    private int saveSecurity(@Nullable String isin, String securityName, SecurityType securityType) {
         SecurityEntity security = findSecurity(isin, securityName, securityType)
                 .orElseGet(SecurityEntity::new);
         return saveSecurity(security, isin, securityName, securityType, false);
     }
 
-    private int saveSecurity(SecurityEntity security, String isin, String securityName,
+    private int saveSecurity(SecurityEntity security, @Nullable String isin, @Nullable String securityName,
                              SecurityType securityType, boolean forceRewriteByEmptyIsin) {
         isin = validateIsin(isin);
         if (isin == null && !forceRewriteByEmptyIsin) {
@@ -144,32 +151,31 @@ public class SecurityRepositoryHelper {
         return security.getId();
     }
 
-    private Optional<SecurityEntity> findSecurity(String isin, String securityName, SecurityType securityType) {
+    private Optional<SecurityEntity> findSecurity(@Nullable String isin, @Nullable String securityName, SecurityType securityType) {
         isin = validateIsin(isin);
         securityName = Objects.equals(securityName, SecurityHelper.NULL_SECURITY_NAME) ? null : securityName;
 
         return switch (securityType) {
             case SHARE, BOND -> {
                 Assert.isTrue(isin != null || securityName != null, "Отсутствует и ISIN, и наименование ЦБ");
-                String name = securityName;
+                @Nullable String name = securityName;
                 yield ofNullable(isin).flatMap(securityRepository::findByIsin)
                         .or(() -> ofNullable(name).flatMap(securityRepository::findByTicker))
                         .or(() -> ofNullable(name).flatMap(securityRepository::findByName));
             }
             case DERIVATIVE, CURRENCY -> {
-                Assert.notNull(securityName, "Отсутствует тикер контракта");
+                requireNonNull(securityName, "Отсутствует тикер контракта");
                 yield securityRepository.findByTicker(securityName);
             }
             case ASSET -> {
-                Assert.notNull(securityName, "Отсутствует наименование произвольного актива");
+                requireNonNull(securityName, "Отсутствует наименование произвольного актива");
                 yield securityRepository.findByName(securityName);
             }
         };
     }
 
-    @Nullable
-    private String validateIsin(String isin) {
-        isin = StringUtils.hasLength(isin) ? isin : null;
+    private @Nullable String validateIsin(@Nullable String isin) {
+        isin = hasLength(isin) ? isin : null;
         if (isin != null && !isinPattern.matcher(isin).matches()) {
             throw new IllegalArgumentException("Невалидный ISIN: " + isin);
         }

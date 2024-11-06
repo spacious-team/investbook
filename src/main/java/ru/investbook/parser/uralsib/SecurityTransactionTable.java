@@ -20,6 +20,7 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
@@ -29,15 +30,14 @@ import org.spacious_team.table_wrapper.api.RelativePositionTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
-import org.springframework.lang.Nullable;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.TransactionValueAndFeeParser;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.SecurityTransactionTable.TransactionTableHeader.*;
 
 @Slf4j
@@ -67,16 +67,15 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
         this.transactionValueAndFeeParser = transactionValueAndFeeParser;
     }
 
-    @Nullable
     @Override
-    protected SecurityTransaction parseRow(TableRow row) {
-        String tradeId = getTradeId(row, TRADE_ID);
+    protected @Nullable SecurityTransaction parseRow(TableRow row) {
+        @Nullable String tradeId = getTradeId(row, TRADE_ID);
         if (tradeId == null) {
-            security = getSecurity(row);
+            this.security = getSecurity(row);
             return null;
         }
 
-        Objects.requireNonNull(security, "Не известная ЦБ");
+        Security security = requireNonNull(this.security, "Не известная ЦБ");
         boolean isBuy = row.getStringCellValue(DIRECTION).equalsIgnoreCase("покупка");
         BigDecimal value = row.getBigDecimalCellValue(VALUE);
         BigDecimal accruedInterest = row.getBigDecimalCellValue(ACCRUED_INTEREST);
@@ -105,7 +104,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                 .timestamp(timestamp)
                 .tradeId(tradeId)
                 .portfolio(getReport().getPortfolio())
-                .security(security.getId())
+                .security(requireNonNull(security.getId()))
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(valueAndFee.value())
                 .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)
@@ -115,8 +114,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                 .build();
     }
 
-    @Nullable
-    static String getTradeId(TableRow row, TableHeaderColumn column) {
+    static @Nullable String getTradeId(TableRow row, TableHeaderColumn column) {
         try {
             // some numbers (doubles) represented by string type cells
             return String.valueOf(row.getLongCellValue(column));
@@ -125,8 +123,8 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
         }
     }
 
-    @Nullable
-    private Security getSecurity(TableRow row) {
+    private @Nullable Security getSecurity(TableRow row) {
+        //noinspection DataFlowIssue
         return Optional.ofNullable(row.getStringCellValueOrDefault(TRADE_ID, null))
                 .filter(securityDescription -> !securityDescription.startsWith("Итого"))
                 .map(securityDescription -> securityDescription.split(" "))
@@ -135,6 +133,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                 .orElse(null);
     }
 
+    @Getter
     enum TransactionTableHeader implements TableHeaderColumn {
         DATE_TIME(
                 AnyOfTableColumn.of(
@@ -175,7 +174,6 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
                                 PatternTableColumn.of("валюта списания")),
                         VALUE_CURRENCY.getColumn()));                          // new report (fallback to value currency)
 
-        @Getter
         private final TableColumn column;
 
         TransactionTableHeader(String... words) {

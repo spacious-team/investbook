@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.Duration;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -35,10 +34,9 @@ import java.util.function.Consumer;
 @SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:testdb;mode=mysql;non_keywords=value")
 class AbstractEntityRepositoryServiceTest {
 
+    static final AtomicInteger i = new AtomicInteger();
     @Autowired
-    private SecurityRestController service;
-    private final Random random = new Random();
-    private final AtomicInteger i = new AtomicInteger();
+    SecurityRestController service;
 
     @Test
     void insert() {

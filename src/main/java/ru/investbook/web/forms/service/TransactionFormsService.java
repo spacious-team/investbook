@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
@@ -65,6 +66,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.Math.abs;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.springframework.data.domain.Sort.Order.asc;
 import static org.springframework.data.domain.Sort.Order.desc;
@@ -128,21 +131,22 @@ public class TransactionFormsService {
 
         AbstractTransactionBuilder<?, ?> builder;
 
-        if (tr.getPrice() != null) {
+        @Nullable BigDecimal price = tr.getPrice();
+        if (nonNull(price)) {
             builder = switch (tr.getSecurityType()) {
                 case SHARE, BOND, ASSET -> SecurityTransaction.builder()
-                        .value(tr.getPrice().multiply(multiplier))
+                        .value(price.multiply(multiplier))
                         .valueCurrency(tr.getPriceCurrency())
                         .accruedInterest(ofNullable(tr.getAccruedInterest())
                                 .map(v -> v.multiply(multiplier))
                                 .orElse(null));
                 case DERIVATIVE -> {
-                    BigDecimal value = null;
-                    BigDecimal valueInPoints = tr.getPrice().multiply(multiplier);
+                    @Nullable BigDecimal value = null;
+                    BigDecimal valueInPoints = price.multiply(multiplier);
                     if (tr.hasDerivativeTickValue()) {
                         value = valueInPoints
-                                .multiply(tr.getPriceTickValue())
-                                .divide(tr.getPriceTick(), 6, RoundingMode.HALF_UP);
+                                .multiply(requireNonNull(tr.getPriceTickValue()))
+                                .divide(requireNonNull(tr.getPriceTick()), 6, RoundingMode.HALF_UP);
                     }
                     yield DerivativeTransaction.builder()
                             .valueInPoints(valueInPoints)
@@ -150,11 +154,11 @@ public class TransactionFormsService {
                             .valueCurrency(tr.getPriceTickValueCurrency());
                 }
                 case CURRENCY -> ForeignExchangeTransaction.builder()
-                        .value(tr.getPrice().multiply(multiplier))
+                        .value(price.multiply(multiplier))
                         .valueCurrency(tr.getPriceCurrency());
             };
 
-            if (tr.getFee() != null) {
+            if (nonNull(tr.getFee())) {
                 builder
                         .fee(tr.getFee().negate())
                         .feeCurrency(tr.getFeeCurrency());
@@ -167,8 +171,11 @@ public class TransactionFormsService {
             };
         }
 
+        if (nonNull(tr.getId())) {  // is null for new object
+            builder.id(tr.getId());
+        }
+
         AbstractTransaction transaction = builder
-                .id(tr.getId())
                 .tradeId(tr.getTradeId())
                 .portfolio(tr.getPortfolio())
                 .timestamp(tr.getDate().atTime(tr.getTime()).atZone(zoneId).toInstant())
@@ -188,6 +195,7 @@ public class TransactionFormsService {
         TransactionEntity transactionEntity = transactionRepository.save(
                 transactionConverter.toEntity(transaction.getTransaction()));
 
+        //noinspection OptionalOfNullableMisuse
         Optional.ofNullable(transactionEntity.getId()).ifPresent(transactionCashFlowRepository::deleteByTransactionId);
         transactionCashFlowRepository.flush();
         transaction.toBuilder()
@@ -284,14 +292,14 @@ public class TransactionFormsService {
                 ofNullable(securityEntity.getName()).orElse(securityEntity.getTicker()),
                 securityType.get());
         if (m.getSecurityType() == DERIVATIVE &&
-                m.getPrice() != null && m.getPrice().floatValue() > 0.000001) {
+                nonNull(m.getPrice()) && m.getPrice().floatValue() > 0.000001) {
             cashFlows.stream()
                     .filter(value -> CashFlowType.valueOf(value.getCashFlowType().getId()) == CashFlowType.DERIVATIVE_PRICE)
                     .forEach(value -> {
                         m.setPriceTick(BigDecimal.ONE); // information not stored in db, normalizing
                         m.setPriceTickValue(value.getValue()
                                 .divide(BigDecimal.valueOf(m.getCount()), 6, RoundingMode.HALF_UP)
-                                .divide(m.getPrice(), 6, RoundingMode.HALF_UP)
+                                .divide(requireNonNull(m.getPrice()), 6, RoundingMode.HALF_UP)
                                 .abs());
                         m.setPriceTickValueCurrency(value.getCurrency());
                     });

@@ -65,6 +65,7 @@ public class VtbForeignExchangeRateTable extends SingleInitializableReportTable<
 
     private Collection<ForeignExchangeRate> buildPortfolioProperty(CurrencyPair currencyPair, String rowHeader) {
         try {
+            @SuppressWarnings({"nullness", "DataFlowIssue"})
             String value = getReport().getReportPage()
                     .getNextColumnValue(rowHeader)
                     .toString()

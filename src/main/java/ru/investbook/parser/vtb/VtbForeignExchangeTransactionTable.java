@@ -19,6 +19,7 @@
 package ru.investbook.parser.vtb;
 
 import lombok.Getter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
@@ -62,13 +63,13 @@ public class VtbForeignExchangeTransactionTable extends SingleInitializableRepor
                 .getData(getReport(), this::parseRow);
     }
 
-    protected ForeignExchangeTransaction parseRow(TableRow row) {
+    protected @Nullable ForeignExchangeTransaction parseRow(TableRow row) {
         boolean isBuy = row.getStringCellValue(DIRECTION).trim().equalsIgnoreCase("Покупка");
         BigDecimal value = row.getBigDecimalCellValue(VALUE);
         if (isBuy) {
             value = value.negate();
         }
-        BigDecimal marketComission = row.getBigDecimalCellValueOrDefault(MARKET_COMMISSION, null);
+        @Nullable BigDecimal marketComission = row.getBigDecimalCellValueOrDefault(MARKET_COMMISSION, null);
         if (marketComission == null) {
             // сделка не завершена в отчете, в следующем отчете она будет корректно распаршена
             return null;
@@ -91,6 +92,7 @@ public class VtbForeignExchangeTransactionTable extends SingleInitializableRepor
                 .build();
     }
 
+    @Getter
     enum FxTransactionTableHeader implements TableHeaderColumn {
         TRADE_ID("№ сделки"),
         INSTRUMENT("Финансовый инструмент"),
@@ -102,7 +104,6 @@ public class VtbForeignExchangeTransactionTable extends SingleInitializableRepor
         MARKET_COMMISSION("Комиссия", "за расчет по сделке"),
         BROKER_COMMISSION("Комиссия", "за заключение сделки");
 
-        @Getter
         private final TableColumn column;
 
         FxTransactionTableHeader(String... words) {

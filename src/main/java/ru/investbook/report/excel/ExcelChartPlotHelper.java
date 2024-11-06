@@ -82,6 +82,7 @@ public class ExcelChartPlotHelper {
 
     static XDDFChartData createPieChartData(XSSFChart chart) {
         setPieChartStyle(chart);
+        @SuppressWarnings("argument")
         XDDFChartData data = chart.createData(ChartTypes.PIE, null, null);
         data.setVaryColors(true);
         return data;

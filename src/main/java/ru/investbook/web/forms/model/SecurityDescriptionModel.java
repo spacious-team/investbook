@@ -21,26 +21,22 @@ package ru.investbook.web.forms.model;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Data
 public class SecurityDescriptionModel {
 
-    @Nullable
-    private Integer securityId;
+    private @Nullable Integer securityId;
     /**
      * In "name (isin)" or "contract-name" format
      */
-    @NotEmpty
-    private String security = "Наименование (RU0000000000)";
+    private @NotEmpty String security = "Наименование (RU0000000000)";
 
-    @NotEmpty
-    private String sector;
+    private @Nullable @NotEmpty String sector;
 
-    @NotNull
-    private SecurityType securityType;
+    private @NotNull SecurityType securityType;
 
-    public void setSecurity(Integer securityId, String securityIsin, String securityName, SecurityType securityType) {
+    public void setSecurity(Integer securityId, @Nullable String securityIsin, @Nullable String securityName, SecurityType securityType) {
         this.securityId = securityId;
         this.security = SecurityHelper.getSecurityDescription(securityIsin, securityName, securityType);
         this.securityType = securityType;
@@ -56,7 +52,7 @@ public class SecurityDescriptionModel {
     /**
      * Returns ISIN if description in "Name (ISIN)" format, null otherwise
      */
-    public String getSecurityIsin() {
+    public @Nullable String getSecurityIsin() {
         return SecurityHelper.getSecurityIsin(security);
     }
 }

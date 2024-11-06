@@ -18,11 +18,13 @@
 
 package ru.investbook.web.forms.model.filter;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
-@Getter
-@Setter
+@Data
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class SecurityDescriptionFormFilterModel extends AbstractFormFilterModel {
     private String security;
     private String securitySector;

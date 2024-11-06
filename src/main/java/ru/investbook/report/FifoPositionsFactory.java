@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.SecurityType.CURRENCY_PAIR;
 
 @Component
@@ -64,7 +65,8 @@ public class FifoPositionsFactory {
     }
 
     public FifoPositions get(Security security, FifoPositionsFilter filter) {
-        return get(security.getId(), security.getType(), filter);
+        int securityId = requireNonNull(security.getId());
+        return get(securityId, security.getType(), filter);
     }
 
     /**

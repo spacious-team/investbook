@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
@@ -40,6 +41,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 
 @Service
@@ -61,7 +63,7 @@ public class Sp500Service {
     public void update() {
         try {
             long t0 = System.nanoTime();
-            Resource resource = restTemplate.getForObject(uri, Resource.class);
+            @Nullable Resource resource = restTemplate.getForObject(uri, Resource.class);
             updateBy(resource);
             log.info("Индекс S&P 500 обновлен за {}", Duration.ofNanos(System.nanoTime() - t0));
         } catch (Exception e) {
@@ -69,12 +71,13 @@ public class Sp500Service {
         }
     }
 
-    private void updateBy(Resource resource) throws IOException {
-        Objects.requireNonNull(resource, () -> "Не удалось скачать S&P 500 с адреса " + uri);
+    private void updateBy(@Nullable Resource resource) throws IOException {
+        requireNonNull(resource, () -> "Не удалось скачать S&P 500 с адреса " + uri);
         Workbook book = new HSSFWorkbook(resource.getInputStream());
         new ExcelSheet(book.getSheetAt(0))
                 .createNameless("Effective date", TableHeader.class)
                 .stream()
+                .filter(Objects::nonNull)
                 .map(Sp500Service::getIndexValue)
                 .forEach(this::save);
     }

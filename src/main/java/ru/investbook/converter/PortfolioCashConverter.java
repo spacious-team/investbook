@@ -25,6 +25,7 @@ import ru.investbook.entity.PortfolioCashEntity;
 @Component
 public class PortfolioCashConverter implements EntityConverter<PortfolioCashEntity, PortfolioCash>  {
 
+    @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override
     public PortfolioCashEntity toEntity(PortfolioCash cash) {
         PortfolioCashEntity entity = new PortfolioCashEntity();

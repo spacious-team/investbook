@@ -21,6 +21,7 @@ package ru.investbook.parser.psb.foreignmarket;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
@@ -34,6 +35,7 @@ import ru.investbook.parser.SingleAbstractReportTable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
@@ -62,14 +64,14 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
     @Override
     protected Collection<EventCashFlow> parseRowToCollection(TableRow row) {
         String action = row.getStringCellValue(OPERATION);
-        action = String.valueOf(action).toLowerCase().trim();
+        action = action.toLowerCase().trim();
         boolean isPositive;
         switch (action) {
             case "ввод дс" -> isPositive = true;
             case "вывод дс" -> isPositive = false;
             default -> {
                 log.debug("Не известный тип операции '{}' в таблице '{}'", action, row.getTable());
-                return null;
+                return List.of();
             }
         }
         EventCashFlow.EventCashFlowBuilder builder = EventCashFlow.builder()
@@ -96,6 +98,7 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
     }
 
     private Optional<BigDecimal> getBigDecimal(TableRow row, FxCashFlowTableHeader column, boolean isPositive) {
+        //noinspection DataFlowIssue
         return Optional.ofNullable(row.getBigDecimalCellValueOrDefault(column, null))
                 .filter(value -> value.compareTo(min) > 0)
                 .map(value -> isPositive ? value : value.negate());
@@ -103,7 +106,7 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
 
     private Collection<EventCashFlow> getDailyBrokerCommission() {
         try {
-            Object value = getReport().getReportPage().getNextColumnValue(BROKER_FEE);
+            @Nullable Object value = getReport().getReportPage().getNextColumnValue(BROKER_FEE);
             double doubleValue = Double.parseDouble(String.valueOf(value));
             if (doubleValue > 0.01) {
                 BigDecimal brokerFee = BigDecimal.valueOf(doubleValue).negate();
@@ -131,6 +134,7 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
         return EventCashFlow.mergeDuplicates(old, nw);
     }
 
+    @Getter
     @RequiredArgsConstructor
     enum FxCashFlowTableHeader implements TableHeaderColumn {
         DATE("дата"),
@@ -141,9 +145,9 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
         VALUE(OptionalTableColumn.of(PatternTableColumn.of("Сумма"))),     // new format
         CURRENCY(OptionalTableColumn.of(PatternTableColumn.of("Валюта"))); // new format
 
-        @Getter
         private final TableColumn column;
-        FxCashFlowTableHeader(String ... words) {
+
+        FxCashFlowTableHeader(String... words) {
             this.column = PatternTableColumn.of(words);
         }
     }

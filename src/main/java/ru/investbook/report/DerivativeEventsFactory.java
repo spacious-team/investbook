@@ -19,6 +19,7 @@
 package ru.investbook.report;
 
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
@@ -51,6 +52,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singleton;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 
 @Component
 @RequiredArgsConstructor
@@ -68,19 +71,22 @@ public class DerivativeEventsFactory {
         Deque<Transaction> transactions = getTransactions(portfolio, contract, filter);
         Map<LocalDate, SecurityEventCashFlow> securityEventCashFlows = getSecurityEventCashFlows(portfolio, contract, filter);
 
-        LocalDate firstEventDate = getContractFirstEventDate(transactions, securityEventCashFlows);
-        LocalDate lastEventDate = Optional.ofNullable(getContractLastEventDate(transactions, securityEventCashFlows))
+        @Nullable LocalDate firstEventDate = getContractFirstEventDate(transactions, securityEventCashFlows);
+        @Nullable LocalDate lastEventDate = Optional.ofNullable(getContractLastEventDate(transactions, securityEventCashFlows))
                 .orElse(firstEventDate);
 
         DerivativeEvents derivativeEvents = new DerivativeEvents();
         BigDecimal totalProfit = BigDecimal.ZERO;
         int currentPosition = 0;
-        LocalDate currentDay = firstEventDate;
-        while (currentDay != null && currentDay.compareTo(lastEventDate) <= 0) {
+        @Nullable LocalDate currentDay = firstEventDate;
+        //noinspection ConstantValue
+        while (nonNull(currentDay) && nonNull(lastEventDate) && currentDay.compareTo(lastEventDate) <= 0) {
             Deque<Transaction> dailyTransactions = getDailyTransactions(transactions, currentDay);
-            SecurityEventCashFlow cash = securityEventCashFlows.get(currentDay);
+            @Nullable SecurityEventCashFlow cash = securityEventCashFlows.get(currentDay);
+            //noinspection ConstantValue
             if ((dailyTransactions != null && !dailyTransactions.isEmpty())
                     || (cash != null && !cash.getValue().equals(BigDecimal.ZERO))) {
+                //noinspection OptionalOfNullableMisuse
                 currentPosition += Optional.ofNullable(dailyTransactions)
                         .orElse(new LinkedList<>())
                         .stream()
@@ -104,7 +110,7 @@ public class DerivativeEventsFactory {
     private LinkedList<Transaction> getTransactions(Portfolio portfolio, Security contract, ViewFilter filter) {
         return transactionRepository
                 .findBySecurityIdAndPortfolioInAndTimestampBetweenOrderByTimestampAscTradeIdAsc(
-                        contract.getId(),
+                        requireNonNull(contract.getId()),
                         singleton(portfolio.getId()),
                         filter.getFromDate(),
                         filter.getToDate())
@@ -117,7 +123,7 @@ public class DerivativeEventsFactory {
         return securityEventCashFlowRepository
                 .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         singleton(portfolio.getId()),
-                        contract.getId(),
+                        requireNonNull(contract.getId()),
                         CashFlowType.DERIVATIVE_PROFIT.getId(),
                         filter.getFromDate(),
                         filter.getToDate())
@@ -126,25 +132,25 @@ public class DerivativeEventsFactory {
                 .collect(Collectors.toMap(e -> getTradeDay(e.getTimestamp()), Function.identity()));
     }
 
-    private LocalDate getContractFirstEventDate(Deque<Transaction> transactions,
+    private @Nullable LocalDate getContractFirstEventDate(Deque<Transaction> transactions,
                                                 Map<LocalDate, SecurityEventCashFlow> securityEventCashFlows) {
-        LocalDate firstTransactionDate, firstEventDate;
+        @Nullable LocalDate firstTransactionDate, firstEventDate;
         firstEventDate = firstTransactionDate = Optional.ofNullable(transactions.peekFirst())
                 .map(t -> ZonedDateTime.ofInstant(t.getTimestamp(), MOEX_TIMEZONE).toLocalDate())
                 .orElse(null);
         ArrayList<LocalDate> cashFlows = new ArrayList<>(securityEventCashFlows.keySet());
         if (!cashFlows.isEmpty()) {
             Collections.sort(cashFlows);
-            LocalDate firstCashFlowDate = cashFlows.get(0);
+            @Nullable LocalDate firstCashFlowDate = cashFlows.getFirst();
             firstEventDate = (firstTransactionDate == null || firstCashFlowDate.compareTo(firstTransactionDate) < 0) ?
                     firstCashFlowDate : firstTransactionDate;
         }
         return firstEventDate;
     }
 
-    private LocalDate getContractLastEventDate(Deque<Transaction> transactions,
+    private @Nullable LocalDate getContractLastEventDate(Deque<Transaction> transactions,
                                                Map<LocalDate, SecurityEventCashFlow> securityEventCashFlows) {
-        LocalDate lastTransactionDate, lastEventDate;
+        @Nullable LocalDate lastTransactionDate, lastEventDate;
         lastEventDate = lastTransactionDate = Optional.ofNullable(transactions.peekLast())
                 .map(Transaction::getTimestamp)
                 .map(DerivativeEventsFactory::getTradeDay)
@@ -152,7 +158,7 @@ public class DerivativeEventsFactory {
         ArrayList<LocalDate> cashFlows = new ArrayList<>(securityEventCashFlows.keySet());
         if (!cashFlows.isEmpty()) {
             Collections.sort(cashFlows);
-            LocalDate lastCashFlowDate = cashFlows.get(cashFlows.size() - 1);
+            @Nullable LocalDate lastCashFlowDate = cashFlows.getLast();
             lastEventDate = (lastTransactionDate == null || lastCashFlowDate.compareTo(lastTransactionDate) > 0) ?
                     lastCashFlowDate : lastTransactionDate;
         }
@@ -177,6 +183,7 @@ public class DerivativeEventsFactory {
 
     private LinkedHashMap<Transaction, Map<CashFlowType, TransactionCashFlow>> getCashFlows(Deque<Transaction> dailyTransactions) {
         LinkedHashMap<Transaction, Map<CashFlowType, TransactionCashFlow>> dailyTransactionsCashFlows = new LinkedHashMap<>();
+        //noinspection ConstantValue
         if (dailyTransactions != null) {
             for (Transaction transaction : dailyTransactions) {
                 if (transaction.getId() != null) {
@@ -189,7 +196,7 @@ public class DerivativeEventsFactory {
 
     private Map<CashFlowType, TransactionCashFlow> getTransactionCashFlows(Transaction transaction) {
         return transactionCashFlowRepository
-                .findByTransactionId(transaction.getId())
+                .findByTransactionId(requireNonNull(transaction.getId()))
                 .stream()
                 .map(transactionCashFlowConverter::fromEntity)
                 .collect(Collectors.toMap(TransactionCashFlow::getEventType, Function.identity()));

@@ -40,31 +40,31 @@ import java.util.Collections;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VndInvestbookPof {
 
-    @NotNull
     @JsonProperty("version")
+    @NotNull
     String version;
 
-    @NotNull
     @Builder.Default
     @JsonIgnoreProperties(value = {"id"})
     @JsonProperty("portfolio-cash")
+    @NotNull
     Collection<PortfolioCash> portfolioCash = Collections.emptySet();
 
-    @NotNull
     @Builder.Default
     @JsonIgnoreProperties(value = {"id"})
     @JsonProperty("portfolio-properties")
+    @NotNull
     Collection<PortfolioProperty> portfolioProperties = Collections.emptySet();
 
-    @NotNull
     @Builder.Default
     @JsonIgnoreProperties(value = {"issuer"})
     @JsonProperty("security-descriptions")
+    @NotNull
     Collection<SecurityDescription> securityDescriptions = Collections.emptySet();
 
-    @NotNull
     @Builder.Default
     @JsonIgnoreProperties(value = {"id"})
     @JsonProperty("security-quotes")
+    @NotNull
     Collection<SecurityQuote> securityQuotes = Collections.emptySet();
 }

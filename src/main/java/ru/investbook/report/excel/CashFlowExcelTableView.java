@@ -25,6 +25,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.decampo.xirr.NewtonRaphson;
 import org.decampo.xirr.Transaction;
 import org.decampo.xirr.Xirr;
@@ -76,7 +77,7 @@ public class CashFlowExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
+    protected <T extends Enum<T> & TableHeader> void writeHeader(Sheet sheet, Class<T> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         sheet.setColumnWidth(CASH.ordinal(), 17 * 256);
         sheet.setColumnWidth(CASH_RUB.ordinal(), 22 * 256);
@@ -123,14 +124,14 @@ public class CashFlowExcelTableView extends ExcelTableView {
     }
 
     private Optional<Transaction> castRecordToXirrTransaction(Table.Record record) {
-        Object cash = record.get(CASH);
-        Object currency = record.get(CURRENCY);
-        Double cashInRub = null;
+        @Nullable Object cash = record.get(CASH);
+        @Nullable Object currency = record.get(CURRENCY);
+        @Nullable Double cashInRub = null;
         if (cash instanceof Number n && currency instanceof String cur) {
             cashInRub = n.doubleValue() * foreignExchangeRateService.getExchangeRateToRub(cur).doubleValue();
         }
-        Object date = record.get(DATE);
-        Transaction transaction = (cashInRub != null && date instanceof Instant instant) ?
+        @Nullable Object date = record.get(DATE);
+        @Nullable Transaction transaction = (cashInRub != null && date instanceof Instant instant) ?
                 new Transaction(cashInRub, LocalDate.ofInstant(instant, ZoneId.systemDefault())) :
                 null;
         return Optional.ofNullable(transaction);

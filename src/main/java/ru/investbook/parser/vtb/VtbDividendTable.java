@@ -19,6 +19,7 @@
 package ru.investbook.parser.vtb;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.springframework.util.StringUtils;
@@ -31,6 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Double.parseDouble;
+import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.CashFlowType.DIVIDEND;
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
 
@@ -45,7 +47,7 @@ public class VtbDividendTable extends AbstractVtbCashFlowTable<EventCashFlow> {
 
     @Override
     protected Collection<EventCashFlow> getRow(CashFlowEventTable.CashFlowEvent event) {
-        CashFlowType eventType = event.getEventType();
+        @Nullable CashFlowType eventType = event.getEventType();
         if (eventType != DIVIDEND) { // предположение
             return Collections.emptyList();
         }
@@ -76,7 +78,8 @@ public class VtbDividendTable extends AbstractVtbCashFlowTable<EventCashFlow> {
         Matcher matcher = taxInformationPattern.matcher(description);
         if (matcher.find()) {
             try {
-                return BigDecimal.valueOf(parseDouble(matcher.group(2)));
+                String number = requireNonNull(matcher.group(2));
+                return BigDecimal.valueOf(parseDouble(number));
             } catch (Exception e) {
                 log.info("Не смогу выделить сумму налога из описания: {}", description);
             }

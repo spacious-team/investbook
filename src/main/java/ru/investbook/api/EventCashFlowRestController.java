@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
@@ -84,7 +85,7 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "409"),
             @ApiResponse(responseCode = "500", content = @Content)})
-    public ResponseEntity<Void> post(@Valid @RequestBody EventCashFlow event) {
+    public ResponseEntity<Void> post(@RequestBody @Valid EventCashFlow event) {
         return super.post(event);
     }
 
@@ -97,8 +98,8 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер события")
                                     Integer id,
-                                    @Valid
                                     @RequestBody
+                                    @Valid
                                     EventCashFlow event) {
         return super.put(id, event);
     }
@@ -115,7 +116,7 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     }
 
     @Override
-    public Integer getId(EventCashFlow object) {
+    public @Nullable Integer getId(EventCashFlow object) {
         return object.getId();
     }
 

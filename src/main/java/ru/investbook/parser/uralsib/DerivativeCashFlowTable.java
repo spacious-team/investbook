@@ -19,6 +19,7 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.table_wrapper.api.TableRow;
@@ -28,6 +29,7 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
@@ -39,9 +41,10 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
         super(report, PaymentsTable.TABLE_NAME, "", PaymentsTable.PaymentsTableHeader.class);
     }
 
-    protected SecurityEventCashFlow parseRow(TableRow row) {
-        String action = row.getStringCellValue(OPERATION);
-        action = String.valueOf(action).toLowerCase().trim();
+    protected @Nullable SecurityEventCashFlow parseRow(TableRow row) {
+        String action = row.getStringCellValue(OPERATION)
+                .toLowerCase()
+                .trim();
         if (!action.equalsIgnoreCase("вариационная маржа")) {
             return null;
         }
@@ -56,10 +59,12 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
     }
 
     private int getSecurityId(TableRow row) {
+        @SuppressWarnings("DataFlowIssue")
         String description = row.getStringCellValueOrDefault(DESCRIPTION, "");
+        @SuppressWarnings("DataFlowIssue")
         Matcher matcher = contractPattern.matcher(description);
         if (matcher.find()) {
-            String code = matcher.group(1);
+            String code = requireNonNull(matcher.group(1));
             return getReport().getSecurityRegistrar().declareDerivative(code);
         }
         throw new RuntimeException("Не могу найти наименование контракта в отчете брокера по событию:" + description);

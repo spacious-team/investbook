@@ -26,10 +26,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.investbook.loadingpage.LoadingPageServer;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
-class LoadingPageServerTests {
+class LoadingPageServerTest {
 
     private LoadingPageServer loadingPageServer;
 

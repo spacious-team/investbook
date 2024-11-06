@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
@@ -82,7 +83,7 @@ public class PortfolioCashRestController extends AbstractRestController<Integer,
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "409"),
             @ApiResponse(responseCode = "500", content = @Content)})
-    public ResponseEntity<Void> post(@Valid @RequestBody PortfolioCash property) {
+    public ResponseEntity<Void> post(@RequestBody @Valid PortfolioCash property) {
         return super.post(property);
     }
 
@@ -95,8 +96,8 @@ public class PortfolioCashRestController extends AbstractRestController<Integer,
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор записи")
                                     Integer id,
-                                    @Valid
                                     @RequestBody
+                                    @Valid
                                     PortfolioCash property) {
         return super.put(id, property);
     }
@@ -113,7 +114,7 @@ public class PortfolioCashRestController extends AbstractRestController<Integer,
     }
 
     @Override
-    public Integer getId(PortfolioCash object) {
+    public @Nullable Integer getId(PortfolioCash object) {
         return object.getId();
     }
 

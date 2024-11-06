@@ -31,6 +31,7 @@ import ru.investbook.parser.SingleBrokerReport;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.vtb.VtbSecurityFlowTable.VtbSecurityFlowTableHeader.NAME_REGNUMBER_ISIN;
 
 public class VtbSecurityFlowTable extends SingleAbstractReportTable<Security> {
@@ -46,7 +47,8 @@ public class VtbSecurityFlowTable extends SingleAbstractReportTable<Security> {
     protected Security parseRow(TableRow row) {
         String description = row.getStringCellValue(NAME_REGNUMBER_ISIN);
         Security security = VtbReportHelper.getSecurity(description);
-        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(security.getIsin(), security::toBuilder);
+        String isin = requireNonNull(security.getIsin());
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(isin, security::toBuilder);
         security = security.toBuilder().id(securityId).build();
         String registrationNumber = description.split(",")[1].toUpperCase().trim();
         regNumberToSecurity.put(registrationNumber, security);

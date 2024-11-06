@@ -19,6 +19,7 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.table_wrapper.api.TableRow;
@@ -29,6 +30,7 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
@@ -43,9 +45,10 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
     }
 
     @Override
-    protected EventCashFlow parseRow(TableRow row) {
-        String action = row.getStringCellValue(OPERATION);
-        action = String.valueOf(action).toLowerCase().trim();
+    protected @Nullable EventCashFlow parseRow(TableRow row) {
+        String action = row.getStringCellValue(OPERATION)
+                .toLowerCase()
+                .trim();
         String description = row.getStringCellValueOrDefault(DESCRIPTION, "");
         CashFlowType type;
         switch (action) {
@@ -57,8 +60,8 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
                 Matcher matcherFrom = moneyTransferFromDescriptionPattern.matcher(description);
                 Matcher matcherTo = moneyTransferToDescriptionPattern.matcher(description);
                 if (matcherFrom.find() && matcherTo.find()) {
-                    String to = matcherTo.group(1);
-                    String from = matcherFrom.group(1);
+                    String to = requireNonNull(matcherTo.group(1));
+                    String from = requireNonNull(matcherFrom.group(1));
                     if (isCurrentPortfolioAccount(to) != isCurrentPortfolioAccount(from)) {
                         if (isExternalAccount(from) && isExternalAccount(to)) {
                             type = CashFlowType.CASH;
@@ -111,8 +114,10 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
     private Integer getClientCode(String account) {
         try {
             Matcher matcher = clientCodePattern.matcher(account);
+            //noinspection ResultOfMethodCallIgnored
             matcher.find();
-            return Integer.parseInt(matcher.group(1));
+            String value = requireNonNull(matcher.group(1));
+            return Integer.parseInt(value);
         } catch (Exception e) {
             throw new RuntimeException("Не могу найти код клиента для субсчета " + account);
         }

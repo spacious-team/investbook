@@ -21,6 +21,7 @@ package ru.investbook.parser.psb;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
@@ -71,7 +72,7 @@ public class PortfolioPropertyTable extends SingleInitializableReportTable<Portf
 
     protected Collection<PortfolioProperty> getTotalAssets(Table table) {
         try {
-            TableRow row = table.findRowByPrefix(ASSETS);
+            @Nullable TableRow row = table.findRowByPrefix(ASSETS);
             if (row == null) {
                 return emptyList();
             }
@@ -87,6 +88,7 @@ public class PortfolioPropertyTable extends SingleInitializableReportTable<Portf
         }
     }
 
+    @Getter
     @RequiredArgsConstructor
     public enum SummaryTableHeader implements TableHeaderColumn {
         DESCRIPTION(1),
@@ -98,7 +100,6 @@ public class PortfolioPropertyTable extends SingleInitializableReportTable<Portf
         GBP(OptionalTableColumn.of(PatternTableColumn.of("GBP"))),
         CHF(OptionalTableColumn.of(PatternTableColumn.of("CHF")));
 
-        @Getter
         private final TableColumn column;
         SummaryTableHeader(int columnIndex) {
             this.column = ConstantPositionTableColumn.of(columnIndex);

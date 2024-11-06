@@ -21,6 +21,7 @@ package ru.investbook.report;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import ru.investbook.web.model.ViewFilterModel;
 
 import java.time.Instant;
@@ -32,12 +33,13 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static java.time.ZoneId.systemDefault;
+import static java.util.Objects.requireNonNull;
 
 @Getter
 @Builder(toBuilder = true)
 @EqualsAndHashCode
 public class ViewFilter {
-    private static final ThreadLocal<ViewFilter> filters = ThreadLocal.withInitial(() -> null);
+    private static final ThreadLocal<@Nullable ViewFilter> filters = ThreadLocal.withInitial(() -> null);
     public static final Instant defaultFromDate = Instant.ofEpochSecond(0);
     private static final Function<LocalDate, Instant> toInstant = date -> date.atStartOfDay(systemDefault()).toInstant();
 
@@ -78,7 +80,7 @@ public class ViewFilter {
     }
 
     public static ViewFilter get() {
-        return filters.get();
+        return requireNonNull(filters.get(), "ViewFilter is not set");
     }
 
     public static void remove() {

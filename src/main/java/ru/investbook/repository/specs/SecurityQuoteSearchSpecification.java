@@ -23,6 +23,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.SecurityQuoteEntity;
 import ru.investbook.entity.SecurityQuoteEntity_;
@@ -31,6 +32,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 
@@ -41,7 +43,8 @@ public class SecurityQuoteSearchSpecification implements Specification<SecurityQ
     private final LocalDate date;
 
     @Override
-    public Predicate toPredicate(Root<SecurityQuoteEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+    public Predicate toPredicate(Root<SecurityQuoteEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
+        requireNonNull(query);
         return Stream.of(
                         filterBySecurity(root, builder, SecurityQuoteEntity_.security, security),
                         filterByEquals(root, builder, SecurityQuoteEntity_.currency, currency),

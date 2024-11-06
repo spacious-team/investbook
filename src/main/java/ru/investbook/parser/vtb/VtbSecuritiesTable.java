@@ -20,6 +20,7 @@ package ru.investbook.parser.vtb;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
@@ -31,6 +32,7 @@ import ru.investbook.parser.SingleBrokerReport;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.vtb.VtbSecuritiesTable.VtbSecuritiesTableHeader.NAME_REGNUMBER_ISIN;
 import static ru.investbook.parser.vtb.VtbSecuritiesTable.VtbSecuritiesTableHeader.SECTION;
 
@@ -46,13 +48,14 @@ public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
     }
 
     @Override
-    protected Security parseRow(TableRow row) {
+    protected @Nullable Security parseRow(TableRow row) {
         if (row.getCellValue(SECTION) == null) {
             return null; // sub-header row
         }
         String description = row.getStringCellValue(NAME_REGNUMBER_ISIN);
         Security security = VtbReportHelper.getSecurity(description);
-        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(security.getIsin(), security::toBuilder);
+        String isin = requireNonNull(security.getIsin());
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(isin, security::toBuilder);
         security = security.toBuilder().id(securityId).build();
         String registrationNumber = description.split(",")[1].toUpperCase().trim();
         regNumberToSecurity.put(registrationNumber, security);

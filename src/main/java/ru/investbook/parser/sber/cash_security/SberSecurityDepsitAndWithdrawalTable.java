@@ -20,6 +20,7 @@ package ru.investbook.parser.sber.cash_security;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
@@ -49,7 +50,7 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Ab
     }
 
     @Override
-    protected SecurityTransaction parseRow(TableRow row) {
+    protected @Nullable SecurityTransaction parseRow(TableRow row) {
         if (!"Исполнено".equalsIgnoreCase(row.getStringCellValueOrDefault(STATUS, null))) {
             return null;
         } else if ("Погашение ценной бумаги".equalsIgnoreCase(row.getStringCellValueOrDefault(DESCRIPTION, null))) {
@@ -74,20 +75,23 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Ab
                 null,
                 report.getSecurityRegistrar());
 
+        @SuppressWarnings({"nullable", "DataFlowIssue"})
+        int securityId = security.getId();
         return SecurityTransaction.builder()
-                .tradeId(generateTradeId(portfolio, instant, security.getId()))
+                .tradeId(generateTradeId(portfolio, instant, securityId))
                 .timestamp(instant)
                 .portfolio(portfolio)
-                .security(security.getId())
+                .security(securityId)
                 .count(count)
                 .build();
     }
 
-    private static String generateTradeId(String portfolio, Instant instant, Integer securityId) {
+    private static String generateTradeId(String portfolio, Instant instant, int securityId) {
         String id = instant.getEpochSecond() + securityId + portfolio;
         return id.substring(0, Math.min(32, id.length()));
     }
 
+    @Getter
     enum SberSecurityDepositAndWithdrawalTableHeader implements TableHeaderColumn {
         PORTFOLIO("Номер договора"),
         DATE_TIME("Дата исполнения поручения"),
@@ -99,8 +103,8 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Ab
         DESCRIPTION("Содержание операции"),
         STATUS("Статус");
 
-        @Getter
         private final TableColumn column;
+
         SberSecurityDepositAndWithdrawalTableHeader(String words) {
             this.column = PatternTableColumn.of(words);
         }

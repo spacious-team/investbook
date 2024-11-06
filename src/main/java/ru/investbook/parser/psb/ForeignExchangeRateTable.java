@@ -19,6 +19,7 @@
 package ru.investbook.parser.psb;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
@@ -52,7 +53,7 @@ public class ForeignExchangeRateTable extends SingleInitializableReportTable<For
 
     protected Collection<ForeignExchangeRate> getExchangeRate(Table table) {
         try {
-            TableRow row = table.findRowByPrefix(EXCHANGE_RATE_ROW);
+            @Nullable TableRow row = table.findRowByPrefix(EXCHANGE_RATE_ROW);
             if (row == null) {
                 return emptyList();
             }

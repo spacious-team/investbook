@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.uralsib;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.TableRow;
@@ -25,6 +26,7 @@ import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.SecurityRedemptionTable.SecurityFlowTableHeader.*;
 
 /**
@@ -42,7 +44,7 @@ public class SecurityDepositAndWithdrawalTable extends SingleAbstractReportTable
     }
 
     @Override
-    protected SecurityTransaction parseRow(TableRow row) {
+    protected @Nullable SecurityTransaction parseRow(TableRow row) {
         String operation = row.getStringCellValue(OPERATION);
         if (!operation.equalsIgnoreCase(IN_DESCRIPTION) && !operation.equalsIgnoreCase(OUT_DESCRIPTION)) {
             return null;
@@ -51,7 +53,7 @@ public class SecurityDepositAndWithdrawalTable extends SingleAbstractReportTable
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                 .tradeId(row.getStringCellValue(ID))
                 .portfolio(getReport().getPortfolio())
-                .security(getSecurity(row).getId())
+                .security(requireNonNull(getSecurity(row).getId()))
                 .count(row.getIntCellValue(COUNT))
                 .value(BigDecimal.ZERO)
                 .accruedInterest(BigDecimal.ZERO)

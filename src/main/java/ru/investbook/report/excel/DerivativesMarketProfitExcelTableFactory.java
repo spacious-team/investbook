@@ -19,6 +19,7 @@
 package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
@@ -94,6 +95,7 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
             Table.Record record = new Table.Record();
             contractProfit.add(record);
             LinkedHashMap<Transaction, Map<CashFlowType, TransactionCashFlow>> dailyTransactions = dailyEvents.getDailyTransactions();
+            //noinspection ConstantValue
             if (dailyTransactions != null) {
                 boolean isFirstRowOfDay = true;
                 for (Map.Entry<Transaction, Map<CashFlowType, TransactionCashFlow>> e : dailyTransactions.entrySet()) {
@@ -126,7 +128,7 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
                     isFirstRowOfDay = false;
                 }
             }
-            SecurityEventCashFlow dailyProfit = dailyEvents.getDailyProfit();
+            @Nullable SecurityEventCashFlow dailyProfit = dailyEvents.getDailyProfit();
             if (dailyProfit != null) {
                 record.put(DATE, dailyProfit.getTimestamp());
                 record.put(DERIVATIVE_PROFIT_DAY, dailyProfit.getValue());

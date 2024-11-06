@@ -23,6 +23,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.EventCashFlowEntity;
 import ru.investbook.entity.EventCashFlowEntity_;
@@ -41,7 +42,7 @@ public class EventCashFlowEntitySearchSpecification implements Specification<Eve
     private final LocalDate dateTo;
 
     @Override
-    public Predicate toPredicate(Root<EventCashFlowEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+    public Predicate toPredicate(Root<EventCashFlowEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
         return Stream.of(
                         filterByPortfolio(root, builder, EventCashFlowEntity_.portfolio, portfolio),
                         filterByDateFrom(root, builder, EventCashFlowEntity_.timestamp, dateFrom),

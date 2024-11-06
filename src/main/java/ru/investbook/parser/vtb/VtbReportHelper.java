@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.vtb;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 
@@ -25,9 +26,9 @@ class VtbReportHelper {
 
     static Security getSecurity(String description) {
         String[] parts = description.split(",");
-        String name = parts[0].trim();
+        @Nullable String name = parts[0].trim();
         SecurityType type = SecurityType.STOCK_OR_BOND;
-        String ticker = null;
+        @Nullable String ticker = null;
         if (name.endsWith(" US Equity") || name.endsWith(" US")) {
             ticker = name.substring(0, name.lastIndexOf(" US"));
             name = null;

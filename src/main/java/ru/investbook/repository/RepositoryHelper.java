@@ -18,10 +18,13 @@
 
 package ru.investbook.repository;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.exception.ConstraintViolationException;
 
 import java.sql.SQLException;
 import java.util.Objects;
+
+import static java.util.Objects.nonNull;
 
 public class RepositoryHelper {
 
@@ -29,14 +32,14 @@ public class RepositoryHelper {
      * May return false positive result if NOT NULL column set by NULL (or for other constraint violations)
      * for not H2 or MariaDB RDBMS
      */
-    public static boolean isUniqIndexViolationException(Throwable t) {
+    public static boolean isUniqIndexViolationException(@Nullable Throwable t) {
         do {
             if (t instanceof ConstraintViolationException) {
                 // todo Не точное условие, нужно выбирать
-                Throwable cause = t.getCause();
+                @Nullable Throwable cause = t.getCause();
                 if (cause instanceof SQLException sqlException) {
                     int errorCode = sqlException.getErrorCode();
-                    String sqlState = sqlException.getSQLState();
+                    @Nullable String sqlState = sqlException.getSQLState();
                     String packageName = cause.getClass().getPackageName();
                     // https://www.h2database.com/javadoc/org/h2/api/ErrorCode.html#DUPLICATE_KEY_1
                     if (errorCode == 23505 && Objects.equals(packageName, "org.h2.jdbc")) {
@@ -50,7 +53,7 @@ public class RepositoryHelper {
                 }
                 return true;  // other databases
             }
-        } while ((t = t.getCause()) != null);
+        } while (nonNull(t) && nonNull(t = t.getCause()));
         return false;
     }
 }

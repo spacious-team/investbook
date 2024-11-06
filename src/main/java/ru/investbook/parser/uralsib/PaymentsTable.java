@@ -20,6 +20,7 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Security;
@@ -48,6 +49,7 @@ import java.util.regex.Pattern;
 
 import static java.lang.Character.isLetterOrDigit;
 import static java.lang.Double.parseDouble;
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 import static ru.investbook.parser.uralsib.UralsibBrokerReport.convertToCurrency;
 
@@ -61,7 +63,7 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
     private final List<SecurityTransaction> securityTransactions;
     private final Collection<EventCashFlow> eventCashFlows = new ArrayList<>();
     private final Pattern taxInformationPattern = Pattern.compile("налог в размере ([0-9.]+) удержан");
-    private String currentRowDescription = "";
+    private @Nullable String currentRowDescription = "";
 
     public PaymentsTable(UralsibBrokerReport report,
                          SecuritiesTable securitiesTable,
@@ -86,7 +88,7 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
     /**
      * @return security if found, null otherwise
      */
-    protected Security getSecurity(TableRow row, CashFlowType cashEventIfSecurityNotFound) {
+    protected @Nullable Security getSecurity(TableRow row, CashFlowType cashEventIfSecurityNotFound) {
         try {
             return getSecurityIfCan(row);
         } catch (Exception e) {
@@ -132,7 +134,7 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
         throw new RuntimeException("Не могу найти ISIN ценной бумаги в отчете брокера по событию:" + description);
     }
 
-    private boolean contains(String description, String securityParameter) {
+    private boolean contains(String description, @Nullable String securityParameter) {
         if (securityParameter == null) {
             return false;
         }
@@ -151,7 +153,8 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
         Matcher matcher = taxInformationPattern.matcher(description.toLowerCase());
         if (matcher.find()) {
             try {
-                return BigDecimal.valueOf(parseDouble(matcher.group(1)));
+                String value = requireNonNull(matcher.group(1));
+                return BigDecimal.valueOf(parseDouble(value));
             } catch (Exception e) {
                 log.info("Не смогу выделить сумму налога из описания: {}", description);
             }
@@ -161,7 +164,7 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
 
     protected Integer getSecurityCount(Security security, Instant atInstant) {
         int count = securitiesIncomingCount.stream()
-                .filter(i -> i.getSecurity().getId().equals(security.getId()))
+                .filter(i -> Objects.equals(i.getSecurity().getId(), security.getId()))
                 .map(ReportSecurityInformation::getIncomingCount)
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("Не найдено количество на начало периода отчета для ЦБ " + security));

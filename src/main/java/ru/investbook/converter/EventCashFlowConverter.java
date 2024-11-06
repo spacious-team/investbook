@@ -34,6 +34,7 @@ public class EventCashFlowConverter implements EntityConverter<EventCashFlowEnti
     private final PortfolioRepository portfolioRepository;
     private final CashFlowTypeRepository cashFlowTypeRepository;
 
+    @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override
     public EventCashFlowEntity toEntity(EventCashFlow eventCashFlow) {
         PortfolioEntity portfolioEntity = portfolioRepository.getReferenceById(eventCashFlow.getPortfolio());
@@ -45,6 +46,7 @@ public class EventCashFlowConverter implements EntityConverter<EventCashFlowEnti
         entity.setTimestamp(eventCashFlow.getTimestamp());
         entity.setCashFlowType(cashFlowTypeEntity);
         entity.setValue(eventCashFlow.getValue());
+        //noinspection ConstantValue
         if(eventCashFlow.getCurrency() != null) entity.setCurrency(eventCashFlow.getCurrency());
         if (eventCashFlow.getDescription() != null &&! eventCashFlow.getDescription().isEmpty()) {
             entity.setDescription(eventCashFlow.getDescription());

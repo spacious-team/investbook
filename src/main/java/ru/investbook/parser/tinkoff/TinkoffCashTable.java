@@ -20,6 +20,7 @@ package ru.investbook.parser.tinkoff;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
@@ -40,12 +41,12 @@ public class TinkoffCashTable extends SingleAbstractReportTable<PortfolioCash>  
     }
 
     @Override
-    protected PortfolioCash parseRow(TableRow row) {
-        BigDecimal value = row.getBigDecimalCellValueOrDefault(CashTableHeader.VALUE, null);
+    protected @Nullable PortfolioCash parseRow(TableRow row) {
+        @Nullable BigDecimal value = row.getBigDecimalCellValueOrDefault(CashTableHeader.VALUE, null);
         if (value == null) {
             return null;
         }
-        String currency = row.getStringCellValue(CashTableHeader.CURRENCY);
+        @Nullable String currency = row.getStringCellValue(CashTableHeader.CURRENCY);
         if (currency == null || currency.length() != 3) {
             return null; // неизвестный контракт GLD_MOEX указывается в качестве валюты
         }
@@ -58,12 +59,12 @@ public class TinkoffCashTable extends SingleAbstractReportTable<PortfolioCash>  
                 .build();
     }
 
+    @Getter
     @RequiredArgsConstructor
     protected enum CashTableHeader implements TableHeaderColumn {
         CURRENCY("Валюта"),
         VALUE("Исходящий", "остаток", "на конец", "периода");
 
-        @Getter
         private final TableColumn column;
 
         CashTableHeader(String... words) {

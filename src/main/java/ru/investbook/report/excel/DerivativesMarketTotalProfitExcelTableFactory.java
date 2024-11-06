@@ -20,6 +20,7 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
@@ -52,6 +53,7 @@ import java.util.Set;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.*;
 import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
@@ -148,6 +150,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
             row.put(LAST_TRANSACTION_DATE, ofNullable(transactions.peekLast())
                     .map(Transaction::getTimestamp)
                     .orElse(null));
+            //noinspection DataFlowIssue
             row.put(LAST_EVENT_DATE, getLastEventDate(portfolios, contracts));
             row.put(BUY_COUNT, transactions
                     .stream()
@@ -182,13 +185,13 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
         ViewFilter filter = ViewFilter.get();
         FifoPositionsFilter pf = FifoPositionsFilter.of(portfolios, filter.getFromDate(), filter.getToDate());
         return contracts.stream()
-                .map(contract -> positionsFactory.getTransactions(contract.getId(), pf))
+                .map(contract -> positionsFactory.getTransactions(requireNonNull(contract.getId()), pf))
                 .flatMap(Collection::stream)
                 .sorted(Comparator.comparing(Transaction::getTimestamp))
                 .collect(toCollection(LinkedList::new));
     }
 
-    private Instant getLastEventDate(Collection<String> portfolios, Collection<Security> contracts) {
+    private @Nullable Instant getLastEventDate(Collection<String> portfolios, Collection<Security> contracts) {
         ViewFilter filter = ViewFilter.get();
         return contracts.stream()
                 .map(contract -> securityProfitService.getLastEventTimestamp(

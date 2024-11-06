@@ -27,11 +27,11 @@ import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioProperty.PortfolioPropertyBuilder;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
-import org.springframework.lang.Nullable;
 import ru.investbook.entity.PortfolioEntity;
 
 import java.math.BigDecimal;
@@ -54,27 +54,30 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 @Slf4j
 public class AccountPof {
 
+    @SuppressWarnings("type.argument")
     private static final ThreadLocal<AtomicInteger> idGenerator = ThreadLocal.withInitial(AtomicInteger::new);
+    @SuppressWarnings("type.argument")
     private static final ThreadLocal<Map<String, Integer>> accountNumberToIdMap = ThreadLocal.withInitial(HashMap::new);
 
-    @NotNull
     @JsonProperty("id")
+    @NotNull
     int id;
 
-    @Nullable
+
     @JsonProperty("account-number")
+    @Nullable
     String accountNumber;
 
-    @NotNull
     @JsonProperty("type")
+    @NotNull
     AccountTypePof type;
 
-    @NotNull
     @JsonProperty("valuation")
+    @NotNull
     BigDecimal valuation;
 
-    @NotEmpty
     @JsonProperty("valuation-currency")
+    @NotEmpty
     String valuationCurrency;
 
     static void resetAccountIdGenerator() {
