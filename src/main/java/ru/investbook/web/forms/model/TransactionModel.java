@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.model;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.xml.bind.DatatypeConverter;
@@ -56,20 +57,20 @@ public class TransactionModel {
 
     private @NotEmpty String portfolio;
 
-    private Action action;
+    private @NotNull Action action;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date = LocalDate.now();
+    private @NotNull LocalDate date = LocalDate.now();
 
     @DateTimeFormat(pattern = "HH:mm:ss")
-    private LocalTime time = LocalTime.NOON;
+    private @NotNull LocalTime time = LocalTime.NOON;
 
     /**
      * In "name (isin)" or "contract-name" format
      */
     private @NotEmpty String security;
 
-    private SecurityType securityType;
+    private @NotNull SecurityType securityType;
 
     private @Positive int count;
 

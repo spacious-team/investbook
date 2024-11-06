@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.model;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -31,9 +32,9 @@ public class SecurityDescriptionModel {
      */
     private @NotEmpty String security = "Наименование (RU0000000000)";
 
-    private @Nullable @NotEmpty String sector;
+    private @NotEmpty String sector;
 
-    private SecurityType securityType;
+    private @NotNull SecurityType securityType;
 
     public void setSecurity(Integer securityId, @Nullable String securityIsin, @Nullable String securityName, SecurityType securityType) {
         this.securityId = securityId;

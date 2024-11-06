@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.model;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
@@ -41,11 +42,11 @@ public class SecurityQuoteModel {
      */
     private @NotEmpty String security;
 
-    private SecurityType securityType;
+    private @NotNull SecurityType securityType;
 
-    private Instant timestamp = LocalDate.now().atTime(LocalTime.NOON).atZone(systemDefault()).toInstant();
+    private @NotNull Instant timestamp = LocalDate.now().atTime(LocalTime.NOON).atZone(systemDefault()).toInstant();
 
-    private @Positive BigDecimal quote;
+    private @NotNull @Positive BigDecimal quote;
 
     private @Nullable @Positive BigDecimal price;
 

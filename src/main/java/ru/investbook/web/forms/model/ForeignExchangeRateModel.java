@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.model;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -30,13 +31,14 @@ import java.time.LocalDate;
 public class ForeignExchangeRateModel {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date = LocalDate.now();
+    private @NotNull LocalDate date = LocalDate.now();
 
     private @NotEmpty String baseCurrency;
 
-    @NotEmpty String quoteCurrency;
+    @NotEmpty
+    String quoteCurrency;
 
-    private @Positive BigDecimal rate;
+    private @Positive @NotNull BigDecimal rate;
 
     public void setBaseCurrency(String currency) {
         this.baseCurrency = currency.toUpperCase();

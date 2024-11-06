@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.model;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -41,17 +42,17 @@ public class EventCashFlowModel {
     private @NotEmpty String portfolio;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date = LocalDate.now();
+    private @NotNull LocalDate date = LocalDate.now();
 
     @DateTimeFormat(pattern = "HH:mm:ss")
-    private LocalTime time = LocalTime.NOON;
+    private @NotNull LocalTime time = LocalTime.NOON;
 
-    private CashFlowType type;
+    private @NotNull CashFlowType type;
 
     /**
      * Negative value for cash out, otherwise - positive
      */
-    private BigDecimal value;
+    private @NotNull BigDecimal value;
 
     private @NotEmpty String valueCurrency = "RUB";
 

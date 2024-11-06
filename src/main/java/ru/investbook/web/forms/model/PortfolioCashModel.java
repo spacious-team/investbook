@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.model;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,12 +40,12 @@ public class PortfolioCashModel {
     private @Nullable String market;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date = LocalDate.now();
+    private @NotNull LocalDate date = LocalDate.now();
 
     @DateTimeFormat(pattern = "HH:mm:ss")
-    private LocalTime time = LocalTime.NOON;
+    private @NotNull LocalTime time = LocalTime.NOON;
 
-    private BigDecimal cash = BigDecimal.ZERO;
+    private @NotNull BigDecimal cash = BigDecimal.ZERO;
 
-    private String currency = "RUB";
+    private @NotEmpty String currency = "RUB";
 }

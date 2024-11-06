@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.model;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -36,10 +37,10 @@ public class SplitModel {
     private @NotEmpty String portfolio;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date = LocalDate.now();
+    private @NotNull LocalDate date = LocalDate.now();
 
     @DateTimeFormat(pattern = "HH:mm")
-    private LocalTime time = LocalTime.NOON;
+    private @NotNull LocalTime time = LocalTime.NOON;
 
     /**
      * In "name (isin)" format

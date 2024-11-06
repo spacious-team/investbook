@@ -37,7 +37,6 @@ import ru.investbook.web.forms.model.filter.SecurityQuoteFormFilterModel;
 
 import java.util.Optional;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.springframework.data.domain.Sort.Order.asc;
 import static org.springframework.data.domain.Sort.Order.desc;
@@ -76,7 +75,7 @@ public class SecurityQuoteFormsService {
                         .id(e.getId())
                         .security(savedSecurityId)
                         .timestamp(e.getTimestamp())
-                        .quote(requireNonNull(e.getQuote()))
+                        .quote(e.getQuote())
                         .price(e.getPrice())
                         .accruedInterest(e.getAccruedInterest())
                         .currency(hasLength(e.getCurrency()) ? e.getCurrency() : null)

@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.model;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,10 +40,10 @@ public class SecurityEventCashFlowModel {
     private @NotEmpty String portfolio;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date = LocalDate.now();
+    private @NotNull LocalDate date = LocalDate.now();
 
     @DateTimeFormat(pattern = "HH:mm:ss")
-    private LocalTime time = LocalTime.NOON;
+    private @NotNull LocalTime time = LocalTime.NOON;
 
     /**
      * In "name (isin)" or "contract-name" format
@@ -51,9 +52,9 @@ public class SecurityEventCashFlowModel {
 
     private int count;
 
-    private CashFlowType type;
+    private @NotNull CashFlowType type;
 
-    private BigDecimal value;
+    private @NotNull BigDecimal value;
 
     private @NotEmpty String valueCurrency = "RUB";
 
