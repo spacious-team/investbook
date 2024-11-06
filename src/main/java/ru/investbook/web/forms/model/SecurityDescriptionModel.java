@@ -32,7 +32,7 @@ public class SecurityDescriptionModel {
      */
     private @NotEmpty String security = "Наименование (RU0000000000)";
 
-    private @NotEmpty String sector;
+    private @Nullable @NotEmpty String sector;
 
     private @NotNull SecurityType securityType;
 
