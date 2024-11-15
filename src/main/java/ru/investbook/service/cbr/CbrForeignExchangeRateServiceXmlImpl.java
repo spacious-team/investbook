@@ -19,9 +19,9 @@
 package ru.investbook.service.cbr;
 
 import generated.ValCurs;
+import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import lombok.SneakyThrows;
-import org.glassfish.jaxb.runtime.v2.ContextFactory;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -35,8 +35,6 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
-
-import static java.util.Collections.emptyMap;
 
 @Service
 public class CbrForeignExchangeRateServiceXmlImpl extends AbstractCbrForeignExchangeRateService {
@@ -64,7 +62,8 @@ public class CbrForeignExchangeRateServiceXmlImpl extends AbstractCbrForeignExch
 
     private ValCurs getFxRates(LocalDate fromDate, String currencyId) throws JAXBException, IOException {
         try (InputStream stream = getInputStream(fromDate, currencyId)) {
-            return (ValCurs) ContextFactory.createContext(new Class[]{ValCurs.class}, emptyMap())
+
+            return (ValCurs) JAXBContext.newInstance(ValCurs.class)
                     .createUnmarshaller()
                     .unmarshal(stream);
         }

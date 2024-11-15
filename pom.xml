@@ -85,12 +85,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.glassfish.jaxb</groupId>
-                <artifactId>jaxb-runtime</artifactId>
-                <!-- scope is changed, CbrForeignExchangeRateServiceXmlImpl.class requires -->
-                <scope>compile</scope>
-            </dependency>
             <!-- TODO: remove before release -->
             <dependency>
                 <groupId>com.github.spacious-team</groupId>
