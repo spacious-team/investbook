@@ -1,6 +1,6 @@
 #### Оглавление
-- [Установка на Windows x64](install-on-windows.md)
-- [Установка на Windows x86](install-on-windows-by-zip.md)
+- [Установка на Windows](#установка-и-работа-на-windows)
+- [Установка на Windows из ZIP архива](install-on-windows-by-zip.md)
 - [Установка на Mac](#установка-и-работа-на-mac-и-linux)
 - [Установка на Linux](#установка-и-работа-на-mac-и-linux)
 - [Запуск в Docker](run-by-docker.md)
@@ -18,8 +18,7 @@
    $ sudo apt update
    $ sudo apt install openjdk-23-jre-headless
    ```
-   Или можно скачать [Java 23](https://jdk.java.net/23/) и распаковать папку `jdk-23` в директорию `/opt`.
-   Для 32 разрядных ОС можно скачать [Java 23 x86 32](https://bell-sw.com/pages/downloads/). Если java распакована из
+   Или можно скачать [Java 23](https://jdk.java.net/23/) и распаковать папку `jdk-23` в директорию `/opt`. Если java распакована из
    архива, то в директории приложения нужно найти файл `start.sh`, раскомментировать и актуализировать `JAVA_HOME`
    ```shell
    $ export JAVA_HOME=/opt/jdk-23
