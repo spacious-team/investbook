@@ -290,7 +290,7 @@
                             lombok.launch.AnnotationProcessorHider$AnnotationProcessor
                         </annotationProcessor>
                         <annotationProcessor>
-                            org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor
+                           org.hibernate.processor.HibernateProcessor
                         </annotationProcessor>
                         <annotationProcessor>
                             org.checkerframework.checker.nullness.NullnessChecker
