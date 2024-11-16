@@ -36,7 +36,8 @@ import static java.util.Objects.requireNonNull;
 @UtilityClass
 public class LoadingPageServerUtils {
 
-    private static final String CONF_PROPERTIES = "application-conf.properties";
+    private static final String CONF_PROPERTIES = "app/application-conf.properties";
+    private static final String RESOURCE_CONF_PROPERTIES = "application-conf.properties";
 
     public static int getMainAppPort() {
         try {
@@ -44,7 +45,7 @@ public class LoadingPageServerUtils {
             String value = properties.getProperty("server.port", "2030");
             return Integer.parseInt(value);
         } catch (Exception e) {
-            log.warn("Can't find 'server.port' property, fallback to default value: 2030");
+            log.warn("Can't find 'server.port' property, fallback to default value: 2030", e);
             return 2030;
         }
     }
@@ -55,7 +56,7 @@ public class LoadingPageServerUtils {
             String value = properties.getProperty("investbook.open-home-page-after-start", "true");
             return Boolean.parseBoolean(value);
         } catch (Exception e) {
-            log.warn("Can't find 'investbook.open-home-page-after-start' fallback to default value: true");
+            log.warn("Can't find 'investbook.open-home-page-after-start' fallback to default value: true", e);
             return true;
         }
     }
@@ -67,7 +68,7 @@ public class LoadingPageServerUtils {
             properties.load(reader);
         } catch (Exception e) {
             // Properties file is not found in app installation path, read default file from class path
-            try (InputStream in = requireNonNull(LoadingPageServerUtils.class.getResourceAsStream(CONF_PROPERTIES));
+            try (InputStream in = requireNonNull(LoadingPageServerUtils.class.getResourceAsStream(RESOURCE_CONF_PROPERTIES));
                  Reader reader = new InputStreamReader(in, UTF_8)) {
                 properties.load(reader);
             }
