@@ -453,6 +453,7 @@
                     </plugin>
                     <plugin>
                         <!-- jpackage requires Wix 3: https://wixtoolset.org/docs/wix3/ (only Wix, Toolset not required) -->
+                        <!-- https://github.panteleyev.org/jpackage-maven-plugin/examples/executions.html-->
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
                         <version>1.2.1</version>
@@ -493,6 +494,7 @@
                                     <icon>${project.basedir}/src/main/assembly/jpackage/icon.ico</icon>
                                     <destination>${project.build.directory}/jpackage</destination>
                                     <winDirChooser>true</winDirChooser>
+                                    <winPerUserInstall>true</winPerUserInstall>
                                     <winMenu>true</winMenu>
                                     <winMenuGroup>Investbook</winMenuGroup>
                                     <winShortcut>true</winShortcut>
