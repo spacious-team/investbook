@@ -53,6 +53,10 @@
             <outputDirectory/>
         </file>
         <file>
+            <source>README-en.md</source>
+            <outputDirectory/>
+        </file>
+        <file>
             <source>LICENSE</source>
             <outputDirectory/>
         </file>
