@@ -284,7 +284,7 @@
                             lombok.launch.AnnotationProcessorHider$AnnotationProcessor
                         </annotationProcessor>
                         <annotationProcessor>
-                           org.hibernate.processor.HibernateProcessor
+                            org.hibernate.processor.HibernateProcessor
                         </annotationProcessor>
                         <annotationProcessor>
                             org.checkerframework.checker.nullness.NullnessChecker
@@ -359,6 +359,8 @@
                 </configuration>
             </plugin>
             <plugin>
+                <!-- To build via Idea menu Build -> Rebuild Project you must go to menu -> View -> Tool Windows ->
+                     Maven -> Plugins -> jaxb2 -> jaxb2:xjc -> mouse right click -> Execute Before Build -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxb2-maven-plugin</artifactId>
                 <version>3.2.0</version>
