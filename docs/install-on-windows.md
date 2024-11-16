@@ -1,14 +1,13 @@
 #### Оглавление
-- [Установка на Windows x64](#установка-и-работа-на-windows)
-- [Установка на Windows x86](install-on-windows-by-zip.md)
+- [Установка на Windows](#установка-и-работа-на-windows)
+- [Установка на Windows из ZIP архива](install-on-windows-by-zip.md)
 - [Установка на Mac](install-on-linux.md)
 - [Установка на Linux](install-on-linux.md)
 - [Запуск в Docker](run-by-docker.md)
 
 ### Установка и работа на Windows
 
-Данная инструкция поддерживает версию Windows x64. Если у вас 32 битная Windows, рекомендуем устанавливать по
-[инструкции](install-on-windows-by-zip.md).
+Данная инструкция поддерживает версию Windows x64. 32 битные Windows не поддерживаются.
 1. Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest) установщик `.msi`
    и запустить его.
 1. Если вы обновляете приложение и в процессе обновления появилось показанное ниже окно - это означает, что запущена 

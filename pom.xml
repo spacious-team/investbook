@@ -63,8 +63,8 @@
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
         <win.msi.version>24.2</win.msi.version> <!-- TODO: remove dependencyManagement table-wrapper-api before release -->
-        <java.version>22</java.version>
-        <lombok.version>1.18.34</lombok.version>
+        <java.version>23</java.version>
+        <lombok.version>1.18.36</lombok.version>
         <checkerframework.version>3.48.1</checkerframework.version>
     </properties>
 
@@ -85,12 +85,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.glassfish.jaxb</groupId>
-                <artifactId>jaxb-runtime</artifactId>
-                <!-- scope is changed, CbrForeignExchangeRateServiceXmlImpl.class requires -->
-                <scope>compile</scope>
-            </dependency>
             <!-- TODO: remove before release -->
             <dependency>
                 <groupId>com.github.spacious-team</groupId>
@@ -290,7 +284,7 @@
                             lombok.launch.AnnotationProcessorHider$AnnotationProcessor
                         </annotationProcessor>
                         <annotationProcessor>
-                            org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor
+                            org.hibernate.processor.HibernateProcessor
                         </annotationProcessor>
                         <annotationProcessor>
                             org.checkerframework.checker.nullness.NullnessChecker
@@ -365,6 +359,8 @@
                 </configuration>
             </plugin>
             <plugin>
+                <!-- To build via Idea menu Build -> Rebuild Project you must go to menu -> View -> Tool Windows ->
+                     Maven -> Plugins -> jaxb2 -> jaxb2:xjc -> mouse right click -> Execute Before Build -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxb2-maven-plugin</artifactId>
                 <version>3.2.0</version>

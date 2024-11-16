@@ -1,0 +1,9 @@
+# https://docs.codecov.com/docs/codecov-yaml
+coverage:
+  status:
+    project:
+      default:
+        threshold: 5%  # allows to drop coverage (https://docs.codecov.com/docs/commit-status#project-status)
+    patch:
+      default:
+        target: 0%  # allows no tests in PR (https://docs.codecov.com/docs/commit-status#patch-status)

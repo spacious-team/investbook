@@ -1,21 +1,18 @@
 #### Оглавление
-- [Установка на Windows x64](install-on-windows.md)
-- [Установка на Windows x86](#установка-и-работа-на-windows-из-zip-архива)
+- [Установка на Windows](#установка-и-работа-на-windows)
+- [Установка на Windows из ZIP архива](install-on-windows-by-zip.md)
 - [Установка на Mac](install-on-linux.md)
 - [Установка на Linux](install-on-linux.md)
 - [Запуск в Docker](run-by-docker.md)
 
 ### Установка и работа на Windows из zip архива
 
-Данная инструкция поддерживает все версии Windows. Если у вас 64 битная Windows, рекомендуем устанавливать по
-[инструкции](install-on-windows.md).
-1. Создать папку `C:\Program Files\Java\`, скачать Java 22 под вашу версию операционной системы.
-   Если у вас 32 битная Windows можете использовать скачать по [ссылке](https://libericajdk.ru/pages/downloads/)
-   (достаточно JRE сборки), если 64 битная - рекомендуется скачивать сборку [OpenJdk](https://jdk.java.net/22/).
-1. Скачать со страницы [проекта](https://github.com/vananiev/portfolio/releases/latest) архив `investbook.zip`
+Данная инструкция поддерживает версию Windows x64. 32 битные Windows не поддерживаются.
+1. Создать папку `C:\Program Files\Java\`, скачать [Java 23](https://jdk.java.net/23/).
+1. Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest) архив `investbook.zip`
    и распаковать в любую удобную папку. В ней открыть файл `start.bat` и изменить строчку
    ```
-   #set JAVA_HOME=C:\Program Files\Java\jdk-22
+   #set JAVA_HOME=C:\Program Files\Java\jdk-23
    ```
    следующим образом: 
    + Убрать первый символ `#`.
