@@ -489,9 +489,9 @@
                                     <arguments>
                                         <argument>--spring.config.additional-location=file:./app/</argument>
                                     </arguments>
-                                    <input>${project.build.directory}/jpackage/jpackage/</input>
+                                    <input>${project.build.directory}/jpackage/input</input>
                                     <icon>${project.basedir}/src/main/assembly/jpackage/icon.ico</icon>
-                                    <destination>${project.build.directory}/jpackage</destination>
+                                    <destination>${project.build.directory}/jpackage/output</destination>
                                     <winDirChooser>true</winDirChooser>
                                     <winPerUserInstall>true</winPerUserInstall>
                                     <winMenu>true</winMenu>

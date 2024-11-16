@@ -23,6 +23,7 @@
     <formats>
         <format>dir</format>
     </formats>
+    <baseDirectory>input</baseDirectory>
     <fileSets>
         <fileSet>
             <directory>src/main/assembly/jpackage</directory>
