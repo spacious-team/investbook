@@ -31,11 +31,8 @@ public class ApplicationFailedRunListener implements ApplicationListener<Applica
     public void onApplicationEvent(ApplicationFailedEvent event) {
         ConfigurableEnvironment environment = event.getApplicationContext().getEnvironment();
         if (environment.getProperty("investbook.open-home-page-after-start", Boolean.class, false)) {
+            // App is opened by LoadingPageServer started in InvestbookApplication.class
             log.info("Application run failed. May be application was run a second time, trying to open the application page...");
-
-            try (LoadingPageServer loadingPageServer = new LoadingPageServer()) {
-                loadingPageServer.start();
-            }
         }
     }
 }

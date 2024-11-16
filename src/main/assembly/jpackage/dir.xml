@@ -23,6 +23,7 @@
     <formats>
         <format>dir</format>
     </formats>
+    <baseDirectory>input</baseDirectory>
     <fileSets>
         <fileSet>
             <directory>src/main/assembly/jpackage</directory>
@@ -46,11 +47,15 @@
             <outputDirectory/>
         </file>
         <file>
-            <source>src/main/assembly/zip/extensions/README.md</source>
+            <source>src/main/assembly/jpackage/extensions/README.md</source>
             <outputDirectory>extensions</outputDirectory>
         </file>
         <file>
             <source>README.md</source>
+            <outputDirectory/>
+        </file>
+        <file>
+            <source>README-en.md</source>
             <outputDirectory/>
         </file>
         <file>

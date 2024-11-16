@@ -19,9 +19,17 @@ git clone https://github.com/spacious-team/investbook.git
 
 ### Установка Wix
 Для сборки пакета для установки Investbook требуется Wix 3.
-Скачать Wix 3 можно по ссылке с официального сайта [Wix](https://wixtoolset.org/docs/wix3/)
+Скачать Wix 3 можно по ссылке с официального сайта [Wix3](https://wixtoolset.org/docs/wix3/)
 (пакет для установки расположен на [GitHub](https://github.com/wixtoolset/wix3/releases)).
 Wix в свою очередь потребует установки [.NET](https://dotnet.microsoft.com/en-us/download/dotnet).
+
+На Windows вы можете установить Wix и .NET в `%LOCALAPPDATA%\Programs\wix3` и `%LOCALAPPDATA%\Programs\dotnet`
+соответственно. В этом случае добавьте следующие переменные окружения
+(win+R -> `rundll32 sysdm.cpl,EditEnvironmentVariables`):
+```shell
+DOTNET_ROOT=%LOCALAPPDATA%\Programs\dotnet
+PATH=<предыдущие значения>;%DOTNET_ROOT%;%LOCALAPPDATA%\Programs\wix3
+```
 
 ### Компиляция
 Компиляция запускается командой:
