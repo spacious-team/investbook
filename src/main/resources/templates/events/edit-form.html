@@ -32,11 +32,15 @@
         }
 
         #operation-type {
-            width: 235px;
+            width: 300px;
+        }
+
+        #count {
+            width: 280px;
         }
 
         #description {
-            width: 660px;
+            width: 725px;
         }
 
         #security-attach-elements {
@@ -96,7 +100,7 @@
         </a>
         <label>
             Количество<span class="hint">*</span>, шт
-            <input type="number" min="1" th:field="*{attachedSecurity.count}" class="input-width"/>
+            <input type="number" min="1" th:field="*{attachedSecurity.count}" class="input-width" id="count"/>
         </label>
         <br>
     </div>
@@ -166,6 +170,8 @@
             case 'COUPON':
             case 'AMORTIZATION':
             case 'REDEMPTION':
+            case 'DERIVATIVE_PROFIT_OUT':
+            case 'DERIVATIVE_PROFIT_IN':
             case 'TAX_OUT':
                 displaySecurityAttachBlock('inline');
                 break

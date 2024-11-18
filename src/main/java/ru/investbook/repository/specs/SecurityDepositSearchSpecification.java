@@ -44,10 +44,10 @@ public class SecurityDepositSearchSpecification implements Specification<Transac
 
     private final TransactionSearchSpecification specification;
 
-    public static SecurityDepositSearchSpecification of(String portfolio,
-                                                        String security,
-                                                        LocalDate dateFrom,
-                                                        LocalDate dateTo) {
+    public static SecurityDepositSearchSpecification of(@Nullable String portfolio,
+                                                        @Nullable String security,
+                                                        @Nullable LocalDate dateFrom,
+                                                        @Nullable LocalDate dateTo) {
         TransactionSearchSpecification specification =
                 TransactionSearchSpecification.of(portfolio, security, dateFrom, dateTo);
         return new SecurityDepositSearchSpecification(specification);

@@ -38,10 +38,10 @@ import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 @RequiredArgsConstructor(staticName = "of")
 public class PortfolioCashSearchSpecification implements Specification<PortfolioCashEntity> {
-    private final String portfolio;
-    private final LocalDate dateFrom;
-    private final LocalDate dateTo;
-    private final String currency;
+    private final @Nullable String portfolio;
+    private final @Nullable LocalDate dateFrom;
+    private final @Nullable LocalDate dateTo;
+    private final @Nullable String currency;
 
     @Override
     public Predicate toPredicate(Root<PortfolioCashEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {

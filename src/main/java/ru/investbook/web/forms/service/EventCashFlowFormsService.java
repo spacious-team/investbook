@@ -70,7 +70,7 @@ public class EventCashFlowFormsService {
     @Transactional(readOnly = true)
     public Page<EventCashFlowModel> getPage(EventCashFlowFormFilterModel filter) {
         EventCashFlowEntitySearchSpecification spec = EventCashFlowEntitySearchSpecification.of(
-                filter.getPortfolio(), filter.getDateFrom(), filter.getDateTo());
+                filter.getPortfolio(), filter.getDateFrom(), filter.getDateTo(), filter.getCashFlowType());
 
         Sort sort = Sort.by(Order.asc("portfolio.id"), Order.desc(EventCashFlowEntity_.TIMESTAMP));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);

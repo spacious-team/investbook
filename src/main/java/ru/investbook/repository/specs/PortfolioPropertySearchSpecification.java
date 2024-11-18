@@ -38,8 +38,8 @@ import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 @RequiredArgsConstructor(staticName = "of")
 public class PortfolioPropertySearchSpecification implements Specification<PortfolioPropertyEntity> {
-    private final String portfolio;
-    private final LocalDate date;
+    private final @Nullable String portfolio;
+    private final @Nullable LocalDate date;
     private final @Nullable PortfolioPropertyType property;
 
     @Override

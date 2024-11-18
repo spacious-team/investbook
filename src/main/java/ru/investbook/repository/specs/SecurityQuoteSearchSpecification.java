@@ -38,9 +38,9 @@ import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 @RequiredArgsConstructor(staticName = "of")
 public class SecurityQuoteSearchSpecification implements Specification<SecurityQuoteEntity> {
-    private final String security;
-    private final String currency;
-    private final LocalDate date;
+    private final @Nullable String security;
+    private final @Nullable String currency;
+    private final @Nullable LocalDate date;
 
     @Override
     public Predicate toPredicate(Root<SecurityQuoteEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {

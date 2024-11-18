@@ -38,8 +38,8 @@ import static ru.investbook.repository.specs.SpecificationHelper.filterBySecurit
 
 @RequiredArgsConstructor(staticName = "of")
 public class SecurityDescriptionSearchSpecification implements Specification<SecurityDescriptionEntity> {
-    private final String security;
-    private final String securitySector;
+    private final @Nullable String security;
+    private final @Nullable String securitySector;
 
     @Override
     public Predicate toPredicate(Root<SecurityDescriptionEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {

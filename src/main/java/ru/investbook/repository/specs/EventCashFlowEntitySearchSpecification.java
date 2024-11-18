@@ -24,6 +24,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.EventCashFlowEntity;
 import ru.investbook.entity.EventCashFlowEntity_;
@@ -37,16 +38,18 @@ import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 @RequiredArgsConstructor(staticName = "of")
 public class EventCashFlowEntitySearchSpecification implements Specification<EventCashFlowEntity> {
-    private final String portfolio;
-    private final LocalDate dateFrom;
-    private final LocalDate dateTo;
+    private final @Nullable String portfolio;
+    private final @Nullable LocalDate dateFrom;
+    private final @Nullable LocalDate dateTo;
+    private final @Nullable CashFlowType cashFlowType;
 
     @Override
     public Predicate toPredicate(Root<EventCashFlowEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
         return Stream.of(
                         filterByPortfolio(root, builder, EventCashFlowEntity_.portfolio, portfolio),
                         filterByDateFrom(root, builder, EventCashFlowEntity_.timestamp, dateFrom),
-                        filterByDateTo(root, builder, EventCashFlowEntity_.timestamp, dateTo))
+                        filterByDateTo(root, builder, EventCashFlowEntity_.timestamp, dateTo),
+                        filterByEquals(root, builder, EventCashFlowEntity_.cashFlowType, cashFlowType))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);

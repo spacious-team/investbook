@@ -38,10 +38,10 @@ import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 @RequiredArgsConstructor(staticName = "of")
 public class TransactionSearchSpecification implements Specification<TransactionEntity> {
-    private final String portfolio;
-    private final String security;
-    private final LocalDate dateFrom;
-    private final LocalDate dateTo;
+    private final @Nullable String portfolio;
+    private final @Nullable String security;
+    private final @Nullable LocalDate dateFrom;
+    private final @Nullable LocalDate dateTo;
 
     @Override
     public Predicate toPredicate(Root<TransactionEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {

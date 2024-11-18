@@ -21,11 +21,12 @@ package ru.investbook.web.forms.model.filter;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class SecurityDescriptionFormFilterModel extends AbstractFormFilterModel {
-    private String security;
-    private String securitySector;
+    private @Nullable String security;
+    private @Nullable String securitySector;
 }

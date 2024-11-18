@@ -21,6 +21,8 @@ package ru.investbook.web.forms.model.filter;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -29,9 +31,10 @@ import java.time.LocalDate;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class EventCashFlowFormFilterModel extends AbstractFormFilterModel {
-    private String portfolio;
+    private @Nullable String portfolio;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate dateFrom;
+    private @Nullable LocalDate dateFrom;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate dateTo;
+    private @Nullable LocalDate dateTo;
+    private @Nullable CashFlowType cashFlowType;
 }

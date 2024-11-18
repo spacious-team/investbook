@@ -39,7 +39,7 @@ import static org.springframework.util.StringUtils.hasText;
 
 @RequiredArgsConstructor(staticName = "of")
 public class ForeignExchangeRateSearchSpecification implements Specification<ForeignExchangeRateEntity> {
-    private final String currency;
+    private final @Nullable String currency;
     private final @Nullable LocalDate date;
 
     @Override
