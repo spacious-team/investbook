@@ -30,6 +30,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static org.springframework.util.StringUtils.hasLength;
@@ -47,7 +48,7 @@ public class EventCashFlowModel {
     @DateTimeFormat(pattern = "HH:mm:ss")
     private @NotNull LocalTime time = LocalTime.NOON;
 
-    private @NotNull CashFlowType type;
+    private @NotNull CashFlowType type = CASH;
 
     /**
      * Negative value for cash out, otherwise - positive
@@ -98,7 +99,8 @@ public class EventCashFlowModel {
     }
 
     private boolean isValuePositive() {
-        return value.compareTo(BigDecimal.ZERO) >= 0;
+        //noinspection ConstantValue
+        return isNull(value) || value.compareTo(BigDecimal.ZERO) >= 0;
     }
 
     public boolean isAttachedToSecurity() {

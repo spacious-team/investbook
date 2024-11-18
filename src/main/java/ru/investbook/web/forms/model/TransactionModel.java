@@ -136,14 +136,14 @@ public class TransactionModel {
         return SecurityHelper.getSecurityIsin(security);
     }
 
-    public String getTradeId() {
+    public String getOrGenerateTradeId() {
         if (!hasText(tradeId)) {
-            setTradeId(createTradeId());
+            setTradeId(generateTradeId());
         }
         return requireNonNull(tradeId, "Не задан trade-id");
     }
 
-    private String createTradeId() {
+    private String generateTradeId() {
         //noinspection ConstantValue
         Assert.isTrue(portfolio != null && security != null && date != null && action != null,
                 "Невалидные данные, ошибка вычисления trade-id");

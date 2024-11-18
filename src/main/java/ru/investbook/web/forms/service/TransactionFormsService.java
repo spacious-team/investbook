@@ -176,7 +176,7 @@ public class TransactionFormsService {
         }
 
         AbstractTransaction transaction = builder
-                .tradeId(tr.getTradeId())
+                .tradeId(tr.getOrGenerateTradeId())
                 .portfolio(tr.getPortfolio())
                 .timestamp(tr.getDate().atTime(tr.getTime()).atZone(zoneId).toInstant())
                 .security(savedSecurityId)
