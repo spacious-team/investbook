@@ -35,6 +35,7 @@ public class InvestbookApplication {
 
     public static void main(String[] args) {
         try(LoadingPageServer loadingPageServer = new LoadingPageServer()) {
+            LoadingPageServerUtils.setSpringProfilesFromArgs(args);
             if (LoadingPageServerUtils.shouldOpenHomePageAfterStart()) {
                 loadingPageServer.start();
             }

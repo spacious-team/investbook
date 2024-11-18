@@ -20,6 +20,7 @@ package ru.investbook.loadingpage;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +28,10 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
@@ -36,13 +40,28 @@ import static java.util.Objects.requireNonNull;
 @UtilityClass
 public class LoadingPageServerUtils {
 
-    private static final String CONF_PROPERTIES = "app/application-conf.properties";
-    private static final String RESOURCE_CONF_PROPERTIES = "application-conf.properties";
+    private static final String PROPERTIES_LOCATION_DIR = "app";
+    private static final String DEFAULT_PROFILE = "conf";
+    private static final List<String> profiles = new CopyOnWriteArrayList<>();
+
+    public static void setSpringProfilesFromArgs(String[] args) {
+        for (String arg : args) {
+            if (arg.startsWith("--spring.profiles.active")) {
+                String[] _profiles = arg.replace("--spring.profiles.active", "")
+                        .replace("=", "")
+                        .trim()
+                        .split(",");
+                profiles.clear();
+                profiles.addAll(List.of(_profiles));
+                Collections.reverse(profiles);  // last spring profile property should win
+                profiles.add(DEFAULT_PROFILE);
+            }
+        }
+    }
 
     public static int getMainAppPort() {
         try {
-            Properties properties = loadProperties();
-            String value = properties.getProperty("server.port", "2030");
+            String value = getProperty("server.port", "2030");
             return Integer.parseInt(value);
         } catch (Exception e) {
             log.warn("Can't find 'server.port' property, fallback to default value: 2030", e);
@@ -52,8 +71,7 @@ public class LoadingPageServerUtils {
 
     public static boolean shouldOpenHomePageAfterStart() {
         try {
-            Properties properties = loadProperties();
-            String value = properties.getProperty("investbook.open-home-page-after-start", "true");
+            String value = getProperty("investbook.open-home-page-after-start", "true");
             return Boolean.parseBoolean(value);
         } catch (Exception e) {
             log.warn("Can't find 'investbook.open-home-page-after-start' fallback to default value: true", e);
@@ -61,14 +79,29 @@ public class LoadingPageServerUtils {
         }
     }
 
-    private static Properties loadProperties() throws IOException {
+    private static String getProperty(String key, String defaultValue) {
+        for (String profile : profiles) {
+            try {
+                Properties properties = loadProperties(profile);
+                @Nullable String value = properties.getProperty(key, null);
+                if (value != null) {
+                    return value;
+                }
+            } catch (Exception ignore) {
+            }
+        }
+        return defaultValue;
+    }
+
+    private static Properties loadProperties(String profile) throws IOException {
         Properties properties = new Properties();
-        Path path = Path.of(CONF_PROPERTIES);
+        String file = "application-" + profile + ".properties";
+        Path path = Path.of(PROPERTIES_LOCATION_DIR).resolve(file);
         try (Reader reader = Files.newBufferedReader(path)) {  // default is UTF_8
             properties.load(reader);
         } catch (Exception e) {
             // Properties file is not found in app installation path, read default file from class path
-            try (InputStream in = requireNonNull(LoadingPageServerUtils.class.getResourceAsStream(RESOURCE_CONF_PROPERTIES));
+            try (InputStream in = requireNonNull(LoadingPageServerUtils.class.getResourceAsStream("/" + file));
                  Reader reader = new InputStreamReader(in, UTF_8)) {
                 properties.load(reader);
             }
