@@ -27,6 +27,8 @@ import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.SingularAttribute;
 import lombok.NoArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.CashFlowType;
+import ru.investbook.entity.CashFlowTypeEntity;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.PortfolioEntity_;
 import ru.investbook.entity.SecurityEntity;
@@ -37,6 +39,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 
+import static java.util.Objects.nonNull;
 import static lombok.AccessLevel.PRIVATE;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -46,7 +49,7 @@ class SpecificationHelper {
     static <T> @Nullable Predicate filterBySecurity(Root<T> root,
                                                     CriteriaBuilder builder,
                                                     SingularAttribute<T, SecurityEntity> attribute,
-                                                    String security) {
+                                                    @Nullable String security) {
         if (hasText(security)) {
             Path<SecurityEntity> securityPath = root.get(attribute);
             return builder.or(
@@ -60,7 +63,7 @@ class SpecificationHelper {
     static <T> @Nullable Predicate filterBySecurityId(Root<T> root,
                                                       CriteriaBuilder builder,
                                                       SingularAttribute<T, Integer> attribute,
-                                                      String security,
+                                                      @Nullable String security,
                                                       CriteriaQuery<?> query) {
         if (hasText(security)) {
             // Do sub-query because SecurityEntity is not related to SecurityDescriptionEntity in Java model, so
@@ -131,7 +134,7 @@ class SpecificationHelper {
     static <T> Predicate filterByPortfolio(Root<T> root,
                                            CriteriaBuilder builder,
                                            SingularAttribute<T, PortfolioEntity> attribute,
-                                           String portfolio) {
+                                           @Nullable String portfolio) {
         if (hasText(portfolio)) {
             Path<String> path = root.get(attribute)
                     .get(PortfolioEntity_.ID);
@@ -145,7 +148,7 @@ class SpecificationHelper {
     static <T> Predicate filterByPortfolioName(Root<T> root,
                                                CriteriaBuilder builder,
                                                SingularAttribute<T, String> attribute,
-                                               String portfolio,
+                                               @Nullable String portfolio,
                                                CriteriaQuery<?> query) {
         Path<String> transactionPortfolioPath = root.get(attribute);
         if (hasText(portfolio)) {
@@ -164,6 +167,19 @@ class SpecificationHelper {
 
         return builder.in(transactionPortfolioPath)
                 .value(enabledPortfolioIds);
+    }
+
+    static <X> @Nullable Predicate filterByEquals(Root<X> root,
+                                                  CriteriaBuilder builder,
+                                                  SingularAttribute<X, CashFlowTypeEntity> attribute,
+                                                  @Nullable CashFlowType value) {
+        if (nonNull(value)) {
+            Path<CashFlowTypeEntity> path = root.get(attribute);
+            CashFlowTypeEntity entity = new CashFlowTypeEntity();
+            entity.setId(value.getId());
+            return builder.equal(path, entity);
+        }
+        return null;
     }
 
     static <X, T> @Nullable Predicate filterByEquals(Root<X> root,

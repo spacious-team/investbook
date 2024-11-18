@@ -21,6 +21,7 @@ package ru.investbook.web.forms.model.filter;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -29,7 +30,7 @@ import java.time.LocalDate;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class ForeignExchangeRateFormFilterModel extends AbstractFormFilterModel {
-    private String currency;
+    private @Nullable String currency;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate date;
+    private @Nullable LocalDate date;
 }

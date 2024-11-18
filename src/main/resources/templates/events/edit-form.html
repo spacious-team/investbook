@@ -32,11 +32,15 @@
         }
 
         #operation-type {
-            width: 235px;
+            width: 300px;
+        }
+
+        #count {
+            width: 280px;
         }
 
         #description {
-            width: 660px;
+            width: 725px;
         }
 
         #security-attach-elements {
@@ -73,6 +77,8 @@
             <option value="COUPON">Купон</option>
             <option value="AMORTIZATION">Амортизация облигации</option>
             <option value="REDEMPTION">Погашение облигации</option>
+            <option value="DERIVATIVE_PROFIT_OUT">Списание вариационной маржи</option>
+            <option value="DERIVATIVE_PROFIT_IN">Зачисление вариационной маржи</option>
             <option value="FEE_OUT">Комиссия</option>
             <option value="FEE_IN">Возврат комиссии</option>
             <option value="TAX_OUT">Налог</option>
@@ -94,7 +100,7 @@
         </a>
         <label>
             Количество<span class="hint">*</span>, шт
-            <input type="number" min="1" th:field="*{attachedSecurity.count}" class="input-width"/>
+            <input type="number" min="1" th:field="*{attachedSecurity.count}" class="input-width" id="count"/>
         </label>
         <br>
     </div>
@@ -164,6 +170,8 @@
             case 'COUPON':
             case 'AMORTIZATION':
             case 'REDEMPTION':
+            case 'DERIVATIVE_PROFIT_OUT':
+            case 'DERIVATIVE_PROFIT_IN':
             case 'TAX_OUT':
                 displaySecurityAttachBlock('inline');
                 break

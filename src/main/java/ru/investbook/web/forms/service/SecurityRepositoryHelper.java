@@ -41,6 +41,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.entity.SecurityEntity.isinPattern;
+import static ru.investbook.web.forms.model.SecurityHelper.NULL_SECURITY_NAME;
 
 
 @Service
@@ -130,7 +131,7 @@ public class SecurityRepositoryHelper {
         if (isin == null && !forceRewriteByEmptyIsin) {
             isin = security.getIsin(); // optional isin not provided by forms, use isin from db
         }
-        securityName = Objects.equals(securityName, SecurityHelper.NULL_SECURITY_NAME) ? null : securityName;
+        securityName = Objects.equals(securityName, NULL_SECURITY_NAME) ? null : securityName;
         security.setType(securityType.toDbType());
         switch (securityType) {
             case SHARE, BOND -> {
@@ -153,23 +154,24 @@ public class SecurityRepositoryHelper {
 
     private Optional<SecurityEntity> findSecurity(@Nullable String isin, @Nullable String securityName, SecurityType securityType) {
         isin = validateIsin(isin);
-        securityName = Objects.equals(securityName, SecurityHelper.NULL_SECURITY_NAME) ? null : securityName;
+        final @Nullable String name = Objects.equals(securityName, NULL_SECURITY_NAME) ? null : securityName;
 
         return switch (securityType) {
             case SHARE, BOND -> {
-                Assert.isTrue(isin != null || securityName != null, "Отсутствует и ISIN, и наименование ЦБ");
-                @Nullable String name = securityName;
+                Assert.isTrue(isin != null || name != null, "Отсутствует и ISIN, и наименование ЦБ");
                 yield ofNullable(isin).flatMap(securityRepository::findByIsin)
                         .or(() -> ofNullable(name).flatMap(securityRepository::findByTicker))
                         .or(() -> ofNullable(name).flatMap(securityRepository::findByName));
             }
             case DERIVATIVE, CURRENCY -> {
-                requireNonNull(securityName, "Отсутствует тикер контракта");
-                yield securityRepository.findByTicker(securityName);
+                requireNonNull(name, "Отсутствует тикер контракта");
+                String ticker = moexDerivativeCodeService.convertDerivativeCode(name);
+                yield securityRepository.findByTicker(ticker)
+                        .or(() -> securityRepository.findByTicker(name));
             }
             case ASSET -> {
-                requireNonNull(securityName, "Отсутствует наименование произвольного актива");
-                yield securityRepository.findByName(securityName);
+                requireNonNull(name, "Отсутствует наименование произвольного актива");
+                yield securityRepository.findByName(name);
             }
         };
     }

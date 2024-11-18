@@ -71,8 +71,8 @@ public class SecurityEventCashFlowFormsService {
     @Transactional(readOnly = true)
     public Page<SecurityEventCashFlowModel> getPage(SecurityEventCashFlowFormFilterModel filter) {
         SecurityEventCashFlowEntitySearchSpecification spec =
-                SecurityEventCashFlowEntitySearchSpecification.of(
-                        filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo());
+                SecurityEventCashFlowEntitySearchSpecification.of(filter.getPortfolio(), filter.getSecurity(),
+                        filter.getDateFrom(), filter.getDateTo(), filter.getCashFlowType());
 
         Sort sort = Sort.by(asc("portfolio.id"), desc(SecurityEventCashFlowEntity_.TIMESTAMP), asc("security.id"));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);

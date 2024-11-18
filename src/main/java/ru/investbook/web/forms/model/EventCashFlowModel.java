@@ -94,7 +94,9 @@ public class EventCashFlowModel {
         if (value.equals("TAX_IIS_A")) {
             type = CashFlowType.CASH;
         } else {
-            type = CashFlowType.valueOf(value.split("_")[0]);
+            String typeName = value.replace("_IN", "")
+                    .replace("_OUT", "");
+            type = CashFlowType.valueOf(typeName);
         }
     }
 

@@ -40,10 +40,11 @@ import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 @RequiredArgsConstructor(staticName = "of")
 public class SecurityEventCashFlowEntitySearchSpecification implements Specification<SecurityEventCashFlowEntity> {
-    private final String portfolio;
-    private final String security;
-    private final LocalDate dateFrom;
-    private final LocalDate dateTo;
+    private final @Nullable String portfolio;
+    private final @Nullable String security;
+    private final @Nullable LocalDate dateFrom;
+    private final @Nullable LocalDate dateTo;
+    private final @Nullable CashFlowType cashFlowType;
 
     @Override
     public Predicate toPredicate(Root<SecurityEventCashFlowEntity> root,
@@ -54,6 +55,7 @@ public class SecurityEventCashFlowEntitySearchSpecification implements Specifica
                         filterByDateFrom(root, builder, SecurityEventCashFlowEntity_.timestamp, dateFrom),
                         filterByDateTo(root, builder, SecurityEventCashFlowEntity_.timestamp, dateTo),
                         filterBySecurity(root, builder, SecurityEventCashFlowEntity_.security, security),
+                        filterByEquals(root, builder, SecurityEventCashFlowEntity_.cashFlowType, cashFlowType),
                         filterByCacheFlowType(root, builder))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
