@@ -24,11 +24,12 @@ git clone https://github.com/spacious-team/investbook.git
 Wix в свою очередь потребует установки [.NET](https://dotnet.microsoft.com/en-us/download/dotnet).
 
 На Windows вы можете установить Wix и .NET в `%LOCALAPPDATA%\Programs\wix3` и `%LOCALAPPDATA%\Programs\dotnet`
-соответственно. В этом случае добавьте следующие переменные окружения
+соответственно. Для этого на страницах проектов нужно скачать не msi установщики, а архивы "binaries", которые требуется
+распаковать в указанные папки. После этого нужно добавить следующие переменные окружения
 (win+R -> `rundll32 sysdm.cpl,EditEnvironmentVariables`):
 ```shell
 DOTNET_ROOT=%LOCALAPPDATA%\Programs\dotnet
-PATH=<предыдущие значения>;%DOTNET_ROOT%;%LOCALAPPDATA%\Programs\wix3
+PATH=<предыдущие значения>;%LOCALAPPDATA%\Programs\wix3;%DOTNET_ROOT%
 ```
 
 ### Компиляция
