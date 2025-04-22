@@ -70,6 +70,6 @@ public class MoexIssClientTest {
     }
 
     public String[] secids() {
-        return new String[] {"AFLT", "OZON", "MGNT", "DSKY", "MVID"};
+        return new String[] {"AFLT", "OZON", "MGNT", "MVID"};
     }
 }

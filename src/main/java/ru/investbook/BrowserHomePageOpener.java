@@ -55,7 +55,7 @@ public class BrowserHomePageOpener {
             }
             log.debug("Home page \"{}\" was opened", url);
         } catch (Exception e) {
-            log.info("Can't open home page \"{}\" with browser", url, e);
+            log.debug("Can't open home page \"{}\" with browser", url, e);
         }
     }
 }

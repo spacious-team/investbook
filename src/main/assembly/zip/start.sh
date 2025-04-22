@@ -17,7 +17,7 @@
 #
 
 # Задать путь к распакованному архиву с Java
-#export JAVA_HOME=/opt/jdk-23
+#export JAVA_HOME=/opt/jdk-24
 
 [ -n "$JAVA_HOME" ] && export PATH=$JAVA_HOME/bin:$PATH
 cd $(dirname $0)

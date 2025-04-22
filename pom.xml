@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.5</version> <!-- Обновлять с учетом https://github.com/spacious-team/investbook/issues/545 -->
+        <version>3.4.4</version> <!-- Обновлять с учетом https://github.com/spacious-team/investbook/issues/545 -->
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.investbook</groupId>
@@ -63,8 +63,8 @@
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
         <win.msi.version>24.2</win.msi.version> <!-- TODO: remove dependencyManagement table-wrapper-api before release -->
-        <java.version>23</java.version>
-        <lombok.version>1.18.36</lombok.version>
+        <java.version>24</java.version>
+        <lombok.version>1.18.38</lombok.version>
         <checkerframework.version>3.48.1</checkerframework.version>
     </properties>
 
@@ -370,7 +370,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>0.8.13</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -516,9 +516,10 @@
                                 <enabled>true</enabled>
                             </layers>
                             <image>
-                                <name>spaciousteam/investbook:latest</name>
+                                <!-- ${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX} defined in .github/workflows/publish-docker.yml -->
+                                <name>spaciousteam/investbook:latest${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX}</name>
                                 <tags>
-                                    <tag>spaciousteam/investbook:${project.version}</tag>
+                                    <tag>spaciousteam/investbook:${project.version}${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX}</tag>
                                 </tags>
                                 <publish>true</publish>
                                 <env>
@@ -528,7 +529,7 @@
                                     <!-- Defines available bellsoft-liberica java versions from
                                     https://github.com/paketo-buildpacks/java/releases
                                     JRE with ${java.version} will be selected automatically when available -->
-                                    <buildpack>gcr.io/paketo-buildpacks/java:17.2.0</buildpack>
+                                    <buildpack>gcr.io/paketo-buildpacks/java:18.5.0</buildpack>
                                 </buildpacks>
                             </image>
                             <docker>

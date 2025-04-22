@@ -8,11 +8,11 @@
 ### Установка и работа на Windows из zip архива
 
 Данная инструкция поддерживает версию Windows x64. 32 битные Windows [не поддерживаются](https://openjdk.org/jeps/449).
-1. Создать папку `C:\Program Files\Java\`, скачать [Java 23](https://jdk.java.net/23/).
+1. Создать папку `C:\Program Files\Java\`, скачать [Java 24](https://jdk.java.net/24/).
 1. Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest) архив `investbook.zip`
    и распаковать в любую удобную папку. В ней открыть файл `start.bat` и изменить строчку
    ```
-   #set JAVA_HOME=C:\Program Files\Java\jdk-23
+   #set JAVA_HOME=C:\Program Files\Java\jdk-24
    ```
    следующим образом: 
    + Убрать первый символ `#`.

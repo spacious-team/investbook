@@ -7,21 +7,21 @@
 
 ### Установка и работа на Mac и Linux
 
-Поддерживаетcя любая версия Mac и Linux.
+Поддерживается любая версия Mac и Linux.
 1. Проверить версию java
    ```shell script
    $ java -version
    ```
-   Если версия 23 или выше, пропустите следующий пункт.
+   Если версия 24 или выше, пропустите следующий пункт.
 2. Воспользуйтесь менеджером пакетов вашей ОС для установки java, например на Ubuntu
    ```shell
    $ sudo apt update
-   $ sudo apt install openjdk-23-jre-headless
+   $ sudo apt install openjdk-24-jre-headless
    ```
-   Или можно скачать [Java 23](https://jdk.java.net/23/) и распаковать папку `jdk-23` в директорию `/opt`. Если java распакована из
+   Или можно скачать [Java 24](https://jdk.java.net/24/) и распаковать папку `jdk-24` в директорию `/opt`. Если java распакована из
    архива, то в директории приложения нужно найти файл `start.sh`, раскомментировать и актуализировать `JAVA_HOME`
    ```shell
-   $ export JAVA_HOME=/opt/jdk-23
+   $ export JAVA_HOME=/opt/jdk-24
    ```
 3. Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest) архив `.zip` и
    распаковать в директорию `/opt`.
@@ -55,7 +55,7 @@
 | с 2022.7                  | java 18 и выше        | 
 | с 2023.1                  | java 20 и выше        |
 | с 2023.3                  | java 21 и выше        |
-| с 2024.2                  | java 23 и выше        |
+| с 2024.2                  | java 24 и выше        |
 
 #### Установка расширений
 
