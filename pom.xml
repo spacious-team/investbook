@@ -516,9 +516,10 @@
                                 <enabled>true</enabled>
                             </layers>
                             <image>
-                                <name>spaciousteam/investbook:latest</name>
+                                <!-- ${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX} defined in .github/workflows/publish-docker.yml -->
+                                <name>spaciousteam/investbook:latest${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX}</name>
                                 <tags>
-                                    <tag>spaciousteam/investbook:${project.version}</tag>
+                                    <tag>spaciousteam/investbook:${project.version}${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX}</tag>
                                 </tags>
                                 <publish>true</publish>
                                 <env>
