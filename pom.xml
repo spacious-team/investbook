@@ -170,7 +170,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.6.0</version>
+            <version>2.8.6</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
@@ -185,7 +185,7 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.18.1</version>
+            <version>1.19.1</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -223,7 +223,7 @@
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>3.17.1</version>
+            <version>3.19.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -233,7 +233,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.1</version> <!-- JUnit 5 requirement -->
+                    <version>3.5.3</version> <!-- JUnit 5 requirement -->
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -320,7 +320,7 @@
             <plugin>
                 <groupId>org.asciidoctor</groupId>
                 <artifactId>asciidoctor-maven-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>generate-html-doc</id>
@@ -346,7 +346,7 @@
                      Maven -> Plugins -> jaxb2 -> jaxb2:xjc -> mouse right click -> Execute Before Build -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>xsd-to-java</id>
