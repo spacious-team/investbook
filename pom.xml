@@ -62,7 +62,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>24.2</win.msi.version> <!-- TODO: remove dependencyManagement table-wrapper-api before release -->
+        <win.msi.version>24.2</win.msi.version>
         <java.version>24</java.version>
         <lombok.version>1.18.38</lombok.version>
         <checkerframework.version>3.48.1</checkerframework.version>
@@ -83,27 +83,16 @@
         </repository>
     </repositories>
 
-    <dependencyManagement>
-        <dependencies>
-            <!-- TODO: remove before release -->
-            <dependency>
-                <groupId>com.github.spacious-team</groupId>
-                <artifactId>table-wrapper-api</artifactId>
-                <version>f2341ce264</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>109c37e4a9</version>
+            <version>2025.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-spring-boot-starter</artifactId>
-            <version>2024.1</version>  <!-- if changed, update the version of poi-scratchpad -->
+            <version>2025.1</version>  <!-- if changed, update the version of poi-scratchpad -->
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
