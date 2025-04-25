@@ -40,7 +40,7 @@ import java.util.Map;
 public class CbrForeignExchangeRateServiceXmlImpl extends AbstractCbrForeignExchangeRateService {
 
     @SuppressWarnings("HttpUrlsUsage")
-    private final UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(
+    private final UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(
             "http://www.cbr.ru/scripts/XML_dynamic.asp?date_req1={from-date}&date_req2={to-date}&VAL_NM_RQ={currency}");
     private final DateTimeFormatter requestDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private final DateTimeFormatter resultDateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");

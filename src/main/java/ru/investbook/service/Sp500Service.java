@@ -42,13 +42,13 @@ import java.time.Duration;
 import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
-import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
+import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class Sp500Service {
-    private final URI uri = fromHttpUrl("https://www.spglobal.com/spdji/en/idsexport/file.xls")
+    private final URI uri = fromUriString("https://www.spglobal.com/spdji/en/idsexport/file.xls")
             .queryParam("redesignExport", true)
             .queryParam("selectedModule", "PerformanceGraphView")
             .queryParam("selectedSubModule", "Graph")
