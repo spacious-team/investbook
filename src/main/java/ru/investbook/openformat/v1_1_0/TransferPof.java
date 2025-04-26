@@ -53,7 +53,6 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 @Slf4j
 public class TransferPof {
     @JsonProperty("id")
-    @NotNull
     int id;
 
     /**
@@ -65,16 +64,13 @@ public class TransferPof {
     String transferId;
 
     @JsonProperty("account")
-    @NotNull
     int account;
 
     @JsonProperty("timestamp")
-    @NotNull
     long timestamp;
 
     @JsonProperty("asset")
     @Getter(AccessLevel.NONE)
-    @NotNull
     int asset;
 
     /**

@@ -51,11 +51,9 @@ public class PortfolioOpenFormatV1_1_0 {
 
     @Builder.Default
     @JsonProperty("generated")
-    @NotNull
     long generated = System.currentTimeMillis() / 1000;
 
     @JsonProperty("end")
-    @NotNull
     long end;
 
     @JsonProperty("start")

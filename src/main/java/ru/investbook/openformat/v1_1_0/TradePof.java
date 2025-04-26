@@ -61,7 +61,6 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 public class TradePof {
 
     @JsonProperty("id")
-    @NotNull
     int id;
 
     @JsonProperty("trade-id")
@@ -85,12 +84,10 @@ public class TradePof {
     Long settlement;
 
     @JsonProperty("account")
-    @NotNull
     int account;
 
     @Getter(AccessLevel.NONE)
     @JsonProperty("asset")
-    @NotNull
     int asset;
 
     /**

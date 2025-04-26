@@ -49,7 +49,6 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 public class CashBalancesPof {
 
     @JsonProperty("account")
-    @NotNull
     int account;
 
     @Builder.Default

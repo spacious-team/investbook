@@ -56,7 +56,6 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 public class PaymentPof {
 
     @JsonProperty("id")
-    @NotNull
     int id;
 
     @JsonProperty("payment-id")
@@ -64,12 +63,10 @@ public class PaymentPof {
     String paymentId;
 
     @JsonProperty("account")
-    @NotNull
     int account;
 
     @Getter(AccessLevel.NONE)
     @JsonProperty("asset")
-    @NotNull
     int asset;
 
     @JsonProperty("type")
@@ -84,7 +81,6 @@ public class PaymentPof {
     BigDecimal count;
 
     @JsonProperty("timestamp")
-    @NotNull
     long timestamp;
 
     @JsonProperty("amount")

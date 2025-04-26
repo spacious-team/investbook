@@ -44,7 +44,6 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidIsinOrNull;
 class AssetPof {
 
     @JsonProperty("id")
-    @NotNull
     int id;
 
     @JsonProperty("type")

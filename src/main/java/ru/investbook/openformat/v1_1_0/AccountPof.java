@@ -60,7 +60,6 @@ public class AccountPof {
     private static final ThreadLocal<Map<String, Integer>> accountNumberToIdMap = ThreadLocal.withInitial(HashMap::new);
 
     @JsonProperty("id")
-    @NotNull
     int id;
 
 

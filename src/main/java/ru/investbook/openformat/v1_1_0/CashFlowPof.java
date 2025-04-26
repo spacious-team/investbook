@@ -49,7 +49,6 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 public class CashFlowPof {
 
     @JsonProperty("id")
-    @NotNull
     int id;
 
     @JsonProperty("flow-id")
@@ -57,11 +56,9 @@ public class CashFlowPof {
     String flowId;
 
     @JsonProperty("account")
-    @NotNull
     int account;
 
     @JsonProperty("timestamp")
-    @NotNull
     long timestamp;
 
     @JsonProperty("amount")
