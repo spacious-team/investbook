@@ -518,7 +518,7 @@
                                     <!-- Defines available bellsoft-liberica java versions from
                                     https://github.com/paketo-buildpacks/java/releases
                                     JRE with ${java.version} will be selected automatically when available -->
-                                    <buildpack>gcr.io/paketo-buildpacks/java:18.5.0</buildpack>
+                                    <buildpack>docker.io/paketobuildpacks/java:18.8.0</buildpack>
                                 </buildpacks>
                             </image>
                             <docker>
