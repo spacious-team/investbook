@@ -200,7 +200,7 @@ Investbook также может быть запущен в [docker](docs/run-by
 
 ### Контакты
 - Телеграм [канал](https://t.me/investbook_official), техническая [поддержка](https://t.me/investbook_support_bot)
-  и [чат](https://t.me/investbook_support) пользователей;
+  и [чат](https://t.me/+TIcXZu-JQkIbOj_D) пользователей;
 - Обсуждение на форуме [banki.ru](https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=380178);
 - Страница приложения на [smart-lab.ru](https://smart-lab.ru/trading-software/Investbook) и
   [страница для связи](https://smart-lab.ru/profile/SpaciousTeam);  
