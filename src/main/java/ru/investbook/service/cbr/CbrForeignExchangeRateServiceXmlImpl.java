@@ -22,6 +22,7 @@ import generated.ValCurs;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import lombok.SneakyThrows;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -63,7 +64,7 @@ public class CbrForeignExchangeRateServiceXmlImpl extends AbstractCbrForeignExch
     private ValCurs getFxRates(LocalDate fromDate, String currencyId) throws JAXBException, IOException {
         try (InputStream stream = getInputStream(fromDate, currencyId)) {
 
-            return (ValCurs) JAXBContext.newInstance(ValCurs.class)
+            return (ValCurs) createJaxbContext(ValCurs.class)
                     .createUnmarshaller()
                     .unmarshal(stream);
         }
@@ -77,6 +78,23 @@ public class CbrForeignExchangeRateServiceXmlImpl extends AbstractCbrForeignExch
                 .toUri()
                 .toURL()
                 .openStream();
+    }
+
+    /**
+     * Create a {@link JAXBContext} for the given type, exposing the class
+     * ClassLoader as current thread context ClassLoader for the time of
+     * creating the context.
+     *
+     * @see <a href="https://github.com/spring-projects/spring-framework/commit/0f3f979d16c9203c5440cd9a1dd87a19312279a1">Fix for same problem in Spring Framework</a>
+     */
+    private JAXBContext createJaxbContext(@SuppressWarnings("SameParameterValue") Class<?> clazz) throws JAXBException {
+        @Nullable ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(clazz.getClassLoader());
+            return JAXBContext.newInstance(clazz);
+        } finally {
+            Thread.currentThread().setContextClassLoader(currentClassLoader);
+        }
     }
 
     private ForeignExchangeRate getRate(ValCurs.Record record, String currencyPair) {
