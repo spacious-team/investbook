@@ -9,7 +9,7 @@
 [![github-all-releases](https://img.shields.io/github/downloads/spacious-team/investbook/total?style=flat-square&logo=github&color=lightblue)](https://github.com/spacious-team/investbook/releases/latest)
 [![docker-pulls](https://img.shields.io/docker/pulls/spaciousteam/investbook?style=flat-square&logo=docker&color=lightblue&logoColor=white)](https://hub.docker.com/r/spaciousteam/investbook)
 [![telegram-channel](https://img.shields.io/endpoint?style=flat-square&color=2ca5e0&label=news&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Finvestbook_official)](https://t.me/investbook_official)
-[![telegram-group](https://img.shields.io/endpoint?style=flat-square&color=2ca5e0&label=chat&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Finvestbook_support)](https://t.me/investbook_support)
+[![telegram-group](https://img.shields.io/endpoint?style=flat-square&color=2ca5e0&label=chat&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Finvestbook_support)](https://t.me/+IzYUY5hyvZtmOTIy)
 [![telegram-support](https://img.shields.io/badge/support-online-2ca5e0?style=flat-square&logo=telegram)](https://t.me/investbook_support_bot)
 
 Find out the real annual percentage return on investment and compare it to a bank deposit, find out the average 
@@ -116,7 +116,7 @@ has the following advantages:
 ### Brokers
 The application analyzes reports from brokers TBank / Tinkoff (xlsx), Sberbank (xlsx), VTB (xls), Promsvyazbank (xlsx, xml)
 and Your Broker / Uralsib (zip with xls). If your account is opened with another broker,
-write to [us](https://t.me/investbook_support). You can also use it already on your version of the application
+write to [us](https://t.me/+IzYUY5hyvZtmOTIy). You can also use it already on your version of the application
 [forms](src/main/asciidoc/investbook-forms.adoc) for entering information or
 [download](src/main/asciidoc/investbook-input-format.adoc) data from Excel file. Your broker's support can also be
 offered to third-party developers through extension functionality. Instructions for installing extensions are available for
@@ -207,7 +207,7 @@ repository, please read the following [information](docs/CONTRIBUTING.md).
 
 ### Contacts
 - Telegram [channel](https://t.me/investbook_official), technical [support](https://t.me/investbook_support_bot)
-  and users [chat](https://t.me/investbook_support);
+  and users [chat](https://t.me/+IzYUY5hyvZtmOTIy);
 - Discussion on the forum [banki.ru](https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=380178);
 - Application page on the [smart-lab.ru](https://smart-lab.ru/trading-software/Investbook) and
   [contact page](https://smart-lab.ru/profile/SpaciousTeam);

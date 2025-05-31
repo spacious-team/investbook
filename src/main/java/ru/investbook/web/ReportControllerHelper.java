@@ -57,7 +57,7 @@ public class ReportControllerHelper {
                 <br>
                 <span style="font-size: smaller; color: gray;">Вы можете
                 <a href="https://github.com/spacious-team/investbook/issues/new?labels=bug&template=bug_report.md">сообщить</a>
-                об ошибке разработчикам  или связаться с <a href="https://t.me/investbook_support">технической поддержкой</a>
+                об ошибке разработчикам  или связаться с <a href="https://t.me/+zriyX7tRQOc0MDEy">технической поддержкой</a>
                 </span>
                 <br><br> -
                 """, "");

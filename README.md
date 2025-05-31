@@ -11,7 +11,7 @@ https://github.com/spacious-team/investbook/actions/workflows/unit-tests.yml)
 [![github-all-releases](https://img.shields.io/github/downloads/spacious-team/investbook/total?style=flat-square&logo=github&color=lightblue)](https://github.com/spacious-team/investbook/releases/latest)
 [![docker-pulls](https://img.shields.io/docker/pulls/spaciousteam/investbook?style=flat-square&logo=docker&color=lightblue&logoColor=white)](https://hub.docker.com/r/spaciousteam/investbook)
 [![telegram-channel](https://img.shields.io/endpoint?style=flat-square&color=2ca5e0&label=news&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Finvestbook_official)](https://t.me/investbook_official)
-[![telegram-group](https://img.shields.io/endpoint?style=flat-square&color=2ca5e0&label=chat&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Finvestbook_support)](https://t.me/investbook_support)
+[![telegram-group](https://img.shields.io/endpoint?style=flat-square&color=2ca5e0&label=chat&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Finvestbook_support)](https://t.me/+IzYUY5hyvZtmOTIy)
 [![telegram-support](https://img.shields.io/badge/support-online-2ca5e0?style=flat-square&logo=telegram)](https://t.me/investbook_support_bot)
 
 <img src="https://user-images.githubusercontent.com/11336712/85948992-b1d6de00-b95c-11ea-8edc-4d5e7dfc8210.png" width="100%"/>
@@ -111,7 +111,7 @@ Investbook в сравнении с [Intelinvest](https://intelinvest.ru) и [Sn
 ### Брокеры
 Приложение анализирует отчеты брокеров ТБанк / Тинькофф (xlsx), Сбербанк (xlsx), ВТБ (xls), Промсвязьбанк (xlsx, xml)
 и Твой Брокер / Уралсиб (zip с xls). Если ваш счет открыт у другого брокера,
-напишите [нам](https://t.me/investbook_support). Также вы можете уже на вашей версии приложения воспользоваться
+напишите [нам](https://t.me/+IzYUY5hyvZtmOTIy). Также вы можете уже на вашей версии приложения воспользоваться
 [формами](src/main/asciidoc/investbook-forms.adoc) ввода информации или 
 [загрузить](src/main/asciidoc/investbook-input-format.adoc) данные из excel файла. Также поддержку вашего брокера могут 
 предложить сторонние разработчики через функционал расширений. Инструкция для установки расширений доступна для
