@@ -22,6 +22,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import ru.investbook.BrowserHomePageOpener;
 
@@ -30,26 +31,34 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.util.Objects;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
+import static ru.investbook.loadingpage.LoadingPageHttpServerUtils.getMainAppPort;
 
 @Slf4j
-public class LoadingPageServer implements AutoCloseable{
-    public static final int SERVER_PORT = 2031;
+public class LoadingPageHttpServer implements AutoCloseable {
+    public static @MonotonicNonNull LoadingPageHttpServer INSTANCE;
     public static final int DEFAULT_CLOSE_DELAY_SEC = 120;
+    private volatile @Nullable HttpServer server;
 
-    private volatile @Nullable HttpServer server = null;
+    public LoadingPageHttpServer(String[] args) {
+        LoadingPageHttpServerUtils.setSpringProfilesFromArgs(args);
+        INSTANCE = this;
+    }
 
     public void start() {
         try {
-            HttpServer server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
+            int port = getMainAppPort();
+            HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/", new LoadingPageHandler());
             server.createContext("/main-app-port", new PortHandler());
             server.start();
             this.server = server;
-            String loadingPageUrl = "http://localhost:" + SERVER_PORT + "/loading";
+            log.info("Loading page server is started on port {}", port);
+            String loadingPageUrl = "http://localhost:" + port;
             BrowserHomePageOpener.open(loadingPageUrl);
         } catch (IOException e) {
             log.warn("Can't open /loading page", e);
@@ -62,12 +71,22 @@ public class LoadingPageServer implements AutoCloseable{
             //noinspection DataFlowIssue
             server.stop(DEFAULT_CLOSE_DELAY_SEC);
             server = null;
+            log.info("Loading page server is stopped");
         }
     }
+
 
     static class LoadingPageHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            if (Objects.equals(exchange.getRequestURI().getPath(), "/")) {
+                sendLoadingPage(exchange);
+            } else {
+                sendNotFound(exchange);
+            }
+        }
+
+        private void sendLoadingPage(HttpExchange exchange) throws IOException {
             byte[] data;
             try (InputStream in = requireNonNull(getClass().getResourceAsStream("/templates/loading.html"))) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -81,12 +100,16 @@ public class LoadingPageServer implements AutoCloseable{
                 os.write(data);
             }
         }
+
+        private static void sendNotFound(HttpExchange exchange) throws IOException {
+            exchange.sendResponseHeaders(404, -1);
+        }
     }
 
     static class PortHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            String mainServerPort = String.valueOf(LoadingPageServerUtils.getMainAppPort());
+            String mainServerPort = String.valueOf(getMainAppPort());
 
             exchange.sendResponseHeaders(200, mainServerPort.length());
 

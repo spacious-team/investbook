@@ -24,26 +24,27 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.investbook.loadingpage.LoadingPageServer;
+import ru.investbook.loadingpage.LoadingPageHttpServer;
+import ru.investbook.loadingpage.LoadingPageHttpServerUtils;
 
 import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
-class LoadingPageServerTest {
+class LoadingPageHttpServerTest {
 
-    private LoadingPageServer loadingPageServer;
+    private LoadingPageHttpServer loadingPageHttpServer;
 
     @BeforeEach
     void setup() {
-        loadingPageServer = new LoadingPageServer();
+        loadingPageHttpServer = new LoadingPageHttpServer(new String[]{});
     }
 
     @Test
     void testBrowserOpensOnLoadingPageStart() {
         try (MockedStatic<BrowserHomePageOpener> browserOpenerMock = Mockito.mockStatic(BrowserHomePageOpener.class)) {
-            loadingPageServer.start();
+            loadingPageHttpServer.start();
 
-            String expectedUrl = "http://localhost:" + LoadingPageServer.SERVER_PORT + "/loading";
+            String expectedUrl = "http://localhost:" + LoadingPageHttpServerUtils.getMainAppPort();
             browserOpenerMock.verify(() -> BrowserHomePageOpener.open(expectedUrl), times(1));
         }
     }

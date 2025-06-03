@@ -38,13 +38,13 @@ import static java.util.Objects.requireNonNull;
 
 @Slf4j
 @UtilityClass
-public class LoadingPageServerUtils {
+public class LoadingPageHttpServerUtils {
 
     private static final String PROPERTIES_LOCATION_DIR = "app";
     private static final String DEFAULT_PROFILE = "conf";
     private static final List<String> profiles = new CopyOnWriteArrayList<>();
 
-    public static void setSpringProfilesFromArgs(String[] args) {
+    static void setSpringProfilesFromArgs(String[] args) {
         for (String arg : args) {
             if (arg.startsWith("--spring.profiles.active")) {
                 String[] _profiles = arg.replace("--spring.profiles.active", "")
@@ -101,7 +101,7 @@ public class LoadingPageServerUtils {
             properties.load(reader);
         } catch (Exception e) {
             // Properties file is not found in app installation path, read default file from class path
-            try (InputStream in = requireNonNull(LoadingPageServerUtils.class.getResourceAsStream("/" + file));
+            try (InputStream in = requireNonNull(LoadingPageHttpServerUtils.class.getResourceAsStream("/" + file));
                  Reader reader = new InputStreamReader(in, UTF_8)) {
                 properties.load(reader);
             }

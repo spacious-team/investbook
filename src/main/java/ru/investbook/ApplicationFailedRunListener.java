@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationFailedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.ConfigurableEnvironment;
-import ru.investbook.loadingpage.LoadingPageServer;
 
 @Slf4j
 public class ApplicationFailedRunListener implements ApplicationListener<ApplicationFailedEvent> {

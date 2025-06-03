@@ -24,20 +24,19 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.stereotype.Component;
-import ru.investbook.loadingpage.LoadingPageServer;
-import ru.investbook.loadingpage.LoadingPageServerUtils;
+import ru.investbook.loadingpage.LoadingPageHttpServer;
+import ru.investbook.loadingpage.LoadingPageHttpServerUtils;
 
 @SpringBootApplication
 @Component
 @EnableCaching
 @RequiredArgsConstructor
-public class InvestbookApplication {
+public class InvestbookApplication  {
 
     public static void main(String[] args) {
-        try(LoadingPageServer loadingPageServer = new LoadingPageServer()) {
-            LoadingPageServerUtils.setSpringProfilesFromArgs(args);
-            if (LoadingPageServerUtils.shouldOpenHomePageAfterStart()) {
-                loadingPageServer.start();
+        try (LoadingPageHttpServer loadingPageHttpServer = new LoadingPageHttpServer(args)) {
+            if (LoadingPageHttpServerUtils.shouldOpenHomePageAfterStart()) {
+                loadingPageHttpServer.start();
             }
 
             SpringApplication app = new SpringApplication(InvestbookApplication.class);

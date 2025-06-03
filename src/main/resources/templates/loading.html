@@ -44,36 +44,35 @@
             }
         }
     </style>
-    <script>
-        let mainAppPort = "2030";
-
-        function getMainAppPort() {
-            fetch('/main-app-port')
-                .then(response => response.text())
-                .then(port => {
-                    mainAppPort = port;
-                }).catch(error => {
-                console.error("Error fetching port:", error);
-            });
+    <script type = "module">
+        async function getMainAppPort() {
+            let response = await fetch('/main-app-port')
+            let port = await response.text()
+            console.info("Application port is " + port)
+            return port
         }
 
-        function checkMainApp() {
-            if (mainAppPort) {
-                let homePageUrl = location.protocol + '//' + location.hostname + `:${mainAppPort}`
-                fetch(homePageUrl)
-                    .then(response => {
-                        if (response && response.ok) {
-                            window.location.href = homePageUrl;
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error checking main app:", error);
-                    });
-            }
+        function checkMainApp(port) {
+            let homePageUrl = location.protocol + '//' + location.hostname + ":" +  port
+            // checkPage доступен только после загрузки основного http сервера
+            let checkPage = homePageUrl + '/broker-file-reports'
+            console.info("Check main server page: " + checkPage)
+            fetch(checkPage)
+                .then(response => {
+                    if (response && response.ok) {
+                        console.info("Redirect to: " + homePageUrl);
+                        window.location.href = homePageUrl;
+                    } else {
+                        console.info("Main server is not ready")
+                    }
+                })
+                .catch(error => {
+                    console.error("Error checking main app:", error);
+                });
         }
 
-        getMainAppPort();
-        setInterval(checkMainApp, 500);
+        let port = await getMainAppPort();
+        setInterval(function() { checkMainApp(port); }, 500);
     </script>
 </head>
 <body>
