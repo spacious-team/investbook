@@ -45,14 +45,8 @@
         }
     </style>
     <script type = "module">
-        async function getMainAppPort() {
-            let response = await fetch('/main-app-port')
-            let port = await response.text()
-            console.info("Application port is " + port)
-            return port
-        }
-
-        function checkMainApp(port) {
+        function checkMainApp() {
+            let port = {{ server.port }}  // replaced by java's LoadingPageHandler.class
             let homePageUrl = location.protocol + '//' + location.hostname + ":" +  port
             // checkPage доступен только после загрузки основного http сервера
             let checkPage = homePageUrl + '/broker-file-reports'
@@ -71,8 +65,7 @@
                 });
         }
 
-        let port = await getMainAppPort();
-        setInterval(function() { checkMainApp(port); }, 500);
+        setInterval(checkMainApp, 500);
     </script>
 </head>
 <body>

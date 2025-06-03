@@ -54,10 +54,9 @@ public class LoadingPageHttpServer implements AutoCloseable {
             int port = getMainAppPort();
             HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/", new LoadingPageHandler());
-            server.createContext("/main-app-port", new PortHandler());
             server.start();
             this.server = server;
-            log.info("Loading page server is started on port {}", port);
+            log.info("Loading page http server is started on port {}", port);
             String loadingPageUrl = "http://localhost:" + port;
             BrowserHomePageOpener.open(loadingPageUrl);
         } catch (IOException e) {
@@ -71,7 +70,7 @@ public class LoadingPageHttpServer implements AutoCloseable {
             //noinspection DataFlowIssue
             server.stop(DEFAULT_CLOSE_DELAY_SEC);
             server = null;
-            log.info("Loading page server is stopped");
+            log.info("Loading page http server is stopped");
         }
     }
 
@@ -82,7 +81,7 @@ public class LoadingPageHttpServer implements AutoCloseable {
             if (Objects.equals(exchange.getRequestURI().getPath(), "/")) {
                 sendLoadingPage(exchange);
             } else {
-                sendNotFound(exchange);
+                sendNotFound(exchange);  // is required for /templates/loading.html
             }
         }
 
@@ -91,7 +90,10 @@ public class LoadingPageHttpServer implements AutoCloseable {
             try (InputStream in = requireNonNull(getClass().getResourceAsStream("/templates/loading.html"))) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 in.transferTo(out);
-                data = out.toByteArray();
+                String page = out.toString(UTF_8);
+                page = setServerPortVariable(page);
+                data = page.getBytes(UTF_8);
+
             }
 
             exchange.sendResponseHeaders(200, data.length);
@@ -104,19 +106,11 @@ public class LoadingPageHttpServer implements AutoCloseable {
         private static void sendNotFound(HttpExchange exchange) throws IOException {
             exchange.sendResponseHeaders(404, -1);
         }
-    }
 
-    static class PortHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            String mainServerPort = String.valueOf(getMainAppPort());
-
-            exchange.sendResponseHeaders(200, mainServerPort.length());
-
-            try (OutputStream os = exchange.getResponseBody()) {
-                byte[] data = mainServerPort.getBytes(UTF_8);
-                os.write(data);
-            }
+        private static String setServerPortVariable(String page) {
+            String serverPort = String.valueOf(getMainAppPort());
+            return page.replace("{{ server.port }}", serverPort);
         }
     }
 }
+
