@@ -24,7 +24,6 @@ import java.util.Objects;
 
 import static ru.investbook.loadingpage.LoadingPageHttpServer.Implementation.INSTANCE;
 import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.setSpringProfilesFromArgs;
-import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.shouldOpenHomePageAfterStart;
 
 public interface LoadingPageHttpServer extends AutoCloseable {
 
@@ -34,15 +33,10 @@ public interface LoadingPageHttpServer extends AutoCloseable {
 
     static LoadingPageHttpServer of(String[] args) {
         setSpringProfilesFromArgs(args);
-        if (isDevToolThread()) {
-            INSTANCE = new LoadingPageHttpServerDevToolImpl();
-        } else {
-            LoadingPageHttpServer server = new LoadingPageHttpServerImpl();
-            if (shouldOpenHomePageAfterStart()) {
-                server.start();
-            }
-            INSTANCE = server;
-        }
+        INSTANCE = isDevToolThread() ?
+                new LoadingPageHttpServerDevToolImpl() :
+                new LoadingPageHttpServerImpl();
+        INSTANCE.start();
         return INSTANCE;
     }
 

@@ -35,6 +35,7 @@ import java.util.Objects;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.*;
 import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.getMainAppPort;
+import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.shouldOpenHomePageAfterStart;
 
 @Slf4j
 public class LoadingPageHttpServerImpl implements LoadingPageHttpServer {
@@ -51,8 +52,10 @@ public class LoadingPageHttpServerImpl implements LoadingPageHttpServer {
                 server.start();
                 this.server = server;
                 log.info("Loading page http server is started on port {}", port);
-                String loadingPageUrl = "http://localhost:" + port;
-                BrowserHomePageOpener.open(loadingPageUrl);
+                if (shouldOpenHomePageAfterStart()) {
+                    String loadingPageUrl = "http://localhost:" + port;
+                    BrowserHomePageOpener.open(loadingPageUrl);
+                }
             }
         } catch (IOException e) {
             log.warn("Can't open /loading page", e);
