@@ -21,6 +21,7 @@ package ru.investbook.loadingpage;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -36,17 +37,27 @@ import java.util.Objects;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
-import static ru.investbook.loadingpage.LoadingPageHttpServerUtils.getMainAppPort;
+import static lombok.AccessLevel.PRIVATE;
+import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.*;
 
 @Slf4j
+@NoArgsConstructor(access = PRIVATE)
 public class LoadingPageHttpServer implements AutoCloseable {
-    public static @MonotonicNonNull LoadingPageHttpServer INSTANCE;
     public static final int DEFAULT_CLOSE_DELAY_SEC = 120;
+    private static volatile @MonotonicNonNull LoadingPageHttpServer INSTANCE;
     private volatile @Nullable HttpServer server;
 
-    public LoadingPageHttpServer(String[] args) {
-        LoadingPageHttpServerUtils.setSpringProfilesFromArgs(args);
-        INSTANCE = this;
+    public static LoadingPageHttpServer of(String[] args) {
+        setSpringProfilesFromArgs(args);
+        INSTANCE = new LoadingPageHttpServer();
+        if (shouldOpenHomePageAfterStart()) {
+            INSTANCE.start();
+        }
+        return INSTANCE;
+    }
+
+    public static @Nullable LoadingPageHttpServer getInstance() {
+        return INSTANCE;
     }
 
     public void start() {

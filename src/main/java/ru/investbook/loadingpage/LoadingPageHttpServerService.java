@@ -21,7 +21,7 @@ package ru.investbook.loadingpage;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.Phased;
 import org.springframework.context.SmartLifecycle;
@@ -42,7 +42,7 @@ public class LoadingPageHttpServerService implements SmartLifecycle {
     @SneakyThrows
     @Override
     public void start() {
-        @MonotonicNonNull LoadingPageHttpServer server = LoadingPageHttpServer.INSTANCE;
+        @Nullable LoadingPageHttpServer server = LoadingPageHttpServer.getInstance();
         if (!isRunning() && server != null) {
             server.close();
         }

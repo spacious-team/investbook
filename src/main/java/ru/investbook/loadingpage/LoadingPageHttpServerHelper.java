@@ -38,7 +38,7 @@ import static java.util.Objects.requireNonNull;
 
 @Slf4j
 @UtilityClass
-public class LoadingPageHttpServerUtils {
+class LoadingPageHttpServerHelper {
 
     private static final String PROPERTIES_LOCATION_DIR = "app";
     private static final String DEFAULT_PROFILE = "conf";
@@ -59,7 +59,7 @@ public class LoadingPageHttpServerUtils {
         }
     }
 
-    public static int getMainAppPort() {
+    static int getMainAppPort() {
         try {
             String value = getProperty("server.port", "2030");
             return Integer.parseInt(value);
@@ -69,7 +69,7 @@ public class LoadingPageHttpServerUtils {
         }
     }
 
-    public static boolean shouldOpenHomePageAfterStart() {
+    static boolean shouldOpenHomePageAfterStart() {
         try {
             String value = getProperty("investbook.open-home-page-after-start", "true");
             return Boolean.parseBoolean(value);
@@ -101,7 +101,7 @@ public class LoadingPageHttpServerUtils {
             properties.load(reader);
         } catch (Exception e) {
             // Properties file is not found in app installation path, read default file from class path
-            try (InputStream in = requireNonNull(LoadingPageHttpServerUtils.class.getResourceAsStream("/" + file));
+            try (InputStream in = requireNonNull(LoadingPageHttpServerHelper.class.getResourceAsStream("/" + file));
                  Reader reader = new InputStreamReader(in, UTF_8)) {
                 properties.load(reader);
             }

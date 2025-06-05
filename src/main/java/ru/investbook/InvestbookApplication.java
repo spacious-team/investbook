@@ -25,7 +25,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.stereotype.Component;
 import ru.investbook.loadingpage.LoadingPageHttpServer;
-import ru.investbook.loadingpage.LoadingPageHttpServerUtils;
 
 @SpringBootApplication
 @Component
@@ -34,11 +33,7 @@ import ru.investbook.loadingpage.LoadingPageHttpServerUtils;
 public class InvestbookApplication  {
 
     public static void main(String[] args) {
-        try (LoadingPageHttpServer loadingPageHttpServer = new LoadingPageHttpServer(args)) {
-            if (LoadingPageHttpServerUtils.shouldOpenHomePageAfterStart()) {
-                loadingPageHttpServer.start();
-            }
-
+        try (LoadingPageHttpServer _ = LoadingPageHttpServer.of(args)) {
             SpringApplication app = new SpringApplication(InvestbookApplication.class);
             app.addListeners(new ApplicationFailedRunListener());
             app.run(args);
