@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2024  Spacious Team <spacious-team@ya.ru>
+ * Copyright (C) 2025  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,110 +18,49 @@
 
 package ru.investbook.loadingpage;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import ru.investbook.BrowserHomePageOpener;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.util.Objects;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Objects.nonNull;
-import static java.util.Objects.requireNonNull;
-import static lombok.AccessLevel.PRIVATE;
-import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.*;
+import static ru.investbook.loadingpage.LoadingPageHttpServer.Implementation.INSTANCE;
+import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.setSpringProfilesFromArgs;
+import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.shouldOpenHomePageAfterStart;
 
-@Slf4j
-@NoArgsConstructor(access = PRIVATE)
-public class LoadingPageHttpServer implements AutoCloseable {
-    public static final int DEFAULT_CLOSE_DELAY_SEC = 120;
-    private static volatile @MonotonicNonNull LoadingPageHttpServer INSTANCE;
-    private volatile @Nullable HttpServer server;
+public interface LoadingPageHttpServer extends AutoCloseable {
 
-    public static LoadingPageHttpServer of(String[] args) {
+    void start();
+
+    void close();
+
+    static LoadingPageHttpServer of(String[] args) {
         setSpringProfilesFromArgs(args);
-        INSTANCE = new LoadingPageHttpServer();
-        if (shouldOpenHomePageAfterStart()) {
-            INSTANCE.start();
+        if (isDevToolThread()) {
+            INSTANCE = new LoadingPageHttpServerDevToolImpl();
+        } else {
+            LoadingPageHttpServer server = new LoadingPageHttpServerImpl();
+            if (shouldOpenHomePageAfterStart()) {
+                server.start();
+            }
+            INSTANCE = server;
         }
         return INSTANCE;
     }
 
-    public static @Nullable LoadingPageHttpServer getInstance() {
-        return INSTANCE;
+    /**
+     * @return true is thread started by
+     * <a href="https://central.sonatype.com/artifact/org.springframework.boot/spring-boot-devtools">spring-boot-devtools</a>
+     */
+    private static boolean isDevToolThread() {
+        return Objects.equals(Thread.currentThread().getName(), "restartedMain");
     }
 
-    public void start() {
-        try {
-            int port = getMainAppPort();
-            HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
-            server.createContext("/", new LoadingPageHandler());
-            server.start();
-            this.server = server;
-            log.info("Loading page http server is started on port {}", port);
-            String loadingPageUrl = "http://localhost:" + port;
-            BrowserHomePageOpener.open(loadingPageUrl);
-        } catch (IOException e) {
-            log.warn("Can't open /loading page", e);
-        }
-    }
+    class Implementation {
+        protected static volatile @MonotonicNonNull LoadingPageHttpServer INSTANCE;
 
-    @Override
-    public void close() {
-        if (nonNull(server)) {
-            //noinspection DataFlowIssue
-            server.stop(DEFAULT_CLOSE_DELAY_SEC);
-            server = null;
-            log.info("Loading page http server is stopped");
-        }
-    }
-
-
-    static class LoadingPageHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            if (Objects.equals(exchange.getRequestURI().getPath(), "/")) {
-                sendLoadingPage(exchange);
-            } else {
-                sendNotFound(exchange);  // is required for /templates/loading.html
+        public static void close() {
+            if (INSTANCE != null) {
+                INSTANCE.close();
             }
-        }
-
-        private void sendLoadingPage(HttpExchange exchange) throws IOException {
-            byte[] data;
-            try (InputStream in = requireNonNull(getClass().getResourceAsStream("/templates/loading.html"))) {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                in.transferTo(out);
-                String page = out.toString(UTF_8);
-                page = setServerPortVariable(page);
-                data = page.getBytes(UTF_8);
-
-            }
-
-            exchange.sendResponseHeaders(200, data.length);
-
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(data);
-            }
-        }
-
-        private static void sendNotFound(HttpExchange exchange) throws IOException {
-            exchange.sendResponseHeaders(404, -1);
-        }
-
-        private static String setServerPortVariable(String page) {
-            String serverPort = String.valueOf(getMainAppPort());
-            return page.replace("{{ server.port }}", serverPort);
         }
     }
 }
-
