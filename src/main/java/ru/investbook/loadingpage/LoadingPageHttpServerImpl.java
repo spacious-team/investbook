@@ -34,8 +34,7 @@ import java.util.Objects;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.*;
-import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.getMainAppPort;
-import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.shouldOpenHomePageAfterStart;
+import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.*;
 
 @Slf4j
 public class LoadingPageHttpServerImpl implements LoadingPageHttpServer {
@@ -46,14 +45,15 @@ public class LoadingPageHttpServerImpl implements LoadingPageHttpServer {
     public void start() {
         try {
             if (isNull(server)) {
-                int port = getMainAppPort();
-                HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+                int port = getServerPort();
+                HttpServer server = HttpServer.create(new InetSocketAddress(port), 0); // start on any address
                 server.createContext("/", new LoadingPageHandler());
                 server.start();
                 this.server = server;
                 log.info("Loading page http server is started on port {}", port);
                 if (shouldOpenHomePageAfterStart()) {
-                    String loadingPageUrl = "http://localhost:" + port;
+                    String address = getServerAddress();
+                    String loadingPageUrl = "http://" + address + ":" + port;
                     BrowserHomePageOpener.open(loadingPageUrl);
                 }
             }
@@ -106,7 +106,7 @@ public class LoadingPageHttpServerImpl implements LoadingPageHttpServer {
         }
 
         private static String setServerPortVariable(String page) {
-            String serverPort = String.valueOf(getMainAppPort());
+            String serverPort = String.valueOf(getServerPort());
             return page.replace("{{ server.port }}", serverPort);
         }
     }

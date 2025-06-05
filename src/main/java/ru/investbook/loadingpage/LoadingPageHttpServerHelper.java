@@ -59,7 +59,16 @@ class LoadingPageHttpServerHelper {
         }
     }
 
-    static int getMainAppPort() {
+    static String getServerAddress() {
+        try {
+            return getProperty("server.address", "localhost");
+        } catch (Exception e) {
+            log.warn("Can't find 'server.address' property, fallback to default value: 'localhost'", e);
+            return "localhost";
+        }
+    }
+
+    static int getServerPort() {
         try {
             String value = getProperty("server.port", "2030");
             return Integer.parseInt(value);
