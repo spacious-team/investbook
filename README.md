@@ -12,7 +12,7 @@ https://github.com/spacious-team/investbook/actions/workflows/unit-tests.yml)
 [![docker-pulls](https://img.shields.io/docker/pulls/spaciousteam/investbook?style=flat-square&logo=docker&color=lightblue&logoColor=white)](https://hub.docker.com/r/spaciousteam/investbook)
 [![telegram-channel](https://img.shields.io/endpoint?style=flat-square&color=2ca5e0&label=news&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Finvestbook_official)](https://t.me/investbook_official)
 [![telegram-group](https://img.shields.io/endpoint?style=flat-square&color=2ca5e0&label=chat&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Finvestbook_support)](https://t.me/+IzYUY5hyvZtmOTIy)
-[![telegram-support](https://img.shields.io/badge/support-online-2ca5e0?style=flat-square&logo=telegram)](https://t.me/investbook_support_bot)
+[![telegram-support](https://img.shields.io/badge/support-online-2ca5e0?style=flat-square&logo=telegram)](https://t.me/investbook_official)
 
 <img src="https://user-images.githubusercontent.com/11336712/85948992-b1d6de00-b95c-11ea-8edc-4d5e7dfc8210.png" width="100%"/>
 
@@ -199,8 +199,8 @@ Investbook также может быть запущен в [docker](docs/run-by
 ознакомьтесь, пожалуйста, со следующей [информацией](docs/CONTRIBUTING.md).
 
 ### Контакты
-- Телеграм [канал](https://t.me/investbook_official), техническая [поддержка](https://t.me/investbook_support_bot)
-  и [чат](https://t.me/+IzYUY5hyvZtmOTIy) пользователей;
+- Телеграм [канал](https://t.me/investbook_official), [чат](https://t.me/+IzYUY5hyvZtmOTIy) пользователей,
+  техническая поддержка оказывается в директ сообщениях телеграм канала (кнопка внизу слева канала);
 - Обсуждение на форуме [banki.ru](https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=380178);
 - Страница приложения на [smart-lab.ru](https://smart-lab.ru/trading-software/Investbook) и
   [страница для связи](https://smart-lab.ru/profile/SpaciousTeam);  

@@ -10,7 +10,7 @@
 [![docker-pulls](https://img.shields.io/docker/pulls/spaciousteam/investbook?style=flat-square&logo=docker&color=lightblue&logoColor=white)](https://hub.docker.com/r/spaciousteam/investbook)
 [![telegram-channel](https://img.shields.io/endpoint?style=flat-square&color=2ca5e0&label=news&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Finvestbook_official)](https://t.me/investbook_official)
 [![telegram-group](https://img.shields.io/endpoint?style=flat-square&color=2ca5e0&label=chat&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Finvestbook_support)](https://t.me/+IzYUY5hyvZtmOTIy)
-[![telegram-support](https://img.shields.io/badge/support-online-2ca5e0?style=flat-square&logo=telegram)](https://t.me/investbook_support_bot)
+[![telegram-support](https://img.shields.io/badge/support-online-2ca5e0?style=flat-square&logo=telegram)](https://t.me/investbook_official)
 
 Find out the real annual percentage return on investment and compare it to a bank deposit, find out the average 
 cost of buying stocks, bonds, derivatives, automate, analyze your portfolio.
@@ -206,8 +206,8 @@ therefore, developers, even pursuing different goals, work together. If you deci
 repository, please read the following [information](docs/CONTRIBUTING.md).
 
 ### Contacts
-- Telegram [channel](https://t.me/investbook_official), technical [support](https://t.me/investbook_support_bot)
-  and users [chat](https://t.me/+IzYUY5hyvZtmOTIy);
+- Telegram [channel](https://t.me/investbook_official), users [chat](https://t.me/+IzYUY5hyvZtmOTIy),
+  technical support is available in the channel's private direct messages (button below on the left);
 - Discussion on the forum [banki.ru](https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=380178);
 - Application page on the [smart-lab.ru](https://smart-lab.ru/trading-software/Investbook) and
   [contact page](https://smart-lab.ru/profile/SpaciousTeam);
