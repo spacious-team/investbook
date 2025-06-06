@@ -21,6 +21,7 @@ package ru.investbook.loadingpage;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.Phased;
 import org.springframework.context.SmartLifecycle;
@@ -54,8 +55,12 @@ public class LoadingPageHttpServerService implements SmartLifecycle {
     @SneakyThrows
     @Override
     public int getPhase() {
-        Phased webServerStartStopLifecycle = (Phased) applicationContext.getBean("webServerStartStop");
-        return webServerStartStopLifecycle.getPhase() - 1;
-
+        try {
+            Phased webServerStartStopLifecycle = (Phased) applicationContext.getBean("webServerStartStop");
+            return webServerStartStopLifecycle.getPhase() - 1;
+        } catch (NoSuchBeanDefinitionException e) {
+            // there is no WebServerStartStopLifecycle (maybe tests in the progress), phase doesn't matter
+            return Integer.MIN_VALUE;
+        }
     }
 }
