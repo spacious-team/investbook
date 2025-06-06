@@ -48,24 +48,23 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 @Slf4j
 public class CashBalancesPof {
 
-    @NotNull
     @JsonProperty("account")
     int account;
 
-    @NotNull
     @Builder.Default
     @JsonProperty("cash")
+    @NotNull
     Collection<CashPof> cash = Collections.emptyList();
 
     @Value
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private static class CashPof {
-        @NotNull
         @JsonProperty("value")
+        @NotNull
         BigDecimal value;
 
-        @NotEmpty
         @JsonProperty("currency")
+        @NotEmpty
         String currency;
     }
 

@@ -47,6 +47,21 @@
     <input type="text" th:field="__${securitySector}__" placeholder="Сектор" onchange="this.form.submit()"/>
 </label>
 
+<label th:fragment="cash-flow-event(type)">
+    Операция
+    <select th:field="__${type}__" onchange="this.form.submit()">
+        <option th:value="NULL" th:text="NULL" th:selected/>
+        <option value="CASH">Пополнение и снятие</option>
+        <option value="DIVIDEND">Дивиденд</option>
+        <option value="COUPON">Купон</option>
+        <option value="AMORTIZATION">Амортизация облигации</option>
+        <option value="REDEMPTION">Погашение облигации</option>
+        <option value="DERIVATIVE_PROFIT">Вариационная маржа</option>
+        <option value="FEE">Комиссия</option>
+        <option value="TAX">Налог</option>
+    </select>
+</label>
+
 <label th:fragment="date(date)">
     <label>
         Дата

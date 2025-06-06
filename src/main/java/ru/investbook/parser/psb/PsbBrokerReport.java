@@ -32,7 +32,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+
+import static java.time.temporal.ChronoUnit.HOURS;
 
 @EqualsAndHashCode(callSuper = true)
 public class PsbBrokerReport extends AbstractExcelBrokerReport {
@@ -40,25 +41,33 @@ public class PsbBrokerReport extends AbstractExcelBrokerReport {
     private static final String PORTFOLIO_MARKER = "Договор №:";
     private static final String REPORT_DATE_MARKER = "ОТЧЕТ БРОКЕРА";
 
-    private final Workbook book;
-
     public PsbBrokerReport(String excelFileName, SecurityRegistrar securityRegistrar) throws IOException {
         this(Paths.get(excelFileName), securityRegistrar);
     }
 
     public PsbBrokerReport(Path report, SecurityRegistrar securityRegistrar) throws IOException {
-        this(report.getFileName().toString(), Files.newInputStream(report), securityRegistrar);
+        this(getFileName(report), Files.newInputStream(report), securityRegistrar);
     }
 
     public PsbBrokerReport(String excelFileName, InputStream is, SecurityRegistrar securityRegistrar) {
-        super(securityRegistrar);
-        this.book = getWorkBook(excelFileName, is);
-        ReportPage reportPage = new ExcelSheet(book.getSheetAt(0));
+        super(getBrokerReportAttributes(excelFileName, is), securityRegistrar);
+    }
+
+    @SuppressWarnings("nullness")
+    private static String getFileName(Path path) {
+        return path.getFileName().toString();
+    }
+
+    private static ExcelAttributes getBrokerReportAttributes(String excelFileName, InputStream is) {
+        Workbook workbook = getWorkBook(excelFileName, is);
+        ReportPage reportPage = new ExcelSheet(workbook.getSheetAt(0));
         checkReportFormat(excelFileName, reportPage);
-        setPath(Paths.get(excelFileName));
-        setReportPage(reportPage);
-        setPortfolio(getPortfolio(reportPage));
-        setReportEndDateTime(getReportEndDateTime(reportPage));
+        Attributes attributes = new Attributes(
+                reportPage,
+                excelFileName,
+                getReportEndDateTime(reportPage),
+                getPortfolio(reportPage));
+        return new ExcelAttributes(workbook, attributes);
     }
 
     public static void checkReportFormat(String excelFileName, ReportPage reportPage) {
@@ -77,19 +86,15 @@ public class PsbBrokerReport extends AbstractExcelBrokerReport {
         }
     }
 
-    private Instant getReportEndDateTime(ReportPage reportPage) {
+    private static Instant getReportEndDateTime(ReportPage reportPage) {
         try {
             String value = String.valueOf(reportPage.getNextColumnValue(REPORT_DATE_MARKER));
-            return convertToInstant(value.split(" ")[3])
-                    .plus(LAST_TRADE_HOUR, ChronoUnit.HOURS);
+            String date = value.split(" ")[3];
+            return convertToInstantWithRussianFormatAndMoscowZoneId(date)
+                    .plus(LAST_TRADE_HOUR, HOURS);
         } catch (Exception e) {
             throw new IllegalArgumentException(
                     "Не найдена дата отчета по заданному шаблону '" + REPORT_DATE_MARKER + " XXX'");
         }
-    }
-
-    @Override
-    public void close() throws IOException {
-        this.book.close();
     }
 }

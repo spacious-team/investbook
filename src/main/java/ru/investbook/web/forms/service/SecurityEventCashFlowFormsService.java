@@ -19,6 +19,7 @@
 package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
@@ -39,10 +40,13 @@ import ru.investbook.repository.specs.SecurityEventCashFlowEntitySearchSpecifica
 import ru.investbook.web.forms.model.SecurityEventCashFlowModel;
 import ru.investbook.web.forms.model.filter.SecurityEventCashFlowFormFilterModel;
 
+import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PROFIT;
 import static org.springframework.data.domain.Sort.Order.asc;
@@ -67,8 +71,8 @@ public class SecurityEventCashFlowFormsService {
     @Transactional(readOnly = true)
     public Page<SecurityEventCashFlowModel> getPage(SecurityEventCashFlowFormFilterModel filter) {
         SecurityEventCashFlowEntitySearchSpecification spec =
-                SecurityEventCashFlowEntitySearchSpecification.of(
-                        filter.getPortfolio(), filter.getSecurity(), filter.getDateFrom(), filter.getDateTo());
+                SecurityEventCashFlowEntitySearchSpecification.of(filter.getPortfolio(), filter.getSecurity(),
+                        filter.getDateFrom(), filter.getDateTo(), filter.getCashFlowType());
 
         Sort sort = Sort.by(asc("portfolio.id"), desc(SecurityEventCashFlowEntity_.TIMESTAMP), asc("security.id"));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
@@ -79,8 +83,8 @@ public class SecurityEventCashFlowFormsService {
 
     @Transactional
     public void save(SecurityEventCashFlowModel e) {
-        saveAndFlush(e.getPortfolio());
-        int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(e);
+        savePortfolio(e.getPortfolio());
+        int savedSecurityId = securityRepositoryHelper.saveSecurity(e);
         SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .portfolio(e.getPortfolio())
                 .timestamp(e.getDate().atTime(e.getTime()).atZone(zoneId).toInstant())
@@ -94,24 +98,25 @@ public class SecurityEventCashFlowFormsService {
                         .currency(e.getValueCurrency())
                         .build()));
         e.setId(entity.getId()); // used in view
-        if (e.getTax() != null && e.getTax().floatValue() > 0.001) {
+        @Nullable BigDecimal tax = e.getTax();
+        if (nonNull(tax) && nonNull(e.getTaxCurrency()) && tax.floatValue() > 0.001) {
             entity = securityEventCashFlowRepository.save(securityEventCashFlowConverter.toEntity(
                     builder
                             .id(e.getTaxId())
                             .eventType(CashFlowType.TAX)
-                            .value(e.getTax().negate())
-                            .currency(e.getTaxCurrency())
+                            .value(tax.negate())
+                            .currency(requireNonNull(e.getTaxCurrency()))
                             .build()));
             e.setTaxId(entity.getId());
-        } else if (e.getTaxId() != null) { // taxId exists in db, but no tax value in edited version
+        } else if (nonNull(e.getTaxId())) { // taxId exists in db, but no tax value in edited version
             securityEventCashFlowRepository.deleteById(e.getTaxId());
         }
         securityEventCashFlowRepository.flush();
     }
 
-    private void saveAndFlush(String portfolio) {
+    private void savePortfolio(String portfolio) {
         if (!portfolioRepository.existsById(portfolio)) {
-            portfolioRepository.saveAndFlush(
+            portfolioRepository.save(
                     portfolioConverter.toEntity(Portfolio.builder()
                             .id(portfolio)
                             .build()));

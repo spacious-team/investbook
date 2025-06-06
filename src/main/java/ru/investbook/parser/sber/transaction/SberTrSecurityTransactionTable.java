@@ -64,11 +64,13 @@ public class SberTrSecurityTransactionTable extends AbstractReportTable<Abstract
                 row.getStringCellValue(SECURITY_TYPE),
                 report.getSecurityRegistrar());
 
+        @SuppressWarnings({"nullable", "DataFlowIssue"})
+        int securityId = security.getId();
         return SecurityTransaction.builder()
                 .portfolio(row.getStringCellValue(PORTFOLIO))
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .tradeId(String.valueOf(row.getLongCellValue(TRADE_ID))) // may be double numbers in future
-                .security(security.getId())
+                .security(securityId)
                 .count(row.getIntCellValue(COUNT) * (isBuy ? 1 : -1))
                 .value(value)
                 .accruedInterest(accruedInterest)
@@ -80,6 +82,7 @@ public class SberTrSecurityTransactionTable extends AbstractReportTable<Abstract
                 .build();
     }
 
+    @Getter
     public enum SberTransactionTableHeader implements TableHeaderColumn {
         PORTFOLIO("Номер договора"),
         TRADE_ID("Номер сделки"),
@@ -96,7 +99,6 @@ public class SberTrSecurityTransactionTable extends AbstractReportTable<Abstract
         CURRENCY("Валюта"),
         EXCHANGE_RATE("Курс"); // обменный курс валюты? "1" для CURRENCY = RUB
 
-        @Getter
         private final TableColumn column;
 
         SberTransactionTableHeader(String words) {

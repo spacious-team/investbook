@@ -45,7 +45,7 @@ import static ru.investbook.parser.psb.SecurityTransactionTable.TransactionTable
 @Slf4j
 public class SecurityTransactionTable extends SingleInitializableReportTable<SecurityTransaction> {
 
-    // Использовать в том числе таблицы "... рассчитанные в отчетном периоде",
+    // Использовать, в том числе таблицы "... рассчитанные в отчетном периоде",
     // иначе в расчет не возьмутся позиции, закрытые в течении T+2 (до исполнения),
     // в годовых же отчетах сделка уже не встретится в таблице нерассчитанных сделок.
     private static final String[] TABLE_NAMES = {
@@ -92,11 +92,13 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
                 .add(row.getBigDecimalCellValue(ITS_COMMISSION))
                 .negate();
         Security security = getSecurity(row);
+        @SuppressWarnings({"nullable", "DataFlowIssue"})
+        int securityId = security.getId();
         return SecurityTransaction.builder()
                 .timestamp(getReport().convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .tradeId(String.valueOf(row.getLongCellValue(TRADE_ID))) // may be double numbers in future
                 .portfolio(getReport().getPortfolio())
-                .security(security.getId())
+                .security(securityId)
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)
                 .accruedInterest((accruedInterest.abs().compareTo(minValue) >= 0) ? accruedInterest : BigDecimal.ZERO)
@@ -123,6 +125,7 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
         return Set.copyOf(securities);
     }
 
+    @Getter
     enum TransactionTableHeader implements TableHeaderColumn {
         DATE_TIME(PatternTableColumn.of("дата", "исполнения"), PatternTableColumn.of("дата и время")),
         TRADE_ID("номер сделки"),
@@ -139,7 +142,6 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
         BROKER_COMMISSION("ком", "брокера"),
         COMMISSION_CURRENCY("валюта", "брок", "комиссии");
 
-        @Getter
         private final TableColumn column;
 
         TransactionTableHeader(String... words) {

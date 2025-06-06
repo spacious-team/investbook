@@ -20,8 +20,12 @@ package ru.investbook.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
@@ -39,7 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.PortfolioPropertyEntity;
 
-import java.util.Optional;
+import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Информация по счетам")
@@ -54,7 +58,10 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отображает всю имеющуюся информацию обо всех счетах")
+    @Operation(summary = "Отобразить все", description = "Отображает всю имеющуюся информацию обо всех счетах",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public Page<PortfolioProperty> get(@Parameter(hidden = true)
                                        Pageable pageable) {
         return super.get(pageable);
@@ -62,7 +69,10 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить один", description = "Отображает информацию по идентификатору")
+    @Operation(summary = "Отобразить один", description = "Отображает информацию по идентификатору",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<PortfolioProperty> get(@PathVariable("id")
                                                  @Parameter(description = "Внутренний идентификатор записи")
                                                  Integer id) {
@@ -71,39 +81,45 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Добавить информацию для конкретного счета")
-    public ResponseEntity<Void> post(@Valid @RequestBody PortfolioProperty property) {
+    @Operation(summary = "Добавить", description = "Добавить информацию для конкретного счета",
+            responses = {
+                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+                    @ApiResponse(responseCode = "409"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
+    public ResponseEntity<Void> post(@RequestBody @Valid PortfolioProperty property) {
         return super.post(property);
     }
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", description = "Обновить информацию для счета")
+    @Operation(summary = "Обновить", description = "Обновить информацию для счета",
+            responses = {
+                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор записи")
                                     Integer id,
-                                    @Valid
                                     @RequestBody
+                                    @Valid
                                     PortfolioProperty property) {
         return super.put(id, property);
     }
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить")
-    public void delete(@PathVariable("id")
-                       @Parameter(description = "Внутренний идентификатор записи")
-                       Integer id) {
-        super.delete(id);
+    @Operation(summary = "Удалить",
+            responses = {
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
+    public ResponseEntity<Void> delete(@PathVariable("id")
+                                       @Parameter(description = "Внутренний идентификатор записи")
+                                       Integer id) {
+        return super.delete(id);
     }
 
     @Override
-    protected Optional<PortfolioPropertyEntity> getById(Integer id) {
-        return repository.findById(id);
-    }
-
-    @Override
-    protected Integer getId(PortfolioProperty object) {
+    public @Nullable Integer getId(PortfolioProperty object) {
         return object.getId();
     }
 

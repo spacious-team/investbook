@@ -26,9 +26,9 @@ import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
-import org.springframework.lang.Nullable;
 import ru.investbook.entity.SecurityEntity;
 
 import java.util.Optional;
@@ -43,24 +43,23 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidIsinOrNull;
 @Slf4j
 class AssetPof {
 
-    @NotNull
     @JsonProperty("id")
     int id;
 
-    @NotNull
     @JsonProperty("type")
+    @NotNull
     String type;
 
-    @Nullable
     @JsonProperty("symbol")
+    @Nullable
     String symbol;
 
-    @Nullable
     @JsonProperty("name")
+    @Nullable
     String name;
 
-    @Nullable
     @JsonProperty("isin")
+    @Nullable
     String isin;
 
 

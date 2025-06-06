@@ -18,10 +18,12 @@
 
 package ru.investbook.parser.uralsib;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import ru.investbook.parser.SecurityRegistrar;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.entity.SecurityEntity.isinPattern;
 
 class SecurityRegistryHelper {
@@ -33,18 +35,19 @@ class SecurityRegistryHelper {
 
     static int declareStockOrBond(Security security, SecurityRegistrar registrar) {
         return (security.getTicker() != null) ?
-                registrar.declareStockOrBondByTicker(security.getTicker(), security::toBuilder) :
-                registrar.declareStockOrBondByIsin(security.getIsin(), security::toBuilder);
+                registrar.declareStockOrBondByTicker(requireNonNull(security.getTicker()), security::toBuilder) :
+                registrar.declareStockOrBondByIsin(requireNonNull(security.getIsin()), security::toBuilder);
     }
 
     static Security getStockOrBond(String isin, String name) {
-        String ticker = null;
+        @Nullable String securityIsin = isin;
+        @Nullable String ticker = null;
         if (!isinPattern.matcher(isin).matches()) {
             ticker = isin;
-            isin = null; // отчет иногда вместо ISIN содержит непонятный идентификаторБ например TRAK
+            securityIsin = null; // отчет иногда вместо ISIN содержит непонятный идентификаторБ например TRAK
         }
         return Security.builder()
-                .isin(isin)
+                .isin(securityIsin)
                 .ticker(ticker)
                 .name(name)
                 .type(SecurityType.STOCK_OR_BOND)

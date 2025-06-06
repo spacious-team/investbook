@@ -32,11 +32,9 @@ import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_U
 @EqualsAndHashCode(callSuper = true)
 public class PortfolioPropertyTotalAssetsModel extends PortfolioPropertyModel {
 
-    @NotNull
-    private BigDecimal totalAssets;
+    private @NotNull BigDecimal totalAssets;
 
-    @NotNull
-    private Currency totalAssetsCurrency;
+    private @NotNull Currency totalAssetsCurrency;
 
     public enum Currency {
         RUB, USD;

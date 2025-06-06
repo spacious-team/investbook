@@ -20,6 +20,7 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.Security.SecurityBuilder;
 import org.spacious_team.broker.pojo.SecurityType;
@@ -43,7 +44,7 @@ public class SecuritiesTable extends SingleAbstractReportTable<Security> {
     }
 
     @Override
-    protected Security parseRow(TableRow row) {
+    protected @Nullable Security parseRow(TableRow row) {
         if (row.rowContains(INVALID_TEXT)) {
             return null;
         }
@@ -56,6 +57,7 @@ public class SecuritiesTable extends SingleAbstractReportTable<Security> {
         return security.id(securityId).build();
     }
 
+    @Getter
     enum SecuritiesTableHeader implements TableHeaderColumn {
         NAME("наименование"),
         ISIN("isin"),
@@ -68,7 +70,6 @@ public class SecuritiesTable extends SingleAbstractReportTable<Security> {
         FACEUNIT("валюта бумаги"),
         CURRENCY("валюта цены");
 
-        @Getter
         private final TableColumn column;
 
         SecuritiesTableHeader(String... words) {

@@ -25,27 +25,23 @@ import org.springframework.stereotype.Component;
 import ru.investbook.entity.CashFlowTypeEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.repository.CashFlowTypeRepository;
-import ru.investbook.repository.TransactionRepository;
 
 @Component
 @RequiredArgsConstructor
 public class TransactionCashFlowConverter implements EntityConverter<TransactionCashFlowEntity, TransactionCashFlow> {
-    private final TransactionRepository transactionRepository;
     private final CashFlowTypeRepository cashFlowTypeRepository;
 
+    @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override
     public TransactionCashFlowEntity toEntity(TransactionCashFlow cash) {
-        if (!transactionRepository.existsById(cash.getTransactionId())) {
-            throw new IllegalArgumentException("Транзакция с номером не найдена: " + cash.getTransactionId());
-        }
-        CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.findById(cash.getEventType().getId())
-                .orElseThrow(() -> new IllegalArgumentException("В справочнике не найдено событие с типом: " + cash.getEventType().getId()));
+        CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.getReferenceById(cash.getEventType().getId());
 
         TransactionCashFlowEntity entity = new TransactionCashFlowEntity();
         entity.setId(cash.getId());
         entity.setTransactionId(cash.getTransactionId());
         entity.setCashFlowType(cashFlowTypeEntity);
         entity.setValue(cash.getValue());
+        //noinspection ConstantValue
         if (cash.getCurrency() != null) entity.setCurrency(cash.getCurrency());
         return entity;
     }

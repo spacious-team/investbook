@@ -20,24 +20,22 @@ package ru.investbook.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Entity
 @Table(name = "issuer")
 @Data
 public class IssuerEntity {
     @Id
-    @GeneratedValue(generator = UseExistingOrGenerateIdGenerator.NAME)
-    @GenericGenerator(name = UseExistingOrGenerateIdGenerator.NAME, strategy = UseExistingOrGenerateIdGenerator.STRATEGY)
+    @AssignedOrGeneratedValue
     @Column(name = "id")
     private Integer id;
 
     @Column(name = "taxpayer_id")
-    private String taxpayerId;
+    private @Nullable String taxpayerId;
 
     @Column(name = "name", nullable = false)
     private String name;

@@ -20,6 +20,7 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
@@ -44,9 +45,10 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
     }
 
     @Override
-    protected EventCashFlow parseRow(TableRow row) {
-        String action = row.getStringCellValue(OPERATION);
-        action = String.valueOf(action).toLowerCase().trim();
+    protected @Nullable EventCashFlow parseRow(TableRow row) {
+        String action = row.getStringCellValue(OPERATION)
+                .toLowerCase()
+                .trim();
         CashFlowType type = CashFlowType.CASH;
         boolean isPositive;
         switch (action) {
@@ -66,7 +68,7 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
         if (type == CashFlowType.CASH && !row.getStringCellValue(DESCRIPTION).isEmpty()) {
             return null; // cash in/out records has no description
         }
-        String description = row.getStringCellValueOrDefault(DESCRIPTION, null);
+        @Nullable String description = row.getStringCellValueOrDefault(DESCRIPTION, null);
         BigDecimal value = row.getBigDecimalCellValue(VALUE);
         return EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())

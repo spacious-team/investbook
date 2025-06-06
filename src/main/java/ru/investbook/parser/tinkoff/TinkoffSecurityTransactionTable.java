@@ -21,6 +21,7 @@ package ru.investbook.parser.tinkoff;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
@@ -77,7 +78,7 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
     }
 
     @Override
-    protected AbstractTransaction parseRow(TableRow row) {
+    protected @Nullable AbstractTransaction parseRow(TableRow row) {
         String tradeId = row.getStringCellValueOrDefault(TRADE_ID, "");
         if (!hasLength(tradeId)) return null;
         String operation = row.getStringCellValue(OPERATION).toLowerCase();
@@ -97,7 +98,7 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
         amount = isBuy ? amount.negate() : amount;
         count = isBuy ? count : -count;
 
-        Instant timestamp = null;
+        Instant timestamp;
         SecurityType securityType = transactionTableHelper.getSecurityType(row);
         AbstractTransaction.AbstractTransactionBuilder<?, ?> builder = switch (securityType) {
             case STOCK -> SecurityTransaction.builder()

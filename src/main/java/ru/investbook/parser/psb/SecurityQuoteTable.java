@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.psb;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.table_wrapper.api.TableRow;
@@ -38,7 +39,7 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
     }
 
     @Override
-    protected SecurityQuote parseRow(TableRow row) {
+    protected @Nullable SecurityQuote parseRow(TableRow row) {
         if (row.rowContains(SecuritiesTable.INVALID_TEXT)) {
             return null;
         }
@@ -48,9 +49,9 @@ public class SecurityQuoteTable extends SingleAbstractReportTable<SecurityQuote>
         }
         String isin = row.getStringCellValue(ISIN);
         BigDecimal amount = row.getBigDecimalCellValue(AMOUNT);
-        BigDecimal price = amount.divide(BigDecimal.valueOf(count), 4, RoundingMode.HALF_UP);
+        @Nullable BigDecimal price = amount.divide(BigDecimal.valueOf(count), 4, RoundingMode.HALF_UP);
         BigDecimal quote = row.getBigDecimalCellValue(QUOTE);
-        BigDecimal accruedInterest = row.getBigDecimalCellValue(ACCRUED_INTEREST)
+        @Nullable BigDecimal accruedInterest = row.getBigDecimalCellValue(ACCRUED_INTEREST)
                 .divide(BigDecimal.valueOf(count), 2, RoundingMode.HALF_UP);
         String currency = row.getStringCellValue(CURRENCY);
         if (accruedInterest.compareTo(minValue) < 0 && price.subtract(quote).abs().compareTo(minValue) < 0) {

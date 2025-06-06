@@ -20,8 +20,12 @@ package ru.investbook.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
@@ -39,7 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.SecurityQuoteEntity;
 
-import java.util.Optional;
+import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Котировки", description = "Котировки биржевых инструментов")
@@ -54,7 +58,10 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отобразить всю историю котировок по всем инструментам")
+    @Operation(summary = "Отобразить все", description = "Отобразить всю историю котировок по всем инструментам",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public Page<SecurityQuote> get(@Parameter(hidden = true)
                                    Pageable pageable) {
         return super.get(pageable);
@@ -63,7 +70,10 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить одну", description = "Отобразить котировку по номеру записи в БД")
+    @Operation(summary = "Отобразить одну", description = "Отобразить котировку по номеру записи",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<SecurityQuote> get(@PathVariable("id")
                                              @Parameter(description = "Номер записи о котировке")
                                              Integer id) {
@@ -72,39 +82,42 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить")
-    public ResponseEntity<Void> post(@Valid @RequestBody SecurityQuote quote) {
+    @Operation(summary = "Добавить", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "409"),
+            @ApiResponse(responseCode = "500", content = @Content)})
+    public ResponseEntity<Void> post(@RequestBody @Valid SecurityQuote quote) {
         return super.post(quote);
     }
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Изменить")
+    @Operation(summary = "Обновить", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер записи о котировке")
                                     Integer id,
-                                    @Valid
                                     @RequestBody
+                                    @Valid
                                     SecurityQuote quote) {
         return super.put(id, quote);
     }
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить")
-    public void delete(@PathVariable("id")
-                       @Parameter(description = "Номер записи о котировке")
-                       Integer id) {
-        super.delete(id);
+    @Operation(summary = "Удалить", responses = {
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
+    public ResponseEntity<Void> delete(@PathVariable("id")
+                                       @Parameter(description = "Номер записи о котировке")
+                                       Integer id) {
+        return super.delete(id);
     }
 
     @Override
-    protected Optional<SecurityQuoteEntity> getById(Integer id) {
-        return repository.findById(id);
-    }
-
-    @Override
-    protected Integer getId(SecurityQuote object) {
+    public @Nullable Integer getId(SecurityQuote object) {
         return object.getId();
     }
 

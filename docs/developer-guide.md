@@ -19,16 +19,25 @@ git clone https://github.com/spacious-team/investbook.git
 
 ### Установка Wix
 Для сборки пакета для установки Investbook требуется Wix 3.
-Скачать Wix 3 можно по ссылке с официального сайта [Wix](https://wixtoolset.org/docs/wix3/)
+Скачать Wix 3 можно по ссылке с официального сайта [Wix3](https://wixtoolset.org/docs/wix3/)
 (пакет для установки расположен на [GitHub](https://github.com/wixtoolset/wix3/releases)).
 Wix в свою очередь потребует установки [.NET](https://dotnet.microsoft.com/en-us/download/dotnet).
+
+На Windows вы можете установить Wix и .NET в `%LOCALAPPDATA%\Programs\wix3` и `%LOCALAPPDATA%\Programs\dotnet`
+соответственно. Для этого на страницах проектов нужно скачать не msi установщики, а архивы "binaries", которые требуется
+распаковать в указанные папки. После этого нужно добавить следующие переменные окружения
+(win+R -> `rundll32 sysdm.cpl,EditEnvironmentVariables`):
+```shell
+DOTNET_ROOT=%LOCALAPPDATA%\Programs\dotnet
+PATH=<предыдущие значения>;%LOCALAPPDATA%\Programs\wix3;%DOTNET_ROOT%
+```
 
 ### Компиляция
 Компиляция запускается командой:
 ```
 mvn clean compile
 ```
-Она очищает сгенерированные ранее классы (типа JAXB), которые возможно устарели,
+Она очищает сгенерированные ранее классы (например JAXB2), которые возможно устарели,
 и генерирует файл `META_INF/build-info.properties`, который используется приложением в своей работе.
 
 ### Запуск

@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static java.util.Objects.requireNonNull;
 import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.web.ReportControllerHelper.errorPage;
 import static ru.investbook.web.ReportControllerHelper.getBrokerNames;
@@ -78,7 +79,7 @@ public class BrokerFileReportController {
 
     private void uploadReport(MultipartFile report, String broker, Collection<Exception> exceptions) {
         try (InputStream inputStream = report.getInputStream()) { // creates new input stream
-            brokerReportParserService.parseReport(inputStream, report.getOriginalFilename(), broker);
+            brokerReportParserService.parseReport(inputStream, requireNonNull(report.getOriginalFilename()), broker);
         } catch (Exception e) {
             exceptions.add(e);
         }

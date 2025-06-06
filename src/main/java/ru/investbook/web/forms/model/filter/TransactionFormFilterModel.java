@@ -18,19 +18,22 @@
 
 package ru.investbook.web.forms.model.filter;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
+@Data
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class TransactionFormFilterModel extends AbstractFormFilterModel {
-    private String portfolio;
-    private String security;
+    private @Nullable String portfolio;
+    private @Nullable String security;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate dateFrom;
+    private @Nullable LocalDate dateFrom;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate dateTo;
+    private @Nullable LocalDate dateTo;
 }

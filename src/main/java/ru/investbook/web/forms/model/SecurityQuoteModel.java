@@ -23,7 +23,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -35,34 +35,26 @@ import static java.time.ZoneId.systemDefault;
 @Data
 public class SecurityQuoteModel {
 
-    @Nullable
-    private Integer id;
+    private @Nullable Integer id;
 
     /**
      * In "name (isin)" or "contract-name" format
      */
-    @NotEmpty
-    private String security;
+    private @NotEmpty String security;
 
-    @NotNull
-    private SecurityType securityType;
+    private @NotNull SecurityType securityType;
 
-    @NotNull
-    private Instant timestamp = LocalDate.now().atTime(LocalTime.NOON).atZone(systemDefault()).toInstant();
+    private @NotNull Instant timestamp = LocalDate.now().atTime(LocalTime.NOON).atZone(systemDefault()).toInstant();
 
-    @NotNull
-    @Positive
-    private BigDecimal quote;
+    private @NotNull @Positive BigDecimal quote;
 
-    @Positive
-    private BigDecimal price;
+    private @Nullable @Positive BigDecimal price;
 
-    @PositiveOrZero
-    private BigDecimal accruedInterest;
+    private @Nullable @PositiveOrZero BigDecimal accruedInterest;
 
-    private String currency;
+    private @Nullable String currency;
 
-    public void setSecurity(String isin, String securityName, SecurityType securityType) {
+    public void setSecurity(@Nullable String isin, @Nullable String securityName, SecurityType securityType) {
         this.security = SecurityHelper.getSecurityDescription(isin, securityName, securityType);
         this.securityType = securityType;
     }
@@ -77,7 +69,7 @@ public class SecurityQuoteModel {
     /**
      * Returns ISIN if description in "Name (ISIN)" format, null otherwise
      */
-    public String getSecurityIsin() {
+    public @Nullable String getSecurityIsin() {
         return SecurityHelper.getSecurityIsin(security);
     }
 }

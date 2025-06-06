@@ -21,11 +21,11 @@ package ru.investbook.openformat.v1_1_0;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityDescription;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import ru.investbook.parser.InvestbookApiClient;
 import ru.investbook.parser.SecurityRegistrar;
 
@@ -43,6 +43,7 @@ import java.util.concurrent.Executors;
 
 import static java.util.concurrent.Executors.newWorkStealingPool;
 import static java.util.stream.Collectors.toMap;
+import static org.springframework.util.StringUtils.hasText;
 import static ru.investbook.openformat.v1_1_0.PortfolioOpenFormatV1_1_0.GENERATED_BY_INVESTBOOK;
 
 @Service
@@ -107,7 +108,7 @@ public class PortfolioOpenFormatPersister {
                 .flatMap(Optional::stream)
                 .forEach(api::addEventCashFlow));
 
-        VndInvestbookPof vndInvestbook = object.getVndInvestbook();
+        @Nullable VndInvestbookPof vndInvestbook = object.getVndInvestbook();
         if (vndInvestbook != null) {
             tasks.add(() -> vndInvestbook.getPortfolioCash().forEach(api::addPortfolioCash));
             tasks.add(() -> vndInvestbook.getPortfolioProperties().forEach(api::addPortfolioProperty));
@@ -126,14 +127,12 @@ public class PortfolioOpenFormatPersister {
 
     @SneakyThrows
     private void runTasks(Collection<Runnable> tasks) {
-        ExecutorService executorService = newWorkStealingPool(4 * Runtime.getRuntime().availableProcessors());
-        try {
+        try (ExecutorService executorService = newWorkStealingPool(4 * Runtime.getRuntime().availableProcessors())) {
+            @SuppressWarnings("assignment")
             Collection<Callable<Object>> callables = tasks.stream()
                     .map(Executors::callable)
                     .toList();
             executorService.invokeAll(callables);
-        } finally {
-            executorService.shutdown();
         }
     }
 
@@ -151,7 +150,7 @@ public class PortfolioOpenFormatPersister {
         Collection<TradePof> tradesWithUniqId = new ArrayList<>(trades.size());
         Set<String> tradeIds = new HashSet<>(trades.size());
         for (TradePof t : trades) {
-            String tradeId = StringUtils.hasText(t.getTradeId()) ?
+            String tradeId = hasText(t.getTradeId()) ?
                     t.getTradeId() :
                     t.getSettlementOrTimestamp() + ":" + t.getSecurityId(assetToSecurityId) + ":" + t.getAccount();
             String tid = getUniqId(tradeId, tradeIds);
@@ -168,7 +167,8 @@ public class PortfolioOpenFormatPersister {
         Collection<TransferPof> transfersWithUniqId = new ArrayList<>(transfers.size());
         Set<String> transferIds = new HashSet<>(transfers.size());
         for (TransferPof t : transfers) {
-            String transferId = StringUtils.hasText(t.getTransferId()) ?
+            @SuppressWarnings("assignment")
+            String transferId = hasText(t.getTransferId()) ?
                     t.getTransferId() :
                     t.getTimestamp() + ":" + t.getSecurityId(assetToSecurityId) + ":" + t.getAccount();
             String tid = getUniqId(transferId, transferIds);

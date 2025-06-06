@@ -21,6 +21,7 @@ package ru.investbook.parser.uralsib;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
@@ -31,6 +32,7 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleAbstractReportTable;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
@@ -39,7 +41,7 @@ import static ru.investbook.parser.uralsib.DerivativeTransactionTable.FortsTable
 @Slf4j
 public class DerivativeTransactionTable extends SingleAbstractReportTable<DerivativeTransaction> {
     private static final String TABLE_NAME = "СДЕЛКИ С ФЬЮЧЕРСАМИ И ОПЦИОНАМИ";
-    private static final Pattern tableEndPredicate = Pattern.compile("^[А-Я\s]+$", UNICODE_CHARACTER_CLASS);
+    private static final Pattern tableEndPredicate = Pattern.compile("^[А-Я\\s]+$", UNICODE_CHARACTER_CLASS);
     private boolean expirationTableReached = false;
 
     public DerivativeTransactionTable(UralsibBrokerReport report) {
@@ -55,11 +57,13 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
     }
 
     @Override
-    protected DerivativeTransaction parseRow(TableRow row) {
+    protected @Nullable DerivativeTransaction parseRow(TableRow row) {
         if (expirationTableReached) return null;
-        String tradeId = SecurityTransactionTable.getTradeId(row, TRANSACTION);
+        @Nullable String tradeId = SecurityTransactionTable.getTradeId(row, TRANSACTION);
         if (tradeId == null) {
-            if (DerivativeExpirationTable.TABLE_NAME.equals(row.getStringCellValueOrDefault(TRANSACTION, null))) {
+            if (Objects.equals(
+                    row.getStringCellValueOrDefault(TRANSACTION, null),
+                    DerivativeExpirationTable.TABLE_NAME)) {
                 expirationTableReached = true;
             }
             return null;
@@ -96,6 +100,7 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
                 .build();
     }
 
+    @Getter
     @RequiredArgsConstructor
     enum FortsTableHeader implements TableHeaderColumn {
         DATE_TIME(AnyOfTableColumn.of(
@@ -119,7 +124,6 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
         CLEARING_COMMISSION(OptionalTableColumn.of(
                 PatternTableColumn.of("клиринговая комиссия"))); // only for Expiration table
 
-        @Getter
         private final TableColumn column;
         FortsTableHeader(String ... words) {
             this.column = PatternTableColumn.of(words);

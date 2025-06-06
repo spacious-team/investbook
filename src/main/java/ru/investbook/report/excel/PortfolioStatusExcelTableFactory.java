@@ -20,6 +20,7 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.PortfolioCash;
@@ -57,6 +58,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singleton;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.spacious_team.broker.pojo.SecurityType.*;
 import static ru.investbook.report.excel.PortfolioStatusExcelTableFactoryProportionHelper.setCurrentProportionFormula;
@@ -196,7 +198,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
         SecurityType securityType = security.getType();
         row.put(SECURITY,
                 securityType == CURRENCY_PAIR ?
-                        getCurrencyPair(security.getTicker()) :
+                        getCurrencyPair(requireNonNull(security.getTicker())) :
                         ofNullable(security.getName())
                                 .or(() -> ofNullable(security.getTicker()))
                                 .orElse(security.getIsin()));
@@ -232,7 +234,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                             .mapToInt(SecurityEventCashFlow::getCount)
                             .sum());
 
-            SecurityQuote quote = null;
+            @Nullable SecurityQuote quote = null;
             int count = positions.getCurrentOpenedPositionsCount();
             row.put(COUNT, count);
             if (count == 0) {

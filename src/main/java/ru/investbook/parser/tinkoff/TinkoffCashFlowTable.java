@@ -20,6 +20,7 @@ package ru.investbook.parser.tinkoff;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
@@ -36,7 +37,7 @@ import static ru.investbook.parser.tinkoff.TinkoffCashFlowTable.CashFlowTableHea
 
 public class TinkoffCashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
 
-    private String currency = null;
+    private String currency = "";
 
     protected TinkoffCashFlowTable(SingleBrokerReport report) {
         super(report,
@@ -48,9 +49,9 @@ public class TinkoffCashFlowTable extends SingleAbstractReportTable<EventCashFlo
     }
 
     @Override
-    protected EventCashFlow parseRow(TableRow row) {
+    protected @Nullable EventCashFlow parseRow(TableRow row) {
         currency = TinkoffCashFlowTableHelper.getCurrency(row, currency);
-        if (currency == null) {
+        if (!hasLength(currency)) {
             return null;
         }
         String operationOriginal = row.getStringCellValueOrDefault(OPERATION, "");
@@ -86,7 +87,7 @@ public class TinkoffCashFlowTable extends SingleAbstractReportTable<EventCashFlo
     }
 
     private EventCashFlow.EventCashFlowBuilder getBuilder(TableRow row, String currency) {
-        String description = row.getStringCellValueOrDefault(DESCRIPTION, null);
+        @Nullable String description = row.getStringCellValueOrDefault(DESCRIPTION, null);
         return EventCashFlow.builder()
                 .portfolio(getReport().getPortfolio())
                 .timestamp(getReport().convertToInstant(row.getStringCellValue(DATE)))

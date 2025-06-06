@@ -92,7 +92,7 @@ public class PortfolioCashController {
     }
 
     @PostMapping
-    public String postCash(@Valid @ModelAttribute("cash") PortfolioCashModel cash) {
+    public String postCash(@ModelAttribute("cash") @Valid PortfolioCashModel cash) {
         selectedPortfolio = cash.getPortfolio();
         portfolioCashFormsService.save(cash);
         return "portfolio-cash/view-single";

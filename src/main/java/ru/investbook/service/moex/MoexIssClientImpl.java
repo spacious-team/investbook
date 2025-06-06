@@ -20,6 +20,7 @@ package ru.investbook.service.moex;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityQuote.SecurityQuoteBuilder;
 import org.spacious_team.broker.pojo.SecurityType;
@@ -36,6 +37,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.String.valueOf;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static org.spacious_team.broker.pojo.SecurityType.*;
 
@@ -87,10 +89,10 @@ public class MoexIssClientImpl implements MoexIssClient {
             "securities.columns=SECID,PREVDATE,PREVADMITTEDQUOTE,PREVSETTLEPRICE,PREVPRICE,ACCRUEDINT,LOTSIZE,LOTVALUE,MINSTEP,STEPPRICE";
     private static final String contractDescription = "http://iss.moex.com/iss/securities/{secId}.json?" +
             "iss.meta=off&iss.only=description&description.columns=name,value";
+    private static volatile int currentYear = getCurrentYear();
+    private static volatile long fastCoarseDayCounter = getFastCoarseDayCounter();
     private final MoexDerivativeCodeService moexDerivativeCodeService;
     private final RestTemplate restTemplate;
-    private int currentYear = getCurrentYear();
-    private long fastCoarseDayCounter = getFastCoarseDayCounter();
     private final Map<String, Optional<String>> optionCodeToShortNames = new ConcurrentHashMap<>();
     private final Map<String, Optional<String>> optionUnderlingFutures = new ConcurrentHashMap<>();
 
@@ -162,7 +164,7 @@ public class MoexIssClientImpl implements MoexIssClient {
                     .filter(moexDerivativeCodeService::isFutures)
                     .flatMap(underlyingSecid -> getMarket(underlyingSecid)
                             .flatMap(underlyingMarket -> getQuote(underlyingSecid, underlyingMarket)))
-                    .map(futuresContract -> futuresContract.getPrice()
+                    .map(futuresContract -> requireNonNull(futuresContract.getPrice())
                             .divide(futuresContract.getQuote(), 6, RoundingMode.HALF_UP))
                     .map(oneUnitPrice -> quote.get().getQuote().multiply(oneUnitPrice))
                     .map(optionalPrice -> quote.get().toBuilder()
@@ -173,7 +175,7 @@ public class MoexIssClientImpl implements MoexIssClient {
         return quote;
     }
 
-    public boolean isDerivativeAndExpired(String shortnameOrSecid, SecurityType securityType) {
+    public boolean isDerivativeAndExpired(@Nullable String shortnameOrSecid, SecurityType securityType) {
         try {
             if (securityType == DERIVATIVE && shortnameOrSecid != null) {
                 int currentYear = getCurrentYear();
@@ -205,7 +207,7 @@ public class MoexIssClientImpl implements MoexIssClient {
         return false;
     }
 
-    private int getCurrentYear() {
+    private static int getCurrentYear() {
         if (fastCoarseDayCounter != getFastCoarseDayCounter()) {
             fastCoarseDayCounter = getFastCoarseDayCounter();
             currentYear = LocalDate.now().getYear();
@@ -239,6 +241,7 @@ public class MoexIssClientImpl implements MoexIssClient {
                 .flatMap(moexDerivativeCodeService::getFuturesCode);
     }
 
+    @SuppressWarnings("return")
     private Optional<String> getContractDescriptionFromMoex(String contract, String key) {
         try {
             return Optional.ofNullable(restTemplate.getForObject(contractDescription, Map.class, contract))

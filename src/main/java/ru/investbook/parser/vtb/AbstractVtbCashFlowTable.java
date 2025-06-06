@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.vtb;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import ru.investbook.parser.SingleInitializableReportTable;
 
 import java.util.ArrayList;
@@ -34,8 +35,8 @@ import static org.spacious_team.table_wrapper.api.AbstractTable.addWithEqualityC
 public abstract class AbstractVtbCashFlowTable<RowType> extends SingleInitializableReportTable<RowType> {
 
     private final Collection<CashFlowEventTable.CashFlowEvent> events;
-    private final BiPredicate<RowType, RowType> equalityChecker;
-    private final BiFunction<RowType, RowType, Collection<RowType>> duplicatesMerger;
+    private final @Nullable BiPredicate<RowType, RowType> equalityChecker;
+    private final @Nullable BiFunction<RowType, RowType, Collection<RowType>> duplicatesMerger;
 
     public AbstractVtbCashFlowTable(CashFlowEventTable cashFlowEventTable) {
         super(cashFlowEventTable.getReport());

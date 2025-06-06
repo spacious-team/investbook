@@ -31,15 +31,15 @@ import ru.investbook.repository.PortfolioRepository;
 public class PortfolioPropertyConverter implements EntityConverter<PortfolioPropertyEntity, PortfolioProperty> {
     private final PortfolioRepository portfolioRepository;
 
+    @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override
     public PortfolioPropertyEntity toEntity(PortfolioProperty property) {
-        PortfolioEntity portfolioEntity = portfolioRepository.findById(property.getPortfolio())
-                .orElseThrow(() -> new IllegalArgumentException("В справочнике не найден брокерский счет: " + property.getPortfolio()));
+        PortfolioEntity portfolioEntity = portfolioRepository.getReferenceById(property.getPortfolio());
 
         PortfolioPropertyEntity entity = new PortfolioPropertyEntity();
         entity.setId(property.getId());
         entity.setPortfolio(portfolioEntity);
-        entity.setTimestamp(property.getTimestamp());
+        entity.setTimestamp(property.getTimestamp());  // when is null, default value is set
         entity.setProperty(property.getProperty().name());
         entity.setValue(property.getValue());
         return  entity;

@@ -19,6 +19,7 @@
 package ru.investbook.parser.psb.foreignmarket;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.table_wrapper.api.Table;
@@ -50,8 +51,8 @@ public class ForeignExchangePortfolioPropertyTable extends PortfolioPropertyTabl
     @Override
     protected Collection<PortfolioProperty> getTotalAssets(Table table) {
         try {
-            TableRow assetsRow = table.findRowByPrefix(ASSETS);
-            TableRow exchangeRateRow = table.findRowByPrefix(ForeignExchangeRateTable.EXCHANGE_RATE_ROW);
+            @Nullable TableRow assetsRow = table.findRowByPrefix(ASSETS);
+            @Nullable TableRow exchangeRateRow = table.findRowByPrefix(ForeignExchangeRateTable.EXCHANGE_RATE_ROW);
             if (assetsRow == null || exchangeRateRow == null) {
                 return emptyList();
             }

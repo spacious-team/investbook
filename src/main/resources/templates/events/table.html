@@ -27,6 +27,10 @@
         body {
             max-width: 95%;
         }
+
+        .no-security a:hover {
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -47,6 +51,7 @@
 <form action="#" th:action="@{/events/search}" th:object="${filter}" method="post" class="search-filter">
     <div th:replace="~{fragments/search :: portfolio (selected='*{portfolio}', portfolios=${portfolios})}"></div>
     <div th:replace="~{fragments/search :: date-range (from='*{dateFrom}', to='*{dateTo}')}"></div>
+    <div th:replace="~{fragments/search :: cash-flow-event (type='*{cashFlowType}')}"></div>
     <div th:replace="~{fragments/search :: page-size ('*{pageSize}')}"></div>
 </form>
 
@@ -60,6 +65,7 @@
         <th>Валюта</th>
         <th>Описание</th>
         <th></th>
+        <th></th>
     </tr>
     <tr th:each="e : ${page.content}">
         <td th:text="${e.portfolio}"/>
@@ -72,6 +78,7 @@
             <span th:case="COUPON">Купон</span>
             <span th:case="AMORTIZATION">Амортизация облигации</span>
             <span th:case="REDEMPTION">Погашение облигации</span>
+            <span th:case="DERIVATIVE_PROFIT">Вариационная маржа</span>
             <span th:case="FEE">Комиссия</span>
             <span th:case="TAX">Налог</span>
             <span th:text="Пополнение" th:if="${e.type.name == 'CASH' && e.value >= 0}"/>
@@ -80,20 +87,29 @@
         <td th:text="${(e.value != null) ? e.value.setScale(2, T(java.math.RoundingMode).HALF_UP) : ''}" class="value"/>
         <td th:text="${e.valueCurrency}"/>
         <td th:text="${e.description}"/>
+        <td class="no-security">
+            <a th:if="${e.type.name == 'DIVIDEND' ||
+                        e.type.name == 'COUPON' ||
+                        e.type.name == 'AMORTIZATION' ||
+                        e.type.name == 'REDEMPTION' ||
+                        e.type.name == 'DERIVATIVE_PROFIT' ||
+                        e.type.name == 'TAX'}"
+               th:href="@{/events/edit-form(id=${e.id})}" title="Не указана ценная бумага">&#x1F4F0;</a>
+        </td>
         <td class="table-row-control">
             <a th:href="@{/events/delete(id=${e.id})}" title="Удалить">&#x274c;</a>
         </td>
     </tr>
 </table>
 
-    <div th:insert="~{fragments/navigation :: navigation-bar (
+<div th:insert="~{fragments/navigation :: navigation-bar (
         endpoint='events',
         params='portfolio=${filter.portfolio},
                 dateFrom=${filter.dateFrom},
                 dateTo=${filter.dateTo},
                 pageSize=${filter.pageSize}'
     )}">
-    </div>
+</div>
 
 </body>
 </html>

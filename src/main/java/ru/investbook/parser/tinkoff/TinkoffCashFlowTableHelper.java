@@ -29,7 +29,7 @@ class TinkoffCashFlowTableHelper {
     static String getCurrency(TableRow row, String defaultCurrency) {
         boolean isCurrencyHeader = !hasLength(row.getStringCellValueOrDefault(DATE, null));
         if (isCurrencyHeader) {
-            String currency = row.getStringCellValueOrDefault(CURRENCY, null);
+            String currency = row.getStringCellValueOrDefault(CURRENCY, "");
             if (hasLength(currency) && currency.length() == 3) { // RUB, USD, ... (ISO format)
                 return currency.toUpperCase();
             }

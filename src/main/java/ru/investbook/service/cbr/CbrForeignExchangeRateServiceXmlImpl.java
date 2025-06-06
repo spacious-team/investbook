@@ -19,9 +19,10 @@
 package ru.investbook.service.cbr;
 
 import generated.ValCurs;
+import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import lombok.SneakyThrows;
-import org.glassfish.jaxb.runtime.v2.ContextFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -36,13 +37,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
-import static java.util.Collections.emptyMap;
-
 @Service
 public class CbrForeignExchangeRateServiceXmlImpl extends AbstractCbrForeignExchangeRateService {
 
     @SuppressWarnings("HttpUrlsUsage")
-    private final UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(
+    private final UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(
             "http://www.cbr.ru/scripts/XML_dynamic.asp?date_req1={from-date}&date_req2={to-date}&VAL_NM_RQ={currency}");
     private final DateTimeFormatter requestDateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private final DateTimeFormatter resultDateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -64,7 +63,8 @@ public class CbrForeignExchangeRateServiceXmlImpl extends AbstractCbrForeignExch
 
     private ValCurs getFxRates(LocalDate fromDate, String currencyId) throws JAXBException, IOException {
         try (InputStream stream = getInputStream(fromDate, currencyId)) {
-            return (ValCurs) ContextFactory.createContext(new Class[]{ValCurs.class}, emptyMap())
+
+            return (ValCurs) createJaxbContext(ValCurs.class)
                     .createUnmarshaller()
                     .unmarshal(stream);
         }
@@ -78,6 +78,23 @@ public class CbrForeignExchangeRateServiceXmlImpl extends AbstractCbrForeignExch
                 .toUri()
                 .toURL()
                 .openStream();
+    }
+
+    /**
+     * Create a {@link JAXBContext} for the given type, exposing the class
+     * ClassLoader as current thread context ClassLoader for the time of
+     * creating the context.
+     *
+     * @see <a href="https://github.com/spring-projects/spring-framework/commit/0f3f979d16c9203c5440cd9a1dd87a19312279a1">Fix for same problem in Spring Framework</a>
+     */
+    private JAXBContext createJaxbContext(@SuppressWarnings("SameParameterValue") Class<?> clazz) throws JAXBException {
+        @Nullable ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(clazz.getClassLoader());
+            return JAXBContext.newInstance(clazz);
+        } finally {
+            Thread.currentThread().setContextClassLoader(currentClassLoader);
+        }
     }
 
     private ForeignExchangeRate getRate(ValCurs.Record record, String currencyPair) {

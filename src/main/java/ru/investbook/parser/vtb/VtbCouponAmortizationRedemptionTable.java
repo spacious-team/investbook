@@ -19,6 +19,7 @@
 package ru.investbook.parser.vtb;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.Security;
@@ -36,6 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Double.parseDouble;
+import static java.util.Objects.requireNonNull;
 import static java.util.regex.Pattern.UNICODE_CHARACTER_CLASS;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
@@ -64,7 +66,7 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
 
     @Override
     protected Collection<SecurityEventCashFlow> getRow(CashFlowEventTable.CashFlowEvent event) {
-        CashFlowType eventType = event.getEventType();
+        @Nullable CashFlowType eventType = event.getEventType();
         if (eventType != COUPON && eventType != AMORTIZATION && eventType != REDEMPTION) {
             return Collections.emptyList();
         }
@@ -83,7 +85,7 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
                         .orElseThrow(() -> new IllegalArgumentException("Не удалось определить количество погашенных облигаций " + security.getIsin()));
                 default -> throw new UnsupportedOperationException();
             };
-            int securityId = getReport().getSecurityRegistrar().declareBondByIsin(security.getIsin(), security::toBuilder);
+            int securityId = getReport().getSecurityRegistrar().declareBondByIsin(requireNonNull(security.getIsin()), security::toBuilder);
             Instant instant = event.getDate();
             if (eventType != COUPON) {
                 // gh-510: чтобы отличать налог на купон, событие налога и купона сдвигаем по времени от амортизации (погашения)
@@ -117,7 +119,7 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
         for (Pattern pattern : registrationNumberPatterns) {
             Matcher matcher = pattern.matcher(description);
             if (matcher.find()) {
-                String regNumber = matcher.group(1);
+                String regNumber = requireNonNull(matcher.group(1));
                 Optional<Security> security = securityRegNumberRegistrar.getSecurityByRegistrationNumber(regNumber);
                 if (security.isPresent()) {
                     return security.get();
@@ -130,7 +132,8 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
     private static BigDecimal getCouponPerOneBond(String description) {
         Matcher matcher = couponPerOneBondPattern.matcher(description);
         if (matcher.find()) {
-            return BigDecimal.valueOf(parseDouble(matcher.group(1)));
+            String value = requireNonNull(matcher.group(1));
+            return BigDecimal.valueOf(parseDouble(value));
         }
         throw new IllegalArgumentException("Не смогу выделить размер купона на одну облигацию из описания: " + description);
     }
@@ -138,7 +141,8 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
     private static BigDecimal getAmortizationPerOneBond(String description) {
         Matcher matcher = amortizationPerOneBondPattern.matcher(description);
         if (matcher.find()) {
-            return BigDecimal.valueOf(parseDouble(matcher.group(1)));
+            String value = requireNonNull(matcher.group(1));
+            return BigDecimal.valueOf(parseDouble(value));
         }
         throw new IllegalArgumentException("Не смогу выделить размер купона на одну облигацию из описания: " + description);
     }

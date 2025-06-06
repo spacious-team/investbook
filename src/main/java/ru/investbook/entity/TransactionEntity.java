@@ -23,7 +23,6 @@ import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -31,7 +30,6 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.time.Instant;
 
@@ -43,35 +41,35 @@ import java.time.Instant;
 public class TransactionEntity {
 
     @Id
-    @GeneratedValue(generator = UseExistingOrGenerateIdGenerator.NAME)
-    @GenericGenerator(name = UseExistingOrGenerateIdGenerator.NAME, strategy = UseExistingOrGenerateIdGenerator.STRATEGY)
+    @AssignedOrGeneratedValue
     @Column(name = "id")
     private Integer id;
 
     @Basic(optional = false)
-    @Column(name = "trade_id")
+    @Column(name = "trade_id", nullable = false)
     private String tradeId;
 
     @Basic(optional = false)
-    @Column(name = "portfolio")
+    @Column(name = "portfolio", nullable = false)
     private String portfolio;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "portfolio", referencedColumnName = "id")
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "portfolio", referencedColumnName = "id", nullable = false)
 //    @JsonIgnoreProperties({"hibernateLazyInitializer"})
 //    private PortfolioEntity portfolio;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "security", referencedColumnName = "id")
+    // https://stackoverflow.com/questions/17987638/hibernate-one-to-one-lazy-loading-optional-false
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "security", referencedColumnName = "id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private SecurityEntity security;
 
     @Basic(optional = false)
-    @Column(name = "timestamp")
+    @Column(name = "timestamp", nullable = false)
     private Instant timestamp;
 
     @Basic(optional = false)
-    @Column(name = "count")
+    @Column(name = "count", nullable = false)
     private int count;
 
     /*

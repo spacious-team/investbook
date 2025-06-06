@@ -22,11 +22,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.annotations.GenericGenerator;
 import org.spacious_team.broker.pojo.SecurityType;
 
@@ -41,8 +41,7 @@ public class SecurityEntity {
     public static final Pattern isinPattern = Pattern.compile("^[A-Z]{2}[A-Z0-9]{9}[0-9]$");
 
     @Id
-    @GeneratedValue(generator = UseExistingOrGenerateIdGenerator.NAME)
-    @GenericGenerator(name = UseExistingOrGenerateIdGenerator.NAME, strategy = UseExistingOrGenerateIdGenerator.STRATEGY)
+    @AssignedOrGeneratedValue
     @Column(name = "id")
     private Integer id;
 
@@ -51,11 +50,11 @@ public class SecurityEntity {
     private SecurityType type;
 
     @Column(name = "isin")
-    private String isin;
+    private @Nullable String isin;
 
     @Column(name = "ticker")
-    private String ticker;
+    private @Nullable String ticker;
 
     @Column(name = "name")
-    private String name;
+    private @Nullable String name;
 }

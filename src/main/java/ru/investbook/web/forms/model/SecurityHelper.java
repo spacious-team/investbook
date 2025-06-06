@@ -18,7 +18,10 @@
 
 package ru.investbook.web.forms.model;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.util.Assert;
+
+import static java.util.Objects.requireNonNull;
 
 public class SecurityHelper {
     public static String NULL_SECURITY_NAME = "<unknown>";
@@ -26,7 +29,7 @@ public class SecurityHelper {
     /**
      * For stock or bond "Name (ISIN)", for derivatives - code, for asset - securityName
      */
-    public static String getSecurityDescription(String isin, String securityName, SecurityType securityType) {
+    public static String getSecurityDescription(@Nullable String isin, @Nullable String securityName, SecurityType securityType) {
         return switch (securityType) {
             case SHARE, BOND -> {
                 Assert.isTrue(isin != null || securityName != null, "Отсутствует и ISIN, и наименование ЦБ");
@@ -34,8 +37,8 @@ public class SecurityHelper {
                         (isin == null ? "" : " (" + isin + ")");
             }
             case DERIVATIVE, CURRENCY, ASSET -> {
-                Assert.isTrue(securityName != null, "Отсутствует тикер контракта или наименование произвольного актива");
-                yield securityName;
+                Assert.notNull(securityName, "Отсутствует тикер контракта или наименование произвольного актива");
+                yield requireNonNull(securityName);
             }
         };
     }
@@ -56,7 +59,7 @@ public class SecurityHelper {
     /**
      * Returns ISIN if description in "Name (ISIN)" format, null otherwise
      */
-    static String getSecurityIsin(String securityDescription) {
+    static @Nullable String getSecurityIsin(String securityDescription) {
         securityDescription = securityDescription.trim();
         int len = securityDescription.length();
         return isSecurityDescriptionHasIsin(securityDescription) ?

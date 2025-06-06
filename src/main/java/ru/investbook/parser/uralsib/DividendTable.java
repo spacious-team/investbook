@@ -19,6 +19,7 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.PaymentsTable.PaymentsTableHeader.*;
 
 @Slf4j
@@ -55,7 +57,7 @@ public class DividendTable extends PaymentsTable {
             return emptyList();
         }
 
-        Security security = getSecurity(row, CashFlowType.DIVIDEND);
+        @Nullable Security security = getSecurity(row, CashFlowType.DIVIDEND);
         if (security == null) return emptyList();
         Instant timestamp = convertToInstant(row.getStringCellValue(DATE));
 
@@ -63,7 +65,7 @@ public class DividendTable extends PaymentsTable {
         BigDecimal value = row.getBigDecimalCellValue(VALUE)
                 .add(tax.abs());
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
-                .security(security.getId())
+                .security(requireNonNull(security.getId()))
                 .portfolio(getReport().getPortfolio())
                 .count(getSecurityCount(security, timestamp))
                 .eventType(CashFlowType.DIVIDEND)

@@ -20,6 +20,8 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.stereotype.Component;
@@ -43,6 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
 import static ru.investbook.report.excel.PortfolioPaymentExcelTableHeader.*;
 
@@ -85,7 +88,7 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
             table.add(new Table.Record());
             Table.Record monthTotalRecord = new Table.Record();
             table.add(monthTotalRecord);
-            Month month = null;
+            @MonotonicNonNull Month month = null;
             int sumRowCount = 0;
             for (SecurityEventCashFlow cash : cashFlows) {
                 Instant timestamp = cash.getTimestamp();
@@ -112,7 +115,7 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
                 table.add(record);
                 sumRowCount++;
             }
-            calcTotalRecord(monthTotalRecord, month, sumRowCount);
+            calcTotalRecord(monthTotalRecord, requireNonNull(month), sumRowCount);
             if (!cashFlows.isEmpty()) {
                 foreignExchangeRateTableFactory.appendExchangeRates(table, CURRENCY_NAME, EXCHANGE_RATE);
             }
@@ -127,7 +130,7 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
         }
     }
 
-    private static String getPaymentType(SecurityEventCashFlow cash) {
+    private static @Nullable String getPaymentType(SecurityEventCashFlow cash) {
         return switch (cash.getEventType()) {
             case DIVIDEND -> "Дивиденды";
             case COUPON -> "Купоны";

@@ -96,7 +96,7 @@ public class SecurityEventCashFlowController {
     }
 
     @PostMapping
-    public String postSecurityEventCashFlow(@Valid @ModelAttribute("event") SecurityEventCashFlowModel event) {
+    public String postSecurityEventCashFlow(@ModelAttribute("event") @Valid SecurityEventCashFlowModel event) {
         selectedPortfolio = event.getPortfolio();
         securityEventCashFlowFormsService.save(event);
         fifoPositionsFactory.invalidateCache();

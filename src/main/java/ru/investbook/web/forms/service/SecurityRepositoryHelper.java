@@ -19,10 +19,9 @@
 package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.service.moex.MoexDerivativeCodeService;
@@ -38,8 +37,11 @@ import ru.investbook.web.forms.model.TransactionModel;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
+import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.entity.SecurityEntity.isinPattern;
+import static ru.investbook.web.forms.model.SecurityHelper.NULL_SECURITY_NAME;
 
 
 @Service
@@ -50,80 +52,86 @@ public class SecurityRepositoryHelper {
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
-    public int saveAndFlushSecurity(SecurityDescriptionModel m) {
-        int savedSecurityId = saveAndFlush(m.getSecurityId(), m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
+    public int saveSecurity(SecurityDescriptionModel m) {
+        int savedSecurityId = saveSecurity(m.getSecurityId(), m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
         m.setSecurityId(savedSecurityId);
         return savedSecurityId;
     }
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
-    public int saveAndFlushSecurity(EventCashFlowModel.AttachedSecurity s) {
+    public int saveSecurity(EventCashFlowModel.AttachedSecurity s) {
         // EventCashFlowModel. AttachToSecurity может содержать только SHARE или BOND.
         // Тип SHARE захардкожен, тип может быть ошибочен, но для текущего алгоритма сохранения ЦБ этого типа достаточно
-        return saveAndFlush(s.getSecurityIsin(), s.getSecurityName(), SecurityType.SHARE);
+        return saveSecurity(s.getSecurityIsin(), s.getSecurityName(), SecurityType.SHARE);
     }
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
-    public int saveAndFlushSecurity(SecurityEventCashFlowModel m) {
-        return saveAndFlush(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
+    public int saveSecurity(SecurityEventCashFlowModel m) {
+        return saveSecurity(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
     }
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
-    public int saveAndFlushSecurity(SecurityQuoteModel m) {
-        return saveAndFlush(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
+    public int saveSecurity(SecurityQuoteModel m) {
+        return saveSecurity(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
     }
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
-    public int saveAndFlushSecurity(TransactionModel m) {
-        return saveAndFlush(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
+    public int saveSecurity(TransactionModel m) {
+        return saveSecurity(m.getSecurityIsin(), m.getSecurityName(), m.getSecurityType());
     }
 
     /**
      * Generate securityId if needed, save security to DB, update securityId for model if needed
+     *
      * @return saved security id
      */
-    public int saveAndFlushSecurity(SplitModel m) {
-        return saveAndFlush(m.getSecurityIsin(), m.getSecurityName(), SecurityType.SHARE);
+    public int saveSecurity(SplitModel m) {
+        return saveSecurity(m.getSecurityIsin(), m.getSecurityName(), SecurityType.SHARE);
     }
 
     /**
      * @return securityId from DB
      */
-    private int saveAndFlush(Integer securityId, String isin, String securityName, SecurityType securityType) {
+    private int saveSecurity(@Nullable Integer securityId, @Nullable String isin, String securityName, SecurityType securityType) {
         SecurityEntity security = ofNullable(securityId)
                 .flatMap(securityRepository::findById)
                 .or(() -> findSecurity(isin, securityName, securityType))
                 .orElseGet(SecurityEntity::new);
-        return saveAndFlush(security, isin, securityName, securityType, true);
+        return saveSecurity(security, isin, securityName, securityType, true);
     }
 
-    private int saveAndFlush(String isin, String securityName, SecurityType securityType) {
+    private int saveSecurity(@Nullable String isin, String securityName, SecurityType securityType) {
         SecurityEntity security = findSecurity(isin, securityName, securityType)
                 .orElseGet(SecurityEntity::new);
-        return saveAndFlush(security, isin, securityName, securityType, false);
+        return saveSecurity(security, isin, securityName, securityType, false);
     }
 
-    private int saveAndFlush(SecurityEntity security, String isin, String securityName,
+    private int saveSecurity(SecurityEntity security, @Nullable String isin, @Nullable String securityName,
                              SecurityType securityType, boolean forceRewriteByEmptyIsin) {
         isin = validateIsin(isin);
         if (isin == null && !forceRewriteByEmptyIsin) {
             isin = security.getIsin(); // optional isin not provided by forms, use isin from db
         }
-        securityName = Objects.equals(securityName, SecurityHelper.NULL_SECURITY_NAME) ? null : securityName;
+        securityName = Objects.equals(securityName, NULL_SECURITY_NAME) ? null : securityName;
         security.setType(securityType.toDbType());
         switch (securityType) {
             case SHARE, BOND -> {
@@ -140,36 +148,36 @@ public class SecurityRepositoryHelper {
                 security.setName(securityName);
             }
         }
-        security = securityRepository.saveAndFlush(security);
+        security = securityRepository.save(security);
         return security.getId();
     }
 
-    private Optional<SecurityEntity> findSecurity(String isin, String securityName, SecurityType securityType) {
+    private Optional<SecurityEntity> findSecurity(@Nullable String isin, @Nullable String securityName, SecurityType securityType) {
         isin = validateIsin(isin);
-        securityName = Objects.equals(securityName, SecurityHelper.NULL_SECURITY_NAME) ? null : securityName;
+        final @Nullable String name = Objects.equals(securityName, NULL_SECURITY_NAME) ? null : securityName;
 
         return switch (securityType) {
             case SHARE, BOND -> {
-                Assert.isTrue(isin != null || securityName != null, "Отсутствует и ISIN, и наименование ЦБ");
-                String name = securityName;
+                Assert.isTrue(isin != null || name != null, "Отсутствует и ISIN, и наименование ЦБ");
                 yield ofNullable(isin).flatMap(securityRepository::findByIsin)
                         .or(() -> ofNullable(name).flatMap(securityRepository::findByTicker))
                         .or(() -> ofNullable(name).flatMap(securityRepository::findByName));
             }
             case DERIVATIVE, CURRENCY -> {
-                Assert.notNull(securityName, "Отсутствует тикер контракта");
-                yield securityRepository.findByTicker(securityName);
+                requireNonNull(name, "Отсутствует тикер контракта");
+                String ticker = moexDerivativeCodeService.convertDerivativeCode(name);
+                yield securityRepository.findByTicker(ticker)
+                        .or(() -> securityRepository.findByTicker(name));
             }
             case ASSET -> {
-                Assert.notNull(securityName, "Отсутствует наименование произвольного актива");
-                yield securityRepository.findByName(securityName);
+                requireNonNull(name, "Отсутствует наименование произвольного актива");
+                yield securityRepository.findByName(name);
             }
         };
     }
 
-    @Nullable
-    private String validateIsin(String isin) {
-        isin = StringUtils.hasLength(isin) ? isin : null;
+    private @Nullable String validateIsin(@Nullable String isin) {
+        isin = hasLength(isin) ? isin : null;
         if (isin != null && !isinPattern.matcher(isin).matches()) {
             throw new IllegalArgumentException("Невалидный ISIN: " + isin);
         }

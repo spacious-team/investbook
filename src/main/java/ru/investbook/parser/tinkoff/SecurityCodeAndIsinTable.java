@@ -18,9 +18,9 @@
 
 package ru.investbook.parser.tinkoff;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
@@ -54,8 +54,8 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
     }
 
     @Override
-    protected Void parseRow(TableRow row) {
-        String code = row.getStringCellValueOrDefault(CODE, null);
+    protected @Nullable Void parseRow(TableRow row) {
+        @Nullable String code = row.getStringCellValueOrDefault(CODE, null);
         if (hasLength(code) && !code.contains("Код актива")) { // exclude table's empty row
             // если колонка ISIN отсутствует, то ISIN используется в отчете вместо кода (SBERP)
             String isin = row.getStringCellValueOrDefault(ISIN, code);
@@ -72,12 +72,12 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
             }
             codeToType.put(code, securityType);
 
-            BigDecimal faceValue = row.getBigDecimalCellValueOrDefault(FACE_VALUE, null);
+            @Nullable BigDecimal faceValue = row.getBigDecimalCellValueOrDefault(FACE_VALUE, null);
             if (faceValue != null) {
                 codeToFaceValue.put(code, faceValue);
             }
 
-            String shortName = row.getStringCellValueOrDefault(SHORT_NAME, null);
+            String shortName = row.getStringCellValueOrDefault(SHORT_NAME, "");
             if (hasLength(shortName)) {
                 shortNameToCode.put(shortName, code);
             }
@@ -85,45 +85,42 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         return null;
     }
 
-    @NotNull
     public String getIsin(String code, String shortName) {
         initializeIfNeed();
-        String isin = codeToIsin.get(code);
+        @Nullable String isin = codeToIsin.get(code);
         if (isin == null) {
-            code = shortNameToCode.get(shortName);
-            isin = codeToIsin.get(code);
+            String codeFromName = shortNameToCode.getOrDefault(shortName, "");
+            isin = codeToIsin.get(codeFromName);
         }
         return requireNonNull(isin, "Не найден ISIN");
     }
 
-    @NotNull
     public SecurityType getSecurityType(String code, String shortName) {
         initializeIfNeed();
-        SecurityType type = codeToType.get(code);
+        @Nullable SecurityType type = codeToType.get(code);
         if (type == null) {
-            code = shortNameToCode.get(shortName);
-            type = codeToType.get(code);
+            String codeFromName = shortNameToCode.getOrDefault(shortName, "");
+            type = codeToType.get(codeFromName);
         }
         return requireNonNull(type, "Не найден тип ценной бумаги");
     }
 
-    @NotNull
     public BigDecimal getFaceValue(String code, String shortName) {
         initializeIfNeed();
-        BigDecimal faceValue = codeToFaceValue.get(code);
+        @Nullable BigDecimal faceValue = codeToFaceValue.get(code);
         if (faceValue == null) {
-            code = shortNameToCode.get(shortName);
-            faceValue = codeToFaceValue.get(code);
+            String codeFromName = shortNameToCode.getOrDefault(shortName, "");
+            faceValue = codeToFaceValue.get(codeFromName);
         }
         return requireNonNull(faceValue, "Не найдена номинальная стоимость облигации");
     }
 
-    @NotNull
     public String getCode(String shortName) {
         initializeIfNeed();
         return requireNonNull(shortNameToCode.get(shortName), "Не найден код бумаги");
     }
 
+    @Getter
     @RequiredArgsConstructor
     protected enum SecurityAndCodeTableHeader implements TableHeaderColumn {
         SHORT_NAME("Сокращенное", "наименование"),
@@ -132,7 +129,6 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
         TYPE("^Тип$"),
         FACE_VALUE(optional("Номинал"));
 
-        @Getter
         private final TableColumn column;
 
         SecurityAndCodeTableHeader(String... words) {

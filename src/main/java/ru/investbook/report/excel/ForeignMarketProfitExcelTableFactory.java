@@ -19,6 +19,7 @@
 package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Transaction;
@@ -104,9 +105,12 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
         Transaction transaction = position.getOpenTransaction();
         row.put(OPEN_DATE, transaction.getTimestamp());
         row.put(COUNT, Math.abs(position.getCount()) * Integer.signum(transaction.getCount()));
+        //noinspection DataFlowIssue
         row.put(OPEN_PRICE, getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount()));
         double multiplier = Math.abs(1d * position.getCount() / transaction.getCount());
+        //noinspection DataFlowIssue
         row.put(OPEN_AMOUNT, getTransactionCashFlow(transaction, CashFlowType.PRICE, multiplier));
+        //noinspection DataFlowIssue
         row.put(OPEN_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.FEE, multiplier));
         return row;
     }
@@ -118,7 +122,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
         Transaction transaction = position.getCloseTransaction();
         double multiplier = Math.abs(1d * position.getCount() / transaction.getCount());
         row.put(CLOSE_DATE, transaction.getTimestamp());
-        BigDecimal closeAmount;
+        @Nullable BigDecimal closeAmount;
         if (position.getClosingEvent() == CashFlowType.PRICE) {
             closeAmount = getTransactionCashFlow(transaction, CashFlowType.PRICE, multiplier);
         } else {
@@ -126,6 +130,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
                     " не может быть закрыта событием типа " + position.getClosingEvent());
         }
         row.put(CLOSE_AMOUNT, closeAmount);
+        //noinspection DataFlowIssue
         row.put(CLOSE_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.FEE, multiplier));
         boolean isLongPosition = isLongPosition(position);
         row.put(FORECAST_TAX, getForecastTax(isLongPosition));
@@ -138,12 +143,13 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
         return position.getOpenTransaction().getCount() > 0;
     }
 
-    private BigDecimal getTransactionCashFlow(Transaction transaction, CashFlowType type, double multiplier) {
-        if (transaction.getId() == null) {
+    private @Nullable BigDecimal getTransactionCashFlow(Transaction transaction, CashFlowType type, double multiplier) {
+        @Nullable Integer transactionId = transaction.getId();
+        if (transactionId == null) {
             return null;
         }
         return transactionCashFlowRepository
-                .findByTransactionIdAndCashFlowType(transaction.getId(), type)
+                .findByTransactionIdAndCashFlowType(transactionId, type)
                 .map(cash -> cash.getValue()
                         .multiply(BigDecimal.valueOf(multiplier))
                         .abs()

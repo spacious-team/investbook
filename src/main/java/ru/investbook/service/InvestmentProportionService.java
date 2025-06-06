@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.lang.System.nanoTime;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.*;
 import static org.spacious_team.broker.pojo.SecurityType.*;
@@ -118,7 +119,7 @@ public class InvestmentProportionService {
     }
 
     private String getEconomicSector(SecurityInvestment securityInvestment) {
-        return securityDescriptionRepository.findById(securityInvestment.security().getId())
+        return securityDescriptionRepository.findById(requireNonNull(securityInvestment.security().getId()))
                 .map(SecurityDescriptionEntity::getSector)
                 .orElse(SecuritySectorService.UNKNOWN_SECTOR);
     }

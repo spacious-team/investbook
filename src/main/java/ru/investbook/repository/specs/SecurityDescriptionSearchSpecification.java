@@ -23,6 +23,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.SecurityDescriptionEntity;
 import ru.investbook.entity.SecurityDescriptionEntity_;
@@ -30,17 +31,19 @@ import ru.investbook.entity.SecurityDescriptionEntity_;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.repository.specs.SpecificationHelper.filterByLike;
 import static ru.investbook.repository.specs.SpecificationHelper.filterBySecurityId;
 
 
 @RequiredArgsConstructor(staticName = "of")
 public class SecurityDescriptionSearchSpecification implements Specification<SecurityDescriptionEntity> {
-    private final String security;
-    private final String securitySector;
+    private final @Nullable String security;
+    private final @Nullable String securitySector;
 
     @Override
-    public Predicate toPredicate(Root<SecurityDescriptionEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+    public Predicate toPredicate(Root<SecurityDescriptionEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
+        requireNonNull(query);
         return Stream.of(
                         filterBySecurityId(root, builder, SecurityDescriptionEntity_.security, security, query),
                         filterByLike(root, builder, SecurityDescriptionEntity_.sector, securitySector))

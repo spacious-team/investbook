@@ -32,10 +32,10 @@ import java.time.LocalDate;
 @Data
 public class ForeignExchangeRateEntityPk implements Serializable {
 
-    @Column(name = "date")
+    @Column(name = "date", nullable = false)
     private LocalDate date;
 
     @Basic
-    @Column(name = "currency_pair")
+    @Column(name = "currency_pair", nullable = false)
     private String currencyPair;
 }

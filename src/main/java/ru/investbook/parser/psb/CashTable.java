@@ -20,6 +20,7 @@ package ru.investbook.parser.psb;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
@@ -41,7 +42,7 @@ public class CashTable extends SingleAbstractReportTable<PortfolioCash> {
     }
 
     @Override
-    protected PortfolioCash parseRow(TableRow row) {
+    protected @Nullable PortfolioCash parseRow(TableRow row) {
         return row.rowContains(INVALID_TEXT) ? null :
                 PortfolioCash.builder()
                         .portfolio(getReport().getPortfolio())
@@ -52,14 +53,15 @@ public class CashTable extends SingleAbstractReportTable<PortfolioCash> {
                         .build();
     }
 
+    @Getter
     enum CashTableHeader implements TableHeaderColumn {
         SECTION("сектор"),
         VALUE("плановый исходящий остаток"),
         CURRENCY("валюта");
 
-        @Getter
         private final TableColumn column;
-        CashTableHeader(String ... words) {
+
+        CashTableHeader(String... words) {
             this.column = PatternTableColumn.of(words);
         }
     }

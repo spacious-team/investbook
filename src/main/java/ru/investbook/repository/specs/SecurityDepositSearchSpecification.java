@@ -24,6 +24,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntity_;
@@ -34,6 +35,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
 import static lombok.AccessLevel.PRIVATE;
 
 
@@ -42,17 +44,18 @@ public class SecurityDepositSearchSpecification implements Specification<Transac
 
     private final TransactionSearchSpecification specification;
 
-    public static SecurityDepositSearchSpecification of(String portfolio,
-                                                        String security,
-                                                        LocalDate dateFrom,
-                                                        LocalDate dateTo) {
+    public static SecurityDepositSearchSpecification of(@Nullable String portfolio,
+                                                        @Nullable String security,
+                                                        @Nullable LocalDate dateFrom,
+                                                        @Nullable LocalDate dateTo) {
         TransactionSearchSpecification specification =
                 TransactionSearchSpecification.of(portfolio, security, dateFrom, dateTo);
         return new SecurityDepositSearchSpecification(specification);
     }
 
     @Override
-    public Predicate toPredicate(Root<TransactionEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+    public Predicate toPredicate(Root<TransactionEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
+        requireNonNull(query);
         return Stream.of(
                         filterByNullPrice(root, builder, query),
                         specification.toPredicate(root, query, builder))

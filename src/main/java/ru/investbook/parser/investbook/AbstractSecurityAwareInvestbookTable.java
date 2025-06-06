@@ -86,7 +86,7 @@ public class AbstractSecurityAwareInvestbookTable<RowType> extends AbstractInves
         } else {
             builder.name(securityTickerNameOrIsin);
         }
-        return securityRepository.saveAndFlush(securityConverter.toEntity(builder.build()));
+        return securityRepository.save(securityConverter.toEntity(builder.build()));
     }
 
     protected String getTradeId(String portfolio, int securityId, Instant instant) {

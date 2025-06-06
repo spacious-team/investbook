@@ -22,14 +22,12 @@ import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
 
@@ -39,32 +37,31 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(of = "id")
 public class TransactionCashFlowEntity {
     @Id
-    @GeneratedValue(generator = UseExistingOrGenerateIdGenerator.NAME)
-    @GenericGenerator(name = UseExistingOrGenerateIdGenerator.NAME, strategy = UseExistingOrGenerateIdGenerator.STRATEGY)
+    @AssignedOrGeneratedValue
     @Column(name = "id")
     private Integer id;
 
     @Basic(optional = false)
-    @Column(name = "transaction_id")
+    @Column(name = "transaction_id", nullable = false)
     private int transactionId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "type", referencedColumnName = "id", nullable = false)
     private CashFlowTypeEntity cashFlowType;
 
     @Basic(optional = false)
-    @Column(name = "value")
+    @Column(name = "value", nullable = false)
     private BigDecimal value;
 
     @Basic(optional = false)
-    @Column(name = "currency")
+    @Column(name = "currency", nullable = false)
     private String currency = "RUR";
 
 
     /*
     Nowadays not used, commented due to perf issue
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumns({
             @JoinColumn(name = "transaction_id", referencedColumnName = "id", insertable = false, updatable = false),
             @JoinColumn(name = "portfolio", referencedColumnName = "portfolio", insertable = false, updatable = false)

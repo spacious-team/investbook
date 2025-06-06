@@ -23,12 +23,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.7</version> <!-- Обновлять с учетом https://github.com/spacious-team/investbook/issues/545 -->
+        <version>3.5.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2024.1.3</version>
+    <version>2025.1</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -62,8 +62,10 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>24.1.3</win.msi.version>
-        <java.version>21</java.version>
+        <win.msi.version>25.1</win.msi.version>
+        <java.version>24</java.version>
+        <lombok.version>1.18.38</lombok.version>
+        <checkerframework.version>3.49.3</checkerframework.version>
     </properties>
 
     <repositories>
@@ -81,27 +83,16 @@
         </repository>
     </repositories>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.glassfish.jaxb</groupId>
-                <artifactId>jaxb-runtime</artifactId>
-                <!-- version is same as for hibernate-jpamodelgen dep, just scope is changed -->
-                <scope>compile</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>2024.1</version>
+            <version>2025.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-spring-boot-starter</artifactId>
-            <version>2024.1</version>  <!-- if changed, update the version of poi-scratchpad -->
+            <version>2025.2</version>  <!-- if changed, update the version of poi-scratchpad -->
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -149,12 +140,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>7.7.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
@@ -163,10 +148,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-jpamodelgen</artifactId>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -189,7 +170,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.1.0</version>
+            <version>2.8.8</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
@@ -204,28 +185,114 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.15.4</version>
+            <version>1.20.1</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.github.albfernandez</groupId>
             <artifactId>juniversalchardet</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-scratchpad</artifactId>
-            <version>5.2.5</version>  <!-- use same version as table-wrapper-spring-boot-starter provides -->
+            <version>5.4.1</version>  <!-- use same version as Apache POI from table-wrapper-spring-boot-starter -->
+        </dependency>
+        <dependency>
+            <groupId>org.checkerframework</groupId>
+            <artifactId>checker-qual</artifactId>
+            <version>${checkerframework.version}</version>
+            <scope>provided</scope> <!-- for static analysis tools only -->
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.jqno.equalsverifier</groupId>
+            <artifactId>equalsverifier</artifactId>
+            <version>4.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.3</version> <!-- JUnit 5 requirement -->
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <fork>true</fork> <!-- Must fork or else JVM arguments are ignored -->
+                    <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.hibernate</groupId>
+                            <artifactId>hibernate-jpamodelgen</artifactId>
+                            <version>${hibernate.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.checkerframework</groupId>
+                            <artifactId>checker</artifactId>
+                            <version>${checkerframework.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <annotationProcessors>
+                        <annotationProcessor>
+                            lombok.launch.AnnotationProcessorHider$AnnotationProcessor
+                        </annotationProcessor>
+                        <annotationProcessor>
+                            org.hibernate.processor.HibernateProcessor
+                        </annotationProcessor>
+                        <annotationProcessor>
+                            org.checkerframework.checker.nullness.NullnessChecker
+                        </annotationProcessor>
+                    </annotationProcessors>
+                    <compilerArgs combine.children="append">
+                        <!--arg>-Awarns</arg-->
+                        <!-- V2022_1_0_1.class нельзя изменять, чтобы не менялась чек сумма миграции -->
+                        <!-- Классы Entity(Pk)?_ сгенерированы hibernate-jpamodelgen -->
+                        <arg>-AskipDefs=(Test$|V2022_1_0_1|Entity(Pk)?_$|generated.ValCurs)</arg>
+                        <!-- Checker framework inner file https://github.com/typetools/checker-framework/blob/master/checker/src/main/java/org/checkerframework/checker/nullness/permit-nullness-assertion-exception.astub -->
+                        <arg>-Astubs=permit-nullness-assertion-exception.astub${path.separator}${project.basedir}/checkerframework.astub</arg>
+                        <arg>-AsuppressWarnings=methodref,type.arguments.not.inferred,lambda.param,expression.unparsable</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -253,7 +320,7 @@
             <plugin>
                 <groupId>org.asciidoctor</groupId>
                 <artifactId>asciidoctor-maven-plugin</artifactId>
-                <version>2.0.0</version>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>generate-html-doc</id>
@@ -275,14 +342,36 @@
                 </configuration>
             </plugin>
             <plugin>
+                <!-- To build via Idea menu Build -> Rebuild Project you must go to menu -> View -> Tool Windows ->
+                     Maven -> Plugins -> jaxb2 -> jaxb2:xjc -> mouse right click -> Execute Before Build -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>xsd-to-java</id>
                         <goals>
                             <goal>xjc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.13</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -353,9 +442,10 @@
                     </plugin>
                     <plugin>
                         <!-- jpackage requires Wix 3: https://wixtoolset.org/docs/wix3/ (only Wix, Toolset not required) -->
+                        <!-- https://github.panteleyev.org/jpackage-maven-plugin/examples/executions.html-->
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
-                        <version>1.2.1</version>
+                        <version>1.6.6</version>
                         <executions>
                             <execution>
                                 <id>windows installer</id>
@@ -369,9 +459,8 @@
                                     <appVersion>${win.msi.version}</appVersion>
                                     <vendor>Spacious Team</vendor>
                                     <description>${project.description}</description>
-                                    <copyright>InvestBook, Copyright (C) 2020 Spacious Team
-                                        (https://github.com/spacious-team)
-                                    </copyright>
+                                    <copyright>InvestBook, Copyright (C) 2020 Spacious Team</copyright>
+                                    <aboutUrl>https://github.com/spacious-team/investbook</aboutUrl>
                                     <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
                                     <javaOptions>
                                         <javaOption>-Dloader.path=./app/extensions</javaOption>
@@ -389,10 +478,11 @@
                                     <arguments>
                                         <argument>--spring.config.additional-location=file:./app/</argument>
                                     </arguments>
-                                    <input>${project.build.directory}/jpackage/jpackage/</input>
+                                    <input>${project.build.directory}/jpackage/input</input>
                                     <icon>${project.basedir}/src/main/assembly/jpackage/icon.ico</icon>
-                                    <destination>${project.build.directory}/jpackage</destination>
+                                    <destination>${project.build.directory}/jpackage/output</destination>
                                     <winDirChooser>true</winDirChooser>
+                                    <winPerUserInstall>true</winPerUserInstall>
                                     <winMenu>true</winMenu>
                                     <winMenuGroup>Investbook</winMenuGroup>
                                     <winShortcut>true</winShortcut>
@@ -410,19 +500,15 @@
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
-                        <!--
-                            Remove after spring-boot-starter-parent upgrade
-                            https://github.com/spring-projects/spring-boot/issues/39323
-                        -->
-                        <version>3.1.9</version>
                         <configuration>
                             <layers>
                                 <enabled>true</enabled>
                             </layers>
                             <image>
-                                <name>spaciousteam/investbook:latest</name>
+                                <!-- ${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX} defined in .github/workflows/publish-docker.yml -->
+                                <name>spaciousteam/investbook:latest${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX}</name>
                                 <tags>
-                                    <tag>spaciousteam/investbook:${project.version}</tag>
+                                    <tag>spaciousteam/investbook:${project.version}${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX}</tag>
                                 </tags>
                                 <publish>true</publish>
                                 <env>
@@ -432,7 +518,7 @@
                                     <!-- Defines available bellsoft-liberica java versions from
                                     https://github.com/paketo-buildpacks/java/releases
                                     JRE with ${java.version} will be selected automatically when available -->
-                                    <buildpack>gcr.io/paketo-buildpacks/java:15.2.0</buildpack>
+                                    <buildpack>docker.io/paketobuildpacks/java:18.8.0</buildpack>
                                 </buildpacks>
                             </image>
                             <docker>

@@ -80,7 +80,7 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
+    protected <T extends Enum<T> & TableHeader> void writeHeader(Sheet sheet, Class<T> headerType, CellStyle style) {
         super.writeHeader(sheet, headerType, style);
         sheet.setColumnWidth(SECURITY.ordinal(), 45 * 256);
         sheet.setColumnWidth(OPEN_AMOUNT.ordinal(), 16 * 256);

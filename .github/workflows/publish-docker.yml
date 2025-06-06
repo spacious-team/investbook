@@ -14,11 +14,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '24'
           distribution: 'liberica'
           cache: maven
       - name: Publish
@@ -26,3 +26,4 @@ jobs:
         env:
           DOCKER_ID: ${{ secrets.DOCKER_ID }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKER_IMAGE_LATEST_TAG_SUFFIX: ${{ github.ref == 'refs/heads/master' && '' || '-dev' }}

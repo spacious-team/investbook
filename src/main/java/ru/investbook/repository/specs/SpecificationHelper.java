@@ -26,8 +26,9 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.SingularAttribute;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.CashFlowType;
+import ru.investbook.entity.CashFlowTypeEntity;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.PortfolioEntity_;
 import ru.investbook.entity.SecurityEntity;
@@ -38,17 +39,17 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 
+import static java.util.Objects.nonNull;
 import static lombok.AccessLevel.PRIVATE;
 import static org.springframework.util.StringUtils.hasText;
 
 @NoArgsConstructor(access = PRIVATE)
 class SpecificationHelper {
 
-    @Nullable
-    static <T> Predicate filterBySecurity(Root<T> root,
-                                          CriteriaBuilder builder,
-                                          SingularAttribute<T, SecurityEntity> attribute,
-                                          String security) {
+    static <T> @Nullable Predicate filterBySecurity(Root<T> root,
+                                                    CriteriaBuilder builder,
+                                                    SingularAttribute<T, SecurityEntity> attribute,
+                                                    @Nullable String security) {
         if (hasText(security)) {
             Path<SecurityEntity> securityPath = root.get(attribute);
             return builder.or(
@@ -59,12 +60,11 @@ class SpecificationHelper {
         return null;
     }
 
-    @Nullable
-    static <T> Predicate filterBySecurityId(Root<T> root,
-                                            CriteriaBuilder builder,
-                                            SingularAttribute<T, Integer> attribute,
-                                            String security,
-                                            CriteriaQuery<?> query) {
+    static <T> @Nullable Predicate filterBySecurityId(Root<T> root,
+                                                      CriteriaBuilder builder,
+                                                      SingularAttribute<T, Integer> attribute,
+                                                      @Nullable String security,
+                                                      CriteriaQuery<?> query) {
         if (hasText(security)) {
             // Do sub-query because SecurityEntity is not related to SecurityDescriptionEntity in Java model, so
             // can not do join query in Criteria API
@@ -84,11 +84,10 @@ class SpecificationHelper {
         return null;
     }
 
-    @Nullable
-    static <T> Predicate filterByDateFrom(Root<T> root,
-                                          CriteriaBuilder builder,
-                                          SingularAttribute<T, Instant> attribute,
-                                          LocalDate dateFrom) {
+    static <T> @Nullable Predicate filterByDateFrom(Root<T> root,
+                                                    CriteriaBuilder builder,
+                                                    SingularAttribute<T, Instant> attribute,
+                                                    @Nullable LocalDate dateFrom) {
         if (dateFrom == null) {
             return null;
         }
@@ -99,11 +98,10 @@ class SpecificationHelper {
                 startOfDay);
     }
 
-    @Nullable
-    static <T> Predicate filterByDateTo(Root<T> root,
-                                        CriteriaBuilder builder,
-                                        SingularAttribute<T, Instant> attribute,
-                                        LocalDate dateTo) {
+    static <T> @Nullable Predicate filterByDateTo(Root<T> root,
+                                                  CriteriaBuilder builder,
+                                                  SingularAttribute<T, Instant> attribute,
+                                                  @Nullable LocalDate dateTo) {
         if (dateTo == null) {
             return null;
         }
@@ -115,11 +113,10 @@ class SpecificationHelper {
                 endOfDay);
     }
 
-    @Nullable
-    static <T> Predicate filterByInstantBelongsToDate(Root<T> root,
-                                                      CriteriaBuilder builder,
-                                                      SingularAttribute<T, Instant> attribute,
-                                                      LocalDate date) {
+    static <T> @Nullable Predicate filterByInstantBelongsToDate(Root<T> root,
+                                                                CriteriaBuilder builder,
+                                                                SingularAttribute<T, Instant> attribute,
+                                                                @Nullable LocalDate date) {
         if (date == null) {
             return null;
         }
@@ -137,7 +134,7 @@ class SpecificationHelper {
     static <T> Predicate filterByPortfolio(Root<T> root,
                                            CriteriaBuilder builder,
                                            SingularAttribute<T, PortfolioEntity> attribute,
-                                           String portfolio) {
+                                           @Nullable String portfolio) {
         if (hasText(portfolio)) {
             Path<String> path = root.get(attribute)
                     .get(PortfolioEntity_.ID);
@@ -151,7 +148,7 @@ class SpecificationHelper {
     static <T> Predicate filterByPortfolioName(Root<T> root,
                                                CriteriaBuilder builder,
                                                SingularAttribute<T, String> attribute,
-                                               String portfolio,
+                                               @Nullable String portfolio,
                                                CriteriaQuery<?> query) {
         Path<String> transactionPortfolioPath = root.get(attribute);
         if (hasText(portfolio)) {
@@ -172,11 +169,23 @@ class SpecificationHelper {
                 .value(enabledPortfolioIds);
     }
 
-    @Nullable
-    static <X, T> Predicate filterByEquals(Root<X> root,
-                                           CriteriaBuilder builder,
-                                           SingularAttribute<X, T> attribute,
-                                           @Nullable String value) {
+    static <X> @Nullable Predicate filterByEquals(Root<X> root,
+                                                  CriteriaBuilder builder,
+                                                  SingularAttribute<X, CashFlowTypeEntity> attribute,
+                                                  @Nullable CashFlowType value) {
+        if (nonNull(value)) {
+            Path<CashFlowTypeEntity> path = root.get(attribute);
+            CashFlowTypeEntity entity = new CashFlowTypeEntity();
+            entity.setId(value.getId());
+            return builder.equal(path, entity);
+        }
+        return null;
+    }
+
+    static <X, T> @Nullable Predicate filterByEquals(Root<X> root,
+                                                     CriteriaBuilder builder,
+                                                     SingularAttribute<X, T> attribute,
+                                                     @Nullable String value) {
         if (hasText(value)) {
             Path<T> path = root.get(attribute);
             return builder.equal(path, value);
@@ -184,11 +193,10 @@ class SpecificationHelper {
         return null;
     }
 
-    @Nullable
-    static <X> Predicate filterByLike(Root<X> root,
-                                      CriteriaBuilder builder,
-                                      SingularAttribute<X, String> attribute,
-                                      @Nullable String value) {
+    static <X> @Nullable Predicate filterByLike(Root<X> root,
+                                                CriteriaBuilder builder,
+                                                SingularAttribute<X, String> attribute,
+                                                @Nullable String value) {
         if (hasText(value)) {
             Path<String> path = root.get(attribute);
             return filterByLike(builder, path, value);
@@ -196,7 +204,7 @@ class SpecificationHelper {
         return null;
     }
 
-    private static Predicate filterByLike(CriteriaBuilder builder, Path<String> path, @NonNull String value) {
+    private static Predicate filterByLike(CriteriaBuilder builder, Path<String> path, String value) {
         return builder.like(builder.lower(path), "%" + value.toLowerCase() + "%");
     }
 }

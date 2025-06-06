@@ -29,12 +29,12 @@ import lombok.Getter;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
@@ -60,33 +60,32 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 @Slf4j
 public class TradePof {
 
-    @NotNull
     @JsonProperty("id")
     int id;
 
-    @NotEmpty
     @JsonProperty("trade-id")
+    @NotEmpty
     String tradeId;
 
     /**
+     * Дата и время сделки.
      * Если значение null, то значение поля settlement обязательно
      */
-    @Nullable
     @JsonProperty("timestamp")
+    @Nullable
     Long timestamp;
 
     /**
+     * Дата и время поставки.
      * Если значение null, то значение поля timestamp обязательно
      */
-    @Nullable
     @JsonProperty("settlement")
+    @Nullable
     Long settlement;
 
-    @NotNull
     @JsonProperty("account")
     int account;
 
-    @NotNull
     @Getter(AccessLevel.NONE)
     @JsonProperty("asset")
     int asset;
@@ -95,45 +94,50 @@ public class TradePof {
      * Если '+', то это покупка, если '-', то это продажа.
      * Поддерживаются дробные акции
      */
-    @NotNull
     @JsonProperty("count")
+    @NotNull
     BigDecimal count;
 
     /**
-     * В валюте сделки, для облигации - без НКД, для деривативов в валюте - опционально
+     * Цена бумаги/контракта (за единицу) в валюте сделки,
+     * для облигации - без учета НКД, для деривативов поле может отсутствовать
      */
-    @Nullable
     @JsonProperty("price")
+    @Nullable
     BigDecimal price;
 
-    @Nullable
     @JsonProperty("accrued-interest")
+    @Nullable
     BigDecimal accruedInterest;
 
     /**
-     * Котировка. Для облигации в процентах, для деривативов в пунктах
+     * Котировка. Для облигации в процентах, для деривативов в пунктах.
+     * Для деривативов - обязательное поле, для облигаций - опциональное.
      */
-    @Nullable
     @JsonProperty("quote")
+    @Nullable
     BigDecimal quote;
 
-    @Nullable
+    /**
+     * Может отсутствовать, если поле 'price' и 'accrued-interest' отсутствуют
+     */
     @JsonProperty("currency")
+    @Nullable
     String currency;
 
     /**
      * Комиссия. Если отрицательное значение, значит возврат комиссии
      */
-    @NotNull
     @JsonProperty("fee")
+    @NotNull
     BigDecimal fee;
 
-    @NotEmpty
     @JsonProperty("fee-currency")
+    @NotEmpty
     String feeCurrency;
 
-    @Nullable
     @JsonProperty("description")
+    @Nullable
     String description;
 
     static TradePof of(TransactionEntity transaction,
@@ -165,8 +169,8 @@ public class TradePof {
                 .filter(e -> e.getCashFlowType().getId() == FEE.getId())
                 .findAny()
                 .ifPresentOrElse(e -> builder
-                        .fee(e.getValue().negate())
-                        .feeCurrency(getValidCurrencyOrNull(e.getCurrency())),
+                                .fee(e.getValue().negate())
+                                .feeCurrency(requireNonNull(getValidCurrencyOrNull(e.getCurrency()))),
                         () -> builder.fee(BigDecimal.ZERO).feeCurrency("RUB"));
         return builder.build();
     }
@@ -204,18 +208,19 @@ public class TradePof {
                                                 Map<Integer, SecurityType> assetTypes) {
         try {
             SecurityType securityType = requireNonNull(assetTypes.get(asset));
+            @Nullable BigDecimal value = (price == null) ? null : price.multiply(count).negate();
             AbstractTransaction.AbstractTransactionBuilder<?, ?> builder = switch (securityType) {
                 case STOCK, BOND, STOCK_OR_BOND, ASSET -> SecurityTransaction.builder()
-                        .value(requireNonNull(price).multiply(count).negate())
+                        .value(requireNonNull(value))
                         .accruedInterest((accruedInterest == null) ? null : accruedInterest.multiply(count).negate())
-                        .valueCurrency(getValidCurrencyOrNull(requireNonNull(currency)));
+                        .valueCurrency(requireNonNull(getValidCurrencyOrNull(currency)));
                 case DERIVATIVE -> DerivativeTransaction.builder()
-                        .valueInPoints(requireNonNull(quote).multiply(count).negate())
-                        .value((price == null) ? null : price.multiply(count).negate()) // для деривативов - опциональное
-                        .valueCurrency(getValidCurrencyOrNull(currency)); // для деривативов - опциональное
+                                .valueInPoints(requireNonNull(quote).multiply(count).negate())
+                                .value(value) // для деривативов - опциональное
+                                .valueCurrency(getValidCurrencyOrNull(currency)); // для деривативов - опциональное
                 case CURRENCY_PAIR -> ForeignExchangeTransaction.builder()
-                        .value(requireNonNull(price).multiply(count).negate())
-                        .valueCurrency(getValidCurrencyOrNull(requireNonNull(currency)));
+                        .value(requireNonNull(value))
+                        .valueCurrency(requireNonNull(getValidCurrencyOrNull(currency)));
             };
 
             long ts = requireNonNull(getSettlementOrTimestamp());
@@ -225,8 +230,8 @@ public class TradePof {
                     .security(getSecurityId(assetToSecurityId))
                     .count(count.intValueExact())
                     .timestamp(Instant.ofEpochSecond(ts))
-                    .fee((fee == null) ? null : fee.negate())
-                    .feeCurrency(getValidCurrencyOrNull(feeCurrency))
+                    .fee(fee.negate())
+                    .feeCurrency(requireNonNull(getValidCurrencyOrNull(feeCurrency)))
                     .build());
         } catch (Exception e) {
             log.error("Не могу распарсить {}", this, e);

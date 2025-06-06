@@ -26,13 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.report.ViewFilter;
 
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.min;
@@ -59,27 +56,22 @@ public class ExcelView {
     }
 
     @Transactional(readOnly = true)
-    public void writeTo(Workbook book, ViewFilter filter, CellStyles styles) throws InterruptedException, ExecutionException {
-        ExecutorService tableWriterExecutor = Executors.newSingleThreadExecutor();
-        Collection<Future<?>> sheetWriterFutures = new ArrayList<>();
-        int cpuCnt = Runtime.getRuntime().availableProcessors();
-        List<ExcelTableView> usedExcelTableViews = getExcelTableViews(filter);
-        for (int idx = 0, delta = 1; idx < usedExcelTableViews.size(); ) {
-            int fromIndex = idx;
-            idx += delta;
-            delta = cpuCnt;
-            int toIndex = min(idx, usedExcelTableViews.size());
-            List<ExcelTable> tables = usedExcelTableViews.subList(fromIndex, toIndex)
-                    .parallelStream()
-                    .map(excelTableView -> getExcelTables(excelTableView, filter))
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toList());
-            Future<?> future = tableWriterExecutor.submit(() -> writeExcelTables(tables, book, styles));
-            sheetWriterFutures.add(future);
-        }
-
-        for(Future<?> future : sheetWriterFutures) {
-            future.get();
+    public void writeTo(Workbook book, ViewFilter filter, CellStyles styles) {
+        try (ExecutorService tableWriterExecutor = Executors.newSingleThreadExecutor()) {
+            int cpuCnt = Runtime.getRuntime().availableProcessors();
+            List<ExcelTableView> usedExcelTableViews = getExcelTableViews(filter);
+            for (int idx = 0, delta = 1; idx < usedExcelTableViews.size(); ) {
+                int fromIndex = idx;
+                idx += delta;
+                delta = cpuCnt;
+                int toIndex = min(idx, usedExcelTableViews.size());
+                List<ExcelTable> tables = usedExcelTableViews.subList(fromIndex, toIndex)
+                        .parallelStream()
+                        .map(excelTableView -> getExcelTables(excelTableView, filter))
+                        .flatMap(Collection::stream)
+                        .toList();
+                tableWriterExecutor.submit(() -> writeExcelTables(tables, book, styles));
+            }
         }
 
         if (book.getNumberOfSheets() == 0) {

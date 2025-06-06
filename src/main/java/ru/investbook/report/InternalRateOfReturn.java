@@ -20,6 +20,7 @@ package ru.investbook.report;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.decampo.xirr.NewtonRaphson;
 import org.decampo.xirr.Xirr;
 import org.spacious_team.broker.pojo.Security;
@@ -42,6 +43,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toCollection;
@@ -70,11 +72,11 @@ public class InternalRateOfReturn {
      * Возвращает внутреннюю норму доходности вложений. Не рассчитывается для срочных инструментов, т.к.
      * вложение (гарантийное обеспечение) не хранится на данный момент в БД.
      *
-     * @param quote may be null only if current security position is zero
-     * @return internal rate of return if can be calculated or null otherwise
+     * @param quote may be null, if current security position equals to 0. Otherwise, null result is returned
+     * @return internal rate of return, if it can be calculated, or null otherwise
      */
-    public Double calc(
-            Collection<String> portfolios, Security security, SecurityQuote quote, Instant fromDate, Instant toDate) {
+    public @Nullable Double calc(
+            Collection<String> portfolios, Security security, @Nullable SecurityQuote quote, Instant fromDate, Instant toDate) {
 
         try {
             boolean isDerivative = (security.getType() == DERIVATIVE);
@@ -115,7 +117,7 @@ public class InternalRateOfReturn {
     private String getTransactionCurrency(FifoPositions positions) {
         return positions.getTransactions()
                 .stream()
-                .map(t -> transactionCashFlowRepository.findByTransactionIdAndCashFlowType(t.getId(), PRICE))
+                .map(t -> transactionCashFlowRepository.findByTransactionIdAndCashFlowType(requireNonNull(t.getId()), PRICE))
                 .flatMap(Optional::stream)
                 .map(TransactionCashFlowEntity::getCurrency)
                 .findAny()
@@ -136,21 +138,23 @@ public class InternalRateOfReturn {
                 toLocalDate(cashFlowEntity.getTimestamp()));
     }
 
-    private Optional<org.decampo.xirr.Transaction> castToXirrTransaction(SecurityQuote quote,
+    @SuppressWarnings("dereference.of.nullable")
+    private Optional<org.decampo.xirr.Transaction> castToXirrTransaction(@Nullable SecurityQuote quote,
                                                                          String toCurrency, int positionCount,
                                                                          SecurityType securityType) {
         return ofNullable(quote)
                 .map(_quote -> _quote.getDirtyPriceInCurrency(securityType == DERIVATIVE))
-                .map(dirtyPrice -> convertToCurrency(dirtyPrice, quote.getCurrency(), toCurrency))
+                .map(dirtyPrice -> convertToCurrency(dirtyPrice, requireNonNull(quote.getCurrency()), toCurrency))
                 .map(dirtyPrice -> new org.decampo.xirr.Transaction(
                         positionCount * dirtyPrice.doubleValue(),
                         toLocalDate(quote.getTimestamp())));
     }
 
     private Optional<BigDecimal> getTransactionValue(Transaction t, String toCurrency) {
-        BigDecimal value = null;
-        if (t.getId() != null) { // bond redemption, accounted by other way, skipping
-            value = transactionCashFlowRepository.findByTransactionId(t.getId())
+        @Nullable BigDecimal value = null;
+        @Nullable Integer transactionId = t.getId();
+        if (transactionId != null) { // bond redemption, accounted by other way, skipping
+            value = transactionCashFlowRepository.findByTransactionId(transactionId)
                     .stream()
                     .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -164,14 +168,14 @@ public class InternalRateOfReturn {
         return portfolios.isEmpty() ?
                 securityEventCashFlowRepository
                         .findBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
-                                security.getId(),
+                                requireNonNull(security.getId()),
                                 cashFlowTypes,
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate()) :
                 securityEventCashFlowRepository
                         .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
                                 portfolios,
-                                security.getId(),
+                                requireNonNull(security.getId()),
                                 cashFlowTypes,
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate());

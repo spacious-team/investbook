@@ -20,6 +20,7 @@ package ru.investbook.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import org.spacious_team.broker.pojo.SecurityType;
@@ -134,7 +135,7 @@ public class AssetsAndCashServiceImpl implements AssetsAndCashService {
         try {
             long t0 = nanoTime();
             FifoPositionsFilter filter = FifoPositionsFilter.of(portfolio);
-            BigDecimal assetsInRub = securityRepository.findByTypeIn(stockBondAndAssetTypes)
+            @Nullable BigDecimal assetsInRub = securityRepository.findByTypeIn(stockBondAndAssetTypes)
                     .stream()
                     .map(securityConverter::fromEntity)
                     .map(security -> investmentProportionService

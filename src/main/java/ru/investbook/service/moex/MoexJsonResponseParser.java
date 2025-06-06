@@ -19,6 +19,7 @@
 package ru.investbook.service.moex;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +30,7 @@ import java.util.Optional;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
+import static java.util.Objects.requireNonNull;
 
 @Slf4j
 public class MoexJsonResponseParser {
@@ -36,22 +38,23 @@ public class MoexJsonResponseParser {
     @SuppressWarnings("unchecked")
     public static List<Map<String, Object>> convertFromIntObjectMap(Map<?, ?> indicesResponse) {
         try {
-            indicesResponse = (Map<?, ?>) indicesResponse.values().iterator().next();
-            List<String> columnNames = (List<String>) indicesResponse.get("columns");
+            @SuppressWarnings("assignment")
+            Map<?, ?> response = (Map<?, ?>) indicesResponse.values().iterator().next();
+            @Nullable List<String> columnNames = (List<String>) response.get("columns");
             Collection<List<Object>> dataObjects =
-                    (Collection<List<Object>>) Optional.ofNullable(indicesResponse.get("data")).orElseThrow();
+                    (Collection<List<Object>>) Optional.ofNullable(response.get("data")).orElseThrow();
             List<Map<String, Object>> namedItems = new ArrayList<>(dataObjects.size());
             for (List<Object> obj : dataObjects) {
                 HashMap<String, Object> namedObject = new HashMap<>();
                 for (int i = 0, cnt = obj.size(); i < cnt; i++) {
-                    namedObject.put(columnNames.get(i), obj.get(i));
+                    namedObject.put(requireNonNull(columnNames).get(i), obj.get(i));
                 }
                 namedItems.add(unmodifiableMap(namedObject));
             }
             return unmodifiableList(namedItems);
         } catch (Exception e) {
             log.info("Can't parse Moex ISS response: {}", indicesResponse, e);
-            return null;
+            return List.of();
         }
     }
 }

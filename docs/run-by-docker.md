@@ -1,6 +1,6 @@
 #### Оглавление
-- [Установка на Windows x64](install-on-windows.md)
-- [Установка на Windows x86](install-on-windows-by-zip.md)
+- [Установка на Windows](#установка-и-работа-на-windows)
+- [Установка на Windows из ZIP архива](install-on-windows-by-zip.md)
 - [Установка на Mac](install-on-linux.md)
 - [Установка на Linux](install-on-linux.md)
 - [Запуск в Docker](#запуск-investbook)

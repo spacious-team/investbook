@@ -20,6 +20,7 @@ package ru.investbook.report;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.Transaction;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 import static java.lang.Integer.min;
 import static java.lang.Integer.signum;
 import static java.lang.Math.abs;
+import static java.util.Objects.nonNull;
 
 @Getter
 @Slf4j
@@ -49,53 +51,60 @@ public class FifoPositions {
     public FifoPositions(Deque<Transaction> transactions, Deque<SecurityEventCashFlow> redemptions) {
         this.transactions = transactions;
         this.redemptions = redemptions;
-        updateSecuritiesPastPositions(transactions);
-        processTransactions(transactions);
-        processRedemptions(redemptions);
+        updateSecuritiesPastPositions(transactions, positionHistories);
+        processTransactions(transactions, openedPositions, closedPositions);
+        processRedemptions(redemptions, positionHistories, openedPositions, closedPositions);
         this.currentOpenedPositionsCount = Optional.ofNullable(positionHistories.peekLast())
                 .map(PositionHistory::getOpenedPositions)
                 .orElse(0);
     }
 
-    private void processTransactions(Deque<Transaction> transactions) {
+    private static void processTransactions(Deque<Transaction> transactions,
+                                            Deque<OpenedPosition> openedPositions,
+                                            Deque<ClosedPosition> closedPositions) {
         for (Transaction transaction : transactions) {
-            if (isIncreasePosition(transaction)) {
-                this.openedPositions.add(new OpenedPosition(transaction));
+            if (isIncreasePosition(transaction, openedPositions)) {
+                openedPositions.add(new OpenedPosition(transaction));
             } else {
-                closePositions(transaction, CashFlowType.PRICE);
+                closePositions(transaction, CashFlowType.PRICE, openedPositions, closedPositions);
             }
         }
     }
 
-    private void processRedemptions(Deque<SecurityEventCashFlow> redemptions) {
-        if (!redemptions.isEmpty() && (redemptions.peek() != null)) {
+    private static void processRedemptions(Deque<SecurityEventCashFlow> redemptions,
+                                    Deque<PositionHistory> positionHistories,
+                                    Deque<OpenedPosition> openedPositions,
+                                    Deque<ClosedPosition> closedPositions) {
+        //noinspection ConstantValue
+        if (!redemptions.isEmpty() && nonNull(redemptions.peek())) {
             int security = redemptions.peek().getSecurity();
             LinkedList<Transaction> redemptionTransactions = redemptions.stream()
                     .map(FifoPositions::convertBondRedemptionToTransaction)
                     .collect(Collectors.toCollection(LinkedList::new));
-            updateSecuritiesPastPositions(redemptionTransactions);
+            updateSecuritiesPastPositions(redemptionTransactions, positionHistories);
             redemptionTransactions.forEach(
-                    redemption -> closePositions(redemption, CashFlowType.REDEMPTION));
-            if (!this.openedPositions.isEmpty() || this.positionHistories.getLast().getOpenedPositions() != 0) {
+                    redemption -> closePositions(redemption, CashFlowType.REDEMPTION, openedPositions, closedPositions));
+            if (!openedPositions.isEmpty() || positionHistories.getLast().getOpenedPositions() != 0) {
                 log.error("Предоставлены не все транзакции по бумаге " +
                         security + ", в истории портфеля есть событие погашения номинала облигаций по " +
                         redemptions.stream().mapToInt(SecurityEventCashFlow::getCount).sum() +
-                        " бумагам, однако в портфеле остались " + this.positionHistories.getLast().getOpenedPositions() +
+                        " бумагам, однако в портфеле остались " + positionHistories.getLast().getOpenedPositions() +
                         " открытые позиции");
             }
         }
     }
 
-    private void updateSecuritiesPastPositions(Queue<Transaction> transactions) {
-        int openedPosition = (!this.positionHistories.isEmpty()) ? this.positionHistories.peekLast().getOpenedPositions() : 0;
+    private static void updateSecuritiesPastPositions(Queue<Transaction> transactions, Deque<PositionHistory> positionHistories) {
+        @SuppressWarnings("dereference.of.nullable")  // is never null for not empty deque
+        int openedPosition = !positionHistories.isEmpty() ? positionHistories.peekLast().getOpenedPositions() : 0;
         for (Transaction transaction : transactions) {
             openedPosition += transaction.getCount();
-            this.positionHistories.add(new PositionHistory(transaction, openedPosition));
+            positionHistories.add(new PositionHistory(transaction, openedPosition));
         }
     }
 
-    private boolean isIncreasePosition(Transaction transaction) {
-        OpenedPosition position = openedPositions.peek();
+    private static boolean isIncreasePosition(Transaction transaction, Deque<OpenedPosition> openedPositions) {
+        @Nullable OpenedPosition position = openedPositions.peek();
         return position == null ||
                 position.getUnclosedPositions() == 0 ||
                 (signum(transaction.getCount()) == signum(position.getUnclosedPositions()));
@@ -104,10 +113,14 @@ public class FifoPositions {
     /**
      * @param closing position decreasing transaction
      */
-    private void closePositions(Transaction closing, CashFlowType closingEvent) {
+    private static void closePositions(Transaction closing,
+                                CashFlowType closingEvent,
+                                Deque<OpenedPosition> openedPositions,
+                                Deque<ClosedPosition> closedPositions) {
         int closingCount = abs(closing.getCount());
         while (!openedPositions.isEmpty() && closingCount > 0) {
-            OpenedPosition opening = openedPositions.peek();
+            @SuppressWarnings("assignment")
+            OpenedPosition opening = openedPositions.peek();  // is never null for not empty deque
             int openedCount = abs(opening.getUnclosedPositions());
             if (openedCount <= closingCount) {
                 openedPositions.remove();

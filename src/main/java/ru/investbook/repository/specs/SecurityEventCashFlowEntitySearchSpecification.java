@@ -24,6 +24,7 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.CashFlowTypeEntity_;
@@ -39,20 +40,22 @@ import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 @RequiredArgsConstructor(staticName = "of")
 public class SecurityEventCashFlowEntitySearchSpecification implements Specification<SecurityEventCashFlowEntity> {
-    private final String portfolio;
-    private final String security;
-    private final LocalDate dateFrom;
-    private final LocalDate dateTo;
+    private final @Nullable String portfolio;
+    private final @Nullable String security;
+    private final @Nullable LocalDate dateFrom;
+    private final @Nullable LocalDate dateTo;
+    private final @Nullable CashFlowType cashFlowType;
 
     @Override
     public Predicate toPredicate(Root<SecurityEventCashFlowEntity> root,
-                                 CriteriaQuery<?> query,
+                                 @Nullable CriteriaQuery<?> query,
                                  CriteriaBuilder builder) {
         return Stream.of(
                         filterByPortfolio(root, builder, SecurityEventCashFlowEntity_.portfolio, portfolio),
                         filterByDateFrom(root, builder, SecurityEventCashFlowEntity_.timestamp, dateFrom),
                         filterByDateTo(root, builder, SecurityEventCashFlowEntity_.timestamp, dateTo),
                         filterBySecurity(root, builder, SecurityEventCashFlowEntity_.security, security),
+                        filterByEquals(root, builder, SecurityEventCashFlowEntity_.cashFlowType, cashFlowType),
                         filterByCacheFlowType(root, builder))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)

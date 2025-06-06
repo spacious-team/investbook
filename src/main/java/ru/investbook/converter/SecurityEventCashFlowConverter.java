@@ -37,14 +37,12 @@ public class SecurityEventCashFlowConverter implements EntityConverter<SecurityE
     private final SecurityRepository securityRepository;
     private final CashFlowTypeRepository cashFlowTypeRepository;
 
+    @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override
     public SecurityEventCashFlowEntity toEntity(SecurityEventCashFlow eventCashFlow) {
-        SecurityEntity securityEntity = securityRepository.findById(eventCashFlow.getSecurity())
-                .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ID не найдена: " + eventCashFlow.getSecurity()));
-        PortfolioEntity portfolioEntity = portfolioRepository.findById(eventCashFlow.getPortfolio())
-                .orElseThrow(() -> new IllegalArgumentException("В справочнике не найден брокерский счет: " + eventCashFlow.getPortfolio()));
-        CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.findById(eventCashFlow.getEventType().getId())
-                .orElseThrow(() -> new IllegalArgumentException("В справочнике не найдено событие с типом: " + eventCashFlow.getEventType().getId()));
+        SecurityEntity securityEntity = securityRepository.getReferenceById(eventCashFlow.getSecurity());
+        PortfolioEntity portfolioEntity = portfolioRepository.getReferenceById(eventCashFlow.getPortfolio());
+        CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.getReferenceById(eventCashFlow.getEventType().getId());
 
         SecurityEventCashFlowEntity entity = new SecurityEventCashFlowEntity();
         entity.setId(eventCashFlow.getId());
@@ -54,6 +52,7 @@ public class SecurityEventCashFlowConverter implements EntityConverter<SecurityE
         entity.setCount(eventCashFlow.getCount());
         entity.setCashFlowType(cashFlowTypeEntity);
         entity.setValue(eventCashFlow.getValue());
+        //noinspection ConstantValue
         if (eventCashFlow.getCurrency() != null) entity.setCurrency(eventCashFlow.getCurrency());
         return entity;
     }

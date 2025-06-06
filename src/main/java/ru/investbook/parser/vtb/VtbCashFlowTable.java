@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.vtb;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.springframework.util.StringUtils;
@@ -37,7 +38,7 @@ public class VtbCashFlowTable extends AbstractVtbCashFlowTable<EventCashFlow> {
 
     @Override
     protected Collection<EventCashFlow> getRow(CashFlowEventTable.CashFlowEvent event) {
-        CashFlowType type = event.getEventType();
+        @Nullable CashFlowType type = event.getEventType();
         if (type != CASH && type != TAX) {
             return Collections.emptyList();
         }

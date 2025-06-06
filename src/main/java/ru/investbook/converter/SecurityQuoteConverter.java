@@ -30,11 +30,10 @@ import ru.investbook.repository.SecurityRepository;
 public class SecurityQuoteConverter implements EntityConverter<SecurityQuoteEntity, SecurityQuote> {
     private final SecurityRepository securityRepository;
 
+    @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override
     public SecurityQuoteEntity toEntity(SecurityQuote quote) {
-        SecurityEntity securityEntity = securityRepository.findById(quote.getSecurity())
-                .orElseThrow(() -> new IllegalArgumentException("Ценная бумага с заданным ISIN не найдена: " + quote.getSecurity()));
-
+        SecurityEntity securityEntity = securityRepository.getReferenceById(quote.getSecurity());
 
         SecurityQuoteEntity entity = new SecurityQuoteEntity();
         entity.setId(quote.getId());

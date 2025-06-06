@@ -30,19 +30,15 @@ import java.time.LocalDate;
 @Data
 public class ForeignExchangeRateModel {
 
-    @NotNull
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date = LocalDate.now();
+    private @NotNull LocalDate date = LocalDate.now();
 
-    @NotEmpty
-    private String baseCurrency;
+    private @NotEmpty String baseCurrency;
 
     @NotEmpty
     String quoteCurrency;
 
-    @NotNull
-    @Positive
-    private BigDecimal rate;
+    private @Positive @NotNull BigDecimal rate;
 
     public void setBaseCurrency(String currency) {
         this.baseCurrency = currency.toUpperCase();

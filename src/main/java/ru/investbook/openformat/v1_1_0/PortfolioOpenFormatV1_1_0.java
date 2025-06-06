@@ -25,10 +25,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
-import java.util.Collections;
+
+import static java.util.Collections.emptySet;
 
 @Jacksonized
 @Builder
@@ -38,65 +39,63 @@ import java.util.Collections;
 public class PortfolioOpenFormatV1_1_0 {
     public static String GENERATED_BY_INVESTBOOK = "investbook";
 
-    @NotNull
     @Builder.Default
     @JsonProperty("version")
+    @NotNull
     String version = "1.1.0";
 
-    @NotNull
     @Builder.Default
     @JsonProperty("generated-by")
+    @NotNull
     String generatedBy = GENERATED_BY_INVESTBOOK;
 
-    @NotNull
     @Builder.Default
     @JsonProperty("generated")
     long generated = System.currentTimeMillis() / 1000;
 
-    @NotNull
     @JsonProperty("end")
     long end;
 
-    @Nullable
     @JsonProperty("start")
+    @Nullable
     Long start;
 
-    @NotNull
     @Builder.Default
     @JsonProperty("accounts")
-    Collection<AccountPof> accounts = Collections.emptySet();
-
     @NotNull
+    Collection<AccountPof> accounts = emptySet();
+
     @Builder.Default
     @JsonProperty("cash-balances")
-    Collection<CashBalancesPof> cashBalances = Collections.emptySet();
-
     @NotNull
+    Collection<CashBalancesPof> cashBalances = emptySet();
+
     @Builder.Default
     @JsonProperty("assets")
-    Collection<AssetPof> assets = Collections.emptySet();
-
     @NotNull
+    Collection<AssetPof> assets = emptySet();
+
     @Builder.Default
     @JsonProperty("trades")
-    Collection<TradePof> trades = Collections.emptySet();
-
     @NotNull
+    Collection<TradePof> trades = emptySet();
+
     @Builder.Default
     @JsonProperty("transfers")
-    Collection<TransferPof> transfer = Collections.emptySet();
-
     @NotNull
+    Collection<TransferPof> transfer = emptySet();
+
     @Builder.Default
     @JsonProperty("payments")
-    Collection<PaymentPof> payments = Collections.emptySet();
-
     @NotNull
+    Collection<PaymentPof> payments = emptySet();
+
     @Builder.Default
     @JsonProperty("cash-flows")
-    Collection<CashFlowPof> cashFlows = Collections.emptySet();
+    @NotNull
+    Collection<CashFlowPof> cashFlows = emptySet();
 
-    @Nullable
     @JsonProperty("vnd-investbook")
+    @Nullable
     VndInvestbookPof vndInvestbook;
 }

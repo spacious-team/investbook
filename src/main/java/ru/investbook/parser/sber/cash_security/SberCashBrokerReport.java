@@ -42,9 +42,12 @@ public class SberCashBrokerReport implements BrokerReport {
 
     public static void checkReportFormat(String excelFileName, ExcelSheet reportPage) {
         Sheet sheet = reportPage.getSheet();
-        if (sheet.getSheetName().equals("Движение ДС") &&
-                reportPage.getRow(0).getCell(0).getStringValue().equals("Номер договора")) {
-            return;
+        if (sheet.getSheetName().equals("Движение ДС")) {
+            @SuppressWarnings({"nullable", "DataFlowIssue"})
+            String string = reportPage.getRow(0).getCell(0).getStringValue();
+            if (string.equals("Номер договора")) {
+                return;
+            }
         }
         throw new RuntimeException("В файле " + excelFileName + " не содержится отчета движения ДС брокера Сбербанк");
     }

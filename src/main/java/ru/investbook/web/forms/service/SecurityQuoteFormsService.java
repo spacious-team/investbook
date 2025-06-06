@@ -69,8 +69,8 @@ public class SecurityQuoteFormsService {
 
     @Transactional
     public void save(SecurityQuoteModel e) {
-        int savedSecurityId = securityRepositoryHelper.saveAndFlushSecurity(e);
-        SecurityQuoteEntity entity = securityQuoteRepository.saveAndFlush(
+        int savedSecurityId = securityRepositoryHelper.saveSecurity(e);
+        SecurityQuoteEntity entity = securityQuoteRepository.save(
                 securityQuoteConverter.toEntity(SecurityQuote.builder()
                         .id(e.getId())
                         .security(savedSecurityId)

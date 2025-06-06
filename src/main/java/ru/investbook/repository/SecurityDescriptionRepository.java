@@ -18,6 +18,7 @@
 
 package ru.investbook.repository;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -30,7 +31,7 @@ public interface SecurityDescriptionRepository extends JpaRepository<SecurityDes
         JpaSpecificationExecutor<SecurityDescriptionEntity> {
 
     @Transactional
-    default void createOrUpdateSector(int securityId, String sector) {
+    default void createOrUpdateSector(int securityId, @Nullable String sector) {
         if (existsById(securityId)) {
             updateSector(securityId, sector);
         } else {
@@ -41,10 +42,10 @@ public interface SecurityDescriptionRepository extends JpaRepository<SecurityDes
     @Transactional
     @Modifying
     @Query("UPDATE SecurityDescriptionEntity SET sector = :sector WHERE security = :securityId")
-    void updateSector(int securityId, String sector);
+    void updateSector(int securityId, @Nullable String sector);
 
     @Transactional
-    default void createSectorIfNotExists(int securityId, String sector) {
+    default void createSectorIfNotExists(int securityId, @Nullable String sector) {
         if (!existsById(securityId)) {
             SecurityDescriptionEntity entity = new SecurityDescriptionEntity();
             entity.setSecurity(securityId);

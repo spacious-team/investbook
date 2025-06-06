@@ -19,6 +19,7 @@
 package ru.investbook.converter;
 
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityDescription;
 import org.springframework.stereotype.Component;
 import ru.investbook.entity.IssuerEntity;
@@ -33,10 +34,10 @@ public class SecurityDescriptionConverter implements EntityConverter<SecurityDes
 
     @Override
     public SecurityDescriptionEntity toEntity(SecurityDescription security) {
-        IssuerEntity issuerEntity = null;
-        if (security.getIssuer() != null) {
-            issuerEntity = issuerRepository.findById(security.getIssuer())
-                    .orElseThrow(() -> new IllegalArgumentException("Эмитент c идентификатором не найден: " + security.getIssuer()));
+        @Nullable IssuerEntity issuerEntity = null;
+        @Nullable Integer issuer = security.getIssuer();
+        if (issuer != null) {
+            issuerEntity = issuerRepository.getReferenceById(issuer);
         }
 
         SecurityDescriptionEntity entity = new SecurityDescriptionEntity();
@@ -48,10 +49,11 @@ public class SecurityDescriptionConverter implements EntityConverter<SecurityDes
 
     @Override
     public SecurityDescription fromEntity(SecurityDescriptionEntity entity) {
+        @Nullable IssuerEntity issuer = entity.getIssuer();
         return SecurityDescription.builder()
                 .security(entity.getSecurity())
                 .sector(entity.getSector())
-                .issuer((entity.getIssuer() != null) ? entity.getIssuer().getId() : null)
+                .issuer((issuer != null) ? issuer.getId() : null)
                 .build();
     }
 }

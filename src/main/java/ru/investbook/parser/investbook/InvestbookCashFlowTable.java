@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.investbook;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
@@ -37,7 +38,7 @@ public class InvestbookCashFlowTable extends AbstractInvestbookTable<EventCashFl
     }
 
     @Override
-    protected EventCashFlow parseRow(TableRow row) {
+    protected @Nullable EventCashFlow parseRow(TableRow row) {
         String operation = row.getStringCellValue(OPERATION).toLowerCase();
         CashFlowType type;
         boolean negate;
@@ -56,10 +57,12 @@ public class InvestbookCashFlowTable extends AbstractInvestbookTable<EventCashFl
         } else {
             return null;
         }
-        BigDecimal value = Optional.ofNullable(row.getBigDecimalCellValueOrDefault(PRICE, null))
+        @SuppressWarnings("DataFlowIssue")
+        @Nullable BigDecimal value = Optional.ofNullable(row.getBigDecimalCellValueOrDefault(PRICE, null))
                 .orElseGet(() -> row.getBigDecimalCellValue(FEE))
                 .abs();
         if (negate) value = value.negate();
+        @SuppressWarnings("DataFlowIssue")
         String currency = Optional.ofNullable(row.getStringCellValueOrDefault(CURRENCY, null))
                 .orElseGet(() -> row.getStringCellValue(FEE_CURRENCY));
         return EventCashFlow.builder()

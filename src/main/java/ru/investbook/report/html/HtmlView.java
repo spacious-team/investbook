@@ -41,6 +41,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutionException;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.report.html.ExcelFormulaEvaluatorHelper.evaluateFormulaCells;
 
 @Component
@@ -95,14 +96,17 @@ public class HtmlView {
                 @page { size: 1980px 1400px landscape; }
                 tr { border-bottom: 1pt solid #eee; }
                 """);
-        htmlDocument.getFirstChild() // html
-                .getFirstChild()     // head
-                .appendChild(style);
+        @SuppressWarnings({"assignment", "dereference.of.nullable"})
+        Node head = htmlDocument.getFirstChild() // html
+                .getFirstChild(); // head
+        head.appendChild(style);
     }
 
     private void addReportFileDownloadLink(Document htmlDocument) {
-        Node body = htmlDocument.getFirstChild() // html
-                .getLastChild(); // body
+        @SuppressWarnings("dereference.of.nullable")
+        Node body = requireNonNull(
+                htmlDocument.getFirstChild() // html
+                        .getLastChild()); // body
 
         Element div = htmlDocument.createElement("div");
         div.setAttribute("style", "float: right");
@@ -124,8 +128,10 @@ public class HtmlView {
     }
 
     private void addHomeLink(Document htmlDocument) {
-        Node body = htmlDocument.getFirstChild() // html
-                .getLastChild(); // body
+        @SuppressWarnings("dereference.of.nullable")
+        Node body = requireNonNull(
+                htmlDocument.getFirstChild() // html
+                        .getLastChild()); // body
 
         Element doc = htmlDocument.createElement("a");
         doc.setTextContent("[Описание таблиц]");

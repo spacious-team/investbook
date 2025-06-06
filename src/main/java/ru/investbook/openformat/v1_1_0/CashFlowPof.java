@@ -27,9 +27,9 @@ import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.springframework.lang.Nullable;
 import ru.investbook.entity.EventCashFlowEntity;
 
 import java.math.BigDecimal;
@@ -48,36 +48,33 @@ import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 @Slf4j
 public class CashFlowPof {
 
-    @NotNull
     @JsonProperty("id")
     int id;
 
-    @Nullable
     @JsonProperty("flow-id")
+    @Nullable
     String flowId;
 
-    @NotNull
     @JsonProperty("account")
     int account;
 
-    @NotNull
     @JsonProperty("timestamp")
     long timestamp;
 
-    @NotNull
     @JsonProperty("amount")
+    @NotNull
     BigDecimal amount;
 
-    @NotEmpty
     @JsonProperty("currency")
+    @NotEmpty
     String currency;
 
-    @NotNull
     @JsonProperty("type")
+    @NotNull
     PaymentTypePof type;
 
-    @Nullable
     @JsonProperty("description")
+    @Nullable
     String description;
 
     static CashFlowPof of(EventCashFlowEntity cashFlow) {

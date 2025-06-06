@@ -18,22 +18,26 @@
 
 package ru.investbook.openformat;
 
-import org.springframework.util.StringUtils;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 
 import java.util.Objects;
 
+import static org.springframework.util.StringUtils.hasLength;
 import static ru.investbook.entity.SecurityEntity.isinPattern;
 
 public class OpenFormatHelper {
 
-    public static String getValidCurrencyOrNull(String currency) {
-        if (currency == null) return null;
+    public static @PolyNull String getValidCurrencyOrNull(@PolyNull String currency) {
+        if (currency == null) {
+            return null;
+        }
         currency = currency.toUpperCase();
         return Objects.equals(currency, "RUR") ? "RUB" : currency;
     }
 
-    public static String getValidIsinOrNull(String isin) {
-        return StringUtils.hasLength(isin) && isinPattern.matcher(isin).matches() ?
+    @SuppressWarnings("return")
+    public static @PolyNull String getValidIsinOrNull(@PolyNull String isin) {
+        return hasLength(isin) && isinPattern.matcher(isin).matches() ?
                 isin :
                 null;
     }

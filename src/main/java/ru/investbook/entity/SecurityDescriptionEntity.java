@@ -28,6 +28,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Entity
 @Table(name = "security_description")
@@ -35,14 +36,14 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(of = "security")
 public class SecurityDescriptionEntity {
     @Id
-    @Column(name = "security")
+    @Column(name = "security", nullable = false)
     private int security;
 
     @Column(name = "sector")
-    private String sector;
+    private @Nullable String sector;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "issuer", referencedColumnName = "id")
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
-    private IssuerEntity issuer;
+    private @Nullable IssuerEntity issuer;
 }

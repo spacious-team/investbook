@@ -27,6 +27,7 @@ import ru.investbook.entity.SecurityEntity;
 @RequiredArgsConstructor
 public class SecurityConverter implements EntityConverter<SecurityEntity, Security> {
 
+    @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override
     public SecurityEntity toEntity(Security security) {
         SecurityEntity entity = new SecurityEntity();

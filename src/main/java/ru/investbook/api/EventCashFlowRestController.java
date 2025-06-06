@@ -20,8 +20,12 @@ package ru.investbook.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
@@ -39,7 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.EventCashFlowEntity;
 
-import java.util.Optional;
+import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Движения ДС по счету", description = """
@@ -56,7 +60,9 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам")
+    @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public Page<EventCashFlow> get(@Parameter(hidden = true)
                                    Pageable pageable) {
         return super.get(pageable);
@@ -64,7 +70,9 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить одну", description = "Отобразить выплату по ее номеру")
+    @Operation(summary = "Отобразить одну", description = "Отобразить выплату по ее номеру", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<EventCashFlow> get(@PathVariable("id")
                                              @Parameter(description = "Номер события")
                                              Integer id) {
@@ -73,39 +81,42 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Сохранить информацию в БД")
-    public ResponseEntity<Void> post(@Valid @RequestBody EventCashFlow event) {
+    @Operation(summary = "Добавить", description = "Сохранить информацию", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "409"),
+            @ApiResponse(responseCode = "500", content = @Content)})
+    public ResponseEntity<Void> post(@RequestBody @Valid EventCashFlow event) {
         return super.post(event);
     }
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Изменить", description = "Модифицировать информацию в БД")
+    @Operation(summary = "Обновить", description = "Модифицировать информацию", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер события")
                                     Integer id,
-                                    @Valid
                                     @RequestBody
+                                    @Valid
                                     EventCashFlow event) {
         return super.put(id, event);
     }
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удалить информацию из БД")
-    public void delete(@PathVariable("id")
-                       @Parameter(description = "Номер события")
-                       Integer id) {
-        super.delete(id);
+    @Operation(summary = "Удалить", description = "Удалить информацию из БД", responses = {
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
+    public ResponseEntity<Void> delete(@PathVariable("id")
+                                       @Parameter(description = "Номер события")
+                                       Integer id) {
+        return super.delete(id);
     }
 
     @Override
-    protected Optional<EventCashFlowEntity> getById(Integer id) {
-        return repository.findById(id);
-    }
-
-    @Override
-    protected Integer getId(EventCashFlow object) {
+    public @Nullable Integer getId(EventCashFlow object) {
         return object.getId();
     }
 

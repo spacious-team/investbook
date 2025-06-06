@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class BrowserHomePageOpener {
 
-    static void open(String url) {
+    public static void open(String url) {
         Logger log = LoggerFactory.getLogger(BrowserHomePageOpener.class);
         log.debug("Opening browser with home page \"{}\" ...", url);
         String os = System.getProperty("os.name").toLowerCase();
@@ -55,7 +55,7 @@ public class BrowserHomePageOpener {
             }
             log.debug("Home page \"{}\" was opened", url);
         } catch (Exception e) {
-            log.info("Can't open home page \"{}\" with browser", url, e);
+            log.debug("Can't open home page \"{}\" with browser", url, e);
         }
     }
 }

@@ -30,6 +30,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.beans.factory.annotation.Value;
 import ru.investbook.converter.PortfolioConverter;
@@ -47,12 +48,13 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
+import static org.springframework.util.CollectionUtils.isEmpty;
 import static ru.investbook.report.excel.StockMarketProfitExcelTableHeader.ROW_NUM_PLACE_HOLDER;
 
 @Slf4j
@@ -100,15 +102,16 @@ public abstract class ExcelTableView {
 
     /**
      * Thread safe method
+     *
      * @param portfolio accept null or portfolio
      */
-    public void createSheet(Portfolio portfolio,
-                                     Workbook book,
-                                     String sheetName,
-                                     Table table,
-                                     CellStyles styles) {
+    public <T extends Enum<T> & TableHeader> void createSheet(@Nullable Portfolio portfolio,
+                                                              Workbook book,
+                                                              String sheetName,
+                                                              Table table,
+                                                              CellStyles styles) {
         if (table == null || table.isEmpty()) return;
-        Class<? extends TableHeader> headerType = getHeaderType(table);
+        @Nullable Class<T> headerType = getHeaderType(table);
         if (headerType == null) return;
         synchronized (book) {
             long t0 = System.nanoTime();
@@ -120,10 +123,11 @@ public abstract class ExcelTableView {
                 table.addFirst(totalRow);
             }
             int rowNum = 0;
-            for (Map<? extends TableHeader, Object> tableRow : table) {
+            for (Table.Record tableRow : table) {
                 Row row = sheet.createRow(++rowNum);
-                for (TableHeader header : headerType.getEnumConstants()) {
-                    Object value = tableRow.get(header);
+                TableHeader[] tableHeader = requireNonNull(headerType.getEnumConstants());
+                for (TableHeader header : tableHeader) {
+                    @Nullable Object value = tableRow.get(header);
                     if (value == null) {
                         continue;
                     }
@@ -170,13 +174,17 @@ public abstract class ExcelTableView {
         }
     }
 
-    private Class<? extends TableHeader> getHeaderType(Table table) {
+    private <T extends Enum<T> & TableHeader> @Nullable Class<T> getHeaderType(Table table) {
         for (Table.Record record : table) {
-            if (record.isEmpty()) continue;
-            return record.keySet()
-                    .iterator()
-                    .next()
-                    .getClass();
+            if (!isEmpty(record)) {
+                //noinspection unchecked
+                return (Class<T>) record.keySet()
+                        .stream()
+                        .map(TableHeader::getClass)
+                        .filter(Class::isEnum)
+                        .findAny()
+                        .orElseThrow();
+            }
         }
         return null;
     }
@@ -185,11 +193,12 @@ public abstract class ExcelTableView {
         return invalidExcelSheetNameChars.matcher(name).replaceAll("-");
     }
 
-    protected void writeHeader(Sheet sheet, Class<? extends TableHeader> headerType, CellStyle style) {
+    protected <T extends Enum<T> & TableHeader> void writeHeader(Sheet sheet, Class<T> headerType, CellStyle style) {
         Row row = sheet.createRow(0);
-        row.setHeight((short)-1);
+        row.setHeight((short) -1);
         CreationHelper createHelper = sheet.getWorkbook().getCreationHelper();
-        for (TableHeader header : headerType.getEnumConstants()) {
+        TableHeader[] tableHeader = requireNonNull(headerType.getEnumConstants());
+        for (TableHeader header : tableHeader) {
             Cell cell = row.createCell(header.ordinal());
             cell.setCellValue(header.getDescription());
             cell.setCellStyle(style);
@@ -223,6 +232,7 @@ public abstract class ExcelTableView {
     }
 
     protected void sheetPostCreate(Sheet sheet, Class<? extends TableHeader> headerType, CellStyles styles) {
-        sheet.setAutoFilter(new CellRangeAddress(0, sheet.getLastRowNum(), 0, (headerType.getEnumConstants().length - 1)));
+        TableHeader[] tableHeader = requireNonNull(headerType.getEnumConstants());
+        sheet.setAutoFilter(new CellRangeAddress(0, sheet.getLastRowNum(), 0, (tableHeader.length - 1)));
     }
 }

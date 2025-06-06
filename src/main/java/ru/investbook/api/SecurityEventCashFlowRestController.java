@@ -20,8 +20,12 @@ package ru.investbook.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
@@ -40,14 +44,11 @@ import ru.investbook.converter.EntityConverter;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.report.FifoPositionsFactory;
 
-import java.util.Optional;
-
 import static org.spacious_team.broker.pojo.CashFlowType.REDEMPTION;
+import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
-@Tag(name = "События по бумаге", description = """
-        Дивиденды, купоны, амортизации, вариационная маржа, комиссии, налоги
-        """)
+@Tag(name = "События по бумаге", description = "Дивиденды, купоны, амортизации, вариационная маржа, комиссии, налоги")
 @RequestMapping("/api/v1/security-event-cash-flows")
 public class SecurityEventCashFlowRestController extends AbstractRestController<Integer, SecurityEventCashFlow, SecurityEventCashFlowEntity> {
     private final FifoPositionsFactory positionsFactory;
@@ -62,7 +63,9 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам")
+    @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public Page<SecurityEventCashFlow> get(@Parameter(hidden = true)
                                            Pageable pageable) {
         return super.get(pageable);
@@ -70,29 +73,37 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить одну", description = "Отобразить выплату по идентификатору")
+    @Operation(summary = "Отобразить одну", description = "Отобразить выплату по идентификатору", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<SecurityEventCashFlow> get(@PathVariable("id")
-                                                     @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                                                     @Parameter(description = "Внутренний идентификатор выплаты")
                                                      Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Сохранить информацию о выплате в БД")
-    public ResponseEntity<Void> post(@Valid @RequestBody SecurityEventCashFlow event) {
+    @Operation(summary = "Добавить", description = "Сохранить информацию о выплате", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "409"),
+            @ApiResponse(responseCode = "500", content = @Content)})
+    public ResponseEntity<Void> post(@RequestBody @Valid SecurityEventCashFlow event) {
         if (event.getEventType() == REDEMPTION) positionsFactory.invalidateCache();
         return super.post(event);
     }
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Изменить", description = "Модифицировать информацию о выплате в БД")
+    @Operation(summary = "Обновить", description = "Модифицировать информацию о выплате", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
-                                    @Parameter(description = "Внутренний идентификатор выплаты в БД")
+                                    @Parameter(description = "Внутренний идентификатор выплаты")
                                     Integer id,
-                                    @Valid
                                     @RequestBody
+                                    @Valid
                                     SecurityEventCashFlow event) {
         if (event.getEventType() == REDEMPTION) positionsFactory.invalidateCache();
         return super.put(id, event);
@@ -100,21 +111,18 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удалить информацию о выплате из БД")
-    public void delete(@PathVariable("id")
-                       @Parameter(description = "Внутренний идентификатор выплаты в БД")
-                       Integer id) {
+    @Operation(summary = "Удалить", description = "Удалить информацию о выплате", responses = {
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
+    public ResponseEntity<Void> delete(@PathVariable("id")
+                                       @Parameter(description = "Внутренний идентификатор выплаты")
+                                       Integer id) {
         positionsFactory.invalidateCache();
-        super.delete(id);
+        return super.delete(id);
     }
 
     @Override
-    protected Optional<SecurityEventCashFlowEntity> getById(Integer id) {
-        return repository.findById(id);
-    }
-
-    @Override
-    protected Integer getId(SecurityEventCashFlow object) {
+    public @Nullable Integer getId(SecurityEventCashFlow object) {
         return object.getId();
     }
 

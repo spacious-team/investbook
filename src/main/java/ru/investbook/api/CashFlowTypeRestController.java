@@ -20,6 +20,10 @@ package ru.investbook.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
@@ -32,7 +36,6 @@ import ru.investbook.converter.CashFlowTypeConverter;
 import ru.investbook.repository.CashFlowTypeRepository;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,16 +47,23 @@ public class CashFlowTypeRestController {
     private final CashFlowTypeConverter cashFlowTypeConverter;
 
     @GetMapping
-    @Operation(summary = "Отобразить все")
+    @Operation(summary = "Отобразить все",
+            responses = {
+                    @ApiResponse(responseCode = "200", content = @Content(
+                            array = @ArraySchema(schema = @Schema(implementation = CashFlowType.class)))),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public Iterable<CashFlowType> getCashFlowType() {
         return cashFlowTypeRepository.findAll()
                 .stream()
                 .map(cashFlowTypeConverter::fromEntity)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить по идентификатору")
+    @Operation(summary = "Отобразить по идентификатору",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<CashFlowType> getCashFlowType(@PathVariable("id")
                                                         @Parameter(description = "Идентификатор типа")
                                                         Integer id) {

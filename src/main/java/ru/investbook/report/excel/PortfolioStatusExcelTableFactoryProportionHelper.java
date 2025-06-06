@@ -18,6 +18,7 @@
 
 package ru.investbook.report.excel;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import ru.investbook.report.Table;
 
 import java.math.BigDecimal;
@@ -75,7 +76,7 @@ public class PortfolioStatusExcelTableFactoryProportionHelper {
     }
 
     private static boolean isDerivativeOrCurrencyPair(Table.Record record) {
-        Object type = record.get(TYPE);
+        @Nullable Object type = record.get(TYPE);
         return Objects.equals(type, DERIVATIVE.getDescription()) ||
                 Objects.equals(type, CURRENCY_PAIR.getDescription());
     }
@@ -93,7 +94,7 @@ public class PortfolioStatusExcelTableFactoryProportionHelper {
                 .multiply(toBigDecimal(record.get(COUNT)));
     }
 
-    private static BigDecimal toBigDecimal(Object value) {
+    private static BigDecimal toBigDecimal(@Nullable Object value) {
         if (value instanceof BigDecimal n) {
             return n;
         }

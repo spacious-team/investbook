@@ -23,12 +23,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
 import org.spacious_team.table_wrapper.api.TableRow;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -36,18 +40,28 @@ import ru.investbook.entity.StockMarketIndexEntity;
 import ru.investbook.repository.StockMarketIndexRepository;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.time.Duration;
+import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.zip.GZIPInputStream;
 
-import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class Sp500Service {
-    private final URI uri = fromHttpUrl("https://www.spglobal.com/spdji/en/idsexport/file.xls")
+    // Link has been copied from https://www.spglobal.com -> menu -> indices -> S&P 500 -> 10 Years
+    private final URI uri = fromUriString("https://www.spglobal.com/spdji/en/idsexport/file.xls")
+            .queryParam("hostIdentifier", UUID.randomUUID())
             .queryParam("redesignExport", true)
+            .queryParam("languageId", 1)
             .queryParam("selectedModule", "PerformanceGraphView")
             .queryParam("selectedSubModule", "Graph")
             .queryParam("yearFlag", "tenYearFlag")
@@ -61,20 +75,42 @@ public class Sp500Service {
     public void update() {
         try {
             long t0 = System.nanoTime();
-            Resource resource = restTemplate.getForObject(uri, Resource.class);
-            updateBy(resource);
+            ResponseEntity<Resource> response = downloadSp500Data();
+            InputStream is = getInputStream(response);
+            updateBy(is);
             log.info("Индекс S&P 500 обновлен за {}", Duration.ofNanos(System.nanoTime() - t0));
         } catch (Exception e) {
             throw new RuntimeException("Не смог обновить значения индекса S&P 500", e);
         }
     }
 
-    private void updateBy(Resource resource) throws IOException {
-        Objects.requireNonNull(resource, () -> "Не удалось скачать S&P 500 с адреса " + uri);
-        Workbook book = new HSSFWorkbook(resource.getInputStream());
+    private ResponseEntity<Resource> downloadSp500Data() {
+        // Http server without headers returns 403 Forbidden
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:139.0) Gecko/20100101 Firefox/139.0");
+        headers.add(HttpHeaders.ACCEPT_ENCODING, "gzip");
+        HttpEntity<?> httpEntity = new HttpEntity<>(headers);
+        return restTemplate.exchange(uri, GET, httpEntity, Resource.class);
+    }
+
+    private InputStream getInputStream(ResponseEntity<Resource> response) throws IOException {
+        @Nullable Resource resource = response.getBody();
+        InputStream is = requireNonNull(resource, () -> "Не удалось скачать S&P 500 с адреса " + uri)
+                .getInputStream();
+        @Nullable List<String> contentEncoding = response.getHeaders()
+                .get("Content-Encoding");
+        if (nonNull(contentEncoding) && contentEncoding.contains("gzip")) {
+            is = new GZIPInputStream(is);
+        }
+        return is;
+    }
+
+    private void updateBy(InputStream inputStream) throws IOException {
+        Workbook book = new HSSFWorkbook(inputStream);
         new ExcelSheet(book.getSheetAt(0))
                 .createNameless("Effective date", TableHeader.class)
                 .stream()
+                .filter(Objects::nonNull)
                 .map(Sp500Service::getIndexValue)
                 .forEach(this::save);
     }

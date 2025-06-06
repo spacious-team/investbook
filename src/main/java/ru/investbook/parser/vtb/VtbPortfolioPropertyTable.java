@@ -19,6 +19,7 @@
 package ru.investbook.parser.vtb;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.PortfolioPropertyType;
 import ru.investbook.parser.SingleBrokerReport;
@@ -57,7 +58,7 @@ public class VtbPortfolioPropertyTable extends SingleInitializableReportTable<Po
     }
 
     private BigDecimal getBigDecimalValue() {
-        Object value = getReport().getReportPage().getNextColumnValue(TOTAL_ASSETS1);
+        @Nullable Object value = getReport().getReportPage().getNextColumnValue(TOTAL_ASSETS1);
         if (value == null) {
             value = getReport().getReportPage().getNextColumnValue(TOTAL_ASSETS2);
         }

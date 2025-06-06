@@ -33,6 +33,7 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.vtb.VtbBrokerReport.minValue;
 import static ru.investbook.parser.vtb.VtbSecurityTransactionTable.VtbSecurityTransactionTableHeader.*;
 
@@ -68,7 +69,7 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
 
         Security security = VtbReportHelper.getSecurity(row.getStringCellValue(NAME_AND_ISIN));
         securities.add(security);
-        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(security.getIsin(), security::toBuilder);
+        int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(requireNonNull(security.getIsin()), security::toBuilder);
 
         return SecurityTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE))

@@ -18,6 +18,7 @@
 
 package ru.investbook.parser.tinkoff;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
@@ -38,7 +39,7 @@ import static ru.investbook.parser.tinkoff.TinkoffSecurityTransactionTableHelper
 public class TinkoffSecurityEventCashFlowTable extends SingleAbstractReportTable<SecurityEventCashFlow> {
 
     private final SecurityCodeAndIsinTable codeAndIsin;
-    private String currency = null;
+    private String currency = "";
 
     protected TinkoffSecurityEventCashFlowTable(SingleBrokerReport report, SecurityCodeAndIsinTable codeAndIsin) {
         super(report,
@@ -51,9 +52,9 @@ public class TinkoffSecurityEventCashFlowTable extends SingleAbstractReportTable
     }
 
     @Override
-    protected SecurityEventCashFlow parseRow(TableRow row) {
+    protected @Nullable SecurityEventCashFlow parseRow(TableRow row) {
         currency = TinkoffCashFlowTableHelper.getCurrency(row, currency);
-        if (currency == null) {
+        if (!hasLength(currency)) {
             return null;
         }
         String operation = row.getStringCellValueOrDefault(OPERATION, "").toLowerCase();
@@ -135,7 +136,7 @@ public class TinkoffSecurityEventCashFlowTable extends SingleAbstractReportTable
         Assert.isTrue(slashPos != -1 && description.endsWith(" шт."),
                 "Ожидается количество бумаг в формате '<...>/ 10 шт.'");
         String text = description.substring(slashPos + 1).trim();
-        return Integer.parseInt(text.split("\s+")[0]);
+        return Integer.parseInt(text.split("\\s+")[0]);
     }
 
     @Override
