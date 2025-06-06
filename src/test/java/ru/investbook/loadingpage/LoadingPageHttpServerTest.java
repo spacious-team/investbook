@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2024  Spacious Team <spacious-team@ya.ru>
+ * Copyright (C) 2025  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook;
+package ru.investbook.loadingpage;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,26 +24,28 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.investbook.loadingpage.LoadingPageServer;
+import ru.investbook.BrowserHomePageOpener;
 
 import static org.mockito.Mockito.times;
+import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.getServerAddress;
+import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.getServerPort;
 
 @ExtendWith(MockitoExtension.class)
-class LoadingPageServerTest {
+class LoadingPageHttpServerTest {
 
-    private LoadingPageServer loadingPageServer;
+    private LoadingPageHttpServer loadingPageHttpServer;
 
     @BeforeEach
     void setup() {
-        loadingPageServer = new LoadingPageServer();
+        loadingPageHttpServer = new LoadingPageHttpServerImpl();
     }
 
     @Test
     void testBrowserOpensOnLoadingPageStart() {
         try (MockedStatic<BrowserHomePageOpener> browserOpenerMock = Mockito.mockStatic(BrowserHomePageOpener.class)) {
-            loadingPageServer.start();
+            loadingPageHttpServer.start();
 
-            String expectedUrl = "http://localhost:" + LoadingPageServer.SERVER_PORT + "/loading";
+            String expectedUrl = "http://" + getServerAddress() + ":" + getServerPort();
             browserOpenerMock.verify(() -> BrowserHomePageOpener.open(expectedUrl), times(1));
         }
     }

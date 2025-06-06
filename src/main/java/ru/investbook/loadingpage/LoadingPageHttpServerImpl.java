@@ -30,27 +30,33 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.util.Objects;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Objects.nonNull;
-import static java.util.Objects.requireNonNull;
+import static java.util.Objects.*;
+import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.*;
 
 @Slf4j
-public class LoadingPageServer implements AutoCloseable{
-    public static final int SERVER_PORT = 2031;
-    public static final int DEFAULT_CLOSE_DELAY_SEC = 120;
+public class LoadingPageHttpServerImpl implements LoadingPageHttpServer {
+    public static final int DEFAULT_CLOSE_DELAY_SEC = 20;
+    private volatile @Nullable HttpServer server;
 
-    private volatile @Nullable HttpServer server = null;
-
+    @Override
     public void start() {
         try {
-            HttpServer server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
-            server.createContext("/", new LoadingPageHandler());
-            server.createContext("/main-app-port", new PortHandler());
-            server.start();
-            this.server = server;
-            String loadingPageUrl = "http://localhost:" + SERVER_PORT + "/loading";
-            BrowserHomePageOpener.open(loadingPageUrl);
+            if (isNull(server)) {
+                int port = getServerPort();
+                HttpServer server = HttpServer.create(new InetSocketAddress(port), 0); // start on any address
+                server.createContext("/", new LoadingPageHandler());
+                server.start();
+                this.server = server;
+                log.info("Loading page http server is started on port {}", port);
+                if (shouldOpenHomePageAfterStart()) {
+                    String address = getServerAddress();
+                    String loadingPageUrl = "http://" + address + ":" + port;
+                    BrowserHomePageOpener.open(loadingPageUrl);
+                }
+            }
         } catch (IOException e) {
             log.warn("Can't open /loading page", e);
         }
@@ -62,17 +68,30 @@ public class LoadingPageServer implements AutoCloseable{
             //noinspection DataFlowIssue
             server.stop(DEFAULT_CLOSE_DELAY_SEC);
             server = null;
+            log.info("Loading page http server is stopped");
         }
     }
+
 
     static class LoadingPageHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            if (Objects.equals(exchange.getRequestURI().getPath(), "/")) {
+                sendLoadingPage(exchange);
+            } else {
+                sendNotFound(exchange);  // is required for /templates/loading.html
+            }
+        }
+
+        private void sendLoadingPage(HttpExchange exchange) throws IOException {
             byte[] data;
             try (InputStream in = requireNonNull(getClass().getResourceAsStream("/templates/loading.html"))) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 in.transferTo(out);
-                data = out.toByteArray();
+                String page = out.toString(UTF_8);
+                page = setServerPortVariable(page);
+                data = page.getBytes(UTF_8);
+
             }
 
             exchange.sendResponseHeaders(200, data.length);
@@ -81,19 +100,15 @@ public class LoadingPageServer implements AutoCloseable{
                 os.write(data);
             }
         }
-    }
 
-    static class PortHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            String mainServerPort = String.valueOf(LoadingPageServerUtils.getMainAppPort());
+        private static void sendNotFound(HttpExchange exchange) throws IOException {
+            exchange.sendResponseHeaders(404, -1);
+        }
 
-            exchange.sendResponseHeaders(200, mainServerPort.length());
-
-            try (OutputStream os = exchange.getResponseBody()) {
-                byte[] data = mainServerPort.getBytes(UTF_8);
-                os.write(data);
-            }
+        private static String setServerPortVariable(String page) {
+            String serverPort = String.valueOf(getServerPort());
+            return page.replace("{{ server.port }}", serverPort);
         }
     }
 }
+

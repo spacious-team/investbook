@@ -38,13 +38,13 @@ import static java.util.Objects.requireNonNull;
 
 @Slf4j
 @UtilityClass
-public class LoadingPageServerUtils {
+class LoadingPageHttpServerHelper {
 
     private static final String PROPERTIES_LOCATION_DIR = "app";
     private static final String DEFAULT_PROFILE = "conf";
     private static final List<String> profiles = new CopyOnWriteArrayList<>();
 
-    public static void setSpringProfilesFromArgs(String[] args) {
+    static void setSpringProfilesFromArgs(String[] args) {
         for (String arg : args) {
             if (arg.startsWith("--spring.profiles.active")) {
                 String[] _profiles = arg.replace("--spring.profiles.active", "")
@@ -59,7 +59,16 @@ public class LoadingPageServerUtils {
         }
     }
 
-    public static int getMainAppPort() {
+    static String getServerAddress() {
+        try {
+            return getProperty("server.address", "localhost");
+        } catch (Exception e) {
+            log.warn("Can't find 'server.address' property, fallback to default value: 'localhost'", e);
+            return "localhost";
+        }
+    }
+
+    static int getServerPort() {
         try {
             String value = getProperty("server.port", "2030");
             return Integer.parseInt(value);
@@ -69,7 +78,7 @@ public class LoadingPageServerUtils {
         }
     }
 
-    public static boolean shouldOpenHomePageAfterStart() {
+    static boolean shouldOpenHomePageAfterStart() {
         try {
             String value = getProperty("investbook.open-home-page-after-start", "true");
             return Boolean.parseBoolean(value);
@@ -101,7 +110,7 @@ public class LoadingPageServerUtils {
             properties.load(reader);
         } catch (Exception e) {
             // Properties file is not found in app installation path, read default file from class path
-            try (InputStream in = requireNonNull(LoadingPageServerUtils.class.getResourceAsStream("/" + file));
+            try (InputStream in = requireNonNull(LoadingPageHttpServerHelper.class.getResourceAsStream("/" + file));
                  Reader reader = new InputStreamReader(in, UTF_8)) {
                 properties.load(reader);
             }
