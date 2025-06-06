@@ -23,6 +23,7 @@ import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,6 +32,7 @@ import java.util.function.Consumer;
 /**
  * Performance test
  */
+@ActiveProfiles(profiles = {"core", "dev"})
 @SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:testdb;mode=mysql;non_keywords=value")
 class AbstractEntityRepositoryServiceTest {
 
