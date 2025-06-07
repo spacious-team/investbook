@@ -66,6 +66,7 @@
         <java.version>24</java.version>
         <lombok.version>1.18.38</lombok.version>
         <checkerframework.version>3.49.3</checkerframework.version>
+        <prod.run.args.spring.profiles>h2,conf</prod.run.args.spring.profiles> <!-- last wins -->
     </properties>
 
     <repositories>
@@ -476,6 +477,7 @@
                                         </javaOption> <!-- reduce VM.native_memory Code by 20MB -->
                                     </javaOptions>
                                     <arguments>
+                                        <agument>--spring.profiles.active=${prod.run.args.spring.profiles}</agument>
                                         <argument>--spring.config.additional-location=file:./app/</argument>
                                     </arguments>
                                     <input>${project.build.directory}/jpackage/input</input>
@@ -512,7 +514,9 @@
                                 </tags>
                                 <publish>true</publish>
                                 <env>
-                                    <BPE_LANG>C.UTF-8</BPE_LANG>
+                                    <!-- Env var name convention https://github.com/paketo-buildpacks/environment-variables?tab=readme-ov-file#configuration -->
+                                    <BPE_DEFAULT_LANG>C.UTF-8</BPE_DEFAULT_LANG>
+                                    <BPE_DEFAULT_SPRING_PROFILES_ACTIVE>${prod.run.args.spring.profiles}</BPE_DEFAULT_SPRING_PROFILES_ACTIVE>
                                 </env>
                                 <!-- Replace with 'paketobuildpacks/builder-jammy-java-tiny' if resolved
                                      https://github.com/paketo-buildpacks/jammy-tiny-stack/issues/202 -->
