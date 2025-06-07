@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="InvestbookApplication" type="Application" factoryName="Application">
-    <module name="investbook" />
     <option name="MAIN_CLASS_NAME" value="ru.investbook.InvestbookApplication" />
-    <option name="PROGRAM_PARAMETERS" value="--spring.profiles.active=core,dev" />
+    <module name="investbook" />
+    <option name="PROGRAM_PARAMETERS" value="--spring.profiles.active=dev" />
     <option name="VM_PARAMETERS" value="-Xms16m -XX:MinHeapFreeRatio=1 -XX:MaxHeapFreeRatio=5 -XX:G1PeriodicGCInterval=5000 -XX:GCTimeRatio=1 -XX:MaxGCPauseMillis=2000 -XX:NativeMemoryTracking=summary" />
     <method v="2">
       <option name="Make" enabled="true" />

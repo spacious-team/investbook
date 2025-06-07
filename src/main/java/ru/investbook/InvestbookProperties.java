@@ -39,7 +39,7 @@ import static java.util.Objects.requireNonNull;
 @ConfigurationProperties("investbook")
 public class InvestbookProperties implements InitializingBean {
 
-    private Path dataPath = Paths.get(System.getProperty("user.home", ""), "investbook");
+    private Path dataPath = Paths.get("investbook");
 
     private Path reportBackupPath = dataPath.resolve("report-backups");
 
