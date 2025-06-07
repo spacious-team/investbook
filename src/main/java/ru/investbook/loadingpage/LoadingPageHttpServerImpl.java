@@ -38,7 +38,7 @@ import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.*;
 
 @Slf4j
 public class LoadingPageHttpServerImpl implements LoadingPageHttpServer {
-    public static final int DEFAULT_CLOSE_DELAY_SEC = 20;
+    public static final int DEFAULT_CLOSE_DELAY_SEC = 1;
     private volatile @Nullable HttpServer server;
 
     @Override
