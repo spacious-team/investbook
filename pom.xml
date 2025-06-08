@@ -28,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2025.2</version>
+    <version>2025.1.1</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -62,7 +62,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>25.2</win.msi.version>
+        <win.msi.version>25.1.1</win.msi.version>
         <java.version>24</java.version>
         <lombok.version>1.18.38</lombok.version>
         <checkerframework.version>3.49.3</checkerframework.version>
