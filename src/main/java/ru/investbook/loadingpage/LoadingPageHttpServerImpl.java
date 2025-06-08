@@ -38,7 +38,6 @@ import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.*;
 
 @Slf4j
 public class LoadingPageHttpServerImpl implements LoadingPageHttpServer {
-    public static final int DEFAULT_CLOSE_DELAY_SEC = 20;
     private volatile @Nullable HttpServer server;
 
     @Override
@@ -66,7 +65,7 @@ public class LoadingPageHttpServerImpl implements LoadingPageHttpServer {
     public void close() {
         if (nonNull(server)) {
             //noinspection DataFlowIssue
-            server.stop(DEFAULT_CLOSE_DELAY_SEC);
+            server.stop(0);
             server = null;
             log.info("Loading page http server is stopped");
         }
