@@ -8,7 +8,7 @@
 После установки в файле `application-conf.properties` необходимо прописать
 [source,properties]
 ----
-spring.profiles.active=core,mariadb,conf
+spring.profiles.active=mariadb
 ----
 и указать логин и пароль доступа к БД
 [source,properties]

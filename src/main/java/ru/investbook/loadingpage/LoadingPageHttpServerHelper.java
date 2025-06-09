@@ -40,7 +40,7 @@ import static java.util.Objects.requireNonNull;
 @UtilityClass
 class LoadingPageHttpServerHelper {
 
-    private static final String PROPERTIES_LOCATION_DIR = "app";
+    private static final String[] PROPERTIES_LOCATION_DIR = {"./", "./app"};
     private static final String DEFAULT_PROFILE = "conf";
     private static final List<String> profiles = new CopyOnWriteArrayList<>();
 
@@ -107,16 +107,23 @@ class LoadingPageHttpServerHelper {
     private static Properties loadProperties(String profile) throws IOException {
         Properties properties = new Properties();
         String file = "application-" + profile + ".properties";
-        Path path = Path.of(PROPERTIES_LOCATION_DIR).resolve(file);
-        try (Reader reader = Files.newBufferedReader(path)) {  // default is UTF_8
-            properties.load(reader);
-            log.trace("Read profile '{}' from file {}", profile, path);
+        try {
+            for (String dir : PROPERTIES_LOCATION_DIR) {
+                Path path = Path.of(dir).resolve(file);
+                try (Reader reader = Files.newBufferedReader(path)) {  // default is UTF_8
+                    properties.load(reader);
+                    log.trace("Read properties '{}' from file {}", profile, path);
+                    break;
+                } catch (Exception ignore) {
+                }
+                throw new RuntimeException("Can't find properties file");
+            }
         } catch (Exception e) {
             // Properties file is not found in app installation path, read default file from class path
             try (InputStream in = requireNonNull(LoadingPageHttpServerHelper.class.getResourceAsStream("/" + file));
                  Reader reader = new InputStreamReader(in, UTF_8)) {
                 properties.load(reader);
-                log.trace("Read profile '{}' from classpath:/{}", profile, file);
+                log.trace("Read properties '{}' from classpath:/{}", profile, file);
             }
         }
         return properties;

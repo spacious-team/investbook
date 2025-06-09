@@ -9,7 +9,7 @@
 Поддерживаются версии, указанные в документации [Flyway](https://documentation.red-gate.com/fd/mariadb-184127600.html).
 После установки в файле `application-conf.properties` необходимо прописать
 ```
-spring.profiles.active=core,mariadb,conf
+spring.profiles.active=mariadb
 ```
 и указать логин и пароль доступа к БД
 ```
