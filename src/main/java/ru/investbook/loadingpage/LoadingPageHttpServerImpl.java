@@ -62,12 +62,13 @@ public class LoadingPageHttpServerImpl implements LoadingPageHttpServer {
     }
 
     @Override
+    @SuppressWarnings({"dereference.of.nullable","DataFlowIssue"})
     public void close() {
         if (nonNull(server)) {
-            //noinspection DataFlowIssue
+            InetSocketAddress address = server.getAddress();
             server.stop(0);
             server = null;
-            log.info("Loading page http server is stopped");
+            log.info("Loading page http server is stopped on {}", address);
         }
     }
 

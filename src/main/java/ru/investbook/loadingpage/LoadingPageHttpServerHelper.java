@@ -94,11 +94,13 @@ class LoadingPageHttpServerHelper {
                 Properties properties = loadProperties(profile);
                 @Nullable String value = properties.getProperty(key, null);
                 if (value != null) {
+                    log.trace("Get property {}={}", key, value);
                     return value;
                 }
             } catch (Exception ignore) {
             }
         }
+        log.trace("Get property default value {}={}", key, defaultValue);
         return defaultValue;
     }
 
@@ -108,11 +110,13 @@ class LoadingPageHttpServerHelper {
         Path path = Path.of(PROPERTIES_LOCATION_DIR).resolve(file);
         try (Reader reader = Files.newBufferedReader(path)) {  // default is UTF_8
             properties.load(reader);
+            log.trace("Read profile '{}' from file {}", profile, path);
         } catch (Exception e) {
             // Properties file is not found in app installation path, read default file from class path
             try (InputStream in = requireNonNull(LoadingPageHttpServerHelper.class.getResourceAsStream("/" + file));
                  Reader reader = new InputStreamReader(in, UTF_8)) {
                 properties.load(reader);
+                log.trace("Read profile '{}' from classpath:/{}", profile, file);
             }
         }
         return properties;
