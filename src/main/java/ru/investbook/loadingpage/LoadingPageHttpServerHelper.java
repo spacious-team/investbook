@@ -54,9 +54,9 @@ class LoadingPageHttpServerHelper {
                 profiles.clear();
                 profiles.addAll(List.of(_profiles));
                 Collections.reverse(profiles);  // last spring profile property should win
-                profiles.add(DEFAULT_PROFILE);
             }
         }
+        profiles.add(DEFAULT_PROFILE);
     }
 
     static String getServerAddress() {
@@ -107,25 +107,21 @@ class LoadingPageHttpServerHelper {
     private static Properties loadProperties(String profile) throws IOException {
         Properties properties = new Properties();
         String file = "application-" + profile + ".properties";
-        try {
-            for (String dir : PROPERTIES_LOCATION_DIR) {
-                Path path = Path.of(dir).resolve(file);
-                try (Reader reader = Files.newBufferedReader(path)) {  // default is UTF_8
-                    properties.load(reader);
-                    log.trace("Read properties '{}' from file {}", profile, path);
-                    break;
-                } catch (Exception ignore) {
-                }
-                throw new RuntimeException("Can't find properties file");
-            }
-        } catch (Exception e) {
-            // Properties file is not found in app installation path, read default file from class path
-            try (InputStream in = requireNonNull(LoadingPageHttpServerHelper.class.getResourceAsStream("/" + file));
-                 Reader reader = new InputStreamReader(in, UTF_8)) {
+        for (String dir : PROPERTIES_LOCATION_DIR) {
+            Path path = Path.of(dir).resolve(file);
+            try (Reader reader = Files.newBufferedReader(path)) {  // default is UTF_8
                 properties.load(reader);
-                log.trace("Read properties '{}' from classpath:/{}", profile, file);
+                log.trace("Read properties '{}' from file {}", profile, path);
+                return properties;
+            } catch (Exception ignore) {
             }
         }
-        return properties;
+        // Properties file is not found in app installation path, read default file from class path
+        try (InputStream in = requireNonNull(LoadingPageHttpServerHelper.class.getResourceAsStream("/" + file));
+             Reader reader = new InputStreamReader(in, UTF_8)) {
+            properties.load(reader);
+            log.trace("Read properties '{}' from classpath:/{}", profile, file);
+            return properties;
+        }
     }
 }
