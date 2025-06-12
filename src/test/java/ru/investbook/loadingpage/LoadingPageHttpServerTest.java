@@ -27,8 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.investbook.BrowserHomePageOpener;
 
 import static org.mockito.Mockito.times;
-import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.getServerAddress;
-import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.getServerPort;
+import static ru.investbook.loadingpage.PropertiesGetter.*;
 
 @ExtendWith(MockitoExtension.class)
 class LoadingPageHttpServerTest {
@@ -45,7 +44,9 @@ class LoadingPageHttpServerTest {
         try (MockedStatic<BrowserHomePageOpener> browserOpenerMock = Mockito.mockStatic(BrowserHomePageOpener.class)) {
             loadingPageHttpServer.start();
 
-            String expectedUrl = "http://" + getServerAddress() + ":" + getServerPort();
+            String expectedUrl = "http://" +
+                    getProperty("server.address", "localhost") + ":" +
+                    getIntProperty("server.port", 2030);
             browserOpenerMock.verify(() -> BrowserHomePageOpener.open(expectedUrl), times(1));
         }
     }

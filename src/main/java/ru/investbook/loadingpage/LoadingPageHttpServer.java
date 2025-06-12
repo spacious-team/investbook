@@ -23,7 +23,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import java.util.Objects;
 
 import static ru.investbook.loadingpage.LoadingPageHttpServer.Implementation.INSTANCE;
-import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.setSpringProfilesFromArgs;
+import static ru.investbook.loadingpage.PropertiesGetter.setSpringProfilesFromArgs;
 
 public interface LoadingPageHttpServer extends AutoCloseable {
 

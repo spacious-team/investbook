@@ -34,7 +34,7 @@ import java.util.Objects;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.*;
-import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.*;
+import static ru.investbook.loadingpage.PropertiesGetter.*;
 
 @Slf4j
 public class LoadingPageHttpServerImpl implements LoadingPageHttpServer {
@@ -44,14 +44,14 @@ public class LoadingPageHttpServerImpl implements LoadingPageHttpServer {
     public void start() {
         try {
             if (isNull(server)) {
-                int port = getServerPort();
+                int port = getIntProperty("server.port", 2030);
                 HttpServer server = HttpServer.create(new InetSocketAddress(port), 0); // start on any address
                 server.createContext("/", new LoadingPageHandler());
                 server.start();
                 this.server = server;
                 log.info("Loading page http server is started on port {}", port);
-                if (shouldOpenHomePageAfterStart()) {
-                    String address = getServerAddress();
+                if (getBooleanProperty("investbook.open-home-page-after-start", true)) {
+                    String address = getProperty("server.address", "localhost");
                     String loadingPageUrl = "http://" + address + ":" + port;
                     BrowserHomePageOpener.open(loadingPageUrl);
                 }
@@ -62,7 +62,7 @@ public class LoadingPageHttpServerImpl implements LoadingPageHttpServer {
     }
 
     @Override
-    @SuppressWarnings({"dereference.of.nullable","DataFlowIssue"})
+    @SuppressWarnings({"dereference.of.nullable", "DataFlowIssue"})
     public void close() {
         if (nonNull(server)) {
             InetSocketAddress address = server.getAddress();
@@ -106,8 +106,8 @@ public class LoadingPageHttpServerImpl implements LoadingPageHttpServer {
         }
 
         private static String setServerPortVariable(String page) {
-            String serverPort = String.valueOf(getServerPort());
-            return page.replace("{{ server.port }}", serverPort);
+            int serverPort = getIntProperty("server.port", 2030);
+            return page.replace("{{ server.port }}", String.valueOf(serverPort));
         }
     }
 }
