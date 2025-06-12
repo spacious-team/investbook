@@ -66,6 +66,7 @@
         <java.version>24</java.version>
         <lombok.version>1.18.38</lombok.version>
         <checkerframework.version>3.49.3</checkerframework.version>
+        <checkerframework.skipDefs>-AskipDefs=.*</checkerframework.skipDefs>  <!-- overdated by 'nullcheck' profile -->
     </properties>
 
     <repositories>
@@ -275,9 +276,7 @@
                     </annotationProcessors>
                     <compilerArgs combine.children="append">
                         <!--arg>-Awarns</arg-->
-                        <!-- V2022_1_0_1.class нельзя изменять, чтобы не менялась чек сумма миграции -->
-                        <!-- Классы Entity(Pk)?_ сгенерированы hibernate-jpamodelgen -->
-                        <arg>-AskipDefs=(Test$|V2022_1_0_1|Entity(Pk)?_$|generated.ValCurs)</arg>
+                        <arg>${checkerframework.skipDefs}</arg>
                         <!-- Checker framework inner file https://github.com/typetools/checker-framework/blob/master/checker/src/main/java/org/checkerframework/checker/nullness/permit-nullness-assertion-exception.astub -->
                         <arg>-Astubs=permit-nullness-assertion-exception.astub${path.separator}${project.basedir}/checkerframework.astub</arg>
                         <arg>-AsuppressWarnings=methodref,type.arguments.not.inferred,lambda.param,expression.unparsable</arg>
@@ -315,30 +314,6 @@
                     PropertiesLauncher reads settings from resources/loader.properties
                     (https://docs.spring.io/spring-boot/docs/current/reference/html/executable-jar.html#executable-jar-property-launcher-features) -->
                     <layout>ZIP</layout>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.asciidoctor</groupId>
-                <artifactId>asciidoctor-maven-plugin</artifactId>
-                <version>3.2.0</version>
-                <executions>
-                    <execution>
-                        <id>generate-html-doc</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>process-asciidoc</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>target/classes/static/user-guide/</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <attributes>
-                        <project-version>${project.version}</project-version>
-                        <linkcss>true</linkcss>
-                        <source-highlighter>coderay</source-highlighter>
-                    </attributes>
                 </configuration>
             </plugin>
             <plugin>
@@ -380,6 +355,57 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>nullcheck</id>
+            <activation>
+                <property>
+                    <name>!no-nullcheck</name>
+                </property>
+            </activation>
+            <properties>
+                <!-- V2022_1_0_1.class нельзя изменять, чтобы не менялась чек сумма миграции -->
+                <!-- Классы Entity(Pk)?_ сгенерированы hibernate-jpamodelgen -->
+                <checkerframework.skipDefs>
+                    -AskipDefs=(Test$|V2022_1_0_1|Entity(Pk)?_$|generated.ValCurs)
+                </checkerframework.skipDefs>
+            </properties>
+        </profile>
+        <profile>
+            <id>doc</id>
+            <activation>
+                <property>
+                    <name>!no-doc</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctor-maven-plugin</artifactId>
+                        <version>3.2.0</version>
+                        <executions>
+                            <execution>
+                                <id>generate-html-doc</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>process-asciidoc</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>target/classes/static/user-guide/</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <attributes>
+                                <project-version>${project.version}</project-version>
+                                <linkcss>true</linkcss>
+                                <source-highlighter>coderay</source-highlighter>
+                            </attributes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>zip</id>
             <activation>

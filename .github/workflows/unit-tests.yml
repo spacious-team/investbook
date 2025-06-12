@@ -36,7 +36,7 @@ jobs:
 
       - name: SonarCloud Analyze
         run: >
-          mvn --batch-mode sonar:sonar
+          mvn --batch-mode --define no-doc sonar:sonar
           -Dsonar.projectKey=spacious-team_investbook
           -Dsonar.organization=spacious-team
           -Dsonar.host.url=https://sonarcloud.io
