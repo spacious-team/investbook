@@ -502,8 +502,6 @@
                                         </javaOption> <!-- reduce VM.native_memory Code by 20MB -->
                                     </javaOptions>
                                     <arguments>
-                                        <!-- Не используется в текущий момент из коробки.
-                                             Нужно на случай, если пользователь создаст файл конфигурации самостоятельно -->
                                         <argument>--spring.config.additional-location=file:./app/</argument>
                                     </arguments>
                                     <input>${project.build.directory}/jpackage/input</input>
@@ -542,7 +540,7 @@
                                 <env>
                                     <!-- Env var name convention https://github.com/paketo-buildpacks/environment-variables?tab=readme-ov-file#configuration -->
                                     <BPE_DEFAULT_LANG>C.UTF-8</BPE_DEFAULT_LANG>
-                                    <BPE_DEFAULT_SPRING_CONFIG_IMPORT>classpath:application-conf.properties</BPE_DEFAULT_SPRING_CONFIG_IMPORT>
+                                    <BPE_DEFAULT_SPRING_PROFILES_ACTIVE>prod</BPE_DEFAULT_SPRING_PROFILES_ACTIVE>
                                 </env>
                                 <!-- Replace with 'paketobuildpacks/builder-jammy-java-tiny' if resolved
                                      https://github.com/paketo-buildpacks/jammy-tiny-stack/issues/202 -->
