@@ -7,9 +7,9 @@
 
 Возможен переход на [MariaDB](https://downloads.mariadb.org/).
 Поддерживаются версии, указанные в документации [Flyway](https://documentation.red-gate.com/fd/mariadb-184127600.html).
-После установки в файле `application-conf.properties` необходимо прописать
+После установки в файле `application.properties` необходимо изменить настройку параметра `spring.config.import` на значение
 ```
-spring.profiles.active=core,mariadb,conf
+spring.config.import=classpath:application-mariadb.properties
 ```
 и указать логин и пароль доступа к БД
 ```
