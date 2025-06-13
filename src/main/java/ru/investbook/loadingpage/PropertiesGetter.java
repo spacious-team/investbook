@@ -45,8 +45,8 @@ import static java.util.Objects.requireNonNull;
 @Slf4j
 @UtilityClass
 class PropertiesGetter {
-
-    private static final String[] PROPERTIES_LOCATION_DIR = {"./", "./app"};
+    // ./app for msi installation
+    private static final String[] PROPERTIES_LOCATION_DIR = {"./", "./config", "./app"};
     private static final String DEFAULT_PROFILE = "conf";
     private static final List<String> args = new CopyOnWriteArrayList<>();
     private static final List<String> profiles = new CopyOnWriteArrayList<>();
