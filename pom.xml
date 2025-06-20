@@ -467,8 +467,8 @@
                         </executions>
                     </plugin>
                     <plugin>
-                        <!-- jpackage requires Wix 3: https://wixtoolset.org/docs/wix3/ (only Wix, Toolset not required) -->
-                        <!-- https://github.panteleyev.org/jpackage-maven-plugin/examples/executions.html-->
+                        <!-- jpackage requires Wix: https://docs.firegiant.com/wix/using-wix/ -->
+                        <!-- https://github.panteleyev.org/jpackage-maven-plugin/examples/executions.html -->
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
                         <version>1.6.6</version>
@@ -532,8 +532,10 @@
                             </layers>
                             <image>
                                 <!-- ${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX} defined in .github/workflows/publish-docker.yml -->
+                                <!--suppress UnresolvedMavenProperty -->
                                 <name>spaciousteam/investbook:latest${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX}</name>
                                 <tags>
+                                    <!--suppress UnresolvedMavenProperty -->
                                     <tag>spaciousteam/investbook:${project.version}${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX}</tag>
                                 </tags>
                                 <publish>true</publish>
