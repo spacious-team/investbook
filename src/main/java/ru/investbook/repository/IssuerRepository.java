@@ -19,9 +19,10 @@
 package ru.investbook.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.IssuerEntity;
 
 @Transactional(readOnly = true)
-public interface IssuerRepository extends JpaRepository<IssuerEntity, Integer> {
+public interface IssuerRepository extends JpaRepository<IssuerEntity, Integer>, QuerydslPredicateExecutor<IssuerEntity> {
 }

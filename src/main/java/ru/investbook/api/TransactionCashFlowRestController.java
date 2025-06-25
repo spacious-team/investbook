@@ -18,6 +18,7 @@
 
 package ru.investbook.api;
 
+import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -33,6 +34,7 @@ import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -90,14 +92,19 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
             @Nullable
             Integer eventType,
             @Parameter(hidden = true)
+            @Nullable
+            @QuerydslPredicate(root = TransactionCashFlowEntity.class)
+            Predicate predicate,
+            @Parameter(hidden = true)
             Pageable pageable
     ) {
-        if (portfolio == null && tradeId == null && eventType == null) {
-            return super.get(pageable);
+        if (portfolio != null || tradeId != null || eventType != null) {
+            return filterByEventType(
+                    transactionRestController.get(portfolio, tradeId, predicate, Pageable.unpaged()),
+                    eventType);
         }
-        return filterByEventType(
-                transactionRestController.get(portfolio, tradeId, Pageable.unpaged()),
-                eventType);
+
+        return super.get(predicate, pageable);
     }
 
     private Page<TransactionCashFlow> filterByEventType(Page<Transaction> transactions,
