@@ -67,6 +67,7 @@
         <lombok.version>1.18.38</lombok.version>
         <checkerframework.version>3.49.3</checkerframework.version>
         <checkerframework.skipDefs>-AskipDefs=.*</checkerframework.skipDefs>  <!-- overdated by 'nullcheck' profile -->
+        <querydsl.version>5.1.0</querydsl.version>
     </properties>
 
     <repositories>
@@ -227,6 +228,19 @@
             <version>4.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-jpa</artifactId>
+            <version>${querydsl.version}</version>
+            <classifier>jakarta</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-apt</artifactId>
+            <version>${querydsl.version}</version>
+            <classifier>jakarta</classifier>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -262,6 +276,12 @@
                             <artifactId>checker</artifactId>
                             <version>${checkerframework.version}</version>
                         </path>
+                        <path>
+                            <groupId>com.querydsl</groupId>
+                            <artifactId>querydsl-apt</artifactId>
+                            <version>${querydsl.version}</version>
+                            <classifier>jakarta</classifier>
+                        </path>
                     </annotationProcessorPaths>
                     <annotationProcessors>
                         <annotationProcessor>
@@ -272,6 +292,9 @@
                         </annotationProcessor>
                         <annotationProcessor>
                             org.checkerframework.checker.nullness.NullnessChecker
+                        </annotationProcessor>
+                        <annotationProcessor>
+                            com.querydsl.apt.jpa.JPAAnnotationProcessor
                         </annotationProcessor>
                     </annotationProcessors>
                     <compilerArgs combine.children="append">
@@ -348,6 +371,25 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>add-generated-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/annotations</source>
+                            </sources>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
