@@ -33,7 +33,9 @@
             </includes>
             <excludes>
                 <exclude>dir.xml</exclude>
+                <exclude>icon.icns</exclude>
                 <exclude>icon.ico</exclude>
+                <exclude>icon.png</exclude>
             </excludes>
         </fileSet>
     </fileSets>

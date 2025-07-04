@@ -29,7 +29,7 @@ jobs:
           wix extension add -g WixToolset.Ui.wixext/6.0.1
 
       - name: Build
-        run: mvn --batch-mode --activate-profiles msi package
+        run: mvn --batch-mode package
 
       - name: Attach MSI and ZIP to Release
         uses: softprops/action-gh-release@v2
@@ -38,21 +38,29 @@ jobs:
             target/investbook-*.zip
             target/jpackage/output/investbook-*.msi 
 
-  publish-deb:
+  publish-deb-and-rpm:
 
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-      # TODO
 
-  publish-rpm:
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '24'
+          distribution: 'liberica'
+          cache: maven
 
-    runs-on: ubuntu-latest
+      - name: Build
+        run: mvn --batch-mode --define no-zip package
 
-    steps:
-      - uses: actions/checkout@v4
-      # TODO
+      - name: Attach DEB and RPM to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            target/jpackage/output/investbook-*.deb 
+            target/jpackage/output/investbook-*.rpm 
 
   publish-mac:
 
@@ -60,4 +68,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      # TODO
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '24'
+          distribution: 'liberica'
+          cache: maven
+
+      - name: Build
+        run: mvn --batch-mode --define no-zip package
+
+      - name: Attach PKG to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            target/jpackage/output/investbook-*.pkg 
