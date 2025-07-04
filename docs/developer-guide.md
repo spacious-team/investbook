@@ -75,8 +75,8 @@ dotnet tool list --global
 ```shell
 ./mvnw package
 ```
-Zip-архив может быть [установлен](install-on-linux.md) на Linux и Mac. На Windows рекомендуется
-[установка](install-on-windows.md) через msi-инсталлятор.
+Zip-архив собирается на любой ОС в папке `target/`.
+Если команда запущена под Windows, то соберется msi-инсталлятор в папке `target/jpackage/output/`.
 
 ### Обновление maven wrapper
 Если требуется обновить maven wrapper, выполнить
