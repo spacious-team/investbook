@@ -2,7 +2,7 @@
 [<img src="https://github.com/spacious-team/investbook/assets/11336712/14847ff5-827e-4d0f-a4e9-882cb0d1397c" align="right"/>](README.md)<br/>
 
 [![java-version](https://img.shields.io/badge/java-24-brightgreen?style=flat-square)](https://openjdk.org/)
-[![spring-boot-version](https://img.shields.io/badge/spring--boot-3.5.0-brightgreen?style=flat-square)](https://github.com/spring-projects/spring-boot/releases)
+[![spring-boot-version](https://img.shields.io/badge/spring--boot-3.5.3-brightgreen?style=flat-square)](https://github.com/spring-projects/spring-boot/releases)
 [![hits-of-code](https://img.shields.io/badge/dynamic/json?style=flat-square&color=lightblue&label=hits-of-code&url=https://hitsofcode.com/github/spacious-team/investbook/json?branch=develop&query=$.count)](https://hitsofcode.com/github/spacious-team/investbook/view?branch=develop)
 [![github-closed-pull-requests](https://img.shields.io/github/issues-pr-closed/spacious-team/investbook?style=flat-square&color=brightgreen)](https://github.com/spacious-team/investbook/pulls?q=is%3Apr+is%3Aclosed)
 [![Unit tests](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fspacious-team%2Finvestbook%2Fbadge%3Fref%3Ddevelop&style=flat-square&label=test&logo=none)](
@@ -190,7 +190,8 @@ Investbook также может быть запущен в [docker](docs/run-by
 Помочь можно, расширяя или корректируя [документацию](https://github.com/spacious-team/investbook/files/5398264/github.docx),
 [сообщая](https://github.com/spacious-team/investbook/issues/new/choose) о проблемах в работе приложения,
 [предлагая](https://github.com/spacious-team/investbook/issues/new/choose) новую функциональность или дорабатывая код
-приложения Investbook.
+приложения Investbook. Разрабатывая Investbook, вы всегда будете работать с последними версиями Java, Spring Boot 
+и свежих версиях библиотек. 
 
 Также существует функционал [расширений](/docs/extension-developer-guide.md), который позволяет сторонним разработчикам
 расширить список поддерживаемых "из коробки" [брокеров](#брокеры). Расширения могут быть подключены по желанию пользователей
