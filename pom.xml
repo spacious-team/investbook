@@ -452,16 +452,16 @@
                         <artifactId>maven-assembly-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>jpackage</id>
+                                <id>copy installer files</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>single</goal>
                                 </goals>
                                 <configuration>
-                                    <finalName>jpackage</finalName>
+                                    <finalName>installer</finalName>
                                     <appendAssemblyId>false</appendAssemblyId>
                                     <descriptors>
-                                        <descriptor>src/main/assembly/jpackage/dir.xml</descriptor>
+                                        <descriptor>src/main/assembly/installer/dir.xml</descriptor>
                                     </descriptors>
                                 </configuration>
                             </execution>
@@ -495,8 +495,8 @@
                             <arguments>
                                 <argument>--spring.config.additional-location=file:./app/</argument>
                             </arguments>
-                            <input>${project.build.directory}/jpackage/input</input>
-                            <destination>${project.build.directory}/jpackage/output</destination>
+                            <input>${project.build.directory}/installer/input</input>
+                            <destination>${project.build.directory}/installer/output</destination>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -529,7 +529,7 @@
                                 </goals>
                                 <configuration>
                                     <type>MSI</type>
-                                    <icon>${project.basedir}/src/main/assembly/jpackage/icon.ico</icon>
+                                    <icon>${project.basedir}/src/main/assembly/installer/icon.ico</icon>
                                     <winDirChooser>true</winDirChooser>
                                     <winPerUserInstall>true</winPerUserInstall>
                                     <winMenu>true</winMenu>
@@ -547,6 +547,7 @@
             <activation>
                 <os>
                     <family>unix</family>
+                    <name>Linux</name>
                 </os>
                 <property>
                     <name>!no-installer</name>
@@ -567,7 +568,7 @@
                                 </goals>
                                 <configuration>
                                     <type>DEB</type>
-                                    <icon>${project.basedir}/src/main/assembly/jpackage/icon.png</icon>
+                                    <icon>${project.basedir}/src/main/assembly/installer/icon.png</icon>
                                 </configuration>
                             </execution>
                             <execution>
@@ -578,7 +579,7 @@
                                 </goals>
                                 <configuration>
                                     <type>RPM</type>
-                                    <icon>${project.basedir}/src/main/assembly/jpackage/icon.png</icon>
+                                    <icon>${project.basedir}/src/main/assembly/installer/icon.png</icon>
                                 </configuration>
                             </execution>
                         </executions>
@@ -611,7 +612,7 @@
                                 </goals>
                                 <configuration>
                                     <type>PKG</type>
-                                    <icon>${project.basedir}/src/main/assembly/jpackage/icon.icns</icon>
+                                    <icon>${project.basedir}/src/main/assembly/installer/icon.icns</icon>
                                 </configuration>
                             </execution>
                         </executions>

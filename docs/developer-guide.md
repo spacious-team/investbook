@@ -18,10 +18,11 @@ git clone https://github.com/spacious-team/investbook.git
 окружения `JAVA_HOME` и `PATH`, например для Windows 10 по этой [инструкции](https://csharpcoderr.com/5351/).
 
 ### Установка Wix
-Для сборки msi пакета, устанавливающего Investbook под Windows, требуется Wix.
+Эта глава относится только к тем, кто работает на Windows.
+Для сборки msi пакета, устанавливающего Investbook на Windows, требуется Wix.
 Wix в свою очередь требует установки [.NET](https://dotnet.microsoft.com/en-us/download/dotnet).
 
-На Windows вы можете установить .NET без прав администратора в директорию `%LOCALAPPDATA%\Programs\dotnet`.
+Вы можете установить .NET без прав администратора в директорию `%LOCALAPPDATA%\Programs\dotnet`.
 Для этого нужно скачать не msi установщик, а архив "binaries", который требуется распаковать в указанную папку.
 После этого нужно отредактировать переменные окружения (win+R -> `rundll32 sysdm.cpl,EditEnvironmentVariables`):
 ```shell
@@ -68,15 +69,17 @@ dotnet tool list --global
 ```
 
 ### Сборка релиза
-Релиз состоит из двух файлов: zip-архива и msi-установщика. Msi-установщик собирается только на Windows.
-Поэтому если вы работаете под Windows, необходимо установить [Wix](#установка-wix).
+Если вы работаете на Windows, то перед сборкой релиза необходимо установить [Wix](#установка-wix).
 
-Для сборки релиза запустите
+Для сборки релиза запустите:
 ```shell
 ./mvnw package
 ```
-Zip-архив собирается на любой ОС в папке `target/`.
-Если команда запущена под Windows, то соберется msi-инсталлятор в папке `target/jpackage/output/`.
+В зависимости от ОС в папке `target/installer/output/` соберется:
+- msi инсталлятор на Windows;
+- deb и rpm пакет на Unix;
+- pkg пакет на Mac.
+Portable версия в zip архиве собирается на любой ОС в папке `target/`.
 
 ### Обновление maven wrapper
 Если требуется обновить maven wrapper, выполнить

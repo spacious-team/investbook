@@ -26,7 +26,7 @@
     <baseDirectory>input</baseDirectory>
     <fileSets>
         <fileSet>
-            <directory>src/main/assembly/jpackage</directory>
+            <directory>src/main/assembly/installer</directory>
             <outputDirectory/>
             <includes>
                 <include>*</include>
@@ -50,7 +50,7 @@
             <outputDirectory/>
         </file>
         <file>
-            <source>src/main/assembly/jpackage/extensions/README.md</source>
+            <source>src/main/assembly/installer/extensions/README.md</source>
             <outputDirectory>extensions</outputDirectory>
         </file>
         <file>

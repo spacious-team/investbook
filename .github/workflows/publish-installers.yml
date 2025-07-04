@@ -36,7 +36,7 @@ jobs:
         with:
           files: |
             target/investbook-*.zip
-            target/jpackage/output/investbook-*.msi 
+            target/installer/output/*.msi 
 
   publish-deb-and-rpm:
 
@@ -59,8 +59,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            target/jpackage/output/investbook-*.deb 
-            target/jpackage/output/investbook-*.rpm 
+            target/installer/output/*.deb 
+            target/installer/output/*.rpm 
 
   publish-mac:
 
@@ -83,4 +83,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            target/jpackage/output/investbook-*.pkg 
+            target/installer/output/*.pkg 
