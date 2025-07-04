@@ -51,8 +51,8 @@ dotnet tool list --global
 
 ### Компиляция
 Компиляция запускается командой:
-```
-mvn clean compile
+```shell
+./mvnw clean compile
 ```
 Она очищает сгенерированные ранее классы (например JAXB2), которые возможно устарели,
 и генерирует файл `META_INF/build-info.properties`, который используется приложением в своей работе.
@@ -63,8 +63,8 @@ mvn clean compile
 
 Если у вас другая среда разработки или вы работаете из консоли, то приложение можно запустить без предварительной
 компиляции командой:
-```
-mvn spring-boot:run
+```shell
+./mvnw spring-boot:run
 ```
 
 ### Сборка релиза
@@ -72,8 +72,14 @@ mvn spring-boot:run
 Поэтому если вы работаете под Windows, необходимо установить [Wix](#установка-wix).
 
 Для сборки релиза запустите
-```
-mvn package
+```shell
+./mvnw package
 ```
 Zip-архив может быть [установлен](install-on-linux.md) на Linux и Mac. На Windows рекомендуется
 [установка](install-on-windows.md) через msi-инсталлятор.
+
+### Обновление maven wrapper
+Если требуется обновить maven wrapper, выполнить
+```shell
+mvn wrapper:wrapper -Dtype=only-script
+```
