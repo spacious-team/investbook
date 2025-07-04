@@ -438,11 +438,14 @@
             </build>
         </profile>
         <profile>
-            <id>jpackage</id>
+            <id>msi</id>
             <activation>
                 <os>
                     <family>windows</family>
                 </os>
+                <property>
+                    <name>!no-msi</name>
+                </property>
             </activation>
             <build>
                 <plugins>

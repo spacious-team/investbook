@@ -15,12 +15,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '24'
           distribution: 'liberica'
           cache: maven
+
       - name: Publish
         run: mvn --batch-mode --activate-profiles docker --define no-zip spring-boot:build-image
         env:
