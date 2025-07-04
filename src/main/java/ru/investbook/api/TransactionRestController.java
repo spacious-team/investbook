@@ -18,6 +18,8 @@
 
 package ru.investbook.api;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -31,6 +33,7 @@ import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.TransactionConverter;
+import ru.investbook.entity.QTransactionEntity;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.repository.TransactionRepository;
@@ -82,16 +86,24 @@ public class TransactionRestController extends AbstractRestController<Integer, T
                                  @Nullable
                                  String tradeId,
                                  @Parameter(hidden = true)
+                                 @Nullable
+                                 @QuerydslPredicate(root = TransactionEntity.class)
+                                 Predicate predicate,
+                                 @Parameter(hidden = true)
                                  Pageable pageable) {
-        if (portfolio != null && tradeId != null) {
-            return getByPortfolioAndTradeId(portfolio, tradeId);
-        } else if (portfolio != null) {
-            return getByPortfolio(portfolio, pageable);
-        } else if (tradeId != null) {
-            return getByTradeId(tradeId, pageable);
-        } else {
-            return super.get(pageable);
+        BooleanBuilder combinedPredicate = new BooleanBuilder();
+
+        if (portfolio != null) {
+            combinedPredicate.and(QTransactionEntity.transactionEntity.portfolio.eq(portfolio));
         }
+        if (tradeId != null) {
+            combinedPredicate.and(QTransactionEntity.transactionEntity.tradeId.eq(tradeId));
+        }
+        if (predicate != null) {
+            combinedPredicate.and(predicate);
+        }
+
+        return super.get(combinedPredicate, pageable);
     }
 
     private Page<Transaction> getByPortfolio(String portfolio, Pageable pageable) {
