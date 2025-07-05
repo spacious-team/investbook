@@ -66,8 +66,9 @@
         <java.version>24</java.version>
         <lombok.version>1.18.38</lombok.version>
         <checkerframework.version>3.49.3</checkerframework.version>
-        <checkerframework.skipDefs>-AskipDefs=.*</checkerframework.skipDefs>  <!-- overdated by 'nullcheck' profile -->
         <jpackage.version>1.6.6</jpackage.version>
+        <checkerframework.skipDefs>-AskipDefs=.*</checkerframework.skipDefs>  <!-- overridden by 'nullcheck' profile -->
+        <extension.loader.path>./extensions</extension.loader.path>  <!-- overridden by installer-* profiles -->
     </properties>
 
     <repositories>
@@ -481,17 +482,15 @@
                             <licenseFile>${project.basedir}/LICENSE</licenseFile>
                             <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
                             <javaOptions>
-                                <javaOption>-Dloader.path=./app/extensions</javaOption>
+                                <javaOption>-Dloader.path=${extension.loader.path}</javaOption>
                                 <javaOption>-Xms16m</javaOption>
                                 <javaOption>-XX:MinHeapFreeRatio=1</javaOption>
                                 <javaOption>-XX:MaxHeapFreeRatio=5</javaOption>
                                 <javaOption>-XX:G1PeriodicGCInterval=5000</javaOption>
                                 <javaOption>-XX:GCTimeRatio=1</javaOption>
                                 <javaOption>-XX:MaxGCPauseMillis=2000</javaOption>
-                                <javaOption>-Xverify:none
-                                </javaOption> <!-- reduce VM.native_memory Class by 6MB -->
-                                <javaOption>-XX:-TieredCompilation
-                                </javaOption> <!-- reduce VM.native_memory Code by 20MB -->
+                                <javaOption>-Xverify:none</javaOption> <!-- reduce VM.native_memory Class by 6MB -->
+                                <javaOption>-XX:-TieredCompilation</javaOption> <!-- reduce VM.native_memory Code by 20MB -->
                             </javaOptions>
                             <input>${project.build.directory}/installer/input</input>
                             <destination>${project.build.directory}/installer/output</destination>
@@ -510,6 +509,9 @@
                     <name>!no-installer</name>
                 </property>
             </activation>
+            <properties>
+                <extension.loader.path>./app/extensions</extension.loader.path>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -544,7 +546,7 @@
             </build>
         </profile>
         <profile>
-            <id>installer-unix</id>
+            <id>installer-linux</id>
             <activation>
                 <os>
                     <family>unix</family>
@@ -554,6 +556,9 @@
                     <name>!no-installer</name>
                 </property>
             </activation>
+            <properties>
+                <extension.loader.path>/opt/investbook/lib/app/extensions</extension.loader.path>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -572,7 +577,9 @@
                                     <icon>${project.basedir}/src/main/assembly/installer/icon.png</icon>
                                     <linuxDebMaintainer>spacious-team@ya.ru</linuxDebMaintainer>
                                     <arguments>
-                                        <argument>--spring.config.additional-location=file:/opt/investbook/lib/app/</argument>
+                                        <argument>
+                                            --spring.config.additional-location=file:/opt/investbook/lib/app/
+                                        </argument>
                                     </arguments>
                                 </configuration>
                             </execution>
@@ -587,7 +594,9 @@
                                     <icon>${project.basedir}/src/main/assembly/installer/icon.png</icon>
                                     <linuxRpmLicenseType>AGPL-3.0</linuxRpmLicenseType>
                                     <arguments>
-                                        <argument>--spring.config.additional-location=file:/opt/investbook/lib/app/</argument>
+                                        <argument>
+                                            --spring.config.additional-location=file:/opt/investbook/lib/app/
+                                        </argument>
                                     </arguments>
                                 </configuration>
                             </execution>
@@ -606,6 +615,9 @@
                     <name>!no-installer</name>
                 </property>
             </activation>
+            <properties>
+                <extension.loader.path>/Applications/Investbook.app/Contents/app/extensions</extension.loader.path>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -623,7 +635,9 @@
                                     <type>PKG</type>
                                     <icon>${project.basedir}/src/main/assembly/installer/icon.icns</icon>
                                     <arguments>
-                                        <argument>--spring.config.additional-location=file:/Applications/Investbook.app/Contents/app</argument>
+                                        <argument>
+                                            --spring.config.additional-location=file:/Applications/Investbook.app/Contents/app/
+                                        </argument>
                                     </arguments>
                                 </configuration>
                             </execution>

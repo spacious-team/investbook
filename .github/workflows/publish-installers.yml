@@ -62,8 +62,43 @@ jobs:
             target/installer/output/*.deb 
             target/installer/output/*.rpm 
 
-  publish-mac:
+  publish-mac-arm64-arch:
 
+    # macos-latest is run on Apple's CPU
+    # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#standard-github-hosted-runners-for-public-repositories
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '24'
+          distribution: 'liberica'
+          cache: maven
+
+      - name: Build
+        run: mvn --batch-mode --define no-zip package
+
+      - name: Add arm64 arch to Package Name
+        run: |
+          cd target/installer/output/
+          ls -1 *.pkg | while read file; do
+              name=${file%.pkg}
+              mv "$file" "${name}-arm64.pkg"
+          done
+
+      - name: Attach PKG to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            target/installer/output/*.pkg 
+
+  publish-mac-intel-arch:
+
+    # macos-13 is run on Intel's CPU
+    # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#standard-github-hosted-runners-for-public-repositories
     runs-on: macos-13
 
     steps:
@@ -79,8 +114,16 @@ jobs:
       - name: Build
         run: mvn --batch-mode --define no-zip package
 
+      - name: Add intel arch to Package Name
+        run: |       
+          cd target/installer/output/
+          ls -1 *.pkg | while read file; do
+              name=${file%.pkg}
+              mv "$file" "${name}-intel.pkg"
+          done
+
       - name: Attach PKG to Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            target/installer/output/*.pkg 
+            target/installer/output/*.pkg

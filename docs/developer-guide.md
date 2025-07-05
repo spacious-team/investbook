@@ -77,7 +77,7 @@ dotnet tool list --global
 ```
 В зависимости от ОС в папке `target/installer/output/` соберется:
 - msi инсталлятор на Windows;
-- deb и rpm пакет на Unix;
+- deb и rpm пакет на Linux;
 - pkg пакет на Mac.
 Portable версия в zip архиве собирается на любой ОС в папке `target/`.
 
