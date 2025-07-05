@@ -478,6 +478,7 @@
                             <description>${project.description}</description>
                             <copyright>InvestBook, Copyright (C) 2020 Spacious Team</copyright>
                             <aboutUrl>https://github.com/spacious-team/investbook</aboutUrl>
+                            <licenseFile>${project.basedir}/LICENSE</licenseFile>
                             <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
                             <javaOptions>
                                 <javaOption>-Dloader.path=./app/extensions</javaOption>
@@ -492,9 +493,6 @@
                                 <javaOption>-XX:-TieredCompilation
                                 </javaOption> <!-- reduce VM.native_memory Code by 20MB -->
                             </javaOptions>
-                            <arguments>
-                                <argument>--spring.config.additional-location=file:./app/</argument>
-                            </arguments>
                             <input>${project.build.directory}/installer/input</input>
                             <destination>${project.build.directory}/installer/output</destination>
                         </configuration>
@@ -535,6 +533,9 @@
                                     <winMenu>true</winMenu>
                                     <winMenuGroup>Investbook</winMenuGroup>
                                     <winShortcut>true</winShortcut>
+                                    <arguments>
+                                        <argument>--spring.config.additional-location=file:./app/</argument>
+                                    </arguments>
                                 </configuration>
                             </execution>
                         </executions>
@@ -569,6 +570,10 @@
                                 <configuration>
                                     <type>DEB</type>
                                     <icon>${project.basedir}/src/main/assembly/installer/icon.png</icon>
+                                    <linuxDebMaintainer>spacious-team@ya.ru</linuxDebMaintainer>
+                                    <arguments>
+                                        <argument>--spring.config.additional-location=file:/opt/investbook/lib/app/</argument>
+                                    </arguments>
                                 </configuration>
                             </execution>
                             <execution>
@@ -580,6 +585,10 @@
                                 <configuration>
                                     <type>RPM</type>
                                     <icon>${project.basedir}/src/main/assembly/installer/icon.png</icon>
+                                    <linuxRpmLicenseType>AGPL-3.0</linuxRpmLicenseType>
+                                    <arguments>
+                                        <argument>--spring.config.additional-location=file:/opt/investbook/lib/app/</argument>
+                                    </arguments>
                                 </configuration>
                             </execution>
                         </executions>
@@ -613,6 +622,9 @@
                                 <configuration>
                                     <type>PKG</type>
                                     <icon>${project.basedir}/src/main/assembly/installer/icon.icns</icon>
+                                    <arguments>
+                                        <argument>--spring.config.additional-location=file:/Applications/Investbook.app/Contents/app</argument>
+                                    </arguments>
                                 </configuration>
                             </execution>
                         </executions>
