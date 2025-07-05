@@ -142,7 +142,11 @@ Investbook в сравнении с [Intelinvest](https://intelinvest.ru) и [Sn
 После загрузки отчета становится доступным аналитическая выгрузка в формате [excel файла](src/main/asciidoc/investbook-report.adoc). 
 
 ### Обновление приложения
-Процесс обновления на Windows не отличается от процесса первоначальной [установки](#установка).
+Процесс обновления на Windows не отличается от процесса первоначальной установки.
+
+Можете обратиться к подробной инструкции для операционных систем [windows](docs/install-on-windows.md),
+[mac](docs/install-on-mac.md) и [linux](docs/install-on-linux.md),
+а также к инструкции для [portable версии](docs/install-portable.md) и [docker версии](docs/run-by-docker.md).
 
 ### Документация
 Дополнительная информация может быть найдена в [документации](docs/documentation.md), также оффлайн документация всегда

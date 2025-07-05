@@ -149,7 +149,11 @@ After downloading the report, analytical download in [excel file](src/main/ascii
 format becomes available.
 
 ### Application update
-The update process on Windows is no different from [the initial installation process](#install).
+The update process on Windows does not differ from the process of the initial installation.
+
+You can refer to detailed instructions for [windows](docs/install-on-windows.md),
+[mac](docs/install-on-mac.md) and [linux](docs/install-on-linux.md).
+As well as to the instructions for the [portable version](docs/install-portable.md) and [docker version](docs/run-by-docker.md).
 
 ### Documentation
 Additional information can be found in [documentation](docs/documentation.md), also offline documentation is always 
