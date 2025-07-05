@@ -1,9 +1,9 @@
 #### Оглавление
-- [Установка на Windows](#установка-и-работа-на-windows)
-- [Установка на Windows из ZIP архива](install-on-windows-by-zip.md)
-- [Установка на Mac](install-on-linux.md)
+- [Установка на Windows](install-on-windows.md)
+- [Установка на Mac](install-on-mac.md)
 - [Установка на Linux](install-on-linux.md)
-- [Запуск в Docker](#запуск-investbook)
+- [Установка portable версии](install-portable.md)
+- [Запуск в Docker](run-by-docker.md)
 
 ### Запуск в Docker контейнере
 

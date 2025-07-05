@@ -120,15 +120,18 @@ write to [us](https://t.me/+IzYUY5hyvZtmOTIy). You can also use it already on yo
 [forms](src/main/asciidoc/investbook-forms.adoc) for entering information or
 [download](src/main/asciidoc/investbook-input-format.adoc) data from Excel file. Your broker's support can also be
 offered to third-party developers through extension functionality. Instructions for installing extensions are available for
-operating systems [windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md) and [linux](docs/install-on-linux.md).
+operating systems [windows](docs/install-on-windows.md), [mac](docs/install-on-mac.md) and [linux](docs/install-on-linux.md).
 
 ### Install
-Download the `.msi` installer from the [project] page (https://github.com/spacious-team/investbook/releases/latest)
-and run it.
+On the project [page](https://github.com/spacious-team/investbook/releases/latest) installers are provided
+for different operating systems.
 
-You can refer to more detailed instructions for installing and using the application for operating systems
-[windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md) and [linux](docs/install-on-linux.md).
-Investbook can also be run in [docker](docs/run-by-docker.md).
+You can refer to detailed installation instructions for operating systems
+[windows](docs/install-on-windows.md), [mac](docs/install-on-mac.md) and [linux](docs/install-on-linux.md).
+It is recommended to use one of these instructions.
+
+If you are an advanced user, you can install [portable version](docs/install-portable.md),
+or you can start the Investbook by [docker](docs/run-by-docker.md).
 
 ### Working with the application
 Launch the application via a shortcut on the Windows desktop, in the browser go to http://localhost:2030
@@ -146,10 +149,7 @@ After downloading the report, analytical download in [excel file](src/main/ascii
 format becomes available.
 
 ### Application update
-The update process on Windows is no different from the initial installation process. Use the instructions
-for operating systems [windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md) or
-[linux](docs/install-on-linux.md). Or, if Investbook was run in docker, use
-[instructions](docs/run-by-docker.md).
+The update process on Windows is no different from [the initial installation process](#install).
 
 ### Documentation
 Additional information can be found in [documentation](docs/documentation.md), also offline documentation is always 
