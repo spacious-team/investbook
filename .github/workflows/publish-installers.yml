@@ -1,0 +1,129 @@
+# https://github.com/softprops/action-gh-release#%EF%B8%8F-uploading-release-assets
+
+name: Attach Installers to Release Assets
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  publish-msi-and-zip:
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '24'
+          distribution: 'liberica'
+          cache: maven
+
+      - name: Set up Wix
+        run: |
+          dotnet tool install --global wix --version 6.0.1
+          wix extension add -g WixToolset.Util.wixext/6.0.1
+          wix extension add -g WixToolset.Ui.wixext/6.0.1
+
+      - name: Build
+        run: mvn --batch-mode package
+
+      - name: Attach MSI and ZIP to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            target/investbook-*.zip
+            target/installer/output/*.msi 
+
+  publish-deb-and-rpm:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '24'
+          distribution: 'liberica'
+          cache: maven
+
+      - name: Build
+        run: mvn --batch-mode --define no-zip package
+
+      - name: Attach DEB and RPM to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            target/installer/output/*.deb 
+            target/installer/output/*.rpm 
+
+  publish-mac-arm64-arch:
+
+    # macos-latest is run on Apple's CPU
+    # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#standard-github-hosted-runners-for-public-repositories
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '24'
+          distribution: 'liberica'
+          cache: maven
+
+      - name: Build
+        run: mvn --batch-mode --define no-zip package
+
+      - name: Add arm64 arch to Package Name
+        run: |
+          cd target/installer/output/
+          ls -1 *.pkg | while read file; do
+              name=${file%.pkg}
+              mv "$file" "${name}-arm64.pkg"
+          done
+
+      - name: Attach PKG to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            target/installer/output/*.pkg 
+
+  publish-mac-intel-arch:
+
+    # macos-13 is run on Intel's CPU
+    # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#standard-github-hosted-runners-for-public-repositories
+    runs-on: macos-13
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '24'
+          distribution: 'liberica'
+          cache: maven
+
+      - name: Build
+        run: mvn --batch-mode --define no-zip package
+
+      - name: Add intel arch to Package Name
+        run: |       
+          cd target/installer/output/
+          ls -1 *.pkg | while read file; do
+              name=${file%.pkg}
+              mv "$file" "${name}-intel.pkg"
+          done
+
+      - name: Attach PKG to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            target/installer/output/*.pkg

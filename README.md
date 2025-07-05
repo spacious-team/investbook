@@ -115,15 +115,18 @@ Investbook в сравнении с [Intelinvest](https://intelinvest.ru) и [Sn
 [формами](src/main/asciidoc/investbook-forms.adoc) ввода информации или 
 [загрузить](src/main/asciidoc/investbook-input-format.adoc) данные из excel файла. Также поддержку вашего брокера могут 
 предложить сторонние разработчики через функционал расширений. Инструкция для установки расширений доступна для
-операционных систем [windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md) и [linux](docs/install-on-linux.md).
+операционных систем [windows](docs/install-on-windows.md), [mac](docs/install-on-mac.md) и [linux](docs/install-on-linux.md).
 
 ### Установка
-Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest) установщик `.msi`
-и запустить его.
+На странице [проекта](https://github.com/spacious-team/investbook/releases/latest) предоставлены установщики
+для разных операционных систем.
 
-Можете обратиться к более подробной инструкции по установке и работе с приложением для операционных систем
-[windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md) и [linux](docs/install-on-linux.md).
-Investbook также может быть запущен в [docker](docs/run-by-docker.md).
+Можете обратиться к подробной инструкции по установке для операционных систем
+[windows](docs/install-on-windows.md), [mac](docs/install-on-mac.md) и [linux](docs/install-on-linux.md).
+Рекомендуется воспользоваться одной из этих инструкций.
+
+Либо, если вы продвинутый пользователь, то можете установить [portable версию](docs/install-portable.md)
+или можете запустить Investbook в [docker](docs/run-by-docker.md).
 
 ### Работа с приложением
 Запустите приложение через ярлык на рабочем столе Windows, в браузере перейдите по адресу http://localhost:2030
@@ -139,10 +142,7 @@ Investbook также может быть запущен в [docker](docs/run-by
 После загрузки отчета становится доступным аналитическая выгрузка в формате [excel файла](src/main/asciidoc/investbook-report.adoc). 
 
 ### Обновление приложения
-Процесс обновления на Windows не отличается от процесса первоначальной установки. Воспользуйтесь инструкцией
-для операционных систем [windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md) или
-[linux](docs/install-on-linux.md). Или, если Investbook запускался в docker, воспользуйтесь
-[инструкцией](docs/run-by-docker.md).
+Процесс обновления на Windows не отличается от процесса первоначальной [установки](#установка).
 
 ### Документация
 Дополнительная информация может быть найдена в [документации](docs/documentation.md), также оффлайн документация всегда
@@ -191,7 +191,7 @@ Investbook также может быть запущен в [docker](docs/run-by
 [сообщая](https://github.com/spacious-team/investbook/issues/new/choose) о проблемах в работе приложения,
 [предлагая](https://github.com/spacious-team/investbook/issues/new/choose) новую функциональность или дорабатывая код
 приложения Investbook. Разрабатывая Investbook, вы всегда будете работать с последними версиями Java, Spring Boot 
-и свежих версиях библиотек. 
+и свежими версиями библиотек. 
 
 Также существует функционал [расширений](/docs/extension-developer-guide.md), который позволяет сторонним разработчикам
 расширить список поддерживаемых "из коробки" [брокеров](#брокеры). Расширения могут быть подключены по желанию пользователей

@@ -5,31 +5,15 @@
 - [Установка portable версии](install-portable.md)
 - [Запуск в Docker](run-by-docker.md)
 
-### Установка и обновление на Ubuntu и Debian
+### Установка
 
-1. Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest) `.deb` пакет.
-2. Если требуется установка, то в директории, куда скачан файл, выполнить команду
-   ```shell
-   sudo apt install ./investbook*.deb
-   ```
-   Если требуется обновление, то выполнить
-      ```shell
-   sudo apt upgrade ./investbook*.deb
-   ```
+1. На странице [проекта](https://github.com/spacious-team/investbook/releases/latest) имеется 2 пакета с расширением `.pkg`. Вам нужен один из них.
+   Если у вас [Mac с чипом Apple](https://support.apple.com/ru-ru/116943), то требуется скачать пакет с суффиксом `arm64`.
+   Если у вас Mac с чипом Intel, то требуется скачать пакет с суффиксом `intel`.
+2. Нажмите на скаченный файл правой кнопкой и выберите "Open with" -> "Installer (default)".
+3. Следуйте инструкциям по установке.   
 
-### Установка и обновление на Fedora
-
-1. Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest) `.rpm` пакет.
-2. Если требуется установка, то в директории, куда скачан файл, выполнить команду
-   ```shell
-   sudo rpm -ivh --nodeps investbook*.rpm
-   ```
-   Если требуется обновление, то выполнить
-      ```shell
-   sudo rpm -Uvh --nodeps investbook*.rpm
-   ```
-
-### Запуск Investbook на Linux дистрибутивах
+### Запуск Investbook на Mac
 
 1. После установки в списке приложений появится `Investbook`. Запустите его, откроется браузер и отобразится страница приложения.
    Если браузер не открылся в течении 5-30 сек (в зависимости от производительности вашего компьютера),
@@ -46,4 +30,4 @@
 
 Если вы хотите добавить поддержку новых брокеров, то это можно сделать за счет установки расширения.
 Получите у сторонних разработчиков расширение, поддерживающее нового брокера, и выложите jar-файл в директорию
-`/opt/investbook/lib/app/extensions`.
+`/Applications/Investbook.app/Contents/app/extensions`.
