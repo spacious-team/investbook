@@ -23,7 +23,7 @@ sudo apt purge investbook
 rm -rf ~/investbook
 ```
 
-#### На Fedora
+#### На Fedora и openSUSE
 Требуется запустить консоль и выполнить команду
 ```shell
 sudo rpm -ev investbook
