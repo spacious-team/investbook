@@ -17,7 +17,7 @@
    sudo apt upgrade ./investbook*.deb
    ```
 
-### Установка и обновление на Fedora
+### Установка и обновление на Fedora и openSUSE
 
 1. Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest) `.rpm` пакет.
 2. Если требуется установка, то в директории, куда скачан файл, выполнить команду
@@ -40,14 +40,14 @@ Investbook можно установить на [Windows Subsystem for Linux](ht
    ```shell
    wsl --list --online
    ```
-3. Установить один из дистрибутивов Linux, например Ubuntu (deb) или openSUSE-Leap-15.6 (rpm)
+3. Установить один из дистрибутивов Linux, например `Ubuntu` или `openSUSE-Leap-15.6`
    ```shell
    wsl --install -d Ubuntu
    ```
-   Будет выполнена загрузка и запуск Ubuntu и откроется терминал Linux.
+   Будет выполнена загрузка и запуск выбранного дистрибутива, откроется терминал Linux.
 4. В зависимости от выбранного дистрибутива Linux требуется установить Investbook из
    [deb](#установка-и-обновление-на-ubuntu-и-debian) или [rpm](#установка-и-обновление-на-fedora) пакета. После этого
-   запустите команду `/opt/investbook/bin/Investbook` и открыть http://localhost:2030 в браузере на Windows.
+   запустить команду `/opt/investbook/bin/Investbook` и открыть http://localhost:2030 в браузере на Windows.
 
 ### Запуск Investbook на Linux дистрибутивах
 
