@@ -15,14 +15,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Set Up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '24'
           distribution: 'liberica'
           cache: maven
 
-      - name: Set up Wix
+      - name: Set Up Wix
         run: |
           dotnet tool install --global wix --version 6.0.1
           wix extension add -g WixToolset.Util.wixext/6.0.1
@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Set Up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '24'
@@ -71,7 +71,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Set Up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '24'
@@ -81,7 +81,7 @@ jobs:
       - name: Build
         run: mvn --batch-mode --define no-zip package
 
-      - name: Add arm64 arch to Package Name
+      - name: Add Arm64 Arch to Package Name
         run: |
           cd target/installer/output/
           ls -1 *.pkg | while read file; do
@@ -104,7 +104,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Set Up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '24'
@@ -114,7 +114,7 @@ jobs:
       - name: Build
         run: mvn --batch-mode --define no-zip package
 
-      - name: Add intel arch to Package Name
+      - name: Add Intel Arch to Package Name
         run: |       
           cd target/installer/output/
           ls -1 *.pkg | while read file; do
