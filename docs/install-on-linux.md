@@ -22,16 +22,38 @@
 1. Скачать со страницы [проекта](https://github.com/spacious-team/investbook/releases/latest) `.rpm` пакет.
 2. Если требуется установка, то в директории, куда скачан файл, выполнить команду
    ```shell
-   sudo rpm -ivh --nodeps investbook*.rpm
+   sudo rpm -ivh investbook*.rpm
    ```
    Если требуется обновление, то выполнить
       ```shell
-   sudo rpm -Uvh --nodeps investbook*.rpm
+   sudo rpm -Uvh investbook*.rpm
    ```
+   Также возможна установка на Linux без GUI. Для этого к командам нужно добавить аргументы `--nodeps --noscripts`.
+
+### Установка и обновление на Windows Subsystem for Linux
+Investbook можно установить на [Windows Subsystem for Linux](https://learn.microsoft.com/ru-ru/windows/wsl/install).
+1. Установить Windows Subsystem for Linux
+   ```shell
+   wsl --install
+   ```
+2. Отобразить список дистрибутивов
+   ```shell
+   wsl --list --online
+   ```
+3. Установить один из дистрибутивов Linux, например Ubuntu (deb) или openSUSE-Leap-15.6 (rpm)
+   ```shell
+   wsl --install -d Ubuntu
+   ```
+   Будет выполнена загрузка и запуск Ubuntu и откроется терминал Linux.
+4. В зависимости от выбранного дистрибутива Linux требуется установить Investbook из
+   [deb](#установка-и-обновление-на-ubuntu-и-debian) или [rpm](#установка-и-обновление-на-fedora) пакета. После этого
+   запустите команду `/opt/investbook/bin/Investbook` и открыть http://localhost:2030 в браузере на Windows.
 
 ### Запуск Investbook на Linux дистрибутивах
 
-1. После установки в списке приложений появится `Investbook`. Запустите его, откроется браузер и отобразится страница приложения.
+1. После установки на Linux с GUI в списке приложений появится `Investbook`. Запустите его.
+   Если устанавливали на Linux без GUI, то запустите из консоли утилиту `/opt/investbook/bin/Investbook`.
+   Откроется браузер и отобразится страница приложения.
    Если браузер не открылся в течении 5-30 сек (в зависимости от производительности вашего компьютера),
    откройте сайт http://localhost:2030 (это локальный сайт, запущенный приложением на вашем компьютере).
 2. Если страница не открылась, ознакомьтесь с возможными причинами и [решениями проблем](/src/main/asciidoc/troubleshooting.adoc).

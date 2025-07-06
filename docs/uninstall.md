@@ -28,6 +28,7 @@ rm -rf ~/investbook
 ```shell
 sudo rpm -ev investbook
 ```
+Для ОС без GUI требуется добавить аргумент `--noscripts`.
 Для удаления загруженных данных и отчетов брокера нужно выполнить
 ```shell
 rm -rf ~/investbook
