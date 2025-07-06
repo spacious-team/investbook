@@ -204,7 +204,7 @@ You can help by expanding or correcting the [documentation](https://github.com/s
 [offering](https://github.com/spacious-team/investbook/issues/new/choose) new functionality or improving the Investbook application code. Developing Investbook,
 you will always work with the latest versions of Java, Spring Boot and the latest versions of the libraries.
 
-There is also [extension](/docs/extension-developer-guide.md) functionality, that allows third-party developers
+There is also [extension](docs/developer-guide-extension.md) functionality, that allows third-party developers
 expand the list of [brokers](#brokers) supported out of the box. Extensions can be connected at the request of users
 to the application. Third-party developers can distribute extensions for free or for a [fee](https://youtu.be/q4O6PX0ZuFU),
 therefore, developers, even pursuing different goals, work together. If you decide to improve the application in this 
