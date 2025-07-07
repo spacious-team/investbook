@@ -42,18 +42,28 @@ set JAVA_HOME=%LocalAppData%\jdk
 и сохранить файл.
 
 #### Установка Java на Mac или Linux
-Скачать под вашу ОС Java последней версии со [страницы](https://openjdk.org/) и распаковать в директорию `/opt/jdk`.
-Далее в директории `/opt/investbook-*` нужно найти файл `start.sh`, раскомментировать и актуализировать переменную `JAVA_HOME`
+Скачать под вашу ОС Java последней версии со [страницы](https://openjdk.org/) и распаковать в директорию `/opt/jdk`. Далее в директории
+`/opt/investbook-*` нужно найти файл `start.sh`, раскомментировать и актуализировать переменную `JAVA_HOME`
    ```shell
 export JAVA_HOME=/opt/jdk
 ```
 
-Альтернативный способ установки Java - воспользоваться менеджером пакетов вашей ОС, например на Ubuntu
+Альтернативный способ установки Java - воспользоваться менеджером пакетов вашей ОС. В этом случае файл `start.sh`
+редактировать не нужно. Однако, менеджер пакетов не всегда может предоставить нужную версию Java.
+Проверить наличие нужной версии java и установить можно командой:
+- Ubuntu (может быть недоступно)
 ```shell
 $ sudo apt update
 $ sudo apt install openjdk-24-jre-headless
 ```
-Однако, не всегда менеджер пакетов может предоставить нужную версию Java.
+- Fedora
+```shell
+sudo dnf install java-latest-openjdk-headless
+```
+- openSUSE Tumbleweed
+```shell
+sudo zypper install java-24-openjdk-headless
+```
 
 ### Запуск Portable версии Investbook
 1. Из директории, в которую распаковали `investbook.zip`, запустите приложение. Для этого на Windows запустите

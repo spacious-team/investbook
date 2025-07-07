@@ -40,7 +40,7 @@ Investbook можно установить на [Windows Subsystem for Linux](ht
    ```shell
    wsl --list --online
    ```
-3. Установить один из дистрибутивов Linux, например `Ubuntu` или `openSUSE-Leap-15.6`
+3. Установить один из дистрибутивов Linux, например `Ubuntu`, `FedoraLinux-42` или `openSUSE-Tumbleweed`
    ```shell
    wsl --install -d Ubuntu
    ```
