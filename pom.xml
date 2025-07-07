@@ -429,6 +429,7 @@
                                 </goals>
                                 <configuration>
                                     <appendAssemblyId>false</appendAssemblyId>
+                                    <finalName>${project.artifactId}-${project.version}-portable</finalName>
                                     <descriptors>
                                         <descriptor>src/main/assembly/zip/zip.xml</descriptor>
                                     </descriptors>
