@@ -7,7 +7,8 @@
 [![github-closed-pull-requests](https://img.shields.io/github/issues-pr-closed/spacious-team/investbook?style=flat-square&color=brightgreen)](https://github.com/spacious-team/investbook/pulls?q=is%3Apr+is%3Aclosed)
 [![Unit tests](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fspacious-team%2Finvestbook%2Fbadge%3Fref%3Ddevelop&style=flat-square&label=test&logo=none)](
 https://github.com/spacious-team/investbook/actions/workflows/unit-tests.yml)
-[![github-workflow-status](https://img.shields.io/github/actions/workflow/status/spacious-team/investbook/publish-docker.yml?style=flat-square&branch=master)](https://github.com/spacious-team/investbook/actions/workflows/publish-docker.yml)
+[![github-action-docker-build-status](https://img.shields.io/github/actions/workflow/status/spacious-team/investbook/publish-docker.yml?style=flat-square&branch=master&label=docker%20build)](https://github.com/spacious-team/investbook/actions/workflows/publish-docker.yml)
+[![github-action-installer-build-status](https://img.shields.io/github/actions/workflow/status/spacious-team/investbook/publish-docker.yml?style=flat-square&branch=master&label=installers%20build)](https://github.com/spacious-team/investbook/actions/workflows/publish-installers.yml)
 [![github-all-releases](https://img.shields.io/github/downloads/spacious-team/investbook/total?style=flat-square&logo=github&color=lightblue)](https://github.com/spacious-team/investbook/releases/latest)
 [![docker-pulls](https://img.shields.io/docker/pulls/spaciousteam/investbook?style=flat-square&logo=docker&color=lightblue&logoColor=white)](https://hub.docker.com/r/spaciousteam/investbook)
 [![telegram-channel](https://img.shields.io/endpoint?style=flat-square&color=2ca5e0&label=news&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Finvestbook_official)](https://t.me/investbook_official)
