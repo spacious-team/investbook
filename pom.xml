@@ -62,7 +62,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>25.2</win.msi.version>
+        <app.version>25.2</app.version>
         <java.version>24</java.version>
         <lombok.version>1.18.38</lombok.version>
         <checkerframework.version>3.49.3</checkerframework.version>
@@ -429,7 +429,7 @@
                                 </goals>
                                 <configuration>
                                     <appendAssemblyId>false</appendAssemblyId>
-                                    <finalName>${project.artifactId}-${project.version}-portable</finalName>
+                                    <finalName>${project.artifactId}-${app.version}-portable</finalName>
                                     <descriptors>
                                         <descriptor>src/main/assembly/zip/zip.xml</descriptor>
                                     </descriptors>
@@ -475,7 +475,7 @@
                         <version>${jpackage.version}</version>
                         <configuration>
                             <name>Investbook</name>
-                            <appVersion>${win.msi.version}</appVersion>
+                            <appVersion>${app.version}</appVersion>
                             <vendor>Spacious Team</vendor>
                             <description>${project.description}</description>
                             <copyright>InvestBook, Copyright (C) 2020 Spacious Team</copyright>
