@@ -46,7 +46,11 @@ import static java.util.Objects.requireNonNull;
 @UtilityClass
 class PropertiesGetter {
     // ./app for msi installation
-    private static final String[] PROPERTIES_LOCATION_DIR = {"./", "./config", "./app"};
+    private static final String[] PROPERTIES_LOCATION_DIR = {
+            "./", "./config",                              // spring defaults
+            "./app",                                       // windows
+            "/opt/investbook/lib/app",                     // unix
+            "/Applications/Investbook.app/Contents/app"};  // mac
     private static final String DEFAULT_PROFILE = "conf";
     private static final List<String> args = new CopyOnWriteArrayList<>();
     private static final List<String> profiles = new CopyOnWriteArrayList<>();

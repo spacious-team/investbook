@@ -2,10 +2,13 @@
 [<img src="https://github.com/spacious-team/investbook/assets/11336712/14847ff5-827e-4d0f-a4e9-882cb0d1397c" align="right"/>](README.md)<br/>
 
 [![java-version](https://img.shields.io/badge/java-24-brightgreen?style=flat-square)](https://openjdk.org/)
-[![spring-boot-version](https://img.shields.io/badge/spring--boot-3.5.0-brightgreen?style=flat-square)](https://github.com/spring-projects/spring-boot/releases)
+[![spring-boot-version](https://img.shields.io/badge/spring--boot-3.5.3-brightgreen?style=flat-square)](https://github.com/spring-projects/spring-boot/releases)
 [![hits-of-code](https://img.shields.io/badge/dynamic/json?style=flat-square&color=lightblue&label=hits-of-code&url=https://hitsofcode.com/github/spacious-team/investbook/json?branch=develop&query=$.count)](https://hitsofcode.com/github/spacious-team/investbook/view?branch=develop)
 [![github-closed-pull-requests](https://img.shields.io/github/issues-pr-closed/spacious-team/investbook?style=flat-square&color=brightgreen)](https://github.com/spacious-team/investbook/pulls?q=is%3Apr+is%3Aclosed)
-[![github-workflow-status](https://img.shields.io/github/actions/workflow/status/spacious-team/investbook/publish-docker.yml?style=flat-square&branch=master)](https://github.com/spacious-team/investbook/actions/workflows/publish-docker.yml)
+[![Unit tests](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fspacious-team%2Finvestbook%2Fbadge%3Fref%3Ddevelop&style=flat-square&label=test&logo=none)](
+https://github.com/spacious-team/investbook/actions/workflows/unit-tests.yml)
+[![github-action-docker-build-status](https://img.shields.io/github/actions/workflow/status/spacious-team/investbook/publish-docker.yml?style=flat-square&branch=master&label=docker%20build)](https://github.com/spacious-team/investbook/actions/workflows/publish-docker.yml)
+[![github-action-installer-build-status](https://img.shields.io/github/actions/workflow/status/spacious-team/investbook/publish-docker.yml?style=flat-square&branch=master&label=installers%20build)](https://github.com/spacious-team/investbook/actions/workflows/publish-installers.yml)
 [![github-all-releases](https://img.shields.io/github/downloads/spacious-team/investbook/total?style=flat-square&logo=github&color=lightblue)](https://github.com/spacious-team/investbook/releases/latest)
 [![docker-pulls](https://img.shields.io/docker/pulls/spaciousteam/investbook?style=flat-square&logo=docker&color=lightblue&logoColor=white)](https://hub.docker.com/r/spaciousteam/investbook)
 [![telegram-channel](https://img.shields.io/endpoint?style=flat-square&color=2ca5e0&label=news&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Finvestbook_official)](https://t.me/investbook_official)
@@ -120,15 +123,18 @@ write to [us](https://t.me/+IzYUY5hyvZtmOTIy). You can also use it already on yo
 [forms](src/main/asciidoc/investbook-forms.adoc) for entering information or
 [download](src/main/asciidoc/investbook-input-format.adoc) data from Excel file. Your broker's support can also be
 offered to third-party developers through extension functionality. Instructions for installing extensions are available for
-operating systems [windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md) and [linux](docs/install-on-linux.md).
+operating systems [windows](docs/install-on-windows.md), [mac](docs/install-on-mac.md) and [linux](docs/install-on-linux.md).
 
 ### Install
-Download the `.msi` installer from the [project] page (https://github.com/spacious-team/investbook/releases/latest)
-and run it.
+On the project [page](https://github.com/spacious-team/investbook/releases/latest) installers are provided
+for different operating systems.
 
-You can refer to more detailed instructions for installing and using the application for operating systems
-[windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md) and [linux](docs/install-on-linux.md).
-Investbook can also be run in [docker](docs/run-by-docker.md).
+You can refer to detailed installation instructions for operating systems
+[windows](docs/install-on-windows.md), [mac](docs/install-on-mac.md) and [linux](docs/install-on-linux.md).
+It is recommended to use one of these instructions.
+
+If you are an advanced user, you can install [portable version](docs/install-portable.md),
+or you can start the Investbook by [docker](docs/run-by-docker.md).
 
 ### Working with the application
 Launch the application via a shortcut on the Windows desktop, in the browser go to http://localhost:2030
@@ -146,10 +152,11 @@ After downloading the report, analytical download in [excel file](src/main/ascii
 format becomes available.
 
 ### Application update
-The update process on Windows is no different from the initial installation process. Use the instructions
-for operating systems [windows](docs/install-on-windows.md), [mac](docs/install-on-linux.md) or
-[linux](docs/install-on-linux.md). Or, if Investbook was run in docker, use
-[instructions](docs/run-by-docker.md).
+The update process on Windows does not differ from the process of the initial installation.
+
+You can refer to detailed instructions for [windows](docs/install-on-windows.md),
+[mac](docs/install-on-mac.md) and [linux](docs/install-on-linux.md).
+As well as to the instructions for the [portable version](docs/install-portable.md) and [docker version](docs/run-by-docker.md).
 
 ### Documentation
 Additional information can be found in [documentation](docs/documentation.md), also offline documentation is always 
@@ -197,9 +204,10 @@ What are you trying to hide? Clearly not something good. If you have nothing to 
 ### How to help
 You can help by expanding or correcting the [documentation](https://github.com/spacious-team/investbook/files/5398264/github.docx),
 [reporting](https://github.com/spacious-team/investbook/issues/new/choose)  problems with the application,
-[offering](https://github.com/spacious-team/investbook/issues/new/choose) new functionality or improving the Investbook application code.
+[offering](https://github.com/spacious-team/investbook/issues/new/choose) new functionality or improving the Investbook application code. Developing Investbook,
+you will always work with the latest versions of Java, Spring Boot and the latest versions of the libraries.
 
-There is also [extension](/docs/extension-developer-guide.md) functionality, that allows third-party developers
+There is also [extension](docs/developer-guide-extension.md) functionality, that allows third-party developers
 expand the list of [brokers](#brokers) supported out of the box. Extensions can be connected at the request of users
 to the application. Third-party developers can distribute extensions for free or for a [fee](https://youtu.be/q4O6PX0ZuFU),
 therefore, developers, even pursuing different goals, work together. If you decide to improve the application in this 
