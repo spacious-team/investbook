@@ -22,7 +22,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityType;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.parser.SecurityRegistrar;
@@ -37,7 +36,7 @@ import static ru.investbook.parser.investbook.AbstractInvestbookTable.Investbook
 
 public class InvestbookSecurityEventCashFowTable extends AbstractSecurityAwareInvestbookTable<SecurityEventCashFlow> {
 
-    protected InvestbookSecurityEventCashFowTable(BrokerReport report,
+    protected InvestbookSecurityEventCashFowTable(InvestbookBrokerReport report,
                                                   SecurityRegistrar securityRegistrar,
                                                   SecurityRepository securityRepository,
                                                   SecurityConverter securityConverter) {
@@ -76,7 +75,7 @@ public class InvestbookSecurityEventCashFowTable extends AbstractSecurityAwareIn
         }
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .portfolio(row.getStringCellValue(PORTFOLIO))
-                .timestamp(row.getInstantCellValue(DATE_TIME))
+                .timestamp(parseEventInstant(row))
                 .security(securityId)
                 .count(count)
                 .eventType(type)

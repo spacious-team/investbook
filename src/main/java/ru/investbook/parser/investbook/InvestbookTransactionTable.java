@@ -22,7 +22,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction.AbstractTransactionBuilder;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
 import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
@@ -38,7 +37,7 @@ import static ru.investbook.parser.investbook.AbstractInvestbookTable.Investbook
 
 public class InvestbookTransactionTable extends AbstractSecurityAwareInvestbookTable<AbstractTransaction> {
 
-    protected InvestbookTransactionTable(BrokerReport report,
+    protected InvestbookTransactionTable(InvestbookBrokerReport report,
                                          SecurityRegistrar securityRegistrar,
                                          SecurityRepository securityRepository,
                                          SecurityConverter securityConverter) {
@@ -85,7 +84,7 @@ public class InvestbookTransactionTable extends AbstractSecurityAwareInvestbookT
                     .valueCurrency(row.getStringCellValue(CURRENCY));
         };
         String portfolio = row.getStringCellValue(PORTFOLIO);
-        Instant timestamp = row.getInstantCellValue(DATE_TIME);
+        Instant timestamp = parseEventInstant(row);
         int securityId = getSecurityIdForTransaction(securityTickerNameOrIsin, securityType);
         return builder
                 .tradeId(getTradeId(portfolio, securityId, timestamp))
