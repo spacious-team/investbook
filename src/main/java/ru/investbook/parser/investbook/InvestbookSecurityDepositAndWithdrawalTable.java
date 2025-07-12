@@ -21,7 +21,6 @@ package ru.investbook.parser.investbook;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.converter.SecurityConverter;
@@ -35,7 +34,7 @@ import static ru.investbook.parser.investbook.AbstractInvestbookTable.Investbook
 
 public class InvestbookSecurityDepositAndWithdrawalTable extends AbstractSecurityAwareInvestbookTable<SecurityTransaction> {
 
-    protected InvestbookSecurityDepositAndWithdrawalTable(BrokerReport report,
+    protected InvestbookSecurityDepositAndWithdrawalTable(InvestbookBrokerReport report,
                                                           SecurityRegistrar securityRegistrar,
                                                           SecurityRepository securityRepository,
                                                           SecurityConverter securityConverter) {
@@ -54,7 +53,7 @@ public class InvestbookSecurityDepositAndWithdrawalTable extends AbstractSecurit
             return null;
         }
         String portfolio = row.getStringCellValue(PORTFOLIO);
-        Instant timestamp = row.getInstantCellValue(DATE_TIME);
+        Instant timestamp = parseEventInstant(row);
         int securityId = getSecurityIdForDepositOrWithdrawal(row);
         return SecurityTransaction.builder()
                 .tradeId(getTradeId(portfolio, securityId, timestamp))

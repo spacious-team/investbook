@@ -20,7 +20,6 @@ package ru.investbook.parser.investbook;
 
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.parser.SecurityRegistrar;
@@ -38,7 +37,7 @@ public class AbstractSecurityAwareInvestbookTable<RowType> extends AbstractInves
     protected final SecurityConverter securityConverter;
     private final Set<String> generatedTradeIds = new HashSet<>();
 
-    protected AbstractSecurityAwareInvestbookTable(BrokerReport report,
+    protected AbstractSecurityAwareInvestbookTable(InvestbookBrokerReport report,
                                                    SecurityRegistrar securityRegistrar,
                                                    SecurityRepository securityRepository,
                                                    SecurityConverter securityConverter) {

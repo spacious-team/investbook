@@ -42,6 +42,10 @@ public class InvestbookReportTablesFactory implements ReportTablesFactory {
 
     @Override
     public ReportTables create(BrokerReport brokerReport) {
-        return new InvestbookReportTables(brokerReport, securityRegistrar, securityRepository, securityConverter);
+        return new InvestbookReportTables(
+                (InvestbookBrokerReport) brokerReport,
+                securityRegistrar,
+                securityRepository,
+                securityConverter);
     }
 }

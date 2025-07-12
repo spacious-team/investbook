@@ -25,21 +25,28 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.validator.internal.xml.CloseIgnoringInputStream;
 import org.mozilla.universalchardet.UniversalDetector;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
+import org.spacious_team.table_wrapper.api.InstantParser;
 import org.spacious_team.table_wrapper.api.ReportPage;
 import org.spacious_team.table_wrapper.csv.CsvReportPage;
 import org.spacious_team.table_wrapper.excel.ExcelSheet;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import ru.investbook.parser.ZoneIdAwareBrokerReport;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
-public class InvestbookBrokerReport implements BrokerReport {
+public class InvestbookBrokerReport implements ZoneIdAwareBrokerReport {
 
+    @Getter
+    private final ZoneId reportZoneId = ZoneId.of("Europe/Moscow");
+    private final InstantParser instantParser;
     @Getter
     private final ReportPage reportPage;
     private @Nullable Workbook workbook;
@@ -60,6 +67,10 @@ public class InvestbookBrokerReport implements BrokerReport {
             String string = reportPage.getRow(0).getCell(0).getStringValue();
             Assert.isTrue(string.toLowerCase().contains("событие"), "Не отчет в формате Investbook");
         }
+        this.instantParser = InstantParser.builder()
+                .defaultZoneId(reportZoneId)
+                .defaultTime(LocalTime.NOON)
+                .build();
     }
 
     public static Workbook getWorkBook(String excelFileName, InputStream is) {
@@ -73,6 +84,11 @@ public class InvestbookBrokerReport implements BrokerReport {
         } catch (IOException e) {
             throw new RuntimeException("Не смог открыть excel файл", e);
         }
+    }
+
+    @Override
+    public Instant convertToInstant(String value) {
+        return instantParser.parseInstant(value);
     }
 
     @Override

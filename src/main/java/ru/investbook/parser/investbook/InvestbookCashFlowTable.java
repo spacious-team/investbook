@@ -21,7 +21,6 @@ package ru.investbook.parser.investbook;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import java.math.BigDecimal;
@@ -33,7 +32,7 @@ import static ru.investbook.parser.investbook.AbstractInvestbookTable.Investbook
 
 public class InvestbookCashFlowTable extends AbstractInvestbookTable<EventCashFlow> {
 
-    protected InvestbookCashFlowTable(BrokerReport report) {
+    protected InvestbookCashFlowTable(InvestbookBrokerReport report) {
         super(report);
     }
 
@@ -67,7 +66,7 @@ public class InvestbookCashFlowTable extends AbstractInvestbookTable<EventCashFl
                 .orElseGet(() -> row.getStringCellValue(FEE_CURRENCY));
         return EventCashFlow.builder()
                 .portfolio(row.getStringCellValue(PORTFOLIO))
-                .timestamp(row.getInstantCellValue(DATE_TIME))
+                .timestamp(parseEventInstant(row))
                 .eventType(type)
                 .value(value)
                 .currency(currency)
