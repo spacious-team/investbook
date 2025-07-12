@@ -120,11 +120,18 @@ has the following advantages:
 ### Brokers
 The application analyzes reports from brokers TBank / Tinkoff (xlsx), Sberbank (xlsx), VTB (xls), Promsvyazbank (xlsx, xml)
 and Your Broker / Uralsib (zip with xls). If your account is opened with another broker,
-write to [us](https://t.me/+IzYUY5hyvZtmOTIy). You can also use it already on your version of the application
-[forms](src/main/asciidoc/investbook-forms.adoc) for entering information or
-[download](src/main/asciidoc/investbook-input-format.adoc) data from Excel file. Your broker's support can also be
-offered to third-party developers through extension functionality. Instructions for installing extensions are available for
-operating systems [windows](docs/install-on-windows.md), [mac](docs/install-on-mac.md) and [linux](docs/install-on-linux.md).
+write to [us](https://t.me/+IzYUY5hyvZtmOTIy). You can also add your transactions (and other information)
+to [excel file](src/main/asciidoc/investbook-input-format.adoc) (broker in this case does not matter) and upload it to app
+for analysis. The file format is simple and consists of a minimum set of information, an example
+
+| Event | Date       | Securiy | Count | Price | Fee | Currency |
+|-------|------------|---------|-------|-------|-----|----------|
+| Buy   | 14/07/2025 | SBER    | 10    | 300   | 1,5 | RUB      |
+
+Or you can add transactions (and other information) by [web interface](src/main/asciidoc/investbook-forms.adoc).
+Your broker's support can be offered by third-party developers through extensions functionality.
+Instructions for installing extensions are available for operating systems [windows](docs/install-on-windows.md), 
+[mac](docs/install-on-mac.md) and [linux](docs/install-on-linux.md).
 
 ### Install
 On the project [page](https://github.com/spacious-team/investbook/releases/latest) installers are provided

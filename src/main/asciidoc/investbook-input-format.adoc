@@ -11,8 +11,8 @@
 
 Шаблоны файлов:
 
-. Пример link:/investbook-format-example.xlsx[excel] файла
-. Пример link:/investbook-format-example.csv[csv] файла
+. Пример link:/investbook-format-example.xlsx[excel] файла (link:https://github.com/spacious-team/investbook/blob/develop/src/main/resources/static/investbook-format-example.xlsx[зеркало])
+. Пример link:/investbook-format-example.csv[csv] файла (link:https://github.com/spacious-team/investbook/blob/develop/src/main/resources/static/investbook-format-example.csv[зеркало])
 
 Способ можно использовать, если отчет Вашего брокер еще не поддерживается. Является альтернативой ручному внесению
 сделок через <<investbook-forms.adoc#,Формы>>. Для загрузки файла нужно перейти с главной страницы по ссылке
