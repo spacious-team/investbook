@@ -110,7 +110,8 @@ has the following advantages:
 5. Safety. No need to upload broker reports to the cloud, no need to provide an access token
    to the brokerage account to third parties and software with potential errors. For example, it is known
    that tokens of a popular broker allow you to make transactions without your participation.
-6. Open source is an additional guarantee of security and confidence in the availability of data only to you.
+6. [Open source](#why-is-the-application-code-open-source) is an additional guarantee of security and confidence
+   in the availability of data only to you.
 7. Clear, widely used report format - Excel tables with [detailed description](src/main/asciidoc/investbook-report.adoc)
    of each column.
 8. Unified data presentation format "[Portfolio Open Format](https://github.com/spacious-team/portfolio-open-format)"
