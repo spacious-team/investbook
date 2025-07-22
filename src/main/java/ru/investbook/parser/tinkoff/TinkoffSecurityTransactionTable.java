@@ -29,6 +29,7 @@ import org.spacious_team.broker.report_parser.api.ForeignExchangeTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.SecurityTransaction;
 import org.spacious_team.broker.report_parser.api.WrappingReportTable;
+import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
@@ -172,7 +173,9 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
         TRANSACTION_TIME("время"),
         TYPE(optional("режим", "торгов")),
         OPERATION("вид", "сделки"),
-        SHORT_NAME("сокращен", "наименова"),
+        SHORT_NAME(AnyOfTableColumn.of(
+                PatternTableColumn.of("сокращен", "наименова"),     // отчет 2022 г.
+                PatternTableColumn.of("наименование", "актива"))),  // отчет 2024-2025 г.
         CODE("код", "актива"),
         PRICE("Цена", "за едини"),
         COUNT("количество"),
