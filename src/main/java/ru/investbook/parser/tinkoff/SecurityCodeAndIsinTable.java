@@ -123,7 +123,7 @@ public class SecurityCodeAndIsinTable extends AbstractReportTable<Void> {
     @Getter
     @RequiredArgsConstructor
     protected enum SecurityAndCodeTableHeader implements TableHeaderColumn {
-        SHORT_NAME("Сокращенное", "наименование"),
+        SHORT_NAME("наименование", "актива"),
         CODE("код", "актива"),  // код (SBERP) или ISIN
         ISIN(optional("isin")), // может отсутствовать, если колонка CODE заполняется ISIN
         TYPE("^Тип$"),

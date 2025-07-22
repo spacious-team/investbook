@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
+import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
@@ -111,11 +112,15 @@ public class TinkoffCashFlowTable extends SingleAbstractReportTable<EventCashFlo
     @RequiredArgsConstructor
     protected enum CashFlowTableHeader implements TableHeaderColumn {
         CURRENCY("Валюта"),
-        DATE("Исходящий", "остаток", "на конец", "периода"), // Дата исполнения
+        DATE("^Исходящий", "остаток"), // Дата исполнения
         OPERATION("Плановый", "исходящий", "остаток"), // Операция
-        DEPOSIT("Задолженность", "клиента", "перед", "брокером"), // Сумма зачисления
-        WITHDRAWAL("Сумма", "непокрытого", "остатка"), // Сумма списания
-        DESCRIPTION("Задолженность", "клиента",  "перед", "Депозитарием"); // Примечание
+        DEPOSIT(AnyOfTableColumn.of(                          // Сумма зачисления
+                PatternTableColumn.of("Задолженность", "клиента", "перед", "брокером"), // отчет 2022-2024 г.
+                PatternTableColumn.of("Задолженность", "клиента$"))),                   // отчет 2025 г.
+        WITHDRAWAL(AnyOfTableColumn.of(                       // Сумма списания
+                PatternTableColumn.of("Сумма", "непокрытого", "остатка"),  // отчет 2022-2024 г.
+                PatternTableColumn.of("Непокрытая", "позиция"))),          // отчет 2025 г.
+        DESCRIPTION("Задолженность", "клиента", "перед", "Депозитарием");  // Примечание
 
         @Getter
         private final TableColumn column;

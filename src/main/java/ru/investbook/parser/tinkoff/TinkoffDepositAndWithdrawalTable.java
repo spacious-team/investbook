@@ -128,7 +128,7 @@ public class TinkoffDepositAndWithdrawalTable extends SingleAbstractReportTable<
     }
 
     protected enum SecurityDepositAndWithdrawalTableHeader implements TableHeaderColumn {
-        SHORT_NAME("Сокращенное", "наименование"),
+        SHORT_NAME("наименование", "актива"),
         CODE("код", "актива"),
         DEPOSIT("зачисление"),
         WITHDRAWAL("списание");
