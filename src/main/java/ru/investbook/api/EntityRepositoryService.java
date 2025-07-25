@@ -18,6 +18,7 @@
 
 package ru.investbook.api;
 
+import com.querydsl.core.types.Predicate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +34,7 @@ public interface EntityRepositoryService<ID, Pojo> {
 
     Optional<Pojo> getById(ID id);
 
-    Page<Pojo> getPage(Pageable pageable);
+    Page<Pojo> getPage(@Nullable Predicate predicate, Pageable pageable);
 
     /**
      * Creates a new object with direct INSERT into DB (without prior SELECT call) if possible,
