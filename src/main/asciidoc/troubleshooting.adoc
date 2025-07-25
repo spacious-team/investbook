@@ -18,9 +18,8 @@
 
 == Ошибка в логе "Port 2030 was already in use"
 
-Лог расположен в домашней папке пользователя в подпапке `investbook`, файл `investbook.log`. Для исправления ошибки
-в папке, в которую установлено Приложение (по умолчанию на Windows устанавливается в `C:\Program Files\Investbook`),
-откройте папку `app` и измените в файле `application-conf.properties` неиспользуемый порт, например попробуйте 8080
+Файл лога `investbook.log` расположен в домашней папке пользователя в подпапке `investbook`.
+Откройте файл <<configuration.adoc#,application.properties>> и укажите неиспользуемый порт, например попробуйте 8080
 [source, properties]
 ----
 server.port = 8080

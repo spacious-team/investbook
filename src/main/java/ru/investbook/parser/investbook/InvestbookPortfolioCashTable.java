@@ -20,14 +20,13 @@ package ru.investbook.parser.investbook;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import static ru.investbook.parser.investbook.AbstractInvestbookTable.InvestbookReportTableHeader.*;
 
 public class InvestbookPortfolioCashTable extends AbstractInvestbookTable<PortfolioCash> {
 
-    protected InvestbookPortfolioCashTable(BrokerReport report) {
+    protected InvestbookPortfolioCashTable(InvestbookBrokerReport report) {
         super(report);
     }
 
@@ -39,7 +38,7 @@ public class InvestbookPortfolioCashTable extends AbstractInvestbookTable<Portfo
         }
         return PortfolioCash.builder()
                 .portfolio(row.getStringCellValue(PORTFOLIO))
-                .timestamp(row.getInstantCellValue(DATE_TIME))
+                .timestamp(parseEventInstant(row))
                 .value(row.getBigDecimalCellValue(PRICE))
                 .currency(row.getStringCellValue(CURRENCY))
                 .market("")

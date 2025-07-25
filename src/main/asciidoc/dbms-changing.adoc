@@ -5,10 +5,11 @@
 
 Если Вы по каким-то причинам решили сменить СУБД, возможен переход на https://downloads.mariadb.org/[MariaDB].
 Поддерживаются версии, указанные в документации [Flyway](https://documentation.red-gate.com/fd/mariadb-184127600.html).
-После установки в файле `application-conf.properties` необходимо прописать
+После установки в файле <<configuration.adoc#,application.properties>> необходимо
+в параметре `spring.config.import` указать
 [source,properties]
 ----
-spring.profiles.active=core,mariadb,conf
+spring.config.import=classpath:application-mariadb.properties
 ----
 и указать логин и пароль доступа к БД
 [source,properties]

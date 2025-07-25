@@ -18,24 +18,42 @@ git clone https://github.com/spacious-team/investbook.git
 окружения `JAVA_HOME` и `PATH`, например для Windows 10 по этой [инструкции](https://csharpcoderr.com/5351/).
 
 ### Установка Wix
-Для сборки пакета для установки Investbook требуется Wix 3.
-Скачать Wix 3 можно по ссылке с официального сайта [Wix3](https://wixtoolset.org/docs/wix3/)
-(пакет для установки расположен на [GitHub](https://github.com/wixtoolset/wix3/releases)).
-Wix в свою очередь потребует установки [.NET](https://dotnet.microsoft.com/en-us/download/dotnet).
+Эта глава относится только к тем, кто работает на Windows.
+Для сборки msi пакета, устанавливающего Investbook на Windows, требуется Wix.
+Wix в свою очередь требует установки [.NET](https://dotnet.microsoft.com/en-us/download/dotnet).
 
-На Windows вы можете установить Wix и .NET в `%LOCALAPPDATA%\Programs\wix3` и `%LOCALAPPDATA%\Programs\dotnet`
-соответственно. Для этого на страницах проектов нужно скачать не msi установщики, а архивы "binaries", которые требуется
-распаковать в указанные папки. После этого нужно добавить следующие переменные окружения
-(win+R -> `rundll32 sysdm.cpl,EditEnvironmentVariables`):
+Вы можете установить .NET без прав администратора в директорию `%LOCALAPPDATA%\Programs\dotnet`.
+Для этого нужно скачать не msi установщик, а архив "binaries", который требуется распаковать в указанную папку.
+После этого нужно отредактировать переменные окружения (win+R -> `rundll32 sysdm.cpl,EditEnvironmentVariables`):
 ```shell
 DOTNET_ROOT=%LOCALAPPDATA%\Programs\dotnet
-PATH=<предыдущие значения>;%LOCALAPPDATA%\Programs\wix3;%DOTNET_ROOT%
+PATH=<предыдущие значения>;%DOTNET_ROOT%
+```
+
+Далее в командной нужно проверить, установлен ли Wix
+```shell
+dotnet tool list --global
+```
+Если Wix не установлен, то его требуется установить по [инструкции](https://docs.firegiant.com/wix/using-wix/)
+```shell
+dotnet tool install --global wix
+wix --version
+```
+Также требуется установить расширения Wix, без которых сборка завершается с
+[ошибкой](https://github.com/petr-panteleyev/jpackage-gradle-plugin/issues/38)
+```shell
+wix extension add -g WixToolset.Util.wixext/6.0.1
+wix extension add -g WixToolset.Ui.wixext/6.0.1
+```
+где 6.0.1 - это версия Wix, которая указана в выводе команды
+```shell
+dotnet tool list --global
 ```
 
 ### Компиляция
 Компиляция запускается командой:
-```
-mvn clean compile
+```shell
+./mvnw clean compile
 ```
 Она очищает сгенерированные ранее классы (например JAXB2), которые возможно устарели,
 и генерирует файл `META_INF/build-info.properties`, который используется приложением в своей работе.
@@ -46,18 +64,25 @@ mvn clean compile
 
 Если у вас другая среда разработки или вы работаете из консоли, то приложение можно запустить без предварительной
 компиляции командой:
-```
-mvn spring-boot:run
+```shell
+./mvnw spring-boot:run
 ```
 
 ### Сборка релиза
-Релиз состоит из двух файлов: zip-архива и msi-установщика. Msi-установщик собирается только на Windows.
-Поэтому если вы работаете под Windows, необходимо установить `Wix` со страницы [проекта](https://wixtoolset.org/releases/)
-(_WiX Toolset Visual Studio Extension_ устанавливать не нужно).
+Если вы работаете на Windows, то перед сборкой релиза необходимо установить [Wix](#установка-wix).
 
-Для сборки релиза запустите
+Для сборки релиза запустите:
+```shell
+./mvnw package
 ```
-mvn package
+В зависимости от ОС в папке `target/installer/output/` соберется:
+- msi инсталлятор на Windows;
+- deb и rpm пакет на Linux;
+- pkg пакет на Mac.
+Portable версия в zip архиве собирается на любой ОС в папке `target/`.
+
+### Обновление maven wrapper
+Если требуется обновить maven wrapper, выполнить
+```shell
+mvn wrapper:wrapper -Dtype=only-script
 ```
-Zip-архив может быть [установлен](install-on-linux.md) на Linux и Mac. На Windows рекомендуется
-[установка](install-on-windows.md) через msi-инсталлятор.

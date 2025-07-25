@@ -26,14 +26,16 @@
     <baseDirectory>input</baseDirectory>
     <fileSets>
         <fileSet>
-            <directory>src/main/assembly/jpackage</directory>
+            <directory>src/main/assembly/installer</directory>
             <outputDirectory/>
             <includes>
                 <include>*</include>
             </includes>
             <excludes>
                 <exclude>dir.xml</exclude>
+                <exclude>icon.icns</exclude>
                 <exclude>icon.ico</exclude>
+                <exclude>icon.png</exclude>
             </excludes>
         </fileSet>
     </fileSets>
@@ -43,11 +45,12 @@
             <outputDirectory/>
         </file>
         <file>
-            <source>src/main/resources/application-conf.properties</source>
+            <source>src/main/resources/application-prod.properties</source>
+            <destName>application.properties</destName>
             <outputDirectory/>
         </file>
         <file>
-            <source>src/main/assembly/jpackage/extensions/README.md</source>
+            <source>src/main/assembly/installer/extensions/README.md</source>
             <outputDirectory>extensions</outputDirectory>
         </file>
         <file>

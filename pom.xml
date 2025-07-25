@@ -23,12 +23,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.0</version>
+        <version>3.5.3</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2025.1.1</version>
+    <version>20${app.version}</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -62,10 +62,13 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <win.msi.version>25.1.1</win.msi.version>
+        <app.version>25.2</app.version>
         <java.version>24</java.version>
         <lombok.version>1.18.38</lombok.version>
-        <checkerframework.version>3.49.3</checkerframework.version>
+        <checkerframework.version>3.49.5</checkerframework.version>
+        <jpackage.version>1.6.6</jpackage.version>
+        <checkerframework.skipDefs>-AskipDefs=.*</checkerframework.skipDefs>  <!-- overridden by 'nullcheck' profile -->
+        <extension.loader.path>./extensions</extension.loader.path>  <!-- overridden by installer-* profiles -->
     </properties>
 
     <repositories>
@@ -223,7 +226,7 @@
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>4.0</version>
+            <version>4.0.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -275,9 +278,7 @@
                     </annotationProcessors>
                     <compilerArgs combine.children="append">
                         <!--arg>-Awarns</arg-->
-                        <!-- V2022_1_0_1.class нельзя изменять, чтобы не менялась чек сумма миграции -->
-                        <!-- Классы Entity(Pk)?_ сгенерированы hibernate-jpamodelgen -->
-                        <arg>-AskipDefs=(Test$|V2022_1_0_1|Entity(Pk)?_$|generated.ValCurs)</arg>
+                        <arg>${checkerframework.skipDefs}</arg>
                         <!-- Checker framework inner file https://github.com/typetools/checker-framework/blob/master/checker/src/main/java/org/checkerframework/checker/nullness/permit-nullness-assertion-exception.astub -->
                         <arg>-Astubs=permit-nullness-assertion-exception.astub${path.separator}${project.basedir}/checkerframework.astub</arg>
                         <arg>-AsuppressWarnings=methodref,type.arguments.not.inferred,lambda.param,expression.unparsable</arg>
@@ -315,30 +316,6 @@
                     PropertiesLauncher reads settings from resources/loader.properties
                     (https://docs.spring.io/spring-boot/docs/current/reference/html/executable-jar.html#executable-jar-property-launcher-features) -->
                     <layout>ZIP</layout>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.asciidoctor</groupId>
-                <artifactId>asciidoctor-maven-plugin</artifactId>
-                <version>3.2.0</version>
-                <executions>
-                    <execution>
-                        <id>generate-html-doc</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>process-asciidoc</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>target/classes/static/user-guide/</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <attributes>
-                        <project-version>${project.version}</project-version>
-                        <linkcss>true</linkcss>
-                        <source-highlighter>coderay</source-highlighter>
-                    </attributes>
                 </configuration>
             </plugin>
             <plugin>
@@ -381,6 +358,57 @@
 
     <profiles>
         <profile>
+            <id>nullcheck</id>
+            <activation>
+                <property>
+                    <name>!no-nullcheck</name>
+                </property>
+            </activation>
+            <properties>
+                <!-- V2022_1_0_1.class нельзя изменять, чтобы не менялась чек сумма миграции -->
+                <!-- Классы Entity(Pk)?_ сгенерированы hibernate-jpamodelgen -->
+                <checkerframework.skipDefs>
+                    -AskipDefs=(Test$|V2022_1_0_1|Entity(Pk)?_$|generated.ValCurs)
+                </checkerframework.skipDefs>
+            </properties>
+        </profile>
+        <profile>
+            <id>doc</id>
+            <activation>
+                <property>
+                    <name>!no-doc</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctor-maven-plugin</artifactId>
+                        <version>3.2.0</version>
+                        <executions>
+                            <execution>
+                                <id>generate-html-doc</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>process-asciidoc</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>target/classes/static/user-guide/</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <attributes>
+                                <project-version>${project.version}</project-version>
+                                <linkcss>true</linkcss>
+                                <source-highlighter>coderay</source-highlighter>
+                            </attributes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>zip</id>
             <activation>
                 <property>
@@ -401,6 +429,7 @@
                                 </goals>
                                 <configuration>
                                     <appendAssemblyId>false</appendAssemblyId>
+                                    <finalName>${project.artifactId}-${app.version}-portable</finalName>
                                     <descriptors>
                                         <descriptor>src/main/assembly/zip/zip.xml</descriptor>
                                     </descriptors>
@@ -412,11 +441,11 @@
             </build>
         </profile>
         <profile>
-            <id>jpackage</id>
+            <id>installer-prepare</id>
             <activation>
-                <os>
-                    <family>windows</family>
-                </os>
+                <property>
+                    <name>!no-installer</name>
+                </property>
             </activation>
             <build>
                 <plugins>
@@ -425,27 +454,73 @@
                         <artifactId>maven-assembly-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>jpackage</id>
+                                <id>copy installer files</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>single</goal>
                                 </goals>
                                 <configuration>
-                                    <finalName>jpackage</finalName>
+                                    <finalName>installer</finalName>
                                     <appendAssemblyId>false</appendAssemblyId>
                                     <descriptors>
-                                        <descriptor>src/main/assembly/jpackage/dir.xml</descriptor>
+                                        <descriptor>src/main/assembly/installer/dir.xml</descriptor>
                                     </descriptors>
                                 </configuration>
                             </execution>
                         </executions>
                     </plugin>
                     <plugin>
-                        <!-- jpackage requires Wix 3: https://wixtoolset.org/docs/wix3/ (only Wix, Toolset not required) -->
-                        <!-- https://github.panteleyev.org/jpackage-maven-plugin/examples/executions.html-->
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
-                        <version>1.6.6</version>
+                        <version>${jpackage.version}</version>
+                        <configuration>
+                            <name>Investbook</name>
+                            <appVersion>${app.version}</appVersion>
+                            <vendor>Spacious Team</vendor>
+                            <description>${project.description}</description>
+                            <copyright>InvestBook, Copyright (C) 2020 Spacious Team</copyright>
+                            <aboutUrl>https://github.com/spacious-team/investbook</aboutUrl>
+                            <licenseFile>${project.basedir}/LICENSE</licenseFile>
+                            <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
+                            <javaOptions>
+                                <javaOption>-Dloader.path=${extension.loader.path}</javaOption>
+                                <javaOption>-Xms16m</javaOption>
+                                <javaOption>-XX:MinHeapFreeRatio=1</javaOption>
+                                <javaOption>-XX:MaxHeapFreeRatio=5</javaOption>
+                                <javaOption>-XX:G1PeriodicGCInterval=5000</javaOption>
+                                <javaOption>-XX:GCTimeRatio=1</javaOption>
+                                <javaOption>-XX:MaxGCPauseMillis=2000</javaOption>
+                                <javaOption>-Xverify:none</javaOption> <!-- reduce VM.native_memory Class by 6MB -->
+                                <javaOption>-XX:-TieredCompilation</javaOption> <!-- reduce VM.native_memory Code by 20MB -->
+                            </javaOptions>
+                            <input>${project.build.directory}/installer/input</input>
+                            <destination>${project.build.directory}/installer/output</destination>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>installer-windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+                <property>
+                    <name>!no-installer</name>
+                </property>
+            </activation>
+            <properties>
+                <extension.loader.path>./app/extensions</extension.loader.path>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <!-- jpackage requires Wix: https://docs.firegiant.com/wix/using-wix/ -->
+                        <!-- https://github.panteleyev.org/jpackage-maven-plugin/examples/executions.html -->
+                        <groupId>org.panteleyev</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>${jpackage.version}</version>
                         <executions>
                             <execution>
                                 <id>windows installer</id>
@@ -455,37 +530,116 @@
                                 </goals>
                                 <configuration>
                                     <type>MSI</type>
-                                    <name>Investbook</name>
-                                    <appVersion>${win.msi.version}</appVersion>
-                                    <vendor>Spacious Team</vendor>
-                                    <description>${project.description}</description>
-                                    <copyright>InvestBook, Copyright (C) 2020 Spacious Team</copyright>
-                                    <aboutUrl>https://github.com/spacious-team/investbook</aboutUrl>
-                                    <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
-                                    <javaOptions>
-                                        <javaOption>-Dloader.path=./app/extensions</javaOption>
-                                        <javaOption>-Xms16m</javaOption>
-                                        <javaOption>-XX:MinHeapFreeRatio=1</javaOption>
-                                        <javaOption>-XX:MaxHeapFreeRatio=5</javaOption>
-                                        <javaOption>-XX:G1PeriodicGCInterval=5000</javaOption>
-                                        <javaOption>-XX:GCTimeRatio=1</javaOption>
-                                        <javaOption>-XX:MaxGCPauseMillis=2000</javaOption>
-                                        <javaOption>-Xverify:none
-                                        </javaOption> <!-- reduce VM.native_memory Class by 6MB -->
-                                        <javaOption>-XX:-TieredCompilation
-                                        </javaOption> <!-- reduce VM.native_memory Code by 20MB -->
-                                    </javaOptions>
-                                    <arguments>
-                                        <argument>--spring.config.additional-location=file:./app/</argument>
-                                    </arguments>
-                                    <input>${project.build.directory}/jpackage/input</input>
-                                    <icon>${project.basedir}/src/main/assembly/jpackage/icon.ico</icon>
-                                    <destination>${project.build.directory}/jpackage/output</destination>
+                                    <icon>${project.basedir}/src/main/assembly/installer/icon.ico</icon>
                                     <winDirChooser>true</winDirChooser>
                                     <winPerUserInstall>true</winPerUserInstall>
                                     <winMenu>true</winMenu>
                                     <winMenuGroup>Investbook</winMenuGroup>
                                     <winShortcut>true</winShortcut>
+                                    <arguments>
+                                        <argument>--spring.config.additional-location=file:./app/</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>installer-linux</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>Linux</name>
+                </os>
+                <property>
+                    <name>!no-installer</name>
+                </property>
+            </activation>
+            <properties>
+                <extension.loader.path>/opt/investbook/lib/app/extensions</extension.loader.path>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.panteleyev</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>${jpackage.version}</version>
+                        <executions>
+                            <execution>
+                                <id>deb installer</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <type>DEB</type>
+                                    <icon>${project.basedir}/src/main/assembly/installer/icon.png</icon>
+                                    <linuxDebMaintainer>spacious-team@ya.ru</linuxDebMaintainer>
+                                    <arguments>
+                                        <argument>
+                                            --spring.config.additional-location=file:/opt/investbook/lib/app/
+                                        </argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>rpm installer</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <type>RPM</type>
+                                    <icon>${project.basedir}/src/main/assembly/installer/icon.png</icon>
+                                    <linuxRpmLicenseType>AGPL-3.0</linuxRpmLicenseType>
+                                    <arguments>
+                                        <argument>
+                                            --spring.config.additional-location=file:/opt/investbook/lib/app/
+                                        </argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>installer-mac</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+                <property>
+                    <name>!no-installer</name>
+                </property>
+            </activation>
+            <properties>
+                <extension.loader.path>/Applications/Investbook.app/Contents/app/extensions</extension.loader.path>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.panteleyev</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>${jpackage.version}</version>
+                        <executions>
+                            <execution>
+                                <id>mac installer</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <type>PKG</type>
+                                    <icon>${project.basedir}/src/main/assembly/installer/icon.icns</icon>
+                                    <arguments>
+                                        <argument>
+                                            --spring.config.additional-location=file:/Applications/Investbook.app/Contents/app/
+                                        </argument>
+                                    </arguments>
                                 </configuration>
                             </execution>
                         </executions>
@@ -506,13 +660,17 @@
                             </layers>
                             <image>
                                 <!-- ${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX} defined in .github/workflows/publish-docker.yml -->
+                                <!--suppress UnresolvedMavenProperty -->
                                 <name>spaciousteam/investbook:latest${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX}</name>
                                 <tags>
+                                    <!--suppress UnresolvedMavenProperty -->
                                     <tag>spaciousteam/investbook:${project.version}${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX}</tag>
                                 </tags>
                                 <publish>true</publish>
                                 <env>
-                                    <BPE_LANG>C.UTF-8</BPE_LANG>
+                                    <!-- Env var name convention https://github.com/paketo-buildpacks/environment-variables?tab=readme-ov-file#configuration -->
+                                    <BPE_DEFAULT_LANG>C.UTF-8</BPE_DEFAULT_LANG>
+                                    <BPE_DEFAULT_SPRING_PROFILES_ACTIVE>prod</BPE_DEFAULT_SPRING_PROFILES_ACTIVE>
                                 </env>
                                 <!-- Replace with 'paketobuildpacks/builder-jammy-java-tiny' if resolved
                                      https://github.com/paketo-buildpacks/jammy-tiny-stack/issues/202 -->

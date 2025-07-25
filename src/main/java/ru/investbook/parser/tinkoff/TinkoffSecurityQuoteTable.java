@@ -175,7 +175,7 @@ public class TinkoffSecurityQuoteTable extends SingleAbstractReportTable<Securit
     @Getter
     @RequiredArgsConstructor
     protected enum SecurityQuoteTableHeader implements TableHeaderColumn {
-        SHORT_NAME("Сокращенное", "наименование", "актива"),
+        SHORT_NAME("наименование", "актива"),
         CODE("Код", "актива"),
         COUNT("Исходящий", "остаток"),
         PRICE(optional("Рыночная", "цена")), // на одну бумагу

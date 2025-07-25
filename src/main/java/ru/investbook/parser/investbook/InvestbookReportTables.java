@@ -27,20 +27,19 @@ import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.report_parser.api.AbstractReportTables;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import org.spacious_team.broker.report_parser.api.WrappingReportTable;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.parser.SecurityRegistrar;
 import ru.investbook.repository.SecurityRepository;
 
-public class InvestbookReportTables extends AbstractReportTables<BrokerReport> {
+public class InvestbookReportTables extends AbstractReportTables<InvestbookBrokerReport> {
 
     private final SecurityRegistrar securityRegistrar;
     private final SecurityRepository securityRepository;
     private final SecurityConverter securityConverter;
 
-    protected InvestbookReportTables(BrokerReport report,
+    protected InvestbookReportTables(InvestbookBrokerReport report,
                                      SecurityRegistrar securityRegistrar,
                                      SecurityRepository securityRepository,
                                      SecurityConverter securityConverter) {

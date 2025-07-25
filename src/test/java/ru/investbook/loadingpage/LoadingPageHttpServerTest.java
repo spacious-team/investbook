@@ -26,9 +26,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.investbook.BrowserHomePageOpener;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
-import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.getServerAddress;
-import static ru.investbook.loadingpage.LoadingPageHttpServerHelper.getServerPort;
+import static ru.investbook.loadingpage.PropertiesGetter.getBooleanProperty;
 
 @ExtendWith(MockitoExtension.class)
 class LoadingPageHttpServerTest {
@@ -42,10 +42,21 @@ class LoadingPageHttpServerTest {
 
     @Test
     void testBrowserOpensOnLoadingPageStart() {
-        try (MockedStatic<BrowserHomePageOpener> browserOpenerMock = Mockito.mockStatic(BrowserHomePageOpener.class)) {
+        try (MockedStatic<BrowserHomePageOpener> browserOpenerMock = Mockito.mockStatic(BrowserHomePageOpener.class);
+             MockedStatic<PropertiesGetter> properties = Mockito.mockStatic(PropertiesGetter.class)) {
+
+            String host = "localhost";
+            int port = 20300;
+            String expectedUrl = "http://" + host + ":" + port;
+            properties.when(() -> PropertiesGetter.getProperty(eq("server.address"), any(String.class)))
+                    .thenReturn(host);
+            properties.when(() -> PropertiesGetter.getIntProperty(eq("server.port"), anyInt()))
+                    .thenReturn(port);
+            properties.when(() -> getBooleanProperty(eq("investbook.open-home-page-after-start"), anyBoolean()))
+                            .thenReturn(true);
+
             loadingPageHttpServer.start();
 
-            String expectedUrl = "http://" + getServerAddress() + ":" + getServerPort();
             browserOpenerMock.verify(() -> BrowserHomePageOpener.open(expectedUrl), times(1));
         }
     }
