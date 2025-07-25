@@ -28,7 +28,7 @@
     </parent>
     <groupId>ru.investbook</groupId>
     <artifactId>investbook</artifactId>
-    <version>2025.2</version>
+    <version>20${app.version}</version>
 
     <name>investbook</name>
     <description>Investor Accounting Book</description>
@@ -65,7 +65,7 @@
         <app.version>25.2</app.version>
         <java.version>24</java.version>
         <lombok.version>1.18.38</lombok.version>
-        <checkerframework.version>3.49.3</checkerframework.version>
+        <checkerframework.version>3.49.5</checkerframework.version>
         <jpackage.version>1.6.6</jpackage.version>
         <extension.loader.path>./extensions</extension.loader.path>  <!-- overridden by installer-* profiles -->
         <checkerframework.skipDefs>-AskipDefs=.*</checkerframework.skipDefs>  <!-- overdated by 'nullcheck' profile -->
@@ -226,7 +226,7 @@
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>4.0</version>
+            <version>4.0.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>

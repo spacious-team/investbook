@@ -1,6 +1,6 @@
 /*
  * InvestBook
- * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
+ * Copyright (C) 2025  Spacious Team <spacious-team@ya.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -18,19 +18,14 @@
 
 package ru.investbook.parser;
 
+import org.spacious_team.broker.report_parser.api.BrokerReport;
+
 import java.time.Instant;
+import java.time.ZoneId;
 
-/**
- * Broker report containing single portfolio information
- */
-public interface SingleBrokerReport extends ZoneIdAwareBrokerReport {
+public interface ZoneIdAwareBrokerReport extends BrokerReport {
 
-    String getPortfolio();
+    ZoneId getReportZoneId();
 
-    Instant getReportEndDateTime();
-
-    /**
-     * Registrar where new securities will be registered
-     */
-    SecurityRegistrar getSecurityRegistrar();
+    Instant convertToInstant(String value);
 }

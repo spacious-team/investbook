@@ -21,16 +21,21 @@ package ru.investbook.parser.investbook;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.report_parser.api.AbstractReportTable;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.ConstantPositionTableColumn;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
+import org.spacious_team.table_wrapper.api.TableRow;
+import ru.investbook.parser.ZoneIdAwareBrokerReport;
+
+import java.time.Instant;
+
+import static ru.investbook.parser.investbook.AbstractInvestbookTable.InvestbookReportTableHeader.DATE_TIME;
 
 public class AbstractInvestbookTable<RowType> extends AbstractReportTable<RowType> {
 
-    protected AbstractInvestbookTable(BrokerReport report) {
+    protected AbstractInvestbookTable(InvestbookBrokerReport report) {
         super(report,
                 "Investbook Report Table",
                 "Дата",
@@ -38,6 +43,17 @@ public class AbstractInvestbookTable<RowType> extends AbstractReportTable<RowTyp
                 InvestbookReportTableHeader.class);
     }
 
+    public Instant parseEventInstant(TableRow row) {
+        try {
+            return row.getInstantCellValue(DATE_TIME);
+        } catch (Exception e) {
+            if (getReport() instanceof ZoneIdAwareBrokerReport report) {
+                String dateTime = row.getStringCellValue(DATE_TIME);
+                return report.convertToInstant(dateTime);
+            }
+            throw e;
+        }
+    }
 
     @Getter
     @RequiredArgsConstructor

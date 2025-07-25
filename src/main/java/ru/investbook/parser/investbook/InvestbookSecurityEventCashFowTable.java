@@ -22,7 +22,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityType;
-import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.parser.SecurityRegistrar;
@@ -37,7 +36,7 @@ import static ru.investbook.parser.investbook.AbstractInvestbookTable.Investbook
 
 public class InvestbookSecurityEventCashFowTable extends AbstractSecurityAwareInvestbookTable<SecurityEventCashFlow> {
 
-    protected InvestbookSecurityEventCashFowTable(BrokerReport report,
+    protected InvestbookSecurityEventCashFowTable(InvestbookBrokerReport report,
                                                   SecurityRegistrar securityRegistrar,
                                                   SecurityRepository securityRepository,
                                                   SecurityConverter securityConverter) {
@@ -69,13 +68,18 @@ public class InvestbookSecurityEventCashFowTable extends AbstractSecurityAwareIn
             default -> throw new IllegalArgumentException("Unexpected type: " + type);
         };
         Collection<SecurityEventCashFlow> result = new ArrayList<>(2);
+        int count = row.getIntCellValue(COUNT);
+        BigDecimal value = row.getBigDecimalCellValue(PRICE);
+        if (type != CashFlowType.DERIVATIVE_PROFIT) {
+                value = value.multiply(BigDecimal.valueOf(count));
+        }
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .portfolio(row.getStringCellValue(PORTFOLIO))
-                .timestamp(row.getInstantCellValue(DATE_TIME))
+                .timestamp(parseEventInstant(row))
                 .security(securityId)
-                .count(row.getIntCellValue(COUNT))
+                .count(count)
                 .eventType(type)
-                .value(row.getBigDecimalCellValue(PRICE))
+                .value(value)
                 .currency(row.getStringCellValue(CURRENCY));
         result.add(builder.build());
         @Nullable BigDecimal tax = row.getBigDecimalCellValueOrDefault(FEE, null);
