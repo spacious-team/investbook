@@ -69,7 +69,6 @@
         <jpackage.version>1.6.6</jpackage.version>
         <extension.loader.path>./extensions</extension.loader.path>  <!-- overridden by installer-* profiles -->
         <checkerframework.skipDefs>-AskipDefs=.*</checkerframework.skipDefs>  <!-- overdated by 'nullcheck' profile -->
-        <querydsl.version>5.1.0</querydsl.version>
     </properties>
 
     <repositories>
@@ -233,15 +232,6 @@
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
-            <version>${querydsl.version}</version>
-            <classifier>jakarta</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.querydsl</groupId>
-            <artifactId>querydsl-apt</artifactId>
-            <version>${querydsl.version}</version>
-            <classifier>jakarta</classifier>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -274,15 +264,20 @@
                             <version>${hibernate.version}</version>
                         </path>
                         <path>
-                            <groupId>org.checkerframework</groupId>
-                            <artifactId>checker</artifactId>
-                            <version>${checkerframework.version}</version>
-                        </path>
-                        <path>
                             <groupId>com.querydsl</groupId>
                             <artifactId>querydsl-apt</artifactId>
                             <version>${querydsl.version}</version>
                             <classifier>jakarta</classifier>
+                        </path>
+                        <path>
+                            <groupId>jakarta.persistence</groupId>
+                            <artifactId>jakarta.persistence-api</artifactId>
+                            <version>${jakarta-persistence.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.checkerframework</groupId>
+                            <artifactId>checker</artifactId>
+                            <version>${checkerframework.version}</version>
                         </path>
                     </annotationProcessorPaths>
                     <annotationProcessors>
@@ -293,10 +288,10 @@
                             org.hibernate.processor.HibernateProcessor
                         </annotationProcessor>
                         <annotationProcessor>
-                            org.checkerframework.checker.nullness.NullnessChecker
+                            com.querydsl.apt.jpa.JPAAnnotationProcessor
                         </annotationProcessor>
                         <annotationProcessor>
-                            com.querydsl.apt.jpa.JPAAnnotationProcessor
+                            org.checkerframework.checker.nullness.NullnessChecker
                         </annotationProcessor>
                     </annotationProcessors>
                     <compilerArgs combine.children="append">
@@ -376,25 +371,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.5.0</version>
-                <executions>
-                    <execution>
-                        <id>add-generated-sources</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources/annotations</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
@@ -407,10 +383,13 @@
                 </property>
             </activation>
             <properties>
-                <!-- V2022_1_0_1.class нельзя изменять, чтобы не менялась чек сумма миграции -->
+                <!-- Классы, которые исключаем из проверки (regex для fully-qualified java class names) -->
+                <!-- V2022_1_0_1 нельзя изменять, чтобы не менялась чек сумма миграции -->
                 <!-- Классы Entity(Pk)?_ сгенерированы hibernate-jpamodelgen -->
+                <!-- Классы [.]Q[^.]+Entity(Pk)? сгенерированы querydsl-apt -->
+                <!-- Escaping '\' doesn't work: use '[.]' instead of '\.' -->
                 <checkerframework.skipDefs>
-                    -AskipDefs=(Test$|V2022_1_0_1|Entity(Pk)?_$|generated.ValCurs)
+                    -AskipDefs=(Test$|V2022_1_0_1|Entity(Pk)?_$|[.]Q[^.]+Entity(Pk)?$|^generated[.]ValCurs$)
                 </checkerframework.skipDefs>
             </properties>
         </profile>
