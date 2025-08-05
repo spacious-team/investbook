@@ -11,9 +11,9 @@ https://github.com/spacious-team/investbook/actions/workflows/unit-tests.yml)
 [![github-action-installer-build-status](https://img.shields.io/github/actions/workflow/status/spacious-team/investbook/publish-docker.yml?style=flat-square&branch=master&label=installers%20build)](https://github.com/spacious-team/investbook/actions/workflows/publish-installers.yml)
 [![github-all-releases](https://img.shields.io/github/downloads/spacious-team/investbook/total?style=flat-square&logo=github&color=lightblue)](https://github.com/spacious-team/investbook/releases/latest)
 [![docker-pulls](https://img.shields.io/docker/pulls/spaciousteam/investbook?style=flat-square&logo=docker&color=lightblue&logoColor=white)](https://hub.docker.com/r/spaciousteam/investbook)
-[![telegram-channel](https://img.shields.io/endpoint?style=flat-square&color=2ca5e0&label=news&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Finvestbook_official)](https://t.me/investbook_official)
+[![telegram-channel](https://img.shields.io/badge/channel-join-2ca5e0?style=flat-square&logo=telegram)](https://t.me/+3ETAs2BxzWE3NDNi)
 [![telegram-group](https://img.shields.io/badge/chat-private-2ca5e0?style=flat-square&logo=telegram)](https://t.me/+IzYUY5hyvZtmOTIy)
-[![telegram-support](https://img.shields.io/badge/support-online-2ca5e0?style=flat-square&logo=telegram)](https://t.me/investbook_official)
+[![telegram-support](https://img.shields.io/badge/support-online-2ca5e0?style=flat-square&logo=telegram)](https://t.me/+3ETAs2BxzWE3NDNi)
 
 <img src="https://user-images.githubusercontent.com/11336712/85948992-b1d6de00-b95c-11ea-8edc-4d5e7dfc8210.png" width="100%"/>
 
@@ -213,7 +213,7 @@ Investbook в сравнении с [Intelinvest](https://intelinvest.ru) и [Sn
 ознакомьтесь, пожалуйста, со следующей [информацией](docs/CONTRIBUTING.md).
 
 ### Контакты
-- Телеграм [канал](https://t.me/investbook_official), [чат](https://t.me/+IzYUY5hyvZtmOTIy) пользователей,
+- Телеграм [канал](https://t.me/+3ETAs2BxzWE3NDNi), [чат](https://t.me/+IzYUY5hyvZtmOTIy) пользователей,
   техническая поддержка оказывается в директ сообщениях телеграм канала (кнопка внизу слева канала);
 - Обсуждение на форуме [banki.ru](https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=380178);
 - Страница приложения на [smart-lab.ru](https://smart-lab.ru/trading-software/Investbook) и
