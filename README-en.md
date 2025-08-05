@@ -13,7 +13,7 @@ https://github.com/spacious-team/investbook/actions/workflows/unit-tests.yml)
 [![docker-pulls](https://img.shields.io/docker/pulls/spaciousteam/investbook?style=flat-square&logo=docker&color=lightblue&logoColor=white)](https://hub.docker.com/r/spaciousteam/investbook)
 [![telegram-channel](https://img.shields.io/badge/channel-join-2ca5e0?style=flat-square&logo=telegram)](https://t.me/+3ETAs2BxzWE3NDNi)
 [![telegram-group](https://img.shields.io/badge/chat-private-2ca5e0?style=flat-square&logo=telegram)](https://t.me/+IzYUY5hyvZtmOTIy)
-[![telegram-support](https://img.shields.io/badge/support-online-2ca5e0?style=flat-square&logo=telegram)](https://t.me/+3ETAs2BxzWE3NDNi)
+[![telegram-support](https://img.shields.io/badge/support-online-2ca5e0?style=flat-square&logo=telegram)](https://t.me/+yEKD309wU-NhYjhi)
 
 Find out the real annual percentage return on investment and compare it to a bank deposit, find out the average 
 cost of buying stocks, bonds, derivatives, automate, analyze your portfolio.
