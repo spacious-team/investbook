@@ -21,6 +21,7 @@ package ru.investbook.repository;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.SecurityEntity;
 
@@ -30,7 +31,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Transactional(readOnly = true)
-public interface SecurityRepository extends JpaRepository<SecurityEntity, Integer> {
+public interface SecurityRepository extends JpaRepository<SecurityEntity, Integer>, QuerydslPredicateExecutor<SecurityEntity> {
 
     Optional<SecurityEntity> findByIsin(String isin);
 

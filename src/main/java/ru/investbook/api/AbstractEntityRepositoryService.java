@@ -18,6 +18,7 @@
 
 package ru.investbook.api;
 
+import com.querydsl.core.types.Predicate;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -70,7 +72,11 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
     }
 
     @Override
-    public Page<Pojo> getPage(Pageable pageable) {
+    public Page<Pojo> getPage(@Nullable Predicate predicate, Pageable pageable) {
+        if (predicate != null && repository instanceof QuerydslPredicateExecutor) {
+            return ((QuerydslPredicateExecutor<Entity>) repository).findAll(predicate, pageable)
+                    .map(converter::fromEntity);
+        }
         return repository.findAll(pageable)
                 .map(converter::fromEntity);
     }

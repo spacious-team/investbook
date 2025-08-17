@@ -18,6 +18,7 @@
 
 package ru.investbook.api;
 
+import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -30,6 +31,7 @@ import org.spacious_team.broker.pojo.Security;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -61,9 +63,11 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
-    public Page<Security> get(@Parameter(hidden = true)
-                              Pageable pageable) {
-        return super.get(pageable);
+    public Page<Security> get(
+            @Parameter(hidden = true)
+            @QuerydslPredicate(root = SecurityEntity.class) @Nullable Predicate predicate,
+            @Parameter(hidden = true) Pageable pageable) {
+        return super.get(predicate, pageable);
     }
 
 

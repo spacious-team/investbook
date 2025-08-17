@@ -67,8 +67,8 @@
         <lombok.version>1.18.38</lombok.version>
         <checkerframework.version>3.49.5</checkerframework.version>
         <jpackage.version>1.6.6</jpackage.version>
-        <checkerframework.skipDefs>-AskipDefs=.*</checkerframework.skipDefs>  <!-- overridden by 'nullcheck' profile -->
         <extension.loader.path>./extensions</extension.loader.path>  <!-- overridden by installer-* profiles -->
+        <checkerframework.skipDefs>-AskipDefs=.*</checkerframework.skipDefs>  <!-- overdated by 'nullcheck' profile -->
     </properties>
 
     <repositories>
@@ -229,6 +229,10 @@
             <version>4.0.4</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-jpa</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -260,6 +264,17 @@
                             <version>${hibernate.version}</version>
                         </path>
                         <path>
+                            <groupId>com.querydsl</groupId>
+                            <artifactId>querydsl-apt</artifactId>
+                            <version>${querydsl.version}</version>
+                            <classifier>jakarta</classifier>
+                        </path>
+                        <path>
+                            <groupId>jakarta.persistence</groupId>
+                            <artifactId>jakarta.persistence-api</artifactId>
+                            <version>${jakarta-persistence.version}</version>
+                        </path>
+                        <path>
                             <groupId>org.checkerframework</groupId>
                             <artifactId>checker</artifactId>
                             <version>${checkerframework.version}</version>
@@ -271,6 +286,9 @@
                         </annotationProcessor>
                         <annotationProcessor>
                             org.hibernate.processor.HibernateProcessor
+                        </annotationProcessor>
+                        <annotationProcessor>
+                            com.querydsl.apt.jpa.JPAAnnotationProcessor
                         </annotationProcessor>
                         <annotationProcessor>
                             org.checkerframework.checker.nullness.NullnessChecker
@@ -365,10 +383,13 @@
                 </property>
             </activation>
             <properties>
-                <!-- V2022_1_0_1.class нельзя изменять, чтобы не менялась чек сумма миграции -->
+                <!-- Классы, которые исключаем из проверки (regex для fully-qualified java class names) -->
+                <!-- V2022_1_0_1 нельзя изменять, чтобы не менялась чек сумма миграции -->
                 <!-- Классы Entity(Pk)?_ сгенерированы hibernate-jpamodelgen -->
+                <!-- Классы [.]Q[^.]+Entity(Pk)? сгенерированы querydsl-apt -->
+                <!-- Escaping '\' doesn't work: use '[.]' instead of '\.' -->
                 <checkerframework.skipDefs>
-                    -AskipDefs=(Test$|V2022_1_0_1|Entity(Pk)?_$|generated.ValCurs)
+                    -AskipDefs=(Test$|V2022_1_0_1|Entity(Pk)?_$|[.]Q[^.]+Entity(Pk)?$|^generated[.]ValCurs$)
                 </checkerframework.skipDefs>
             </properties>
         </profile>
