@@ -30,25 +30,6 @@
    ```
    Также возможна установка на Linux без GUI. Для этого к командам нужно добавить аргументы `--nodeps --noscripts`.
 
-### Установка и обновление на Windows Subsystem for Linux
-Investbook можно установить на [Windows Subsystem for Linux](https://learn.microsoft.com/ru-ru/windows/wsl/install).
-1. Установить Windows Subsystem for Linux
-   ```shell
-   wsl --install
-   ```
-2. Отобразить список дистрибутивов
-   ```shell
-   wsl --list --online
-   ```
-3. Установить один из дистрибутивов Linux, например `Ubuntu`, `FedoraLinux-42` или `openSUSE-Tumbleweed`
-   ```shell
-   wsl --install -d Ubuntu
-   ```
-   Будет выполнена загрузка и запуск выбранного дистрибутива, откроется терминал Linux.
-4. В зависимости от выбранного дистрибутива Linux требуется установить Investbook из
-   [deb](#установка-и-обновление-на-ubuntu-и-debian) или [rpm](#установка-и-обновление-на-fedora) пакета. После этого
-   запустить команду `/opt/investbook/bin/Investbook` и открыть http://localhost:2030 в браузере на Windows.
-
 ### Запуск Investbook на Linux дистрибутивах
 
 1. После установки на Linux с GUI в списке приложений появится `Investbook`. Запустите его.
