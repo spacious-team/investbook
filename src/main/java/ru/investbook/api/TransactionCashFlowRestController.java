@@ -79,14 +79,6 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
     protected Page<TransactionCashFlow> get(
-            @RequestParam(value = "portfolio", required = false)
-            @Parameter(description = "Номер счета")
-            @Nullable
-            String portfolio,
-            @RequestParam(value = "trade-id", required = false)
-            @Parameter(description = "Номер сделки в системе учета брокера")
-            @Nullable
-            String tradeId,
             @RequestParam(value = "event-type", required = false)
             @Parameter(description = "Тип (стоимость/комиссия/НКД)", example = "Смотреть API \"Типы событий\"")
             @Nullable
@@ -98,13 +90,13 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
             @Parameter(hidden = true)
             Pageable pageable
     ) {
-        if (portfolio != null || tradeId != null || eventType != null) {
+        if (eventType != null) {
             return filterByEventType(
-                    transactionRestController.get(portfolio, tradeId, predicate, Pageable.unpaged()),
+                    transactionRestController.get(predicate, Pageable.unpaged()),
                     eventType);
         }
 
-        return super.get(predicate, pageable);
+        return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 
     private Page<TransactionCashFlow> filterByEventType(Page<Transaction> transactions,

@@ -83,9 +83,10 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
                     @ApiResponse(responseCode = "500", content = @Content)})
     public Page<ForeignExchangeRate> get(
             @Parameter(hidden = true)
-            @QuerydslPredicate(root = ForeignExchangeRateEntity.class) @Nullable Predicate predicate,
+            @QuerydslPredicate(root = ForeignExchangeRateEntity.class)
+            @Nullable Predicate predicate,
             @Parameter(hidden = true) Pageable pageable) {
-        return super.get(predicate, pageable);
+        return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 
     @GetMapping("/currency-pairs/{currency-pair}")

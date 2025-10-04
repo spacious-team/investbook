@@ -67,9 +67,10 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
             @ApiResponse(responseCode = "500", content = @Content)})
     public Page<EventCashFlow> get(
             @Parameter(hidden = true)
-            @QuerydslPredicate(root = EventCashFlowEntity.class) @Nullable Predicate predicate,
+            @QuerydslPredicate(root = EventCashFlowEntity.class)
+            @Nullable Predicate predicate,
             @Parameter(hidden = true) Pageable pageable) {
-        return super.get(predicate, pageable);
+        return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 
     @Override

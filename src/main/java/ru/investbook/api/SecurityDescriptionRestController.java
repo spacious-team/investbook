@@ -65,9 +65,10 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
                     @ApiResponse(responseCode = "500", content = @Content)})
     public Page<SecurityDescription> get(
             @Parameter(hidden = true)
-            @QuerydslPredicate(root = SecurityDescriptionEntity.class) @Nullable Predicate predicate,
+            @QuerydslPredicate(root = SecurityDescriptionEntity.class)
+            @Nullable Predicate predicate,
             @Parameter(hidden = true) Pageable pageable) {
-        return super.get(predicate, pageable);
+        return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 
 

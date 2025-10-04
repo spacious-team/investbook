@@ -20,12 +20,10 @@ package ru.investbook.repository;
 
 import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.querydsl.ListQuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.TransactionEntity;
@@ -41,19 +39,13 @@ public interface TransactionRepository extends
         JpaRepository<TransactionEntity, Integer>,
         JpaSpecificationExecutor<TransactionEntity>,
         ConstraintAwareRepository<TransactionEntity, Integer>,
-        QuerydslPredicateExecutor<TransactionEntity> {
+        ListQuerydslPredicateExecutor<TransactionEntity> {
 
     Optional<TransactionEntity> findFirstByOrderByTimestampAsc();
 
     Optional<TransactionEntity> findFirstByOrderByTimestampDesc();
 
     Optional<TransactionEntity> findFirstBySecurityIdOrderByTimestampDesc(Integer securityId);
-
-    Page<TransactionEntity> findByPortfolio(String portfolio, Pageable pageable);
-
-    Page<TransactionEntity> findByTradeId(String tradeId, Pageable pageable);
-
-    Optional<TransactionEntity> findByPortfolioAndTradeId(String portfolio, String tradeId);
 
     /**
      * Returns stock market share, bonds ISINs and assets

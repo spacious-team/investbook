@@ -48,10 +48,10 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
     }
 
     public Page<Pojo> get(Pageable pageable) {
-        return get(null, pageable);
+        return getPage(pageable);
     }
 
-    public Page<Pojo> get(@Nullable Predicate predicate, Pageable pageable) {
+    public Page<Pojo> get(Predicate predicate, Pageable pageable) {
         return getPage(predicate, pageable);
     }
 

@@ -64,9 +64,10 @@ public class PortfolioRestController extends AbstractRestController<String, Port
             @ApiResponse(responseCode = "500", content = @Content)})
     public Page<Portfolio> get(
             @Parameter(hidden = true)
-            @QuerydslPredicate(root = PortfolioEntity.class) @Nullable Predicate predicate,
+            @QuerydslPredicate(root = PortfolioEntity.class)
+            @Nullable Predicate predicate,
             @Parameter(hidden = true) Pageable pageable) {
-        return super.get(predicate, pageable);
+        return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 
     @Override

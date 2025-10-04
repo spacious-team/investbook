@@ -20,7 +20,7 @@ package ru.investbook.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.querydsl.ListQuerydslPredicateExecutor;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 
@@ -34,7 +34,7 @@ import java.util.Set;
 public interface SecurityEventCashFlowRepository extends
         JpaRepository<SecurityEventCashFlowEntity, Integer>,
         JpaSpecificationExecutor<SecurityEventCashFlowEntity>,
-        QuerydslPredicateExecutor<SecurityEventCashFlowEntity> {
+        ListQuerydslPredicateExecutor<SecurityEventCashFlowEntity> {
 
     Optional<SecurityEventCashFlowEntity> findFirstByOrderByTimestampDesc();
 

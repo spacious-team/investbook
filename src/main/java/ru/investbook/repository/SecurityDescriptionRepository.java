@@ -23,7 +23,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.querydsl.ListQuerydslPredicateExecutor;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.SecurityDescriptionEntity;
 
@@ -31,7 +31,7 @@ import ru.investbook.entity.SecurityDescriptionEntity;
 public interface SecurityDescriptionRepository extends
         JpaRepository<SecurityDescriptionEntity, Integer>,
         JpaSpecificationExecutor<SecurityDescriptionEntity>,
-        QuerydslPredicateExecutor<SecurityDescriptionEntity> {
+        ListQuerydslPredicateExecutor<SecurityDescriptionEntity> {
 
     @Transactional
     default void createOrUpdateSector(int securityId, @Nullable String sector) {

@@ -21,7 +21,7 @@ package ru.investbook.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.querydsl.ListQuerydslPredicateExecutor;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.ForeignExchangeRateEntity;
 import ru.investbook.entity.ForeignExchangeRateEntityPk;
@@ -35,7 +35,7 @@ import java.util.Optional;
 public interface ForeignExchangeRateRepository extends
         JpaRepository<ForeignExchangeRateEntity, ForeignExchangeRateEntityPk>,
         JpaSpecificationExecutor<ForeignExchangeRateEntity>,
-        QuerydslPredicateExecutor<ForeignExchangeRateEntity>
+        ListQuerydslPredicateExecutor<ForeignExchangeRateEntity>
 {
 
     Optional<ForeignExchangeRateEntity> findByPkCurrencyPairAndPkDate(String currencyPair, LocalDate atDate);

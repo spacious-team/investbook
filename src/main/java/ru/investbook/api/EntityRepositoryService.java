@@ -34,7 +34,9 @@ public interface EntityRepositoryService<ID, Pojo> {
 
     Optional<Pojo> getById(ID id);
 
-    Page<Pojo> getPage(@Nullable Predicate predicate, Pageable pageable);
+    Page<Pojo> getPage(Pageable pageable);
+
+    Page<Pojo> getPage(Predicate predicate, Pageable pageable);
 
     /**
      * Creates a new object with direct INSERT into DB (without prior SELECT call) if possible,

@@ -21,7 +21,7 @@ package ru.investbook.repository;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.querydsl.ListQuerydslPredicateExecutor;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.TransactionCashFlowEntity;
 
@@ -33,7 +33,7 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public interface TransactionCashFlowRepository extends
         JpaRepository<TransactionCashFlowEntity, Integer>,
-        QuerydslPredicateExecutor<TransactionCashFlowEntity> {
+        ListQuerydslPredicateExecutor<TransactionCashFlowEntity> {
 
     default boolean isDepositOrWithdrawal(int transactionId) {
         return countByTransactionId(transactionId) == 0;

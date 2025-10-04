@@ -72,12 +72,14 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
     }
 
     @Override
-    public Page<Pojo> getPage(@Nullable Predicate predicate, Pageable pageable) {
-        if (predicate != null && repository instanceof QuerydslPredicateExecutor) {
-            return ((QuerydslPredicateExecutor<Entity>) repository).findAll(predicate, pageable)
-                    .map(converter::fromEntity);
-        }
+    public Page<Pojo> getPage(Pageable pageable) {
         return repository.findAll(pageable)
+                .map(converter::fromEntity);
+    }
+
+    @Override
+    public Page<Pojo> getPage(Predicate predicate, Pageable pageable) {
+        return ((QuerydslPredicateExecutor<Entity>) repository).findAll(predicate, pageable)
                 .map(converter::fromEntity);
     }
 
