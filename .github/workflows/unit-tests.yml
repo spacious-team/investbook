@@ -45,3 +45,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # For security, 'secrets.*' are not exposed to external pull requests
+        # SonarCloud analysis is skipped in these cases
+        if: ${{ github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository }}
