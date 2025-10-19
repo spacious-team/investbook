@@ -62,7 +62,7 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <app.version>25.2</app.version>
+        <app.version>25.3</app.version>
         <java.version>25</java.version>  <!-- update lombok when java is updated -->
         <lombok.version>1.18.42</lombok.version>
         <checkerframework.version>3.49.5</checkerframework.version>
