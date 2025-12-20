@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.7</version>
+        <version>3.5.7</version>  <!-- remove spring-boot-maven-plugin's includeOptional after update to 4.0.0+ -->
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.investbook</groupId>
@@ -308,12 +308,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
+                    <includeOptional>false</includeOptional>
                     <!-- use org.springframework.boot.loader.PropertiesLauncher instead of JarLauncher
                     (https://docs.spring.io/spring-boot/docs/current/maven-plugin/usage.html).
                     PropertiesLauncher reads settings from resources/loader.properties
