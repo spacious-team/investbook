@@ -64,11 +64,12 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
-    public Page<PortfolioProperty> get(
-            @Parameter(hidden = true)
-            @QuerydslPredicate(root = PortfolioPropertyEntity.class)
-            @Nullable Predicate predicate,
-            @Parameter(hidden = true) Pageable pageable) {
+    public Page<PortfolioProperty> get(@Parameter(hidden = true)
+                                       @QuerydslPredicate(root = PortfolioPropertyEntity.class)
+                                       @Nullable
+                                       Predicate predicate,
+                                       @Parameter(hidden = true)
+                                       Pageable pageable) {
         return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 

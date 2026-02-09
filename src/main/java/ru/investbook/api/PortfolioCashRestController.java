@@ -63,11 +63,12 @@ public class PortfolioCashRestController extends AbstractRestController<Integer,
     @Operation(summary = "Отобразить все", description = "Отображает всю информацию обо всех счетах", responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})
-    public Page<PortfolioCash> get(
-            @Parameter(hidden = true)
-            @QuerydslPredicate(root = PortfolioCashEntity.class)
-            @Nullable Predicate predicate,
-            @Parameter(hidden = true) Pageable pageable) {
+    public Page<PortfolioCash> get(@Parameter(hidden = true)
+                                   @QuerydslPredicate(root = PortfolioCashEntity.class)
+                                   @Nullable
+                                   Predicate predicate,
+                                   @Parameter(hidden = true)
+                                   Pageable pageable) {
         return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 

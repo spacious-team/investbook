@@ -84,8 +84,8 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
             @Nullable
             Integer eventType,
             @Parameter(hidden = true)
-            @Nullable
             @QuerydslPredicate(root = TransactionCashFlowEntity.class)
+            @Nullable
             Predicate predicate,
             @Parameter(hidden = true)
             Pageable pageable
@@ -100,7 +100,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     }
 
     private Page<TransactionCashFlow> filterByEventType(Page<Transaction> transactions,
-                                                        @Nullable Integer eventType) {
+                                                        Integer eventType) {
 
         List<TransactionCashFlow> transactionCashFlows = transactions
                 .stream()
@@ -111,14 +111,14 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     }
 
     private Stream<TransactionCashFlowEntity> findTransactionCashFlow(Transaction transaction,
-                                                                      @Nullable Integer eventType) {
+                                                                      Integer eventType) {
         @Nullable Integer id = transaction.getId();
         if (isNull(id)) {
             return Stream.empty();
         }
-        return isNull(eventType) ?
-                repository.findByTransactionId(id).stream() :
-                repository.findByTransactionIdAndCashFlowType(id, CashFlowType.valueOf(eventType)).stream();
+        CashFlowType cashFlowType = CashFlowType.valueOf(eventType);
+        return repository.findByTransactionIdAndCashFlowType(id, cashFlowType)
+                .stream();
     }
 
     @Override

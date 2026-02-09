@@ -46,7 +46,6 @@ import ru.investbook.entity.TransactionEntity;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.repository.TransactionRepository;
 
-
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
@@ -73,8 +72,8 @@ public class TransactionRestController extends AbstractRestController<Integer, T
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
     public Page<Transaction> get(@Parameter(hidden = true)
-                                 @Nullable
                                  @QuerydslPredicate(root = TransactionEntity.class)
+                                 @Nullable
                                  Predicate predicate,
                                  @Parameter(hidden = true)
                                  Pageable pageable) {

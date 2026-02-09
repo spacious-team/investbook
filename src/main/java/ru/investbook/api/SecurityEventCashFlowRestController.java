@@ -68,11 +68,12 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам", responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})
-    public Page<SecurityEventCashFlow> get(
-            @Parameter(hidden = true)
-            @QuerydslPredicate(root = SecurityEventCashFlowEntity.class)
-            @Nullable Predicate predicate,
-            @Parameter(hidden = true) Pageable pageable) {
+    public Page<SecurityEventCashFlow> get(@Parameter(hidden = true)
+                                           @QuerydslPredicate(root = SecurityEventCashFlowEntity.class)
+                                           @Nullable
+                                           Predicate predicate,
+                                           @Parameter(hidden = true)
+                                           Pageable pageable) {
         return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 
