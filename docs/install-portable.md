@@ -22,9 +22,9 @@ $ java -version
 ```
 Пример вывода
 ```shell
-openjdk version "24" 2025-03-18
-OpenJDK Runtime Environment (build 24+36-3646)
-OpenJDK 64-Bit Server VM (build 24+36-3646, mixed mode, sharing)
+openjdk version "25" 2025-09-16
+OpenJDK Runtime Environment (build 25+36-3489)
+OpenJDK 64-Bit Server VM (build 25+36-3489, mixed mode, sharing)
 ```
 Если версия соответствует, то делать ничего не нужно. Если возникает ошибка запуска команды или версия ниже требуемой,
 то нужно установить Java.
@@ -54,7 +54,7 @@ export JAVA_HOME=/opt/jdk
 - Ubuntu (может быть недоступно)
 ```shell
 $ sudo apt update
-$ sudo apt install openjdk-24-jre-headless
+$ sudo apt install openjdk-25-jre-headless
 ```
 - Fedora
 ```shell
@@ -62,7 +62,7 @@ sudo dnf install java-latest-openjdk-headless
 ```
 - openSUSE Tumbleweed
 ```shell
-sudo zypper install java-24-openjdk-headless
+sudo zypper install java-25-openjdk-headless
 ```
 
 ### Запуск Portable версии Investbook
@@ -92,6 +92,7 @@ sudo zypper install java-24-openjdk-headless
 
 | Версия приложения       | Требуемая версия Java |
 |-------------------------|-----------------------|
+| с 25.3                  | java 25 и выше        |
 | с 25.1                  | java 24 и выше        |
 | с 23.3                  | java 21 и выше        |
 | с 23.1                  | java 20 и выше        |
