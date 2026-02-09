@@ -18,6 +18,7 @@
 
 package ru.investbook.api;
 
+import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -33,6 +34,7 @@ import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -77,31 +79,28 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
     protected Page<TransactionCashFlow> get(
-            @RequestParam(value = "portfolio", required = false)
-            @Parameter(description = "Номер счета")
-            @Nullable
-            String portfolio,
-            @RequestParam(value = "trade-id", required = false)
-            @Parameter(description = "Номер сделки в системе учета брокера")
-            @Nullable
-            String tradeId,
             @RequestParam(value = "event-type", required = false)
             @Parameter(description = "Тип (стоимость/комиссия/НКД)", example = "Смотреть API \"Типы событий\"")
             @Nullable
             Integer eventType,
             @Parameter(hidden = true)
+            @QuerydslPredicate(root = TransactionCashFlowEntity.class)
+            @Nullable
+            Predicate predicate,
+            @Parameter(hidden = true)
             Pageable pageable
     ) {
-        if (portfolio == null && tradeId == null && eventType == null) {
-            return super.get(pageable);
+        if (eventType != null) {
+            return filterByEventType(
+                    transactionRestController.get(predicate, Pageable.unpaged()),
+                    eventType);
         }
-        return filterByEventType(
-                transactionRestController.get(portfolio, tradeId, Pageable.unpaged()),
-                eventType);
+
+        return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 
     private Page<TransactionCashFlow> filterByEventType(Page<Transaction> transactions,
-                                                        @Nullable Integer eventType) {
+                                                        Integer eventType) {
 
         List<TransactionCashFlow> transactionCashFlows = transactions
                 .stream()
@@ -112,14 +111,14 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     }
 
     private Stream<TransactionCashFlowEntity> findTransactionCashFlow(Transaction transaction,
-                                                                      @Nullable Integer eventType) {
+                                                                      Integer eventType) {
         @Nullable Integer id = transaction.getId();
         if (isNull(id)) {
             return Stream.empty();
         }
-        return isNull(eventType) ?
-                repository.findByTransactionId(id).stream() :
-                repository.findByTransactionIdAndCashFlowType(id, CashFlowType.valueOf(eventType)).stream();
+        CashFlowType cashFlowType = CashFlowType.valueOf(eventType);
+        return repository.findByTransactionIdAndCashFlowType(id, cashFlowType)
+                .stream();
     }
 
     @Override

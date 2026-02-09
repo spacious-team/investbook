@@ -18,6 +18,7 @@
 
 package ru.investbook.api;
 
+import com.querydsl.core.types.Predicate;
 import jakarta.persistence.GeneratedValue;
 import lombok.SneakyThrows;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -48,6 +49,10 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
 
     public Page<Pojo> get(Pageable pageable) {
         return getPage(pageable);
+    }
+
+    public Page<Pojo> get(Predicate predicate, Pageable pageable) {
+        return getPage(predicate, pageable);
     }
 
     /**
