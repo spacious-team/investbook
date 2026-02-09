@@ -84,10 +84,10 @@ public class MoexDerivativeCodeServiceTest {
     static Object[][] contractToFuturesShortName() {
         return new Object[][]{
                 {"SiM1", "Si-6.21"},
-                {"RIZ9", "RTS-12.19"},
+                {"RIZ9", "RTS-12.29"},
                 {"SRX1", "SBRF-11.21"},
                 {"SRV2", "SBRF-10.22"},
-                {"SPQ9", "SBPR-8.19"},
+                {"SPQ9", "SBPR-8.29"},
                 {"BRK3", "BR-5.23"},
                 {"Si-6.21", "Si-6.21"},
                 {"RTS-12.19", "RTS-12.19"},
