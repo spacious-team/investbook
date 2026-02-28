@@ -60,6 +60,7 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     @GetMapping
     @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отобразить информацию по всем инструментам",
+            operationId = "getSecurityDescriptions",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -76,6 +77,7 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     @Override
     @GetMapping("{id}")
     @Operation(summary = "Отобразить один", description = "Отобразить информацию по инструменту",
+            operationId = "getSecurityDescription",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -90,6 +92,7 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре",
+            operationId = "postSecurityDescription",
             responses = {
                     @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
                     @ApiResponse(responseCode = "409"),
@@ -101,6 +104,7 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     @Override
     @PutMapping("{id}")
     @Operation(summary = "Обновить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре",
+            operationId = "putSecurityDescription",
             responses = {
                     @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
                     @ApiResponse(responseCode = "204"),
@@ -117,6 +121,7 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     @Override
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = "Удалить информацию по инструменту",
+            operationId = "deleteSecurityDescription",
             responses = {
                     @ApiResponse(responseCode = "204"),
                     @ApiResponse(responseCode = "500", content = @Content)})

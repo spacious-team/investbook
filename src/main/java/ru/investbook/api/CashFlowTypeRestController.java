@@ -48,6 +48,7 @@ public class CashFlowTypeRestController {
 
     @GetMapping
     @Operation(summary = "Отобразить все",
+            operationId = "getCashFlowTypes",
             responses = {
                     @ApiResponse(responseCode = "200", content = @Content(
                             array = @ArraySchema(schema = @Schema(implementation = CashFlowType.class)))),
@@ -61,6 +62,7 @@ public class CashFlowTypeRestController {
 
     @GetMapping("{id}")
     @Operation(summary = "Отобразить по идентификатору",
+            operationId = "getCashFlowType",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})

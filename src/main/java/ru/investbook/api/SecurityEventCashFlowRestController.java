@@ -65,9 +65,11 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам", responses = {
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам",
+            operationId = "getSecurityEventCashFlows",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public Page<SecurityEventCashFlow> get(@Parameter(hidden = true)
                                            @QuerydslPredicate(root = SecurityEventCashFlowEntity.class)
                                            @Nullable
@@ -79,9 +81,11 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить одну", description = "Отобразить выплату по идентификатору", responses = {
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(summary = "Отобразить одну", description = "Отобразить выплату по идентификатору",
+            operationId = "getSecurityEventCashFlow",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<SecurityEventCashFlow> get(@PathVariable("id")
                                                      @Parameter(description = "Внутренний идентификатор выплаты")
                                                      Integer id) {
@@ -90,10 +94,12 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Сохранить информацию о выплате", responses = {
-            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-            @ApiResponse(responseCode = "409"),
-            @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(summary = "Добавить", description = "Сохранить информацию о выплате",
+            operationId = "postSecurityEventCashFlow",
+            responses = {
+                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+                    @ApiResponse(responseCode = "409"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> post(@RequestBody @Valid SecurityEventCashFlow event) {
         if (event.getEventType() == REDEMPTION) positionsFactory.invalidateCache();
         return super.post(event);
@@ -101,10 +107,12 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", description = "Модифицировать информацию о выплате", responses = {
-            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-            @ApiResponse(responseCode = "204"),
-            @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(summary = "Обновить", description = "Модифицировать информацию о выплате",
+            operationId = "putSecurityEventCashFlow",
+            responses = {
+                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Внутренний идентификатор выплаты")
                                     Integer id,
@@ -117,9 +125,11 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удалить информацию о выплате", responses = {
-            @ApiResponse(responseCode = "204"),
-            @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(summary = "Удалить", description = "Удалить информацию о выплате",
+            operationId = "deleteSecurityEventCashFlow",
+            responses = {
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
                                        @Parameter(description = "Внутренний идентификатор выплаты")
                                        Integer id) {

@@ -78,6 +78,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
     @GetMapping
     @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отображает всю имеющуюся информацию по обменным курсам",
+            operationId = "getForeignExchangeRates",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -93,6 +94,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
     @GetMapping("/currency-pairs/{currency-pair}")
     @Operation(summary = "Отобразить по валюте",
             description = "Отображает всю имеющуюся информацию по обменному курсу заданной валютной пары",
+            operationId = "getCurrencyPairForeignExchangeRates",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -109,7 +111,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
      * see {@link AbstractRestController#get(Object)}
      */
     @GetMapping("/currency-pairs/{currency-pair}/dates/{date}")
-    @Operation(summary = "Отобразить по валюте и дате", responses = {
+    @Operation(summary = "Отобразить по валюте и дате", operationId = "getForeignExchangeRate", responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})
     protected ResponseEntity<ForeignExchangeRate> get(@PathVariable("currency-pair")
@@ -124,7 +126,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", responses = {
+    @Operation(summary = "Добавить", operationId = "postForeignExchangeRate", responses = {
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "409"),
             @ApiResponse(responseCode = "500", content = @Content)})
@@ -138,6 +140,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
      */
     @PutMapping("/currency-pairs/{currency-pair}/dates/{date}")
     @Operation(summary = "Обновить", description = "Обновляет информацию о курсе валюты за заданную дату",
+            operationId = "putForeignExchangeRate",
             responses = {
                     @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
                     @ApiResponse(responseCode = "204"),
@@ -161,6 +164,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
      */
     @DeleteMapping("/currency-pairs/{currency-pair}/dates/{date}")
     @Operation(summary = "Удалить", description = "Удаляет информацию о курсе из БД",
+            operationId = "deleteForeignExchangeRate",
             responses = {
                     @ApiResponse(responseCode = "204"),
                     @ApiResponse(responseCode = "500", content = @Content)})

@@ -62,9 +62,11 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам", responses = {
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам",
+            operationId = "getEventCashFlows",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public Page<EventCashFlow> get(@Parameter(hidden = true)
                                    @QuerydslPredicate(root = EventCashFlowEntity.class)
                                    @Nullable
@@ -76,9 +78,11 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить одну", description = "Отобразить выплату по ее номеру", responses = {
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(summary = "Отобразить одну", description = "Отобразить выплату по ее номеру",
+            operationId = "getEventCashFlow",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<EventCashFlow> get(@PathVariable("id")
                                              @Parameter(description = "Номер события")
                                              Integer id) {
@@ -87,20 +91,24 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Сохранить информацию", responses = {
-            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-            @ApiResponse(responseCode = "409"),
-            @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(summary = "Добавить", description = "Сохранить информацию",
+            operationId = "postEventCashFlow",
+            responses = {
+                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+                    @ApiResponse(responseCode = "409"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> post(@RequestBody @Valid EventCashFlow event) {
         return super.post(event);
     }
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", description = "Модифицировать информацию", responses = {
-            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-            @ApiResponse(responseCode = "204"),
-            @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(summary = "Обновить", description = "Модифицировать информацию",
+            operationId = "putEventCashFlow",
+            responses = {
+                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
                                     @Parameter(description = "Номер события")
                                     Integer id,
@@ -112,9 +120,11 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удалить информацию из БД", responses = {
-            @ApiResponse(responseCode = "204"),
-            @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(summary = "Удалить", description = "Удалить информацию из БД",
+            operationId = "deleteEventCashFlow",
+            responses = {
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
                                        @Parameter(description = "Номер события")
                                        Integer id) {

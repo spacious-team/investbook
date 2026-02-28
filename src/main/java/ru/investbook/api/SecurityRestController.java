@@ -60,6 +60,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @GetMapping
     @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отобразить все биржевые инструменты",
+            operationId = "getSecurities",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -76,6 +77,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Override
     @GetMapping("{id}")
     @Operation(summary = "Отобразить один", description = "Отобразить биржевой инструмент по внутреннему идентификатору",
+            operationId = "getSecurity",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -89,6 +91,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре",
+            operationId = "postSecurity",
             responses = {
                     @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
                     @ApiResponse(responseCode = "409"),
@@ -100,6 +103,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Override
     @PutMapping("{id}")
     @Operation(summary = "Обновить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре",
+            operationId = "putSecurity",
             responses = {
                     @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
                     @ApiResponse(responseCode = "204"),
@@ -116,6 +120,7 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Override
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = "Удалить сведения о биржевом инструменте и всех его сделках по всем счетам",
+            operationId = "deleteSecurity",
             responses = {
                     @ApiResponse(responseCode = "204"),
                     @ApiResponse(responseCode = "500", content = @Content)})

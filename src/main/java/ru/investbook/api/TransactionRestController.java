@@ -52,22 +52,19 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 @Tag(name = "Сделки", description = "Операции купли/продажи биржевых инструментов")
 @RequestMapping("/api/v1/transactions")
 public class TransactionRestController extends AbstractRestController<Integer, Transaction, TransactionEntity> {
-    private final TransactionRepository repository;
-    private final TransactionConverter converter;
     private final FifoPositionsFactory positionsFactory;
 
     public TransactionRestController(TransactionRepository repository,
                                      TransactionConverter converter,
                                      FifoPositionsFactory positionsFactory) {
         super(repository, converter);
-        this.repository = repository;
-        this.converter = converter;
         this.positionsFactory = positionsFactory;
     }
 
     @GetMapping
     @PageableAsQueryParam
     @Operation(summary = "Отобразить по фильтру", description = "Отображает сделки по счетам",
+            operationId = "getTransactions",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -86,6 +83,7 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @Override
     @GetMapping("{id}")
     @Operation(summary = "Отобразить одну", description = "Отображает одну сделку",
+            operationId = "getTransaction",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -98,6 +96,7 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Сохраняет новую сделку",
+            operationId = "postTransaction",
             responses = {
                     @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
                     @ApiResponse(responseCode = "409"),
@@ -113,6 +112,7 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @Override
     @PutMapping("{id}")
     @Operation(summary = "Обновить параметры", description = "Обновляет параметры указанной сделки",
+            operationId = "putTransaction",
             responses = {
                     @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
                     @ApiResponse(responseCode = "204"),
@@ -133,6 +133,7 @@ public class TransactionRestController extends AbstractRestController<Integer, T
     @Override
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить", description = "Удаляет указанную сделку",
+            operationId = "deleteTransaction",
             responses = {
                     @ApiResponse(responseCode = "204"),
                     @ApiResponse(responseCode = "500", content = @Content)})

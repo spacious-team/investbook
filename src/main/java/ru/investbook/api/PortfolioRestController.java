@@ -59,7 +59,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", responses = {
+    @Operation(summary = "Отобразить все", operationId = "getAccounts", responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public Page<Portfolio> get(@Parameter(hidden = true)
@@ -73,7 +73,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить один", responses = {
+    @Operation(summary = "Отобразить один", operationId = "getAccount", responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Portfolio> get(@PathVariable("id")
@@ -84,7 +84,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", responses = {
+    @Operation(summary = "Добавить", operationId = "postAccount", responses = {
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "409"),
             @ApiResponse(responseCode = "500", content = @Content)})
@@ -94,7 +94,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", responses = {
+    @Operation(summary = "Обновить", operationId = "putAccount", responses = {
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "204"),
             @ApiResponse(responseCode = "500", content = @Content)})
@@ -109,9 +109,11 @@ public class PortfolioRestController extends AbstractRestController<String, Port
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удалить счет и все связанные с ним данные", responses = {
-            @ApiResponse(responseCode = "204"),
-            @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(summary = "Удалить", description = "Удалить счет и все связанные с ним данные",
+            operationId = "deleteAccount",
+            responses = {
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
                                        @Parameter(description = "Номер счета")
                                        String id) {
