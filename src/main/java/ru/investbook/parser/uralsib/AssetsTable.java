@@ -22,8 +22,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.pojo.AccountProperty;
+import org.spacious_team.broker.pojo.AccountPropertyType;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
@@ -47,7 +47,7 @@ import static ru.investbook.parser.uralsib.AssetsTable.SummaryTableHeader.RUB;
  * In that case assets should be calculated by {@link CashTable}.
  */
 @Slf4j
-public class AssetsTable extends SingleInitializableReportTable<PortfolioProperty> {
+public class AssetsTable extends SingleInitializableReportTable<AccountProperty> {
     private static final String ASSETS_TABLE = "ОЦЕНКА АКТИВОВ";
     private static final String TABLE_FIRST_HEADER_LINE = "На конец отчетного периода";
     private static final String TABLE_SECOND_HEADER_LINE = "по цене закрытия";
@@ -58,7 +58,7 @@ public class AssetsTable extends SingleInitializableReportTable<PortfolioPropert
     }
 
     @Override
-    protected Collection<PortfolioProperty> parseTable() {
+    protected Collection<AccountProperty> parseTable() {
         try {
             SingleBrokerReport report = getReport();
             Table table = report.getReportPage()
@@ -79,10 +79,10 @@ public class AssetsTable extends SingleInitializableReportTable<PortfolioPropert
                     .orElse(null);
 
             return (row == null) ? emptyList() :
-                    singletonList(PortfolioProperty.builder()
-                            .portfolio(report.getPortfolio())
+                    singletonList(AccountProperty.builder()
+                            .account(report.getAccount())
                             .timestamp(report.getReportEndDateTime())
-                            .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
+                            .property(AccountPropertyType.TOTAL_ASSETS_RUB)
                             .value(row.getBigDecimalCellValue(RUB).toString())
                             .build());
         } catch (Exception e) {

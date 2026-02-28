@@ -25,7 +25,7 @@ import java.time.Instant;
  */
 public interface SingleBrokerReport extends ZoneIdAwareBrokerReport {
 
-    String getPortfolio();
+    String getAccount();
 
     Instant getReportEndDateTime();
 

@@ -20,8 +20,8 @@ package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction.AbstractTransactionBuilder;
 import org.spacious_team.broker.report_parser.api.DerivativeTransaction;
@@ -31,7 +31,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -113,7 +112,6 @@ public class TransactionFormsService {
         return getTransactionModels(spec, filter);
     }
 
-    @NonNull
     private Page<TransactionModel> getTransactionModels(Specification<TransactionEntity> spec,
                                                         TransactionFormFilterModel filter) {
         Sort sort = Sort.by(asc(TransactionEntity_.PORTFOLIO), desc(TransactionEntity_.TIMESTAMP), asc("security.id"));
@@ -177,7 +175,7 @@ public class TransactionFormsService {
 
         AbstractTransaction transaction = builder
                 .tradeId(tr.getOrGenerateTradeId())
-                .portfolio(tr.getPortfolio())
+                .account(tr.getPortfolio())
                 .timestamp(tr.getDate().atTime(tr.getTime()).atZone(zoneId).toInstant())
                 .security(savedSecurityId)
                 .count(abs(tr.getCount()) * direction)
@@ -211,7 +209,7 @@ public class TransactionFormsService {
     private void savePortfolio(String portfolio) {
         if (!portfolioRepository.existsById(portfolio)) {
             portfolioRepository.save(
-                    portfolioConverter.toEntity(Portfolio.builder()
+                    portfolioConverter.toEntity(Account.builder()
                             .id(portfolio)
                             .build()));
         }
@@ -224,7 +222,7 @@ public class TransactionFormsService {
         checkWithdrawalCount(split, savedSecurityId, splitInstant);
 
         SecurityTransaction.SecurityTransactionBuilder<?, ?> builder = SecurityTransaction.builder()
-                .portfolio(split.getPortfolio())
+                .account(split.getPortfolio())
                 .timestamp(splitInstant)
                 .security(savedSecurityId);
 

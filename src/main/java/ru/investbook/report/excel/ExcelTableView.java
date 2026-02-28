@@ -31,7 +31,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Account;
 import org.springframework.beans.factory.annotation.Value;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.entity.PortfolioEntity;
@@ -71,16 +71,16 @@ public abstract class ExcelTableView {
     public Collection<ExcelTable> createExcelTables() {
         Collection<ExcelTable> tables = new ArrayList<>();
         for (PortfolioEntity entity : getPortfolios(ViewFilter.get().getPortfolios())) {
-            Portfolio portfolio = portfolioConverter.fromEntity(entity);
-            String sheetName = getSheetNameCreator().apply(portfolio.getId());
-            tables.addAll(createExcelTables(portfolio, sheetName));
+            Account account = portfolioConverter.fromEntity(entity);
+            String sheetName = getSheetNameCreator().apply(account.getId());
+            tables.addAll(createExcelTables(account, sheetName));
         }
         return tables;
     }
 
-    protected Collection<ExcelTable> createExcelTables(Portfolio portfolio, String sheetName) {
-        Table table = tableFactory.create(portfolio);
-        return Collections.singleton(ExcelTable.of(portfolio, sheetName, table, this));
+    protected Collection<ExcelTable> createExcelTables(Account account, String sheetName) {
+        Table table = tableFactory.create(account);
+        return Collections.singleton(ExcelTable.of(account, sheetName, table, this));
     }
 
     protected Collection<PortfolioEntity> getPortfolios(Collection<String> allowedPortfolios) {
@@ -103,9 +103,9 @@ public abstract class ExcelTableView {
     /**
      * Thread safe method
      *
-     * @param portfolio accept null or portfolio
+     * @param account accept null or portfolio
      */
-    public <T extends Enum<T> & TableHeader> void createSheet(@Nullable Portfolio portfolio,
+    public <T extends Enum<T> & TableHeader> void createSheet(@Nullable Account account,
                                                               Workbook book,
                                                               String sheetName,
                                                               Table table,
@@ -118,7 +118,7 @@ public abstract class ExcelTableView {
             Sheet sheet = book.createSheet(validateExcelSheetName(sheetName));
             writeHeader(sheet, headerType, styles.getHeaderStyle());
             sheetPreCreate(sheet, table);
-            Table.Record totalRow = getTotalRow(table, Optional.ofNullable(portfolio));
+            Table.Record totalRow = getTotalRow(table, Optional.ofNullable(account));
             if (totalRow != null && !totalRow.isEmpty()) {
                 table.addFirst(totalRow);
             }
@@ -223,7 +223,8 @@ public abstract class ExcelTableView {
         return link;
     }
 
-    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    protected Table.Record getTotalRow(Table table, Optional<Account> account) {
         return new Table.Record();
     }
 

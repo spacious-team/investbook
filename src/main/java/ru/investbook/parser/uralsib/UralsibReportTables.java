@@ -39,11 +39,11 @@ import java.util.stream.Collectors;
 public class UralsibReportTables extends AbstractReportTables<UralsibBrokerReport> {
 
     @Getter
-    private final CashTable portfolioCashTable;
+    private final CashTable accountCashTable;
     private final SecuritiesTable portfolioSecuritiesTable;
     private final ReportTable<SecurityTransaction> securityTransactionTable;
     @Getter
-    private final PortfolioPropertyTable portfolioPropertyTable;
+    private final AccountPropertyTable accountPropertyTable;
     @Getter
     private final ForeignExchangeRateTable foreignExchangeRateTable;
     private final CouponAmortizationRedemptionTable couponAmortizationRedemptionTable;
@@ -56,9 +56,9 @@ public class UralsibReportTables extends AbstractReportTables<UralsibBrokerRepor
                                TransactionValueAndFeeParser transactionValueAndFeeParser) {
         super(report);
         AssetsTable securityAssetsTable = new AssetsTable(report);
-        this.portfolioCashTable = new CashTable(report);
+        this.accountCashTable = new CashTable(report);
         this.foreignExchangeRateTable = new ForeignExchangeRateTable(report, foreignExchangeRateService);
-        this.portfolioPropertyTable = new PortfolioPropertyTable(securityAssetsTable, portfolioCashTable, foreignExchangeRateTable);
+        this.accountPropertyTable = new AccountPropertyTable(securityAssetsTable, accountCashTable, foreignExchangeRateTable);
         this.portfolioSecuritiesTable = new SecuritiesTable(report);
         this.securityTransactionTable = WrappingReportTable.of(
                 new SecurityTransactionTable(report, portfolioSecuritiesTable, foreignExchangeRateTable, transactionValueAndFeeParser),

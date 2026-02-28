@@ -29,7 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.decampo.xirr.NewtonRaphson;
 import org.decampo.xirr.Transaction;
 import org.decampo.xirr.Xirr;
-import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Account;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.report.ForeignExchangeRateService;
@@ -91,9 +91,9 @@ public class CashFlowExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
+    protected Table.Record getTotalRow(Table table, Optional<Account> account) {
         Table.Record total = Table.newRecord();
-        String _portfolio = portfolio
+        String _portfolio = account
                 .orElseThrow(() -> new IllegalArgumentException("Ожидается портфель"))
                 .getId();
         BigDecimal liquidationValueRub = assetsAndCashService.getTotalAssetsInRub(_portfolio).orElse(BigDecimal.ZERO);
@@ -134,6 +134,7 @@ public class CashFlowExcelTableView extends ExcelTableView {
         @Nullable Transaction transaction = (cashInRub != null && date instanceof Instant instant) ?
                 new Transaction(cashInRub, LocalDate.ofInstant(instant, ZoneId.systemDefault())) :
                 null;
+        //noinspection NullableProblems
         return Optional.ofNullable(transaction);
     }
 

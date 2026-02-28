@@ -21,11 +21,11 @@ package ru.investbook.parser;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.Account;
+import org.spacious_team.broker.pojo.AccountCash;
+import org.spacious_team.broker.pojo.AccountProperty;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
-import org.spacious_team.broker.pojo.Portfolio;
-import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityDescription;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
@@ -35,12 +35,12 @@ import org.spacious_team.broker.pojo.Transaction;
 import org.spacious_team.broker.pojo.TransactionCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.springframework.stereotype.Component;
+import ru.investbook.api.AccountCashRestController;
+import ru.investbook.api.AccountPropertyRestController;
+import ru.investbook.api.AccountRestController;
 import ru.investbook.api.CreateResult;
 import ru.investbook.api.EventCashFlowRestController;
 import ru.investbook.api.ForeignExchangeRateRestController;
-import ru.investbook.api.PortfolioCashRestController;
-import ru.investbook.api.PortfolioPropertyRestController;
-import ru.investbook.api.PortfolioRestController;
 import ru.investbook.api.SecurityDescriptionRestController;
 import ru.investbook.api.SecurityEventCashFlowRestController;
 import ru.investbook.api.SecurityQuoteRestController;
@@ -60,24 +60,24 @@ import static ru.investbook.repository.RepositoryHelper.isUniqIndexViolationExce
 @Slf4j
 @RequiredArgsConstructor
 public class InvestbookApiClient {
-    private final PortfolioRestController portfolioRestController;
+    private final AccountRestController accountRestController;
     private final SecurityRestController securityRestController;
     private final SecurityDescriptionRestController securityDescriptionRestController;
     private final SecurityEventCashFlowRestController securityEventCashFlowRestController;
     private final EventCashFlowRestController eventCashFlowRestController;
     private final TransactionRestController transactionRestController;
     private final TransactionCashFlowRestController transactionCashFlowRestController;
-    private final PortfolioPropertyRestController portfolioPropertyRestController;
-    private final PortfolioCashRestController portfolioCashRestController;
+    private final AccountPropertyRestController accountPropertyRestController;
+    private final AccountCashRestController accountCashRestController;
     private final SecurityQuoteRestController securityQuoteRestController;
     private final ForeignExchangeRateRestController foreignExchangeRateRestController;
     private final MoexDerivativeCodeService moexDerivativeCodeService;
     private final ValidatorService validator;
 
-    public boolean addPortfolio(Portfolio portfolio) {
+    public boolean addPortfolio(Account account) {
         return saveWithoutUpdate(
-                portfolio,
-                portfolioRestController::createIfAbsent,
+                account,
+                accountRestController::createIfAbsent,
                 "Не могу сохранить Портфель");
     }
 
@@ -155,17 +155,17 @@ public class InvestbookApiClient {
                 "Не могу добавить информацию о движении денежных средств");
     }
 
-    public void addPortfolioCash(PortfolioCash cash) {
+    public void addAccountCash(AccountCash cash) {
         saveWithoutUpdate(
                 cash,
-                portfolioCashRestController::createIfAbsent,
+                accountCashRestController::createIfAbsent,
                 "Не могу добавить информацию об остатках денежных средств портфеля");
     }
 
-    public void addPortfolioProperty(PortfolioProperty property) {
+    public void addPortfolioProperty(AccountProperty property) {
         saveWithoutUpdate(
                 property,
-                portfolioPropertyRestController::createIfAbsent,
+                accountPropertyRestController::createIfAbsent,
                 "Не могу добавить информацию о свойствах портфеля");
     }
 

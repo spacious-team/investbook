@@ -37,7 +37,7 @@ public class EventCashFlowConverter implements EntityConverter<EventCashFlowEnti
     @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override
     public EventCashFlowEntity toEntity(EventCashFlow eventCashFlow) {
-        PortfolioEntity portfolioEntity = portfolioRepository.getReferenceById(eventCashFlow.getPortfolio());
+        PortfolioEntity portfolioEntity = portfolioRepository.getReferenceById(eventCashFlow.getAccount());
         CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.getReferenceById(eventCashFlow.getEventType().getId());
 
         EventCashFlowEntity entity = new EventCashFlowEntity();
@@ -58,7 +58,7 @@ public class EventCashFlowConverter implements EntityConverter<EventCashFlowEnti
     public EventCashFlow fromEntity(EventCashFlowEntity entity) {
         return EventCashFlow.builder()
                 .id(entity.getId())
-                .portfolio(entity.getPortfolio().getId())
+                .account(entity.getPortfolio().getId())
                 .timestamp(entity.getTimestamp())
                 .eventType(CashFlowType.valueOf(entity.getCashFlowType().getId()))
                 .value(entity.getValue())

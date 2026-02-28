@@ -27,7 +27,7 @@ import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.pojo.PortfolioCash;
+import org.spacious_team.broker.pojo.AccountCash;
 import ru.investbook.entity.PortfolioCashEntity;
 
 import java.math.BigDecimal;
@@ -88,11 +88,11 @@ public class CashBalancesPof {
                 .toList();
     }
 
-    Collection<PortfolioCash> toPortfolioCash(Map<Integer, String> accountToPortfolioId, Instant instant) {
+    Collection<AccountCash> toAccountCash(Map<Integer, String> accountToPortfolioId, Instant instant) {
         try {
             return cash.stream()
-                    .map(c -> PortfolioCash.builder()
-                            .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
+                    .map(c -> AccountCash.builder()
+                            .account(Objects.requireNonNull(accountToPortfolioId.get(account)))
                             .market("all")
                             .timestamp(instant)
                             .value(c.getValue())

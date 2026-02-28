@@ -226,7 +226,7 @@ public class TradePof {
             long ts = requireNonNull(getSettlementOrTimestamp());
             return Optional.of(builder
                     .tradeId(tradeId)
-                    .portfolio(requireNonNull(accountToPortfolioId.get(account)))
+                    .account(requireNonNull(accountToPortfolioId.get(account)))
                     .security(getSecurityId(assetToSecurityId))
                     .count(count.intValueExact())
                     .timestamp(Instant.ofEpochSecond(ts))

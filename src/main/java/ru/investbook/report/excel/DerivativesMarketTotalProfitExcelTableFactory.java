@@ -21,8 +21,8 @@ package ru.investbook.report.excel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
@@ -75,21 +75,21 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     private final MoexDerivativeCodeService moexDerivativeCodeService;
     private final SecurityProfitService securityProfitService;
 
-    public Table create(Portfolio portfolio) {
+    public Table create(Account account) {
         throw new UnsupportedOperationException();
     }
 
-    public Table create(Portfolio portfolio, String forCurrency) {
-        return create(singleton(portfolio.getId()), forCurrency);
+    public Table create(Account account, String forCurrency) {
+        return create(singleton(account.getId()), forCurrency);
     }
 
     /**
-     * @param portfolios should be empty for display for all
+     * @param accountIds should be empty for display for all
      */
     @Override
-    public Table create(Collection<String> portfolios, String forCurrency) {
-        Collection<String> contractGroups = getContractGroups(portfolios, forCurrency);
-        return create(portfolios, contractGroups, forCurrency);
+    public Table create(Collection<String> accountIds, String forCurrency) {
+        Collection<String> contractGroups = getContractGroups(accountIds, forCurrency);
+        return create(accountIds, contractGroups, forCurrency);
     }
 
     private Table create(Collection<String> portfolios, Collection<String> contractGroups, String forCurrency) {
@@ -150,7 +150,6 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
             row.put(LAST_TRANSACTION_DATE, ofNullable(transactions.peekLast())
                     .map(Transaction::getTimestamp)
                     .orElse(null));
-            //noinspection DataFlowIssue
             row.put(LAST_EVENT_DATE, getLastEventDate(portfolios, contracts));
             row.put(BUY_COUNT, transactions
                     .stream()

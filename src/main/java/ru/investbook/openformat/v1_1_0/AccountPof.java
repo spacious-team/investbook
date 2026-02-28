@@ -28,10 +28,10 @@ import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.Portfolio;
-import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.PortfolioProperty.PortfolioPropertyBuilder;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.pojo.Account;
+import org.spacious_team.broker.pojo.AccountProperty;
+import org.spacious_team.broker.pojo.AccountProperty.AccountPropertyBuilder;
+import org.spacious_team.broker.pojo.AccountPropertyType;
 import ru.investbook.entity.PortfolioEntity;
 
 import java.math.BigDecimal;
@@ -42,8 +42,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_RUB;
-import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_USD;
+import static org.spacious_team.broker.pojo.AccountPropertyType.TOTAL_ASSETS_RUB;
+import static org.spacious_team.broker.pojo.AccountPropertyType.TOTAL_ASSETS_USD;
 import static ru.investbook.openformat.OpenFormatHelper.getValidCurrencyOrNull;
 
 @Jacksonized
@@ -100,12 +100,12 @@ public class AccountPof {
                 .build();
     }
 
-    Optional<Portfolio> toPortfolio() {
+    Optional<Account> toAccount() {
         try {
-            String portfolioId = Optional.ofNullable(accountNumber)
+            String account = Optional.ofNullable(accountNumber)
                     .orElse(String.valueOf(id));
-            return Optional.of(Portfolio.builder()
-                    .id(portfolioId)
+            return Optional.of(Account.builder()
+                    .id(account)
                     .build());
         } catch (Exception e) {
             log.error("Не могу распарсить {}", this, e);
@@ -113,19 +113,19 @@ public class AccountPof {
         }
     }
 
-    Optional<PortfolioProperty> toTotalAssets(Instant atInstant) {
+    Optional<AccountProperty> toTotalAssets(Instant atInstant) {
         try {
-            return getPortfolioPropertyType()
+            return getAccountPropertyType()
                     .map(this::getPortfolioProperty)
                     .map(p -> p.timestamp(atInstant))
-                    .map(PortfolioPropertyBuilder::build);
+                    .map(AccountPropertyBuilder::build);
         } catch (Exception e) {
             log.error("Не могу распарсить {}", this, e);
             return Optional.empty();
         }
     }
 
-    private Optional<PortfolioPropertyType> getPortfolioPropertyType() {
+    private Optional<AccountPropertyType> getAccountPropertyType() {
         String currency = getValidCurrencyOrNull(valuationCurrency);
         if ("RUB".equalsIgnoreCase(currency)) {
             return Optional.of(TOTAL_ASSETS_RUB);
@@ -135,11 +135,11 @@ public class AccountPof {
         return Optional.empty();
     }
 
-    private PortfolioPropertyBuilder getPortfolioProperty(PortfolioPropertyType type) {
-        String portfolioId = Optional.ofNullable(accountNumber)
+    private AccountPropertyBuilder getPortfolioProperty(AccountPropertyType type) {
+        String account = Optional.ofNullable(accountNumber)
                 .orElse(String.valueOf(id));
-        return PortfolioProperty.builder()
-                .portfolio(portfolioId)
+        return AccountProperty.builder()
+                .account(account)
                 .property(type)
                 .value(valuation.toString());
     }

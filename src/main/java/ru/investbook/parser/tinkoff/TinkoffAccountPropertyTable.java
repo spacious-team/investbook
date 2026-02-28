@@ -19,9 +19,9 @@
 package ru.investbook.parser.tinkoff;
 
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.pojo.AccountCash;
+import org.spacious_team.broker.pojo.AccountProperty;
+import org.spacious_team.broker.pojo.AccountPropertyType;
 import org.spacious_team.broker.report_parser.api.InitializableReportTable;
 import org.spacious_team.broker.report_parser.api.ReportTable;
 import ru.investbook.parser.SingleBrokerReport;
@@ -36,22 +36,22 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
-import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_RUB;
-import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_USD;
+import static org.spacious_team.broker.pojo.AccountPropertyType.TOTAL_ASSETS_RUB;
+import static org.spacious_team.broker.pojo.AccountPropertyType.TOTAL_ASSETS_USD;
 
 @Slf4j
-public class TinkoffPortfolioPropertyTable extends InitializableReportTable<PortfolioProperty> {
+public class TinkoffAccountPropertyTable extends InitializableReportTable<AccountProperty> {
 
     private final SingleBrokerReport report;
     private final ForeignExchangeRateService foreignExchangeRateService;
     private final LocalDate date;
-    private final ReportTable<PortfolioCash> tinkoffCashTable;
+    private final ReportTable<AccountCash> tinkoffCashTable;
     private final TinkoffSecurityQuoteTable[] tinkoffSecurityQuoteTable;
 
-    public TinkoffPortfolioPropertyTable(SingleBrokerReport report,
-                                         ForeignExchangeRateService foreignExchangeRateService,
-                                         ReportTable<PortfolioCash> tinkoffCashTable,
-                                         TinkoffSecurityQuoteTable[] tinkoffSecurityQuoteTable) {
+    public TinkoffAccountPropertyTable(SingleBrokerReport report,
+                                       ForeignExchangeRateService foreignExchangeRateService,
+                                       ReportTable<AccountCash> tinkoffCashTable,
+                                       TinkoffSecurityQuoteTable[] tinkoffSecurityQuoteTable) {
         super(report);
         this.report = report;
         this.foreignExchangeRateService = foreignExchangeRateService;
@@ -61,9 +61,9 @@ public class TinkoffPortfolioPropertyTable extends InitializableReportTable<Port
     }
 
     @Override
-    protected Collection<PortfolioProperty> parseTable() {
+    protected Collection<AccountProperty> parseTable() {
         try {
-            Collection<PortfolioProperty> result = new ArrayList<>(2);
+            Collection<AccountProperty> result = new ArrayList<>(2);
 
             getTotalAssets("RUB", TinkoffSecurityQuoteTable::getRubSecuritiesTotalValue)
                     .map(value -> value.add(getNonRubAndNonUsdCashInRub()))
@@ -99,14 +99,14 @@ public class TinkoffPortfolioPropertyTable extends InitializableReportTable<Port
         return tinkoffCashTable.getData()
                 .stream()
                 .filter(cash -> cash.getCurrency().equalsIgnoreCase(currency))
-                .map(PortfolioCash::getValue)
+                .map(AccountCash::getValue)
                 .map(value -> value.add(securityValueEstimate))
                 .findAny();
     }
 
-    private PortfolioProperty toPortfolioProperty(PortfolioPropertyType type, BigDecimal value) {
-        return PortfolioProperty.builder()
-                .portfolio(report.getPortfolio())
+    private AccountProperty toPortfolioProperty(AccountPropertyType type, BigDecimal value) {
+        return AccountProperty.builder()
+                .account(report.getAccount())
                 .timestamp(report.getReportEndDateTime())
                 .property(type)
                 .value(String.valueOf(value))

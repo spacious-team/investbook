@@ -19,9 +19,9 @@
 package ru.investbook.parser.uralsib;
 
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.pojo.AccountCash;
+import org.spacious_team.broker.pojo.AccountProperty;
+import org.spacious_team.broker.pojo.AccountPropertyType;
 import ru.investbook.parser.SingleInitializableReportTable;
 
 import java.math.BigDecimal;
@@ -33,13 +33,13 @@ import static java.util.Collections.singletonList;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 
 @Slf4j
-public class PortfolioPropertyTable extends SingleInitializableReportTable<PortfolioProperty> {
+public class AccountPropertyTable extends SingleInitializableReportTable<AccountProperty> {
     private final AssetsTable securityAssetsTable;
     private final CashTable cashTable;
     private final ForeignExchangeRateTable foreignExchangeRateTable;
 
-    public PortfolioPropertyTable(AssetsTable securityAssetsTable, CashTable cashTable,
-                                  ForeignExchangeRateTable foreignExchangeRateTable) {
+    public AccountPropertyTable(AssetsTable securityAssetsTable, CashTable cashTable,
+                                ForeignExchangeRateTable foreignExchangeRateTable) {
         super(securityAssetsTable.getReport());
         this.securityAssetsTable = securityAssetsTable;
         this.cashTable = cashTable;
@@ -47,16 +47,16 @@ public class PortfolioPropertyTable extends SingleInitializableReportTable<Portf
     }
 
     @Override
-    protected Collection<PortfolioProperty> parseTable() {
+    protected Collection<AccountProperty> parseTable() {
         try {
-            Collection<PortfolioProperty> securityAssets = securityAssetsTable.getData();
+            Collection<AccountProperty> securityAssets = securityAssetsTable.getData();
             if (!securityAssets.isEmpty()) {
                 return securityAssets;
             }
 
             BigDecimal assets = BigDecimal.ZERO;
             Instant reportEndDateTime = getReport().getReportEndDateTime();
-            for (PortfolioCash cash : cashTable.getData()) {
+            for (AccountCash cash : cashTable.getData()) {
                 BigDecimal value = cash.getValue();
                 if (value.floatValue() > 0.001f) {
                     String currency = cash.getCurrency();
@@ -65,10 +65,10 @@ public class PortfolioPropertyTable extends SingleInitializableReportTable<Portf
                 }
             }
 
-            return singletonList(PortfolioProperty.builder()
-                    .portfolio(getReport().getPortfolio())
+            return singletonList(AccountProperty.builder()
+                    .account(getReport().getAccount())
                     .timestamp(reportEndDateTime)
-                    .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
+                    .property(AccountPropertyType.TOTAL_ASSETS_RUB)
                     .value(assets.toString())
                     .build());
         } catch (Exception e) {

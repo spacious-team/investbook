@@ -20,8 +20,8 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.Transaction;
@@ -74,18 +74,18 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     private final ForeignExchangeRateService foreignExchangeRateService;
     private final FifoPositionsFactory positionsFactory;
 
-    public Table create(Portfolio portfolio) {
+    public Table create(Account account) {
         throw new UnsupportedOperationException();
     }
 
-    public Table create(Portfolio portfolio, String forCurrency) {
-        Collection<Security> securities = getSecurities(portfolio, forCurrency);
-        return create(portfolio, securities, forCurrency);
+    public Table create(Account account, String forCurrency) {
+        Collection<Security> securities = getSecurities(account, forCurrency);
+        return create(account, securities, forCurrency);
     }
 
-    private Collection<Security> getSecurities(Portfolio portfolio, String currency) {
+    private Collection<Security> getSecurities(Account account, String currency) {
         return transactionRepository.findDistinctSecurityByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
-                        singleton(portfolio.getId()),
+                        singleton(account.getId()),
                         currency,
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate())
@@ -96,23 +96,23 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                 .toList();
     }
 
-    public Table create(Portfolio portfolio, Collection<Security> securities, String toCurrency) {
+    public Table create(Account account, Collection<Security> securities, String toCurrency) {
         Table openPositionsProfit = new Table();
         Table closedPositionsProfit = new Table();
         securities.forEach(security ->
-                getRowsForSecurity(security, portfolio, openPositionsProfit, closedPositionsProfit, toCurrency));
+                getRowsForSecurity(security, account, openPositionsProfit, closedPositionsProfit, toCurrency));
         Table profit = new Table();
         profit.addAll(openPositionsProfit);
         profit.addAll(closedPositionsProfit);
         return profit;
     }
 
-    private void getRowsForSecurity(Security security, Portfolio portfolio, Table openPositionsProfit,
+    private void getRowsForSecurity(Security security, Account account, Table openPositionsProfit,
                                     Table closedPositionsProfit, String toCurrency) {
         ViewFilter filter = ViewFilter.get();
-        FifoPositionsFilter pf = FifoPositionsFilter.of(portfolio, filter.getFromDate(), filter.getToDate());
+        FifoPositionsFilter pf = FifoPositionsFilter.of(account, filter.getFromDate(), filter.getToDate());
         FifoPositions positions = positionsFactory.get(security, pf);
-        PaidInterest paidInterest = paidInterestFactory.get(portfolio, security, filter.getFromDate(), filter.getToDate());
+        PaidInterest paidInterest = paidInterestFactory.get(account, security, filter.getFromDate(), filter.getToDate());
         openPositionsProfit.addAll(getPositionProfit(security, positions.getOpenedPositions(),
                 paidInterest, this::getOpenedPositionProfit, toCurrency));
         closedPositionsProfit.addAll(getPositionProfit(security, positions.getClosedPositions(),
@@ -159,9 +159,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             row.put(OPEN_AMOUNT, "=ABS(" + OPEN_PRICE.getCellAddr() + "*" + COUNT.getCellAddr() + ")");
         }
         double multiplier = Math.abs(1d * position.getCount() / transaction.getCount());
-        //noinspection DataFlowIssue
         row.put(OPEN_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier, toCurrency));
-        //noinspection DataFlowIssue
         row.put(OPEN_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.FEE, multiplier, toCurrency));
         return row;
     }
@@ -176,7 +174,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
         @SuppressWarnings("switch.expression")
         @Nullable String closeAmount = switch (position.getClosingEvent()) {
             case PRICE -> getTransactionCashFlow(transaction, CashFlowType.PRICE, multiplier, toCurrency);
-            case REDEMPTION -> getRedemptionCashFlow(transaction.getPortfolio(), transaction.getSecurity(), multiplier, toCurrency);
+            case REDEMPTION -> getRedemptionCashFlow(transaction.getAccount(), transaction.getSecurity(), multiplier, toCurrency);
             default -> throw new IllegalArgumentException("ЦБ " + transaction.getSecurity() +
                     " не может быть закрыта событием типа " + position.getClosingEvent());
         };
@@ -186,9 +184,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             closeAmount = getTransactionCashFlow(position.getOpenTransaction(), CashFlowType.PRICE, withdrawalMultiplier, toCurrency);
         }
         row.put(CLOSE_AMOUNT, closeAmount);
-        //noinspection DataFlowIssue
         row.put(CLOSE_ACCRUED_INTEREST, getTransactionCashFlow(transaction, CashFlowType.ACCRUED_INTEREST, multiplier, toCurrency));
-        //noinspection DataFlowIssue
         row.put(CLOSE_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.FEE, multiplier, toCurrency));
         boolean isLongPosition = isLongPosition(position);
         row.put(FORECAST_TAX, getForecastTax(isLongPosition));
@@ -203,13 +199,9 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
 
     private Table.Record getPaidInterestProfit(Position position, PaidInterest paidInterest, String toCurrency) {
         Table.Record info = new Table.Record();
-        //noinspection DataFlowIssue
         info.put(COUPON, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.COUPON, position), toCurrency));
-        //noinspection DataFlowIssue
         info.put(AMORTIZATION, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.AMORTIZATION, position), toCurrency));
-        //noinspection DataFlowIssue
         info.put(DIVIDEND, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.DIVIDEND, position), toCurrency));
-        //noinspection DataFlowIssue
         info.put(TAX, convertPaidInterestToExcelFormula(paidInterest.get(CashFlowType.TAX, position), toCurrency));
         if (!toCurrency.equals(RUB) || !paidInterest.getCurrencies().stream().allMatch(RUB::equals)) {
             // Если речь о сделках в иностранной валюте или хотя бы одна выплата была в иностранной валюте,
@@ -249,7 +241,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
             throw new IllegalArgumentException("По ЦБ может быть не более одного события погашения, по бумаге " + securityId +
                     " найдено " + cashFlows.size() + " событий погашения");
         }
-        SecurityEventCashFlowEntity redemptionEntity = cashFlows.get(0);
+        SecurityEventCashFlowEntity redemptionEntity = cashFlows.getFirst();
         BigDecimal redemption = redemptionEntity.getValue()
                 .multiply(BigDecimal.valueOf(multiplier))
                 .abs()

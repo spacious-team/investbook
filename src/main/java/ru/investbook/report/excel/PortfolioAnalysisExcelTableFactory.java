@@ -21,10 +21,10 @@ package ru.investbook.report.excel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.Account;
+import org.spacious_team.broker.pojo.AccountCash;
+import org.spacious_team.broker.pojo.AccountProperty;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.spacious_team.broker.pojo.Portfolio;
-import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.converter.PortfolioCashConverter;
@@ -65,9 +65,9 @@ import static java.util.Collections.singleton;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
+import static org.spacious_team.broker.pojo.AccountPropertyType.TOTAL_ASSETS_RUB;
+import static org.spacious_team.broker.pojo.AccountPropertyType.TOTAL_ASSETS_USD;
 import static org.spacious_team.broker.pojo.CashFlowType.CASH;
-import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_RUB;
-import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_USD;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
 import static ru.investbook.report.excel.ExcelTableHeader.getColumnsRange;
 import static ru.investbook.report.excel.PortfolioAnalysisExcelTableHeader.*;
@@ -92,22 +92,22 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
             TOTAL_ASSETS_USD.name());
 
     @Override
-    public Table create(Collection<String> portfolios) {
-        List<EventCashFlow> cashFlow = getCashFlow(portfolios);
+    public Table create(Collection<String> accountIds) {
+        List<EventCashFlow> cashFlow = getCashFlow(accountIds);
         return createTable(
                 cashFlow,
-                getCashBalance(portfolios),
-                getTotalAssets(portfolios, cashFlow),
+                getCashBalance(accountIds),
+                getTotalAssets(accountIds, cashFlow),
                 getSp500Index());
     }
 
     @Override
-    public Table create(Portfolio portfolio) {
-        List<EventCashFlow> cashFlow = getCashFlow(singleton(portfolio.getId()));
+    public Table create(Account account) {
+        List<EventCashFlow> cashFlow = getCashFlow(singleton(account.getId()));
         return createTable(
                 cashFlow,
-                getCashBalance(singleton(portfolio.getId())),
-                getTotalAssets(singleton(portfolio.getId()), cashFlow),
+                getCashBalance(singleton(account.getId())),
+                getTotalAssets(singleton(account.getId()), cashFlow),
                 getSp500Index());
     }
 
@@ -256,7 +256,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
             isTotalInvestmentUsdKnown = isTotalInvestmentUsdKnown || record.containsKey(TOTAL_INVESTMENT_USD);
             if (isTotalInvestmentUsdKnown) {
                 record.computeIfAbsent(TOTAL_INVESTMENT_USD,
-                        $ -> "=" + TOTAL_INVESTMENT_USD.getRelativeCellAddr(-1, 0));
+                        _ -> "=" + TOTAL_INVESTMENT_USD.getRelativeCellAddr(-1, 0));
             }
         }
     }
@@ -320,7 +320,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         List<PortfolioCashEntity> portfolioCashEntities = portfolios.isEmpty() ?
                 portfolioCashRepository.findAll() :
                 portfolioCashRepository.findByPortfolioIn(portfolios);
-        List<PortfolioCash> portfolioCashes = portfolioCashEntities.stream()
+        List<AccountCash> portfolioCashes = portfolioCashEntities.stream()
                 .map(portfolioCashConverter::fromEntity)
                 .toList();
         List<PortfolioInstantCurrencyValue> balances = sumCashWithSameCurrency(portfolioCashes);
@@ -330,11 +330,11 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
 
     private LinkedHashMap<Instant, BigDecimal> getTotalAssets(Collection<String> portfolios,
                                                               List<EventCashFlow> cashFlows) {
-        List<PortfolioProperty> assets = getPortfolioProperty(portfolios, totalAssetsProperty);
+        List<AccountProperty> assets = getPortfolioProperty(portfolios, totalAssetsProperty);
         return getAllPortfolioTotalAssets(assets, cashFlows);
     }
 
-    private List<PortfolioProperty> getPortfolioProperty(Collection<String> portfolios, Collection<String> propertyTypes) {
+    private List<AccountProperty> getPortfolioProperty(Collection<String> portfolios, Collection<String> propertyTypes) {
         ViewFilter viewFilter = ViewFilter.get();
         List<PortfolioPropertyEntity> entities = portfolios.isEmpty() ?
                 portfolioPropertyRepository
@@ -390,20 +390,20 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         return allPortfolioCashBalance;
     }
 
-    private static int countPortfolios(List<PortfolioCash> portfolioCashes) {
-        return (int) portfolioCashes.stream()
-                .map(PortfolioCash::getPortfolio)
+    private static int countPortfolios(List<AccountCash> accountCashList) {
+        return (int) accountCashList.stream()
+                .map(AccountCash::getAccount)
                 .distinct()
                 .count();
     }
 
-    private static List<PortfolioInstantCurrencyValue> sumCashWithSameCurrency(List<PortfolioCash> portfolioCashes) {
+    private static List<PortfolioInstantCurrencyValue> sumCashWithSameCurrency(List<AccountCash> portfolioCashes) {
         Map<String, Map<Instant, Map<String, BigDecimal>>> portfolioTimestampCurrencyMap = portfolioCashes.stream()
                 .collect(
-                        groupingBy(PortfolioCash::getPortfolio,
-                                groupingBy(PortfolioCash::getTimestamp,
-                                        groupingBy(PortfolioCash::getCurrency,
-                                                reducing(BigDecimal.ZERO, PortfolioCash::getValue, BigDecimal::add)))));
+                        groupingBy(AccountCash::getAccount,
+                                groupingBy(AccountCash::getTimestamp,
+                                        groupingBy(AccountCash::getCurrency,
+                                                reducing(BigDecimal.ZERO, AccountCash::getValue, BigDecimal::add)))));
         List<PortfolioInstantCurrencyValue> result = new ArrayList<>(portfolioCashes.size());
         portfolioTimestampCurrencyMap.forEach((portfolio, timestampCurrencyValueMap) ->
                 timestampCurrencyValueMap.forEach((timestamp, currencyValueMap) ->
@@ -421,7 +421,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     /**
      * Assets in ruble
      */
-    private LinkedHashMap<Instant, BigDecimal> getAllPortfolioTotalAssets(List<PortfolioProperty> assets,
+    private LinkedHashMap<Instant, BigDecimal> getAllPortfolioTotalAssets(List<AccountProperty> assets,
                                                                           List<EventCashFlow> cashFlows) {
         List<PortfolioAssetsInRub> summedAssetsInRub = sumValuesOfSameInstantInRub(assets);
         // temp var: portfolio -> assets
@@ -448,11 +448,11 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     /**
      * Sums PortfolioPropertyType.TOTAL_ASSETS_RUB and TOTAL_ASSETS_USD if both exists for same timestamp
      */
-    private List<PortfolioAssetsInRub> sumValuesOfSameInstantInRub(List<PortfolioProperty> assets) {
+    private List<PortfolioAssetsInRub> sumValuesOfSameInstantInRub(List<AccountProperty> assets) {
         // portfolio -> Instant -> value in RUB
         Map<String, Map<Instant, BigDecimal>> portfolioInstantValueInRub = assets.stream()
-                .collect(groupingBy(PortfolioProperty::getPortfolio,
-                        toMap(PortfolioProperty::getTimestamp, this::convertAssetsToRub, BigDecimal::add)));
+                .collect(groupingBy(AccountProperty::getAccount,
+                        toMap(AccountProperty::getTimestamp, this::convertAssetsToRub, BigDecimal::add)));
         List<PortfolioAssetsInRub> summedAssetsInRub = new ArrayList<>();
         portfolioInstantValueInRub.forEach((portfolio, instantValueInRub) ->
                 instantValueInRub.forEach((instant, valueInRub) ->
@@ -464,7 +464,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     private record PortfolioAssetsInRub(String portfolio, Instant instant, BigDecimal valueInRub) {
     }
 
-    private BigDecimal convertAssetsToRub(PortfolioProperty updatingAssets) {
+    private BigDecimal convertAssetsToRub(AccountProperty updatingAssets) {
         String currency = switch (updatingAssets.getProperty()) {
             case TOTAL_ASSETS_RUB -> RUB;
             case TOTAL_ASSETS_USD -> "USD";
@@ -472,16 +472,16 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         return foreignExchangeRateService.convertValueToCurrency(getAssets(updatingAssets), currency, RUB);
     }
 
-    private Map<String, BigDecimal> initPortfoliosByZero(Collection<PortfolioProperty> assets) {
+    private Map<String, BigDecimal> initPortfoliosByZero(Collection<AccountProperty> assets) {
         return assets.stream()
-                .map(PortfolioProperty::getPortfolio)
+                .map(AccountProperty::getAccount)
                 .distinct()
-                .collect(toMap(Function.identity(), $ -> BigDecimal.ZERO));
+                .collect(toMap(Function.identity(), _ -> BigDecimal.ZERO));
     }
 
     private Map<String, TreeMap<Instant, BigDecimal>> convertCashFlowsToRubAndGroupByPortfolio(List<EventCashFlow> cashFlows) {
         return cashFlows.stream()
-                .collect(groupingBy(EventCashFlow::getPortfolio,
+                .collect(groupingBy(EventCashFlow::getAccount,
                         toMap(EventCashFlow::getTimestamp,
                                 v -> foreignExchangeRateService.convertValueToCurrency(v.getValue(), v.getCurrency(), RUB),
                                 BigDecimal::add,
@@ -504,7 +504,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                                 .reduce(portfolioAssets, BigDecimal::add));
     }
 
-    private static BigDecimal getAssets(PortfolioProperty property) {
+    private static BigDecimal getAssets(AccountProperty property) {
         try {
             return BigDecimal.valueOf(parseDouble(property.getValue()));
         } catch (Exception e) {

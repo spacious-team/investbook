@@ -18,7 +18,7 @@
 
 package ru.investbook.service;
 
-import org.spacious_team.broker.pojo.PortfolioCash;
+import org.spacious_team.broker.pojo.AccountCash;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -31,16 +31,16 @@ public interface AssetsAndCashService {
 
     Set<String> getActivePortfolios();
 
-    Optional<BigDecimal> getTotalAssetsInRub(Collection<String> portfolios);
+    Optional<BigDecimal> getTotalAssetsInRub(Collection<String> accounts);
 
-    Optional<BigDecimal> getTotalAssetsInRub(String portfolio);
+    Optional<BigDecimal> getTotalAssetsInRub(String account);
 
-    Optional<BigDecimal> getTotalCashInRub(Collection<String> portfolios);
+    Optional<BigDecimal> getTotalCashInRub(Collection<String> accounts);
 
     /**
      * Возвращает для портфеля последний известный остаток денежных средств соответствующей дате, не позже указанной.
      * Если портфель не указан, возвращает для всех портфелей последние известные остатки денежных средств
      * соответствующих дате, не позже указанной. Записи в результирующем списке отсортированы по времени от новых к старым.
      */
-    List<PortfolioCash> getPortfolioCash(Collection<String> portfolios, Instant atInstant);
+    List<AccountCash> getPortfolioCash(Collection<String> accounts, Instant atInstant);
 }

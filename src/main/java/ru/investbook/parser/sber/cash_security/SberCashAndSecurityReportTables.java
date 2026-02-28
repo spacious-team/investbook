@@ -18,10 +18,10 @@
 
 package ru.investbook.parser.sber.cash_security;
 
+import org.spacious_team.broker.pojo.AccountCash;
+import org.spacious_team.broker.pojo.AccountProperty;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
-import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
@@ -36,12 +36,12 @@ public class SberCashAndSecurityReportTables extends AbstractReportTables<SberCa
     }
 
     @Override
-    public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
+    public ReportTable<AccountProperty> getAccountPropertyTable() {
         return emptyTable();
     }
 
     @Override
-    public ReportTable<PortfolioCash> getPortfolioCashTable() {
+    public ReportTable<AccountCash> getAccountCashTable() {
         return emptyTable();
     }
 

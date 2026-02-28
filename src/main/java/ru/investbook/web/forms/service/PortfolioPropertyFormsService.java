@@ -20,9 +20,9 @@ package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.pojo.Portfolio;
-import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.pojo.Account;
+import org.spacious_team.broker.pojo.AccountProperty;
+import org.spacious_team.broker.pojo.AccountPropertyType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -44,7 +44,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
-import static org.spacious_team.broker.pojo.PortfolioPropertyType.valueOf;
+import static org.spacious_team.broker.pojo.AccountPropertyType.valueOf;
 import static org.springframework.data.domain.Sort.Order.asc;
 import static org.springframework.data.domain.Sort.Order.desc;
 
@@ -79,13 +79,13 @@ public class PortfolioPropertyFormsService {
     @Transactional
     public void save(PortfolioPropertyModel m) {
         savePortfolio(m.getPortfolio());
-        PortfolioProperty.PortfolioPropertyBuilder builder = PortfolioProperty.builder()
+        AccountProperty.AccountPropertyBuilder builder = AccountProperty.builder()
                 .id(m.getId())
-                .portfolio(m.getPortfolio())
+                .account(m.getPortfolio())
                 .timestamp(m.getDate().atTime(m.getTime()).atZone(zoneId).toInstant());
 
         if (m instanceof PortfolioPropertyTotalAssetsModel a) {
-            builder.property(a.getTotalAssetsCurrency().toPortfolioProperty())
+            builder.property(a.getTotalAssetsCurrency().toAccountProperty())
                     .value(a.getTotalAssets().toString());
         } else {
             throw new IllegalArgumentException("Unexpected type " + m.getClass());
@@ -100,7 +100,7 @@ public class PortfolioPropertyFormsService {
     private void savePortfolio(String portfolio) {
         if (!portfolioRepository.existsById(portfolio)) {
             portfolioRepository.save(
-                    portfolioConverter.toEntity(Portfolio.builder()
+                    portfolioConverter.toEntity(Account.builder()
                             .id(portfolio)
                             .build()));
         }
@@ -108,7 +108,7 @@ public class PortfolioPropertyFormsService {
 
     private PortfolioPropertyModel toModel(PortfolioPropertyEntity e) {
         PortfolioPropertyModel m;
-        PortfolioPropertyType type = valueOf(e.getProperty().toUpperCase());
+        AccountPropertyType type = valueOf(e.getProperty().toUpperCase());
         m = switch (type) {
             case TOTAL_ASSETS_RUB, TOTAL_ASSETS_USD -> new PortfolioPropertyTotalAssetsModel();
         };

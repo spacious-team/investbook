@@ -80,7 +80,7 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Ab
         return SecurityTransaction.builder()
                 .tradeId(generateTradeId(portfolio, instant, securityId))
                 .timestamp(instant)
-                .portfolio(portfolio)
+                .account(portfolio)
                 .security(securityId)
                 .count(count)
                 .build();

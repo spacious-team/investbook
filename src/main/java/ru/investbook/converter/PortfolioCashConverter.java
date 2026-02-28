@@ -18,19 +18,19 @@
 
 package ru.investbook.converter;
 
-import org.spacious_team.broker.pojo.PortfolioCash;
+import org.spacious_team.broker.pojo.AccountCash;
 import org.springframework.stereotype.Component;
 import ru.investbook.entity.PortfolioCashEntity;
 
 @Component
-public class PortfolioCashConverter implements EntityConverter<PortfolioCashEntity, PortfolioCash>  {
+public class PortfolioCashConverter implements EntityConverter<PortfolioCashEntity, AccountCash>  {
 
     @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override
-    public PortfolioCashEntity toEntity(PortfolioCash cash) {
+    public PortfolioCashEntity toEntity(AccountCash cash) {
         PortfolioCashEntity entity = new PortfolioCashEntity();
         entity.setId(cash.getId());
-        entity.setPortfolio(cash.getPortfolio());
+        entity.setPortfolio(cash.getAccount());
         entity.setMarket(cash.getMarket());
         entity.setTimestamp(cash.getTimestamp());
         entity.setValue(cash.getValue());
@@ -39,10 +39,10 @@ public class PortfolioCashConverter implements EntityConverter<PortfolioCashEnti
     }
 
     @Override
-    public PortfolioCash fromEntity(PortfolioCashEntity entity) {
-        return PortfolioCash.builder()
+    public AccountCash fromEntity(PortfolioCashEntity entity) {
+        return AccountCash.builder()
                 .id(entity.getId())
-                .portfolio(entity.getPortfolio())
+                .account(entity.getPortfolio())
                 .market(entity.getMarket())
                 .timestamp(entity.getTimestamp())
                 .value(entity.getValue())

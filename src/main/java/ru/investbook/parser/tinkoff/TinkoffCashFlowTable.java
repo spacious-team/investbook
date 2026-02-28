@@ -90,7 +90,7 @@ public class TinkoffCashFlowTable extends SingleAbstractReportTable<EventCashFlo
     private EventCashFlow.EventCashFlowBuilder getBuilder(TableRow row, String currency) {
         @Nullable String description = row.getStringCellValueOrDefault(DESCRIPTION, null);
         return EventCashFlow.builder()
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .timestamp(getReport().convertToInstant(row.getStringCellValue(DATE)))
                 .currency(currency)
                 .description(hasLength(description) ? description : null);

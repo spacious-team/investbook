@@ -21,12 +21,12 @@ package ru.investbook.web.forms.model;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.pojo.AccountPropertyType;
 
 import java.math.BigDecimal;
 
-import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_RUB;
-import static org.spacious_team.broker.pojo.PortfolioPropertyType.TOTAL_ASSETS_USD;
+import static org.spacious_team.broker.pojo.AccountPropertyType.TOTAL_ASSETS_RUB;
+import static org.spacious_team.broker.pojo.AccountPropertyType.TOTAL_ASSETS_USD;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -39,14 +39,14 @@ public class PortfolioPropertyTotalAssetsModel extends PortfolioPropertyModel {
     public enum Currency {
         RUB, USD;
 
-        public PortfolioPropertyType toPortfolioProperty() {
+        public AccountPropertyType toAccountProperty() {
             return switch (this) {
                 case RUB -> TOTAL_ASSETS_RUB;
                 case USD -> TOTAL_ASSETS_USD;
             };
         }
 
-        public static Currency valueOf(PortfolioPropertyType property) {
+        public static Currency valueOf(AccountPropertyType property) {
             return switch (property) {
                 case TOTAL_ASSETS_RUB -> RUB;
                 case TOTAL_ASSETS_USD -> USD;

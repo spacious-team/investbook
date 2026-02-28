@@ -19,8 +19,8 @@
 package ru.investbook.report;
 
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityType;
@@ -60,8 +60,8 @@ public class FifoPositionsFactory {
     // portfolios -> cache_key -> positions
     private final Map<String, Map<String, FifoPositions>> positionsCache = new ConcurrentHashMap<>();
 
-    public FifoPositions get(Security security, Portfolio portfolio) {
-        return get(security, FifoPositionsFilter.of(portfolio));
+    public FifoPositions get(Security security, Account account) {
+        return get(security, FifoPositionsFilter.of(account));
     }
 
     public FifoPositions get(Security security, FifoPositionsFilter filter) {
@@ -75,7 +75,7 @@ public class FifoPositionsFactory {
     public FifoPositions getForCurrencyPair(String currencyPair, FifoPositionsFilter filter) {
         return getPortfolioCache(filter).computeIfAbsent(
                 getCacheKey(currencyPair, filter),
-                k -> create(currencyPair, filter));
+                _ -> create(currencyPair, filter));
     }
 
     public FifoPositions get(int securityId, SecurityType securityType, FifoPositionsFilter filter) {
@@ -86,18 +86,18 @@ public class FifoPositionsFactory {
         }
         return getPortfolioCache(filter).computeIfAbsent(
                 getCacheKey(String.valueOf(securityId), filter),
-                k -> create(securityId, securityType, filter));
+                _ -> create(securityId, securityType, filter));
     }
 
     private Map<String, FifoPositions> getPortfolioCache(FifoPositionsFilter filter) {
         String key = filter.getPortfolios().stream().sorted().collect(Collectors.joining(","));
         return positionsCache.computeIfAbsent(
                 key.isEmpty() ? ALL_PORTFOLIO_KEY : key,
-                k -> new ConcurrentHashMap<>());
+                _ -> new ConcurrentHashMap<>());
     }
 
     private String getCacheKey(String currencyPair, FifoPositionsFilter filter) {
-        return currencyPair + filter.getFromDate().toString() + filter.getToDate().toString();
+        return currencyPair + filter.getFromDate() + filter.getToDate();
     }
 
     public void invalidateCache() {

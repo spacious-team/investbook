@@ -19,9 +19,9 @@
 package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -95,7 +95,7 @@ public class EventCashFlowFormsService {
         SecurityEventCashFlowEntity entity = securityEventCashFlowRepository.save(
                 securityEventCashFlowConverter.toEntity(SecurityEventCashFlow.builder()
                         // no id(), it is always the new object
-                        .portfolio(e.getPortfolio())
+                        .account(e.getPortfolio())
                         .timestamp(e.getDate().atTime(e.getTime()).atZone(zoneId).toInstant())
                         .security(savedSecurityId)
                         .count(requireNonNull(attachedSecurity.getCount()))
@@ -113,7 +113,7 @@ public class EventCashFlowFormsService {
         EventCashFlowEntity entity = eventCashFlowRepository.save(
                 eventCashFlowConverter.toEntity(EventCashFlow.builder()
                         .id(e.getId())
-                        .portfolio(e.getPortfolio())
+                        .account(e.getPortfolio())
                         .timestamp(e.getDate().atTime(e.getTime()).atZone(zoneId).toInstant())
                         .eventType(e.getType())
                         .value(e.getValue())
@@ -127,7 +127,7 @@ public class EventCashFlowFormsService {
     private void savePortfolio(String portfolio) {
         if (!portfolioRepository.existsById(portfolio)) {
             portfolioRepository.save(
-                    portfolioConverter.toEntity(Portfolio.builder()
+                    portfolioConverter.toEntity(Account.builder()
                             .id(portfolio)
                             .build()));
         }

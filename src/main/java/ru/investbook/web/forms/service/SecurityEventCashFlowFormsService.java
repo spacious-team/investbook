@@ -20,8 +20,8 @@ package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow.SecurityEventCashFlowBuilder;
 import org.springframework.data.domain.Page;
@@ -86,7 +86,7 @@ public class SecurityEventCashFlowFormsService {
         savePortfolio(e.getPortfolio());
         int savedSecurityId = securityRepositoryHelper.saveSecurity(e);
         SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
-                .portfolio(e.getPortfolio())
+                .account(e.getPortfolio())
                 .timestamp(e.getDate().atTime(e.getTime()).atZone(zoneId).toInstant())
                 .security(savedSecurityId)
                 .count(e.getCount());
@@ -117,7 +117,7 @@ public class SecurityEventCashFlowFormsService {
     private void savePortfolio(String portfolio) {
         if (!portfolioRepository.existsById(portfolio)) {
             portfolioRepository.save(
-                    portfolioConverter.toEntity(Portfolio.builder()
+                    portfolioConverter.toEntity(Account.builder()
                             .id(portfolio)
                             .build()));
         }

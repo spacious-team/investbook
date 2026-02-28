@@ -19,10 +19,10 @@
 package ru.investbook.parser;
 
 import lombok.Getter;
+import org.spacious_team.broker.pojo.AccountCash;
+import org.spacious_team.broker.pojo.AccountProperty;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
-import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
@@ -35,8 +35,8 @@ import org.spacious_team.broker.report_parser.api.ReportTables;
 public class ReportTablesCachingWrapper implements ReportTables {
 
     private final BrokerReport report;
-    private final ReportTable<PortfolioProperty> portfolioPropertyTable;
-    private final ReportTable<PortfolioCash> portfolioCashTable;
+    private final ReportTable<AccountProperty> accountPropertyTable;
+    private final ReportTable<AccountCash> accountCashTable;
     private final ReportTable<EventCashFlow> cashFlowTable;
     private final ReportTable<Security> securitiesTable;
     private final ReportTable<AbstractTransaction> transactionTable;
@@ -46,8 +46,8 @@ public class ReportTablesCachingWrapper implements ReportTables {
 
     public ReportTablesCachingWrapper(ReportTables wrappee) {
         this.report = wrappee.getReport();
-        this.portfolioPropertyTable = wrappee.getPortfolioPropertyTable();
-        this.portfolioCashTable = wrappee.getPortfolioCashTable();
+        this.accountPropertyTable = wrappee.getAccountPropertyTable();
+        this.accountCashTable = wrappee.getAccountCashTable();
         this.cashFlowTable = wrappee.getCashFlowTable();
         this.securitiesTable = wrappee.getSecuritiesTable();
         this.transactionTable = wrappee.getTransactionTable();

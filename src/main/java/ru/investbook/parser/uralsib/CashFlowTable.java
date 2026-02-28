@@ -81,7 +81,7 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
                 return null;
         }
         return EventCashFlow.builder()
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .eventType(type)
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                 .value(row.getBigDecimalCellValue(VALUE))
@@ -91,7 +91,7 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
     }
 
     private boolean isCurrentPortfolioAccount(String account) {
-        String portfolio = getReport().getPortfolio();
+        String portfolio = getReport().getAccount();
         boolean isIIS = portfolio.endsWith("I");
         if (account.startsWith("SPBFUT")) {
             // срочный рынок

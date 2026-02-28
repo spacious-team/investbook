@@ -41,7 +41,7 @@ public class SecurityEventCashFlowConverter implements EntityConverter<SecurityE
     @Override
     public SecurityEventCashFlowEntity toEntity(SecurityEventCashFlow eventCashFlow) {
         SecurityEntity securityEntity = securityRepository.getReferenceById(eventCashFlow.getSecurity());
-        PortfolioEntity portfolioEntity = portfolioRepository.getReferenceById(eventCashFlow.getPortfolio());
+        PortfolioEntity portfolioEntity = portfolioRepository.getReferenceById(eventCashFlow.getAccount());
         CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.getReferenceById(eventCashFlow.getEventType().getId());
 
         SecurityEventCashFlowEntity entity = new SecurityEventCashFlowEntity();
@@ -61,7 +61,7 @@ public class SecurityEventCashFlowConverter implements EntityConverter<SecurityE
     public SecurityEventCashFlow fromEntity(SecurityEventCashFlowEntity entity) {
         return SecurityEventCashFlow.builder()
                 .id(entity.getId())
-                .portfolio(entity.getPortfolio().getId())
+                .account(entity.getPortfolio().getId())
                 .timestamp(entity.getTimestamp())
                 .eventType(CashFlowType.valueOf(entity.getCashFlowType().getId()))
                 .security(entity.getSecurity().getId())

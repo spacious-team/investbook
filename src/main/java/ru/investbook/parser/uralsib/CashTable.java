@@ -20,7 +20,7 @@ package ru.investbook.parser.uralsib;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.pojo.PortfolioCash;
+import org.spacious_team.broker.pojo.AccountCash;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
@@ -31,7 +31,7 @@ import static ru.investbook.parser.uralsib.CashTable.CashTableHeader.CURRENCY;
 import static ru.investbook.parser.uralsib.CashTable.CashTableHeader.VALUE;
 
 @Slf4j
-public class CashTable extends SingleAbstractReportTable<PortfolioCash> {
+public class CashTable extends SingleAbstractReportTable<AccountCash> {
 
     private static final String TABLE_NAME = "ПОЗИЦИЯ ПО ДЕНЕЖНЫМ СРЕДСТВАМ";
 
@@ -40,9 +40,9 @@ public class CashTable extends SingleAbstractReportTable<PortfolioCash> {
     }
 
     @Override
-    protected PortfolioCash parseRow(TableRow row) {
-        return PortfolioCash.builder()
-                .portfolio(getReport().getPortfolio())
+    protected AccountCash parseRow(TableRow row) {
+        return AccountCash.builder()
+                .account(getReport().getAccount())
                 .timestamp(getReport().getReportEndDateTime())
                 .market("all")
                 .value(row.getBigDecimalCellValue(VALUE))

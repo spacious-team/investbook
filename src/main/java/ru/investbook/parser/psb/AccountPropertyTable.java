@@ -22,8 +22,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.pojo.AccountProperty;
+import org.spacious_team.broker.pojo.AccountPropertyType;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.ConstantPositionTableColumn;
@@ -40,19 +40,19 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static java.util.Collections.emptyList;
-import static ru.investbook.parser.psb.PortfolioPropertyTable.SummaryTableHeader.RUB;
+import static ru.investbook.parser.psb.AccountPropertyTable.SummaryTableHeader.RUB;
 
 @Slf4j
-public class PortfolioPropertyTable extends SingleInitializableReportTable<PortfolioProperty> {
+public class AccountPropertyTable extends SingleInitializableReportTable<AccountProperty> {
     public static final String SUMMARY_TABLE = "Сводная информация по счетам клиента в валюте счета";
     static final String ASSETS = "\"СУММА АКТИВОВ\" на конец дня";
 
-    public PortfolioPropertyTable(SingleBrokerReport report) {
+    public AccountPropertyTable(SingleBrokerReport report) {
         super(report);
     }
 
     @Override
-    protected Collection<PortfolioProperty> parseTable() {
+    protected Collection<AccountProperty> parseTable() {
         Table table = getSummaryTable();
         return getTotalAssets(table);
     }
@@ -70,15 +70,15 @@ public class PortfolioPropertyTable extends SingleInitializableReportTable<Portf
         return table;
     }
 
-    protected Collection<PortfolioProperty> getTotalAssets(Table table) {
+    protected Collection<AccountProperty> getTotalAssets(Table table) {
         try {
             @Nullable TableRow row = table.findRowByPrefix(ASSETS);
             if (row == null) {
                 return emptyList();
             }
-            return Collections.singletonList(PortfolioProperty.builder()
-                    .portfolio(getReport().getPortfolio())
-                    .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
+            return Collections.singletonList(AccountProperty.builder()
+                    .account(getReport().getAccount())
+                    .property(AccountPropertyType.TOTAL_ASSETS_RUB)
                     .value(row.getBigDecimalCellValue(RUB).toString())
                     .timestamp(getReport().getReportEndDateTime())
                     .build());

@@ -130,7 +130,7 @@ public class PaymentPof {
                 eventType = CashFlowType.COUPON; // izi-invest.ru fix: не различает дивиденды и купоны (type = other)
             }
             SecurityEventCashFlow cashFlow = SecurityEventCashFlow.builder()
-                    .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
+                    .account(Objects.requireNonNull(accountToPortfolioId.get(account)))
                     .security(getSecurityId(assetToSecurityId))
                     .eventType(eventType)
                     .count(count.intValueExact())

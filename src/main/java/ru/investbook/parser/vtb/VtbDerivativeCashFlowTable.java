@@ -76,7 +76,7 @@ public class VtbDerivativeCashFlowTable extends AbstractVtbCashFlowTable<Securit
             return Collections.emptyList();
         }
         return singletonList(SecurityEventCashFlow.builder()
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .timestamp(event.getDate())
                 .security(requireNonNull(contractId))
                 .eventType(eventType)

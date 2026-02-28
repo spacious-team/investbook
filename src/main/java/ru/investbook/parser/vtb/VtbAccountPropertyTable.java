@@ -20,8 +20,8 @@ package ru.investbook.parser.vtb;
 
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.pojo.AccountProperty;
+import org.spacious_team.broker.pojo.AccountPropertyType;
 import ru.investbook.parser.SingleBrokerReport;
 import ru.investbook.parser.SingleInitializableReportTable;
 
@@ -32,22 +32,22 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 
 @Slf4j
-public class VtbPortfolioPropertyTable extends SingleInitializableReportTable<PortfolioProperty> {
+public class VtbAccountPropertyTable extends SingleInitializableReportTable<AccountProperty> {
 
     private static final String TOTAL_ASSETS1 = "ОЦЕНКА активов (по курсу ЦБ с учётом незавершенных сделок)";
     private static final String TOTAL_ASSETS2 = "ОЦЕНКА активов по Kурсу с учётом незавершенных сделок";
 
-    public VtbPortfolioPropertyTable(SingleBrokerReport report) {
+    public VtbAccountPropertyTable(SingleBrokerReport report) {
         super(report);
     }
 
     @Override
-    protected Collection<PortfolioProperty> parseTable() {
+    protected Collection<AccountProperty> parseTable() {
         try {
-            return singleton(PortfolioProperty.builder()
-                    .portfolio(getReport().getPortfolio())
+            return singleton(AccountProperty.builder()
+                    .account(getReport().getAccount())
                     .timestamp(getReport().getReportEndDateTime())
-                    .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
+                    .property(AccountPropertyType.TOTAL_ASSETS_RUB)
                     .value(getBigDecimalValue().toString())
                     .build());
         } catch (Exception e) {

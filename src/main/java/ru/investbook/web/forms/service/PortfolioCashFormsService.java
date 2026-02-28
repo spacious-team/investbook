@@ -20,8 +20,8 @@ package ru.investbook.web.forms.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.pojo.Portfolio;
-import org.spacious_team.broker.pojo.PortfolioCash;
+import org.spacious_team.broker.pojo.Account;
+import org.spacious_team.broker.pojo.AccountCash;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -76,9 +76,9 @@ public class PortfolioCashFormsService {
     @Transactional
     public void save(PortfolioCashModel m) {
         savePortfolio(m.getPortfolio());
-        PortfolioCash cash = PortfolioCash.builder()
+        AccountCash cash = AccountCash.builder()
                 .id(m.getId())
-                .portfolio(m.getPortfolio())
+                .account(m.getPortfolio())
                 .market(StringUtils.hasLength(m.getMarket()) ? m.getMarket() : "")
                 .timestamp(m.getDate().atTime(m.getTime()).atZone(zoneId).toInstant())
                 .value(m.getCash())
@@ -94,7 +94,7 @@ public class PortfolioCashFormsService {
     private void savePortfolio(String portfolio) {
         if (!portfolioRepository.existsById(portfolio)) {
             portfolioRepository.save(
-                    portfolioConverter.toEntity(Portfolio.builder()
+                    portfolioConverter.toEntity(Account.builder()
                             .id(portfolio)
                             .build()));
         }

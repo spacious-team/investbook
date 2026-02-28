@@ -57,7 +57,7 @@ public class InvestbookSecurityDepositAndWithdrawalTable extends AbstractSecurit
         int securityId = getSecurityIdForDepositOrWithdrawal(row);
         return SecurityTransaction.builder()
                 .tradeId(getTradeId(portfolio, securityId, timestamp))
-                .portfolio(portfolio)
+                .account(portfolio)
                 .timestamp(timestamp)
                 .security(securityId)
                 .count(row.getIntCellValue(COUNT) * (negate ? -1 : 1))

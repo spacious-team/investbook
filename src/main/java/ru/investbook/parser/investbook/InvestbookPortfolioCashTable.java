@@ -19,25 +19,25 @@
 package ru.investbook.parser.investbook;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.PortfolioCash;
+import org.spacious_team.broker.pojo.AccountCash;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import static ru.investbook.parser.investbook.AbstractInvestbookTable.InvestbookReportTableHeader.*;
 
-public class InvestbookPortfolioCashTable extends AbstractInvestbookTable<PortfolioCash> {
+public class InvestbookPortfolioCashTable extends AbstractInvestbookTable<AccountCash> {
 
     protected InvestbookPortfolioCashTable(InvestbookBrokerReport report) {
         super(report);
     }
 
     @Override
-    protected @Nullable PortfolioCash parseRow(TableRow row) {
+    protected @Nullable AccountCash parseRow(TableRow row) {
         String operation = row.getStringCellValue(OPERATION).toLowerCase();
         if (!operation.contains("остаток")) { // Остаток денежных средств
             return null;
         }
-        return PortfolioCash.builder()
-                .portfolio(row.getStringCellValue(PORTFOLIO))
+        return AccountCash.builder()
+                .account(row.getStringCellValue(PORTFOLIO))
                 .timestamp(parseEventInstant(row))
                 .value(row.getBigDecimalCellValue(PRICE))
                 .currency(row.getStringCellValue(CURRENCY))

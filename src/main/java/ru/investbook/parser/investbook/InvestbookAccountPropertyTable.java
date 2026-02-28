@@ -19,36 +19,36 @@
 package ru.investbook.parser.investbook;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.pojo.AccountProperty;
+import org.spacious_team.broker.pojo.AccountPropertyType;
 import org.spacious_team.table_wrapper.api.TableRow;
 
 import static ru.investbook.parser.investbook.AbstractInvestbookTable.InvestbookReportTableHeader.*;
 
-public class InvestbookPortfolioPropertyTable extends AbstractInvestbookTable<PortfolioProperty> {
+public class InvestbookAccountPropertyTable extends AbstractInvestbookTable<AccountProperty> {
 
-    protected InvestbookPortfolioPropertyTable(InvestbookBrokerReport report) {
+    protected InvestbookAccountPropertyTable(InvestbookBrokerReport report) {
         super(report);
     }
 
     @Override
-    protected @Nullable PortfolioProperty parseRow(TableRow row) {
+    protected @Nullable AccountProperty parseRow(TableRow row) {
         String operation = row.getStringCellValue(OPERATION).toLowerCase();
         if (!operation.contains("актив")) { // Оценка стоимости активов
             return null;
         }
         String currency = row.getStringCellValue(CURRENCY);
-        PortfolioPropertyType property;
+        AccountPropertyType property;
         if (currency.equalsIgnoreCase("RUB") || currency.equalsIgnoreCase("RUR")) {
-            property = PortfolioPropertyType.TOTAL_ASSETS_RUB;
+            property = AccountPropertyType.TOTAL_ASSETS_RUB;
         } else if (currency.equalsIgnoreCase("USD")) {
-            property = PortfolioPropertyType.TOTAL_ASSETS_USD;
+            property = AccountPropertyType.TOTAL_ASSETS_USD;
         } else {
             throw new IllegalArgumentException(
                     "Оценка активов может быть выполнена только в RUB или USD, указана валюта: " + currency);
         }
-        return PortfolioProperty.builder()
-                .portfolio(row.getStringCellValue(PORTFOLIO))
+        return AccountProperty.builder()
+                .account(row.getStringCellValue(PORTFOLIO))
                 .timestamp(parseEventInstant(row))
                 .property(property)
                 .value(row.getBigDecimalCellValue(PRICE).toString())

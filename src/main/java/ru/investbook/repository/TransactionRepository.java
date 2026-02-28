@@ -18,7 +18,7 @@
 
 package ru.investbook.repository;
 
-import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.Security;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -282,7 +282,7 @@ public interface TransactionRepository extends
             """)
     Long findBySecurityIdAndPortfolioAndTimestampBetweenBuyCount(
             @Param("security") Security security,
-            @Param("portfolio") Portfolio portfolio,
+            @Param("portfolio") Account portfolio,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
@@ -298,7 +298,7 @@ public interface TransactionRepository extends
             """)
     Long findBySecurityIdAndPortfolioAndTimestampBetweenCellCount(
             @Param("security") Security security,
-            @Param("portfolio") Portfolio portfolio,
+            @Param("portfolio") Account portfolio,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
@@ -311,7 +311,7 @@ public interface TransactionRepository extends
                 AND t.timestamp between :from AND :to
             """)
     Collection<TransactionEntity> findByPortfolioAndTimestampBetweenDepositAndWithdrawalTransactions(
-            @Param("portfolio") Portfolio portfolio,
+            @Param("portfolio") Account portfolio,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 

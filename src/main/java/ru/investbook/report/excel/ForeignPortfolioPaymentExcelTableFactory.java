@@ -21,9 +21,9 @@ package ru.investbook.report.excel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import ru.investbook.converter.EventCashFlowConverter;
@@ -62,15 +62,15 @@ public class ForeignPortfolioPaymentExcelTableFactory implements TableFactory {
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
 
     @Override
-    public Table create(Portfolio portfolio) {
-        List<EventCashFlow> cashFlows = getCashFlows(portfolio);
+    public Table create(Account account) {
+        List<EventCashFlow> cashFlows = getCashFlows(account);
         return getTable(cashFlows);
     }
 
-    private ArrayList<EventCashFlow> getCashFlows(Portfolio portfolio) {
+    private ArrayList<EventCashFlow> getCashFlows(Account account) {
         return eventCashFlowRepository
                 .findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                        portfolio.getId(),
+                        account.getId(),
                         PAY_TYPES,
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate())

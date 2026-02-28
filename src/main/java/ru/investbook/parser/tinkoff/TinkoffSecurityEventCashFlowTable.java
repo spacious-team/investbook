@@ -107,7 +107,7 @@ public class TinkoffSecurityEventCashFlowTable extends SingleAbstractReportTable
 
     private SecurityEventCashFlow.SecurityEventCashFlowBuilder getBuilder(TableRow row, String currency) {
         return SecurityEventCashFlow.builder()
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .timestamp(getReport().convertToInstant(row.getStringCellValue(DATE)))
                 .security(getSecurityId(row))
                 .count(getCount(row))

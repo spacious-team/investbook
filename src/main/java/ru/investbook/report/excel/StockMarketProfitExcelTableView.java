@@ -24,8 +24,8 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.report.Table;
@@ -63,18 +63,18 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Collection<ExcelTable> createExcelTables(Portfolio portfolio, String sheetName) {
-        List<String> currencies = getCurrencies(portfolio);
+    protected Collection<ExcelTable> createExcelTables(Account account, String sheetName) {
+        List<String> currencies = getCurrencies(account);
         Collection<ExcelTable> tables = new ArrayList<>(currencies.size());
         for (String currency : currencies) {
-            Table table = tableFactory.create(portfolio, currency);
+            Table table = tableFactory.create(account, currency);
             String sheetNameWithCurrency = sheetName + " " + currency;
-            tables.add(ExcelTable.of(portfolio, sheetNameWithCurrency, table, this));
+            tables.add(ExcelTable.of(account, sheetNameWithCurrency, table, this));
         }
         return tables;
     }
 
-    private List<String> getCurrencies(Portfolio portfolio) {
+    private List<String> getCurrencies(Account portfolio) {
         return transactionCashFlowRepository
                 .findDistinctCurrencyByPortfolioAndCashFlowType(portfolio.getId(), CashFlowType.PRICE);
     }
@@ -90,7 +90,7 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
+    protected Table.Record getTotalRow(Table table, Optional<Account> account) {
         Table.Record totalRow = new Table.Record();
         for (StockMarketProfitExcelTableHeader column : StockMarketProfitExcelTableHeader.values()) {
             totalRow.put(column, "=SUM(" + column.getRange(3, table.size() + 2) + ")");

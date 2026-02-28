@@ -32,8 +32,8 @@ import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
 import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
 import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.report.Table;
@@ -118,19 +118,19 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Collection<ExcelTable> createExcelTables(Portfolio portfolio, String sheetName) {
+    protected Collection<ExcelTable> createExcelTables(Account account, String sheetName) {
         List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPortfolioInAndCashFlowTypeIn(
-                singleton(portfolio.getId()), types);
+                singleton(account.getId()), types);
         if (!currencies.contains(RUB)) currencies.add(RUB);
         return currencies.stream()
-                .map(currency -> createExcelTables(portfolio, sheetName, currency))
+                .map(currency -> createExcelTables(account, sheetName, currency))
                 .collect(toList());
     }
 
-    private ExcelTable createExcelTables(Portfolio portfolio, String sheetName, String currency) {
-        Table table = tableFactory.create(portfolio, currency);
+    private ExcelTable createExcelTables(Account account, String sheetName, String currency) {
+        Table table = tableFactory.create(account, currency);
         String sheetNameWithCurrency = sheetName + " " + currency;
-        return ExcelTable.of(portfolio, sheetNameWithCurrency, table, this);
+        return ExcelTable.of(account, sheetNameWithCurrency, table, this);
     }
 
     @Override
@@ -145,7 +145,7 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
+    protected Table.Record getTotalRow(Table table, Optional<Account> account) {
         Table.Record totalRow = Table.newRecord();
         for (DerivativesMarketTotalProfitExcelTableHeader column : DerivativesMarketTotalProfitExcelTableHeader.values()) {
             totalRow.put(column, "=SUM(" + column.getRange(3, table.size() + 2) + ")");

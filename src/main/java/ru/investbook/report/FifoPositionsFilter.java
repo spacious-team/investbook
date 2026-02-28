@@ -18,7 +18,7 @@
 
 package ru.investbook.report;
 
-import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Account;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -33,8 +33,8 @@ public interface FifoPositionsFilter {
 
     Instant getToDate();
 
-    static FifoPositionsFilter of(Portfolio portfolio) {
-        return of(portfolio.getId());
+    static FifoPositionsFilter of(Account account) {
+        return of(account.getId());
     }
 
     static FifoPositionsFilter of(String portfolio) {
@@ -79,8 +79,8 @@ public interface FifoPositionsFilter {
         return of(portfolios, ViewFilter.defaultFromDate, Instant.now());
     }
 
-    static FifoPositionsFilter of(Portfolio portfolio, Instant from, Instant to) {
-        return of(singleton(portfolio.getId()), from, to);
+    static FifoPositionsFilter of(Account account, Instant from, Instant to) {
+        return of(singleton(account.getId()), from, to);
     }
 
     static FifoPositionsFilter of(String portfolio, Instant from, Instant to) {

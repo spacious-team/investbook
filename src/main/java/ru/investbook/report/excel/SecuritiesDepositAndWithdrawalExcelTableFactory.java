@@ -20,7 +20,7 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Account;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.SecurityEntity;
@@ -41,12 +41,12 @@ public class SecuritiesDepositAndWithdrawalExcelTableFactory implements TableFac
 
     @Transactional(readOnly = true)
     @Override
-    public Table create(Portfolio portfolio) {
+    public Table create(Account account) {
         Table table = new Table();
         ViewFilter viewFilter = ViewFilter.get();
         for (TransactionEntity transactionEntity :
                 transactionRepository.findByPortfolioAndTimestampBetweenDepositAndWithdrawalTransactions(
-                        portfolio, viewFilter.getFromDate(), viewFilter.getToDate())) {
+                        account, viewFilter.getFromDate(), viewFilter.getToDate())) {
             Table.Record record = new Table.Record();
             table.add(record);
             record.put(DATE, transactionEntity.getTimestamp());

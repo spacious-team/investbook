@@ -86,7 +86,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
                 .subtract(row.getBigDecimalCellValue(DerivativeCashFlowTableHeader.OUTGOING));
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DerivativeCashFlowTableHeader.DATE)))
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .value(value)
                 .currency("RUB"); // FORTS, only RUB
         String action = row.getStringCellValue(DerivativeCashFlowTableHeader.OPERATION).toLowerCase();

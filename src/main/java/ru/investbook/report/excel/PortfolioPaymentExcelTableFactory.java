@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -65,15 +65,15 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
             TAX.getId());
 
     @Override
-    public Table create(Portfolio portfolio) {
-        List<SecurityEventCashFlow> cashFlows = getCashFlows(portfolio);
+    public Table create(Account account) {
+        List<SecurityEventCashFlow> cashFlows = getCashFlows(account);
         return getTable(cashFlows);
     }
 
-    private ArrayList<SecurityEventCashFlow> getCashFlows(Portfolio portfolio) {
+    private ArrayList<SecurityEventCashFlow> getCashFlows(Account account) {
         return securityEventCashFlowRepository
                 .findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                        portfolio.getId(),
+                        account.getId(),
                         paymentTypes,
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate())

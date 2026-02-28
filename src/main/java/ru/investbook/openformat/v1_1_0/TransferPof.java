@@ -112,7 +112,7 @@ public class TransferPof {
         try {
             return Optional.of(Transaction.builder()
                     .tradeId(requireNonNull(transferId))
-                    .portfolio(requireNonNull(accountToPortfolioId.get(account)))
+                    .account(requireNonNull(accountToPortfolioId.get(account)))
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .security(getSecurityId(assetToSecurityId))
                     .count(count.intValueExact())
@@ -129,7 +129,7 @@ public class TransferPof {
             if (fee != null && feeCurrency != null) {
                 return Set.of(
                         SecurityEventCashFlow.builder()
-                                .portfolio(requireNonNull(accountToPortfolioId.get(account)))
+                                .account(requireNonNull(accountToPortfolioId.get(account)))
                                 .timestamp(Instant.ofEpochSecond(timestamp))
                                 .security(getSecurityId(assetToSecurityId))
                                 .count(count.intValueExact())

@@ -19,8 +19,8 @@
 package ru.investbook.converter;
 
 import lombok.RequiredArgsConstructor;
-import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.pojo.AccountProperty;
+import org.spacious_team.broker.pojo.AccountPropertyType;
 import org.springframework.stereotype.Component;
 import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.PortfolioPropertyEntity;
@@ -28,13 +28,13 @@ import ru.investbook.repository.PortfolioRepository;
 
 @Component
 @RequiredArgsConstructor
-public class PortfolioPropertyConverter implements EntityConverter<PortfolioPropertyEntity, PortfolioProperty> {
+public class PortfolioPropertyConverter implements EntityConverter<PortfolioPropertyEntity, AccountProperty> {
     private final PortfolioRepository portfolioRepository;
 
     @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override
-    public PortfolioPropertyEntity toEntity(PortfolioProperty property) {
-        PortfolioEntity portfolioEntity = portfolioRepository.getReferenceById(property.getPortfolio());
+    public PortfolioPropertyEntity toEntity(AccountProperty property) {
+        PortfolioEntity portfolioEntity = portfolioRepository.getReferenceById(property.getAccount());
 
         PortfolioPropertyEntity entity = new PortfolioPropertyEntity();
         entity.setId(property.getId());
@@ -46,12 +46,12 @@ public class PortfolioPropertyConverter implements EntityConverter<PortfolioProp
     }
 
     @Override
-    public PortfolioProperty fromEntity(PortfolioPropertyEntity entity) {
-        return PortfolioProperty.builder()
+    public AccountProperty fromEntity(PortfolioPropertyEntity entity) {
+        return AccountProperty.builder()
                 .id(entity.getId())
-                .portfolio(entity.getPortfolio().getId())
+                .account(entity.getPortfolio().getId())
                 .timestamp(entity.getTimestamp())
-                .property(PortfolioPropertyType.valueOf(entity.getProperty()))
+                .property(AccountPropertyType.valueOf(entity.getProperty()))
                 .value(entity.getValue())
                 .build();
     }

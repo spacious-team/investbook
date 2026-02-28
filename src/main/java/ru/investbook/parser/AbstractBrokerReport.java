@@ -50,7 +50,7 @@ public abstract class AbstractBrokerReport implements SingleBrokerReport {
     @Getter
     private final Instant reportEndDateTime;
     @Getter
-    private final String portfolio;
+    private final String account;
     @Getter
     private final SecurityRegistrar securityRegistrar;
 
@@ -58,7 +58,7 @@ public abstract class AbstractBrokerReport implements SingleBrokerReport {
         this.reportPage = attributes.reportPage();
         this.reportName = attributes.reportName();
         this.reportEndDateTime = attributes.reportEndDateTime();
-        this.portfolio = attributes.portfolio();
+        this.account = attributes.account();
         this.securityRegistrar = securityRegistrar;
     }
 
@@ -85,6 +85,6 @@ public abstract class AbstractBrokerReport implements SingleBrokerReport {
     public record Attributes(ReportPage reportPage,
                              String reportName,
                              Instant reportEndDateTime,
-                             String portfolio) {
+                             String account) {
     }
 }

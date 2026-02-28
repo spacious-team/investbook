@@ -22,11 +22,10 @@ import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.boot.info.BuildProperties;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.investbook.api.PortfolioCashRestController;
-import ru.investbook.api.PortfolioPropertyRestController;
+import ru.investbook.api.AccountCashRestController;
+import ru.investbook.api.AccountPropertyRestController;
 import ru.investbook.api.SecurityDescriptionRestController;
 import ru.investbook.api.SecurityQuoteRestController;
 import ru.investbook.entity.EventCashFlowEntity;
@@ -76,8 +75,8 @@ public class PortfolioOpenFormatBuilder {
     private final PortfolioPropertyRepository portfolioPropertyRepository;
     private final PortfolioCashRepository portfolioCashRepository;
     private final SecurityDescriptionRestController securityDescriptionRestController;
-    private final PortfolioPropertyRestController portfolioPropertyRestController;
-    private final PortfolioCashRestController portfolioCashRestController;
+    private final AccountPropertyRestController accountPropertyRestController;
+    private final AccountCashRestController accountCashRestController;
     private final SecurityQuoteRestController securityQuoteRestController;
 
     public PortfolioOpenFormatV1_1_0 create() {
@@ -228,8 +227,8 @@ public class PortfolioOpenFormatBuilder {
     private VndInvestbookPof getVndInvestbook() {
         return VndInvestbookPof.builder()
                 .version(buildProperties.getVersion())
-                .portfolioCash(portfolioCashRestController.get(Pageable.unpaged()).getContent())
-                .portfolioProperties(portfolioPropertyRestController.get(Pageable.unpaged()).getContent())
+                .accountCash(accountCashRestController.get(Pageable.unpaged()).getContent())
+                .accountProperties(accountPropertyRestController.get(Pageable.unpaged()).getContent())
                 .securityDescriptions(securityDescriptionRestController.get(Pageable.unpaged()).getContent())
                 .securityQuotes(securityQuoteRestController.get(Pageable.unpaged()).getContent())
                 .build();

@@ -80,7 +80,7 @@ public class SberCashFlowTable extends AbstractReportTable<EventCashFlow> {
             value = value.negate();
         }
         return EventCashFlow.builder()
-                .portfolio(row.getStringCellValue(PORTFOLIO))
+                .account(row.getStringCellValue(PORTFOLIO))
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .eventType(type)
                 .value(value)

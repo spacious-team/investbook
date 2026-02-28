@@ -24,7 +24,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.pojo.AccountPropertyType;
 import org.springframework.data.jpa.domain.Specification;
 import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.entity.PortfolioPropertyEntity_;
@@ -40,7 +40,7 @@ import static ru.investbook.repository.specs.SpecificationHelper.*;
 public class PortfolioPropertySearchSpecification implements Specification<PortfolioPropertyEntity> {
     private final @Nullable String portfolio;
     private final @Nullable LocalDate date;
-    private final @Nullable PortfolioPropertyType property;
+    private final @Nullable AccountPropertyType property;
 
     @Override
     public Predicate toPredicate(Root<PortfolioPropertyEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {

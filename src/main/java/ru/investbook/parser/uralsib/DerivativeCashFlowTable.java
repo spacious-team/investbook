@@ -50,7 +50,7 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
         }
         return SecurityEventCashFlow.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .value(row.getBigDecimalCellValue(VALUE))
                 .currency(UralsibBrokerReport.convertToCurrency(row.getStringCellValue(CURRENCY)))
                 .eventType(CashFlowType.DERIVATIVE_PROFIT)

@@ -67,7 +67,7 @@ public class SberTrSecurityTransactionTable extends AbstractReportTable<Abstract
         @SuppressWarnings({"nullable", "DataFlowIssue"})
         int securityId = security.getId();
         return SecurityTransaction.builder()
-                .portfolio(row.getStringCellValue(PORTFOLIO))
+                .account(row.getStringCellValue(PORTFOLIO))
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .tradeId(String.valueOf(row.getLongCellValue(TRADE_ID))) // may be double numbers in future
                 .security(securityId)

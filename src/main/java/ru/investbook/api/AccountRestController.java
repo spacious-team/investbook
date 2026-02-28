@@ -27,7 +27,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Account;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,9 +50,9 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 @RestController
 @Tag(name = "Счета")
 @RequestMapping("/api/v1/portfolios")
-public class PortfolioRestController extends AbstractRestController<String, Portfolio, PortfolioEntity> {
+public class AccountRestController extends AbstractRestController<String, Account, PortfolioEntity> {
 
-    public PortfolioRestController(PortfolioRepository repository, PortfolioConverter converter) {
+    public AccountRestController(PortfolioRepository repository, PortfolioConverter converter) {
         super(repository, converter);
     }
 
@@ -62,7 +62,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @Operation(summary = "Отобразить все", operationId = "getAccounts", responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})
-    public Page<Portfolio> get(@Parameter(hidden = true)
+    public Page<Account> get(@Parameter(hidden = true)
                                @QuerydslPredicate(root = PortfolioEntity.class)
                                @Nullable
                                Predicate predicate,
@@ -76,7 +76,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     @Operation(summary = "Отобразить один", operationId = "getAccount", responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})
-    public ResponseEntity<Portfolio> get(@PathVariable("id")
+    public ResponseEntity<Account> get(@PathVariable("id")
                                          @Parameter(description = "Номер счета")
                                          String id) {
         return super.get(id);
@@ -88,7 +88,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "409"),
             @ApiResponse(responseCode = "500", content = @Content)})
-    public ResponseEntity<Void> post(@RequestBody @Valid Portfolio object) {
+    public ResponseEntity<Void> post(@RequestBody @Valid Account object) {
         return super.post(object);
     }
 
@@ -103,7 +103,7 @@ public class PortfolioRestController extends AbstractRestController<String, Port
                                     String id,
                                     @RequestBody
                                     @Valid
-                                    Portfolio object) {
+                                    Account object) {
         return super.put(id, object);
     }
 
@@ -121,12 +121,12 @@ public class PortfolioRestController extends AbstractRestController<String, Port
     }
 
     @Override
-    public String getId(Portfolio object) {
+    public String getId(Account object) {
         return object.getId();
     }
 
     @Override
-    protected Portfolio updateId(String id, Portfolio object) {
+    protected Account updateId(String id, Account object) {
         return object.toBuilder().id(id).build();
     }
 

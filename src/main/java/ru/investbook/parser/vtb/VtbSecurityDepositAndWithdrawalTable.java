@@ -66,7 +66,7 @@ public class VtbSecurityDepositAndWithdrawalTable extends SingleAbstractReportTa
                 return null;
         }
 
-        String portfolio = getReport().getPortfolio();
+        String portfolio = getReport().getAccount();
         String description = row.getStringCellValue(NAME_REGNUMBER_ISIN);
         Security security = VtbReportHelper.getSecurity(description);
         Instant timestamp = row.getInstantCellValue(DATE);
@@ -77,7 +77,7 @@ public class VtbSecurityDepositAndWithdrawalTable extends SingleAbstractReportTa
         return SecurityTransaction.builder()
                 .tradeId(tradeId)
                 .timestamp(timestamp)
-                .portfolio(portfolio)
+                .account(portfolio)
                 .security(securityId)
                 .count(row.getIntCellValue(COUNT))
                 .build();

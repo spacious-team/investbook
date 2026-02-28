@@ -21,16 +21,15 @@ package ru.investbook.report.excel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.Account;
+import org.spacious_team.broker.pojo.AccountCash;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.Portfolio;
-import org.spacious_team.broker.pojo.PortfolioCash;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
-import ru.investbook.converter.PortfolioPropertyConverter;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.FifoPositionsFactory;
@@ -76,7 +75,6 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
     protected final TransactionRepository transactionRepository;
     private final SecurityRepository securityRepository;
     private final SecurityConverter securityConverter;
-    protected final PortfolioPropertyConverter portfolioPropertyConverter;
     private final FifoPositionsFactory positionsFactory;
     private final SecurityProfitService securityProfitService;
     private final AssetsAndCashService assetsAndCashService;
@@ -89,22 +87,22 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             CashFlowType.DIVIDEND.getId(),
             CashFlowType.DERIVATIVE_PROFIT.getId());
 
-    public Table create(Portfolio portfolio) {
+    public Table create(Account account) {
         throw new UnsupportedOperationException();
     }
 
-    public Table create(Portfolio portfolio, String forCurrency) {
-        return create(singleton(portfolio.getId()), forCurrency);
+    public Table create(Account account, String forCurrency) {
+        return create(singleton(account.getId()), forCurrency);
     }
 
     /**
-     * @param portfolios should be empty for display for all
+     * @param accountIds should be empty for display for all
      */
     @Override
-    public Table create(Collection<String> portfolios, String forCurrency) {
-        Collection<Security> securities = getSecurities(portfolios, forCurrency);
-        Table table = create(portfolios, securities, forCurrency);
-        table.add(getCashRow(portfolios, forCurrency));
+    public Table create(Collection<String> accountIds, String forCurrency) {
+        Collection<Security> securities = getSecurities(accountIds, forCurrency);
+        Table table = create(accountIds, securities, forCurrency);
+        table.add(getCashRow(accountIds, forCurrency));
         setInvestmentProportionFormula(table);
         setCurrentProportionFormula(table);
         return table;
@@ -174,18 +172,18 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 ViewFilter.get().getToDate().getEpochSecond(),
                 Instant.now().getEpochSecond()));
         row.put(SECURITY, CASH_BALANCE + ", " + forCurrency.toLowerCase());
-        Collection<PortfolioCash> portfolioCashes = assetsAndCashService.getPortfolioCash(portfolios, atTime);
-        row.put(LAST_EVENT_DATE, portfolioCashes.stream()
-                .map(PortfolioCash::getTimestamp)
+        Collection<AccountCash> accountCashList = assetsAndCashService.getPortfolioCash(portfolios, atTime);
+        row.put(LAST_EVENT_DATE, accountCashList.stream()
+                .map(AccountCash::getTimestamp)
                 .reduce((t1, t2) -> t1.isAfter(t2) ? t1 : t2)
                 .orElse(null));
-        BigDecimal portfolioCash = portfolioCashes.stream()
+        BigDecimal accountCash = accountCashList.stream()
                 .filter(cash -> Objects.equals(forCurrency, cash.getCurrency()))
-                .map(PortfolioCash::getValue)
+                .map(AccountCash::getValue)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        row.put(LAST_PRICE, portfolioCash);
+        row.put(LAST_PRICE, accountCash);
         if (ViewFilter.get().getFromDate().isBefore(instantOf2000_01_01) &&
-                portfolioCash.floatValue() >= 0.01) { // fix div by zero in proportion column when all position closed and money = 0
+                accountCash.floatValue() >= 0.01) { // fix div by zero in proportion column when all position closed and money = 0
             // режим отображения по умолчанию, скорее всего отображаем портфель с начала открытия счета,
             // учитываем остаток денежных средств в Доле портфеля (%)
             row.put(COUNT, 1);

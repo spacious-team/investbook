@@ -88,7 +88,7 @@ public class InvestbookTransactionTable extends AbstractSecurityAwareInvestbookT
         int securityId = getSecurityIdForTransaction(securityTickerNameOrIsin, securityType);
         return builder
                 .tradeId(getTradeId(portfolio, securityId, timestamp))
-                .portfolio(portfolio)
+                .account(portfolio)
                 .timestamp(timestamp)
                 .security(securityId)
                 .count(count * (isBuy ? 1 : -1))

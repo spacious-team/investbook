@@ -151,7 +151,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
         LocalDate transactionDay = LocalDate.ofInstant(transaction.getTimestamp(), zoneId);
         Collection<TransactionEntity> depositAndWithdrawalDuringTheDay =
                 transactionRepository.findByPortfolioAndSecurityIdAndTimestampBetweenDepositAndWithdrawalTransactions(
-                        transaction.getPortfolio(),
+                        transaction.getAccount(),
                         transaction.getSecurity(),
                         transactionDay.atStartOfDay(zoneId).toInstant(),
                         transactionDay.atTime(LocalTime.MAX).atZone(zoneId).toInstant());

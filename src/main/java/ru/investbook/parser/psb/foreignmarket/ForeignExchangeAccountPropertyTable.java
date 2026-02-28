@@ -20,27 +20,27 @@ package ru.investbook.parser.psb.foreignmarket;
 
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.pojo.AccountProperty;
+import org.spacious_team.broker.pojo.AccountPropertyType;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleBrokerReport;
+import ru.investbook.parser.psb.AccountPropertyTable;
 import ru.investbook.parser.psb.ForeignExchangeRateTable;
-import ru.investbook.parser.psb.PortfolioPropertyTable;
 
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 
 import static java.util.Collections.emptyList;
-import static ru.investbook.parser.psb.PortfolioPropertyTable.SummaryTableHeader.*;
+import static ru.investbook.parser.psb.AccountPropertyTable.SummaryTableHeader.*;
 
 @Slf4j
-public class ForeignExchangePortfolioPropertyTable extends PortfolioPropertyTable {
+public class ForeignExchangeAccountPropertyTable extends AccountPropertyTable {
 
     static final String ASSETS = "Остаток средств на счете";
 
-    public ForeignExchangePortfolioPropertyTable(SingleBrokerReport report) {
+    public ForeignExchangeAccountPropertyTable(SingleBrokerReport report) {
         super(report);
     }
 
@@ -49,7 +49,7 @@ public class ForeignExchangePortfolioPropertyTable extends PortfolioPropertyTabl
     }
 
     @Override
-    protected Collection<PortfolioProperty> getTotalAssets(Table table) {
+    protected Collection<AccountProperty> getTotalAssets(Table table) {
         try {
             @Nullable TableRow assetsRow = table.findRowByPrefix(ASSETS);
             @Nullable TableRow exchangeRateRow = table.findRowByPrefix(ForeignExchangeRateTable.EXCHANGE_RATE_ROW);
@@ -65,9 +65,9 @@ public class ForeignExchangePortfolioPropertyTable extends PortfolioPropertyTabl
                             .multiply(exchangeRateRow.getBigDecimalCellValueOrDefault(GBP, BigDecimal.ZERO)))
                     .add(assetsRow.getBigDecimalCellValueOrDefault(CHF, BigDecimal.ZERO)
                             .multiply(exchangeRateRow.getBigDecimalCellValueOrDefault(CHF, BigDecimal.ZERO)));
-            return Collections.singletonList(PortfolioProperty.builder()
-                    .portfolio(getReport().getPortfolio())
-                    .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
+            return Collections.singletonList(AccountProperty.builder()
+                    .account(getReport().getAccount())
+                    .property(AccountPropertyType.TOTAL_ASSETS_RUB)
                     .value(totalAssets.toString())
                     .timestamp(getReport().getReportEndDateTime())
                     .build());
