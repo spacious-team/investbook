@@ -50,7 +50,7 @@ public class TaxExcelTableFactory implements TableFactory {
     public Table create(Account account) {
         Table table = new Table();
         List<EventCashFlow> cashFlows = eventCashFlowRepository
-                .findByPortfolioIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
+                .findByAccountIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
                         singleton(account.getId()),
                         CashFlowType.TAX.getId(),
                         ViewFilter.get().getFromDate(),

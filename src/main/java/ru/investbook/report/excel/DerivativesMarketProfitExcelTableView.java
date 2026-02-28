@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 
 import java.util.Optional;
 import java.util.function.UnaryOperator;
@@ -47,10 +47,10 @@ public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (срочный)";
 
-    public DerivativesMarketProfitExcelTableView(PortfolioRepository portfolioRepository,
+    public DerivativesMarketProfitExcelTableView(AccountRepository accountRepository,
                                                  DerivativesMarketProfitExcelTableFactory tableFactory,
                                                  PortfolioConverter portfolioConverter) {
-        super(portfolioRepository, tableFactory, portfolioConverter);
+        super(accountRepository, tableFactory, portfolioConverter);
     }
 
     @Override

@@ -84,7 +84,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
     }
 
     private Collection<Security> getSecurities(Account account, String currency) {
-        return transactionRepository.findDistinctSecurityByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+        return transactionRepository.findDistinctSecurityByAccountInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
                         singleton(account.getId()),
                         currency,
                         ViewFilter.get().getFromDate(),
@@ -229,7 +229,7 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
 
     private @Nullable String getRedemptionCashFlow(String portfolio, Integer securityId, double multiplier, String toCurrency) {
         List<SecurityEventCashFlowEntity> cashFlows = securityEventCashFlowRepository
-                .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                .findByAccountIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         singleton(portfolio),
                         securityId,
                         CashFlowType.REDEMPTION.getId(),

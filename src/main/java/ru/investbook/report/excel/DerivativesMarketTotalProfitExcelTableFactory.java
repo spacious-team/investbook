@@ -107,7 +107,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
                 transactionRepository.findDistinctDerivativeByTimestampBetweenOrderByTimestampDesc(
                         filter.getFromDate(),
                         filter.getToDate()) :
-                transactionRepository.findDistinctDerivativeByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
+                transactionRepository.findDistinctDerivativeByAccountInAndTimestampBetweenOrderByTimestampDesc(
                         portfolios,
                         filter.getFromDate(),
                         filter.getToDate());

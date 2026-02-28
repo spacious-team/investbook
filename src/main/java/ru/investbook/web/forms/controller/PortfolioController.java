@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.report.ForeignExchangeRateService;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.forms.model.ArchivedPortfolioModel;
 
@@ -41,25 +41,25 @@ import static ru.investbook.web.ControllerHelper.getPortfolios;
 @RequestMapping("/portfolios")
 @RequiredArgsConstructor
 public class PortfolioController {
-    private final PortfolioRepository portfolioRepository;
+    private final AccountRepository accountRepository;
     private final SecurityRepository securityRepository;
     private final FifoPositionsFactory fifoPositionsFactory;
     private final ForeignExchangeRateService foreignExchangeRateService;
 
     @GetMapping("/archive")
     public String get(Model model, @ModelAttribute("archive") ArchivedPortfolioModel archive) {
-        Set<String> allPortfolios = getPortfolios(portfolioRepository);
+        Set<String> allPortfolios = getPortfolios(accountRepository);
         model.addAttribute("allPortfolios", allPortfolios);
-        archive.setPortfolios(getInactivePortfolios(portfolioRepository));
+        archive.setPortfolios(getInactivePortfolios(accountRepository));
         return "portfolios/archive";
     }
 
     @PostMapping("/archive")
     public String postEventCashFlow(@ModelAttribute("archive") @Valid ArchivedPortfolioModel archive) {
-        getPortfolios(portfolioRepository)
+        getPortfolios(accountRepository)
                 .forEach(portfolio -> {
                     boolean isEnabled = !archive.getPortfolios().contains(portfolio);
-                    portfolioRepository.setEnabledForPortfolio(portfolio, isEnabled);
+                    accountRepository.setEnabledForPortfolio(portfolio, isEnabled);
                 });
         return "success";
     }
@@ -80,7 +80,7 @@ public class PortfolioController {
 
     @GetMapping("/delete-all-accepted")
     public String deleteAllAccepted(Model model) {
-        portfolioRepository.deleteAll();
+        accountRepository.deleteAll();
         securityRepository.deleteAll();
         fifoPositionsFactory.invalidateCache();
         foreignExchangeRateService.invalidateCache();

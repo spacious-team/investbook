@@ -69,7 +69,7 @@ public class ForeignPortfolioPaymentExcelTableFactory implements TableFactory {
 
     private ArrayList<EventCashFlow> getCashFlows(Account account) {
         return eventCashFlowRepository
-                .findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+                .findByAccountIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
                         account.getId(),
                         PAY_TYPES,
                         ViewFilter.get().getFromDate(),

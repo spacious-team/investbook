@@ -34,7 +34,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "portfolio_property")
 @Data
-public class PortfolioPropertyEntity {
+public class AccountPropertyEntity {
 
     @Id
     @AssignedOrGeneratedValue
@@ -44,7 +44,7 @@ public class PortfolioPropertyEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "portfolio", referencedColumnName = "id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
-    private PortfolioEntity portfolio;
+    private AccountEntity account;
 
     @Basic
     @Column(name = "timestamp", nullable = false)

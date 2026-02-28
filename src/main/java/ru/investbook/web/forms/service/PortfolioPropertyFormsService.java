@@ -30,11 +30,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.PortfolioPropertyConverter;
-import ru.investbook.entity.PortfolioPropertyEntity;
-import ru.investbook.entity.PortfolioPropertyEntity_;
-import ru.investbook.repository.PortfolioPropertyRepository;
-import ru.investbook.repository.PortfolioRepository;
-import ru.investbook.repository.specs.PortfolioPropertySearchSpecification;
+import ru.investbook.entity.AccountPropertyEntity;
+import ru.investbook.entity.AccountPropertyEntity_;
+import ru.investbook.repository.AccountPropertyRepository;
+import ru.investbook.repository.AccountRepository;
+import ru.investbook.repository.specs.AccountPropertySearchSpecification;
 import ru.investbook.web.forms.model.PortfolioPropertyModel;
 import ru.investbook.web.forms.model.PortfolioPropertyTotalAssetsModel;
 import ru.investbook.web.forms.model.filter.PortfolioPropertyFormFilterModel;
@@ -53,26 +53,26 @@ import static org.springframework.data.domain.Sort.Order.desc;
 @RequiredArgsConstructor
 public class PortfolioPropertyFormsService {
     private static final ZoneId zoneId = ZoneId.systemDefault();
-    private final PortfolioPropertyRepository portfolioPropertyRepository;
-    private final PortfolioRepository portfolioRepository;
+    private final AccountPropertyRepository accountPropertyRepository;
+    private final AccountRepository accountRepository;
     private final PortfolioPropertyConverter portfolioPropertyConverter;
     private final PortfolioConverter portfolioConverter;
 
     @Transactional(readOnly = true)
     public Optional<PortfolioPropertyModel> getById(Integer id) {
-        return portfolioPropertyRepository.findById(id)
+        return accountPropertyRepository.findById(id)
                 .map(this::toModel);
     }
 
     @Transactional(readOnly = true)
     public Page<PortfolioPropertyModel> getPage(PortfolioPropertyFormFilterModel filter) {
-        PortfolioPropertySearchSpecification spec = PortfolioPropertySearchSpecification.of(
+        AccountPropertySearchSpecification spec = AccountPropertySearchSpecification.of(
                 filter.getPortfolio(), filter.getDate(), filter.getProperty());
 
-        Sort sort = Sort.by(asc(PortfolioPropertyEntity_.PORTFOLIO), desc(PortfolioPropertyEntity_.TIMESTAMP));
+        Sort sort = Sort.by(asc(AccountPropertyEntity_.ACCOUNT), desc(AccountPropertyEntity_.TIMESTAMP));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
-        return portfolioPropertyRepository.findAll(spec, page)
+        return accountPropertyRepository.findAll(spec, page)
                 .map(this::toModel);
     }
 
@@ -91,29 +91,29 @@ public class PortfolioPropertyFormsService {
             throw new IllegalArgumentException("Unexpected type " + m.getClass());
         }
 
-        PortfolioPropertyEntity entity = portfolioPropertyConverter.toEntity(builder.build());
-        entity = portfolioPropertyRepository.save(entity);
+        AccountPropertyEntity entity = portfolioPropertyConverter.toEntity(builder.build());
+        entity = accountPropertyRepository.save(entity);
         m.setId(entity.getId()); // used in view
-        portfolioPropertyRepository.flush();
+        accountPropertyRepository.flush();
     }
 
     private void savePortfolio(String portfolio) {
-        if (!portfolioRepository.existsById(portfolio)) {
-            portfolioRepository.save(
+        if (!accountRepository.existsById(portfolio)) {
+            accountRepository.save(
                     portfolioConverter.toEntity(Account.builder()
                             .id(portfolio)
                             .build()));
         }
     }
 
-    private PortfolioPropertyModel toModel(PortfolioPropertyEntity e) {
+    private PortfolioPropertyModel toModel(AccountPropertyEntity e) {
         PortfolioPropertyModel m;
         AccountPropertyType type = valueOf(e.getProperty().toUpperCase());
         m = switch (type) {
             case TOTAL_ASSETS_RUB, TOTAL_ASSETS_USD -> new PortfolioPropertyTotalAssetsModel();
         };
         m.setId(e.getId());
-        m.setPortfolio(e.getPortfolio().getId());
+        m.setPortfolio(e.getAccount().getId());
         ZonedDateTime zonedDateTime = e.getTimestamp().atZone(zoneId);
         m.setDate(zonedDateTime.toLocalDate());
         m.setTime(zonedDateTime.toLocalTime());
@@ -127,7 +127,7 @@ public class PortfolioPropertyFormsService {
         };
     }
 
-    private static BigDecimal getBigDecimalValue(PortfolioPropertyEntity entity) {
+    private static BigDecimal getBigDecimalValue(AccountPropertyEntity entity) {
         try {
             return BigDecimal.valueOf(
                     Double.parseDouble(
@@ -140,7 +140,7 @@ public class PortfolioPropertyFormsService {
 
     @Transactional
     public void delete(Integer id) {
-        portfolioPropertyRepository.deleteById(id);
-        portfolioPropertyRepository.flush();
+        accountPropertyRepository.deleteById(id);
+        accountPropertyRepository.flush();
     }
 }

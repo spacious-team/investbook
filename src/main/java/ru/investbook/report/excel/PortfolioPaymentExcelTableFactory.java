@@ -72,7 +72,7 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
 
     private ArrayList<SecurityEventCashFlow> getCashFlows(Account account) {
         return securityEventCashFlowRepository
-                .findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+                .findByAccountIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
                         account.getId(),
                         paymentTypes,
                         ViewFilter.get().getFromDate(),

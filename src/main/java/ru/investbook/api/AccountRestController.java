@@ -42,17 +42,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.PortfolioConverter;
-import ru.investbook.entity.PortfolioEntity;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.entity.AccountEntity;
+import ru.investbook.repository.AccountRepository;
 
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Счета")
 @RequestMapping("/api/v1/portfolios")
-public class AccountRestController extends AbstractRestController<String, Account, PortfolioEntity> {
+public class AccountRestController extends AbstractRestController<String, Account, AccountEntity> {
 
-    public AccountRestController(PortfolioRepository repository, PortfolioConverter converter) {
+    public AccountRestController(AccountRepository repository, PortfolioConverter converter) {
         super(repository, converter);
     }
 
@@ -63,7 +63,7 @@ public class AccountRestController extends AbstractRestController<String, Accoun
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public Page<Account> get(@Parameter(hidden = true)
-                               @QuerydslPredicate(root = PortfolioEntity.class)
+                               @QuerydslPredicate(root = AccountEntity.class)
                                @Nullable
                                Predicate predicate,
                                @Parameter(hidden = true)

@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.ControllerHelper;
 import ru.investbook.web.forms.model.EventCashFlowModel;
@@ -45,7 +45,7 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class EventCashFlowController {
     private final EventCashFlowFormsService eventCashFlowFormsService;
-    private final PortfolioRepository portfolioRepository;
+    private final AccountRepository accountRepository;
     private final SecurityRepository securityRepository;
     private volatile Collection<String> securities;
     private volatile Collection<String> portfolios;
@@ -53,14 +53,14 @@ public class EventCashFlowController {
 
     @PostConstruct
     public void start() {
-        portfolios = ControllerHelper.getPortfolios(portfolioRepository);
+        portfolios = ControllerHelper.getPortfolios(accountRepository);
         securities = ControllerHelper.getSecuritiesDescriptions(securityRepository);
     }
 
     @GetMapping
     public String get(@ModelAttribute("filter") EventCashFlowFormFilterModel filter, Model model) {
         Page<EventCashFlowModel> data = eventCashFlowFormsService.getPage(filter);
-        portfolios = ControllerHelper.getPortfolios(portfolioRepository); // update portfolios for filter
+        portfolios = ControllerHelper.getPortfolios(accountRepository); // update portfolios for filter
         model.addAttribute("page", new PageableWrapperModel<>(data));
         model.addAttribute("portfolios", portfolios);
 

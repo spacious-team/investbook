@@ -36,7 +36,7 @@ import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
 import ru.investbook.report.ViewFilter;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,10 +58,10 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> "Обзор (" + portfolio + ")";
 
-    public PortfolioAnalysisExcelTableView(PortfolioRepository portfolioRepository,
+    public PortfolioAnalysisExcelTableView(AccountRepository accountRepository,
                                            PortfolioAnalysisExcelTableFactory tableFactory,
                                            PortfolioConverter portfolioConverter) {
-        super(portfolioRepository, tableFactory, portfolioConverter);
+        super(accountRepository, tableFactory, portfolioConverter);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     }
 
     private boolean isManyPortfolioRequested(Collection<String> portfolios) {
-        return portfolios.size() > 1 || (portfolios.isEmpty() && portfolioRepository.count() > 1);
+        return portfolios.size() > 1 || (portfolios.isEmpty() && accountRepository.count() > 1);
     }
 
     private static boolean showOnlySummary(ViewFilter filter) {

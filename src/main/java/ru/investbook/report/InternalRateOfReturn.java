@@ -173,7 +173,7 @@ public class InternalRateOfReturn {
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate()) :
                 securityEventCashFlowRepository
-                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
+                        .findByAccountIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
                                 portfolios,
                                 requireNonNull(security.getId()),
                                 cashFlowTypes,

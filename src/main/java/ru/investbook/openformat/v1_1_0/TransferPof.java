@@ -100,7 +100,7 @@ public class TransferPof {
         return TransferPof.builder()
                 .id(transaction.getId())
                 .transferId(transaction.getTradeId())
-                .account(AccountPof.getAccountId(transaction.getPortfolio()))
+                .account(AccountPof.getAccountId(transaction.getAccount()))
                 .timestamp(transaction.getTimestamp().getEpochSecond())
                 .asset(transaction.getSecurity().getId())
                 .count(BigDecimal.valueOf(transaction.getCount()))

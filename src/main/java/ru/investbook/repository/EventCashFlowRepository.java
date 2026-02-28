@@ -37,22 +37,22 @@ public interface EventCashFlowRepository extends
 
     Optional<EventCashFlowEntity> findFirstByOrderByTimestampDesc();
 
-    List<EventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdOrderByTimestamp(String portfolio,
-                                                                                 int cashFlowType);
+    List<EventCashFlowEntity> findByAccountIdAndCashFlowTypeIdOrderByTimestamp(String account,
+                                                                               int cashFlowType);
 
     List<EventCashFlowEntity> findByCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
             int cashFlowType,
             Instant from,
             Instant to);
 
-    List<EventCashFlowEntity> findByPortfolioIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
-            Collection<String> portfolio,
+    List<EventCashFlowEntity> findByAccountIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
+            Collection<String> accounts,
             int cashFlowType,
             Instant from,
             Instant to);
 
-    List<EventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-            String portfolio,
+    List<EventCashFlowEntity> findByAccountIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+            String account,
             Collection<Integer> cashFlowType,
             Instant from,
             Instant to);

@@ -29,17 +29,17 @@ import org.springframework.stereotype.Component;
 import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.converter.PortfolioCashConverter;
 import ru.investbook.converter.PortfolioPropertyConverter;
+import ru.investbook.entity.AccountCashEntity;
+import ru.investbook.entity.AccountPropertyEntity;
 import ru.investbook.entity.EventCashFlowEntity;
-import ru.investbook.entity.PortfolioCashEntity;
-import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.entity.StockMarketIndexEntity;
 import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
 import ru.investbook.report.ViewFilter;
+import ru.investbook.repository.AccountCashRepository;
+import ru.investbook.repository.AccountPropertyRepository;
 import ru.investbook.repository.EventCashFlowRepository;
-import ru.investbook.repository.PortfolioCashRepository;
-import ru.investbook.repository.PortfolioPropertyRepository;
 import ru.investbook.repository.StockMarketIndexRepository;
 
 import java.math.BigDecimal;
@@ -79,9 +79,9 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     private static final String SP500_GROWTH_FORMULA = getSp500GrowthFormula();
     private final EventCashFlowRepository eventCashFlowRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
-    private final PortfolioPropertyRepository portfolioPropertyRepository;
+    private final AccountPropertyRepository accountPropertyRepository;
     private final PortfolioPropertyConverter portfolioPropertyConverter;
-    private final PortfolioCashRepository portfolioCashRepository;
+    private final AccountCashRepository accountCashRepository;
     private final PortfolioCashConverter portfolioCashConverter;
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
     private final ForeignExchangeRateService foreignExchangeRateService;
@@ -301,7 +301,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                                 viewFilter.getFromDate(),
                                 viewFilter.getToDate()) :
                 eventCashFlowRepository
-                        .findByPortfolioIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
+                        .findByAccountIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
                                 portfolios,
                                 CASH.getId(),
                                 viewFilter.getFromDate(),
@@ -317,9 +317,9 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
      * @return map of date -> currency -> value
      */
     private LinkedHashMap<Instant, Map<String, BigDecimal>> getCashBalance(Collection<String> portfolios) {
-        List<PortfolioCashEntity> portfolioCashEntities = portfolios.isEmpty() ?
-                portfolioCashRepository.findAll() :
-                portfolioCashRepository.findByPortfolioIn(portfolios);
+        List<AccountCashEntity> portfolioCashEntities = portfolios.isEmpty() ?
+                accountCashRepository.findAll() :
+                accountCashRepository.findByAccountIn(portfolios);
         List<AccountCash> portfolioCashes = portfolioCashEntities.stream()
                 .map(portfolioCashConverter::fromEntity)
                 .toList();
@@ -336,14 +336,14 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
 
     private List<AccountProperty> getPortfolioProperty(Collection<String> portfolios, Collection<String> propertyTypes) {
         ViewFilter viewFilter = ViewFilter.get();
-        List<PortfolioPropertyEntity> entities = portfolios.isEmpty() ?
-                portfolioPropertyRepository
+        List<AccountPropertyEntity> entities = portfolios.isEmpty() ?
+                accountPropertyRepository
                         .findByPropertyInAndTimestampBetweenOrderByTimestampAsc(
                                 propertyTypes,
                                 viewFilter.getFromDate(),
                                 viewFilter.getToDate()) :
-                portfolioPropertyRepository
-                        .findByPortfolioIdInAndPropertyInAndTimestampBetweenOrderByTimestampAsc(
+                accountPropertyRepository
+                        .findByAccountIdInAndPropertyInAndTimestampBetweenOrderByTimestampAsc(
                                 portfolios,
                                 propertyTypes,
                                 viewFilter.getFromDate(),

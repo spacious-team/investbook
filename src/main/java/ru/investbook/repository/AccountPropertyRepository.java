@@ -24,8 +24,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.ListQuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
-import ru.investbook.entity.PortfolioEntity;
-import ru.investbook.entity.PortfolioPropertyEntity;
+import ru.investbook.entity.AccountEntity;
+import ru.investbook.entity.AccountPropertyEntity;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -33,19 +33,19 @@ import java.util.List;
 import java.util.Optional;
 
 @Transactional(readOnly = true)
-public interface PortfolioPropertyRepository extends
-        JpaRepository<PortfolioPropertyEntity, Integer>,
-        JpaSpecificationExecutor<PortfolioPropertyEntity>,
-        ListQuerydslPredicateExecutor<PortfolioPropertyEntity> {
+public interface AccountPropertyRepository extends
+        JpaRepository<AccountPropertyEntity, Integer>,
+        JpaSpecificationExecutor<AccountPropertyEntity>,
+        ListQuerydslPredicateExecutor<AccountPropertyEntity> {
 
-    Optional<PortfolioPropertyEntity> findFirstByOrderByTimestampDesc();
+    Optional<AccountPropertyEntity> findFirstByOrderByTimestampDesc();
 
-    List<PortfolioPropertyEntity> findByPortfolioInAndPropertyInOrderByTimestampDesc(
-            Collection<PortfolioEntity> portfolios,
+    List<AccountPropertyEntity> findByAccountInAndPropertyInOrderByTimestampDesc(
+            Collection<AccountEntity> accounts,
             Collection<String> property);
 
-    Optional<PortfolioPropertyEntity> findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(String portfolio,
-                                                                                            String property);
+    Optional<AccountPropertyEntity> findFirstByAccountIdAndPropertyOrderByTimestampDesc(String account,
+                                                                                        String property);
 
     @Query(nativeQuery = true, value = """
             SELECT *
@@ -60,7 +60,7 @@ public interface PortfolioPropertyRepository extends
             )
             ORDER BY portfolio, timestamp DESC
             """)
-    List<PortfolioPropertyEntity> findDistinctOnPortfolioIdByPropertyAndTimestampBetweenOrderByTimestampDesc(
+    List<AccountPropertyEntity> findDistinctOnAccountIdByPropertyAndTimestampBetweenOrderByTimestampDesc(
             @Param("property") String property,
             @Param("from") Instant startDate,
             @Param("to") Instant endDate);
@@ -68,7 +68,7 @@ public interface PortfolioPropertyRepository extends
     @Query(nativeQuery = true, value = """
             SELECT *
             FROM portfolio_property AS t1
-            WHERE portfolio IN (:portfolios)
+            WHERE portfolio IN (:accounts)
             AND property = :property
             AND timestamp = (
                 SELECT MAX(timestamp)
@@ -79,18 +79,18 @@ public interface PortfolioPropertyRepository extends
             )
             ORDER BY portfolio, timestamp DESC
             """)
-    List<PortfolioPropertyEntity> findDistinctOnPortfolioIdByPortfolioIdInAndPropertyAndTimestampBetweenOrderByTimestampDesc(
-            @Param("portfolios") Collection<String> portfolios,
+    List<AccountPropertyEntity> findDistinctOnAccountIdByAccountIdInAndPropertyAndTimestampBetweenOrderByTimestampDesc(
+            @Param("accounts") Collection<String> accounts,
             @Param("property") String property,
             @Param("from") Instant startDate,
             @Param("to") Instant endDate);
 
-    List<PortfolioPropertyEntity> findByPropertyInAndTimestampBetweenOrderByTimestampAsc(Collection<String> properties,
-                                                                                         Instant startDate,
-                                                                                         Instant endDate);
+    List<AccountPropertyEntity> findByPropertyInAndTimestampBetweenOrderByTimestampAsc(Collection<String> properties,
+                                                                                       Instant startDate,
+                                                                                       Instant endDate);
 
-    List<PortfolioPropertyEntity> findByPortfolioIdInAndPropertyInAndTimestampBetweenOrderByTimestampAsc(
-            Collection<String> portfolios,
+    List<AccountPropertyEntity> findByAccountIdInAndPropertyInAndTimestampBetweenOrderByTimestampAsc(
+            Collection<String> accounts,
             Collection<String> properties,
             Instant startDate,
             Instant endDate);

@@ -80,7 +80,7 @@ public class CashFlowPof {
     static CashFlowPof of(EventCashFlowEntity cashFlow) {
         return CashFlowPof.builder()
                 .id(cashFlow.getId())
-                .account(AccountPof.getAccountId(cashFlow.getPortfolio().getId()))
+                .account(AccountPof.getAccountId(cashFlow.getAccount().getId()))
                 .timestamp(cashFlow.getTimestamp().getEpochSecond())
                 .amount(cashFlow.getValue())
                 .currency(getValidCurrencyOrNull(cashFlow.getCurrency()))

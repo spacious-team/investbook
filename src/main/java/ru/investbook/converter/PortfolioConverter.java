@@ -21,21 +21,21 @@ package ru.investbook.converter;
 import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.Account;
 import org.springframework.stereotype.Component;
-import ru.investbook.entity.PortfolioEntity;
+import ru.investbook.entity.AccountEntity;
 
 @Component
 @RequiredArgsConstructor
-public class PortfolioConverter implements EntityConverter<PortfolioEntity, Account> {
+public class PortfolioConverter implements EntityConverter<AccountEntity, Account> {
     @Override
-    public PortfolioEntity toEntity(Account pojo) {
-        PortfolioEntity entity = new PortfolioEntity();
+    public AccountEntity toEntity(Account pojo) {
+        AccountEntity entity = new AccountEntity();
         entity.setId(pojo.getId());
         entity.setEnabled(pojo.isEnabled());
         return entity;
     }
 
     @Override
-    public Account fromEntity(PortfolioEntity entity) {
+    public Account fromEntity(AccountEntity entity) {
         return Account.builder()
                 .id(entity.getId())
                 .enabled(entity.isEnabled())

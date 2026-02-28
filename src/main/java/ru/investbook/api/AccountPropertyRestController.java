@@ -43,17 +43,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
-import ru.investbook.entity.PortfolioPropertyEntity;
+import ru.investbook.entity.AccountPropertyEntity;
 
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Информация по счетам")
 @RequestMapping("/api/v1/portfolio-properties")
-public class AccountPropertyRestController extends AbstractRestController<Integer, AccountProperty, PortfolioPropertyEntity> {
+public class AccountPropertyRestController extends AbstractRestController<Integer, AccountProperty, AccountPropertyEntity> {
 
-    public AccountPropertyRestController(JpaRepository<PortfolioPropertyEntity, Integer> repository,
-                                         EntityConverter<PortfolioPropertyEntity, AccountProperty> converter) {
+    public AccountPropertyRestController(JpaRepository<AccountPropertyEntity, Integer> repository,
+                                         EntityConverter<AccountPropertyEntity, AccountProperty> converter) {
         super(repository, converter);
     }
 
@@ -66,7 +66,7 @@ public class AccountPropertyRestController extends AbstractRestController<Intege
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
     public Page<AccountProperty> get(@Parameter(hidden = true)
-                                       @QuerydslPredicate(root = PortfolioPropertyEntity.class)
+                                       @QuerydslPredicate(root = AccountPropertyEntity.class)
                                        @Nullable
                                        Predicate predicate,
                                        @Parameter(hidden = true)

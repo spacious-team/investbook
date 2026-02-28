@@ -22,27 +22,27 @@ import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.springframework.stereotype.Component;
+import ru.investbook.entity.AccountEntity;
 import ru.investbook.entity.CashFlowTypeEntity;
 import ru.investbook.entity.EventCashFlowEntity;
-import ru.investbook.entity.PortfolioEntity;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.CashFlowTypeRepository;
-import ru.investbook.repository.PortfolioRepository;
 
 @Component
 @RequiredArgsConstructor
 public class EventCashFlowConverter implements EntityConverter<EventCashFlowEntity, EventCashFlow> {
-    private final PortfolioRepository portfolioRepository;
+    private final AccountRepository accountRepository;
     private final CashFlowTypeRepository cashFlowTypeRepository;
 
     @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override
     public EventCashFlowEntity toEntity(EventCashFlow eventCashFlow) {
-        PortfolioEntity portfolioEntity = portfolioRepository.getReferenceById(eventCashFlow.getAccount());
+        AccountEntity accountEntity = accountRepository.getReferenceById(eventCashFlow.getAccount());
         CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.getReferenceById(eventCashFlow.getEventType().getId());
 
         EventCashFlowEntity entity = new EventCashFlowEntity();
         entity.setId(eventCashFlow.getId());
-        entity.setPortfolio(portfolioEntity);
+        entity.setAccount(accountEntity);
         entity.setTimestamp(eventCashFlow.getTimestamp());
         entity.setCashFlowType(cashFlowTypeEntity);
         entity.setValue(eventCashFlow.getValue());
@@ -58,7 +58,7 @@ public class EventCashFlowConverter implements EntityConverter<EventCashFlowEnti
     public EventCashFlow fromEntity(EventCashFlowEntity entity) {
         return EventCashFlow.builder()
                 .id(entity.getId())
-                .account(entity.getPortfolio().getId())
+                .account(entity.getAccount().getId())
                 .timestamp(entity.getTimestamp())
                 .eventType(CashFlowType.valueOf(entity.getCashFlowType().getId()))
                 .value(entity.getValue())

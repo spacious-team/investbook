@@ -30,11 +30,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import ru.investbook.converter.PortfolioCashConverter;
 import ru.investbook.converter.PortfolioConverter;
-import ru.investbook.entity.PortfolioCashEntity;
-import ru.investbook.entity.PortfolioCashEntity_;
-import ru.investbook.repository.PortfolioCashRepository;
-import ru.investbook.repository.PortfolioRepository;
-import ru.investbook.repository.specs.PortfolioCashSearchSpecification;
+import ru.investbook.entity.AccountCashEntity;
+import ru.investbook.entity.AccountCashEntity_;
+import ru.investbook.repository.AccountCashRepository;
+import ru.investbook.repository.AccountRepository;
+import ru.investbook.repository.specs.AccountCashSearchSpecification;
 import ru.investbook.web.forms.model.PortfolioCashModel;
 import ru.investbook.web.forms.model.filter.PortfolioCashFormFilterModel;
 
@@ -50,26 +50,26 @@ import static org.springframework.data.domain.Sort.Order.desc;
 @RequiredArgsConstructor
 public class PortfolioCashFormsService {
     private static final ZoneId zoneId = ZoneId.systemDefault();
-    private final PortfolioCashRepository portfolioCashRepository;
-    private final PortfolioRepository portfolioRepository;
+    private final AccountCashRepository accountCashRepository;
+    private final AccountRepository accountRepository;
     private final PortfolioCashConverter portfolioCashConverter;
     private final PortfolioConverter portfolioConverter;
 
     @Transactional(readOnly = true)
     public Optional<PortfolioCashModel> getById(Integer id) {
-        return portfolioCashRepository.findById(id)
+        return accountCashRepository.findById(id)
                 .map(this::toModel);
     }
 
     @Transactional(readOnly = true)
     public Page<PortfolioCashModel> getPage(PortfolioCashFormFilterModel filter) {
-        PortfolioCashSearchSpecification spec = PortfolioCashSearchSpecification.of(
+        AccountCashSearchSpecification spec = AccountCashSearchSpecification.of(
                 filter.getPortfolio(), filter.getDateFrom(), filter.getDateTo(), filter.getCurrency());
 
-        Sort sort = Sort.by(asc(PortfolioCashEntity_.PORTFOLIO), desc(PortfolioCashEntity_.TIMESTAMP));
+        Sort sort = Sort.by(asc(AccountCashEntity_.ACCOUNT), desc(AccountCashEntity_.TIMESTAMP));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
-        return portfolioCashRepository.findAll(spec, page)
+        return accountCashRepository.findAll(spec, page)
                 .map(this::toModel);
     }
 
@@ -85,25 +85,25 @@ public class PortfolioCashFormsService {
                 .currency(m.getCurrency())
                 .build();
 
-        PortfolioCashEntity entity = portfolioCashConverter.toEntity(cash);
-        entity = portfolioCashRepository.save(entity);
+        AccountCashEntity entity = portfolioCashConverter.toEntity(cash);
+        entity = accountCashRepository.save(entity);
         m.setId(entity.getId()); // used in view
-        portfolioCashRepository.flush();
+        accountCashRepository.flush();
     }
 
     private void savePortfolio(String portfolio) {
-        if (!portfolioRepository.existsById(portfolio)) {
-            portfolioRepository.save(
+        if (!accountRepository.existsById(portfolio)) {
+            accountRepository.save(
                     portfolioConverter.toEntity(Account.builder()
                             .id(portfolio)
                             .build()));
         }
     }
 
-    private PortfolioCashModel toModel(PortfolioCashEntity e) {
+    private PortfolioCashModel toModel(AccountCashEntity e) {
         PortfolioCashModel m = new PortfolioCashModel();
         m.setId(e.getId());
-        m.setPortfolio(e.getPortfolio());
+        m.setPortfolio(e.getAccount());
         m.setMarket(e.getMarket());
         ZonedDateTime zonedDateTime = e.getTimestamp().atZone(zoneId);
         m.setDate(zonedDateTime.toLocalDate());
@@ -115,7 +115,7 @@ public class PortfolioCashFormsService {
 
     @Transactional
     public void delete(Integer id) {
-        portfolioCashRepository.deleteById(id);
-        portfolioCashRepository.flush();
+        accountCashRepository.deleteById(id);
+        accountCashRepository.flush();
     }
 }

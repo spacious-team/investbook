@@ -43,17 +43,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.converter.EntityConverter;
-import ru.investbook.entity.PortfolioCashEntity;
+import ru.investbook.entity.AccountCashEntity;
 
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Информация по остатку денежных средств на счете")
 @RequestMapping("/api/v1/portfolio-cash")
-public class AccountCashRestController extends AbstractRestController<Integer, AccountCash, PortfolioCashEntity> {
+public class AccountCashRestController extends AbstractRestController<Integer, AccountCash, AccountCashEntity> {
 
-    public AccountCashRestController(JpaRepository<PortfolioCashEntity, Integer> repository,
-                                     EntityConverter<PortfolioCashEntity, AccountCash> converter) {
+    public AccountCashRestController(JpaRepository<AccountCashEntity, Integer> repository,
+                                     EntityConverter<AccountCashEntity, AccountCash> converter) {
         super(repository, converter);
     }
 
@@ -66,7 +66,7 @@ public class AccountCashRestController extends AbstractRestController<Integer, A
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
     public Page<AccountCash> get(@Parameter(hidden = true)
-                                   @QuerydslPredicate(root = PortfolioCashEntity.class)
+                                   @QuerydslPredicate(root = AccountCashEntity.class)
                                    @Nullable
                                    Predicate predicate,
                                    @Parameter(hidden = true)

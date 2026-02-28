@@ -40,7 +40,7 @@ import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 @RequiredArgsConstructor(staticName = "of")
 public class SecurityEventCashFlowEntitySearchSpecification implements Specification<SecurityEventCashFlowEntity> {
-    private final @Nullable String portfolio;
+    private final @Nullable String account;
     private final @Nullable String security;
     private final @Nullable LocalDate dateFrom;
     private final @Nullable LocalDate dateTo;
@@ -51,7 +51,7 @@ public class SecurityEventCashFlowEntitySearchSpecification implements Specifica
                                  @Nullable CriteriaQuery<?> query,
                                  CriteriaBuilder builder) {
         return Stream.of(
-                        filterByPortfolio(root, builder, SecurityEventCashFlowEntity_.portfolio, portfolio),
+                        filterByAccount(root, builder, SecurityEventCashFlowEntity_.account, account),
                         filterByDateFrom(root, builder, SecurityEventCashFlowEntity_.timestamp, dateFrom),
                         filterByDateTo(root, builder, SecurityEventCashFlowEntity_.timestamp, dateTo),
                         filterBySecurity(root, builder, SecurityEventCashFlowEntity_.security, security),

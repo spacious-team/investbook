@@ -18,8 +18,8 @@
 
 package ru.investbook.web;
 
-import ru.investbook.entity.PortfolioEntity;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.entity.AccountEntity;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.forms.model.SecurityType;
 
@@ -32,26 +32,26 @@ import static ru.investbook.web.forms.model.SecurityHelper.getSecurityDescriptio
 
 public class ControllerHelper {
 
-    public static Set<String> getPortfolios(PortfolioRepository portfolioRepository) {
-        return portfolioRepository.findAll()
+    public static Set<String> getPortfolios(AccountRepository accountRepository) {
+        return accountRepository.findAll()
                 .stream()
-                .map(PortfolioEntity::getId)
+                .map(AccountEntity::getId)
                 .sorted()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public static Set<String> getActivePortfolios(PortfolioRepository portfolioRepository) {
-        return portfolioRepository.findByEnabledIsTrue()
+    public static Set<String> getActivePortfolios(AccountRepository accountRepository) {
+        return accountRepository.findByEnabledIsTrue()
                 .stream()
-                .map(PortfolioEntity::getId)
+                .map(AccountEntity::getId)
                 .sorted()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public static Set<String> getInactivePortfolios(PortfolioRepository portfolioRepository) {
-        return portfolioRepository.findByEnabledIsFalse()
+    public static Set<String> getInactivePortfolios(AccountRepository accountRepository) {
+        return accountRepository.findByEnabledIsFalse()
                 .stream()
-                .map(PortfolioEntity::getId)
+                .map(AccountEntity::getId)
                 .collect(Collectors.toSet());
     }
 

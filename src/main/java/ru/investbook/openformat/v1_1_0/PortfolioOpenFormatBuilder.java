@@ -28,17 +28,17 @@ import ru.investbook.api.AccountCashRestController;
 import ru.investbook.api.AccountPropertyRestController;
 import ru.investbook.api.SecurityDescriptionRestController;
 import ru.investbook.api.SecurityQuoteRestController;
+import ru.investbook.entity.AccountCashEntity;
+import ru.investbook.entity.AccountEntity;
+import ru.investbook.entity.AccountPropertyEntity;
 import ru.investbook.entity.EventCashFlowEntity;
-import ru.investbook.entity.PortfolioCashEntity;
-import ru.investbook.entity.PortfolioEntity;
-import ru.investbook.entity.PortfolioPropertyEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
+import ru.investbook.repository.AccountCashRepository;
+import ru.investbook.repository.AccountPropertyRepository;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.EventCashFlowRepository;
-import ru.investbook.repository.PortfolioCashRepository;
-import ru.investbook.repository.PortfolioPropertyRepository;
-import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
@@ -66,14 +66,14 @@ import static org.spacious_team.broker.pojo.SecurityType.DERIVATIVE;
 public class PortfolioOpenFormatBuilder {
     private final BuildProperties buildProperties;
     private final AssetsAndCashService assetsAndCashService;
-    private final PortfolioRepository portfolioRepository;
+    private final AccountRepository accountRepository;
     private final SecurityRepository securityRepository;
     private final TransactionRepository transactionRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final EventCashFlowRepository eventCashFlowRepository;
-    private final PortfolioPropertyRepository portfolioPropertyRepository;
-    private final PortfolioCashRepository portfolioCashRepository;
+    private final AccountPropertyRepository accountPropertyRepository;
+    private final AccountCashRepository accountCashRepository;
     private final SecurityDescriptionRestController securityDescriptionRestController;
     private final AccountPropertyRestController accountPropertyRestController;
     private final AccountCashRestController accountCashRestController;
@@ -108,11 +108,11 @@ public class PortfolioOpenFormatBuilder {
                         eventCashFlowRepository.findFirstByOrderByTimestampDesc()
                                 .map(EventCashFlowEntity::getTimestamp)
                                 .orElse(Instant.EPOCH),
-                        portfolioPropertyRepository.findFirstByOrderByTimestampDesc()
-                                .map(PortfolioPropertyEntity::getTimestamp)
+                        accountPropertyRepository.findFirstByOrderByTimestampDesc()
+                                .map(AccountPropertyEntity::getTimestamp)
                                 .orElse(Instant.EPOCH),
-                        portfolioCashRepository.findFirstByOrderByTimestampDesc()
-                                .map(PortfolioCashEntity::getTimestamp)
+                        accountCashRepository.findFirstByOrderByTimestampDesc()
+                                .map(AccountCashEntity::getTimestamp)
                                 .orElse(Instant.EPOCH))
                 .map(Instant::getEpochSecond)
                 .max(Comparator.naturalOrder())
@@ -121,7 +121,7 @@ public class PortfolioOpenFormatBuilder {
 
     private List<AccountPof> getAccounts() {
         AccountPof.resetAccountIdGenerator();
-        return portfolioRepository.findAll()
+        return accountRepository.findAll()
                 .stream()
                 .map(portfolio -> AccountPof.of(
                         portfolio,
@@ -137,15 +137,15 @@ public class PortfolioOpenFormatBuilder {
     }
 
     private List<CashBalancesPof> getCashBalances() {
-        return portfolioRepository.findAll()
+        return accountRepository.findAll()
                 .stream()
                 .map(this::getCashBalances)
                 .toList();
     }
 
-    private CashBalancesPof getCashBalances(PortfolioEntity portfolio) {
-        List<PortfolioCashEntity> latestCashBalances = portfolioCashRepository
-                .findDistinctOnPortfolioByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
+    private CashBalancesPof getCashBalances(AccountEntity portfolio) {
+        List<AccountCashEntity> latestCashBalances = accountCashRepository
+                .findDistinctOnAccountByAccountInAndTimestampBetweenOrderByTimestampDesc(
                         Set.of(portfolio.getId()),
                         Instant.EPOCH,
                         Instant.now());
@@ -207,8 +207,8 @@ public class PortfolioOpenFormatBuilder {
 
     private Optional<SecurityEventCashFlowEntity> getPaymentTax(SecurityEventCashFlowEntity cashFlow) {
         if (cashFlow.getCashFlowType().getId() != CashFlowType.TAX.getId()) {
-            return securityEventCashFlowRepository.findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampAndCount(
-                            cashFlow.getPortfolio().getId(),
+            return securityEventCashFlowRepository.findByAccountIdAndSecurityIdAndCashFlowTypeIdAndTimestampAndCount(
+                            cashFlow.getAccount().getId(),
                             cashFlow.getSecurity().getId(),
                             CashFlowType.TAX.getId(),
                             cashFlow.getTimestamp(),

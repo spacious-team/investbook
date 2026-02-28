@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.investbook.report.FifoPositionsFactory;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.ControllerHelper;
 import ru.investbook.web.forms.model.PageableWrapperModel;
@@ -46,7 +46,7 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class TransactionController {
     protected final TransactionFormsService transactionFormsService;
-    protected final PortfolioRepository portfolioRepository;
+    protected final AccountRepository accountRepository;
     private final SecurityRepository securityRepository;
     protected final FifoPositionsFactory fifoPositionsFactory;
     protected volatile Collection<String> securities;
@@ -55,14 +55,14 @@ public class TransactionController {
 
     @PostConstruct
     public void start() {
-        portfolios = ControllerHelper.getPortfolios(portfolioRepository);
+        portfolios = ControllerHelper.getPortfolios(accountRepository);
         securities = ControllerHelper.getSecuritiesDescriptions(securityRepository);
     }
 
     @GetMapping
     public String get(@ModelAttribute("filter") TransactionFormFilterModel filter, Model model) {
         Page<TransactionModel> data = transactionFormsService.getTransactionPage(filter);
-        portfolios = ControllerHelper.getPortfolios(portfolioRepository); // update portfolios for filter
+        portfolios = ControllerHelper.getPortfolios(accountRepository); // update portfolios for filter
         model.addAttribute("page", new PageableWrapperModel<>(data));
         model.addAttribute("portfolios", portfolios);
 

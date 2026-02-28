@@ -24,33 +24,31 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.AccountPropertyType;
 import org.springframework.data.jpa.domain.Specification;
-import ru.investbook.entity.PortfolioCashEntity;
-import ru.investbook.entity.PortfolioCashEntity_;
+import ru.investbook.entity.AccountPropertyEntity;
+import ru.investbook.entity.AccountPropertyEntity_;
 
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
 import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 
 @RequiredArgsConstructor(staticName = "of")
-public class PortfolioCashSearchSpecification implements Specification<PortfolioCashEntity> {
-    private final @Nullable String portfolio;
-    private final @Nullable LocalDate dateFrom;
-    private final @Nullable LocalDate dateTo;
-    private final @Nullable String currency;
+public class AccountPropertySearchSpecification implements Specification<AccountPropertyEntity> {
+    private final @Nullable String account;
+    private final @Nullable LocalDate date;
+    private final @Nullable AccountPropertyType property;
 
     @Override
-    public Predicate toPredicate(Root<PortfolioCashEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
-        requireNonNull(query);
+    public Predicate toPredicate(Root<AccountPropertyEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
+        @Nullable String propertyName = (property == null) ? null : property.name();
         return Stream.of(
-                        filterByPortfolioName(root, builder, PortfolioCashEntity_.portfolio, portfolio, query),
-                        filterByDateFrom(root, builder, PortfolioCashEntity_.timestamp, dateFrom),
-                        filterByDateTo(root, builder, PortfolioCashEntity_.timestamp, dateTo),
-                        filterByEquals(root, builder, PortfolioCashEntity_.currency, currency))
+                        filterByAccount(root, builder, AccountPropertyEntity_.account, account),
+                        filterByInstantBelongsToDate(root, builder, AccountPropertyEntity_.timestamp, date),
+                        filterByEquals(root, builder, AccountPropertyEntity_.property, propertyName))
                 .filter(Objects::nonNull)
                 .reduce(builder::and)
                 .orElseGet(builder::conjunction);

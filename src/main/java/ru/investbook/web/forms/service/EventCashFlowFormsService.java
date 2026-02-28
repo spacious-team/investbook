@@ -33,11 +33,13 @@ import org.springframework.util.StringUtils;
 import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
+import ru.investbook.entity.AccountEntity_;
 import ru.investbook.entity.EventCashFlowEntity;
 import ru.investbook.entity.EventCashFlowEntity_;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
+import ru.investbook.entity.SecurityEventCashFlowEntity_;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.EventCashFlowRepository;
-import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityEventCashFlowRepository;
 import ru.investbook.repository.specs.EventCashFlowEntitySearchSpecification;
 import ru.investbook.web.forms.model.EventCashFlowModel;
@@ -55,7 +57,7 @@ public class EventCashFlowFormsService {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final EventCashFlowRepository eventCashFlowRepository;
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
-    private final PortfolioRepository portfolioRepository;
+    private final AccountRepository accountRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
     private final PortfolioConverter portfolioConverter;
@@ -72,7 +74,9 @@ public class EventCashFlowFormsService {
         EventCashFlowEntitySearchSpecification spec = EventCashFlowEntitySearchSpecification.of(
                 filter.getPortfolio(), filter.getDateFrom(), filter.getDateTo(), filter.getCashFlowType());
 
-        Sort sort = Sort.by(Order.asc("portfolio.id"), Order.desc(EventCashFlowEntity_.TIMESTAMP));
+        Sort sort = Sort.by(
+                Order.asc(SecurityEventCashFlowEntity_.ACCOUNT + "." + AccountEntity_.ID),
+                Order.desc(EventCashFlowEntity_.TIMESTAMP));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
         return eventCashFlowRepository.findAll(spec, page)
@@ -125,8 +129,8 @@ public class EventCashFlowFormsService {
     }
 
     private void savePortfolio(String portfolio) {
-        if (!portfolioRepository.existsById(portfolio)) {
-            portfolioRepository.save(
+        if (!accountRepository.existsById(portfolio)) {
+            accountRepository.save(
                     portfolioConverter.toEntity(Account.builder()
                             .id(portfolio)
                             .build()));
@@ -137,7 +141,7 @@ public class EventCashFlowFormsService {
         CashFlowType type = CashFlowType.valueOf(e.getCashFlowType().getId());
         EventCashFlowModel m = new EventCashFlowModel();
         m.setId(e.getId());
-        m.setPortfolio(e.getPortfolio().getId());
+        m.setPortfolio(e.getAccount().getId());
         ZonedDateTime zonedDateTime = e.getTimestamp().atZone(zoneId);
         m.setDate(zonedDateTime.toLocalDate());
         m.setTime(zonedDateTime.toLocalTime());

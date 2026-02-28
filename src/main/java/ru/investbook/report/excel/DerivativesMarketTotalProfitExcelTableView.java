@@ -39,7 +39,7 @@ import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
 import ru.investbook.report.ViewFilter;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 
 import java.util.ArrayList;
@@ -73,11 +73,11 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final Set<Integer> types = Set.of(CashFlowType.DERIVATIVE_PRICE.getId());
 
-    public DerivativesMarketTotalProfitExcelTableView(PortfolioRepository portfolioRepository,
+    public DerivativesMarketTotalProfitExcelTableView(AccountRepository accountRepository,
                                                       DerivativesMarketTotalProfitExcelTableFactory tableFactory,
                                                       PortfolioConverter portfolioConverter,
                                                       TransactionCashFlowRepository transactionCashFlowRepository) {
-        super(portfolioRepository, tableFactory, portfolioConverter);
+        super(accountRepository, tableFactory, portfolioConverter);
         this.transactionCashFlowRepository = transactionCashFlowRepository;
     }
 
@@ -97,7 +97,7 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
             Collection<ExcelTable> tables = new ArrayList<>();
             List<String> currencies = portfolios.isEmpty() ?
                     transactionCashFlowRepository.findDistinctCurrencyByCashFlowTypeIn(types) :
-                    transactionCashFlowRepository.findDistinctCurrencyByPortfolioInAndCashFlowTypeIn(portfolios, types);
+                    transactionCashFlowRepository.findDistinctCurrencyByAccountInAndCashFlowTypeIn(portfolios, types);
             if (!currencies.contains(RUB)) currencies.add(RUB);
             for (String currency : currencies) {
                 Table table = tableFactory.create(portfolios, currency);
@@ -110,7 +110,7 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
     }
 
     private boolean isManyPortfolioRequested(Collection<String> portfolios) {
-        return portfolios.size() > 1 || (portfolios.isEmpty() && portfolioRepository.count() > 1);
+        return portfolios.size() > 1 || (portfolios.isEmpty() && accountRepository.count() > 1);
     }
 
     private static boolean showOnlySummary(ViewFilter filter) {
@@ -119,7 +119,7 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
 
     @Override
     protected Collection<ExcelTable> createExcelTables(Account account, String sheetName) {
-        List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPortfolioInAndCashFlowTypeIn(
+        List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByAccountInAndCashFlowTypeIn(
                 singleton(account.getId()), types);
         if (!currencies.contains(RUB)) currencies.add(RUB);
         return currencies.stream()

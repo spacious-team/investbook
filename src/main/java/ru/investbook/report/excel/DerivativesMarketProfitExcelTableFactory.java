@@ -75,7 +75,7 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
     }
 
     private Collection<SecurityEntity> getDerivatives(Account account) {
-        return transactionRepository.findDistinctDerivativeByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
+        return transactionRepository.findDistinctDerivativeByAccountInAndTimestampBetweenOrderByTimestampDesc(
                         singleton(account.getId()),
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate())

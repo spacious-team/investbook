@@ -35,7 +35,7 @@ import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.service.AssetsAndCashService;
 
 import java.math.BigDecimal;
@@ -66,12 +66,12 @@ public class CashFlowExcelTableView extends ExcelTableView {
     private final Xirr.Builder xirrBuilder = Xirr.builder()
             .withNewtonRaphsonBuilder(NewtonRaphson.builder().withTolerance(0.001)); // in currency units (RUB, USD)
 
-    public CashFlowExcelTableView(PortfolioRepository portfolioRepository,
+    public CashFlowExcelTableView(AccountRepository accountRepository,
                                   CashFlowExcelTableFactory tableFactory,
                                   PortfolioConverter portfolioConverter,
                                   AssetsAndCashService assetsAndCashService,
                                   ForeignExchangeRateService foreignExchangeRateService) {
-        super(portfolioRepository, tableFactory, portfolioConverter);
+        super(accountRepository, tableFactory, portfolioConverter);
         this.assetsAndCashService = assetsAndCashService;
         this.foreignExchangeRateService = foreignExchangeRateService;
     }

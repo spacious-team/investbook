@@ -81,7 +81,7 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
      */
     private Collection<String> getCurrencyPairs(Account account) {
         Collection<Integer> fxContracts = transactionRepository
-                .findDistinctFxContractByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
+                .findDistinctFxContractByAccountInAndTimestampBetweenOrderByTimestampDesc(
                         singleton(account.getId()),
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate());

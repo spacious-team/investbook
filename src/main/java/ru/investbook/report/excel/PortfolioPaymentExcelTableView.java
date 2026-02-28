@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 
 import java.util.Optional;
 import java.util.function.UnaryOperator;
@@ -46,10 +46,10 @@ public class PortfolioPaymentExcelTableView extends ExcelTableView {
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (выплаты)";
 
-    public PortfolioPaymentExcelTableView(PortfolioRepository portfolioRepository,
+    public PortfolioPaymentExcelTableView(AccountRepository accountRepository,
                                           PortfolioPaymentExcelTableFactory tableFactory,
                                           PortfolioConverter portfolioConverter) {
-        super(portfolioRepository, tableFactory, portfolioConverter);
+        super(accountRepository, tableFactory, portfolioConverter);
     }
 
     @Override

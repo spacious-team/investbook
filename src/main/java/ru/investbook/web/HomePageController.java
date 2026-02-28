@@ -47,7 +47,7 @@ public class HomePageController {
     @GetMapping
     public String index(Model model) {
         Set<String> portfolios = assetsAndCashService.getActivePortfolios();
-        model.addAttribute("transactionsCount", transactionRepository.countByPortfolioIn(portfolios));
+        model.addAttribute("transactionsCount", transactionRepository.countByAccountIn(portfolios));
         model.addAttribute("portfolios", portfolios);
         model.addAttribute("assets", assetsAndCashService.getTotalAssetsInRub(portfolios));
         model.addAttribute("cashBalance", assetsAndCashService.getTotalCashInRub(portfolios));

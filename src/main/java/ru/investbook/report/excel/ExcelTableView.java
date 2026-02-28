@@ -34,12 +34,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Account;
 import org.springframework.beans.factory.annotation.Value;
 import ru.investbook.converter.PortfolioConverter;
-import ru.investbook.entity.PortfolioEntity;
+import ru.investbook.entity.AccountEntity;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
 import ru.investbook.report.TableHeader;
 import ru.investbook.report.ViewFilter;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -60,7 +60,7 @@ import static ru.investbook.report.excel.StockMarketProfitExcelTableHeader.ROW_N
 @Slf4j
 @RequiredArgsConstructor
 public abstract class ExcelTableView {
-    protected final PortfolioRepository portfolioRepository;
+    protected final AccountRepository accountRepository;
     protected final TableFactory tableFactory;
     protected final PortfolioConverter portfolioConverter;
     private final Pattern camelCaseWordBoundaryPattern = Pattern.compile("(?<=[a-z])(?=[A-Z][a-z])");
@@ -70,7 +70,7 @@ public abstract class ExcelTableView {
 
     public Collection<ExcelTable> createExcelTables() {
         Collection<ExcelTable> tables = new ArrayList<>();
-        for (PortfolioEntity entity : getPortfolios(ViewFilter.get().getPortfolios())) {
+        for (AccountEntity entity : getPortfolios(ViewFilter.get().getPortfolios())) {
             Account account = portfolioConverter.fromEntity(entity);
             String sheetName = getSheetNameCreator().apply(account.getId());
             tables.addAll(createExcelTables(account, sheetName));
@@ -83,9 +83,9 @@ public abstract class ExcelTableView {
         return Collections.singleton(ExcelTable.of(account, sheetName, table, this));
     }
 
-    protected Collection<PortfolioEntity> getPortfolios(Collection<String> allowedPortfolios) {
+    protected Collection<AccountEntity> getPortfolios(Collection<String> allowedPortfolios) {
         // TODO select by user
-        Collection<PortfolioEntity> portfolios = portfolioRepository.findAll();
+        Collection<AccountEntity> portfolios = accountRepository.findAll();
         if (CollectionUtils.isNotEmpty(allowedPortfolios)) {
             return portfolios.stream()
                     .filter(e -> allowedPortfolios.contains(e.getId()))

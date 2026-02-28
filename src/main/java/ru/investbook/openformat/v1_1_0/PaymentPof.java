@@ -106,7 +106,7 @@ public class PaymentPof {
     static PaymentPof of(SecurityEventCashFlowEntity cashFlow, Optional<SecurityEventCashFlowEntity> tax) {
         return PaymentPof.builder()
                 .id(cashFlow.getId())
-                .account(AccountPof.getAccountId(cashFlow.getPortfolio().getId()))
+                .account(AccountPof.getAccountId(cashFlow.getAccount().getId()))
                 .asset(cashFlow.getSecurity().getId())
                 .type(PaymentTypePof.valueOf(CashFlowType.valueOf(cashFlow.getCashFlowType().getId())))
                 .count(cashFlow.getCount() == null ? BigDecimal.ZERO : BigDecimal.valueOf(cashFlow.getCount())) // опциональное для деривативов

@@ -51,12 +51,12 @@ public class TransactionEntity {
 
     @Basic(optional = false)
     @Column(name = "portfolio", nullable = false)
-    private String portfolio;
+    private String account;
 
 //    @ManyToOne(fetch = FetchType.LAZY, optional = false)
 //    @JoinColumn(name = "portfolio", referencedColumnName = "id", nullable = false)
 //    @JsonIgnoreProperties({"hibernateLazyInitializer"})
-//    private PortfolioEntity portfolio;
+//    private AccountEntity portfolio;
 
     // https://stackoverflow.com/questions/17987638/hibernate-one-to-one-lazy-loading-optional-false
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

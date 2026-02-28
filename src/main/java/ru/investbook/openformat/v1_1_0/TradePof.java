@@ -147,7 +147,7 @@ public class TradePof {
                 .id(transaction.getId())
                 .tradeId(transaction.getTradeId())
                 .settlement(transaction.getTimestamp().getEpochSecond())
-                .account(AccountPof.getAccountId(transaction.getPortfolio()))
+                .account(AccountPof.getAccountId(transaction.getAccount()))
                 .asset(transaction.getSecurity().getId())
                 .count(BigDecimal.valueOf(count));
         transactionCashFlows.stream()
@@ -179,7 +179,7 @@ public class TradePof {
         Assert.isTrue(redemption.getCashFlowType().getId() == REDEMPTION.getId(),
                 () -> "ожидается событие погашения облигации: " + redemption);
         long settlement = redemption.getTimestamp().getEpochSecond();
-        int account = AccountPof.getAccountId(redemption.getPortfolio().getId());
+        int account = AccountPof.getAccountId(redemption.getAccount().getId());
         int count = -Math.abs(redemption.getCount());
         return TradePof.builder()
                 .id(id)

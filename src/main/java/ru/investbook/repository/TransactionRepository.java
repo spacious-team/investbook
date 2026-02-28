@@ -58,14 +58,14 @@ public interface TransactionRepository extends
                 ON t1.security = s.id
             WHERE s.type IN (0, 1, 2, 5)
                 AND t2.type = 1
-                AND t1.portfolio IN (:portfolios)
+                AND t1.portfolio IN (:accounts)
                 AND t2.currency = :currency
                 AND timestamp between :from AND :to
             ORDER BY t1.timestamp DESC
             """)
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
-    List<Integer> findDistinctSecurityByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
-            @Param("portfolios") Collection<String> portfolios,
+    List<Integer> findDistinctSecurityByAccountInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+            @Param("accounts") Collection<String> accounts,
             @Param("currency") String currency,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
@@ -99,13 +99,13 @@ public interface TransactionRepository extends
             JOIN security as s
                 ON t.security = s.id
             WHERE s.type = 3
-                AND t.portfolio IN (:portfolios)
+                AND t.portfolio IN (:accounts)
                 AND t.timestamp between :from AND :to
             ORDER BY t.timestamp DESC
             """)
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
-    List<Integer> findDistinctDerivativeByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
-            @Param("portfolios") Collection<String> portfolios,
+    List<Integer> findDistinctDerivativeByAccountInAndTimestampBetweenOrderByTimestampDesc(
+            @Param("accounts") Collection<String> accounts,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
@@ -133,13 +133,13 @@ public interface TransactionRepository extends
             JOIN security as s
                 ON t.security = s.id
             WHERE s.type = 4
-                AND portfolio IN (:portfolios)
+                AND portfolio IN (:accounts)
                 AND timestamp between :from AND :to
             ORDER BY timestamp DESC
             """)
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
-    List<Integer> findDistinctFxContractByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
-            @Param("portfolios") Collection<String> portfolios,
+    List<Integer> findDistinctFxContractByAccountInAndTimestampBetweenOrderByTimestampDesc(
+            @Param("accounts") Collection<String> accounts,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
@@ -168,13 +168,13 @@ public interface TransactionRepository extends
             JOIN security as s
                 ON t.security = s.id
             WHERE s.type = 4
-                AND portfolio IN (:portfolios)
+                AND portfolio IN (:accounts)
                 AND s.ticker LIKE CONCAT(:currencyPair, '\\_%')
                 AND timestamp between :from AND :to
             ORDER BY timestamp DESC
             """)
-    List<Integer> findDistinctFxContractByPortfolioInAndCurrencyPairAndTimestampBetween(
-            @Param("portfolios") Collection<String> portfolios,
+    List<Integer> findDistinctFxContractByAccountInAndCurrencyPairAndTimestampBetween(
+            @Param("accounts") Collection<String> accounts,
             @Param("currencyPair") String currencyPair,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
@@ -208,14 +208,14 @@ public interface TransactionRepository extends
                 ON t1.security = s.id
             WHERE s.type = 4
                 AND t2.type = 1
-                AND t1.portfolio IN (:portfolios)
+                AND t1.portfolio IN (:accounts)
                 AND t2.currency = :currency
                 AND timestamp between :from AND :to
             ORDER BY t1.timestamp DESC
             """)
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
-    List<Integer> findDistinctFxContractByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
-            @Param("portfolios") Collection<String> portfolios,
+    List<Integer> findDistinctFxContractByAccountInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+            @Param("accounts") Collection<String> accounts,
             @Param("currency") String currency,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
@@ -241,9 +241,9 @@ public interface TransactionRepository extends
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
-    List<TransactionEntity> findBySecurityIdAndPortfolioInAndTimestampBetweenOrderByTimestampAscTradeIdAsc(
+    List<TransactionEntity> findBySecurityIdAndAccountInAndTimestampBetweenOrderByTimestampAscTradeIdAsc(
             Integer securityId,
-            Collection<String> portfolio,
+            Collection<String> account,
             Instant fromDate,
             Instant toDate);
 
@@ -255,18 +255,18 @@ public interface TransactionRepository extends
     /**
      * Return first security transaction
      */
-    Optional<TransactionEntity> findFirstBySecurityIdAndPortfolioAndTimestampBetweenOrderByTimestampAsc(
+    Optional<TransactionEntity> findFirstBySecurityIdAndAccountAndTimestampBetweenOrderByTimestampAsc(
             Integer securityId,
-            String portfolio,
+            String account,
             Instant fromDate,
             Instant toDate);
 
     /**
      * Return last security transaction
      */
-    Optional<TransactionEntity> findFirstBySecurityIdAndPortfolioAndTimestampBetweenOrderByTimestampDesc(
+    Optional<TransactionEntity> findFirstBySecurityIdAndAccountAndTimestampBetweenOrderByTimestampDesc(
             Integer securityId,
-            String portfolio,
+            String account,
             Instant fromDate,
             Instant toDate);
 
@@ -275,14 +275,14 @@ public interface TransactionRepository extends
      */
     @Query(nativeQuery = true, value = """
             SELECT sum(count) FROM transaction
-            WHERE portfolio = :#{#portfolio.id}
+            WHERE portfolio = :#{#account.id}
                 AND security = :#{#security.id}
                 AND timestamp between :from AND :to
                 AND count > 0
             """)
-    Long findBySecurityIdAndPortfolioAndTimestampBetweenBuyCount(
+    Long findBySecurityIdAndAccountAndTimestampBetweenBuyCount(
             @Param("security") Security security,
-            @Param("portfolio") Account portfolio,
+            @Param("account") Account account,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
@@ -291,14 +291,14 @@ public interface TransactionRepository extends
      */
     @Query(nativeQuery = true, value = """
             SELECT abs(sum(count)) FROM transaction
-            WHERE portfolio = :#{#portfolio.id}
+            WHERE portfolio = :#{#account.id}
                 AND security = :#{#security.id}
                 AND timestamp between :from AND :to
                 AND count < 0
             """)
-    Long findBySecurityIdAndPortfolioAndTimestampBetweenCellCount(
+    Long findBySecurityIdAndAccountAndTimestampBetweenCellCount(
             @Param("security") Security security,
-            @Param("portfolio") Account portfolio,
+            @Param("account") Account account,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
@@ -307,11 +307,11 @@ public interface TransactionRepository extends
             LEFT OUTER JOIN TransactionCashFlowEntity c
                 ON t.id = c.transactionId
             WHERE c.cashFlowType IS NULL
-                AND t.portfolio = :#{#portfolio.id}
+                AND t.account = :#{#account.id}
                 AND t.timestamp between :from AND :to
             """)
-    Collection<TransactionEntity> findByPortfolioAndTimestampBetweenDepositAndWithdrawalTransactions(
-            @Param("portfolio") Account portfolio,
+    Collection<TransactionEntity> findByAccountAndTimestampBetweenDepositAndWithdrawalTransactions(
+            @Param("account") Account account,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
@@ -320,29 +320,29 @@ public interface TransactionRepository extends
             LEFT OUTER JOIN TransactionCashFlowEntity c
                 ON t.id = c.transactionId
             WHERE c.cashFlowType IS NULL
-                AND t.portfolio = :portfolio
+                AND t.account = :account
                 AND t.security.id = :security
                 AND t.timestamp between :from AND :to
             """)
-    Collection<TransactionEntity> findByPortfolioAndSecurityIdAndTimestampBetweenDepositAndWithdrawalTransactions(
-            @Param("portfolio") String portfolio,
+    Collection<TransactionEntity> findByAccountAndSecurityIdAndTimestampBetweenDepositAndWithdrawalTransactions(
+            @Param("account") String account,
             @Param("security") int security,
             @Param("from") Instant fromDate,
             @Param("to") Instant toDate);
 
-    int countByPortfolioIn(Set<String> portfolio);
+    int countByAccountIn(Set<String> account);
 
     @Override
     default boolean exists(TransactionEntity probe) {
-        return countByIdOrPortfolioAndTradeId(probe.getId(), probe.getPortfolio(), probe.getTradeId()) > 0;
+        return countByIdOrAccountAndTradeId(probe.getId(), probe.getAccount(), probe.getTradeId()) > 0;
     }
 
-    long countByIdOrPortfolioAndTradeId(Integer id, String portfolio, String tradeId);
+    long countByIdOrAccountAndTradeId(Integer id, String account, String tradeId);
 
     @Override
     default Optional<TransactionEntity> findBy(TransactionEntity probe) {
-        return findByIdOrPortfolioAndTradeId(probe.getId(), probe.getPortfolio(), probe.getTradeId());
+        return findByIdOrAccountAndTradeId(probe.getId(), probe.getAccount(), probe.getTradeId());
     }
 
-    Optional<TransactionEntity> findByIdOrPortfolioAndTradeId(Integer id, String portfolio, String tradeId);
+    Optional<TransactionEntity> findByIdOrAccountAndTradeId(Integer id, String account, String tradeId);
 }

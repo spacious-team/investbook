@@ -22,18 +22,18 @@ import lombok.RequiredArgsConstructor;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.stereotype.Component;
+import ru.investbook.entity.AccountEntity;
 import ru.investbook.entity.CashFlowTypeEntity;
-import ru.investbook.entity.PortfolioEntity;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEventCashFlowEntity;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.CashFlowTypeRepository;
-import ru.investbook.repository.PortfolioRepository;
 import ru.investbook.repository.SecurityRepository;
 
 @Component
 @RequiredArgsConstructor
 public class SecurityEventCashFlowConverter implements EntityConverter<SecurityEventCashFlowEntity, SecurityEventCashFlow> {
-    private final PortfolioRepository portfolioRepository;
+    private final AccountRepository accountRepository;
     private final SecurityRepository securityRepository;
     private final CashFlowTypeRepository cashFlowTypeRepository;
 
@@ -41,12 +41,12 @@ public class SecurityEventCashFlowConverter implements EntityConverter<SecurityE
     @Override
     public SecurityEventCashFlowEntity toEntity(SecurityEventCashFlow eventCashFlow) {
         SecurityEntity securityEntity = securityRepository.getReferenceById(eventCashFlow.getSecurity());
-        PortfolioEntity portfolioEntity = portfolioRepository.getReferenceById(eventCashFlow.getAccount());
+        AccountEntity accountEntity = accountRepository.getReferenceById(eventCashFlow.getAccount());
         CashFlowTypeEntity cashFlowTypeEntity = cashFlowTypeRepository.getReferenceById(eventCashFlow.getEventType().getId());
 
         SecurityEventCashFlowEntity entity = new SecurityEventCashFlowEntity();
         entity.setId(eventCashFlow.getId());
-        entity.setPortfolio(portfolioEntity);
+        entity.setAccount(accountEntity);
         entity.setTimestamp(eventCashFlow.getTimestamp());
         entity.setSecurity(securityEntity);
         entity.setCount(eventCashFlow.getCount());
@@ -61,7 +61,7 @@ public class SecurityEventCashFlowConverter implements EntityConverter<SecurityE
     public SecurityEventCashFlow fromEntity(SecurityEventCashFlowEntity entity) {
         return SecurityEventCashFlow.builder()
                 .id(entity.getId())
-                .account(entity.getPortfolio().getId())
+                .account(entity.getAccount().getId())
                 .timestamp(entity.getTimestamp())
                 .eventType(CashFlowType.valueOf(entity.getCashFlowType().getId()))
                 .security(entity.getSecurity().getId())

@@ -138,13 +138,13 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
             }
         } else {
             securityIds.addAll(
-                    transactionRepository.findDistinctSecurityByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+                    transactionRepository.findDistinctSecurityByAccountInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
                             portfolios,
                             currency,
                             filter.getFromDate(),
                             filter.getToDate()));
             Collection<Integer> fxContracts =
-                    transactionRepository.findDistinctFxContractByPortfolioInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
+                    transactionRepository.findDistinctFxContractByAccountInAndCurrencyAndTimestampBetweenOrderByTimestampDesc(
                             portfolios,
                             currency,
                             filter.getFromDate(),
@@ -153,7 +153,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                     securityRepository.findDistinctContractForCurrencyPair(fxContracts));
             if (currency.equalsIgnoreCase("RUB")) {
                 securityIds.addAll(
-                        transactionRepository.findDistinctDerivativeByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
+                        transactionRepository.findDistinctDerivativeByAccountInAndTimestampBetweenOrderByTimestampDesc(
                                 portfolios,
                                 filter.getFromDate(),
                                 filter.getToDate()));

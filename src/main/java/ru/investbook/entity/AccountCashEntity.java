@@ -24,19 +24,37 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+
+import java.math.BigDecimal;
+import java.time.Instant;
 
 @Entity
-@Table(name = "portfolio")
+@Table(name = "portfolio_cash")
 @Data
-@EqualsAndHashCode(of = "id")
-public class PortfolioEntity {
+public class AccountCashEntity {
 
     @Id
-    @Column(name = "id", nullable = false)
-    private String id;
+    @AssignedOrGeneratedValue
+    @Column(name = "id")
+    private Integer id;
 
     @Basic
-    @Column(name = "enabled", nullable = false)
-    private boolean enabled;
+    @Column(name = "portfolio", nullable = false)
+    private String account;
+
+    @Basic
+    @Column(name = "timestamp", nullable = false)
+    private Instant timestamp;
+
+    @Basic
+    @Column(name = "market", nullable = false)
+    private String market;
+
+    @Basic
+    @Column(name = "value", nullable = false)
+    private BigDecimal value;
+
+    @Basic
+    @Column(name = "currency", nullable = false)
+    private String currency;
 }

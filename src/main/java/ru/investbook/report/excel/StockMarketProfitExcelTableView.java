@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 
 import java.util.ArrayList;
@@ -54,11 +54,11 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
     private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (фондовый)";
     private final TransactionCashFlowRepository transactionCashFlowRepository;
 
-    public StockMarketProfitExcelTableView(PortfolioRepository portfolioRepository,
+    public StockMarketProfitExcelTableView(AccountRepository accountRepository,
                                            StockMarketProfitExcelTableFactory tableFactory,
                                            PortfolioConverter portfolioConverter,
                                            TransactionCashFlowRepository transactionCashFlowRepository) {
-        super(portfolioRepository, tableFactory, portfolioConverter);
+        super(accountRepository, tableFactory, portfolioConverter);
         this.transactionCashFlowRepository = transactionCashFlowRepository;
     }
 
@@ -76,7 +76,7 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
 
     private List<String> getCurrencies(Account portfolio) {
         return transactionCashFlowRepository
-                .findDistinctCurrencyByPortfolioAndCashFlowType(portfolio.getId(), CashFlowType.PRICE);
+                .findDistinctCurrencyByAccountAndCashFlowType(portfolio.getId(), CashFlowType.PRICE);
     }
 
     @Override

@@ -32,7 +32,7 @@ import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.AccountProperty;
 import org.spacious_team.broker.pojo.AccountProperty.AccountPropertyBuilder;
 import org.spacious_team.broker.pojo.AccountPropertyType;
-import ru.investbook.entity.PortfolioEntity;
+import ru.investbook.entity.AccountEntity;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -88,7 +88,7 @@ public class AccountPof {
         return Objects.requireNonNull(accountNumberToIdMap.get().get(accountNumber));
     }
 
-    static AccountPof of(PortfolioEntity portfolio, BigDecimal valuationInRub) {
+    static AccountPof of(AccountEntity portfolio, BigDecimal valuationInRub) {
         int id = idGenerator.get().incrementAndGet();
         accountNumberToIdMap.get().put(portfolio.getId(), id);
         return AccountPof.builder()

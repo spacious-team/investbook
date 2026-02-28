@@ -24,7 +24,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.ListQuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
-import ru.investbook.entity.PortfolioCashEntity;
+import ru.investbook.entity.AccountCashEntity;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -32,16 +32,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Transactional(readOnly = true)
-public interface PortfolioCashRepository extends
-        JpaRepository<PortfolioCashEntity, Integer>,
-        JpaSpecificationExecutor<PortfolioCashEntity>,
-        ListQuerydslPredicateExecutor<PortfolioCashEntity> {
+public interface AccountCashRepository extends
+        JpaRepository<AccountCashEntity, Integer>,
+        JpaSpecificationExecutor<AccountCashEntity>,
+        ListQuerydslPredicateExecutor<AccountCashEntity> {
 
-    Optional<PortfolioCashEntity> findFirstByOrderByTimestampDesc();
+    Optional<AccountCashEntity> findFirstByOrderByTimestampDesc();
 
-    List<PortfolioCashEntity> findByPortfolioIn(Collection<String> portfolios);
+    List<AccountCashEntity> findByAccountIn(Collection<String> accounts);
 
-    List<PortfolioCashEntity> findByPortfolioInOrderByTimestampDesc(Collection<String> portfolios);
+    List<AccountCashEntity> findByAccountInOrderByTimestampDesc(Collection<String> accounts);
 
     @Query(nativeQuery = true, value = """
             SELECT *
@@ -54,14 +54,14 @@ public interface PortfolioCashRepository extends
             )
             ORDER BY portfolio, timestamp DESC
             """)
-    List<PortfolioCashEntity> findDistinctOnPortfolioByTimestampBetweenOrderByTimestampDesc(
+    List<AccountCashEntity> findDistinctOnAccountByTimestampBetweenOrderByTimestampDesc(
             @Param("from") Instant startDate,
             @Param("to") Instant endDate);
 
     @Query(nativeQuery = true, value = """
             SELECT *
             FROM portfolio_cash AS t1
-            WHERE portfolio IN (:portfolios)
+            WHERE portfolio IN (:accounts)
             AND timestamp = (
                 SELECT MAX(timestamp)
                 FROM portfolio_cash AS t2
@@ -70,8 +70,8 @@ public interface PortfolioCashRepository extends
             )
             ORDER BY portfolio, timestamp DESC
             """)
-    List<PortfolioCashEntity> findDistinctOnPortfolioByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
-            @Param("portfolios") Collection<String> portfolios,
+    List<AccountCashEntity> findDistinctOnAccountByAccountInAndTimestampBetweenOrderByTimestampDesc(
+            @Param("accounts") Collection<String> accounts,
             @Param("from") Instant startDate,
             @Param("to") Instant endDate);
 

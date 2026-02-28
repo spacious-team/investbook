@@ -38,13 +38,14 @@ import ru.investbook.converter.PortfolioConverter;
 import ru.investbook.converter.TransactionCashFlowConverter;
 import ru.investbook.converter.TransactionConverter;
 import ru.investbook.entity.SecurityEntity;
+import ru.investbook.entity.SecurityEntity_;
 import ru.investbook.entity.TransactionCashFlowEntity;
 import ru.investbook.entity.TransactionEntity;
 import ru.investbook.entity.TransactionEntity_;
 import ru.investbook.report.FifoPositions;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.report.FifoPositionsFilter;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.repository.specs.SecurityDepositSearchSpecification;
@@ -78,7 +79,7 @@ public class TransactionFormsService {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final TransactionRepository transactionRepository;
     private final TransactionCashFlowRepository transactionCashFlowRepository;
-    private final PortfolioRepository portfolioRepository;
+    private final AccountRepository accountRepository;
     private final TransactionCashFlowConverter transactionCashFlowConverter;
     private final TransactionConverter transactionConverter;
     private final PortfolioConverter portfolioConverter;
@@ -114,7 +115,10 @@ public class TransactionFormsService {
 
     private Page<TransactionModel> getTransactionModels(Specification<TransactionEntity> spec,
                                                         TransactionFormFilterModel filter) {
-        Sort sort = Sort.by(asc(TransactionEntity_.PORTFOLIO), desc(TransactionEntity_.TIMESTAMP), asc("security.id"));
+        Sort sort = Sort.by(
+                asc(TransactionEntity_.ACCOUNT),
+                desc(TransactionEntity_.TIMESTAMP),
+                asc(TransactionEntity_.SECURITY + "." + SecurityEntity_.ID));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
         return transactionRepository.findAll(spec, page)
@@ -207,8 +211,8 @@ public class TransactionFormsService {
     }
 
     private void savePortfolio(String portfolio) {
-        if (!portfolioRepository.existsById(portfolio)) {
-            portfolioRepository.save(
+        if (!accountRepository.existsById(portfolio)) {
+            accountRepository.save(
                     portfolioConverter.toEntity(Account.builder()
                             .id(portfolio)
                             .build()));
@@ -252,7 +256,7 @@ public class TransactionFormsService {
         TransactionModel m = new TransactionModel();
         m.setId(e.getId());
         m.setTradeId(e.getTradeId());
-        m.setPortfolio(e.getPortfolio());
+        m.setPortfolio(e.getAccount());
         int count = e.getCount();
         BigDecimal cnt = BigDecimal.valueOf(count);
         m.setAction(count >= 0 ? TransactionModel.Action.BUY : TransactionModel.Action.CELL);

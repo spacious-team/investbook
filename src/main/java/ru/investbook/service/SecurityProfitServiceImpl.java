@@ -81,7 +81,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                         .findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
                                 securityId, events, from, to) :
                 securityEventCashFlowRepository
-                        .findFirstByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+                        .findFirstByAccountIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
                                 portfolios, securityId, events, from, to);
         return optional.map(SecurityEventCashFlowEntity::getTimestamp);
     }
@@ -150,7 +150,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
         }
         LocalDate transactionDay = LocalDate.ofInstant(transaction.getTimestamp(), zoneId);
         Collection<TransactionEntity> depositAndWithdrawalDuringTheDay =
-                transactionRepository.findByPortfolioAndSecurityIdAndTimestampBetweenDepositAndWithdrawalTransactions(
+                transactionRepository.findByAccountAndSecurityIdAndTimestampBetweenDepositAndWithdrawalTransactions(
                         transaction.getAccount(),
                         transaction.getSecurity(),
                         transactionDay.atStartOfDay(zoneId).toInstant(),
@@ -232,7 +232,7 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate()) :
                 securityEventCashFlowRepository
-                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                        .findByAccountIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                                 portfolios,
                                 securityId,
                                 cashFlowType.getId(),

@@ -82,7 +82,7 @@ public class PaidInterestFactory {
                                                                                Instant fromDate,
                                                                                Instant toDate) {
         List<SecurityEventCashFlowEntity> eventCashFlowEntities = securityEventCashFlowRepository
-                .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                .findByAccountIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                         singleton(portfolio),
                         securityId,
                         event.getId(),

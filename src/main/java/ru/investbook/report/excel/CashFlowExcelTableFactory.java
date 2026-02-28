@@ -60,7 +60,7 @@ public class CashFlowExcelTableFactory implements TableFactory {
     public Table create(Account account) {
         Table table = new Table();
         List<EventCashFlow> cashFlows = eventCashFlowRepository
-                .findByPortfolioIdAndCashFlowTypeIdOrderByTimestamp(
+                .findByAccountIdAndCashFlowTypeIdOrderByTimestamp(
                         account.getId(),
                         CashFlowType.CASH.getId())
                 .stream()

@@ -47,7 +47,7 @@ public class SecurityEventCashFlowEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "portfolio", referencedColumnName = "id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
-    private PortfolioEntity portfolio;
+    private AccountEntity account;
 
     @Basic
     @Column(name = "timestamp", nullable = false)

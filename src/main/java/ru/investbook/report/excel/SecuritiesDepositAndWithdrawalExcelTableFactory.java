@@ -45,7 +45,7 @@ public class SecuritiesDepositAndWithdrawalExcelTableFactory implements TableFac
         Table table = new Table();
         ViewFilter viewFilter = ViewFilter.get();
         for (TransactionEntity transactionEntity :
-                transactionRepository.findByPortfolioAndTimestampBetweenDepositAndWithdrawalTransactions(
+                transactionRepository.findByAccountAndTimestampBetweenDepositAndWithdrawalTransactions(
                         account, viewFilter.getFromDate(), viewFilter.getToDate())) {
             Table.Record record = new Table.Record();
             table.add(record);

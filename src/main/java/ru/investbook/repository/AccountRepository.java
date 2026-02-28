@@ -23,19 +23,19 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.ListQuerydslPredicateExecutor;
 import org.springframework.transaction.annotation.Transactional;
-import ru.investbook.entity.PortfolioEntity;
+import ru.investbook.entity.AccountEntity;
 
 import java.util.Set;
 
 @Transactional(readOnly = true)
-public interface PortfolioRepository extends JpaRepository<PortfolioEntity, String>, ListQuerydslPredicateExecutor<PortfolioEntity> {
+public interface AccountRepository extends JpaRepository<AccountEntity, String>, ListQuerydslPredicateExecutor<AccountEntity> {
 
-    Set<PortfolioEntity> findByEnabledIsTrue();
+    Set<AccountEntity> findByEnabledIsTrue();
 
-    Set<PortfolioEntity> findByEnabledIsFalse();
+    Set<AccountEntity> findByEnabledIsFalse();
 
     @Transactional
     @Modifying
-    @Query("UPDATE PortfolioEntity SET enabled = :enabled WHERE id = :portfolio")
-    void setEnabledForPortfolio(String portfolio, boolean enabled);
+    @Query("UPDATE AccountEntity SET enabled = :enabled WHERE id = :account")
+    void setEnabledForPortfolio(String account, boolean enabled);
 }

@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.web.ControllerHelper;
 import ru.investbook.web.forms.model.PageableWrapperModel;
 import ru.investbook.web.forms.model.PortfolioPropertyModel;
@@ -46,19 +46,19 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class PortfolioPropertyController {
     private final PortfolioPropertyFormsService portfolioPropertyFormsService;
-    private final PortfolioRepository portfolioRepository;
+    private final AccountRepository accountRepository;
     private volatile Collection<String> portfolios;
     private volatile String selectedPortfolio;
 
     @PostConstruct
     public void start() {
-        portfolios = ControllerHelper.getPortfolios(portfolioRepository);
+        portfolios = ControllerHelper.getPortfolios(accountRepository);
     }
 
     @GetMapping
     public String get(@ModelAttribute("filter") PortfolioPropertyFormFilterModel filter, Model model) {
         Page<PortfolioPropertyModel> page = portfolioPropertyFormsService.getPage(filter);
-        portfolios = ControllerHelper.getPortfolios(portfolioRepository); // update portfolios for filter
+        portfolios = ControllerHelper.getPortfolios(accountRepository); // update portfolios for filter
         model.addAttribute("page", new PageableWrapperModel<>(page));
         model.addAttribute("portfolios", portfolios);
         return "portfolio-properties/table";

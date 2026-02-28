@@ -48,7 +48,7 @@ public class CommissionExcelTableFactory implements TableFactory {
     public Table create(Account account) {
         Table table = new Table();
         List<EventCashFlow> cashFlows = eventCashFlowRepository
-                .findByPortfolioIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
+                .findByAccountIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
                         singleton(account.getId()),
                         CashFlowType.FEE.getId(),
                         ViewFilter.get().getFromDate(),

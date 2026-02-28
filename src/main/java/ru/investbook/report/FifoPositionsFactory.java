@@ -131,7 +131,7 @@ public class FifoPositionsFactory {
                                 filter.getFromDate(),
                                 filter.getToDate()) :
                 transactionRepository
-                        .findDistinctFxContractByPortfolioInAndCurrencyPairAndTimestampBetween(
+                        .findDistinctFxContractByAccountInAndCurrencyPairAndTimestampBetween(
                                 filter.getPortfolios(),
                                 currencyPair,
                                 filter.getFromDate(),
@@ -146,7 +146,7 @@ public class FifoPositionsFactory {
                                 filter.getFromDate(),
                                 filter.getToDate()) :
                 transactionRepository
-                        .findBySecurityIdAndPortfolioInAndTimestampBetweenOrderByTimestampAscTradeIdAsc(
+                        .findBySecurityIdAndAccountInAndTimestampBetweenOrderByTimestampAscTradeIdAsc(
                                 securityId,
                                 filter.getPortfolios(),
                                 filter.getFromDate(),
@@ -165,7 +165,7 @@ public class FifoPositionsFactory {
                                 filter.getFromDate(),
                                 filter.getToDate()) :
                 securityEventCashFlowRepository
-                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                        .findByAccountIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                                 filter.getPortfolios(),
                                 securityId,
                                 CashFlowType.REDEMPTION.getId(),

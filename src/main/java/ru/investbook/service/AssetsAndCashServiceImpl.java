@@ -27,13 +27,13 @@ import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
 import ru.investbook.converter.PortfolioCashConverter;
 import ru.investbook.converter.SecurityConverter;
-import ru.investbook.entity.PortfolioCashEntity;
-import ru.investbook.entity.PortfolioPropertyEntity;
+import ru.investbook.entity.AccountCashEntity;
+import ru.investbook.entity.AccountPropertyEntity;
 import ru.investbook.report.FifoPositionsFilter;
 import ru.investbook.report.ForeignExchangeRateService;
-import ru.investbook.repository.PortfolioCashRepository;
-import ru.investbook.repository.PortfolioPropertyRepository;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountCashRepository;
+import ru.investbook.repository.AccountPropertyRepository;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.ControllerHelper;
 
@@ -60,18 +60,18 @@ import static ru.investbook.report.ForeignExchangeRateService.RUB;
 @Slf4j
 public class AssetsAndCashServiceImpl implements AssetsAndCashService {
     private final Set<SecurityType> stockBondAndAssetTypes = Set.of(STOCK, BOND, ASSET);
-    private final PortfolioPropertyRepository portfolioPropertyRepository;
+    private final AccountPropertyRepository accountPropertyRepository;
     private final ForeignExchangeRateService foreignExchangeRateService;
     private final InvestmentProportionService investmentProportionService;
-    private final PortfolioRepository portfolioRepository;
+    private final AccountRepository accountRepository;
     private final SecurityRepository securityRepository;
     private final SecurityConverter securityConverter;
-    private final PortfolioCashRepository portfolioCashRepository;
+    private final AccountCashRepository accountCashRepository;
     private final PortfolioCashConverter portfolioCashConverter;
 
     @Override
     public Set<String> getActivePortfolios() {
-        return ControllerHelper.getActivePortfolios(portfolioRepository);
+        return ControllerHelper.getActivePortfolios(accountRepository);
     }
 
     @Override
@@ -95,12 +95,12 @@ public class AssetsAndCashServiceImpl implements AssetsAndCashService {
     }
 
     private Optional<BigDecimal> getTotalAssetsByBrokerEstimationInRub(String account) {
-        Collection<PortfolioPropertyEntity> assets = new ArrayList<>(2);
+        Collection<AccountPropertyEntity> assets = new ArrayList<>(2);
         getTotalAssets(account, AccountPropertyType.TOTAL_ASSETS_RUB).ifPresent(assets::add);
         getTotalAssets(account, AccountPropertyType.TOTAL_ASSETS_USD).ifPresent(assets::add);
         // groups by date
-        TreeMap<Instant, List<PortfolioPropertyEntity>> assetsGroupedByDate = assets.stream()
-                .collect(groupingBy(PortfolioPropertyEntity::getTimestamp, TreeMap::new, toList()));
+        TreeMap<Instant, List<AccountPropertyEntity>> assetsGroupedByDate = assets.stream()
+                .collect(groupingBy(AccountPropertyEntity::getTimestamp, TreeMap::new, toList()));
         // finds last day assets
         return Optional.ofNullable(assetsGroupedByDate.lastEntry()) // finds last date assets
                 .map(Map.Entry::getValue)
@@ -110,17 +110,17 @@ public class AssetsAndCashServiceImpl implements AssetsAndCashService {
                         .reduce(BigDecimal.ZERO, BigDecimal::add));
     }
 
-    private Optional<PortfolioPropertyEntity> getTotalAssets(String account, AccountPropertyType currency) {
-        return portfolioPropertyRepository
-                .findFirstByPortfolioIdAndPropertyOrderByTimestampDesc(account, currency.name());
+    private Optional<AccountPropertyEntity> getTotalAssets(String account, AccountPropertyType currency) {
+        return accountPropertyRepository
+                .findFirstByAccountIdAndPropertyOrderByTimestampDesc(account, currency.name());
     }
 
-    private static String getCurrency(PortfolioPropertyEntity entity) {
+    private static String getCurrency(AccountPropertyEntity entity) {
         int length = entity.getProperty().length();
         return entity.getProperty().substring(length - 3, length);
     }
 
-    private static BigDecimal parseTotalAssetsIfCan(PortfolioPropertyEntity entity) {
+    private static BigDecimal parseTotalAssetsIfCan(AccountPropertyEntity entity) {
         try {
             return BigDecimal.valueOf(
                     Double.parseDouble(
@@ -170,11 +170,11 @@ public class AssetsAndCashServiceImpl implements AssetsAndCashService {
 
     @Override
     public List<AccountCash> getPortfolioCash(Collection<String> accounts, Instant atInstant) {
-        List<PortfolioCashEntity> entities = accounts.isEmpty() ?
-                portfolioCashRepository.findDistinctOnPortfolioByTimestampBetweenOrderByTimestampDesc(
+        List<AccountCashEntity> entities = accounts.isEmpty() ?
+                accountCashRepository.findDistinctOnAccountByTimestampBetweenOrderByTimestampDesc(
                         Instant.EPOCH,
                         atInstant) :
-                portfolioCashRepository.findDistinctOnPortfolioByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
+                accountCashRepository.findDistinctOnAccountByAccountInAndTimestampBetweenOrderByTimestampDesc(
                         accounts,
                         Instant.EPOCH,
                         atInstant);
