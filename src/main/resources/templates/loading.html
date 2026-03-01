@@ -27,27 +27,28 @@
         }
     </style>
     <script type = "module">
-        function checkMainApp() {
+        async function checkMainApp() {
             let port = {{ server.port }}  // replaced by java's LoadingPageHandler.class
             let homePageUrl = location.protocol + '//' + location.hostname + ":" +  port
             // checkPage доступен только после загрузки основного http сервера
             let checkPage = homePageUrl + '/broker-file-reports'
             console.info("Check main server page: " + checkPage)
-            fetch(checkPage)
+            await fetch(checkPage)
                 .then(response => {
                     if (response && response.ok) {
                         console.info("Redirect to: " + homePageUrl);
                         window.location.href = homePageUrl;
                     } else {
                         console.info("Main server is not ready")
+                        setTimeout(checkMainApp, 500);  // (1/2)
                     }
                 })
                 .catch(error => {
                     console.error("Error checking main app:", error);
+                    setTimeout(checkMainApp, 500);  // (2/2)
                 });
         }
-
-        setInterval(checkMainApp, 500);
+        checkMainApp();
     </script>
 </head>
 <body>
