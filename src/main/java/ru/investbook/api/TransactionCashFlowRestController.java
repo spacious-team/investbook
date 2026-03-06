@@ -75,6 +75,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     @GetMapping
     @PageableAsQueryParam
     @Operation(summary = "Отобразить по фильтру", description = "Отобразить информацию о сделках",
+            operationId = "getTransactionCashFlows",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -124,6 +125,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     @Override
     @GetMapping("{id}")
     @Operation(summary = "Отобразить одну", description = "Отобразить информацию о конкретной сделке",
+            operationId = "getTransactionCashFlow",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -136,6 +138,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Добавить информацию об об объемах движения ДС по сделке",
+            operationId = "postTransactionCashFlow",
             responses = {
                     @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
                     @ApiResponse(responseCode = "409"),
@@ -150,6 +153,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     @Override
     @PutMapping("{id}")
     @Operation(summary = "Обновить", description = "Обновить информацию об об объемах движения ДС по сделке",
+            operationId = "putTransactionCashFlow",
             responses = {
                     @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
                     @ApiResponse(responseCode = "204"),
@@ -171,6 +175,7 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     @Operation(summary = "Удалить", description = """
             Удалить информацию об об объемах движения ДС по сделке. Сама сделка не удаляется, ее нужно удалить своим API
             """,
+            operationId = "deleteTransactionCashFlow",
             responses = {
                     @ApiResponse(responseCode = "204"),
                     @ApiResponse(responseCode = "500", content = @Content)})

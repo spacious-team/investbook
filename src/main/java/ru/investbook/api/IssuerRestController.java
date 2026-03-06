@@ -60,6 +60,7 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     @GetMapping
     @PageableAsQueryParam
     @Operation(summary = "Отобразить всех",
+            operationId = "getIssuers",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -75,6 +76,7 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     @Override
     @GetMapping("{id}")
     @Operation(summary = "Отобразить одного", description = "Отобразить информацию об эмитенте по его номеру",
+            operationId = "getIssuer",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -86,7 +88,7 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", responses = {
+    @Operation(summary = "Добавить", operationId = "postIssuer", responses = {
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "409"),
             @ApiResponse(responseCode = "500", content = @Content)})
@@ -96,7 +98,7 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить сведения", responses = {
+    @Operation(summary = "Обновить сведения", operationId = "putIssuer", responses = {
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "204"),
             @ApiResponse(responseCode = "500", content = @Content)})
@@ -111,9 +113,11 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удаляет сведения об эмитенте из БД", responses = {
-            @ApiResponse(responseCode = "204"),
-            @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(summary = "Удалить", description = "Удаляет сведения об эмитенте из БД",
+            operationId = "deleteIssuer",
+            responses = {
+                    @ApiResponse(responseCode = "204"),
+                    @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
                                        @Parameter(description = "Внутренний идентификатор эмитента")
                                        Integer id) {

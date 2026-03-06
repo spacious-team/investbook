@@ -61,6 +61,7 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @GetMapping
     @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отображает всю имеющуюся информацию обо всех счетах",
+            operationId = "getAccountProperties",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -76,6 +77,7 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @Override
     @GetMapping("{id}")
     @Operation(summary = "Отобразить один", description = "Отображает информацию по идентификатору",
+            operationId = "getAccountProperty",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -88,6 +90,7 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @Override
     @PostMapping
     @Operation(summary = "Добавить", description = "Добавить информацию для конкретного счета",
+            operationId = "postAccountProperty",
             responses = {
                     @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
                     @ApiResponse(responseCode = "409"),
@@ -99,6 +102,7 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @Override
     @PutMapping("{id}")
     @Operation(summary = "Обновить", description = "Обновить информацию для счета",
+            operationId = "putAccountProperty",
             responses = {
                     @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
                     @ApiResponse(responseCode = "204"),
@@ -115,6 +119,7 @@ public class PortfolioPropertyRestController extends AbstractRestController<Inte
     @Override
     @DeleteMapping("{id}")
     @Operation(summary = "Удалить",
+            operationId = "deleteAccountProperty",
             responses = {
                     @ApiResponse(responseCode = "204"),
                     @ApiResponse(responseCode = "500", content = @Content)})

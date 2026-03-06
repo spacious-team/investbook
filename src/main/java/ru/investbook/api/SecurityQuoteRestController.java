@@ -61,6 +61,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @GetMapping
     @PageableAsQueryParam
     @Operation(summary = "Отобразить все", description = "Отобразить всю историю котировок по всем инструментам",
+            operationId = "getSecurityQuotes",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -77,6 +78,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     @Override
     @GetMapping("{id}")
     @Operation(summary = "Отобразить одну", description = "Отобразить котировку по номеру записи",
+            operationId = "getSecurityQuote",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
@@ -88,7 +90,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", responses = {
+    @Operation(summary = "Добавить", operationId = "postSecurityQuote", responses = {
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "409"),
             @ApiResponse(responseCode = "500", content = @Content)})
@@ -98,7 +100,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", responses = {
+    @Operation(summary = "Обновить", operationId = "putSecurityQuote", responses = {
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "204"),
             @ApiResponse(responseCode = "500", content = @Content)})
@@ -113,7 +115,7 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", responses = {
+    @Operation(summary = "Удалить", operationId = "deleteSecurityQuote", responses = {
             @ApiResponse(responseCode = "204"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
