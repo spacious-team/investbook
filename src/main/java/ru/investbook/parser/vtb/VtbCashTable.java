@@ -50,13 +50,13 @@ public class VtbCashTable extends SingleAbstractReportTable<AccountCash> {
     @Override
     protected Collection<AccountCash> parseRowToCollection(TableRow row) {
         Collection<AccountCash> cashes = new ArrayList<>();
-        cashes.addAll(getPortfolioCash(row, VtbCashTableHeader.STOCK_MARKET, "основной рынок"));
-        cashes.addAll(getPortfolioCash(row, VtbCashTableHeader.FORTS_MARKET, "срочный рынок"));
-        cashes.addAll(getPortfolioCash(row, VtbCashTableHeader.NON_MARKET, "внебирж. рынок"));
+        cashes.addAll(getAccountCash(row, VtbCashTableHeader.STOCK_MARKET, "основной рынок"));
+        cashes.addAll(getAccountCash(row, VtbCashTableHeader.FORTS_MARKET, "срочный рынок"));
+        cashes.addAll(getAccountCash(row, VtbCashTableHeader.NON_MARKET, "внебирж. рынок"));
         return cashes;
     }
 
-    private Collection<AccountCash> getPortfolioCash(TableRow row, VtbCashTableHeader column, String section) {
+    private Collection<AccountCash> getAccountCash(TableRow row, VtbCashTableHeader column, String section) {
         try {
             return Collections.singleton(AccountCash.builder()
                     .account(getReport().getAccount())

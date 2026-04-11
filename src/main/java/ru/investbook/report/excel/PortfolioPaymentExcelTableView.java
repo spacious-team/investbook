@@ -44,7 +44,7 @@ public class PortfolioPaymentExcelTableView extends ExcelTableView {
     @Getter
     private final int sheetOrder = 3;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (выплаты)";
+    private final UnaryOperator<String> sheetNameCreator = account -> account + " (выплаты)";
 
     public PortfolioPaymentExcelTableView(AccountRepository accountRepository,
                                           PortfolioPaymentExcelTableFactory tableFactory,

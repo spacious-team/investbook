@@ -56,7 +56,7 @@ public class InvestbookReportTables extends AbstractReportTables<InvestbookBroke
 
     @Override
     public ReportTable<AccountCash> getAccountCashTable() {
-        return new InvestbookPortfolioCashTable(getReport());
+        return new InvestbookAccountCashTable(getReport());
     }
 
     @Override

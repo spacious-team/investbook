@@ -44,7 +44,7 @@ public class TaxExcelTableView extends ExcelTableView {
     @Getter
     private final int sheetOrder = 10;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Налог (" + portfolio + ")";
+    private final UnaryOperator<String> sheetNameCreator = account -> "Налог (" + account + ")";
 
     public TaxExcelTableView(AccountRepository accountRepository,
                              TaxExcelTableFactory tableFactory,

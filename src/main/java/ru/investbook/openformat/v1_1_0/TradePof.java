@@ -203,7 +203,7 @@ public class TradePof {
         return e.getValue().divide(BigDecimal.valueOf(Math.abs(e.getCount())), 6, HALF_UP);
     }
 
-    Optional<AbstractTransaction> toTransaction(Map<Integer, String> accountToPortfolioId,
+    Optional<AbstractTransaction> toTransaction(Map<Integer, String> accountToAccountId,
                                                 Map<Integer, Integer> assetToSecurityId,
                                                 Map<Integer, SecurityType> assetTypes) {
         try {
@@ -226,7 +226,7 @@ public class TradePof {
             long ts = requireNonNull(getSettlementOrTimestamp());
             return Optional.of(builder
                     .tradeId(tradeId)
-                    .account(requireNonNull(accountToPortfolioId.get(account)))
+                    .account(requireNonNull(accountToAccountId.get(account)))
                     .security(getSecurityId(assetToSecurityId))
                     .count(count.intValueExact())
                     .timestamp(Instant.ofEpochSecond(ts))

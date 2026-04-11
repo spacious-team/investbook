@@ -52,12 +52,12 @@ public class InvestbookSecurityDepositAndWithdrawalTable extends AbstractSecurit
         } else {
             return null;
         }
-        String portfolio = row.getStringCellValue(PORTFOLIO);
+        String account = row.getStringCellValue(ACCOUNT);
         Instant timestamp = parseEventInstant(row);
         int securityId = getSecurityIdForDepositOrWithdrawal(row);
         return SecurityTransaction.builder()
-                .tradeId(getTradeId(portfolio, securityId, timestamp))
-                .account(portfolio)
+                .tradeId(getTradeId(account, securityId, timestamp))
+                .account(account)
                 .timestamp(timestamp)
                 .security(securityId)
                 .count(row.getIntCellValue(COUNT) * (negate ? -1 : 1))

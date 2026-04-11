@@ -67,7 +67,7 @@ public class SberTrSecurityTransactionTable extends AbstractReportTable<Abstract
         @SuppressWarnings({"nullable", "DataFlowIssue"})
         int securityId = security.getId();
         return SecurityTransaction.builder()
-                .account(row.getStringCellValue(PORTFOLIO))
+                .account(row.getStringCellValue(ACCOUNT))
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .tradeId(String.valueOf(row.getLongCellValue(TRADE_ID))) // may be double numbers in future
                 .security(securityId)
@@ -84,7 +84,7 @@ public class SberTrSecurityTransactionTable extends AbstractReportTable<Abstract
 
     @Getter
     public enum SberTransactionTableHeader implements TableHeaderColumn {
-        PORTFOLIO("Номер договора"),
+        ACCOUNT("Номер договора"),
         TRADE_ID("Номер сделки"),
         DATE_TIME("Дата расчётов"),
         NAME_AND_ISIN("Код финансового инструмента"),

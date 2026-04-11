@@ -24,9 +24,9 @@ import org.spacious_team.table_wrapper.api.TableRow;
 
 import static ru.investbook.parser.investbook.AbstractInvestbookTable.InvestbookReportTableHeader.*;
 
-public class InvestbookPortfolioCashTable extends AbstractInvestbookTable<AccountCash> {
+public class InvestbookAccountCashTable extends AbstractInvestbookTable<AccountCash> {
 
-    protected InvestbookPortfolioCashTable(InvestbookBrokerReport report) {
+    protected InvestbookAccountCashTable(InvestbookBrokerReport report) {
         super(report);
     }
 
@@ -37,7 +37,7 @@ public class InvestbookPortfolioCashTable extends AbstractInvestbookTable<Accoun
             return null;
         }
         return AccountCash.builder()
-                .account(row.getStringCellValue(PORTFOLIO))
+                .account(row.getStringCellValue(ACCOUNT))
                 .timestamp(parseEventInstant(row))
                 .value(row.getBigDecimalCellValue(PRICE))
                 .currency(row.getStringCellValue(CURRENCY))

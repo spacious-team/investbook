@@ -88,11 +88,11 @@ public class AbstractSecurityAwareInvestbookTable<RowType> extends AbstractInves
         return securityRepository.save(securityConverter.toEntity(builder.build()));
     }
 
-    protected String getTradeId(String portfolio, int securityId, Instant instant) {
+    protected String getTradeId(String account, int securityId, Instant instant) {
         String tradeId;
         int counter = 0; // for spit deposit and withdrawal events have same timestamp
         do {
-            tradeId = (instant.getEpochSecond() + (counter++)) + securityId + portfolio;
+            tradeId = (instant.getEpochSecond() + (counter++)) + securityId + account;
             tradeId = tradeId.substring(0, Math.min(32, tradeId.length()));
         } while (!generatedTradeIds.add(tradeId));
         return tradeId;

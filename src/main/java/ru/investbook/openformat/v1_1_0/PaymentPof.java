@@ -120,7 +120,7 @@ public class PaymentPof {
                 .build();
     }
 
-    Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId,
+    Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToAccountId,
                                                                Map<Integer, Integer> assetToSecurityId,
                                                                Map<Integer, SecurityType> assetTypes) {
         try {
@@ -130,7 +130,7 @@ public class PaymentPof {
                 eventType = CashFlowType.COUPON; // izi-invest.ru fix: не различает дивиденды и купоны (type = other)
             }
             SecurityEventCashFlow cashFlow = SecurityEventCashFlow.builder()
-                    .account(Objects.requireNonNull(accountToPortfolioId.get(account)))
+                    .account(Objects.requireNonNull(accountToAccountId.get(account)))
                     .security(getSecurityId(assetToSecurityId))
                     .eventType(eventType)
                     .count(count.intValueExact())

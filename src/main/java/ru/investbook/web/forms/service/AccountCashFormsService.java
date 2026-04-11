@@ -75,7 +75,7 @@ public class AccountCashFormsService {
 
     @Transactional
     public void save(AccountCashModel m) {
-        savePortfolio(m.getAccount());
+        saveAccount(m.getAccount());
         AccountCash cash = AccountCash.builder()
                 .id(m.getId())
                 .account(m.getAccount())
@@ -91,11 +91,11 @@ public class AccountCashFormsService {
         accountCashRepository.flush();
     }
 
-    private void savePortfolio(String portfolio) {
-        if (!accountRepository.existsById(portfolio)) {
+    private void saveAccount(String account) {
+        if (!accountRepository.existsById(account)) {
             accountRepository.save(
                     accountConverter.toEntity(Account.builder()
-                            .id(portfolio)
+                            .id(account)
                             .build()));
         }
     }

@@ -85,7 +85,7 @@ public class EventCashFlowFormsService {
 
     @Transactional
     public void save(EventCashFlowModel e) {
-        savePortfolio(e.getAccount());
+        saveAccount(e.getAccount());
         if (e.isAttachedToSecurity()) {
             saveSecurityEventCashFlow(e);
         } else {
@@ -128,11 +128,11 @@ public class EventCashFlowFormsService {
         eventCashFlowRepository.flush();
     }
 
-    private void savePortfolio(String portfolio) {
-        if (!accountRepository.existsById(portfolio)) {
+    private void saveAccount(String account) {
+        if (!accountRepository.existsById(account)) {
             accountRepository.save(
                     accountConverter.toEntity(Account.builder()
-                            .id(portfolio)
+                            .id(account)
                             .build()));
         }
     }

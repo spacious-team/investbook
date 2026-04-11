@@ -43,7 +43,7 @@ import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.AssetsTable.SummaryTableHeader.RUB;
 
 /**
- * Shows total assets value (sum of cash and security), but Assets table is empty if no security in portfolio.
+ * Shows total assets value (sum of cash and security), but Assets table is empty if no security in account.
  * In that case assets should be calculated by {@link CashTable}.
  */
 @Slf4j

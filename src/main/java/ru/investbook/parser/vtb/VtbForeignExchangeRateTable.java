@@ -48,22 +48,22 @@ public class VtbForeignExchangeRateTable extends SingleInitializableReportTable<
     @Override
     protected Collection<ForeignExchangeRate> parseTable() {
         Collection<ForeignExchangeRate> data = new ArrayList<>();
-        data.addAll(buildPortfolioProperty(
+        data.addAll(buildAccountProperty(
                 CurrencyPair.USDRUB,
                 USD_EXCHANGE_RATE));
-        data.addAll(buildPortfolioProperty(
+        data.addAll(buildAccountProperty(
                 CurrencyPair.EURRUB,
                 EUR_EXCHANGE_RATE));
-        data.addAll(buildPortfolioProperty(
+        data.addAll(buildAccountProperty(
                 CurrencyPair.CHFRUB,
                 CHF_EXCHANGE_RATE));
-        data.addAll(buildPortfolioProperty(
+        data.addAll(buildAccountProperty(
                 CurrencyPair.GBPRUB,
                 GBP_EXCHANGE_RATE));
         return data;
     }
 
-    private Collection<ForeignExchangeRate> buildPortfolioProperty(CurrencyPair currencyPair, String rowHeader) {
+    private Collection<ForeignExchangeRate> buildAccountProperty(CurrencyPair currencyPair, String rowHeader) {
         try {
             @SuppressWarnings({"nullness", "DataFlowIssue"})
             String value = getReport().getReportPage()

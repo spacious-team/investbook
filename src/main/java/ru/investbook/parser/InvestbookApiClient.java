@@ -74,7 +74,7 @@ public class InvestbookApiClient {
     private final MoexDerivativeCodeService moexDerivativeCodeService;
     private final ValidatorService validator;
 
-    public boolean addPortfolio(Account account) {
+    public boolean addAccount(Account account) {
         return saveWithoutUpdate(
                 account,
                 accountRestController::createIfAbsent,
@@ -162,7 +162,7 @@ public class InvestbookApiClient {
                 "Не могу добавить информацию об остатках денежных средств портфеля");
     }
 
-    public void addPortfolioProperty(AccountProperty property) {
+    public void addAccountProperty(AccountProperty property) {
         saveWithoutUpdate(
                 property,
                 accountPropertyRestController::createIfAbsent,

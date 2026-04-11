@@ -65,7 +65,7 @@ public class InvestbookCashFlowTable extends AbstractInvestbookTable<EventCashFl
         String currency = Optional.ofNullable(row.getStringCellValueOrDefault(CURRENCY, null))
                 .orElseGet(() -> row.getStringCellValue(FEE_CURRENCY));
         return EventCashFlow.builder()
-                .account(row.getStringCellValue(PORTFOLIO))
+                .account(row.getStringCellValue(ACCOUNT))
                 .timestamp(parseEventInstant(row))
                 .eventType(type)
                 .value(value)

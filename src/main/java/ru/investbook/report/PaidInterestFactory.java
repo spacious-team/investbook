@@ -64,18 +64,18 @@ public class PaidInterestFactory {
     }
 
     private PaidInterest create(
-            String portfolio, Security security, FifoPositions positions, Instant fromDate, Instant toDate) {
+            String account, Security security, FifoPositions positions, Instant fromDate, Instant toDate) {
 
         PaidInterest paidInterest = new PaidInterest();
         for (CashFlowType type : PAY_TYPES) {
             paidInterest.get(type)
                     .putAll(getPositionWithPayments(
-                            portfolio, requireNonNull(security.getId()), positions, type, fromDate, toDate));
+                            account, requireNonNull(security.getId()), positions, type, fromDate, toDate));
         }
         return paidInterest;
     }
 
-    private Map<Position, List<SecurityEventCashFlow>> getPositionWithPayments(String portfolio,
+    private Map<Position, List<SecurityEventCashFlow>> getPositionWithPayments(String account,
                                                                                Integer securityId,
                                                                                FifoPositions positions,
                                                                                CashFlowType event,
@@ -83,7 +83,7 @@ public class PaidInterestFactory {
                                                                                Instant toDate) {
         List<SecurityEventCashFlowEntity> eventCashFlowEntities = securityEventCashFlowRepository
                 .findByAccountIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                        singleton(portfolio),
+                        singleton(account),
                         securityId,
                         event.getId(),
                         fromDate,

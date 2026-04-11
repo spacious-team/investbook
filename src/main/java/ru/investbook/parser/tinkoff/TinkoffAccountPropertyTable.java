@@ -67,10 +67,10 @@ public class TinkoffAccountPropertyTable extends InitializableReportTable<Accoun
 
             getTotalAssets("RUB", TinkoffSecurityQuoteTable::getRubSecuritiesTotalValue)
                     .map(value -> value.add(getNonRubAndNonUsdCashInRub()))
-                    .map(value -> toPortfolioProperty(TOTAL_ASSETS_RUB, value))
+                    .map(value -> toAccountProperty(TOTAL_ASSETS_RUB, value))
                     .ifPresent(result::add);
             getTotalAssets("USD", TinkoffSecurityQuoteTable::getUsdSecuritiesTotalValue)
-                    .map(value -> toPortfolioProperty(TOTAL_ASSETS_USD, value))
+                    .map(value -> toAccountProperty(TOTAL_ASSETS_USD, value))
                     .ifPresent(result::add);
 
             return result;
@@ -104,7 +104,7 @@ public class TinkoffAccountPropertyTable extends InitializableReportTable<Accoun
                 .findAny();
     }
 
-    private AccountProperty toPortfolioProperty(AccountPropertyType type, BigDecimal value) {
+    private AccountProperty toAccountProperty(AccountPropertyType type, BigDecimal value) {
         return AccountProperty.builder()
                 .account(report.getAccount())
                 .timestamp(report.getReportEndDateTime())

@@ -80,7 +80,7 @@ public class SberCashFlowTable extends AbstractReportTable<EventCashFlow> {
             value = value.negate();
         }
         return EventCashFlow.builder()
-                .account(row.getStringCellValue(PORTFOLIO))
+                .account(row.getStringCellValue(ACCOUNT))
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .eventType(type)
                 .value(value)
@@ -91,7 +91,7 @@ public class SberCashFlowTable extends AbstractReportTable<EventCashFlow> {
 
     @Getter
     enum SberCashFlowTableHeader implements TableHeaderColumn {
-        PORTFOLIO("Номер договора"),
+        ACCOUNT("Номер договора"),
         DATE_TIME("Дата исполнения поручения"),
         OPERATION("Операция"),
         VALUE("Сумма"), // без учета НКД и комиссий

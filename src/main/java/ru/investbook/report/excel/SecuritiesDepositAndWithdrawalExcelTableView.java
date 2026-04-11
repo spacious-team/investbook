@@ -45,7 +45,7 @@ public class SecuritiesDepositAndWithdrawalExcelTableView extends ExcelTableView
     @Getter
     private final int sheetOrder = 8;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (ввод-вывод цб)";
+    private final UnaryOperator<String> sheetNameCreator = account -> account + " (ввод-вывод цб)";
 
     public SecuritiesDepositAndWithdrawalExcelTableView(AccountRepository accountRepository,
                                                         SecuritiesDepositAndWithdrawalExcelTableFactory tableFactory,

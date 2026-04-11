@@ -61,7 +61,7 @@ public class CashFlowExcelTableView extends ExcelTableView {
     @Getter
     private final int sheetOrder = 9;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Доходность (" + portfolio + ")";
+    private final UnaryOperator<String> sheetNameCreator = account -> "Доходность (" + account + ")";
     private final AssetsAndCashService assetsAndCashService;
     private final Xirr.Builder xirrBuilder = Xirr.builder()
             .withNewtonRaphsonBuilder(NewtonRaphson.builder().withTolerance(0.001)); // in currency units (RUB, USD)
@@ -93,10 +93,10 @@ public class CashFlowExcelTableView extends ExcelTableView {
     @Override
     protected Table.Record getTotalRow(Table table, Optional<Account> account) {
         Table.Record total = Table.newRecord();
-        String _portfolio = account
+        String _account = account
                 .orElseThrow(() -> new IllegalArgumentException("Ожидается портфель"))
                 .getId();
-        BigDecimal liquidationValueRub = assetsAndCashService.getTotalAssetsInRub(_portfolio).orElse(BigDecimal.ZERO);
+        BigDecimal liquidationValueRub = assetsAndCashService.getTotalAssetsInRub(_account).orElse(BigDecimal.ZERO);
         total.put(DATE, "Итого:");
         total.put(CASH_RUB, "=SUM(" +
                 CASH_RUB.getRange(3, table.size() + 2) + ")+" +

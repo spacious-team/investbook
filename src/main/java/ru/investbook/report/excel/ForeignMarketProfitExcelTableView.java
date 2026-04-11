@@ -46,7 +46,7 @@ public class ForeignMarketProfitExcelTableView extends ExcelTableView {
     @Getter
     private final int sheetOrder = 7;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (валюта)";
+    private final UnaryOperator<String> sheetNameCreator = account -> account + " (валюта)";
 
     public ForeignMarketProfitExcelTableView(AccountRepository accountRepository,
                                              ForeignMarketProfitExcelTableFactory tableFactory,

@@ -56,7 +56,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     @Getter
     private final int sheetOrder = 0;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Обзор (" + portfolio + ")";
+    private final UnaryOperator<String> sheetNameCreator = account -> "Обзор (" + account + ")";
 
     public PortfolioAnalysisExcelTableView(AccountRepository accountRepository,
                                            PortfolioAnalysisExcelTableFactory tableFactory,
@@ -69,7 +69,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
         Collection<ExcelTable> tables = new ArrayList<>();
         ViewFilter filter = ViewFilter.get();
         Collection<String> accounts = filter.getAccounts();
-        if (showOnlySummary(filter) || isManyPortfolioRequested(accounts)) {
+        if (showOnlySummary(filter) || isManyAccountRequested(accounts)) {
             Table table = tableFactory.create(accounts);
             tables.add(ExcelTable.of("Обзор (все)", table, this));
         }
@@ -79,8 +79,8 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
         return tables;
     }
 
-    private boolean isManyPortfolioRequested(Collection<String> portfolios) {
-        return portfolios.size() > 1 || (portfolios.isEmpty() && accountRepository.count() > 1);
+    private boolean isManyAccountRequested(Collection<String> accounts) {
+        return accounts.size() > 1 || (accounts.isEmpty() && accountRepository.count() > 1);
     }
 
     private static boolean showOnlySummary(ViewFilter filter) {
@@ -139,7 +139,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
                 cell.setCellStyle(styles.getTotalRowStyle());
         }
         plotChart("Активы и инвестиции, USD", sheet, PortfolioAnalysisExcelTableView::addInvestmentAndAssetsGraph);
-        plotChart("Роста активов, %", sheet, PortfolioAnalysisExcelTableView::addPortfolioGrowthGraph);
+        plotChart("Роста активов, %", sheet, PortfolioAnalysisExcelTableView::addAccountGrowthGraph);
         plotChart("Остаток денежных средств, USD", sheet, PortfolioAnalysisExcelTableView::addCashBalanceGraph);
     }
 
@@ -168,7 +168,7 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     }
 
     @SuppressWarnings("argument")
-    private static void addPortfolioGrowthGraph(String name, Sheet sheet) {
+    private static void addAccountGrowthGraph(String name, Sheet sheet) {
         int rowCount = sheet.getLastRowNum();
         XSSFSheet _sheet = (XSSFSheet) sheet;
 

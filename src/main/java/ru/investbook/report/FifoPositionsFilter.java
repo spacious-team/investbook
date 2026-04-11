@@ -27,7 +27,7 @@ import static java.util.Collections.singleton;
 
 public interface FifoPositionsFilter {
 
-    Collection<String> getPortfolios();
+    Collection<String> getAccounts();
 
     Instant getFromDate();
 
@@ -37,12 +37,12 @@ public interface FifoPositionsFilter {
         return of(account.getId());
     }
 
-    static FifoPositionsFilter of(String portfolio) {
-        Collection<String> portfolios = singleton(portfolio);
+    static FifoPositionsFilter of(String account) {
+        Collection<String> accounts = singleton(account);
         Instant toDate = Instant.now();
         return new FifoPositionsFilter() {
-            public Collection<String> getPortfolios() {
-                return portfolios;
+            public Collection<String> getAccounts() {
+                return accounts;
             }
 
             @Override
@@ -59,7 +59,7 @@ public interface FifoPositionsFilter {
 
     static FifoPositionsFilter of(ViewFilter filter) {
         return new FifoPositionsFilter() {
-            public Collection<String> getPortfolios() {
+            public Collection<String> getAccounts() {
                 return filter.getAccounts();
             }
 
@@ -75,23 +75,23 @@ public interface FifoPositionsFilter {
         };
     }
 
-    static FifoPositionsFilter of(Collection<String> portfolios) {
-        return of(portfolios, ViewFilter.defaultFromDate, Instant.now());
+    static FifoPositionsFilter of(Collection<String> accounts) {
+        return of(accounts, ViewFilter.defaultFromDate, Instant.now());
     }
 
     static FifoPositionsFilter of(Account account, Instant from, Instant to) {
         return of(singleton(account.getId()), from, to);
     }
 
-    static FifoPositionsFilter of(String portfolio, Instant from, Instant to) {
-        return of(singleton(portfolio), from, to);
+    static FifoPositionsFilter of(String account, Instant from, Instant to) {
+        return of(singleton(account), from, to);
     }
 
-    static FifoPositionsFilter of(Collection<String> portfolios, Instant from, Instant to) {
+    static FifoPositionsFilter of(Collection<String> accounts, Instant from, Instant to) {
          return new FifoPositionsFilter() {
             @Override
-            public Collection<String> getPortfolios() {
-                return portfolios;
+            public Collection<String> getAccounts() {
+                return accounts;
             }
 
             @Override

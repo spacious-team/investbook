@@ -46,13 +46,13 @@ public class AccountCompositionController {
     @GetMapping("/sectors-pie-chart")
     public String getSectorsProportionPage(Model model, HttpServletRequest request) {
         try {
-            Set<String> portfolios = assetsAndCashService.getActiveAccounts();
-            Collection<Map<String, ?>> sectorsProportion = investmentProportionService.getSectorsProportion(portfolios)
+            Set<String> accounts = assetsAndCashService.getActiveAccounts();
+            Collection<Map<String, ?>> sectorsProportion = investmentProportionService.getSectorsProportion(accounts)
                     .entrySet()
                     .stream()
                     .map(e -> Map.of("sector", e.getKey(), "investment", ((Number) e.getValue()).intValue()))
                     .collect(toList());
-            int cash = assetsAndCashService.getTotalCashInRub(portfolios)
+            int cash = assetsAndCashService.getTotalCashInRub(accounts)
                     .map(Number::intValue)
                     .orElse(0);
             sectorsProportion.add(Map.of("sector", "Кеш", "investment", cash));
@@ -71,13 +71,13 @@ public class AccountCompositionController {
     @GetMapping("/securities-pie-chart")
     public String getSecuritiesProportionPage(Model model, HttpServletRequest request) {
         try {
-            Set<String> portfolios = assetsAndCashService.getActiveAccounts();
-            Collection<Map<String, ?>> securitiesProportion = investmentProportionService.getSecuritiesProportion(portfolios)
+            Set<String> accounts = assetsAndCashService.getActiveAccounts();
+            Collection<Map<String, ?>> securitiesProportion = investmentProportionService.getSecuritiesProportion(accounts)
                     .entrySet()
                     .stream()
                     .map(e -> Map.of("security", e.getKey(), "investment", ((Number) e.getValue()).intValue()))
                     .collect(toList());
-            int cash = assetsAndCashService.getTotalCashInRub(portfolios)
+            int cash = assetsAndCashService.getTotalCashInRub(accounts)
                     .map(Number::intValue)
                     .orElse(0);
             securitiesProportion.add(Map.of("security", "Кеш", "investment", cash));

@@ -48,7 +48,7 @@ public class InvestbookAccountPropertyTable extends AbstractInvestbookTable<Acco
                     "Оценка активов может быть выполнена только в RUB или USD, указана валюта: " + currency);
         }
         return AccountProperty.builder()
-                .account(row.getStringCellValue(PORTFOLIO))
+                .account(row.getStringCellValue(ACCOUNT))
                 .timestamp(parseEventInstant(row))
                 .property(property)
                 .value(row.getBigDecimalCellValue(PRICE).toString())

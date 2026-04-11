@@ -51,7 +51,7 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
     @Getter
     private final int sheetOrder = 5;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (фондовый)";
+    private final UnaryOperator<String> sheetNameCreator = account -> account + " (фондовый)";
     private final TransactionCashFlowRepository transactionCashFlowRepository;
 
     public StockMarketProfitExcelTableView(AccountRepository accountRepository,
@@ -74,9 +74,9 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
         return tables;
     }
 
-    private List<String> getCurrencies(Account portfolio) {
+    private List<String> getCurrencies(Account account) {
         return transactionCashFlowRepository
-                .findDistinctCurrencyByAccountAndCashFlowType(portfolio.getId(), CashFlowType.PRICE);
+                .findDistinctCurrencyByAccountAndCashFlowType(account.getId(), CashFlowType.PRICE);
     }
 
     @Override

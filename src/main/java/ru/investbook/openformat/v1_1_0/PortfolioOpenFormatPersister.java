@@ -61,7 +61,7 @@ public class PortfolioOpenFormatPersister {
                 .stream()
                 .map(AccountPof::toAccount)
                 .flatMap(Optional::stream)
-                .forEach(api::addPortfolio);
+                .forEach(api::addAccount);
 
         Map<Integer, Integer> assetToSecurityId = object.getAssets()
                 .parallelStream()
@@ -111,7 +111,7 @@ public class PortfolioOpenFormatPersister {
         @Nullable VndInvestbookPof vndInvestbook = object.getVndInvestbook();
         if (vndInvestbook != null) {
             tasks.add(() -> vndInvestbook.getAccountCash().forEach(api::addAccountCash));
-            tasks.add(() -> vndInvestbook.getAccountProperties().forEach(api::addPortfolioProperty));
+            tasks.add(() -> vndInvestbook.getAccountProperties().forEach(api::addAccountProperty));
             tasks.add(() -> vndInvestbook.getSecurityDescriptions()
                     .forEach(security -> persistSecurityDescription(security, assetToSecurityId)));
             tasks.add(() -> vndInvestbook.getSecurityQuotes()
@@ -216,19 +216,19 @@ public class PortfolioOpenFormatPersister {
     }
 
     private void persistTotalAssetsAndAccountCash(PortfolioOpenFormatV1_1_0 object,
-                                                  Map<Integer, String> accountToPortfolioId) {
+                                                  Map<Integer, String> accountToAccountId) {
         try {
             Instant end = Instant.ofEpochSecond(object.getEnd());
             object.getCashBalances()
                     .stream()
-                    .map(cash -> cash.toAccountCash(accountToPortfolioId, end))
+                    .map(cash -> cash.toAccountCash(accountToAccountId, end))
                     .flatMap(Collection::stream)
                     .forEach(api::addAccountCash);
             object.getAccounts()
                     .stream()
                     .map(a -> a.toTotalAssets(end))
                     .flatMap(Optional::stream)
-                    .forEach(api::addPortfolioProperty);
+                    .forEach(api::addAccountProperty);
         } catch (Exception e) {
             log.error("Не могу сохранить оценку активов или остаток денежных средств", e);
         }

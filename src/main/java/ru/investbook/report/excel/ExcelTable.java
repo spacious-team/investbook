@@ -31,7 +31,7 @@ import ru.investbook.report.Table;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public class ExcelTable {
-    private final @Nullable Account portfolio;
+    private final @Nullable Account account;
     private final String sheetName;
     private final Table table;
     private final ExcelTableView creator;
@@ -47,6 +47,6 @@ public class ExcelTable {
     }
 
     void writeTo(Workbook book, CellStyles cellStyles) {
-        creator.createSheet(portfolio, book, sheetName, table, cellStyles);
+        creator.createSheet(account, book, sheetName, table, cellStyles);
     }
 }

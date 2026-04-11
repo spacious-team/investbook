@@ -88,7 +88,7 @@ public class SecurityEventCashFlowFormsService {
 
     @Transactional
     public void save(SecurityEventCashFlowModel e) {
-        savePortfolio(e.getAccount());
+        saveAccount(e.getAccount());
         int savedSecurityId = securityRepositoryHelper.saveSecurity(e);
         SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .account(e.getAccount())
@@ -119,11 +119,11 @@ public class SecurityEventCashFlowFormsService {
         securityEventCashFlowRepository.flush();
     }
 
-    private void savePortfolio(String portfolio) {
-        if (!accountRepository.existsById(portfolio)) {
+    private void saveAccount(String account) {
+        if (!accountRepository.existsById(account)) {
             accountRepository.save(
                     accountConverter.toEntity(Account.builder()
-                            .id(portfolio)
+                            .id(account)
                             .build()));
         }
     }

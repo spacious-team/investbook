@@ -107,12 +107,12 @@ public class TransferPof {
                 .build();
     }
 
-    Optional<Transaction> toTransaction(Map<Integer, String> accountToPortfolioId,
+    Optional<Transaction> toTransaction(Map<Integer, String> accountToAccountId,
                                         Map<Integer, Integer> assetToSecurityId) {
         try {
             return Optional.of(Transaction.builder()
                     .tradeId(requireNonNull(transferId))
-                    .account(requireNonNull(accountToPortfolioId.get(account)))
+                    .account(requireNonNull(accountToAccountId.get(account)))
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .security(getSecurityId(assetToSecurityId))
                     .count(count.intValueExact())
@@ -123,13 +123,13 @@ public class TransferPof {
         }
     }
 
-    Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId,
+    Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToAccountId,
                                                                Map<Integer, Integer> assetToSecurityId) {
         try {
             if (fee != null && feeCurrency != null) {
                 return Set.of(
                         SecurityEventCashFlow.builder()
-                                .account(requireNonNull(accountToPortfolioId.get(account)))
+                                .account(requireNonNull(accountToAccountId.get(account)))
                                 .timestamp(Instant.ofEpochSecond(timestamp))
                                 .security(getSecurityId(assetToSecurityId))
                                 .count(count.intValueExact())

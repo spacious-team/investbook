@@ -66,7 +66,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     @Getter
     private final int sheetOrder = 1;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Портфель (" + portfolio + ")";
+    private final UnaryOperator<String> sheetNameCreator = account -> "Портфель (" + account + ")";
 
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final Set<Integer> types = Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId());
@@ -91,7 +91,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     private Collection<ExcelTable> createExcelTablesByCurrencies() {
         ViewFilter filter = ViewFilter.get();
         Collection<String> accounts = filter.getAccounts();
-        if (showOnlySummary(filter) || isManyPortfolioRequested(accounts)) {
+        if (showOnlySummary(filter) || isManyAccountRequested(accounts)) {
             Collection<ExcelTable> tables = new ArrayList<>();
             List<String> currencies = accounts.isEmpty() ?
                     transactionCashFlowRepository.findDistinctCurrencyByCashFlowTypeIn(types) :
@@ -106,8 +106,8 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         return emptyList();
     }
 
-    private boolean isManyPortfolioRequested(Collection<String> portfolios) {
-        return portfolios.size() > 1 || (portfolios.isEmpty() && accountRepository.count() > 1);
+    private boolean isManyAccountRequested(Collection<String> accounts) {
+        return accounts.size() > 1 || (accounts.isEmpty() && accountRepository.count() > 1);
     }
 
     private static boolean showOnlySummary(ViewFilter filter) {

@@ -66,27 +66,27 @@ public class VtbSecurityDepositAndWithdrawalTable extends SingleAbstractReportTa
                 return null;
         }
 
-        String portfolio = getReport().getAccount();
+        String account = getReport().getAccount();
         String description = row.getStringCellValue(NAME_REGNUMBER_ISIN);
         Security security = VtbReportHelper.getSecurity(description);
         Instant timestamp = row.getInstantCellValue(DATE);
         String isin = requireNonNull(security.getIsin());
-        String tradeId = generateTradeId(portfolio, timestamp, isin);
+        String tradeId = generateTradeId(account, timestamp, isin);
         int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(isin, security::toBuilder);
 
         return SecurityTransaction.builder()
                 .tradeId(tradeId)
                 .timestamp(timestamp)
-                .account(portfolio)
+                .account(account)
                 .security(securityId)
                 .count(row.getIntCellValue(COUNT))
                 .build();
     }
 
-    private String generateTradeId(String portfolio, Instant instant, String isin) {
+    private String generateTradeId(String account, Instant instant, String isin) {
         long epochSecond = instant.getEpochSecond();
         for (int i = 0; i < 1000; i++) { // gh-395: maybe multiple deposit/withdrawal during day for same ISIN (for ex. share split)
-            String id = (epochSecond + i) + isin + portfolio;
+            String id = (epochSecond + i) + isin + account;
             String tradeId = id.substring(0, Math.min(32, id.length()));
             if (generatedTradeIds.add(tradeId)) {
                 return tradeId;

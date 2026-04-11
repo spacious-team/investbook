@@ -44,7 +44,7 @@ public class ForeignPortfolioPaymentExcelTableView extends ExcelTableView {
     @Getter
     private final int sheetOrder = 4;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (внешние выплаты)";
+    private final UnaryOperator<String> sheetNameCreator = account -> account + " (внешние выплаты)";
 
     public ForeignPortfolioPaymentExcelTableView(AccountRepository accountRepository,
                                                  ForeignPortfolioPaymentExcelTableFactory tableFactory,

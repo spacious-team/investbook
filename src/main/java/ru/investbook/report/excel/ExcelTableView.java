@@ -85,13 +85,13 @@ public abstract class ExcelTableView {
 
     protected Collection<AccountEntity> getAccounts(Collection<String> allowedAccounts) {
         // TODO select by user
-        Collection<AccountEntity> portfolios = accountRepository.findAll();
+        Collection<AccountEntity> accounts = accountRepository.findAll();
         if (CollectionUtils.isNotEmpty(allowedAccounts)) {
-            return portfolios.stream()
+            return accounts.stream()
                     .filter(e -> allowedAccounts.contains(e.getId()))
                     .collect(Collectors.toSet());
         }
-        return portfolios;
+        return accounts;
     }
 
     protected abstract UnaryOperator<String> getSheetNameCreator();
@@ -103,7 +103,7 @@ public abstract class ExcelTableView {
     /**
      * Thread safe method
      *
-     * @param account accept null or portfolio
+     * @param account accept null or account
      */
     public <T extends Enum<T> & TableHeader> void createSheet(@Nullable Account account,
                                                               Workbook book,

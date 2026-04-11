@@ -292,9 +292,9 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                 });
     }
 
-    private List<EventCashFlow> getCashFlow(Collection<String> portfolios) {
+    private List<EventCashFlow> getCashFlow(Collection<String> accounts) {
         ViewFilter viewFilter = ViewFilter.get();
-        List<EventCashFlowEntity> entities = portfolios.isEmpty() ?
+        List<EventCashFlowEntity> entities = accounts.isEmpty() ?
                 eventCashFlowRepository
                         .findByCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
                                 CASH.getId(),
@@ -302,7 +302,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                                 viewFilter.getToDate()) :
                 eventCashFlowRepository
                         .findByAccountIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
-                                portfolios,
+                                accounts,
                                 CASH.getId(),
                                 viewFilter.getFromDate(),
                                 viewFilter.getToDate());
@@ -312,31 +312,31 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     }
 
     /**
-     * Returns cash balance information for all portfolios
+     * Returns cash balance information for all accounts
      *
      * @return map of date -> currency -> value
      */
-    private LinkedHashMap<Instant, Map<String, BigDecimal>> getCashBalance(Collection<String> portfolios) {
-        List<AccountCashEntity> portfolioCashEntities = portfolios.isEmpty() ?
+    private LinkedHashMap<Instant, Map<String, BigDecimal>> getCashBalance(Collection<String> accounts) {
+        List<AccountCashEntity> accountCashEntities = accounts.isEmpty() ?
                 accountCashRepository.findAll() :
-                accountCashRepository.findByAccountIn(portfolios);
-        List<AccountCash> portfolioCashes = portfolioCashEntities.stream()
+                accountCashRepository.findByAccountIn(accounts);
+        List<AccountCash> accountCashes = accountCashEntities.stream()
                 .map(accountCashConverter::fromEntity)
                 .toList();
-        List<PortfolioInstantCurrencyValue> balances = sumCashWithSameCurrency(portfolioCashes);
-        int portfolioCount = countPortfolios(portfolioCashes);
-        return getAllPortfolioCashBalance(balances, portfolioCount);
+        List<AccountInstantCurrencyValue> balances = sumCashWithSameCurrency(accountCashes);
+        int accountCount = countAccounts(accountCashes);
+        return getAllAccountCashBalance(balances, accountCount);
     }
 
-    private LinkedHashMap<Instant, BigDecimal> getTotalAssets(Collection<String> portfolios,
+    private LinkedHashMap<Instant, BigDecimal> getTotalAssets(Collection<String> accounts,
                                                               List<EventCashFlow> cashFlows) {
-        List<AccountProperty> assets = getPortfolioProperty(portfolios, totalAssetsProperty);
-        return getAllPortfolioTotalAssets(assets, cashFlows);
+        List<AccountProperty> assets = getAccountProperty(accounts, totalAssetsProperty);
+        return getAllAccountTotalAssets(assets, cashFlows);
     }
 
-    private List<AccountProperty> getPortfolioProperty(Collection<String> portfolios, Collection<String> propertyTypes) {
+    private List<AccountProperty> getAccountProperty(Collection<String> accounts, Collection<String> propertyTypes) {
         ViewFilter viewFilter = ViewFilter.get();
-        List<AccountPropertyEntity> entities = portfolios.isEmpty() ?
+        List<AccountPropertyEntity> entities = accounts.isEmpty() ?
                 accountPropertyRepository
                         .findByPropertyInAndTimestampBetweenOrderByTimestampAsc(
                                 propertyTypes,
@@ -344,7 +344,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                                 viewFilter.getToDate()) :
                 accountPropertyRepository
                         .findByAccountIdInAndPropertyInAndTimestampBetweenOrderByTimestampAsc(
-                                portfolios,
+                                accounts,
                                 propertyTypes,
                                 viewFilter.getFromDate(),
                                 viewFilter.getToDate());
@@ -364,104 +364,104 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     }
 
     /**
-     * Sums cash with same currency for all portfolios and markets, groups result by date.
+     * Sums cash with same currency for all accounts and markets, groups result by date.
      *
      * @return map of date -> currency -> value
      */
-    private static LinkedHashMap<Instant, Map<String, BigDecimal>> getAllPortfolioCashBalance(
-            List<PortfolioInstantCurrencyValue> balances, int portfolioCount) {
+    private static LinkedHashMap<Instant, Map<String, BigDecimal>> getAllAccountCashBalance(
+            List<AccountInstantCurrencyValue> balances, int accountCount) {
         // date -> currency -> cash balance
-        LinkedHashMap<Instant, Map<String, BigDecimal>> allPortfolioCashBalance = new LinkedHashMap<>();
-        // temp var: portfolio -> summed balances
-        Map<String, PortfolioInstantCurrencyValue> lastBalances = new HashMap<>();
-        for (PortfolioInstantCurrencyValue balance : balances) {
-            lastBalances.put(balance.portfolio(), balance);
-            if (lastBalances.size() >= portfolioCount) {
+        LinkedHashMap<Instant, Map<String, BigDecimal>> allAccountCashBalance = new LinkedHashMap<>();
+        // temp var: account -> summed balances
+        Map<String, AccountInstantCurrencyValue> lastBalances = new HashMap<>();
+        for (AccountInstantCurrencyValue balance : balances) {
+            lastBalances.put(balance.account(), balance);
+            if (lastBalances.size() >= accountCount) {
                 Map<String, BigDecimal> joinedBalance = lastBalances.values()
                         .stream()
-                        .map(PortfolioInstantCurrencyValue::currencyValueMap)
+                        .map(AccountInstantCurrencyValue::currencyValueMap)
                         .reduce(new HashMap<>(), (currencyValue1, currencyValue2) -> {
                             currencyValue2.forEach((currency, value) -> currencyValue1.merge(currency, value, BigDecimal::add));
                             return currencyValue1;
                         });
-                allPortfolioCashBalance.put(balance.instant(), joinedBalance);
+                allAccountCashBalance.put(balance.instant(), joinedBalance);
             }
         }
-        return allPortfolioCashBalance;
+        return allAccountCashBalance;
     }
 
-    private static int countPortfolios(List<AccountCash> accountCashList) {
+    private static int countAccounts(List<AccountCash> accountCashList) {
         return (int) accountCashList.stream()
                 .map(AccountCash::getAccount)
                 .distinct()
                 .count();
     }
 
-    private static List<PortfolioInstantCurrencyValue> sumCashWithSameCurrency(List<AccountCash> portfolioCashes) {
-        Map<String, Map<Instant, Map<String, BigDecimal>>> portfolioTimestampCurrencyMap = portfolioCashes.stream()
+    private static List<AccountInstantCurrencyValue> sumCashWithSameCurrency(List<AccountCash> accountCashes) {
+        Map<String, Map<Instant, Map<String, BigDecimal>>> accountTimestampCurrencyMap = accountCashes.stream()
                 .collect(
                         groupingBy(AccountCash::getAccount,
                                 groupingBy(AccountCash::getTimestamp,
                                         groupingBy(AccountCash::getCurrency,
                                                 reducing(BigDecimal.ZERO, AccountCash::getValue, BigDecimal::add)))));
-        List<PortfolioInstantCurrencyValue> result = new ArrayList<>(portfolioCashes.size());
-        portfolioTimestampCurrencyMap.forEach((portfolio, timestampCurrencyValueMap) ->
+        List<AccountInstantCurrencyValue> result = new ArrayList<>(accountCashes.size());
+        accountTimestampCurrencyMap.forEach((account, timestampCurrencyValueMap) ->
                 timestampCurrencyValueMap.forEach((timestamp, currencyValueMap) ->
-                        result.add(new PortfolioInstantCurrencyValue(portfolio, timestamp, currencyValueMap))
+                        result.add(new AccountInstantCurrencyValue(account, timestamp, currencyValueMap))
                 ));
-        result.sort(Comparator.comparing(PortfolioInstantCurrencyValue::instant));
+        result.sort(Comparator.comparing(AccountInstantCurrencyValue::instant));
         return result;
     }
 
-    private record PortfolioInstantCurrencyValue(String portfolio,
-                                                 Instant instant,
-                                                 Map<String, BigDecimal> currencyValueMap) {
+    private record AccountInstantCurrencyValue(String account,
+                                               Instant instant,
+                                               Map<String, BigDecimal> currencyValueMap) {
     }
 
     /**
      * Assets in ruble
      */
-    private LinkedHashMap<Instant, BigDecimal> getAllPortfolioTotalAssets(List<AccountProperty> assets,
-                                                                          List<EventCashFlow> cashFlows) {
-        List<PortfolioAssetsInRub> summedAssetsInRub = sumValuesOfSameInstantInRub(assets);
+    private LinkedHashMap<Instant, BigDecimal> getAllAccountTotalAssets(List<AccountProperty> assets,
+                                                                        List<EventCashFlow> cashFlows) {
+        List<AccountAssetsInRub> summedAssetsInRub = sumValuesOfSameInstantInRub(assets);
         // temp var: portfolio -> assets
-        Map<String, BigDecimal> lastTotalAssets = initPortfoliosByZero(assets);
+        Map<String, BigDecimal> lastTotalAssets = initAccountsByZero(assets);
         Instant lastInstant = Instant.MIN;
-        // date-time -> summed assets for all portfolios
-        LinkedHashMap<Instant, BigDecimal> allPortfolioSummedAssets = new LinkedHashMap<>();
+        // date-time -> summed assets for all accounts
+        LinkedHashMap<Instant, BigDecimal> allAccountSummedAssets = new LinkedHashMap<>();
 
         // portfolio -> timestamp -> cash flows in rub
-        Map<String, TreeMap<Instant, BigDecimal>> rubCashFlowsGroupedByPortfolio =
-                convertCashFlowsToRubAndGroupByPortfolio(cashFlows);
+        Map<String, TreeMap<Instant, BigDecimal>> rubCashFlowsGroupedByAccount =
+                convertCashFlowsToRubAndGroupByAccount(cashFlows);
 
-        for (PortfolioAssetsInRub updatingAssets : summedAssetsInRub) {
-            updateKnownPortfolioAssets(lastTotalAssets, updatingAssets, rubCashFlowsGroupedByPortfolio, lastInstant);
+        for (AccountAssetsInRub updatingAssets : summedAssetsInRub) {
+            updateKnownPortfolioAssets(lastTotalAssets, updatingAssets, rubCashFlowsGroupedByAccount, lastInstant);
             lastInstant = updatingAssets.instant();
             BigDecimal sum = lastTotalAssets.values()
                     .stream()
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            allPortfolioSummedAssets.put(updatingAssets.instant(), sum);
+            allAccountSummedAssets.put(updatingAssets.instant(), sum);
         }
-        return allPortfolioSummedAssets;
+        return allAccountSummedAssets;
     }
 
     /**
-     * Sums PortfolioPropertyType.TOTAL_ASSETS_RUB and TOTAL_ASSETS_USD if both exists for same timestamp
+     * Sums AccountPropertyType.TOTAL_ASSETS_RUB and TOTAL_ASSETS_USD if both exists for same timestamp
      */
-    private List<PortfolioAssetsInRub> sumValuesOfSameInstantInRub(List<AccountProperty> assets) {
+    private List<AccountAssetsInRub> sumValuesOfSameInstantInRub(List<AccountProperty> assets) {
         // portfolio -> Instant -> value in RUB
-        Map<String, Map<Instant, BigDecimal>> portfolioInstantValueInRub = assets.stream()
+        Map<String, Map<Instant, BigDecimal>> accountInstantValueInRub = assets.stream()
                 .collect(groupingBy(AccountProperty::getAccount,
                         toMap(AccountProperty::getTimestamp, this::convertAssetsToRub, BigDecimal::add)));
-        List<PortfolioAssetsInRub> summedAssetsInRub = new ArrayList<>();
-        portfolioInstantValueInRub.forEach((portfolio, instantValueInRub) ->
+        List<AccountAssetsInRub> summedAssetsInRub = new ArrayList<>();
+        accountInstantValueInRub.forEach((account, instantValueInRub) ->
                 instantValueInRub.forEach((instant, valueInRub) ->
-                        summedAssetsInRub.add(new PortfolioAssetsInRub(portfolio, instant, valueInRub))));
-        summedAssetsInRub.sort(comparing(PortfolioAssetsInRub::instant));
+                        summedAssetsInRub.add(new AccountAssetsInRub(account, instant, valueInRub))));
+        summedAssetsInRub.sort(comparing(AccountAssetsInRub::instant));
         return summedAssetsInRub;
     }
 
-    private record PortfolioAssetsInRub(String portfolio, Instant instant, BigDecimal valueInRub) {
+    private record AccountAssetsInRub(String account, Instant instant, BigDecimal valueInRub) {
     }
 
     private BigDecimal convertAssetsToRub(AccountProperty updatingAssets) {
@@ -472,14 +472,14 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
         return foreignExchangeRateService.convertValueToCurrency(getAssets(updatingAssets), currency, RUB);
     }
 
-    private Map<String, BigDecimal> initPortfoliosByZero(Collection<AccountProperty> assets) {
+    private Map<String, BigDecimal> initAccountsByZero(Collection<AccountProperty> assets) {
         return assets.stream()
                 .map(AccountProperty::getAccount)
                 .distinct()
                 .collect(toMap(Function.identity(), _ -> BigDecimal.ZERO));
     }
 
-    private Map<String, TreeMap<Instant, BigDecimal>> convertCashFlowsToRubAndGroupByPortfolio(List<EventCashFlow> cashFlows) {
+    private Map<String, TreeMap<Instant, BigDecimal>> convertCashFlowsToRubAndGroupByAccount(List<EventCashFlow> cashFlows) {
         return cashFlows.stream()
                 .collect(groupingBy(EventCashFlow::getAccount,
                         toMap(EventCashFlow::getTimestamp,
@@ -488,20 +488,20 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                                 TreeMap::new)));
     }
 
-    private void updateKnownPortfolioAssets(Map<String, BigDecimal> lastPortfolioAssets,
-                                            PortfolioAssetsInRub updatingAssets,
-                                            Map<String, TreeMap<Instant, BigDecimal>> rubCashFlowsGroupedByPortfolio,
+    private void updateKnownPortfolioAssets(Map<String, BigDecimal> lastAccountAssets,
+                                            AccountAssetsInRub updatingAssets,
+                                            Map<String, TreeMap<Instant, BigDecimal>> rubCashFlowsGroupedByAccount,
                                             Instant lastInstant) {
-        String updatingPortfolio = updatingAssets.portfolio();
-        lastPortfolioAssets.put(updatingPortfolio, updatingAssets.valueInRub());
-        lastPortfolioAssets.replaceAll((portfolio, portfolioAssets) ->
-                portfolio.equals(updatingPortfolio) ? portfolioAssets :
-                        // update other portfolios by invested sum
-                        rubCashFlowsGroupedByPortfolio.getOrDefault(portfolio, emptyTreeMap)
+        String updatingAccount = updatingAssets.account();
+        lastAccountAssets.put(updatingAccount, updatingAssets.valueInRub());
+        lastAccountAssets.replaceAll((account, accountAssets) ->
+                account.equals(updatingAccount) ? accountAssets :
+                        // update other accounts by invested sum
+                        rubCashFlowsGroupedByAccount.getOrDefault(account, emptyTreeMap)
                                 .subMap(lastInstant, false, updatingAssets.instant(), true)
                                 .values()
                                 .stream()
-                                .reduce(portfolioAssets, BigDecimal::add));
+                                .reduce(accountAssets, BigDecimal::add));
     }
 
     private static BigDecimal getAssets(AccountProperty property) {

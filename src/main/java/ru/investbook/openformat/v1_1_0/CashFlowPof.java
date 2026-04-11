@@ -89,14 +89,14 @@ public class CashFlowPof {
                 .build();
     }
 
-    Optional<EventCashFlow> toEventCashFlow(Map<Integer, String> accountToPortfolioId) {
+    Optional<EventCashFlow> toEventCashFlow(Map<Integer, String> accountToAccountId) {
         try {
             CashFlowType eventType = type.toCashFlowType();
             if (eventType == CashFlowType.DIVIDEND && description != null && description.contains("купон")) {
                 eventType = CashFlowType.COUPON; // izi-invest.ru fix: не различает дивиденды и купоны
             }
             return Optional.of(EventCashFlow.builder()
-                    .account(Objects.requireNonNull(accountToPortfolioId.get(account)))
+                    .account(Objects.requireNonNull(accountToAccountId.get(account)))
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .value(amount)
                     .currency(getValidCurrencyOrNull(currency))

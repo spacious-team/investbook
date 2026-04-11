@@ -41,7 +41,7 @@ import static org.spacious_team.table_wrapper.api.TableCellAddress.NOT_FOUND;
 @EqualsAndHashCode(callSuper = true)
 public class UralsibBrokerReport extends AbstractExcelBrokerReport {
     // "УРАЛСИБ Брокер" или "УРАЛСИБ Кэпитал - Финансовые услуги" (старый формат 2018 г)
-    private static final String PORTFOLIO_MARKER = "Номер счета Клиента:";
+    private static final String ACCOUNT_MARKER = "Номер счета Клиента:";
     private static final Predicate<@Nullable Object> uralsibReportPredicate = cell ->
             (cell instanceof String value) && (value.contains("Твой Брокер") || value.contains("УРАЛСИБ"));
     private static final Predicate<@Nullable Object> dateMarkerPredicate = cell ->
@@ -73,7 +73,7 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
                 reportPage,
                 excelFileName,
                 getReportEndDateTime(reportPage),
-                getPortfolio(reportPage));
+                getAccount(reportPage));
         return new ExcelAttributes(workbook, attributes);
     }
 
@@ -83,9 +83,9 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
         }
     }
 
-    private static String getPortfolio(ReportPage reportPage) {
+    private static String getAccount(ReportPage reportPage) {
         try {
-            TableCellAddress address = reportPage.findByPrefix(PORTFOLIO_MARKER);
+            TableCellAddress address = reportPage.findByPrefix(ACCOUNT_MARKER);
             ReportPageRow row = requireNonNull(reportPage.getRow(address.getRow()));
             for (@Nullable TableCell cell : row) {
                 if (cell != null && cell.getColumnIndex() > address.getColumn()) {
@@ -100,7 +100,7 @@ public class UralsibBrokerReport extends AbstractExcelBrokerReport {
                 }
             }
             throw new IllegalArgumentException(
-                    "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + " XXX'");
+                    "В отчете не найден номер договора по заданному шаблону '" + ACCOUNT_MARKER + " XXX'");
         } catch (Exception e) {
             throw new RuntimeException("Ошибка поиска номера Брокерского счета в отчете", e);
         }

@@ -88,12 +88,12 @@ public class AccountPof {
         return Objects.requireNonNull(accountNumberToIdMap.get().get(accountNumber));
     }
 
-    static AccountPof of(AccountEntity portfolio, BigDecimal valuationInRub) {
+    static AccountPof of(AccountEntity account, BigDecimal valuationInRub) {
         int id = idGenerator.get().incrementAndGet();
-        accountNumberToIdMap.get().put(portfolio.getId(), id);
+        accountNumberToIdMap.get().put(account.getId(), id);
         return AccountPof.builder()
                 .id(id)
-                .accountNumber(portfolio.getId())
+                .accountNumber(account.getId())
                 .type(AccountTypePof.investment)
                 .valuation(valuationInRub)
                 .valuationCurrency("RUB")
@@ -116,7 +116,7 @@ public class AccountPof {
     Optional<AccountProperty> toTotalAssets(Instant atInstant) {
         try {
             return getAccountPropertyType()
-                    .map(this::getPortfolioProperty)
+                    .map(this::getAccountProperty)
                     .map(p -> p.timestamp(atInstant))
                     .map(AccountPropertyBuilder::build);
         } catch (Exception e) {
@@ -135,7 +135,7 @@ public class AccountPof {
         return Optional.empty();
     }
 
-    private AccountPropertyBuilder getPortfolioProperty(AccountPropertyType type) {
+    private AccountPropertyBuilder getAccountProperty(AccountPropertyType type) {
         String account = Optional.ofNullable(accountNumber)
                 .orElse(String.valueOf(id));
         return AccountProperty.builder()

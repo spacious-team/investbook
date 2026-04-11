@@ -227,10 +227,10 @@ public class StockMarketProfitExcelTableFactory implements TableFactory {
                 .orElse(null);
     }
 
-    private @Nullable String getRedemptionCashFlow(String portfolio, Integer securityId, double multiplier, String toCurrency) {
+    private @Nullable String getRedemptionCashFlow(String account, Integer securityId, double multiplier, String toCurrency) {
         List<SecurityEventCashFlowEntity> cashFlows = securityEventCashFlowRepository
                 .findByAccountIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                        singleton(portfolio),
+                        singleton(account),
                         securityId,
                         CashFlowType.REDEMPTION.getId(),
                         ViewFilter.get().getFromDate(),

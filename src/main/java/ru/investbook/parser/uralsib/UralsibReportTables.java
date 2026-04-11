@@ -40,7 +40,7 @@ public class UralsibReportTables extends AbstractReportTables<UralsibBrokerRepor
 
     @Getter
     private final CashTable accountCashTable;
-    private final SecuritiesTable portfolioSecuritiesTable;
+    private final SecuritiesTable accountSecuritiesTable;
     private final ReportTable<SecurityTransaction> securityTransactionTable;
     @Getter
     private final AccountPropertyTable accountPropertyTable;
@@ -59,14 +59,14 @@ public class UralsibReportTables extends AbstractReportTables<UralsibBrokerRepor
         this.accountCashTable = new CashTable(report);
         this.foreignExchangeRateTable = new ForeignExchangeRateTable(report, foreignExchangeRateService);
         this.accountPropertyTable = new AccountPropertyTable(securityAssetsTable, accountCashTable, foreignExchangeRateTable);
-        this.portfolioSecuritiesTable = new SecuritiesTable(report);
+        this.accountSecuritiesTable = new SecuritiesTable(report);
         this.securityTransactionTable = WrappingReportTable.of(
-                new SecurityTransactionTable(report, portfolioSecuritiesTable, foreignExchangeRateTable, transactionValueAndFeeParser),
-                new RepoTransactionTable(report, portfolioSecuritiesTable, foreignExchangeRateTable, transactionValueAndFeeParser),
-                new SecurityDepositAndWithdrawalTable(report, portfolioSecuritiesTable));
+                new SecurityTransactionTable(report, accountSecuritiesTable, foreignExchangeRateTable, transactionValueAndFeeParser),
+                new RepoTransactionTable(report, accountSecuritiesTable, foreignExchangeRateTable, transactionValueAndFeeParser),
+                new SecurityDepositAndWithdrawalTable(report, accountSecuritiesTable));
         this.couponAmortizationRedemptionTable =
-                new CouponAmortizationRedemptionTable(report, portfolioSecuritiesTable, securityTransactionTable);
-        this.dividendTable = new DividendTable(report, portfolioSecuritiesTable, securityTransactionTable);
+                new CouponAmortizationRedemptionTable(report, accountSecuritiesTable, securityTransactionTable);
+        this.dividendTable = new DividendTable(report, accountSecuritiesTable, securityTransactionTable);
         this.securityQuoteTable = WrappingReportTable.of(
                 new SecurityQuoteTable(report, foreignExchangeRateTable),
                 new DerivativeQuoteTable(report));
@@ -83,7 +83,7 @@ public class UralsibReportTables extends AbstractReportTables<UralsibBrokerRepor
 
     @Override
     public ReportTable<Security> getSecuritiesTable() {
-        return WrappingReportTable.of(report, portfolioSecuritiesTable.getData()
+        return WrappingReportTable.of(report, accountSecuritiesTable.getData()
                 .stream()
                 .map(ReportSecurityInformation::getSecurity)
                 .collect(Collectors.toList()));

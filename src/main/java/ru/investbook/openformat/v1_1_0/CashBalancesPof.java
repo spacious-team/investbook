@@ -88,11 +88,11 @@ public class CashBalancesPof {
                 .toList();
     }
 
-    Collection<AccountCash> toAccountCash(Map<Integer, String> accountToPortfolioId, Instant instant) {
+    Collection<AccountCash> toAccountCash(Map<Integer, String> accountToAccountId, Instant instant) {
         try {
             return cash.stream()
                     .map(c -> AccountCash.builder()
-                            .account(Objects.requireNonNull(accountToPortfolioId.get(account)))
+                            .account(Objects.requireNonNull(accountToAccountId.get(account)))
                             .market("all")
                             .timestamp(instant)
                             .value(c.getValue())

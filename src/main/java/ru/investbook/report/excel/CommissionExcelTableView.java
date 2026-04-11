@@ -44,7 +44,7 @@ public class CommissionExcelTableView extends ExcelTableView {
     @Getter
     private final int sheetOrder = 11;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Комиссия (" + portfolio + ")";
+    private final UnaryOperator<String> sheetNameCreator = account -> "Комиссия (" + account + ")";
 
     public CommissionExcelTableView(AccountRepository accountRepository,
                                     CommissionExcelTableFactory tableFactory,

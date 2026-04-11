@@ -45,7 +45,7 @@ public class DerivativesMarketProfitExcelTableView extends ExcelTableView {
     @Getter
     private final int sheetOrder = 6;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (срочный)";
+    private final UnaryOperator<String> sheetNameCreator = account -> account + " (срочный)";
 
     public DerivativesMarketProfitExcelTableView(AccountRepository accountRepository,
                                                  DerivativesMarketProfitExcelTableFactory tableFactory,

@@ -43,12 +43,12 @@ public class ViewFilter {
     public static final Instant defaultFromDate = Instant.ofEpochSecond(0);
     private static final Function<LocalDate, Instant> toInstant = date -> date.atStartOfDay(systemDefault()).toInstant();
 
-    public static ViewFilter of(ViewFilterModel viewFilterModel, Supplier<? extends Set<String>> allPortfoliosSupplier) {
+    public static ViewFilter of(ViewFilterModel viewFilterModel, Supplier<? extends Set<String>> allAccountsSupplier) {
         Set<String> accounts = viewFilterModel.getAccounts();
         if (!accounts.isEmpty()) {
-            Set<String> allPortfolios = allPortfoliosSupplier.get();
-            if (accounts.equals(allPortfolios)) {
-                // portfolio filter not required
+            Set<String> allAccounts = allAccountsSupplier.get();
+            if (accounts.equals(allAccounts)) {
+                // account filter not required
                 accounts = Collections.emptySet();
             }
         }

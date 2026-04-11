@@ -185,7 +185,7 @@ public class TransactionFormsService {
                 .count(abs(tr.getCount()) * direction)
                 .build();
 
-        savePortfolio(tr.getAccount());
+        saveAccount(tr.getAccount());
         int transactionId = saveTransaction(transaction);
         tr.setId(transactionId); // used by view
     }
@@ -210,11 +210,11 @@ public class TransactionFormsService {
         return transactionEntity.getId();
     }
 
-    private void savePortfolio(String portfolio) {
-        if (!accountRepository.existsById(portfolio)) {
+    private void saveAccount(String account) {
+        if (!accountRepository.existsById(account)) {
             accountRepository.save(
                     accountConverter.toEntity(Account.builder()
-                            .id(portfolio)
+                            .id(account)
                             .build()));
         }
     }
@@ -230,7 +230,7 @@ public class TransactionFormsService {
                 .timestamp(splitInstant)
                 .security(savedSecurityId);
 
-        savePortfolio(split.getAccount());
+        saveAccount(split.getAccount());
         saveTransaction(builder
                 .tradeId(split.getTradeId(savedSecurityId) + "w")
                 .count(-Math.abs(split.getWithdrawalCount()))

@@ -123,9 +123,9 @@ public class PortfolioOpenFormatBuilder {
         AccountPof.resetAccountIdGenerator();
         return accountRepository.findAll()
                 .stream()
-                .map(portfolio -> AccountPof.of(
-                        portfolio,
-                        assetsAndCashService.getTotalAssetsInRub(portfolio.getId()).orElse(BigDecimal.ZERO)))
+                .map(account -> AccountPof.of(
+                        account,
+                        assetsAndCashService.getTotalAssetsInRub(account.getId()).orElse(BigDecimal.ZERO)))
                 .toList();
     }
 
@@ -143,13 +143,13 @@ public class PortfolioOpenFormatBuilder {
                 .toList();
     }
 
-    private CashBalancesPof getCashBalances(AccountEntity portfolio) {
+    private CashBalancesPof getCashBalances(AccountEntity account) {
         List<AccountCashEntity> latestCashBalances = accountCashRepository
                 .findDistinctOnAccountByAccountInAndTimestampBetweenOrderByTimestampDesc(
-                        Set.of(portfolio.getId()),
+                        Set.of(account.getId()),
                         Instant.EPOCH,
                         Instant.now());
-        return CashBalancesPof.of(AccountPof.getAccountId(portfolio.getId()), latestCashBalances);
+        return CashBalancesPof.of(AccountPof.getAccountId(account.getId()), latestCashBalances);
     }
 
     private record TradesAndTransfers(Collection<TradePof> trades, Collection<TransferPof> transfers) {

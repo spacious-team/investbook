@@ -46,14 +46,14 @@ public class ReportParserService {
 
     public void parse(ReportTables reportTables) {
         try {
-            boolean isAdded = getPortfolios(reportTables).stream().allMatch(api::addPortfolio);
+            boolean isAdded = getAccounts(reportTables).stream().allMatch(api::addAccount);
             if (!isAdded) {
                 return;
             }
 
             reportTables.getAccountPropertyTable()
                     .getData()
-                    .forEach(api::addPortfolioProperty);
+                    .forEach(api::addAccountProperty);
             reportTables.getAccountCashTable()
                     .getData()
                     .forEach(api::addAccountCash);
@@ -82,25 +82,25 @@ public class ReportParserService {
         }
     }
 
-    private static Set<Account> getPortfolios(ReportTables tables) {
-        Set<String> portfolios = new HashSet<>();
+    private static Set<Account> getAccounts(ReportTables tables) {
+        Set<String> accounts = new HashSet<>();
 
-        addPortfolios(portfolios, tables.getAccountPropertyTable(), AccountProperty::getAccount);
-        addPortfolios(portfolios, tables.getAccountCashTable(), AccountCash::getAccount);
-        addPortfolios(portfolios, tables.getCashFlowTable(), EventCashFlow::getAccount);
-        addPortfolios(portfolios, tables.getTransactionTable(), AbstractTransaction::getAccount);
-        addPortfolios(portfolios, tables.getSecurityEventCashFlowTable(), SecurityEventCashFlow::getAccount);
+        addAccounts(accounts, tables.getAccountPropertyTable(), AccountProperty::getAccount);
+        addAccounts(accounts, tables.getAccountCashTable(), AccountCash::getAccount);
+        addAccounts(accounts, tables.getCashFlowTable(), EventCashFlow::getAccount);
+        addAccounts(accounts, tables.getTransactionTable(), AbstractTransaction::getAccount);
+        addAccounts(accounts, tables.getSecurityEventCashFlowTable(), SecurityEventCashFlow::getAccount);
 
-        return portfolios.stream()
-                .map(portfolio -> Account.builder().id(portfolio).build())
+        return accounts.stream()
+                .map(account -> Account.builder().id(account).build())
                 .collect(Collectors.toSet());
     }
 
-    private static <T> void addPortfolios(Collection<String> dest,
-                                          ReportTable<T> fromTable, Function<T, String> toPortfolio) {
+    private static <T> void addAccounts(Collection<String> dest,
+                                        ReportTable<T> fromTable, Function<T, String> toAccount) {
         fromTable.getData()
                 .stream()
-                .map(toPortfolio)
+                .map(toAccount)
                 .collect(toCollection(() -> dest));
     }
 }

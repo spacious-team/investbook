@@ -76,14 +76,14 @@ public class InternalRateOfReturn {
      * @return internal rate of return, if it can be calculated, or null otherwise
      */
     public @Nullable Double calc(
-            Collection<String> portfolios, Security security, @Nullable SecurityQuote quote, Instant fromDate, Instant toDate) {
+            Collection<String> accounts, Security security, @Nullable SecurityQuote quote, Instant fromDate, Instant toDate) {
 
         try {
             boolean isDerivative = (security.getType() == DERIVATIVE);
             if (isDerivative) {
                 return null;
             }
-            FifoPositionsFilter pf = FifoPositionsFilter.of(portfolios, fromDate, toDate);
+            FifoPositionsFilter pf = FifoPositionsFilter.of(accounts, fromDate, toDate);
             FifoPositions positions = positionsFactory.get(security, pf);
             int count = positions.getCurrentOpenedPositionsCount();
             if (count != 0 && (quote == null || quote.getDirtyPriceInCurrency(isDerivative) == null)) {
@@ -97,7 +97,7 @@ public class InternalRateOfReturn {
                     .flatMap(Optional::stream)
                     .collect(Collectors.toList());
 
-            getSecurityEventCashFlowEntities(portfolios, security, paymentTypes)
+            getSecurityEventCashFlowEntities(accounts, security, paymentTypes)
                     .stream()
                     .map(cash -> castToXirrTransaction(cash, toCurrency))
                     .collect(toCollection(() -> transactions));
@@ -162,10 +162,10 @@ public class InternalRateOfReturn {
         return (BigDecimal.ZERO.equals(value)) ? empty() : ofNullable(value);
     }
 
-    public List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
+    public List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> accounts,
                                                                               Security security,
                                                                               Set<Integer> cashFlowTypes) {
-        return portfolios.isEmpty() ?
+        return accounts.isEmpty() ?
                 securityEventCashFlowRepository
                         .findBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
                                 requireNonNull(security.getId()),
@@ -174,7 +174,7 @@ public class InternalRateOfReturn {
                                 ViewFilter.get().getToDate()) :
                 securityEventCashFlowRepository
                         .findByAccountIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
-                                portfolios,
+                                accounts,
                                 requireNonNull(security.getId()),
                                 cashFlowTypes,
                                 ViewFilter.get().getFromDate(),
