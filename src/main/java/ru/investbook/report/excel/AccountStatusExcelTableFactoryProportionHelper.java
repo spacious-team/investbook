@@ -28,14 +28,14 @@ import java.util.stream.Stream;
 
 import static org.spacious_team.broker.pojo.SecurityType.CURRENCY_PAIR;
 import static org.spacious_team.broker.pojo.SecurityType.DERIVATIVE;
-import static ru.investbook.report.excel.PortfolioStatusExcelTableFactory.CASH_BALANCE;
-import static ru.investbook.report.excel.PortfolioStatusExcelTableHeader.*;
+import static ru.investbook.report.excel.AccountStatusExcelTableFactory.CASH_BALANCE;
+import static ru.investbook.report.excel.AccountStatusExcelTableHeader.*;
 
-public class PortfolioStatusExcelTableFactoryProportionHelper {
+public class AccountStatusExcelTableFactoryProportionHelper {
 
     static void setInvestmentProportionFormula(Table table) {
         BigDecimal totalInvestmentAmount = getRecordStreamForInvestmentAmount(table)
-                .map(PortfolioStatusExcelTableFactoryProportionHelper::getInvestmentAmount)
+                .map(AccountStatusExcelTableFactoryProportionHelper::getInvestmentAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         if (totalInvestmentAmount.floatValue() >= 0.01) {
             getRecordStreamForInvestmentAmount(table).forEach(record ->
@@ -45,7 +45,7 @@ public class PortfolioStatusExcelTableFactoryProportionHelper {
 
     static void setCurrentProportionFormula(Table table) {
         BigDecimal totalAmount = getRecordStreamForTotalAmount(table)
-                .map(PortfolioStatusExcelTableFactoryProportionHelper::getCurrentAmount)
+                .map(AccountStatusExcelTableFactoryProportionHelper::getCurrentAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         if (totalAmount.floatValue() >= 0.01) {
             getRecordStreamForTotalAmount(table).forEach(record ->
@@ -55,14 +55,14 @@ public class PortfolioStatusExcelTableFactoryProportionHelper {
 
     private static Stream<Table.Record> getRecordStreamForInvestmentAmount(Table table) {
         return table.stream()
-                .filter(PortfolioStatusExcelTableFactoryProportionHelper::hasPositiveCount)
-                .filter(Predicate.not(PortfolioStatusExcelTableFactoryProportionHelper::isDerivativeCurrencyPairOrCashBalance));
+                .filter(AccountStatusExcelTableFactoryProportionHelper::hasPositiveCount)
+                .filter(Predicate.not(AccountStatusExcelTableFactoryProportionHelper::isDerivativeCurrencyPairOrCashBalance));
     }
 
     private static Stream<Table.Record> getRecordStreamForTotalAmount(Table table) {
         return table.stream()
-                .filter(PortfolioStatusExcelTableFactoryProportionHelper::hasPositiveCount)
-                .filter(Predicate.not(PortfolioStatusExcelTableFactoryProportionHelper::isDerivativeOrCurrencyPair));
+                .filter(AccountStatusExcelTableFactoryProportionHelper::hasPositiveCount)
+                .filter(Predicate.not(AccountStatusExcelTableFactoryProportionHelper::isDerivativeOrCurrencyPair));
     }
 
     private static boolean hasPositiveCount(Table.Record record) {

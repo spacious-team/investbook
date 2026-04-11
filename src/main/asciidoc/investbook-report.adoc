@@ -1,10 +1,10 @@
 = Описание отчета Investbook
 
-. <<portfolio-analysis.adoc#,Таблица "Обзор">>
-. <<portfolio-status.adoc#,Таблица "Портфель">>
+. <<account-analysis.adoc#,Таблица "Обзор">>
+. <<account-status.adoc#,Таблица "Портфель">>
 . <<derivatives-market-total-profit.adoc#,Таблица "Портфель трейдера">>
-. <<portfolio-payment.adoc#,Таблица "Выплаты">>
-. <<foreign-portfolio-payment.adoc#,Таблица "Внешние выплаты">>
+. <<account-payment.adoc#,Таблица "Выплаты">>
+. <<foreign-account-payment.adoc#,Таблица "Внешние выплаты">>
 . <<stock-market-profit.adoc#,Таблица "Фондовый рынок">>
 . <<derivatives-market-profit.adoc#,Таблица "Срочный рынок">>
 . <<foreign-market-profit.adoc#,Таблица "Валютный рынок">>

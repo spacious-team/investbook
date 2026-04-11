@@ -21,76 +21,76 @@ package ru.investbook.report.excel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Account;
-import org.spacious_team.broker.pojo.SecurityEventCashFlow;
+import org.spacious_team.broker.pojo.CashFlowType;
+import org.spacious_team.broker.pojo.EventCashFlow;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import ru.investbook.converter.SecurityEventCashFlowConverter;
+import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableFactory;
 import ru.investbook.report.ViewFilter;
-import ru.investbook.repository.SecurityEventCashFlowRepository;
-import ru.investbook.repository.SecurityRepository;
+import ru.investbook.repository.EventCashFlowRepository;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
-import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static java.time.format.TextStyle.FULL_STANDALONE;
 import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.CashFlowType.*;
-import static ru.investbook.report.excel.PortfolioPaymentExcelTableHeader.*;
+import static ru.investbook.report.excel.ForeignAccountPaymentExcelTableHeader.*;
+import static ru.investbook.report.excel.TaxExcelTableFactory.isDividendOrCouponTax;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class PortfolioPaymentExcelTableFactory implements TableFactory {
-    private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
-    private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
-    private final SecurityRepository securityRepository;
+public class ForeignAccountPaymentExcelTableFactory implements TableFactory {
+    /** tax accounted by {@link TaxExcelTableFactory} */
+    private final Collection<Integer> PAY_TYPES = Stream.of(new CashFlowType[]{AMORTIZATION, REDEMPTION, COUPON, DIVIDEND, TAX})
+            .map(CashFlowType::getId)
+            .collect(Collectors.toList());
+    private final EventCashFlowRepository eventCashFlowRepository;
+    private final EventCashFlowConverter eventCashFlowConverter;
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
-    private final Set<Integer> paymentTypes = Set.of(
-            AMORTIZATION.getId(),
-            REDEMPTION.getId(),
-            COUPON.getId(),
-            DIVIDEND.getId(),
-            TAX.getId());
 
     @Override
     public Table create(Account account) {
-        List<SecurityEventCashFlow> cashFlows = getCashFlows(account);
+        List<EventCashFlow> cashFlows = getCashFlows(account);
         return getTable(cashFlows);
     }
 
-    private ArrayList<SecurityEventCashFlow> getCashFlows(Account account) {
-        return securityEventCashFlowRepository
+    private ArrayList<EventCashFlow> getCashFlows(Account account) {
+        return eventCashFlowRepository
                 .findByAccountIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
                         account.getId(),
-                        paymentTypes,
+                        PAY_TYPES,
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate())
                 .stream()
-                .map(securityEventCashFlowConverter::fromEntity)
+                .map(eventCashFlowConverter::fromEntity)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private Table getTable(List<SecurityEventCashFlow> cashFlows) {
+    private Table getTable(List<EventCashFlow> cashFlows) {
         Table table = new Table();
+        cashFlows = cashFlows.stream()
+                .filter(cash -> cash.getEventType() != TAX || isDividendOrCouponTax(cash.getDescription()))
+                .collect(Collectors.toList());
         if (!cashFlows.isEmpty()) {
             table.add(new Table.Record());
             Table.Record monthTotalRecord = new Table.Record();
             table.add(monthTotalRecord);
             @MonotonicNonNull Month month = null;
             int sumRowCount = 0;
-            for (SecurityEventCashFlow cash : cashFlows) {
+            for (EventCashFlow cash : cashFlows) {
                 Instant timestamp = cash.getTimestamp();
                 Month currentMonth = LocalDate.ofInstant(timestamp, ZoneId.systemDefault()).getMonth();
                 if (month == null) {
@@ -105,13 +105,11 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
                 }
                 Table.Record record = new Table.Record();
                 record.put(DATE, timestamp);
-                record.put(COUNT, cash.getCount());
-                record.put(PortfolioPaymentExcelTableHeader.CASH, cash.getValue());
+                record.put(ForeignAccountPaymentExcelTableHeader.CASH, cash.getValue());
                 record.put(CURRENCY, cash.getCurrency());
                 record.put(CASH_RUB, foreignExchangeRateTableFactory.cashConvertToRubExcelFormula(cash.getCurrency(),
-                        PortfolioPaymentExcelTableHeader.CASH, EXCHANGE_RATE));
-                record.put(PAYMENT_TYPE, getPaymentType(cash));
-                record.put(SECURITY, getSecurityName(cash));
+                        ForeignAccountPaymentExcelTableHeader.CASH, EXCHANGE_RATE));
+                record.put(DESCRIPTION, cash.getDescription());
                 table.add(record);
                 sumRowCount++;
             }
@@ -125,27 +123,8 @@ public class PortfolioPaymentExcelTableFactory implements TableFactory {
 
     private void calcTotalRecord(Table.Record monthTotalRecord, Month month, int sumRowCount) {
         if (sumRowCount != 0) {
-            monthTotalRecord.put(SECURITY, StringUtils.capitalize(month.getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault())));
+            monthTotalRecord.put(DATE, StringUtils.capitalize(month.getDisplayName(FULL_STANDALONE, Locale.getDefault())));
             monthTotalRecord.put(CASH_RUB, "=SUM(OFFSET(" + CASH_RUB.getCellAddr() + ",1,0," + sumRowCount + ",1))");
         }
-    }
-
-    private static @Nullable String getPaymentType(SecurityEventCashFlow cash) {
-        return switch (cash.getEventType()) {
-            case DIVIDEND -> "Дивиденды";
-            case COUPON -> "Купоны";
-            case REDEMPTION -> "Погашение облигации";
-            case AMORTIZATION -> "Амортизация облигации";
-            case TAX -> "Удержание налога";
-            default -> null;
-        };
-    }
-
-    private String getSecurityName(SecurityEventCashFlow cash) {
-        return securityRepository.findById(cash.getSecurity())
-                .flatMap(security -> Optional.ofNullable(security.getName())
-                        .or(() -> Optional.ofNullable(security.getTicker()))
-                        .or(() -> Optional.ofNullable(security.getIsin())))
-                .orElse("<неизвестно>");
     }
 }

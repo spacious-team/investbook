@@ -53,27 +53,27 @@ https://github.com/spacious-team/investbook/actions/workflows/unit-tests.yml)
 информацию. При этом вся информация сохраняется на вашем компьютере, в облако данные не уходят, для работы интернет не требуется.
 
 По каждому счету в отдельности и подводя единый итог по всем счетам, будет доступна следующая информация:
-- [обзор](src/main/asciidoc/portfolio-analysis.adoc) роста активов, рассчитанного по методике S&P 500,
+- [обзор](src/main/asciidoc/account-analysis.adoc) роста активов, рассчитанного по методике S&P 500,
   в сравнении с S&P 500, история инвестиций и остатка денежных средств;  
-  ![portfolio-analysis](https://user-images.githubusercontent.com/11336712/102415874-fd17a280-4009-11eb-9bff-232975adf21b.png)
+  ![account-analysis](https://user-images.githubusercontent.com/11336712/102415874-fd17a280-4009-11eb-9bff-232975adf21b.png)
   <img src="https://user-images.githubusercontent.com/11336712/102416414-d4dc7380-400a-11eb-95b1-8ff8ae37bd17.png" width="32%"/>
   <img src="https://user-images.githubusercontent.com/11336712/149419132-cad11fc3-fdaa-4572-882b-4ed49b937afe.png" width="32%"/>
   <img src="https://user-images.githubusercontent.com/11336712/102419341-9a75d500-4010-11eb-817a-a9b322237dd2.png" width="32%"/>
-- [портфель](src/main/asciidoc/portfolio-status.adoc) ценных бумаг с информацией о текущей позиции, усредненной цене
+- [портфель](src/main/asciidoc/account-status.adoc) ценных бумаг с информацией о текущей позиции, усредненной цене
   покупок и доходности ценных бумаг (ЧИСТВНДОХ/XIRR) с учетом хеджирующих позиций на срочном рынке и усредненной цены покупки валюты;  
-  ![portfolio](https://user-images.githubusercontent.com/11336712/104820094-af2dce80-5843-11eb-8083-6521ea537334.png)
-- доля ценной бумаги в [портфеле](src/main/asciidoc/portfolio-status.adoc);  
+  ![account-status](https://user-images.githubusercontent.com/11336712/104820094-af2dce80-5843-11eb-8083-6521ea537334.png)
+- доля ценной бумаги в [портфеле](src/main/asciidoc/account-status.adoc);  
   ![current-proportion](https://user-images.githubusercontent.com/11336712/88717010-8cd6b600-d128-11ea-901f-2b3fcee96f07.png)
 - [портфель трейдера](src/main/asciidoc/derivatives-market-total-profit.adoc) с информацией о доходности
   сделок на срочном рынке в разрезе группы контрактов (например, по всем фьючерсам и опционам Si, то же по BR и т.д.);  
   ![derivatives-marker-total-profit](https://user-images.githubusercontent.com/11336712/119887746-30f1df00-bf3d-11eb-9c52-713093ae4d72.png)
 - распределение прибыли по группам срочных контрактов в [портфеле трейдера](src/main/asciidoc/derivatives-market-total-profit.adoc);  
   ![derivatives-profit-proportion](https://user-images.githubusercontent.com/11336712/120565530-fb099a80-c415-11eb-82bb-8288ed9b7806.png)
-- детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/portfolio-payment.adoc);  
-  ![portfolio-payment](https://user-images.githubusercontent.com/11336712/88460806-93a2c600-cea7-11ea-8ac9-95406fd6cec8.png)
-- детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/foreign-portfolio-payment.adoc),
+- детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/account-payment.adoc);  
+  ![account-payment](https://user-images.githubusercontent.com/11336712/88460806-93a2c600-cea7-11ea-8ac9-95406fd6cec8.png)
+- детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/foreign-account-payment.adoc),
   начисленные по акциям и облигациям со связанного счета ИИС;  
-  ![foreign-portfolio-payment](https://user-images.githubusercontent.com/11336712/87988115-7907d000-cae8-11ea-9ec7-d56a120aac89.png)
+  ![foreign-account-payment](https://user-images.githubusercontent.com/11336712/87988115-7907d000-cae8-11ea-9ec7-d56a120aac89.png)
 - доходность сделок на [фондовом](src/main/asciidoc/stock-market-profit.adoc) рынке (метод FIFO);  
   ![stock-market](https://user-images.githubusercontent.com/11336712/78156498-8de02b00-7447-11ea-833c-cfc755bd7558.png)
 - доходность сделок на [срочном](src/main/asciidoc/derivatives-market-profit.adoc) рынке;  

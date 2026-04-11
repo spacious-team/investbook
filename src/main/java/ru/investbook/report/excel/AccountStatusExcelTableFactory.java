@@ -60,14 +60,14 @@ import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.spacious_team.broker.pojo.SecurityType.*;
-import static ru.investbook.report.excel.PortfolioStatusExcelTableFactoryProportionHelper.setCurrentProportionFormula;
-import static ru.investbook.report.excel.PortfolioStatusExcelTableFactoryProportionHelper.setInvestmentProportionFormula;
-import static ru.investbook.report.excel.PortfolioStatusExcelTableHeader.*;
+import static ru.investbook.report.excel.AccountStatusExcelTableFactoryProportionHelper.setCurrentProportionFormula;
+import static ru.investbook.report.excel.AccountStatusExcelTableFactoryProportionHelper.setInvestmentProportionFormula;
+import static ru.investbook.report.excel.AccountStatusExcelTableHeader.*;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class PortfolioStatusExcelTableFactory implements TableFactory {
+public class AccountStatusExcelTableFactory implements TableFactory {
     static final String CASH_BALANCE = "Остаток денежных средств";
     private static final String STOCK_OR_BOND_GROSS_PROFIT_FORMULA = getStockOrBondGrossProfitFormula();
     private static final String PROFIT_FORMULA = getProfitFormula();

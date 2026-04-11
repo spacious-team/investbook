@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum PortfolioAnalysisExcelTableHeader implements ExcelTableHeader {
+public enum AccountAnalysisExcelTableHeader implements ExcelTableHeader {
     DATE("Дата"),
     INVESTMENT_AMOUNT("Инвестиция"),
     INVESTMENT_CURRENCY("Валюта инвестиции"),

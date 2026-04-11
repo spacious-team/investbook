@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum PortfolioStatusExcelTableHeader implements ExcelTableHeader {
+public enum AccountStatusExcelTableHeader implements ExcelTableHeader {
     SECURITY("Бумага"),
     TYPE("Тип"),
     FIRST_TRANSACTION_DATE("Дата первой сделки"),

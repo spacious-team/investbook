@@ -69,13 +69,13 @@ import static org.spacious_team.broker.pojo.AccountPropertyType.TOTAL_ASSETS_RUB
 import static org.spacious_team.broker.pojo.AccountPropertyType.TOTAL_ASSETS_USD;
 import static org.spacious_team.broker.pojo.CashFlowType.CASH;
 import static ru.investbook.report.ForeignExchangeRateService.RUB;
+import static ru.investbook.report.excel.AccountAnalysisExcelTableHeader.*;
 import static ru.investbook.report.excel.ExcelTableHeader.getColumnsRange;
-import static ru.investbook.report.excel.PortfolioAnalysisExcelTableHeader.*;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class PortfolioAnalysisExcelTableFactory implements TableFactory {
+public class AccountAnalysisExcelTableFactory implements TableFactory {
     private static final String SP500_GROWTH_FORMULA = getSp500GrowthFormula();
     private final EventCashFlowRepository eventCashFlowRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
@@ -424,18 +424,18 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     private LinkedHashMap<Instant, BigDecimal> getAllAccountTotalAssets(List<AccountProperty> assets,
                                                                         List<EventCashFlow> cashFlows) {
         List<AccountAssetsInRub> summedAssetsInRub = sumValuesOfSameInstantInRub(assets);
-        // temp var: portfolio -> assets
+        // temp var: account -> assets
         Map<String, BigDecimal> lastTotalAssets = initAccountsByZero(assets);
         Instant lastInstant = Instant.MIN;
         // date-time -> summed assets for all accounts
         LinkedHashMap<Instant, BigDecimal> allAccountSummedAssets = new LinkedHashMap<>();
 
-        // portfolio -> timestamp -> cash flows in rub
+        // account -> timestamp -> cash flows in rub
         Map<String, TreeMap<Instant, BigDecimal>> rubCashFlowsGroupedByAccount =
                 convertCashFlowsToRubAndGroupByAccount(cashFlows);
 
         for (AccountAssetsInRub updatingAssets : summedAssetsInRub) {
-            updateKnownPortfolioAssets(lastTotalAssets, updatingAssets, rubCashFlowsGroupedByAccount, lastInstant);
+            updateKnownAccountAssets(lastTotalAssets, updatingAssets, rubCashFlowsGroupedByAccount, lastInstant);
             lastInstant = updatingAssets.instant();
             BigDecimal sum = lastTotalAssets.values()
                     .stream()
@@ -449,7 +449,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
      * Sums AccountPropertyType.TOTAL_ASSETS_RUB and TOTAL_ASSETS_USD if both exists for same timestamp
      */
     private List<AccountAssetsInRub> sumValuesOfSameInstantInRub(List<AccountProperty> assets) {
-        // portfolio -> Instant -> value in RUB
+        // account -> Instant -> value in RUB
         Map<String, Map<Instant, BigDecimal>> accountInstantValueInRub = assets.stream()
                 .collect(groupingBy(AccountProperty::getAccount,
                         toMap(AccountProperty::getTimestamp, this::convertAssetsToRub, BigDecimal::add)));
@@ -488,10 +488,10 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                                 TreeMap::new)));
     }
 
-    private void updateKnownPortfolioAssets(Map<String, BigDecimal> lastAccountAssets,
-                                            AccountAssetsInRub updatingAssets,
-                                            Map<String, TreeMap<Instant, BigDecimal>> rubCashFlowsGroupedByAccount,
-                                            Instant lastInstant) {
+    private void updateKnownAccountAssets(Map<String, BigDecimal> lastAccountAssets,
+                                          AccountAssetsInRub updatingAssets,
+                                          Map<String, TreeMap<Instant, BigDecimal>> rubCashFlowsGroupedByAccount,
+                                          Instant lastInstant) {
         String updatingAccount = updatingAssets.account();
         lastAccountAssets.put(updatingAccount, updatingAssets.valueInRub());
         lastAccountAssets.replaceAll((account, accountAssets) ->

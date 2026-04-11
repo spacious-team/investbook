@@ -43,13 +43,13 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 
+import static ru.investbook.report.excel.AccountAnalysisExcelTableHeader.*;
 import static ru.investbook.report.excel.ExcelChartPlotHelper.*;
 import static ru.investbook.report.excel.ExcelTableHeader.getColumnsRange;
-import static ru.investbook.report.excel.PortfolioAnalysisExcelTableHeader.*;
 
 @Component
 @Slf4j
-public class PortfolioAnalysisExcelTableView extends ExcelTableView {
+public class AccountAnalysisExcelTableView extends ExcelTableView {
 
     @Getter
     private final boolean summaryView = true;
@@ -58,9 +58,9 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = account -> "Обзор (" + account + ")";
 
-    public PortfolioAnalysisExcelTableView(AccountRepository accountRepository,
-                                           PortfolioAnalysisExcelTableFactory tableFactory,
-                                           AccountConverter accountConverter) {
+    public AccountAnalysisExcelTableView(AccountRepository accountRepository,
+                                         AccountAnalysisExcelTableFactory tableFactory,
+                                         AccountConverter accountConverter) {
         super(accountRepository, tableFactory, accountConverter);
     }
 
@@ -138,9 +138,9 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
         for (Cell cell : sheet.getRow(1)) {
                 cell.setCellStyle(styles.getTotalRowStyle());
         }
-        plotChart("Активы и инвестиции, USD", sheet, PortfolioAnalysisExcelTableView::addInvestmentAndAssetsGraph);
-        plotChart("Роста активов, %", sheet, PortfolioAnalysisExcelTableView::addAccountGrowthGraph);
-        plotChart("Остаток денежных средств, USD", sheet, PortfolioAnalysisExcelTableView::addCashBalanceGraph);
+        plotChart("Активы и инвестиции, USD", sheet, AccountAnalysisExcelTableView::addInvestmentAndAssetsGraph);
+        plotChart("Роста активов, %", sheet, AccountAnalysisExcelTableView::addAccountGrowthGraph);
+        plotChart("Остаток денежных средств, USD", sheet, AccountAnalysisExcelTableView::addCashBalanceGraph);
     }
 
     @SuppressWarnings("argument")

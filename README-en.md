@@ -58,28 +58,28 @@ information. In this case, all information is saved on your computer, the data d
 Internet is not required to work.
 
 For each account separately and summing up a single total for all accounts, the following information will be available:
-- [review](src/main/asciidoc/portfolio-analysis.adoc) of asset growth calculated using the S&P 500 method,
+- [review](src/main/asciidoc/account-analysis.adoc) of asset growth calculated using the S&P 500 method,
   compared to the S&P 500, investment history and cash balances;  
-  ![portfolio-analysis](https://user-images.githubusercontent.com/11336712/102415874-fd17a280-4009-11eb-9bff-232975adf21b.png)
+  ![account-analysis](https://user-images.githubusercontent.com/11336712/102415874-fd17a280-4009-11eb-9bff-232975adf21b.png)
   <img src="https://user-images.githubusercontent.com/11336712/102416414-d4dc7380-400a-11eb-95b1-8ff8ae37bd17.png" width="32%"/>
   <img src="https://user-images.githubusercontent.com/11336712/149419132-cad11fc3-fdaa-4572-882b-4ed49b937afe.png" width="32%"/>
   <img src="https://user-images.githubusercontent.com/11336712/102419341-9a75d500-4010-11eb-817a-a9b322237dd2.png" width="32%"/>
-- [portfolio](src/main/asciidoc/portfolio-status.adoc) of securities with information about the current position, 
+- [portfolio](src/main/asciidoc/account-status.adoc) of securities with information about the current position, 
   average price purchases and yield of securities (XIRR), taking into account hedging positions in the derivatives 
   market and the average purchase price of currency;  
   ![portfolio](https://user-images.githubusercontent.com/11336712/104820094-af2dce80-5843-11eb-8083-6521ea537334.png)
-- share of a security in a [portfolio](src/main/asciidoc/portfolio-status.adoc);  
+- share of a security in a [portfolio](src/main/asciidoc/account-status.adoc);  
   ![current-proportion](https://user-images.githubusercontent.com/11336712/88717010-8cd6b600-d128-11ea-901f-2b3fcee96f07.png)
 - [trader's portfolio](src/main/asciidoc/derivatives-market-total-profit.adoc) with information on profitability transactions on the derivatives market in the context 
   of a group of contracts (for example, for all futures and options Si, the same for BR, etc.);  
   ![derivatives-marker-total-profit](https://user-images.githubusercontent.com/11336712/119887746-30f1df00-bf3d-11eb-9c52-713093ae4d72.png)
 - distribution of profit across groups of derivatives contracts in the [trader’s portfolio](src/main/asciidoc/derivatives-market-total-profit.adoc);  
   ![derivatives-profit-proportion](https://user-images.githubusercontent.com/11336712/120565530-fb099a80-c415-11eb-82bb-8288ed9b7806.png)
-- details of dividend, coupon and depreciation [payments](src/main/asciidoc/portfolio-payment.adoc);  
-  ![portfolio-payment](https://user-images.githubusercontent.com/11336712/88460806-93a2c600-cea7-11ea-8ac9-95406fd6cec8.png)
-- details of dividend, coupon and depreciation [payments](src/main/asciidoc/foreign-portfolio-payment.adoc),
+- details of dividend, coupon and depreciation [payments](src/main/asciidoc/account-payment.adoc);  
+  ![account-payment](https://user-images.githubusercontent.com/11336712/88460806-93a2c600-cea7-11ea-8ac9-95406fd6cec8.png)
+- details of dividend, coupon and depreciation [payments](src/main/asciidoc/foreign-account-payment.adoc),
   accrued on shares and bonds from the linked IIS account;
-  ![foreign-portfolio-payment](https://user-images.githubusercontent.com/11336712/87988115-7907d000-cae8-11ea-9ec7-d56a120aac89.png)
+  ![foreign-account-payment](https://user-images.githubusercontent.com/11336712/87988115-7907d000-cae8-11ea-9ec7-d56a120aac89.png)
 - profitability of transactions on the [stock](src/main/asciidoc/stock-market-profit.adoc) market (FIFO method);  
   ![stock-market](https://user-images.githubusercontent.com/11336712/78156498-8de02b00-7447-11ea-833c-cfc755bd7558.png)
 - profitability of transactions on the [derivatives](src/main/asciidoc/derivatives-market-profit.adoc) market;  

@@ -52,14 +52,14 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static ru.investbook.report.excel.AccountStatusExcelTableHeader.*;
 import static ru.investbook.report.excel.ExcelChartPlotHelper.*;
 import static ru.investbook.report.excel.ExcelConditionalFormatHelper.highlightNegativeByRed;
 import static ru.investbook.report.excel.ExcelFormulaHelper.sumAbsValues;
-import static ru.investbook.report.excel.PortfolioStatusExcelTableHeader.*;
 
 @Component
 @Slf4j
-public class PortfolioStatusExcelTableView extends ExcelTableView {
+public class AccountStatusExcelTableView extends ExcelTableView {
 
     @Getter
     private final boolean summaryView = true;
@@ -71,10 +71,10 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final Set<Integer> types = Set.of(CashFlowType.PRICE.getId(), CashFlowType.DERIVATIVE_PRICE.getId());
 
-    public PortfolioStatusExcelTableView(AccountRepository accountRepository,
-                                         PortfolioStatusExcelTableFactory tableFactory,
-                                         AccountConverter accountConverter,
-                                         TransactionCashFlowRepository transactionCashFlowRepository) {
+    public AccountStatusExcelTableView(AccountRepository accountRepository,
+                                       AccountStatusExcelTableFactory tableFactory,
+                                       AccountConverter accountConverter,
+                                       TransactionCashFlowRepository transactionCashFlowRepository) {
         super(accountRepository, tableFactory, accountConverter);
         this.transactionCashFlowRepository = transactionCashFlowRepository;
     }
@@ -160,7 +160,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
     @Override
     protected Table.Record getTotalRow(Table table, Optional<Account> account) {
         Table.Record totalRow = Table.newRecord();
-        for (PortfolioStatusExcelTableHeader column : PortfolioStatusExcelTableHeader.values()) {
+        for (AccountStatusExcelTableHeader column : AccountStatusExcelTableHeader.values()) {
             totalRow.put(column, "=SUM(" + column.getRange(3, table.size() + 2) + ")");
         }
         totalRow.put(SECURITY, "Итого:");
@@ -226,7 +226,7 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
         }
         highlightNegativeByRed(sheet, PROFIT);
         highlightNegativeByRed(sheet, INTERNAL_RATE_OF_RETURN);
-        plotChart("Состав портфеля", sheet, PortfolioStatusExcelTableView::addPieChart);
+        plotChart("Состав портфеля", sheet, AccountStatusExcelTableView::addPieChart);
     }
 
     private static void addPieChart(String name, XSSFSheet sheet) {

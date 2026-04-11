@@ -34,10 +34,10 @@ import ru.investbook.repository.AccountRepository;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 
-import static ru.investbook.report.excel.PortfolioPaymentExcelTableHeader.*;
+import static ru.investbook.report.excel.AccountPaymentExcelTableHeader.*;
 
 @Component
-public class PortfolioPaymentExcelTableView extends ExcelTableView {
+public class AccountPaymentExcelTableView extends ExcelTableView {
 
     @Getter
     private final boolean summaryView = false;
@@ -46,9 +46,9 @@ public class PortfolioPaymentExcelTableView extends ExcelTableView {
     @Getter(AccessLevel.PROTECTED)
     private final UnaryOperator<String> sheetNameCreator = account -> account + " (выплаты)";
 
-    public PortfolioPaymentExcelTableView(AccountRepository accountRepository,
-                                          PortfolioPaymentExcelTableFactory tableFactory,
-                                          AccountConverter accountConverter) {
+    public AccountPaymentExcelTableView(AccountRepository accountRepository,
+                                        AccountPaymentExcelTableFactory tableFactory,
+                                        AccountConverter accountConverter) {
         super(accountRepository, tableFactory, accountConverter);
     }
 
