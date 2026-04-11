@@ -34,7 +34,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.stereotype.Component;
-import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.converter.AccountConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
 import ru.investbook.report.ViewFilter;
@@ -73,9 +73,9 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
 
     public PortfolioStatusExcelTableView(AccountRepository accountRepository,
                                          PortfolioStatusExcelTableFactory tableFactory,
-                                         PortfolioConverter portfolioConverter,
+                                         AccountConverter accountConverter,
                                          TransactionCashFlowRepository transactionCashFlowRepository) {
-        super(accountRepository, tableFactory, portfolioConverter);
+        super(accountRepository, tableFactory, accountConverter);
         this.transactionCashFlowRepository = transactionCashFlowRepository;
     }
 
@@ -90,14 +90,14 @@ public class PortfolioStatusExcelTableView extends ExcelTableView {
 
     private Collection<ExcelTable> createExcelTablesByCurrencies() {
         ViewFilter filter = ViewFilter.get();
-        Collection<String> portfolios = filter.getPortfolios();
-        if (showOnlySummary(filter) || isManyPortfolioRequested(portfolios)) {
+        Collection<String> accounts = filter.getAccounts();
+        if (showOnlySummary(filter) || isManyPortfolioRequested(accounts)) {
             Collection<ExcelTable> tables = new ArrayList<>();
-            List<String> currencies = portfolios.isEmpty() ?
+            List<String> currencies = accounts.isEmpty() ?
                     transactionCashFlowRepository.findDistinctCurrencyByCashFlowTypeIn(types) :
-                    transactionCashFlowRepository.findDistinctCurrencyByAccountInAndCashFlowTypeIn(portfolios, types);
+                    transactionCashFlowRepository.findDistinctCurrencyByAccountInAndCashFlowTypeIn(accounts, types);
             for (String currency : currencies) {
-                Table table = tableFactory.create(portfolios, currency);
+                Table table = tableFactory.create(accounts, currency);
                 String sheetName = "Портфель (все) " + currency;
                 tables.add(ExcelTable.of(sheetName, table, this));
             }

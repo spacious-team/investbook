@@ -132,7 +132,7 @@ public class CashFlowExcelTableFactory implements TableFactory {
             Instant now = Instant.now();
             Instant toDate = ViewFilter.get().getToDate();
             Instant atTime = toDate.isBefore(now) ?  toDate : now;
-            return assetsAndCashService.getPortfolioCash(Set.of(account.getId()), atTime)
+            return assetsAndCashService.getAccountCash(Set.of(account.getId()), atTime)
                     .stream()
                     .collect(Collectors.toMap(c -> c.getCurrency().toUpperCase(), AccountCash::getValue, BigDecimal::add));
         } catch (Exception e) {

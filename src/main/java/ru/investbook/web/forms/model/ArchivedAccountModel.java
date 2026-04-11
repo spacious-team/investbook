@@ -23,8 +23,8 @@ import lombok.Data;
 import java.util.Set;
 
 @Data
-public class ArchivedPortfolioModel {
+public class ArchivedAccountModel {
 
-    private Set<String> portfolios;
+    private Set<String> accounts;
 
 }

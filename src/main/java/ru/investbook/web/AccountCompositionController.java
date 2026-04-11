@@ -38,7 +38,7 @@ import static java.util.stream.Collectors.toList;
 @RequestMapping("/charts")
 @RequiredArgsConstructor
 @Slf4j
-public class PortfolioCompositionController {
+public class AccountCompositionController {
 
     private final InvestmentProportionService investmentProportionService;
     private final AssetsAndCashService assetsAndCashService;
@@ -46,7 +46,7 @@ public class PortfolioCompositionController {
     @GetMapping("/sectors-pie-chart")
     public String getSectorsProportionPage(Model model, HttpServletRequest request) {
         try {
-            Set<String> portfolios = assetsAndCashService.getActivePortfolios();
+            Set<String> portfolios = assetsAndCashService.getActiveAccounts();
             Collection<Map<String, ?>> sectorsProportion = investmentProportionService.getSectorsProportion(portfolios)
                     .entrySet()
                     .stream()
@@ -71,7 +71,7 @@ public class PortfolioCompositionController {
     @GetMapping("/securities-pie-chart")
     public String getSecuritiesProportionPage(Model model, HttpServletRequest request) {
         try {
-            Set<String> portfolios = assetsAndCashService.getActivePortfolios();
+            Set<String> portfolios = assetsAndCashService.getActiveAccounts();
             Collection<Map<String, ?>> securitiesProportion = investmentProportionService.getSecuritiesProportion(portfolios)
                     .entrySet()
                     .stream()

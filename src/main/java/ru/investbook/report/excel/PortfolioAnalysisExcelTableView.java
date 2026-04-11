@@ -32,7 +32,7 @@ import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.spacious_team.broker.pojo.Account;
 import org.springframework.stereotype.Component;
-import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.converter.AccountConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
 import ru.investbook.report.ViewFilter;
@@ -60,17 +60,17 @@ public class PortfolioAnalysisExcelTableView extends ExcelTableView {
 
     public PortfolioAnalysisExcelTableView(AccountRepository accountRepository,
                                            PortfolioAnalysisExcelTableFactory tableFactory,
-                                           PortfolioConverter portfolioConverter) {
-        super(accountRepository, tableFactory, portfolioConverter);
+                                           AccountConverter accountConverter) {
+        super(accountRepository, tableFactory, accountConverter);
     }
 
     @Override
     public Collection<ExcelTable> createExcelTables() {
         Collection<ExcelTable> tables = new ArrayList<>();
         ViewFilter filter = ViewFilter.get();
-        Collection<String> portfolios = filter.getPortfolios();
-        if (showOnlySummary(filter) || isManyPortfolioRequested(portfolios)) {
-            Table table = tableFactory.create(portfolios);
+        Collection<String> accounts = filter.getAccounts();
+        if (showOnlySummary(filter) || isManyPortfolioRequested(accounts)) {
+            Table table = tableFactory.create(accounts);
             tables.add(ExcelTable.of("Обзор (все)", table, this));
         }
         if (!showOnlySummary(filter)) {

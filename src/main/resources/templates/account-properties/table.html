@@ -20,7 +20,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Информация о денежных остатках</title>
+    <title>Информация по счету</title>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
     <style>
@@ -31,18 +31,18 @@
 </head>
 <body>
 
-<h1>Информация о денежных остатках</h1>
-<a href="/portfolio-cash/edit-form">Задать остаток денежных средства</a><br>
+<h1>Информация по счету</h1>
+<a href="/account-properties/edit-form/total-assets">Добавить оценку стоимости активов</a><br>
 <a href="/forms.html">На главную</a><br>
 
 <p class="hint">
     Для редактирования свойства кликните по его номеру, для удаления - на крестик.
 </p>
 
-<form action="#" th:action="@{/portfolio-cash/search}" th:object="${filter}" method="post" class="search-filter">
-    <div th:replace="~{fragments/search :: portfolio (selected='*{portfolio}', portfolios=${portfolios})}"></div>
-    <div th:replace="~{fragments/search :: date-range (from='*{dateFrom}', to='*{dateTo}')}"></div>
-    <div th:replace="~{fragments/search :: currency-picker ('*{currency}')}"></div>
+<form action="#" th:action="@{/account-properties/search}" th:object="${filter}" method="post" class="search-filter">
+    <div th:replace="~{fragments/search :: account (selected='*{account}', accounts=${accounts})}"></div>
+    <div th:replace="~{fragments/search :: date ('*{date}')}"></div>
+    <div th:replace="~{fragments/search :: account-property-type ('*{property}')}"></div>
     <div th:replace="~{fragments/search :: page-size ('*{pageSize}')}"></div>
 </form>
 
@@ -51,28 +51,27 @@
         <th>Счет</th>
         <th>Номер записи</th>
         <th>Дата</th>
-        <th>Рынок</th>
+        <th>Свойство</th>
         <th class="value">Значение</th>
         <th></th>
     </tr>
-    <th:block th:each="cash : ${page.content}">
-        <tr>
-            <td th:text="${cash.portfolio}"/>
-            <td><a th:href="@{/portfolio-cash/edit-form(id=${cash.id})}" th:text="${cash.id}"/></td>
-            <td th:text="${cash.date}"/>
-            <td th:text="${cash.market}"/>
-            <td th:text="${cash.cash.setScale(2, T(java.math.RoundingMode).HALF_UP)} + '&emsp;' + ${cash.currency}" class="value"/>
-            <td class="table-row-control"><a th:href="@{/portfolio-cash/delete(id=${cash.id})}" title="Удалить">&#x274c;</a></td>
+    <th:block th:each="property : ${page.content}">
+        <tr th:if="${property instanceof T(ru.investbook.web.forms.model.AccountPropertyTotalAssetsModel)}">
+            <td th:text="${property.account}"/>
+            <td><a th:href="@{/account-properties/edit-form/total-assets(id=${property.id})}" th:text="${property.id}"/></td>
+            <td th:text="${property.date}"/>
+            <td>Активы</td>
+            <td th:text="${property.totalAssets.setScale(2, T(java.math.RoundingMode).HALF_UP)} + '&emsp;' + ${property.totalAssetsCurrency}" class="value"/>
+            <td class="table-row-control"><a th:href="@{/account-properties/delete(id=${property.id})}" title="Удалить">&#x274c;</a></td>
         </tr>
     </th:block>
 </table>
 
 <div th:insert="~{fragments/navigation :: navigation-bar (
-        endpoint='portfolio-cash',
-        params='portfolio=${filter.portfolio},
-                dateFrom=${filter.dateFrom},
-                dateTo=${filter.dateTo},
-                currency=${filter.currency},
+        endpoint='account-properties',
+        params='account=${filter.account},
+                date=${filter.date},
+                property=${filter.property},
                 pageSize=${filter.pageSize}'
     )}">
 </div>

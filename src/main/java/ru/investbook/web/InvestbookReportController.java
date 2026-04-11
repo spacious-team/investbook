@@ -43,13 +43,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
 
 import static java.time.ZoneId.systemDefault;
-import static ru.investbook.web.ControllerHelper.getActivePortfolios;
-import static ru.investbook.web.ControllerHelper.getPortfolios;
+import static ru.investbook.web.ControllerHelper.getAccounts;
+import static ru.investbook.web.ControllerHelper.getActiveAccounts;
 import static ru.investbook.web.HttpAttachResponseHelper.sendErrorPage;
 import static ru.investbook.web.HttpAttachResponseHelper.sendSuccessHeader;
 
 @Controller
-@RequestMapping("/portfolio")
+@RequestMapping("/accounts")
 @RequiredArgsConstructor
 @Slf4j
 public class InvestbookReportController {
@@ -62,8 +62,8 @@ public class InvestbookReportController {
 
     @GetMapping("select-period")
     public String getPage(Model model, @ModelAttribute("viewFilter") ViewFilterModel viewFilter) {
-        viewFilter.setPortfolios(getActivePortfolios(accountRepository));
-        model.addAttribute("allPortfolios", getPortfolios(accountRepository));
+        viewFilter.setAccounts(getActiveAccounts(accountRepository));
+        model.addAttribute("allAccounts", getAccounts(accountRepository));
         return "select-period";
     }
 
@@ -125,11 +125,11 @@ public class InvestbookReportController {
 
     private ViewFilterModel getViewFilterModel() {
         ViewFilterModel viewFilter = new ViewFilterModel();
-        viewFilter.setPortfolios(getActivePortfolios(accountRepository));
+        viewFilter.setAccounts(getActiveAccounts(accountRepository));
         return viewFilter;
     }
 
     private ViewFilter getViewFilter(ViewFilterModel viewFilterModel) {
-        return ViewFilter.of(viewFilterModel, () -> getPortfolios(accountRepository));
+        return ViewFilter.of(viewFilterModel, () -> getAccounts(accountRepository));
     }
 }

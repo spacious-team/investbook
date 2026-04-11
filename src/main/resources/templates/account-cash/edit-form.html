@@ -1,6 +1,6 @@
 <!--
   ~ InvestBook
-  ~ Copyright (C) 2021  Spacious Team <spacious-team@ya.ru>
+  ~ Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU Affero General Public License as
@@ -20,8 +20,8 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title th:if="${property.id == null}">Добавить оценку стоимости активов</title>
-    <title th:unless="${property.id == null}">Редактировать оценку стоимости активов</title>
+    <title th:if="${cash.id == null}">Задать денежный остаток</title>
+    <title th:unless="${cash.id == null}">Редактировать денежный остаток</title>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
     <style>
@@ -32,9 +32,9 @@
 </head>
 <body>
 
-<h1 th:if="${property.id == null}">Добавить оценку стоимости активов</h1>
-<h1 th:unless="${property.id == null}">Редактировать оценку стоимости активов</h1>
-<form action="#" th:action="@{/portfolio-properties/total-assets}" th:object="${property}" method="post">
+<h1 th:if="${cash.id == null}">Задать денежный остаток</h1>
+<h1 th:unless="${cash.id == null}">Редактировать денежный остаток</h1>
+<form action="#" th:action="@{/account-cash}" th:object="${cash}" method="post">
     <label>
         <input type="hidden" th:field="*{id}"/>
         <input type="hidden" th:field="*{time}" id="time"/>
@@ -45,27 +45,43 @@
     </label>
     <label>
         Счет
-        <input type="text" th:field="*{portfolio}" list="portfolios" required/>
+        <input type="text" th:field="*{account}" list="accounts" required/>
+    </label>
+    <label>
+        Рынок
+        <input type="text" th:field="*{market}" list="accounts"/>
     </label>
     <br>
     <label>
-        Активы
-        <input type="number" step="0.01" min="0" th:field="*{totalAssets}" required/>
+        Денежные средства
+        <input type="number" step="0.01" min="0" th:field="*{cash}" required/>
     </label>
+    <br>
     <label>
         Валюта
-        <select th:field="*{totalAssetsCurrency}" required>
-            <option value="RUB">RUB</option>
-            <option value="USD">USD</option>
-        </select>
+        <input type="text" th:field="*{currency}" value="RUB" list="currencies" required/>
     </label>
-    <br/>
+    <br>
     <input type="submit" value="Сохранить"/>
 
-    <datalist id="portfolios">
-        <option th:each="portfolio : ${portfolios}" th:text="${portfolio}"></option>
+    <datalist id="accounts">
+        <option th:each="account : ${accounts}" th:text="${account}"></option>
+    </datalist>
+
+    <datalist id="currencies">
+        <option>RUB</option>
+        <option>USD</option>
+        <option>EUR</option>
+        <option>GBP</option>
+        <option>CHF</option>
+        <option>CNY</option>
+        <option>HKD</option>
     </datalist>
 </form>
+
+<p class="hint">
+    Рынок можно не указывать, если у вас единый счет для фондового, срочного, валютного рынков.
+</p>
 
 </body>
 </html>

@@ -49,7 +49,7 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Информация по счетам")
-@RequestMapping("/api/v1/portfolio-properties")
+@RequestMapping("/api/v1/account-properties")
 public class AccountPropertyRestController extends AbstractRestController<Integer, AccountProperty, AccountPropertyEntity> {
 
     public AccountPropertyRestController(JpaRepository<AccountPropertyEntity, Integer> repository,
@@ -141,6 +141,6 @@ public class AccountPropertyRestController extends AbstractRestController<Intege
 
     @Override
     protected String getLocation() {
-        return "/portfolio-properties";
+        return "/account-properties";
     }
 }

@@ -172,7 +172,7 @@ public class PortfolioStatusExcelTableFactory implements TableFactory {
                 ViewFilter.get().getToDate().getEpochSecond(),
                 Instant.now().getEpochSecond()));
         row.put(SECURITY, CASH_BALANCE + ", " + forCurrency.toLowerCase());
-        Collection<AccountCash> accountCashList = assetsAndCashService.getPortfolioCash(portfolios, atTime);
+        Collection<AccountCash> accountCashList = assetsAndCashService.getAccountCash(portfolios, atTime);
         row.put(LAST_EVENT_DATE, accountCashList.stream()
                 .map(AccountCash::getTimestamp)
                 .reduce((t1, t2) -> t1.isAfter(t2) ? t1 : t2)

@@ -49,7 +49,7 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Информация по остатку денежных средств на счете")
-@RequestMapping("/api/v1/portfolio-cash")
+@RequestMapping("/api/v1/account-cash")
 public class AccountCashRestController extends AbstractRestController<Integer, AccountCash, AccountCashEntity> {
 
     public AccountCashRestController(JpaRepository<AccountCashEntity, Integer> repository,
@@ -141,6 +141,6 @@ public class AccountCashRestController extends AbstractRestController<Integer, A
 
     @Override
     protected String getLocation() {
-        return "/portfolio-cash";
+        return "/account-cash";
     }
 }

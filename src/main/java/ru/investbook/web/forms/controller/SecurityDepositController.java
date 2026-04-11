@@ -51,9 +51,9 @@ public class SecurityDepositController extends TransactionController {
     @GetMapping
     public String get(@ModelAttribute("filter") TransactionFormFilterModel filter, Model model) {
         Page<TransactionModel> page = transactionFormsService.getSecurityDepositPage(filter);
-        portfolios = ControllerHelper.getPortfolios(accountRepository); // update portfolios for filter
+        accounts = ControllerHelper.getAccounts(accountRepository); // update accounts for filter
         model.addAttribute("page", new PageableWrapperModel<>(page));
-        model.addAttribute("portfolios", portfolios);
+        model.addAttribute("accounts", accounts);
 
         return "security-deposit/table";
     }
@@ -75,7 +75,7 @@ public class SecurityDepositController extends TransactionController {
     public String getCreateSplitForm(Model model) {
         model.addAttribute("split", new SplitModel());
         model.addAttribute("securities", securities);
-        model.addAttribute("portfolios", portfolios);
+        model.addAttribute("accounts", accounts);
         return "security-deposit/create-split-form";
     }
 
@@ -93,7 +93,7 @@ public class SecurityDepositController extends TransactionController {
 
     @PostMapping("split")
     public String postSplit(@ModelAttribute("split") @Valid SplitModel splitModel) {
-        selectedPortfolio = splitModel.getPortfolio();
+        selectedAccount = splitModel.getAccount();
         transactionFormsService.save(splitModel);
         fifoPositionsFactory.invalidateCache();
         return "security-deposit/view-split";

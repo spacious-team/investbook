@@ -25,7 +25,7 @@ import ru.investbook.entity.AccountEntity;
 
 @Component
 @RequiredArgsConstructor
-public class PortfolioConverter implements EntityConverter<AccountEntity, Account> {
+public class AccountConverter implements EntityConverter<AccountEntity, Account> {
     @Override
     public AccountEntity toEntity(Account pojo) {
         AccountEntity entity = new AccountEntity();

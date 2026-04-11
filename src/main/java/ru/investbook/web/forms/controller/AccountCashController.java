@@ -32,78 +32,78 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.investbook.repository.AccountRepository;
 import ru.investbook.web.ControllerHelper;
+import ru.investbook.web.forms.model.AccountCashModel;
 import ru.investbook.web.forms.model.PageableWrapperModel;
-import ru.investbook.web.forms.model.PortfolioCashModel;
-import ru.investbook.web.forms.model.filter.PortfolioCashFormFilterModel;
-import ru.investbook.web.forms.service.PortfolioCashFormsService;
+import ru.investbook.web.forms.model.filter.AccountCashFormFilterModel;
+import ru.investbook.web.forms.service.AccountCashFormsService;
 
 import java.util.Collection;
 import java.util.function.Supplier;
 
 @Controller
-@RequestMapping("/portfolio-cash")
+@RequestMapping("/account-cash")
 @RequiredArgsConstructor
-public class PortfolioCashController {
-    private final PortfolioCashFormsService portfolioCashFormsService;
+public class AccountCashController {
+    private final AccountCashFormsService accountCashFormsService;
     private final AccountRepository accountRepository;
-    private volatile Collection<String> portfolios;
-    private volatile String selectedPortfolio;
+    private volatile Collection<String> accounts;
+    private volatile String selectedAccount;
 
     @PostConstruct
     public void start() {
-        portfolios = ControllerHelper.getPortfolios(accountRepository);
+        accounts = ControllerHelper.getAccounts(accountRepository);
     }
 
     @GetMapping
-    public String get(@ModelAttribute("filter") PortfolioCashFormFilterModel filter, Model model) {
-        Page<PortfolioCashModel> data = portfolioCashFormsService.getPage(filter);
-        portfolios = ControllerHelper.getPortfolios(accountRepository); // update portfolios for filter
+    public String get(@ModelAttribute("filter") AccountCashFormFilterModel filter, Model model) {
+        Page<AccountCashModel> data = accountCashFormsService.getPage(filter);
+        accounts = ControllerHelper.getAccounts(accountRepository); // update accounts for filter
         model.addAttribute("page", new PageableWrapperModel<>(data));
-        model.addAttribute("portfolios", portfolios);
+        model.addAttribute("accounts", accounts);
 
-        return "portfolio-cash/table";
+        return "account-cash/table";
     }
 
     @PostMapping("/search")
-    public String search(@ModelAttribute("filter") PortfolioCashFormFilterModel filter,
+    public String search(@ModelAttribute("filter") AccountCashFormFilterModel filter,
                          RedirectAttributes attributes) {
         attributes.addFlashAttribute("filter", filter);
-        return "redirect:/portfolio-cash";
+        return "redirect:/account-cash";
     }
 
     @GetMapping("/edit-form")
     public String getCashEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
-        PortfolioCashModel cash = getPortfolioCash(id, PortfolioCashModel::new);
+        AccountCashModel cash = getAccountCash(id, AccountCashModel::new);
         model.addAttribute("cash", cash);
-        model.addAttribute("portfolios", portfolios);
-        return "portfolio-cash/edit-form";
+        model.addAttribute("accounts", accounts);
+        return "account-cash/edit-form";
 
     }
 
-    private PortfolioCashModel getPortfolioCash(Integer id, Supplier<? extends PortfolioCashModel> newSupplier) {
+    private AccountCashModel getAccountCash(Integer id, Supplier<? extends AccountCashModel> newSupplier) {
         if (id != null) {
-            return portfolioCashFormsService.getById(id)
+            return accountCashFormsService.getById(id)
                     .orElseGet(newSupplier);
         } else {
-            PortfolioCashModel model = newSupplier.get();
-            model.setPortfolio(selectedPortfolio);
+            AccountCashModel model = newSupplier.get();
+            model.setAccount(selectedAccount);
             return model;
         }
     }
 
     @PostMapping
-    public String postCash(@ModelAttribute("cash") @Valid PortfolioCashModel cash) {
-        selectedPortfolio = cash.getPortfolio();
-        portfolioCashFormsService.save(cash);
-        return "portfolio-cash/view-single";
+    public String postCash(@ModelAttribute("cash") @Valid AccountCashModel cash) {
+        selectedAccount = cash.getAccount();
+        accountCashFormsService.save(cash);
+        return "account-cash/view-single";
     }
 
 
     @GetMapping("/delete")
     public String delete(@RequestParam(name = "id") Integer id, Model model) {
-        portfolioCashFormsService.delete(id);
+        accountCashFormsService.delete(id);
         model.addAttribute("message", "Запись удалена");
-        model.addAttribute("backLink", "/portfolio-cash");
+        model.addAttribute("backLink", "/account-cash");
         return "success";
     }
 }

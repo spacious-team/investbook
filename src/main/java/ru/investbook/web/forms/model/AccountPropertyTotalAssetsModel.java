@@ -30,7 +30,7 @@ import static org.spacious_team.broker.pojo.AccountPropertyType.TOTAL_ASSETS_USD
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PortfolioPropertyTotalAssetsModel extends PortfolioPropertyModel {
+public class AccountPropertyTotalAssetsModel extends AccountPropertyModel {
 
     private @NotNull BigDecimal totalAssets;
 

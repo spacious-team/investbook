@@ -1,6 +1,6 @@
 <!--
   ~ InvestBook
-  ~ Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
+  ~ Copyright (C) 2021  Spacious Team <spacious-team@ya.ru>
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU Affero General Public License as
@@ -20,22 +20,21 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Сохранен денежный остаток</title>
+    <title>Сохранено свойство</title>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
 </head>
 <body>
 
-<h1>Сохранен денежный остаток</h1>
+<h1>Сохранена оценка стоимости активов</h1>
 
-<p th:text="'Счет: ' +  ${cash.portfolio}"/>
-<p th:text="'Номер записи: ' +  ${cash.id}"/>
-<p th:text="'Дата: ' + ${cash.date}"/>
-<p th:text="'Рынок: ' + ${cash.market}" th:if = "${cash.market != null && !cash.market.isEmpty()}"/>
-<p th:text="${cash.cash} + ' ' + ${cash.currency}"/>
-<a href="/portfolio-cash/edit-form">Добавить еще</a><br>
-<a th:href="@{/portfolio-cash/delete(id=${cash.id})}">Удалить эту запись</a><br>
-<a href="/portfolio-cash">Посмотреть все</a><br>
+<p th:text="'Счет: ' +  ${property.account}"/>
+<p th:text="'Номер записи: ' +  ${property.id}"/>
+<p th:text="'Дата: ' + ${property.date}"/>
+<p th:text="'Активы: ' + ${property.totalAssets} + ' ' + ${property.totalAssetsCurrency}"/>
+<a href="/account-properties/edit-form/total-assets">Добавить еще</a><br>
+<a th:href="@{/account-properties/delete(id=${property.id})}">Удалить эту запись</a><br>
+<a href="/account-properties">Посмотреть все</a><br>
 <a href="/forms.html">На главную</a><br>
 
 </body>

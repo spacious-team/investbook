@@ -28,15 +28,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import ru.investbook.converter.PortfolioCashConverter;
-import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.converter.AccountCashConverter;
+import ru.investbook.converter.AccountConverter;
 import ru.investbook.entity.AccountCashEntity;
 import ru.investbook.entity.AccountCashEntity_;
 import ru.investbook.repository.AccountCashRepository;
 import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.specs.AccountCashSearchSpecification;
-import ru.investbook.web.forms.model.PortfolioCashModel;
-import ru.investbook.web.forms.model.filter.PortfolioCashFormFilterModel;
+import ru.investbook.web.forms.model.AccountCashModel;
+import ru.investbook.web.forms.model.filter.AccountCashFormFilterModel;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -48,23 +48,23 @@ import static org.springframework.data.domain.Sort.Order.desc;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PortfolioCashFormsService {
+public class AccountCashFormsService {
     private static final ZoneId zoneId = ZoneId.systemDefault();
     private final AccountCashRepository accountCashRepository;
     private final AccountRepository accountRepository;
-    private final PortfolioCashConverter portfolioCashConverter;
-    private final PortfolioConverter portfolioConverter;
+    private final AccountCashConverter accountCashConverter;
+    private final AccountConverter accountConverter;
 
     @Transactional(readOnly = true)
-    public Optional<PortfolioCashModel> getById(Integer id) {
+    public Optional<AccountCashModel> getById(Integer id) {
         return accountCashRepository.findById(id)
                 .map(this::toModel);
     }
 
     @Transactional(readOnly = true)
-    public Page<PortfolioCashModel> getPage(PortfolioCashFormFilterModel filter) {
+    public Page<AccountCashModel> getPage(AccountCashFormFilterModel filter) {
         AccountCashSearchSpecification spec = AccountCashSearchSpecification.of(
-                filter.getPortfolio(), filter.getDateFrom(), filter.getDateTo(), filter.getCurrency());
+                filter.getAccount(), filter.getDateFrom(), filter.getDateTo(), filter.getCurrency());
 
         Sort sort = Sort.by(asc(AccountCashEntity_.ACCOUNT), desc(AccountCashEntity_.TIMESTAMP));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
@@ -74,18 +74,18 @@ public class PortfolioCashFormsService {
     }
 
     @Transactional
-    public void save(PortfolioCashModel m) {
-        savePortfolio(m.getPortfolio());
+    public void save(AccountCashModel m) {
+        savePortfolio(m.getAccount());
         AccountCash cash = AccountCash.builder()
                 .id(m.getId())
-                .account(m.getPortfolio())
+                .account(m.getAccount())
                 .market(StringUtils.hasLength(m.getMarket()) ? m.getMarket() : "")
                 .timestamp(m.getDate().atTime(m.getTime()).atZone(zoneId).toInstant())
                 .value(m.getCash())
                 .currency(m.getCurrency())
                 .build();
 
-        AccountCashEntity entity = portfolioCashConverter.toEntity(cash);
+        AccountCashEntity entity = accountCashConverter.toEntity(cash);
         entity = accountCashRepository.save(entity);
         m.setId(entity.getId()); // used in view
         accountCashRepository.flush();
@@ -94,16 +94,16 @@ public class PortfolioCashFormsService {
     private void savePortfolio(String portfolio) {
         if (!accountRepository.existsById(portfolio)) {
             accountRepository.save(
-                    portfolioConverter.toEntity(Account.builder()
+                    accountConverter.toEntity(Account.builder()
                             .id(portfolio)
                             .build()));
         }
     }
 
-    private PortfolioCashModel toModel(AccountCashEntity e) {
-        PortfolioCashModel m = new PortfolioCashModel();
+    private AccountCashModel toModel(AccountCashEntity e) {
+        AccountCashModel m = new AccountCashModel();
         m.setId(e.getId());
-        m.setPortfolio(e.getAccount());
+        m.setAccount(e.getAccount());
         m.setMarket(e.getMarket());
         ZonedDateTime zonedDateTime = e.getTimestamp().atZone(zoneId);
         m.setDate(zonedDateTime.toLocalDate());

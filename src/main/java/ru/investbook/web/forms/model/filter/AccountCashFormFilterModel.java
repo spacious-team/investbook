@@ -22,7 +22,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.AccountPropertyType;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -30,9 +29,11 @@ import java.time.LocalDate;
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class PortfolioPropertyFormFilterModel extends AbstractFormFilterModel {
-    private @Nullable String portfolio;
+public class AccountCashFormFilterModel extends AbstractFormFilterModel {
+    private @Nullable String account;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private @Nullable LocalDate date;
-    private @Nullable AccountPropertyType property;
+    private @Nullable LocalDate dateFrom;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private @Nullable LocalDate dateTo;
+    private @Nullable String currency;
 }

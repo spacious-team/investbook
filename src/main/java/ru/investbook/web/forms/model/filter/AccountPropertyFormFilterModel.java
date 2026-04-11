@@ -16,36 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package ru.investbook.web.forms.model;
+package ru.investbook.web.forms.model.filter;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.AccountPropertyType;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Data
-@EqualsAndHashCode
-public class PortfolioCashModel {
-
-    private @Nullable Integer id;
-
-    private @NotEmpty String portfolio;
-
-    private @Nullable String market;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private @NotNull LocalDate date = LocalDate.now();
-
-    @DateTimeFormat(pattern = "HH:mm:ss")
-    private @NotNull LocalTime time = LocalTime.NOON;
-
-    private @NotNull BigDecimal cash = BigDecimal.ZERO;
-
-    private @NotEmpty String currency = "RUB";
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+public class AccountPropertyFormFilterModel extends AbstractFormFilterModel {
+    private @Nullable String account;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private @Nullable LocalDate date;
+    private @Nullable AccountPropertyType property;
 }

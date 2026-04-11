@@ -55,7 +55,7 @@ public class TransactionModel {
 
     private @Nullable String tradeId;
 
-    private @NotEmpty String portfolio;
+    private @NotEmpty String account;
 
     private @NotNull Action action;
 
@@ -145,9 +145,9 @@ public class TransactionModel {
 
     private String generateTradeId() {
         //noinspection ConstantValue
-        Assert.isTrue(portfolio != null && security != null && date != null && action != null,
+        Assert.isTrue(account != null && security != null && date != null && action != null,
                 "Невалидные данные, ошибка вычисления trade-id");
-        String string = portfolio.replaceAll(" ", "") +
+        String string = account.replaceAll(" ", "") +
                 security.replaceAll(" ", "") +
                 date +
                 action.name() +

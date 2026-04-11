@@ -31,7 +31,7 @@ import org.decampo.xirr.Transaction;
 import org.decampo.xirr.Xirr;
 import org.spacious_team.broker.pojo.Account;
 import org.springframework.stereotype.Component;
-import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.converter.AccountConverter;
 import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
@@ -68,10 +68,10 @@ public class CashFlowExcelTableView extends ExcelTableView {
 
     public CashFlowExcelTableView(AccountRepository accountRepository,
                                   CashFlowExcelTableFactory tableFactory,
-                                  PortfolioConverter portfolioConverter,
+                                  AccountConverter accountConverter,
                                   AssetsAndCashService assetsAndCashService,
                                   ForeignExchangeRateService foreignExchangeRateService) {
-        super(accountRepository, tableFactory, portfolioConverter);
+        super(accountRepository, tableFactory, accountConverter);
         this.assetsAndCashService = assetsAndCashService;
         this.foreignExchangeRateService = foreignExchangeRateService;
     }

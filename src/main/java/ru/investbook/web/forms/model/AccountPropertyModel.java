@@ -28,11 +28,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
-public abstract class PortfolioPropertyModel {
+public abstract class AccountPropertyModel {
 
     private @Nullable Integer id;
 
-    private @NotEmpty String portfolio;
+    private @NotEmpty String account;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private @NotNull LocalDate date = LocalDate.now();

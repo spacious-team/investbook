@@ -32,7 +32,7 @@ import static ru.investbook.web.forms.model.SecurityHelper.getSecurityDescriptio
 
 public class ControllerHelper {
 
-    public static Set<String> getPortfolios(AccountRepository accountRepository) {
+    public static Set<String> getAccounts(AccountRepository accountRepository) {
         return accountRepository.findAll()
                 .stream()
                 .map(AccountEntity::getId)
@@ -40,7 +40,7 @@ public class ControllerHelper {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public static Set<String> getActivePortfolios(AccountRepository accountRepository) {
+    public static Set<String> getActiveAccounts(AccountRepository accountRepository) {
         return accountRepository.findByEnabledIsTrue()
                 .stream()
                 .map(AccountEntity::getId)
@@ -48,7 +48,7 @@ public class ControllerHelper {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public static Set<String> getInactivePortfolios(AccountRepository accountRepository) {
+    public static Set<String> getInactiveAccounts(AccountRepository accountRepository) {
         return accountRepository.findByEnabledIsFalse()
                 .stream()
                 .map(AccountEntity::getId)

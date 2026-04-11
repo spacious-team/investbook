@@ -26,7 +26,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.spacious_team.broker.pojo.Account;
 import org.springframework.stereotype.Component;
-import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.converter.AccountConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
 import ru.investbook.repository.AccountRepository;
@@ -48,8 +48,8 @@ public class PortfolioPaymentExcelTableView extends ExcelTableView {
 
     public PortfolioPaymentExcelTableView(AccountRepository accountRepository,
                                           PortfolioPaymentExcelTableFactory tableFactory,
-                                          PortfolioConverter portfolioConverter) {
-        super(accountRepository, tableFactory, portfolioConverter);
+                                          AccountConverter accountConverter) {
+        super(accountRepository, tableFactory, accountConverter);
     }
 
     @Override

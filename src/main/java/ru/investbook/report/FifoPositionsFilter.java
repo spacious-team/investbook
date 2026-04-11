@@ -60,7 +60,7 @@ public interface FifoPositionsFilter {
     static FifoPositionsFilter of(ViewFilter filter) {
         return new FifoPositionsFilter() {
             public Collection<String> getPortfolios() {
-                return filter.getPortfolios();
+                return filter.getAccounts();
             }
 
             @Override

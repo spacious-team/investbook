@@ -28,7 +28,7 @@ import ru.investbook.repository.AccountRepository;
 
 @Component
 @RequiredArgsConstructor
-public class PortfolioPropertyConverter implements EntityConverter<AccountPropertyEntity, AccountProperty> {
+public class AccountPropertyConverter implements EntityConverter<AccountPropertyEntity, AccountProperty> {
     private final AccountRepository accountRepository;
 
     @SuppressWarnings({"nullness", "DataFlowIssue"})

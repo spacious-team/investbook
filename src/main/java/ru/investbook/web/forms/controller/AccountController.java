@@ -30,36 +30,36 @@ import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.SecurityRepository;
-import ru.investbook.web.forms.model.ArchivedPortfolioModel;
+import ru.investbook.web.forms.model.ArchivedAccountModel;
 
 import java.util.Set;
 
-import static ru.investbook.web.ControllerHelper.getInactivePortfolios;
-import static ru.investbook.web.ControllerHelper.getPortfolios;
+import static ru.investbook.web.ControllerHelper.getAccounts;
+import static ru.investbook.web.ControllerHelper.getInactiveAccounts;
 
 @Controller
-@RequestMapping("/portfolios")
+@RequestMapping("/accounts")
 @RequiredArgsConstructor
-public class PortfolioController {
+public class AccountController {
     private final AccountRepository accountRepository;
     private final SecurityRepository securityRepository;
     private final FifoPositionsFactory fifoPositionsFactory;
     private final ForeignExchangeRateService foreignExchangeRateService;
 
     @GetMapping("/archive")
-    public String get(Model model, @ModelAttribute("archive") ArchivedPortfolioModel archive) {
-        Set<String> allPortfolios = getPortfolios(accountRepository);
-        model.addAttribute("allPortfolios", allPortfolios);
-        archive.setPortfolios(getInactivePortfolios(accountRepository));
-        return "portfolios/archive";
+    public String get(Model model, @ModelAttribute("archive") ArchivedAccountModel archive) {
+        Set<String> allAccounts = getAccounts(accountRepository);
+        model.addAttribute("allAccounts", allAccounts);
+        archive.setAccounts(getInactiveAccounts(accountRepository));
+        return "accounts/archive";
     }
 
     @PostMapping("/archive")
-    public String postEventCashFlow(@ModelAttribute("archive") @Valid ArchivedPortfolioModel archive) {
-        getPortfolios(accountRepository)
-                .forEach(portfolio -> {
-                    boolean isEnabled = !archive.getPortfolios().contains(portfolio);
-                    accountRepository.setEnabledForPortfolio(portfolio, isEnabled);
+    public String postEventCashFlow(@ModelAttribute("archive") @Valid ArchivedAccountModel archive) {
+        getAccounts(accountRepository)
+                .forEach(account -> {
+                    boolean isEnabled = !archive.getAccounts().contains(account);
+                    accountRepository.setEnabledForAccount(account, isEnabled);
                 });
         return "success";
     }
@@ -73,7 +73,7 @@ public class PortfolioController {
                 <a href="/portfolio-open-format/download">бэкап</a> данных.
                 <br><br>
                 Для подтверждения удаления всех данных нажмите на ссылку
-                <a href="/portfolios/delete-all-accepted">[подтверждаю]</a>.
+                <a href="/accounts/delete-all-accepted">[подтверждаю]</a>.
                 """);
         return "success";
     }

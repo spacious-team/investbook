@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 import ru.investbook.entity.AccountCashEntity;
 
 @Component
-public class PortfolioCashConverter implements EntityConverter<AccountCashEntity, AccountCash>  {
+public class AccountCashConverter implements EntityConverter<AccountCashEntity, AccountCash>  {
 
     @SuppressWarnings({"nullness", "DataFlowIssue"})
     @Override

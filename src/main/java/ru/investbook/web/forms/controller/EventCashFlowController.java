@@ -48,21 +48,21 @@ public class EventCashFlowController {
     private final AccountRepository accountRepository;
     private final SecurityRepository securityRepository;
     private volatile Collection<String> securities;
-    private volatile Collection<String> portfolios;
-    private volatile String selectedPortfolio;
+    private volatile Collection<String> accounts;
+    private volatile String selectedAccount;
 
     @PostConstruct
     public void start() {
-        portfolios = ControllerHelper.getPortfolios(accountRepository);
+        accounts = ControllerHelper.getAccounts(accountRepository);
         securities = ControllerHelper.getSecuritiesDescriptions(securityRepository);
     }
 
     @GetMapping
     public String get(@ModelAttribute("filter") EventCashFlowFormFilterModel filter, Model model) {
         Page<EventCashFlowModel> data = eventCashFlowFormsService.getPage(filter);
-        portfolios = ControllerHelper.getPortfolios(accountRepository); // update portfolios for filter
+        accounts = ControllerHelper.getAccounts(accountRepository); // update accounts for filter
         model.addAttribute("page", new PageableWrapperModel<>(data));
-        model.addAttribute("portfolios", portfolios);
+        model.addAttribute("accounts", accounts);
 
         return "events/table";
     }
@@ -76,7 +76,7 @@ public class EventCashFlowController {
     @GetMapping("/edit-form")
     public String getEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
         model.addAttribute("event", getEventCashFlow(id));
-        model.addAttribute("portfolios", portfolios);
+        model.addAttribute("accounts", accounts);
         model.addAttribute("securities", securities);
         return "events/edit-form";
     }
@@ -87,14 +87,14 @@ public class EventCashFlowController {
                     .orElseGet(EventCashFlowModel::new);
         } else {
             EventCashFlowModel event = new EventCashFlowModel();
-            event.setPortfolio(selectedPortfolio);
+            event.setAccount(selectedAccount);
             return event;
         }
     }
 
     @PostMapping
     public String postEventCashFlow(@ModelAttribute("event") @Valid EventCashFlowModel event) {
-        selectedPortfolio = event.getPortfolio();
+        selectedAccount = event.getAccount();
         eventCashFlowFormsService.save(event);
         return "events/view-single";
     }

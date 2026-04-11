@@ -52,7 +52,7 @@
             color: #D0D0D0;
         }
 
-        #portfolios input[type=checkbox] {
+        #accounts input[type=checkbox] {
             margin-left: 16px;
         }
     </style>
@@ -62,7 +62,7 @@
 
 <a href="/">На главную</a>
 
-<form method="POST" id="get-portfolio" class="grey-smaller" th:object="${viewFilter}">
+<form method="POST" id="get-account" class="grey-smaller" th:object="${viewFilter}">
     <div class="flex">
         <a onclick="selectPeriodView()" id="perion-link" class="inactive-text" href="#" title="выбрать период">за период</a>
         <span class="inactive-text" style="text-decoration: none">/</span>
@@ -78,14 +78,14 @@
         </select>
         &emsp;
         <input type="submit" value="Получить"
-               onclick='this.form.action="/portfolio/report?format=" + document.getElementById("format").value'/>
+               onclick='this.form.action="/accounts/report?format=" + document.getElementById("format").value'/>
     </div>
-    <p id='portfolios'>Счета:
-        <span th:each="portfolio : ${allPortfolios}">
+    <p id='accounts'>Счета:
+        <span th:each="account : ${allAccounts}">
             <input type="checkbox"
-                   th:text="${portfolio}"
-                   th:value="${portfolio}"
-                   th:field="*{portfolios}"/>
+                   th:text="${account}"
+                   th:value="${account}"
+                   th:field="*{accounts}"/>
         </span>
     </p>
     <p><input type="checkbox" th:field="*{showDetails}">Детальный отчет (если убрать, отобразится только аналитическая сводка)</p>

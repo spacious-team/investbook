@@ -25,7 +25,7 @@ import org.spacious_team.broker.pojo.AccountCash;
 import org.spacious_team.broker.pojo.AccountPropertyType;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.springframework.stereotype.Service;
-import ru.investbook.converter.PortfolioCashConverter;
+import ru.investbook.converter.AccountCashConverter;
 import ru.investbook.converter.SecurityConverter;
 import ru.investbook.entity.AccountCashEntity;
 import ru.investbook.entity.AccountPropertyEntity;
@@ -67,11 +67,11 @@ public class AssetsAndCashServiceImpl implements AssetsAndCashService {
     private final SecurityRepository securityRepository;
     private final SecurityConverter securityConverter;
     private final AccountCashRepository accountCashRepository;
-    private final PortfolioCashConverter portfolioCashConverter;
+    private final AccountCashConverter accountCashConverter;
 
     @Override
-    public Set<String> getActivePortfolios() {
-        return ControllerHelper.getActivePortfolios(accountRepository);
+    public Set<String> getActiveAccounts() {
+        return ControllerHelper.getActiveAccounts(accountRepository);
     }
 
     @Override
@@ -157,7 +157,7 @@ public class AssetsAndCashServiceImpl implements AssetsAndCashService {
 
     @Override
     public Optional<BigDecimal> getTotalCashInRub(Collection<String> accounts) {
-        Collection<BigDecimal> accountCash =  getPortfolioCash(accounts, Instant.now())
+        Collection<BigDecimal> accountCash =  getAccountCash(accounts, Instant.now())
                 .stream()
                 .map(cash -> foreignExchangeRateService.convertValueToCurrency(cash.getValue(), cash.getCurrency(), RUB))
                 .toList();
@@ -169,7 +169,7 @@ public class AssetsAndCashServiceImpl implements AssetsAndCashService {
     }
 
     @Override
-    public List<AccountCash> getPortfolioCash(Collection<String> accounts, Instant atInstant) {
+    public List<AccountCash> getAccountCash(Collection<String> accounts, Instant atInstant) {
         List<AccountCashEntity> entities = accounts.isEmpty() ?
                 accountCashRepository.findDistinctOnAccountByTimestampBetweenOrderByTimestampDesc(
                         Instant.EPOCH,
@@ -179,7 +179,7 @@ public class AssetsAndCashServiceImpl implements AssetsAndCashService {
                         Instant.EPOCH,
                         atInstant);
         return entities.stream()
-                .map(portfolioCashConverter::fromEntity)
+                .map(accountCashConverter::fromEntity)
                 .toList();
     }
 }

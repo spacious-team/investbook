@@ -32,78 +32,78 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.investbook.repository.AccountRepository;
 import ru.investbook.web.ControllerHelper;
+import ru.investbook.web.forms.model.AccountPropertyModel;
+import ru.investbook.web.forms.model.AccountPropertyTotalAssetsModel;
 import ru.investbook.web.forms.model.PageableWrapperModel;
-import ru.investbook.web.forms.model.PortfolioPropertyModel;
-import ru.investbook.web.forms.model.PortfolioPropertyTotalAssetsModel;
-import ru.investbook.web.forms.model.filter.PortfolioPropertyFormFilterModel;
-import ru.investbook.web.forms.service.PortfolioPropertyFormsService;
+import ru.investbook.web.forms.model.filter.AccountPropertyFormFilterModel;
+import ru.investbook.web.forms.service.AccountPropertyFormsService;
 
 import java.util.Collection;
 import java.util.function.Supplier;
 
 @Controller
-@RequestMapping("/portfolio-properties")
+@RequestMapping("/account-properties")
 @RequiredArgsConstructor
-public class PortfolioPropertyController {
-    private final PortfolioPropertyFormsService portfolioPropertyFormsService;
+public class AccountPropertyController {
+    private final AccountPropertyFormsService accountPropertyFormsService;
     private final AccountRepository accountRepository;
-    private volatile Collection<String> portfolios;
-    private volatile String selectedPortfolio;
+    private volatile Collection<String> accounts;
+    private volatile String selectedAccount;
 
     @PostConstruct
     public void start() {
-        portfolios = ControllerHelper.getPortfolios(accountRepository);
+        accounts = ControllerHelper.getAccounts(accountRepository);
     }
 
     @GetMapping
-    public String get(@ModelAttribute("filter") PortfolioPropertyFormFilterModel filter, Model model) {
-        Page<PortfolioPropertyModel> page = portfolioPropertyFormsService.getPage(filter);
-        portfolios = ControllerHelper.getPortfolios(accountRepository); // update portfolios for filter
+    public String get(@ModelAttribute("filter") AccountPropertyFormFilterModel filter, Model model) {
+        Page<AccountPropertyModel> page = accountPropertyFormsService.getPage(filter);
+        accounts = ControllerHelper.getAccounts(accountRepository); // update accounts for filter
         model.addAttribute("page", new PageableWrapperModel<>(page));
-        model.addAttribute("portfolios", portfolios);
-        return "portfolio-properties/table";
+        model.addAttribute("accounts", accounts);
+        return "account-properties/table";
     }
 
     @PostMapping("/search")
-    public String search(@ModelAttribute("filter") PortfolioPropertyFormFilterModel filter,
+    public String search(@ModelAttribute("filter") AccountPropertyFormFilterModel filter,
                          RedirectAttributes attributes) {
         attributes.addFlashAttribute("filter", filter);
-        return "redirect:/portfolio-properties";
+        return "redirect:/account-properties";
     }
 
     @GetMapping("/edit-form/total-assets")
     public String getTotalAssetsEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
-        PortfolioPropertyTotalAssetsModel property = (PortfolioPropertyTotalAssetsModel)
-                getPortfolioProperty(id, PortfolioPropertyTotalAssetsModel::new);
+        AccountPropertyTotalAssetsModel property = (AccountPropertyTotalAssetsModel)
+                getAccountProperty(id, AccountPropertyTotalAssetsModel::new);
         model.addAttribute("property", property);
-        model.addAttribute("portfolios", portfolios);
-        return "portfolio-properties/total-assets-edit-form";
+        model.addAttribute("accounts", accounts);
+        return "account-properties/total-assets-edit-form";
     }
 
-    private PortfolioPropertyModel getPortfolioProperty(Integer id,
-                                                        Supplier<? extends PortfolioPropertyModel> newSupplier) {
+    private AccountPropertyModel getAccountProperty(Integer id,
+                                                    Supplier<? extends AccountPropertyModel> newSupplier) {
         if (id != null) {
-            return portfolioPropertyFormsService.getById(id)
+            return accountPropertyFormsService.getById(id)
                     .orElseGet(newSupplier);
         } else {
-            PortfolioPropertyModel model = newSupplier.get();
-            model.setPortfolio(selectedPortfolio);
+            AccountPropertyModel model = newSupplier.get();
+            model.setAccount(selectedAccount);
             return model;
         }
     }
 
     @PostMapping("/total-assets")
-    public String postCash(@ModelAttribute("property") @Valid PortfolioPropertyTotalAssetsModel property) {
-        selectedPortfolio = property.getPortfolio();
-        portfolioPropertyFormsService.save(property);
-        return "portfolio-properties/total-assets-view-single";
+    public String postCash(@ModelAttribute("property") @Valid AccountPropertyTotalAssetsModel property) {
+        selectedAccount = property.getAccount();
+        accountPropertyFormsService.save(property);
+        return "account-properties/total-assets-view-single";
     }
 
     @GetMapping("/delete")
     public String delete(@RequestParam(name = "id") Integer id, Model model) {
-        portfolioPropertyFormsService.delete(id);
+        accountPropertyFormsService.delete(id);
         model.addAttribute("message", "Запись удалена");
-        model.addAttribute("backLink", "/portfolio-properties");
+        model.addAttribute("backLink", "/account-properties");
         return "success";
     }
 }

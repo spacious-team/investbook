@@ -29,7 +29,7 @@ import java.util.Set;
 
 public interface AssetsAndCashService {
 
-    Set<String> getActivePortfolios();
+    Set<String> getActiveAccounts();
 
     Optional<BigDecimal> getTotalAssetsInRub(Collection<String> accounts);
 
@@ -42,5 +42,5 @@ public interface AssetsAndCashService {
      * Если портфель не указан, возвращает для всех портфелей последние известные остатки денежных средств
      * соответствующих дате, не позже указанной. Записи в результирующем списке отсортированы по времени от новых к старым.
      */
-    List<AccountCash> getPortfolioCash(Collection<String> accounts, Instant atInstant);
+    List<AccountCash> getAccountCash(Collection<String> accounts, Instant atInstant);
 }

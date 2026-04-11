@@ -34,7 +34,7 @@ public class ViewFilterModel {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate toDate = LocalDate.now();
 
-    private Set<String> portfolios = Collections.emptySet();
+    private Set<String> accounts = Collections.emptySet();
 
     private boolean showDetails = true;
 }

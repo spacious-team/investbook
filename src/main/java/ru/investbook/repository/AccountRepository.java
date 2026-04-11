@@ -37,5 +37,5 @@ public interface AccountRepository extends JpaRepository<AccountEntity, String>,
     @Transactional
     @Modifying
     @Query("UPDATE AccountEntity SET enabled = :enabled WHERE id = :account")
-    void setEnabledForPortfolio(String account, boolean enabled);
+    void setEnabledForAccount(String account, boolean enabled);
 }

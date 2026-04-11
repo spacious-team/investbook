@@ -38,12 +38,12 @@
 </p>
 
 
-<form action="/portfolios/archive" method="POST" id="get-portfolio" class="grey-smaller" th:object="${archive}">
-    <div th:each="portfolio : ${allPortfolios}">
+<form action="/accounts/archive" method="POST" id="get-account" class="grey-smaller" th:object="${archive}">
+    <div th:each="account : ${allAccounts}">
         <input type="checkbox"
-               th:text="${portfolio}"
-               th:value="${portfolio}"
-               th:field="*{portfolios}"/>
+               th:text="${account}"
+               th:value="${account}"
+               th:field="*{accounts}"/>
     </div>
     <input type="submit" value="Сохранить"/>
 </form>

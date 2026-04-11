@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.converter.AccountConverter;
 import ru.investbook.entity.AccountEntity;
 import ru.investbook.repository.AccountRepository;
 
@@ -49,10 +49,10 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Счета")
-@RequestMapping("/api/v1/portfolios")
+@RequestMapping("/api/v1/accounts")
 public class AccountRestController extends AbstractRestController<String, Account, AccountEntity> {
 
-    public AccountRestController(AccountRepository repository, PortfolioConverter converter) {
+    public AccountRestController(AccountRepository repository, AccountConverter converter) {
         super(repository, converter);
     }
 
@@ -132,6 +132,6 @@ public class AccountRestController extends AbstractRestController<String, Accoun
 
     @Override
     protected String getLocation() {
-        return "/portfolios";
+        return "/accounts";
     }
 }

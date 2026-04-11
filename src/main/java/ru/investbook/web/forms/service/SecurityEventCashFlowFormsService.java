@@ -29,7 +29,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.converter.AccountConverter;
 import ru.investbook.converter.SecurityEventCashFlowConverter;
 import ru.investbook.entity.AccountEntity_;
 import ru.investbook.entity.SecurityEntity;
@@ -61,7 +61,7 @@ public class SecurityEventCashFlowFormsService {
     private final SecurityEventCashFlowRepository securityEventCashFlowRepository;
     private final AccountRepository accountRepository;
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
-    private final PortfolioConverter portfolioConverter;
+    private final AccountConverter accountConverter;
     private final SecurityRepositoryHelper securityRepositoryHelper;
 
     @Transactional(readOnly = true)
@@ -73,7 +73,7 @@ public class SecurityEventCashFlowFormsService {
     @Transactional(readOnly = true)
     public Page<SecurityEventCashFlowModel> getPage(SecurityEventCashFlowFormFilterModel filter) {
         SecurityEventCashFlowEntitySearchSpecification spec =
-                SecurityEventCashFlowEntitySearchSpecification.of(filter.getPortfolio(), filter.getSecurity(),
+                SecurityEventCashFlowEntitySearchSpecification.of(filter.getAccount(), filter.getSecurity(),
                         filter.getDateFrom(), filter.getDateTo(), filter.getCashFlowType());
 
         Sort sort = Sort.by(
@@ -88,10 +88,10 @@ public class SecurityEventCashFlowFormsService {
 
     @Transactional
     public void save(SecurityEventCashFlowModel e) {
-        savePortfolio(e.getPortfolio());
+        savePortfolio(e.getAccount());
         int savedSecurityId = securityRepositoryHelper.saveSecurity(e);
         SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
-                .account(e.getPortfolio())
+                .account(e.getAccount())
                 .timestamp(e.getDate().atTime(e.getTime()).atZone(zoneId).toInstant())
                 .security(savedSecurityId)
                 .count(e.getCount());
@@ -122,7 +122,7 @@ public class SecurityEventCashFlowFormsService {
     private void savePortfolio(String portfolio) {
         if (!accountRepository.existsById(portfolio)) {
             accountRepository.save(
-                    portfolioConverter.toEntity(Account.builder()
+                    accountConverter.toEntity(Account.builder()
                             .id(portfolio)
                             .build()));
         }
@@ -131,7 +131,7 @@ public class SecurityEventCashFlowFormsService {
     private SecurityEventCashFlowModel toSecurityEventModel(SecurityEventCashFlowEntity e) {
         SecurityEventCashFlowModel m = new SecurityEventCashFlowModel();
         m.setId(e.getId());
-        m.setPortfolio(e.getAccount().getId());
+        m.setAccount(e.getAccount().getId());
         ZonedDateTime zonedDateTime = e.getTimestamp().atZone(zoneId);
         m.setDate(zonedDateTime.toLocalDate());
         m.setTime(zonedDateTime.toLocalTime());
@@ -148,7 +148,7 @@ public class SecurityEventCashFlowFormsService {
 
         if (m.getType() != CashFlowType.TAX) {
             securityEventCashFlowRepository.findByAccountIdAndSecurityIdAndCashFlowTypeIdAndTimestampAndCount(
-                            m.getPortfolio(),
+                            m.getAccount(),
                             securityEntity.getId(),
                             CashFlowType.TAX.getId(),
                             e.getTimestamp(),

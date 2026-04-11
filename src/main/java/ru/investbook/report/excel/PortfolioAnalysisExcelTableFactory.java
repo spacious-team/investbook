@@ -26,9 +26,9 @@ import org.spacious_team.broker.pojo.AccountCash;
 import org.spacious_team.broker.pojo.AccountProperty;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.springframework.stereotype.Component;
+import ru.investbook.converter.AccountCashConverter;
+import ru.investbook.converter.AccountPropertyConverter;
 import ru.investbook.converter.EventCashFlowConverter;
-import ru.investbook.converter.PortfolioCashConverter;
-import ru.investbook.converter.PortfolioPropertyConverter;
 import ru.investbook.entity.AccountCashEntity;
 import ru.investbook.entity.AccountPropertyEntity;
 import ru.investbook.entity.EventCashFlowEntity;
@@ -80,9 +80,9 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
     private final EventCashFlowRepository eventCashFlowRepository;
     private final EventCashFlowConverter eventCashFlowConverter;
     private final AccountPropertyRepository accountPropertyRepository;
-    private final PortfolioPropertyConverter portfolioPropertyConverter;
+    private final AccountPropertyConverter accountPropertyConverter;
     private final AccountCashRepository accountCashRepository;
-    private final PortfolioCashConverter portfolioCashConverter;
+    private final AccountCashConverter accountCashConverter;
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
     private final ForeignExchangeRateService foreignExchangeRateService;
     private final StockMarketIndexRepository stockMarketIndexRepository;
@@ -321,7 +321,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                 accountCashRepository.findAll() :
                 accountCashRepository.findByAccountIn(portfolios);
         List<AccountCash> portfolioCashes = portfolioCashEntities.stream()
-                .map(portfolioCashConverter::fromEntity)
+                .map(accountCashConverter::fromEntity)
                 .toList();
         List<PortfolioInstantCurrencyValue> balances = sumCashWithSameCurrency(portfolioCashes);
         int portfolioCount = countPortfolios(portfolioCashes);
@@ -349,7 +349,7 @@ public class PortfolioAnalysisExcelTableFactory implements TableFactory {
                                 viewFilter.getFromDate(),
                                 viewFilter.getToDate());
         return entities.stream()
-                .map(portfolioPropertyConverter::fromEntity)
+                .map(accountPropertyConverter::fromEntity)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
