@@ -16,28 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
-
-package java.util;
-public class Objects {
-
-    @EnsuresNonNull("#1")
-    static <T> T requireNonNull(@Nullable T obj);
-
-    @EnsuresNonNull("#1")
-    static <T> T requireNonNull(@Nullable T obj, String message);
-
-    @EnsuresNonNull("#1")
-    static <T> T requireNonNull(@Nullable T obj, Supplier<String> messageSupplier);
-
-    @EnsuresNonNullIf(expression="#1", result=true)
-    static boolean nonNull(@Nullable Object obj);
-
-    @EnsuresNonNullIf(expression="#1", result=false)
-    static boolean isNull(@Nullable Object obj);
-}
-
 
 package org.springframework.util;
 class StringUtils {
