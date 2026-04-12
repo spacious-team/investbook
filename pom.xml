@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.7</version>  <!-- remove spring-boot-maven-plugin's includeOptional after update to 4.0.0+ -->
+        <version>3.5.13</version>  <!-- remove spring-boot-maven-plugin's includeOptional after update to 4.0.0+ -->
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.investbook</groupId>
@@ -63,11 +63,11 @@
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
         <app.version>26.1</app.version>
-        <java.version>25</java.version>  <!-- update lombok when java is updated -->
-        <lombok.version>1.18.42</lombok.version>
-        <checkerframework.version>3.51.1</checkerframework.version>
-        <jpackage.version>1.7.1</jpackage.version>
-        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+        <java.version>26</java.version>  <!-- update lombok when java is updated -->
+        <lombok.version>1.18.44</lombok.version>
+        <checkerframework.version>4.0.0</checkerframework.version>
+        <jpackage.version>1.7.4</jpackage.version>
+        <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
         <extension.loader.path>./extensions</extension.loader.path>  <!-- overridden by installer-* profiles -->
         <checkerframework.skipDefs>-AskipDefs=.*</checkerframework.skipDefs>  <!-- overridden by 'nullcheck' profile -->
     </properties>
@@ -193,7 +193,7 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.21.2</version>
+            <version>1.22.1</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -231,7 +231,7 @@
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>4.2</version>
+            <version>4.4.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -254,7 +254,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.4</version> <!-- JUnit 5 requirement -->
+                    <version>3.5.5</version> <!-- JUnit 5 requirement -->
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -262,7 +262,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.1</version>
+                <version>3.15.0</version>
                 <configuration>
                     <fork>true</fork> <!-- Must fork or else JVM arguments are ignored -->
                     <showDeprecation>true</showDeprecation>
@@ -352,7 +352,7 @@
                      Maven -> Plugins -> jaxb2 -> jaxb2:xjc -> mouse right click -> Execute Before Build -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>4.1.0</version>
                 <executions>
                     <execution>
                         <id>xsd-to-java</id>

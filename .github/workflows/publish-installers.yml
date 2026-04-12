@@ -18,7 +18,7 @@ jobs:
       - name: Set Up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '25'
+          java-version: '26'
           distribution: 'liberica'
           cache: maven
 
@@ -48,7 +48,7 @@ jobs:
       - name: Set Up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '25'
+          java-version: '26'
           distribution: 'liberica'
           cache: maven
 
@@ -74,7 +74,7 @@ jobs:
       - name: Set Up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '25'
+          java-version: '26'
           distribution: 'liberica'
           cache: maven
 
@@ -107,7 +107,7 @@ jobs:
       - name: Set Up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '25'
+          java-version: '26'
           distribution: 'liberica'
           cache: maven
 
