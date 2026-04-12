@@ -62,7 +62,7 @@ public class AbstractInvestbookTable<RowType> extends AbstractReportTable<RowTyp
                 PatternTableColumn.of("событие"),
                 PatternTableColumn.of("тип"),
                 ConstantPositionTableColumn.of(0))),
-        PORTFOLIO(AnyOfTableColumn.of(
+        ACCOUNT(AnyOfTableColumn.of(
                 PatternTableColumn.of("счет"),
                 ConstantPositionTableColumn.of(1))),
         DATE_TIME(AnyOfTableColumn.of(

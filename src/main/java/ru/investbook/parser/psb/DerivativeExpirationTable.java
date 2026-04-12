@@ -66,7 +66,7 @@ class DerivativeExpirationTable extends SingleAbstractReportTable<DerivativeTran
         int securityId = getReport().getSecurityRegistrar().declareDerivative(contract);
         return DerivativeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .tradeId(String.valueOf(row.getLongCellValue(TRADE_ID)))
                 .security(securityId)
                 .count((isBuy ? 1 : -1) * count)

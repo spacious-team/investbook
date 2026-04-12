@@ -38,7 +38,7 @@ import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 @RequiredArgsConstructor(staticName = "of")
 public class TransactionSearchSpecification implements Specification<TransactionEntity> {
-    private final @Nullable String portfolio;
+    private final @Nullable String account;
     private final @Nullable String security;
     private final @Nullable LocalDate dateFrom;
     private final @Nullable LocalDate dateTo;
@@ -47,7 +47,7 @@ public class TransactionSearchSpecification implements Specification<Transaction
     public Predicate toPredicate(Root<TransactionEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
         requireNonNull(query);
         return Stream.of(
-                        filterByPortfolioName(root, builder, TransactionEntity_.portfolio, portfolio, query),
+                        filterByAccountName(root, builder, TransactionEntity_.account, account, query),
                         filterBySecurity(root, builder, TransactionEntity_.security, security),
                         filterByDateFrom(root, builder, TransactionEntity_.timestamp, dateFrom),
                         filterByDateTo(root, builder, TransactionEntity_.timestamp, dateTo))

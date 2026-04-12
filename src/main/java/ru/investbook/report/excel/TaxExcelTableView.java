@@ -24,12 +24,12 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Account;
 import org.springframework.stereotype.Component;
-import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.converter.AccountConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 
 import java.util.Optional;
 import java.util.function.UnaryOperator;
@@ -44,12 +44,12 @@ public class TaxExcelTableView extends ExcelTableView {
     @Getter
     private final int sheetOrder = 10;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Налог (" + portfolio + ")";
+    private final UnaryOperator<String> sheetNameCreator = account -> "Налог (" + account + ")";
 
-    public TaxExcelTableView(PortfolioRepository portfolioRepository,
+    public TaxExcelTableView(AccountRepository accountRepository,
                              TaxExcelTableFactory tableFactory,
-                             PortfolioConverter portfolioConverter) {
-        super(portfolioRepository, tableFactory, portfolioConverter);
+                             AccountConverter accountConverter) {
+        super(accountRepository, tableFactory, accountConverter);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class TaxExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
+    protected Table.Record getTotalRow(Table table, Optional<Account> account) {
         Table.Record total = Table.newRecord();
         total.put(DATE, "Итого:");
         total.put(TAX_RUB, "=SUM(" + TAX_RUB.getRange(3, table.size() + 2) + ")");

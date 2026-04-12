@@ -53,7 +53,7 @@ public class VtbBrokerReport extends AbstractExcelBrokerReport {
                 reportPage,
                 excelFileName,
                 getReportEndDateTime(reportPage),
-                getPortfolio(reportPage));
+                getAccount(reportPage));
         return new ExcelAttributes(workbook, attributes);
     }
 
@@ -63,7 +63,7 @@ public class VtbBrokerReport extends AbstractExcelBrokerReport {
         }
     }
 
-    private static String getPortfolio(ReportPage reportPage) {
+    private static String getAccount(ReportPage reportPage) {
         try {
             @Nullable Object account = reportPage.getNextColumnValue(ACCOUNT_MARKER);
             @Nullable Object subAccount = reportPage.getNextColumnValue(SUBACCOUNT_MARKER);

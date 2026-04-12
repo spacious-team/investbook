@@ -93,7 +93,7 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
             return getSecurityIfCan(row);
         } catch (Exception e) {
             EventCashFlow.EventCashFlowBuilder builder = EventCashFlow.builder()
-                    .portfolio(getReport().getPortfolio())
+                    .account(getReport().getAccount())
                     .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                     .currency(convertToCurrency(row.getStringCellValue(CURRENCY)))
                     .description(row.getStringCellValueOrDefault(DESCRIPTION, null));
@@ -216,7 +216,7 @@ abstract class PaymentsTable extends SingleAbstractReportTable<SecurityEventCash
 
     private EventCashFlow cast(SecurityEventCashFlow cash) {
         return EventCashFlow.builder()
-                .portfolio(cash.getPortfolio())
+                .account(cash.getAccount())
                 .timestamp(cash.getTimestamp())
                 .eventType(cash.getEventType())
                 .value(cash.getValue())

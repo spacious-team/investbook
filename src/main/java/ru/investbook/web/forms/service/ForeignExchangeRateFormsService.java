@@ -28,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.ForeignExchangeRateConverter;
 import ru.investbook.entity.ForeignExchangeRateEntity;
 import ru.investbook.entity.ForeignExchangeRateEntityPk;
+import ru.investbook.entity.ForeignExchangeRateEntityPk_;
+import ru.investbook.entity.ForeignExchangeRateEntity_;
 import ru.investbook.repository.ForeignExchangeRateRepository;
 import ru.investbook.repository.specs.ForeignExchangeRateSearchSpecification;
 import ru.investbook.web.forms.model.ForeignExchangeRateModel;
@@ -60,7 +62,9 @@ public class ForeignExchangeRateFormsService {
         ForeignExchangeRateSearchSpecification spec =
                 ForeignExchangeRateSearchSpecification.of(filter.getCurrency(), filter.getDate());
 
-        Sort sort = Sort.by(desc("pk.date"), asc("pk.currencyPair"));
+        Sort sort = Sort.by(
+                desc(ForeignExchangeRateEntity_.PK + "." + ForeignExchangeRateEntityPk_.DATE),
+                asc(ForeignExchangeRateEntity_.PK + "." + ForeignExchangeRateEntityPk_.CURRENCY_PAIR));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
         return foreignExchangeRateRepository.findAll(spec, page)

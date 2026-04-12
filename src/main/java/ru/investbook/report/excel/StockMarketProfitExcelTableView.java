@@ -24,13 +24,13 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
-import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.converter.AccountConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 
 import java.util.ArrayList;
@@ -51,32 +51,32 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
     @Getter
     private final int sheetOrder = 5;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (фондовый)";
+    private final UnaryOperator<String> sheetNameCreator = account -> account + " (фондовый)";
     private final TransactionCashFlowRepository transactionCashFlowRepository;
 
-    public StockMarketProfitExcelTableView(PortfolioRepository portfolioRepository,
+    public StockMarketProfitExcelTableView(AccountRepository accountRepository,
                                            StockMarketProfitExcelTableFactory tableFactory,
-                                           PortfolioConverter portfolioConverter,
+                                           AccountConverter accountConverter,
                                            TransactionCashFlowRepository transactionCashFlowRepository) {
-        super(portfolioRepository, tableFactory, portfolioConverter);
+        super(accountRepository, tableFactory, accountConverter);
         this.transactionCashFlowRepository = transactionCashFlowRepository;
     }
 
     @Override
-    protected Collection<ExcelTable> createExcelTables(Portfolio portfolio, String sheetName) {
-        List<String> currencies = getCurrencies(portfolio);
+    protected Collection<ExcelTable> createExcelTables(Account account, String sheetName) {
+        List<String> currencies = getCurrencies(account);
         Collection<ExcelTable> tables = new ArrayList<>(currencies.size());
         for (String currency : currencies) {
-            Table table = tableFactory.create(portfolio, currency);
+            Table table = tableFactory.create(account, currency);
             String sheetNameWithCurrency = sheetName + " " + currency;
-            tables.add(ExcelTable.of(portfolio, sheetNameWithCurrency, table, this));
+            tables.add(ExcelTable.of(account, sheetNameWithCurrency, table, this));
         }
         return tables;
     }
 
-    private List<String> getCurrencies(Portfolio portfolio) {
+    private List<String> getCurrencies(Account account) {
         return transactionCashFlowRepository
-                .findDistinctCurrencyByPortfolioAndCashFlowType(portfolio.getId(), CashFlowType.PRICE);
+                .findDistinctCurrencyByAccountAndCashFlowType(account.getId(), CashFlowType.PRICE);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class StockMarketProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
+    protected Table.Record getTotalRow(Table table, Optional<Account> account) {
         Table.Record totalRow = new Table.Record();
         for (StockMarketProfitExcelTableHeader column : StockMarketProfitExcelTableHeader.values()) {
             totalRow.put(column, "=SUM(" + column.getRange(3, table.size() + 2) + ")");

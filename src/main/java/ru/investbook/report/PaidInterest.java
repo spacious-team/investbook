@@ -71,7 +71,7 @@ public class PaidInterest {
     static Position getFictitiousPositionPayment(SecurityEventCashFlow cash) {
         return new OpenedPosition(Transaction.builder()
                 .timestamp(PaidInterest.fictitiousPositionInstant)
-                .portfolio(cash.getPortfolio())
+                .account(cash.getAccount())
                 .security(cash.getSecurity())
                 .count(cash.getCount())
                 .build());

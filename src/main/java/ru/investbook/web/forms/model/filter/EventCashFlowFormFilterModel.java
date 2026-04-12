@@ -31,7 +31,7 @@ import java.time.LocalDate;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class EventCashFlowFormFilterModel extends AbstractFormFilterModel {
-    private @Nullable String portfolio;
+    private @Nullable String account;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private @Nullable LocalDate dateFrom;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)

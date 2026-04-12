@@ -20,44 +20,44 @@ package ru.investbook.parser.psb.foreignmarket;
 
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.PortfolioCash;
+import org.spacious_team.broker.pojo.AccountCash;
 import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleBrokerReport;
 import ru.investbook.parser.SingleInitializableReportTable;
-import ru.investbook.parser.psb.PortfolioPropertyTable;
+import ru.investbook.parser.psb.AccountPropertyTable;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import static java.util.Collections.emptyList;
-import static ru.investbook.parser.psb.PortfolioPropertyTable.SUMMARY_TABLE;
-import static ru.investbook.parser.psb.PortfolioPropertyTable.SummaryTableHeader.*;
-import static ru.investbook.parser.psb.foreignmarket.ForeignExchangePortfolioPropertyTable.ASSETS;
+import static ru.investbook.parser.psb.AccountPropertyTable.SUMMARY_TABLE;
+import static ru.investbook.parser.psb.AccountPropertyTable.SummaryTableHeader.*;
+import static ru.investbook.parser.psb.foreignmarket.ForeignExchangeAccountPropertyTable.ASSETS;
 
 @Slf4j
-public class ForeignExchangeCashTable extends SingleInitializableReportTable<PortfolioCash> {
+public class ForeignExchangeCashTable extends SingleInitializableReportTable<AccountCash> {
 
-    private final PortfolioPropertyTable.SummaryTableHeader[] CURRENCIES = new PortfolioPropertyTable.SummaryTableHeader[]{ RUB, USD, EUR, GBP, CHF };
+    private final AccountPropertyTable.SummaryTableHeader[] CURRENCIES = new AccountPropertyTable.SummaryTableHeader[]{ RUB, USD, EUR, GBP, CHF };
 
     public ForeignExchangeCashTable(SingleBrokerReport report) {
         super(report);
     }
 
     @Override
-    protected Collection<PortfolioCash> parseTable() {
+    protected Collection<AccountCash> parseTable() {
         Table table = getSummaryTable();
         @Nullable TableRow row = table.findRowByPrefix(ASSETS);
         if (row == null) {
             return emptyList();
         }
-        Collection<PortfolioCash> cashes = new ArrayList<>();
-        for (PortfolioPropertyTable.SummaryTableHeader currency : CURRENCIES) {
+        Collection<AccountCash> cashes = new ArrayList<>();
+        for (AccountPropertyTable.SummaryTableHeader currency : CURRENCIES) {
             @Nullable BigDecimal cash = row.getBigDecimalCellValueOrDefault(currency, null);
             if (cash != null) {
-                cashes.add(PortfolioCash.builder()
-                        .portfolio(getReport().getPortfolio())
+                cashes.add(AccountCash.builder()
+                        .account(getReport().getAccount())
                         .timestamp(getReport().getReportEndDateTime())
                         .market("валютный рынок")
                         .value(cash)
@@ -70,7 +70,7 @@ public class ForeignExchangeCashTable extends SingleInitializableReportTable<Por
 
     private Table getSummaryTable() {
         Table table = getReport().getReportPage()
-                .create(SUMMARY_TABLE, ASSETS, PortfolioPropertyTable.SummaryTableHeader.class);
+                .create(SUMMARY_TABLE, ASSETS, AccountPropertyTable.SummaryTableHeader.class);
         if (table.isEmpty()) {
             throw new IllegalArgumentException("Таблица '" + SUMMARY_TABLE + "' не найдена");
         }

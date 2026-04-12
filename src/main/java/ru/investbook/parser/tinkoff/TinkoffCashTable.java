@@ -21,7 +21,7 @@ package ru.investbook.parser.tinkoff;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.PortfolioCash;
+import org.spacious_team.broker.pojo.AccountCash;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
@@ -31,7 +31,7 @@ import ru.investbook.parser.SingleBrokerReport;
 
 import java.math.BigDecimal;
 
-public class TinkoffCashTable extends SingleAbstractReportTable<PortfolioCash>  {
+public class TinkoffCashTable extends SingleAbstractReportTable<AccountCash>  {
 
     protected TinkoffCashTable(SingleBrokerReport report) {
         super(report,
@@ -41,7 +41,7 @@ public class TinkoffCashTable extends SingleAbstractReportTable<PortfolioCash>  
     }
 
     @Override
-    protected @Nullable PortfolioCash parseRow(TableRow row) {
+    protected @Nullable AccountCash parseRow(TableRow row) {
         @Nullable BigDecimal value = row.getBigDecimalCellValueOrDefault(CashTableHeader.VALUE, null);
         if (value == null) {
             return null;
@@ -50,8 +50,8 @@ public class TinkoffCashTable extends SingleAbstractReportTable<PortfolioCash>  
         if (currency == null || currency.length() != 3) {
             return null; // неизвестный контракт GLD_MOEX указывается в качестве валюты
         }
-        return PortfolioCash.builder()
-                .portfolio(getReport().getPortfolio())
+        return AccountCash.builder()
+                .account(getReport().getAccount())
                 .timestamp(getReport().getReportEndDateTime())
                 .market("all")
                 .value(value)

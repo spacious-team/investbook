@@ -72,7 +72,7 @@ public class CouponAmortizationRedemptionTable extends SingleAbstractReportTable
 
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .security(securityId)
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .count(row.getIntCellValue(COUNT))
                 .eventType(event)
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))

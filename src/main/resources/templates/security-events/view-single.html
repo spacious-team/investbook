@@ -28,7 +28,7 @@
 
 <h1>Сохранено событие</h1>
 
-<p th:text="'Счет: ' +  ${event.portfolio}"/>
+<p th:text="'Счет: ' +  ${event.account}"/>
 <p th:text="'Номер записи: ' +  ${event.id != null ? event.id : event.taxId}"/>
 <p th:text="'Дата: ' + ${event.date}"/>
 <p th:text="'Инструмент: ' +  ${event.security}"/>

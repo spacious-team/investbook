@@ -74,7 +74,7 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
         return SecurityTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE))
                 .tradeId(row.getStringCellValue(TRADE_ID))
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .security(securityId)
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)

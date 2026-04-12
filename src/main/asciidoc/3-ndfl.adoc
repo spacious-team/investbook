@@ -40,8 +40,8 @@ https://www.rusbonds.ru[rusbonds.ru] по облигациям. Далее за�
 
 image::99189060-5624ba00-2770-11eb-8f15-e702c39c6dd6.png[Пример заполнения доходов и налогов]
 
-информация для заполнения имеется в отчете, который формирует Investbook, в таблице <<portfolio-payment.adoc#,"Выплаты">>
-или <<foreign-portfolio-payment.adoc#,"Внешние выплаты">>
+информация для заполнения имеется в отчете, который формирует Investbook, в таблице <<account-payment.adoc#,"Выплаты">>
+или <<foreign-account-payment.adoc#,"Внешние выплаты">>
 
 image::99189061-5755e700-2770-11eb-9c57-a450c4a9ff19.png[Пример данных из Investbook]
 

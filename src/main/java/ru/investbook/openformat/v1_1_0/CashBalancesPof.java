@@ -27,8 +27,8 @@ import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.pojo.PortfolioCash;
-import ru.investbook.entity.PortfolioCashEntity;
+import org.spacious_team.broker.pojo.AccountCash;
+import ru.investbook.entity.AccountCashEntity;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -68,18 +68,18 @@ public class CashBalancesPof {
         String currency;
     }
 
-    static CashBalancesPof of(int account, Collection<PortfolioCashEntity> cashBalances) {
+    static CashBalancesPof of(int account, Collection<AccountCashEntity> cashBalances) {
         return CashBalancesPof.builder()
                 .account(account)
                 .cash(getCashBalances(cashBalances))
                 .build();
     }
 
-    private static Collection<CashPof> getCashBalances(Collection<PortfolioCashEntity> cashBalances) {
+    private static Collection<CashPof> getCashBalances(Collection<AccountCashEntity> cashBalances) {
         Map<String, BigDecimal> sumByCurrency = cashBalances.stream()
                 .collect(Collectors.toMap(
-                        PortfolioCashEntity::getCurrency,
-                        PortfolioCashEntity::getValue,
+                        AccountCashEntity::getCurrency,
+                        AccountCashEntity::getValue,
                         BigDecimal::add));
         return sumByCurrency.entrySet()
                 .stream()
@@ -88,11 +88,11 @@ public class CashBalancesPof {
                 .toList();
     }
 
-    Collection<PortfolioCash> toPortfolioCash(Map<Integer, String> accountToPortfolioId, Instant instant) {
+    Collection<AccountCash> toAccountCash(Map<Integer, String> accountToAccountId, Instant instant) {
         try {
             return cash.stream()
-                    .map(c -> PortfolioCash.builder()
-                            .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
+                    .map(c -> AccountCash.builder()
+                            .account(Objects.requireNonNull(accountToAccountId.get(account)))
                             .market("all")
                             .timestamp(instant)
                             .value(c.getValue())

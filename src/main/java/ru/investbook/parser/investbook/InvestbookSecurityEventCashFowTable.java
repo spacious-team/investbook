@@ -74,7 +74,7 @@ public class InvestbookSecurityEventCashFowTable extends AbstractSecurityAwareIn
                 value = value.multiply(BigDecimal.valueOf(count));
         }
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
-                .portfolio(row.getStringCellValue(PORTFOLIO))
+                .account(row.getStringCellValue(ACCOUNT))
                 .timestamp(parseEventInstant(row))
                 .security(securityId)
                 .count(count)

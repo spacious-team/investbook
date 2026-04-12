@@ -39,7 +39,7 @@ import static ru.investbook.parser.tinkoff.TinkoffBrokerReportHelper.removePageN
 @EqualsAndHashCode(callSuper = true)
 public class TinkoffBrokerReport extends AbstractExcelBrokerReport {
     static final Pattern tablesLastRowPattern = Pattern.compile("^[0-9]+\\.[0-9]+\\s+\\b", UNICODE_CHARACTER_CLASS);
-    private static final String PORTFOLIO_MARKER = "Инвестор:";
+    private static final String ACCOUNT_MARKER = "Инвестор:";
     private static final Predicate<@Nullable Object> tinkoffReportPredicate = cell ->
             (cell instanceof String) && ((String) cell).contains("Тинькофф");
     private static final Predicate<@Nullable Object> tbankReportPredicate = cell ->
@@ -60,7 +60,7 @@ public class TinkoffBrokerReport extends AbstractExcelBrokerReport {
                 reportPage,
                 excelFileName,
                 getReportEndDateTime(reportPage),
-                getPortfolio(reportPage));
+                getAccount(reportPage));
         return new ExcelAttributes(workbook, attributes);
     }
 
@@ -72,16 +72,16 @@ public class TinkoffBrokerReport extends AbstractExcelBrokerReport {
     }
 
     @SuppressWarnings({"nullness", "DataFlowIssue"})
-    private static String getPortfolio(ReportPage reportPage) {
+    private static String getAccount(ReportPage reportPage) {
         try {
-            return reportPage.getCell(reportPage.findByPrefix(PORTFOLIO_MARKER))
+            return reportPage.getCell(reportPage.findByPrefix(ACCOUNT_MARKER))
                     .getStringValue()
                     .split("/")[1]
                     .trim()
                     .split("\\s+")[0];
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER);
+                    "В отчете не найден номер договора по заданному шаблону '" + ACCOUNT_MARKER);
         }
     }
 

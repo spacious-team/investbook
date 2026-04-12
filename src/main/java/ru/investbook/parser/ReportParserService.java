@@ -20,10 +20,10 @@ package ru.investbook.parser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.spacious_team.broker.pojo.Account;
+import org.spacious_team.broker.pojo.AccountCash;
+import org.spacious_team.broker.pojo.AccountProperty;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.spacious_team.broker.pojo.Portfolio;
-import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.report_parser.api.AbstractTransaction;
 import org.spacious_team.broker.report_parser.api.ReportTable;
@@ -46,17 +46,17 @@ public class ReportParserService {
 
     public void parse(ReportTables reportTables) {
         try {
-            boolean isAdded = getPortfolios(reportTables).stream().allMatch(api::addPortfolio);
+            boolean isAdded = getAccounts(reportTables).stream().allMatch(api::addAccount);
             if (!isAdded) {
                 return;
             }
 
-            reportTables.getPortfolioPropertyTable()
+            reportTables.getAccountPropertyTable()
                     .getData()
-                    .forEach(api::addPortfolioProperty);
-            reportTables.getPortfolioCashTable()
+                    .forEach(api::addAccountProperty);
+            reportTables.getAccountCashTable()
                     .getData()
-                    .forEach(api::addPortfolioCash);
+                    .forEach(api::addAccountCash);
             reportTables.getSecuritiesTable()
                     .getData()
                     .forEach(api::addSecurity);
@@ -82,25 +82,25 @@ public class ReportParserService {
         }
     }
 
-    private static Set<Portfolio> getPortfolios(ReportTables tables) {
-        Set<String> portfolios = new HashSet<>();
+    private static Set<Account> getAccounts(ReportTables tables) {
+        Set<String> accounts = new HashSet<>();
 
-        addPortfolios(portfolios, tables.getPortfolioPropertyTable(), PortfolioProperty::getPortfolio);
-        addPortfolios(portfolios, tables.getPortfolioCashTable(), PortfolioCash::getPortfolio);
-        addPortfolios(portfolios, tables.getCashFlowTable(), EventCashFlow::getPortfolio);
-        addPortfolios(portfolios, tables.getTransactionTable(), AbstractTransaction::getPortfolio);
-        addPortfolios(portfolios, tables.getSecurityEventCashFlowTable(), SecurityEventCashFlow::getPortfolio);
+        addAccounts(accounts, tables.getAccountPropertyTable(), AccountProperty::getAccount);
+        addAccounts(accounts, tables.getAccountCashTable(), AccountCash::getAccount);
+        addAccounts(accounts, tables.getCashFlowTable(), EventCashFlow::getAccount);
+        addAccounts(accounts, tables.getTransactionTable(), AbstractTransaction::getAccount);
+        addAccounts(accounts, tables.getSecurityEventCashFlowTable(), SecurityEventCashFlow::getAccount);
 
-        return portfolios.stream()
-                .map(portfolio -> Portfolio.builder().id(portfolio).build())
+        return accounts.stream()
+                .map(account -> Account.builder().id(account).build())
                 .collect(Collectors.toSet());
     }
 
-    private static <T> void addPortfolios(Collection<String> dest,
-                                          ReportTable<T> fromTable, Function<T, String> toPortfolio) {
+    private static <T> void addAccounts(Collection<String> dest,
+                                        ReportTable<T> fromTable, Function<T, String> toAccount) {
         fromTable.getData()
                 .stream()
-                .map(toPortfolio)
+                .map(toAccount)
                 .collect(toCollection(() -> dest));
     }
 }

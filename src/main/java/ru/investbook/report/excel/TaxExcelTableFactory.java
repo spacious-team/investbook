@@ -20,9 +20,9 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.report.Table;
@@ -47,11 +47,11 @@ public class TaxExcelTableFactory implements TableFactory {
     private final ForeignExchangeRateTableFactory foreignExchangeRateTableFactory;
 
     @Override
-    public Table create(Portfolio portfolio) {
+    public Table create(Account account) {
         Table table = new Table();
         List<EventCashFlow> cashFlows = eventCashFlowRepository
-                .findByPortfolioIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
-                        singleton(portfolio.getId()),
+                .findByAccountIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
+                        singleton(account.getId()),
                         CashFlowType.TAX.getId(),
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate())

@@ -21,8 +21,8 @@ package ru.investbook.report;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.springframework.stereotype.Component;
@@ -58,32 +58,32 @@ public class PaidInterestFactory {
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
 
     @Transactional(readOnly = true)
-    public PaidInterest get(Portfolio portfolio, Security security, Instant fromDate, Instant toDate) {
-        FifoPositions positions = positionsFactory.get(security, portfolio);
-        return create(portfolio.getId(), security, positions, fromDate, toDate);
+    public PaidInterest get(Account account, Security security, Instant fromDate, Instant toDate) {
+        FifoPositions positions = positionsFactory.get(security, account);
+        return create(account.getId(), security, positions, fromDate, toDate);
     }
 
     private PaidInterest create(
-            String portfolio, Security security, FifoPositions positions, Instant fromDate, Instant toDate) {
+            String account, Security security, FifoPositions positions, Instant fromDate, Instant toDate) {
 
         PaidInterest paidInterest = new PaidInterest();
         for (CashFlowType type : PAY_TYPES) {
             paidInterest.get(type)
                     .putAll(getPositionWithPayments(
-                            portfolio, requireNonNull(security.getId()), positions, type, fromDate, toDate));
+                            account, requireNonNull(security.getId()), positions, type, fromDate, toDate));
         }
         return paidInterest;
     }
 
-    private Map<Position, List<SecurityEventCashFlow>> getPositionWithPayments(String portfolio,
+    private Map<Position, List<SecurityEventCashFlow>> getPositionWithPayments(String account,
                                                                                Integer securityId,
                                                                                FifoPositions positions,
                                                                                CashFlowType event,
                                                                                Instant fromDate,
                                                                                Instant toDate) {
         List<SecurityEventCashFlowEntity> eventCashFlowEntities = securityEventCashFlowRepository
-                .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                        singleton(portfolio),
+                .findByAccountIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                        singleton(account),
                         securityId,
                         event.getId(),
                         fromDate,

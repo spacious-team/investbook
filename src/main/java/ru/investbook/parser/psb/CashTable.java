@@ -21,7 +21,7 @@ package ru.investbook.parser.psb;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.PortfolioCash;
+import org.spacious_team.broker.pojo.AccountCash;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
 import org.spacious_team.table_wrapper.api.TableColumn;
 import org.spacious_team.table_wrapper.api.TableHeaderColumn;
@@ -31,7 +31,7 @@ import ru.investbook.parser.SingleAbstractReportTable;
 import static ru.investbook.parser.psb.CashTable.CashTableHeader.*;
 
 @Slf4j
-public class CashTable extends SingleAbstractReportTable<PortfolioCash> {
+public class CashTable extends SingleAbstractReportTable<AccountCash> {
 
     private static final String TABLE_NAME = "Позиция денежных средств по биржевым площадкам";
     private static final String TABLE_END_TEXT = "КонецДС_Б"; // hidden text in 0-th column
@@ -42,10 +42,10 @@ public class CashTable extends SingleAbstractReportTable<PortfolioCash> {
     }
 
     @Override
-    protected @Nullable PortfolioCash parseRow(TableRow row) {
+    protected @Nullable AccountCash parseRow(TableRow row) {
         return row.rowContains(INVALID_TEXT) ? null :
-                PortfolioCash.builder()
-                        .portfolio(getReport().getPortfolio())
+                AccountCash.builder()
+                        .account(getReport().getAccount())
                         .timestamp(getReport().getReportEndDateTime())
                         .market(row.getStringCellValue(SECTION))
                         .value(row.getBigDecimalCellValue(VALUE))

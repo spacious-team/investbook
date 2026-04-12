@@ -40,15 +40,15 @@ public interface SecurityEventCashFlowRepository extends
 
     List<SecurityEventCashFlowEntity> findByCashFlowTypeId(int type);
 
-    Optional<SecurityEventCashFlowEntity> findByPortfolioIdAndSecurityIdAndCashFlowTypeIdAndTimestampAndCount(
-            String portfolio,
+    Optional<SecurityEventCashFlowEntity> findByAccountIdAndSecurityIdAndCashFlowTypeIdAndTimestampAndCount(
+            String account,
             Integer securityId,
             int cashFlowType,
             Instant timestamp,
             int count);
 
-    List<SecurityEventCashFlowEntity> findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-            Collection<String> portfolios,
+    List<SecurityEventCashFlowEntity> findByAccountIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+            Collection<String> accounts,
             Integer securityId,
             int cashFlowType,
             Instant fromDate,
@@ -60,8 +60,8 @@ public interface SecurityEventCashFlowRepository extends
             Instant fromDate,
             Instant toDate);
 
-    List<SecurityEventCashFlowEntity> findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
-            Collection<String> portfolios,
+    List<SecurityEventCashFlowEntity> findByAccountIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampAsc(
+            Collection<String> accounts,
             Integer securityId,
             Set<Integer> cashFlowType,
             Instant fromDate,
@@ -74,10 +74,10 @@ public interface SecurityEventCashFlowRepository extends
             Instant toDate);
 
     /**
-     * Return all portfolio payments, between date-time interval
+     * Return all account payments, between date-time interval
      */
-    List<SecurityEventCashFlowEntity> findByPortfolioIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-            String portfolio,
+    List<SecurityEventCashFlowEntity> findByAccountIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+            String account,
             Set<Integer> cashFlowType,
             Instant fromDate,
             Instant toDate);
@@ -85,8 +85,8 @@ public interface SecurityEventCashFlowRepository extends
     /**
      * Return last security payment, between date-time interval
      */
-    Optional<SecurityEventCashFlowEntity> findFirstByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-            Collection<String> portfolio,
+    Optional<SecurityEventCashFlowEntity> findFirstByAccountIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+            Collection<String> accounts,
             Integer securityId,
             Set<Integer> cashFlowType,
             Instant fromDate,

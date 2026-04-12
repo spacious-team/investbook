@@ -21,10 +21,10 @@ package ru.investbook.report.excel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.Account;
+import org.spacious_team.broker.pojo.AccountCash;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.spacious_team.broker.pojo.Portfolio;
-import org.spacious_team.broker.pojo.PortfolioCash;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.report.Table;
@@ -57,11 +57,11 @@ public class CashFlowExcelTableFactory implements TableFactory {
     private final AssetsAndCashService assetsAndCashService;
 
     @Override
-    public Table create(Portfolio portfolio) {
+    public Table create(Account account) {
         Table table = new Table();
         List<EventCashFlow> cashFlows = eventCashFlowRepository
-                .findByPortfolioIdAndCashFlowTypeIdOrderByTimestamp(
-                        portfolio.getId(),
+                .findByAccountIdAndCashFlowTypeIdOrderByTimestamp(
+                        account.getId(),
                         CashFlowType.CASH.getId())
                 .stream()
                 .map(eventCashFlowConverter::fromEntity)
@@ -80,7 +80,7 @@ public class CashFlowExcelTableFactory implements TableFactory {
         if (!cashFlows.isEmpty()) {
             addLiquidationValueRow(table);
         }
-        appendCurrencyInfo(portfolio, table);
+        appendCurrencyInfo(account, table);
         return table;
     }
 
@@ -94,13 +94,13 @@ public class CashFlowExcelTableFactory implements TableFactory {
         table.add(record);
     }
 
-    private void appendCurrencyInfo(Portfolio portfolio, Table table) {
+    private void appendCurrencyInfo(Account account, Table table) {
         foreignExchangeRateTableFactory.appendExchangeRates(table, CURRENCY_NAME, EXCHANGE_RATE);
-        appendCashBalance(portfolio, table);
+        appendCashBalance(account, table);
     }
 
-    public void appendCashBalance(Portfolio portfolio, Table table) {
-        Map<String, BigDecimal> currencyToValues = getCashBalances(portfolio);
+    public void appendCashBalance(Account account, Table table) {
+        Map<String, BigDecimal> currencyToValues = getCashBalances(account);
         Table.@Nullable Record rubCashBalanceRecord = null;
         for (Table.Record record : table) {
             @Nullable String currency = Optional.ofNullable((String) record.get(CURRENCY_NAME))
@@ -127,14 +127,14 @@ public class CashFlowExcelTableFactory implements TableFactory {
         }
     }
 
-    private Map<String, BigDecimal> getCashBalances(Portfolio portfolio) {
+    private Map<String, BigDecimal> getCashBalances(Account account) {
         try {
             Instant now = Instant.now();
             Instant toDate = ViewFilter.get().getToDate();
             Instant atTime = toDate.isBefore(now) ?  toDate : now;
-            return assetsAndCashService.getPortfolioCash(Set.of(portfolio.getId()), atTime)
+            return assetsAndCashService.getAccountCash(Set.of(account.getId()), atTime)
                     .stream()
-                    .collect(Collectors.toMap(c -> c.getCurrency().toUpperCase(), PortfolioCash::getValue, BigDecimal::add));
+                    .collect(Collectors.toMap(c -> c.getCurrency().toUpperCase(), AccountCash::getValue, BigDecimal::add));
         } catch (Exception e) {
             log.warn("Внутренняя ошибка", e);
             return Collections.emptyMap();

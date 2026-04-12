@@ -38,7 +38,7 @@ import static ru.investbook.repository.specs.SpecificationHelper.*;
 
 @RequiredArgsConstructor(staticName = "of")
 public class EventCashFlowEntitySearchSpecification implements Specification<EventCashFlowEntity> {
-    private final @Nullable String portfolio;
+    private final @Nullable String account;
     private final @Nullable LocalDate dateFrom;
     private final @Nullable LocalDate dateTo;
     private final @Nullable CashFlowType cashFlowType;
@@ -46,7 +46,7 @@ public class EventCashFlowEntitySearchSpecification implements Specification<Eve
     @Override
     public Predicate toPredicate(Root<EventCashFlowEntity> root, @Nullable CriteriaQuery<?> query, CriteriaBuilder builder) {
         return Stream.of(
-                        filterByPortfolio(root, builder, EventCashFlowEntity_.portfolio, portfolio),
+                        filterByAccount(root, builder, EventCashFlowEntity_.account, account),
                         filterByDateFrom(root, builder, EventCashFlowEntity_.timestamp, dateFrom),
                         filterByDateTo(root, builder, EventCashFlowEntity_.timestamp, dateTo),
                         filterByEquals(root, builder, EventCashFlowEntity_.cashFlowType, cashFlowType))

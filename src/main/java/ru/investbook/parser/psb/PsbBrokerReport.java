@@ -38,7 +38,7 @@ import static java.time.temporal.ChronoUnit.HOURS;
 @EqualsAndHashCode(callSuper = true)
 public class PsbBrokerReport extends AbstractExcelBrokerReport {
     public static final String UNIQ_TEXT = "Брокер: ПАО \"Промсвязьбанк\"";
-    private static final String PORTFOLIO_MARKER = "Договор №:";
+    private static final String ACCOUNT_MARKER = "Договор №:";
     private static final String REPORT_DATE_MARKER = "ОТЧЕТ БРОКЕРА";
 
     public PsbBrokerReport(String excelFileName, SecurityRegistrar securityRegistrar) throws IOException {
@@ -66,7 +66,7 @@ public class PsbBrokerReport extends AbstractExcelBrokerReport {
                 reportPage,
                 excelFileName,
                 getReportEndDateTime(reportPage),
-                getPortfolio(reportPage));
+                getAccount(reportPage));
         return new ExcelAttributes(workbook, attributes);
     }
 
@@ -76,13 +76,13 @@ public class PsbBrokerReport extends AbstractExcelBrokerReport {
         }
     }
 
-    private static String getPortfolio(ReportPage reportPage) {
+    private static String getAccount(ReportPage reportPage) {
         try {
-            String value = String.valueOf(reportPage.getNextColumnValue(PORTFOLIO_MARKER));
+            String value = String.valueOf(reportPage.getNextColumnValue(ACCOUNT_MARKER));
             return value.contains("/") ? value.split("/")[0] : value;
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + " XXX'");
+                    "В отчете не найден номер договора по заданному шаблону '" + ACCOUNT_MARKER + " XXX'");
         }
     }
 

@@ -21,8 +21,8 @@ package ru.investbook.report.excel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
 import org.spacious_team.broker.pojo.Transaction;
@@ -75,40 +75,40 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     private final MoexDerivativeCodeService moexDerivativeCodeService;
     private final SecurityProfitService securityProfitService;
 
-    public Table create(Portfolio portfolio) {
+    public Table create(Account account) {
         throw new UnsupportedOperationException();
     }
 
-    public Table create(Portfolio portfolio, String forCurrency) {
-        return create(singleton(portfolio.getId()), forCurrency);
+    public Table create(Account account, String forCurrency) {
+        return create(singleton(account.getId()), forCurrency);
     }
 
     /**
-     * @param portfolios should be empty for display for all
+     * @param accountIds should be empty for display for all
      */
     @Override
-    public Table create(Collection<String> portfolios, String forCurrency) {
-        Collection<String> contractGroups = getContractGroups(portfolios, forCurrency);
-        return create(portfolios, contractGroups, forCurrency);
+    public Table create(Collection<String> accountIds, String forCurrency) {
+        Collection<String> contractGroups = getContractGroups(accountIds, forCurrency);
+        return create(accountIds, contractGroups, forCurrency);
     }
 
-    private Table create(Collection<String> portfolios, Collection<String> contractGroups, String forCurrency) {
+    private Table create(Collection<String> accounts, Collection<String> contractGroups, String forCurrency) {
         return contractGroups.stream()
-                .map(group -> getSecurityStatus(portfolios, group, forCurrency))
+                .map(group -> getSecurityStatus(accounts, group, forCurrency))
                 .collect(toCollection(Table::new));
     }
 
-    private Collection<String> getContractGroups(Collection<String> portfolios, String currency) {
+    private Collection<String> getContractGroups(Collection<String> accounts, String currency) {
         if (!currency.equalsIgnoreCase("RUB")) {
             return emptyList();
         }
         ViewFilter filter = ViewFilter.get();
-        Collection<Integer> contracts = portfolios.isEmpty() ?
+        Collection<Integer> contracts = accounts.isEmpty() ?
                 transactionRepository.findDistinctDerivativeByTimestampBetweenOrderByTimestampDesc(
                         filter.getFromDate(),
                         filter.getToDate()) :
-                transactionRepository.findDistinctDerivativeByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
-                        portfolios,
+                transactionRepository.findDistinctDerivativeByAccountInAndTimestampBetweenOrderByTimestampDesc(
+                        accounts,
                         filter.getFromDate(),
                         filter.getToDate());
 
@@ -136,11 +136,11 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
                 .orElse(false);
     }
 
-    private Table.Record getSecurityStatus(Collection<String> portfolios, String contractGroup, String toCurrency) {
+    private Table.Record getSecurityStatus(Collection<String> accounts, String contractGroup, String toCurrency) {
         Table.Record row = new Table.Record();
         try {
             Set<Security> contracts = getContracts(contractGroup);
-            Deque<Transaction> transactions = getTransactions(portfolios, contracts);
+            Deque<Transaction> transactions = getTransactions(accounts, contracts);
 
             row.put(CONTRACT_GROUP, moexDerivativeCodeService.codePrefixToShortnamePrefix(contractGroup)
                     .orElse(contractGroup));
@@ -150,8 +150,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
             row.put(LAST_TRANSACTION_DATE, ofNullable(transactions.peekLast())
                     .map(Transaction::getTimestamp)
                     .orElse(null));
-            //noinspection DataFlowIssue
-            row.put(LAST_EVENT_DATE, getLastEventDate(portfolios, contracts));
+            row.put(LAST_EVENT_DATE, getLastEventDate(accounts, contracts));
             row.put(BUY_COUNT, transactions
                     .stream()
                     .mapToInt(Transaction::getCount)
@@ -172,7 +171,7 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
             if (openedPositions == 0) {
                 row.put(GROSS_PROFIT_PNT, securityProfitService.getTotal(transactions, DERIVATIVE_QUOTE, QUOTE_CURRENCY));
             }
-            row.put(GROSS_PROFIT, getGrossProfit(portfolios, contracts, toCurrency));
+            row.put(GROSS_PROFIT, getGrossProfit(accounts, contracts, toCurrency));
             row.put(PROFIT, PROFIT_FORMULA);
             row.put(PROFIT_PROPORTION, PROFIT_PROPORTION_FORMULA);
         } catch (Exception e) {
@@ -181,9 +180,9 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
         return row;
     }
 
-    private Deque<Transaction> getTransactions(Collection<String> portfolios, Set<Security> contracts) {
+    private Deque<Transaction> getTransactions(Collection<String> accounts, Set<Security> contracts) {
         ViewFilter filter = ViewFilter.get();
-        FifoPositionsFilter pf = FifoPositionsFilter.of(portfolios, filter.getFromDate(), filter.getToDate());
+        FifoPositionsFilter pf = FifoPositionsFilter.of(accounts, filter.getFromDate(), filter.getToDate());
         return contracts.stream()
                 .map(contract -> positionsFactory.getTransactions(requireNonNull(contract.getId()), pf))
                 .flatMap(Collection::stream)
@@ -191,11 +190,11 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
                 .collect(toCollection(LinkedList::new));
     }
 
-    private @Nullable Instant getLastEventDate(Collection<String> portfolios, Collection<Security> contracts) {
+    private @Nullable Instant getLastEventDate(Collection<String> accounts, Collection<Security> contracts) {
         ViewFilter filter = ViewFilter.get();
         return contracts.stream()
                 .map(contract -> securityProfitService.getLastEventTimestamp(
-                        portfolios, contract, paymentEvents, filter.getFromDate(), filter.getToDate()))
+                        accounts, contract, paymentEvents, filter.getFromDate(), filter.getToDate()))
                 .flatMap(Optional::stream)
                 .max(Comparator.naturalOrder())
                 .orElse(null);
@@ -204,9 +203,9 @@ public class DerivativesMarketTotalProfitExcelTableFactory implements TableFacto
     /**
      * Суммарная вариационная маржа по всем контрактам
      */
-    private BigDecimal getGrossProfit(Collection<String> portfolios, Collection<Security> contracts, String toCurrency) {
+    private BigDecimal getGrossProfit(Collection<String> accounts, Collection<Security> contracts, String toCurrency) {
         return contracts.stream()
-                .map(contract -> securityProfitService.sumPaymentsForType(portfolios, contract, DERIVATIVE_PROFIT, toCurrency))
+                .map(contract -> securityProfitService.sumPaymentsForType(accounts, contract, DERIVATIVE_PROFIT, toCurrency))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

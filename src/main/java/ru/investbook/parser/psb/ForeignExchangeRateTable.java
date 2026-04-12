@@ -34,7 +34,7 @@ import java.util.Collection;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static ru.investbook.parser.psb.PortfolioPropertyTable.SummaryTableHeader.*;
+import static ru.investbook.parser.psb.AccountPropertyTable.SummaryTableHeader.*;
 
 @Slf4j
 public class ForeignExchangeRateTable extends SingleInitializableReportTable<ForeignExchangeRate> {
@@ -47,7 +47,7 @@ public class ForeignExchangeRateTable extends SingleInitializableReportTable<For
 
     @Override
     protected Collection<ForeignExchangeRate> parseTable() {
-        Table table = PortfolioPropertyTable.getSummaryTable(getReport(), PortfolioPropertyTable.ASSETS);
+        Table table = AccountPropertyTable.getSummaryTable(getReport(), AccountPropertyTable.ASSETS);
         return getExchangeRate(table);
     }
 
@@ -70,7 +70,7 @@ public class ForeignExchangeRateTable extends SingleInitializableReportTable<For
     }
 
     private Collection<ForeignExchangeRate> createExchangeRateProperty(TableRow row,
-                                                                       PortfolioPropertyTable.SummaryTableHeader currency,
+                                                                       AccountPropertyTable.SummaryTableHeader currency,
                                                                        CurrencyPair currencyPair) {
         BigDecimal exchangeRate = row.getBigDecimalCellValueOrDefault(currency, BigDecimal.ZERO);
         if (exchangeRate.compareTo(min) > 0) {

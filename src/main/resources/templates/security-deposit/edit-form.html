@@ -52,7 +52,7 @@
     </label>
     <label>
         Счет
-        <input type="text" th:field="*{portfolio}" list="portfolios" class="portfolio" required/>
+        <input type="text" th:field="*{account}" list="accounts" class="account" required/>
     </label>
     <label>
         Операция
@@ -84,8 +84,8 @@
     <input type="hidden" id="securityType" name="securityType" value="SHARE"/>
     <input type="submit" onclick="checkValues()" value="Сохранить"/>
 
-    <datalist id="portfolios">
-        <option th:each="portfolio : ${portfolios}" th:text="${portfolio}"></option>
+    <datalist id="accounts">
+        <option th:each="account : ${accounts}" th:text="${account}"></option>
     </datalist>
     <datalist id="securities">
         <option th:each="security : ${securities}" th:text="${security}"></option>

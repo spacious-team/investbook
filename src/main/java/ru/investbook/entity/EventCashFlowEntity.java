@@ -30,7 +30,6 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -47,9 +46,9 @@ public class EventCashFlowEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "portfolio", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "account", referencedColumnName = "id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
-    private PortfolioEntity portfolio;
+    private AccountEntity account;
 
     @Basic
     @Column(name = "timestamp")

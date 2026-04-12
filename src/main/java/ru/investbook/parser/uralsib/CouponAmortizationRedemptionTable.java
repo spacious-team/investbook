@@ -82,7 +82,7 @@ public class CouponAmortizationRedemptionTable extends PaymentsTable {
                 .add(tax.abs());
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .security(requireNonNull(security.getId()))
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .count(getSecurityCount(security, timestamp))
                 .eventType(event)
                 .timestamp(timestamp)

@@ -20,8 +20,8 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.Transaction;
@@ -59,12 +59,12 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
     private final SecurityConverter securityConverter;
     private final DerivativeEventsFactory derivativeEventsFactory;
 
-    public Table create(Portfolio portfolio) {
+    public Table create(Account account) {
         Table profit = new Table();
-        for (SecurityEntity securityEntity : getDerivatives(portfolio)) {
+        for (SecurityEntity securityEntity : getDerivatives(account)) {
             Security contract = securityConverter.fromEntity(securityEntity);
             DerivativeEvents derivativeEvents = derivativeEventsFactory.getDerivativeEvents(
-                    portfolio,
+                    account,
                     contract,
                     ViewFilter.get());
 
@@ -74,9 +74,9 @@ public class DerivativesMarketProfitExcelTableFactory implements TableFactory {
         return profit;
     }
 
-    private Collection<SecurityEntity> getDerivatives(Portfolio portfolio) {
-        return transactionRepository.findDistinctDerivativeByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
-                        singleton(portfolio.getId()),
+    private Collection<SecurityEntity> getDerivatives(Account account) {
+        return transactionRepository.findDistinctDerivativeByAccountInAndTimestampBetweenOrderByTimestampDesc(
+                        singleton(account.getId()),
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate())
                 .stream()

@@ -41,7 +41,7 @@
 </p>
 
 <form action="#" th:action="@{/security-deposit/search}" th:object="${filter}" method="post" class="search-filter">
-    <div th:replace="~{fragments/search :: portfolio (selected='*{portfolio}', portfolios=${portfolios})}"></div>
+    <div th:replace="~{fragments/search :: account (selected='*{account}', accounts=${accounts})}"></div>
     <div th:replace="~{fragments/search :: security ('*{security}')}"></div>
     <div th:replace="~{fragments/search :: date-range (from='*{dateFrom}', to='*{dateTo}')}"></div>
     <div th:replace="~{fragments/search :: page-size ('*{pageSize}')}"></div>
@@ -58,7 +58,7 @@
         <th></th>
     </tr>
     <tr th:each="tr : ${page.content}">
-        <td th:text="${tr.portfolio}"/>
+        <td th:text="${tr.account}"/>
         <td>
             <a th:href="@{/security-deposit/edit-form(id=${tr.id})}"
                th:text="${tr.tradeId}"/>
@@ -78,7 +78,7 @@
 
 <div th:insert="~{fragments/navigation :: navigation-bar (
     endpoint='security-deposit',
-    params='portfolio=${filter.portfolio},
+    params='account=${filter.account},
             dateFrom=${filter.dateFrom},
             dateTo=${filter.dateTo},
             security=${filter.security},

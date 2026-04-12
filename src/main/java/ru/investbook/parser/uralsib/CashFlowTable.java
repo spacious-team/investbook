@@ -62,7 +62,7 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
                 if (matcherFrom.find() && matcherTo.find()) {
                     String to = requireNonNull(matcherTo.group(1));
                     String from = requireNonNull(matcherFrom.group(1));
-                    if (isCurrentPortfolioAccount(to) != isCurrentPortfolioAccount(from)) {
+                    if (isCurrentAccountAccount(to) != isCurrentAccountAccount(from)) {
                         if (isExternalAccount(from) && isExternalAccount(to)) {
                             type = CashFlowType.CASH;
                             break;
@@ -81,7 +81,7 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
                 return null;
         }
         return EventCashFlow.builder()
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .eventType(type)
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                 .value(row.getBigDecimalCellValue(VALUE))
@@ -90,15 +90,15 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
                 .build();
     }
 
-    private boolean isCurrentPortfolioAccount(String account) {
-        String portfolio = getReport().getPortfolio();
-        boolean isIIS = portfolio.endsWith("I");
+    private boolean isCurrentAccountAccount(String account) {
+        String _account = getReport().getAccount();
+        boolean isIIS = _account.endsWith("I");
         if (account.startsWith("SPBFUT")) {
             // срочный рынок
             return isIIS == (account.length() > 6 && account.charAt(6) == 'I');
         } else {
             // Мосбиржа, СПб биржа
-            return getClientCode(portfolio).equals(getClientCode(account))
+            return getClientCode(_account).equals(getClientCode(account))
                     && (isIIS == account.endsWith("I"));
         }
     }

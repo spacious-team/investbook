@@ -21,11 +21,11 @@ package ru.investbook.parser;
 import java.time.Instant;
 
 /**
- * Broker report containing single portfolio information
+ * Broker report containing single account information
  */
 public interface SingleBrokerReport extends ZoneIdAwareBrokerReport {
 
-    String getPortfolio();
+    String getAccount();
 
     Instant getReportEndDateTime();
 

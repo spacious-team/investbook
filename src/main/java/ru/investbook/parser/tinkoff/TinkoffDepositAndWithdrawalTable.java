@@ -88,7 +88,7 @@ public class TinkoffDepositAndWithdrawalTable extends SingleAbstractReportTable<
             return Collections.emptyList();
         }
         SecurityTransaction.SecurityTransactionBuilder<?, ?> builder = SecurityTransaction.builder()
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .security(securityId)
                 .timestamp(getReport().getReportEndDateTime());
         SecurityTransaction deposit = builder
@@ -123,7 +123,7 @@ public class TinkoffDepositAndWithdrawalTable extends SingleAbstractReportTable<
         String tradeId = securityId +
                 marker +
                 getReport().getReportEndDateTime().getEpochSecond() +
-                getReport().getPortfolio().replaceAll(" ", "");
+                getReport().getAccount().replaceAll(" ", "");
         return tradeId.substring(0, Math.min(32, tradeId.length()));
     }
 

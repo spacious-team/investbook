@@ -66,7 +66,7 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Ab
                 return null;
             }
         }
-        String portfolio = row.getStringCellValue(PORTFOLIO);
+        String account = row.getStringCellValue(ACCOUNT);
         Instant instant = row.getInstantCellValue(DATE_TIME);
         Security security = SecurityHelper.getSecurity(
                 row.getStringCellValue(CODE),
@@ -78,22 +78,22 @@ public class SberSecurityDepsitAndWithdrawalTable extends AbstractReportTable<Ab
         @SuppressWarnings({"nullable", "DataFlowIssue"})
         int securityId = security.getId();
         return SecurityTransaction.builder()
-                .tradeId(generateTradeId(portfolio, instant, securityId))
+                .tradeId(generateTradeId(account, instant, securityId))
                 .timestamp(instant)
-                .portfolio(portfolio)
+                .account(account)
                 .security(securityId)
                 .count(count)
                 .build();
     }
 
-    private static String generateTradeId(String portfolio, Instant instant, int securityId) {
-        String id = instant.getEpochSecond() + securityId + portfolio;
+    private static String generateTradeId(String account, Instant instant, int securityId) {
+        String id = instant.getEpochSecond() + securityId + account;
         return id.substring(0, Math.min(32, id.length()));
     }
 
     @Getter
     enum SberSecurityDepositAndWithdrawalTableHeader implements TableHeaderColumn {
-        PORTFOLIO("Номер договора"),
+        ACCOUNT("Номер договора"),
         DATE_TIME("Дата исполнения поручения"),
         CODE("Код финансового инструмента"),
         NAME("Наименование финансового инструмента"),

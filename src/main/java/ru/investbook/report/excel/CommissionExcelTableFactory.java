@@ -19,9 +19,9 @@
 package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.spacious_team.broker.pojo.EventCashFlow;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
 import ru.investbook.converter.EventCashFlowConverter;
 import ru.investbook.report.Table;
@@ -45,11 +45,11 @@ public class CommissionExcelTableFactory implements TableFactory {
     private final EventCashFlowConverter eventCashFlowConverter;
 
     @Override
-    public Table create(Portfolio portfolio) {
+    public Table create(Account account) {
         Table table = new Table();
         List<EventCashFlow> cashFlows = eventCashFlowRepository
-                .findByPortfolioIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
-                        singleton(portfolio.getId()),
+                .findByAccountIdInAndCashFlowTypeIdAndTimestampBetweenOrderByTimestamp(
+                        singleton(account.getId()),
                         CashFlowType.FEE.getId(),
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate())

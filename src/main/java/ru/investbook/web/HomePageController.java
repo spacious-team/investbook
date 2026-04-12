@@ -46,11 +46,11 @@ public class HomePageController {
 
     @GetMapping
     public String index(Model model) {
-        Set<String> portfolios = assetsAndCashService.getActivePortfolios();
-        model.addAttribute("transactionsCount", transactionRepository.countByPortfolioIn(portfolios));
-        model.addAttribute("portfolios", portfolios);
-        model.addAttribute("assets", assetsAndCashService.getTotalAssetsInRub(portfolios));
-        model.addAttribute("cashBalance", assetsAndCashService.getTotalCashInRub(portfolios));
+        Set<String> accounts = assetsAndCashService.getActiveAccounts();
+        model.addAttribute("transactionsCount", transactionRepository.countByAccountIn(accounts));
+        model.addAttribute("accounts", accounts);
+        model.addAttribute("assets", assetsAndCashService.getTotalAssetsInRub(accounts));
+        model.addAttribute("cashBalance", assetsAndCashService.getTotalCashInRub(accounts));
         model.addAttribute("buildProperties", buildProperties);
         model.addAttribute("logoUrl",
                 "https://github.com/spacious-team/investbook/assets/11336712/97828ac2-c52f-4c6e-8c3a-8a16f2c3fa3a");

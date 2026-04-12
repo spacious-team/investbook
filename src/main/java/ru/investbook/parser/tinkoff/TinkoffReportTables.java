@@ -37,9 +37,9 @@ public class TinkoffReportTables extends AbstractReportTables<TinkoffBrokerRepor
     @Getter
     private final ReportTable<SecurityQuote> securityQuoteTable;
     @Getter
-    private final TinkoffCashTable portfolioCashTable;
+    private final TinkoffCashTable accountCashTable;
     @Getter
-    private final TinkoffPortfolioPropertyTable portfolioPropertyTable;
+    private final TinkoffAccountPropertyTable accountPropertyTable;
     private final TinkoffSecurityTransactionTableHelper tinkoffSecurityTransactionTableHelper;
 
     protected TinkoffReportTables(TinkoffBrokerReport report,
@@ -49,12 +49,12 @@ public class TinkoffReportTables extends AbstractReportTables<TinkoffBrokerRepor
         super(report);
         this.transactionValueAndFeeParser = transactionValueAndFeeParser;
         this.securityCodeAndIsinTable = new SecurityCodeAndIsinTable(this.report);
-        this.portfolioCashTable = new TinkoffCashTable(report);
+        this.accountCashTable = new TinkoffCashTable(report);
         TinkoffSecurityQuoteTable[] securityQuoteTables =
                 TinkoffSecurityQuoteTable.of(report, securityCodeAndIsinTable, foreignExchangeRateService);
         this.securityQuoteTable = WrappingReportTable.of(securityQuoteTables);
-        this.portfolioPropertyTable = new TinkoffPortfolioPropertyTable(report, foreignExchangeRateService,
-                portfolioCashTable, securityQuoteTables);
+        this.accountPropertyTable = new TinkoffAccountPropertyTable(report, foreignExchangeRateService,
+                accountCashTable, securityQuoteTables);
         this.tinkoffSecurityTransactionTableHelper = tinkoffSecurityTransactionTableHelper;
     }
 

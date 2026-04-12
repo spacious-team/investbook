@@ -20,8 +20,8 @@ package ru.investbook.report;
 
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.Transaction;
@@ -67,9 +67,9 @@ public class DerivativeEventsFactory {
     private final SecurityEventCashFlowConverter securityEventCashFlowConverter;
     private final TransactionCashFlowConverter transactionCashFlowConverter;
 
-    public DerivativeEvents getDerivativeEvents(Portfolio portfolio, Security contract, ViewFilter filter) {
-        Deque<Transaction> transactions = getTransactions(portfolio, contract, filter);
-        Map<LocalDate, SecurityEventCashFlow> securityEventCashFlows = getSecurityEventCashFlows(portfolio, contract, filter);
+    public DerivativeEvents getDerivativeEvents(Account account, Security contract, ViewFilter filter) {
+        Deque<Transaction> transactions = getTransactions(account, contract, filter);
+        Map<LocalDate, SecurityEventCashFlow> securityEventCashFlows = getSecurityEventCashFlows(account, contract, filter);
 
         @Nullable LocalDate firstEventDate = getContractFirstEventDate(transactions, securityEventCashFlows);
         @Nullable LocalDate lastEventDate = Optional.ofNullable(getContractLastEventDate(transactions, securityEventCashFlows))
@@ -107,11 +107,11 @@ public class DerivativeEventsFactory {
         return derivativeEvents;
     }
 
-    private LinkedList<Transaction> getTransactions(Portfolio portfolio, Security contract, ViewFilter filter) {
+    private LinkedList<Transaction> getTransactions(Account account, Security contract, ViewFilter filter) {
         return transactionRepository
-                .findBySecurityIdAndPortfolioInAndTimestampBetweenOrderByTimestampAscTradeIdAsc(
+                .findBySecurityIdAndAccountInAndTimestampBetweenOrderByTimestampAscTradeIdAsc(
                         requireNonNull(contract.getId()),
-                        singleton(portfolio.getId()),
+                        singleton(account.getId()),
                         filter.getFromDate(),
                         filter.getToDate())
                 .stream()
@@ -119,10 +119,10 @@ public class DerivativeEventsFactory {
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    private Map<LocalDate, SecurityEventCashFlow> getSecurityEventCashFlows(Portfolio portfolio, Security contract, ViewFilter filter) {
+    private Map<LocalDate, SecurityEventCashFlow> getSecurityEventCashFlows(Account account, Security contract, ViewFilter filter) {
         return securityEventCashFlowRepository
-                .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                        singleton(portfolio.getId()),
+                .findByAccountIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                        singleton(account.getId()),
                         requireNonNull(contract.getId()),
                         CashFlowType.DERIVATIVE_PROFIT.getId(),
                         filter.getFromDate(),

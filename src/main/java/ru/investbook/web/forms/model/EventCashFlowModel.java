@@ -40,7 +40,7 @@ public class EventCashFlowModel {
 
     private @Nullable Integer id;
 
-    private @NotEmpty String portfolio;
+    private @NotEmpty String account;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private @NotNull LocalDate date = LocalDate.now();

@@ -75,7 +75,7 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
             }
         }
         EventCashFlow.EventCashFlowBuilder builder = EventCashFlow.builder()
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .eventType(CashFlowType.CASH)
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                 .description("Операция по валютному счету");
@@ -111,7 +111,7 @@ public class ForeignExchangeCashFlowTable extends SingleAbstractReportTable<Even
             if (doubleValue > 0.01) {
                 BigDecimal brokerFee = BigDecimal.valueOf(doubleValue).negate();
                 return singletonList(EventCashFlow.builder()
-                        .portfolio(getReport().getPortfolio())
+                        .account(getReport().getAccount())
                         .eventType(CashFlowType.FEE)
                         .timestamp(getReport().getReportEndDateTime())
                         .value(brokerFee)

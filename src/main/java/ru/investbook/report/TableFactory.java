@@ -18,7 +18,7 @@
 
 package ru.investbook.report;
 
-import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Account;
 
 import java.util.Collection;
 
@@ -28,17 +28,17 @@ public interface TableFactory {
         throw new UnsupportedOperationException("Not implemented");
     }
 
-    Table create(Portfolio portfolio);
+    Table create(Account account);
 
-    default Table create(Collection<String> portfolioIds) {
+    default Table create(Collection<String> accountIds) {
         throw new UnsupportedOperationException("Not implemented");
     }
 
-    default Table create(Collection<String> portfolioIds, String forCurrency) {
+    default Table create(Collection<String> accountIds, String forCurrency) {
         throw new UnsupportedOperationException("Not implemented");
     }
 
-    default Table create(Portfolio portfolio, String forCurrency) {
+    default Table create(Account account, String forCurrency) {
         throw new UnsupportedOperationException("Not implemented");
     }
 

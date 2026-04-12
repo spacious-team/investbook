@@ -58,7 +58,7 @@ public class VtbDividendTable extends AbstractVtbCashFlowTable<EventCashFlow> {
         BigDecimal value = event.getValue()
                 .add(tax.abs());
         EventCashFlow.EventCashFlowBuilder builder = EventCashFlow.builder()
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .eventType(eventType)
                 .timestamp(event.getDate())
                 .value(value)

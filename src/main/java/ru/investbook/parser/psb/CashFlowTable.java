@@ -71,7 +71,7 @@ public class CashFlowTable extends SingleAbstractReportTable<EventCashFlow> {
         @Nullable String description = row.getStringCellValueOrDefault(DESCRIPTION, null);
         BigDecimal value = row.getBigDecimalCellValue(VALUE);
         return EventCashFlow.builder()
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .eventType(type)
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))
                 .value(isPositive ? value : value.negate())

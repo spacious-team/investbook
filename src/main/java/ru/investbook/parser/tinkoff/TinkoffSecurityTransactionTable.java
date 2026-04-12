@@ -126,7 +126,7 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
         TransactionValueAndFeeParser.Result valueAndFee = transactionValueAndFeeParser.parse(
                 transactionValueAndFeeParser.argumentsBuilder()
                         .row(row)
-                        .portfolio(getReport().getPortfolio())
+                        .account(getReport().getAccount())
                         .tradeId(tradeId)
                         .transactionInstant(timestamp)
                         .value(amount)
@@ -143,7 +143,7 @@ public class TinkoffSecurityTransactionTable extends SingleAbstractReportTable<A
 
         return builder
                 .tradeId(tradeId)
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .security(securityId)
                 .count(count)
                 .value(valueAndFee.value())

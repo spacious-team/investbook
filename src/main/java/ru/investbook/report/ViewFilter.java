@@ -43,19 +43,19 @@ public class ViewFilter {
     public static final Instant defaultFromDate = Instant.ofEpochSecond(0);
     private static final Function<LocalDate, Instant> toInstant = date -> date.atStartOfDay(systemDefault()).toInstant();
 
-    public static ViewFilter of(ViewFilterModel viewFilterModel, Supplier<? extends Set<String>> allPortfoliosSupplier) {
-        Set<String> portfolios = viewFilterModel.getPortfolios();
-        if (!portfolios.isEmpty()) {
-            Set<String> allPortfolios = allPortfoliosSupplier.get();
-            if (portfolios.equals(allPortfolios)) {
-                // portfolio filter not required
-                portfolios = Collections.emptySet();
+    public static ViewFilter of(ViewFilterModel viewFilterModel, Supplier<? extends Set<String>> allAccountsSupplier) {
+        Set<String> accounts = viewFilterModel.getAccounts();
+        if (!accounts.isEmpty()) {
+            Set<String> allAccounts = allAccountsSupplier.get();
+            if (accounts.equals(allAccounts)) {
+                // account filter not required
+                accounts = Collections.emptySet();
             }
         }
         return ViewFilter.builder()
                 .fromDate(toInstant.apply(viewFilterModel.getFromDate()))
                 .toDate(toInstant.apply(viewFilterModel.getToDate()).plus(1, ChronoUnit.DAYS).minusSeconds(1))
-                .portfolios(portfolios)
+                .accounts(accounts)
                 .showDetails(viewFilterModel.isShowDetails())
                 .build();
     }
@@ -67,10 +67,10 @@ public class ViewFilter {
     private final Instant toDate = Instant.now();
 
     /**
-     * Show all portfolios if empty
+     * Show all accounts if empty
      */
     @Builder.Default
-    private final Set<String> portfolios = Collections.emptySet();
+    private final Set<String> accounts = Collections.emptySet();
 
     @Builder.Default
     private final boolean showDetails = true;

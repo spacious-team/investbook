@@ -92,7 +92,7 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
                 instant = instant.plusSeconds(1);
             }
             SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
-                    .portfolio(getReport().getPortfolio())
+                    .account(getReport().getAccount())
                     .eventType(eventType)
                     .timestamp(instant)
                     .value(value)
@@ -153,7 +153,7 @@ public class VtbCouponAmortizationRedemptionTable extends AbstractVtbCashFlowTab
                                           BigDecimal tax) {
         String description = event.getDescription();
         EventCashFlow.EventCashFlowBuilder builder = EventCashFlow.builder()
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .eventType(eventType)
                 .timestamp(event.getDate())
                 .value(value)

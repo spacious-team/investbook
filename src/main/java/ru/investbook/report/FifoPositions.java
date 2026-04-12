@@ -143,7 +143,7 @@ public class FifoPositions {
         Assert.isTrue(redemption.getEventType() == CashFlowType.REDEMPTION,
             () -> "Ожидается событие погашения номинала облигации, предоставлено событие " + redemption.getEventType());
         return Transaction.builder()
-                .portfolio(redemption.getPortfolio())
+                .account(redemption.getAccount())
                 .security(redemption.getSecurity())
                 .timestamp(redemption.getTimestamp())
                 .count(-redemption.getCount())
