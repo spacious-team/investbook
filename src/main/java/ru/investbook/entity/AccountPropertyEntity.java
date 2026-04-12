@@ -32,7 +32,7 @@ import lombok.Data;
 import java.time.Instant;
 
 @Entity
-@Table(name = "portfolio_property")
+@Table(name = "account_property")
 @Data
 public class AccountPropertyEntity {
 
@@ -42,7 +42,7 @@ public class AccountPropertyEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "portfolio", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "account", referencedColumnName = "id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private AccountEntity account;
 

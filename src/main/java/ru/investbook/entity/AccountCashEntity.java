@@ -29,7 +29,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
-@Table(name = "portfolio_cash")
+@Table(name = "account_cash")
 @Data
 public class AccountCashEntity {
 
@@ -39,7 +39,7 @@ public class AccountCashEntity {
     private Integer id;
 
     @Basic
-    @Column(name = "portfolio", nullable = false)
+    @Column(name = "account", nullable = false)
     private String account;
 
     @Basic

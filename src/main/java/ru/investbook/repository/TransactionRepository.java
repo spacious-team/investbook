@@ -58,7 +58,7 @@ public interface TransactionRepository extends
                 ON t1.security = s.id
             WHERE s.type IN (0, 1, 2, 5)
                 AND t2.type = 1
-                AND t1.portfolio IN (:accounts)
+                AND t1.account IN (:accounts)
                 AND t2.currency = :currency
                 AND timestamp between :from AND :to
             ORDER BY t1.timestamp DESC
@@ -99,7 +99,7 @@ public interface TransactionRepository extends
             JOIN security as s
                 ON t.security = s.id
             WHERE s.type = 3
-                AND t.portfolio IN (:accounts)
+                AND t.account IN (:accounts)
                 AND t.timestamp between :from AND :to
             ORDER BY t.timestamp DESC
             """)
@@ -133,7 +133,7 @@ public interface TransactionRepository extends
             JOIN security as s
                 ON t.security = s.id
             WHERE s.type = 4
-                AND portfolio IN (:accounts)
+                AND account IN (:accounts)
                 AND timestamp between :from AND :to
             ORDER BY timestamp DESC
             """)
@@ -168,7 +168,7 @@ public interface TransactionRepository extends
             JOIN security as s
                 ON t.security = s.id
             WHERE s.type = 4
-                AND portfolio IN (:accounts)
+                AND account IN (:accounts)
                 AND s.ticker LIKE CONCAT(:currencyPair, '\\_%')
                 AND timestamp between :from AND :to
             ORDER BY timestamp DESC
@@ -208,7 +208,7 @@ public interface TransactionRepository extends
                 ON t1.security = s.id
             WHERE s.type = 4
                 AND t2.type = 1
-                AND t1.portfolio IN (:accounts)
+                AND t1.account IN (:accounts)
                 AND t2.currency = :currency
                 AND timestamp between :from AND :to
             ORDER BY t1.timestamp DESC
@@ -275,7 +275,7 @@ public interface TransactionRepository extends
      */
     @Query(nativeQuery = true, value = """
             SELECT sum(count) FROM transaction
-            WHERE portfolio = :#{#account.id}
+            WHERE account = :#{#account.id}
                 AND security = :#{#security.id}
                 AND timestamp between :from AND :to
                 AND count > 0
@@ -291,7 +291,7 @@ public interface TransactionRepository extends
      */
     @Query(nativeQuery = true, value = """
             SELECT abs(sum(count)) FROM transaction
-            WHERE portfolio = :#{#account.id}
+            WHERE account = :#{#account.id}
                 AND security = :#{#security.id}
                 AND timestamp between :from AND :to
                 AND count < 0

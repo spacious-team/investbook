@@ -46,7 +46,7 @@ public class EventCashFlowEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "portfolio", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "account", referencedColumnName = "id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer"})
     private AccountEntity account;
 

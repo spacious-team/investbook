@@ -50,11 +50,11 @@ public class TransactionEntity {
     private String tradeId;
 
     @Basic(optional = false)
-    @Column(name = "portfolio", nullable = false)
+    @Column(name = "account", nullable = false)
     private String account;
 
 //    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(name = "portfolio", referencedColumnName = "id", nullable = false)
+//    @JoinColumn(name = "account", referencedColumnName = "id", nullable = false)
 //    @JsonIgnoreProperties({"hibernateLazyInitializer"})
 //    private AccountEntity account;
 

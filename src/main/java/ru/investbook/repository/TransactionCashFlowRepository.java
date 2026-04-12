@@ -61,7 +61,7 @@ public interface TransactionCashFlowRepository extends
             SELECT distinct c.currency
             FROM transaction t JOIN transaction_cash_flow c
                 ON t.id = c.transaction_id
-            WHERE t.portfolio = :account AND c.type = :#{#cashFlowType.id}
+            WHERE t.account = :account AND c.type = :#{#cashFlowType.id}
             """)
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     List<String> findDistinctCurrencyByAccountAndCashFlowType(String account, CashFlowType cashFlowType);
@@ -70,7 +70,7 @@ public interface TransactionCashFlowRepository extends
             SELECT distinct c.currency
             FROM transaction t JOIN transaction_cash_flow c
                 ON t.id = c.transaction_id
-            WHERE t.portfolio IN (:accounts) AND c.type in (:#{#cashFlowTypes})
+            WHERE t.account IN (:accounts) AND c.type in (:#{#cashFlowTypes})
             """)
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
     List<String> findDistinctCurrencyByAccountInAndCashFlowTypeIn(Collection<String> accounts,

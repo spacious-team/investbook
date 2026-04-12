@@ -45,14 +45,14 @@ public interface AccountCashRepository extends
 
     @Query(nativeQuery = true, value = """
             SELECT *
-            FROM portfolio_cash AS t1
+            FROM account_cash AS t1
             WHERE timestamp = (
                 SELECT MAX(timestamp)
-                FROM portfolio_cash AS t2
-                WHERE t1.portfolio = t2.portfolio
+                FROM account_cash AS t2
+                WHERE t1.account = t2.account
                 AND t2.timestamp between :from AND :to
             )
-            ORDER BY portfolio, timestamp DESC
+            ORDER BY account, timestamp DESC
             """)
     List<AccountCashEntity> findDistinctOnAccountByTimestampBetweenOrderByTimestampDesc(
             @Param("from") Instant startDate,
@@ -60,15 +60,15 @@ public interface AccountCashRepository extends
 
     @Query(nativeQuery = true, value = """
             SELECT *
-            FROM portfolio_cash AS t1
-            WHERE portfolio IN (:accounts)
+            FROM account_cash AS t1
+            WHERE account IN (:accounts)
             AND timestamp = (
                 SELECT MAX(timestamp)
-                FROM portfolio_cash AS t2
-                WHERE t1.portfolio = t2.portfolio
+                FROM account_cash AS t2
+                WHERE t1.account = t2.account
                 AND t2.timestamp between :from AND :to
             )
-            ORDER BY portfolio, timestamp DESC
+            ORDER BY account, timestamp DESC
             """)
     List<AccountCashEntity> findDistinctOnAccountByAccountInAndTimestampBetweenOrderByTimestampDesc(
             @Param("accounts") Collection<String> accounts,

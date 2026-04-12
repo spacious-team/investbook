@@ -64,7 +64,7 @@ public class TransactionCashFlowEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumns({
             @JoinColumn(name = "transaction_id", referencedColumnName = "id", insertable = false, updatable = false),
-            @JoinColumn(name = "portfolio", referencedColumnName = "portfolio", insertable = false, updatable = false)
+            @JoinColumn(name = "account", referencedColumnName = "account", insertable = false, updatable = false)
     })
     private TransactionEntity transaction;
     */

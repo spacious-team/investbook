@@ -27,7 +27,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "portfolio")
+@Table(name = "account")
 @Data
 @EqualsAndHashCode(of = "id")
 public class AccountEntity {

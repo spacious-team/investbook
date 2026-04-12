@@ -49,16 +49,16 @@ public interface AccountPropertyRepository extends
 
     @Query(nativeQuery = true, value = """
             SELECT *
-            FROM portfolio_property AS t1
+            FROM account_property AS t1
             WHERE property = :property
             AND timestamp = (
                 SELECT MAX(timestamp)
-                FROM portfolio_property AS t2
-                WHERE t1.portfolio = t2.portfolio
+                FROM account_property AS t2
+                WHERE t1.account = t2.account
                 AND t2.property = :property
                 AND t2.timestamp between :from AND :to
             )
-            ORDER BY portfolio, timestamp DESC
+            ORDER BY account, timestamp DESC
             """)
     List<AccountPropertyEntity> findDistinctOnAccountIdByPropertyAndTimestampBetweenOrderByTimestampDesc(
             @Param("property") String property,
@@ -67,17 +67,17 @@ public interface AccountPropertyRepository extends
 
     @Query(nativeQuery = true, value = """
             SELECT *
-            FROM portfolio_property AS t1
-            WHERE portfolio IN (:accounts)
+            FROM account_property AS t1
+            WHERE account IN (:accounts)
             AND property = :property
             AND timestamp = (
                 SELECT MAX(timestamp)
-                FROM portfolio_property AS t2
-                WHERE t1.portfolio = t2.portfolio
+                FROM account_property AS t2
+                WHERE t1.account = t2.account
                 AND t2.property = :property
                 AND t2.timestamp between :from AND :to
             )
-            ORDER BY portfolio, timestamp DESC
+            ORDER BY account, timestamp DESC
             """)
     List<AccountPropertyEntity> findDistinctOnAccountIdByAccountIdInAndPropertyAndTimestampBetweenOrderByTimestampDesc(
             @Param("accounts") Collection<String> accounts,
