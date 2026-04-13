@@ -64,7 +64,7 @@
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
         <app.version>26.1</app.version>
         <java.version>26</java.version>  <!-- update lombok when java is updated -->
-        <lombok.version>1.18.44</lombok.version>
+        <lombok.version>edge-SNAPSHOT</lombok.version> <!-- java 26 dep, remove repositories.repository projectlombok.org after update to >= 1.18.45 -->
         <checkerframework.version>4.0.0</checkerframework.version>
         <jpackage.version>1.7.4</jpackage.version>
         <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
@@ -84,6 +84,10 @@
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
+        </repository>
+        <repository> <!-- java 26 dep, remove repositories.repository projectlombok.org after update to lombok >= 1.18.45 -->
+            <id>projectlombok.org</id>
+            <url>https://projectlombok.org/edge-releases</url>
         </repository>
     </repositories>
 
