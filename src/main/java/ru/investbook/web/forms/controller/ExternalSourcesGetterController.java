@@ -59,7 +59,7 @@ public class ExternalSourcesGetterController {
         messages.add(foreignExchangeRateController.updateForeignExchangeRateFromCbr());
         messages.add(securityQuoteController.updateQuoteFromMoexIssApi());
         messages.add(securityDescriptionController.updateSectorsFromSmartLab(false));
-        model.addAttribute("message", String.join(".<br>", messages));
+        model.addAttribute("message", String.join(". ", messages));
         model.addAttribute("backLink", "/forms.html");
         return "success";
     }

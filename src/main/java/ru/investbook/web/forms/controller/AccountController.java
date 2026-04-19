@@ -65,17 +65,8 @@ public class AccountController {
     }
 
     @GetMapping("/delete-all")
-    public String deleteAllWarning(Model model) {
-        model.addAttribute("title", "Внимание!");
-        model.addAttribute("message", """
-                Вы пытаетесь удалить все данные (сделки, выплаты, движения денежных средств и т.д.) для всех счетов.
-                Эта операция не обратима. Если вы все же настаиваете на удалении, то рекомендуем прежде скачать
-                <a href="/portfolio-open-format/download">бэкап</a> данных.
-                <br><br>
-                Для подтверждения удаления всех данных нажмите на ссылку
-                <a href="/accounts/delete-all-accepted">[подтверждаю]</a>.
-                """);
-        return "success";
+    public String deleteAllWarning() {
+        return "delete-all-accounts";
     }
 
     @GetMapping("/delete-all-accepted")
