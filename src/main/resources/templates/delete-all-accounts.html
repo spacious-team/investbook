@@ -1,6 +1,6 @@
 <!--
   ~ InvestBook
-  ~ Copyright (C) 2021  Spacious Team <spacious-team@ya.ru>
+  ~ Copyright (C) 2026  Spacious Team <spacious-team@ya.ru>
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU Affero General Public License as
@@ -17,19 +17,25 @@
   -->
 
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${title ?: 'Успешно'}"></title>
+    <title>Удаление портфеля</title>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
 </head>
 <body>
-    <h1 th:text="${title ?: 'Успешно'}"></h1>
-    <p th:if="${message != null}" th:text="${message}"></p>
+    <h1>Внимание</h1>
     <p>
-        <a th:if="${backLink == null}" href="#" onclick="window.history.back()">[назад]</a>
-        <a th:if="${backLink != null}" th:href="${backLink}">[назад]</a>
+        Вы пытаетесь удалить все данные (сделки, выплаты, движения денежных средств и т.д.) для всех счетов.
+        Эта операция не обратима. Если вы все же настаиваете на удалении, то рекомендуем прежде скачать
+        <a href="/portfolio-open-format/download">бэкап</a> данных.
+        <br><br>
+        Для подтверждения удаления всех данных нажмите на ссылку
+        <a href="/accounts/delete-all-accepted">[подтверждаю]</a>.
+    </p>
+    <p>
+        <a href="#" onclick="window.history.back()">[назад]</a>
         <a href="/">[на главную]</a>
     </p>
 </body>
