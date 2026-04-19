@@ -48,7 +48,7 @@ public class Sp500Controller {
     public String updateSp500(Model model) {
         // Link has been copied from https://www.spglobal.com -> menu -> indices -> S&P 500 -> 10 Years
         model.addAttribute("title", "S&P 500");
-        model.addAttribute("requestURL", "http://www.spglobal.com/spdji/en/idsexport/file.xls?" +
+        model.addAttribute("requestURL", "https://www.spglobal.com/spdji/en/idsexport/file.xls?" +
                 "hostIdentifier=" + UUID.randomUUID() +
                 "&redesignExport=true" +
                 "&languageId=1" +

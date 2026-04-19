@@ -18,10 +18,9 @@
 
 package ru.investbook.service;
 
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-
 import java.io.InputStream;
 
 public interface Sp500Service {
-    void update(@MonotonicNonNull InputStream sp500ExcelFile);
+
+    void update(InputStream sp500ExcelFile);
 }
