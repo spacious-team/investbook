@@ -19,35 +19,61 @@
 package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import ru.investbook.entity.StockMarketIndexEntity;
 import ru.investbook.repository.StockMarketIndexRepository;
 import ru.investbook.service.Sp500Service;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/sp500")
 @RequiredArgsConstructor
 public class Sp500Controller {
-
+    private static final String RETURN_URL = "upload-excel-file";
     private final Sp500Service sp500Service;
     private final StockMarketIndexRepository stockMarketIndexRepository;
 
     @GetMapping("update")
     public String updateSp500(Model model) {
-        String message = updateSp500Index();
+        // Link has been copied from https://www.spglobal.com -> menu -> indices -> S&P 500 -> 10 Years
         model.addAttribute("title", "S&P 500");
-        model.addAttribute("message", message);
-        return "success";
+        model.addAttribute("requestURL", "https://www.spglobal.com/spdji/en/idsexport/file.xls?" +
+                "hostIdentifier=" + UUID.randomUUID() +
+                "&redesignExport=true" +
+                "&languageId=1" +
+                "&selectedModule=PerformanceGraphView" +
+                "&selectedSubModule=Graph" +
+                "&yearFlag=tenYearFlag" +
+                "&indexId=340");
+        model.addAttribute("returnURL", "/sp500/" + RETURN_URL);
+        return "get-by-browser";
     }
 
-    public String updateSp500Index() {
-        sp500Service.update();
+    @PostMapping(RETURN_URL)
+    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile sp500ExcelFile) throws IOException {
+        InputStream is = sp500ExcelFile.getInputStream();
+        String result = updateSp500Index(is);
+        return ResponseEntity.ok(Map.of(
+                "title", "S&P 500",
+                "message", result));
+    }
+
+    public String updateSp500Index(InputStream sp500ExcelFile) {
+        sp500Service.update(sp500ExcelFile);
         return stockMarketIndexRepository.findFirstBySp500NotNullOrderByDateDesc()
                 .map(StockMarketIndexEntity::getDate)
-                .map(date -> "Индекс обновлен обновлен по " + date + " включительно")
+                .map(date -> "S&P 500 обновлен по " + date + " включительно")
                 .orElse("Запрос выполнен, но сервер https://www.spglobal.com/ не вернул данные");
     }
 }
