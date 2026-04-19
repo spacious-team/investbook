@@ -19,13 +19,21 @@
 package ru.investbook.web.forms.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import ru.investbook.entity.StockMarketIndexEntity;
 import ru.investbook.repository.StockMarketIndexRepository;
 import ru.investbook.service.Sp500Service;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/sp500")
@@ -37,14 +45,18 @@ public class Sp500Controller {
 
     @GetMapping("update")
     public String updateSp500(Model model) {
-        String message = updateSp500Index();
-        model.addAttribute("title", "S&P 500");
-        model.addAttribute("message", message);
-        return "success";
+        return "sp500";
     }
 
-    public String updateSp500Index() {
-        sp500Service.update();
+    @PostMapping("update")
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile sp500ExcelFile) throws IOException {
+        InputStream is = sp500ExcelFile.getInputStream();
+        String result = updateSp500Index(is);
+        return ResponseEntity.ok(Map.of("message", result));
+    }
+
+    public String updateSp500Index(InputStream sp500ExcelFile) {
+        sp500Service.update(sp500ExcelFile);
         return stockMarketIndexRepository.findFirstBySp500NotNullOrderByDateDesc()
                 .map(StockMarketIndexEntity::getDate)
                 .map(date -> "Индекс обновлен обновлен по " + date + " включительно")

@@ -1,0 +1,104 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2026  Spacious Team <spacious-team@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>S&P 500</title>
+    <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
+    <link rel="stylesheet" href="/water-wrapper.css">
+</head>
+<body>
+<script>
+    // Link has been copied from https://www.spglobal.com -> menu -> indices -> S&P 500 -> 10 Years
+    const SOURCE_URL = 'http://www.spglobal.com/spdji/en/idsexport/file.xls?hostIdentifier=ac4d0c80-c3e2-4e55-80ba-46660ed42290&redesignExport=true&languageId=1&selectedModule=PerformanceGraphView&selectedSubModule=Graph&yearFlag=tenYearFlag&indexId=340';
+
+    // Файл не может быть скачан из Java приложения. Сайт блокирует такие запросы,
+    // вероятно, на уровне установления TLS соединения по опечатку допустимых протоколов.
+    // Файл будет скачан браузером и будет передан в приложение на этот URL
+    const POST_FILE_TO_APP_URL = '/sp500/update';
+
+    async function fetchAndSend() {
+        try {
+            console.log('1. Загрузка Excel файла из S&P Global...');
+
+            // Загружаем файл как Blob
+            const response = await fetch(SOURCE_URL, {
+                method: 'GET',
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Ошибка загрузки: ${response.status} ${response.statusText}`);
+            }
+
+            const blob = await response.blob();
+            console.log(`2. Файл загружен, размер: ${blob.size} байт, тип: ${blob.type}`);
+
+            // Создаем FormData для отправки
+            const formData = new FormData();
+            formData.append('file', blob, 'sp500_ten_years.xls');
+
+            console.log('3. Отправка файла на сервер...');
+
+            // Отправляем
+            const uploadResponse = await fetch(POST_FILE_TO_APP_URL, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!uploadResponse.ok) {
+                throw new Error(`Ошибка отправки: ${uploadResponse.status} ${uploadResponse.statusText}`);
+            }
+
+            const result = await uploadResponse.json();
+            console.log('4. Успешно! Ответ сервера:', result);
+
+            // Отображаем результат на странице
+            document.body.innerHTML = `
+                    <h1>Результат</h1>
+                    <p>${result.message}</p>
+                    <p>
+                        <a href="#" onclick="window.history.back()">[назад]</a>
+                        <a href="/">[на главную]</a>
+                    </p>
+                `;
+
+        } catch (error) {
+            console.error('Ошибка:', error);
+            document.body.innerHTML = `
+                    <h1>Ошибка</h1>
+                    <p>${error}</p>
+                    <p>
+                        <a href="#" onclick="window.history.back()">[назад]</a>
+                        <a href="/">[на главную]</a>
+                    </p>
+                `;
+        }
+    }
+
+    // Запускаем автоматически при загрузке страницы
+    fetchAndSend();
+</script>
+
+<p>⏳ Загрузка данных из S&P Global...</p>
+</body>
+</html>
