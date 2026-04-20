@@ -40,11 +40,12 @@ import java.util.Collections;
 public class VtbCashTable extends SingleAbstractReportTable<AccountCash> {
 
     private static final String TABLE_NAME = "Отчет об остатках денежных средств";
+    private static final String TABLE_NAME_WITH_YO = "Отчёт об остатках денежных средств";
     private static final String TABLE_FOOTER = "Сумма денежных средств";
 
 
     protected VtbCashTable(SingleBrokerReport report) {
-        super(report, TABLE_NAME, TABLE_FOOTER, VtbCashTableHeader.class, 3);
+        super(report, VtbReportHelper.findTableName(report.getReportPage(), TABLE_NAME, TABLE_NAME_WITH_YO), TABLE_FOOTER, VtbCashTableHeader.class, 3);
     }
 
     @Override

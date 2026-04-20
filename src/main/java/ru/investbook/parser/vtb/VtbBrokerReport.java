@@ -58,7 +58,7 @@ public class VtbBrokerReport extends AbstractExcelBrokerReport {
     }
 
     private static void checkReportFormat(String excelFileName, ReportPage reportPage) {
-        if (reportPage.findByPrefix(UNIQ_TEXT, 1, 2) == TableCellAddress.NOT_FOUND) {
+        if (reportPage.findByPrefix(UNIQ_TEXT) == TableCellAddress.NOT_FOUND) {
             throw new RuntimeException("В файле " + excelFileName + " не содержится отчет брокера ВТБ");
         }
     }
@@ -85,7 +85,7 @@ public class VtbBrokerReport extends AbstractExcelBrokerReport {
 
     private static Instant getReportEndDateTime(ReportPage reportPage) {
         try {
-            TableCellAddress address = reportPage.findByPrefix(REPORT_DATE_MARKER, 1, 2);
+            TableCellAddress address = reportPage.findByPrefix(REPORT_DATE_MARKER);
             @SuppressWarnings({"nullness", "DataFlowIssue"})
             String value = reportPage.getCell(address)
                     .getStringValue()
