@@ -709,7 +709,7 @@
                                 <!-- Defines available bellsoft-liberica java versions from
                                      https://github.com/paketo-buildpacks/builder-jammy-base/releases
                                      JRE with ${java.version} will be selected automatically when available -->
-                                <builder>paketobuildpacks/builder-jammy-base:0.4.418</builder>
+                                <builder>paketobuildpacks/builder-jammy-base:0.4.563</builder>
                             </image>
                             <docker>
                                 <publishRegistry>

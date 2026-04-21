@@ -23,10 +23,13 @@ jobs:
           distribution: 'liberica'
           cache: maven
 
+      - name: Set Short Git Commit Id (SHA)
+        run: echo "SHA_SHORT=${GITHUB_SHA::8}" >> $GITHUB_ENV
+
       - name: Publish
         run: mvn --batch-mode --activate-profiles docker --define no-zip --define no-installer spring-boot:build-image
         env:
           DOCKER_ID: ${{ secrets.DOCKER_ID }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           DOCKER_IMAGE_LATEST_TAG_SUFFIX: ${{ github.ref_name != 'master' && '-dev' || '' }}
-          DOCKER_IMAGE_COMMIT_ID_TAG: ${{ github.sha[0:8] }}
+          DOCKER_IMAGE_COMMIT_ID_TAG: ${{ env.SHA_SHORT }}
