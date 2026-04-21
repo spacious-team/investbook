@@ -29,3 +29,4 @@ jobs:
           DOCKER_ID: ${{ secrets.DOCKER_ID }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           DOCKER_IMAGE_LATEST_TAG_SUFFIX: ${{ github.ref_name != 'master' && '-dev' || '' }}
+          DOCKER_IMAGE_COMMIT_ID_TAG: ${{ github.sha[0:8] }}

@@ -696,6 +696,7 @@
                                 <tags>
                                     <!--suppress UnresolvedMavenProperty -->
                                     <tag>spaciousteam/investbook:${project.version}${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX}</tag>
+                                    <tag>spaciousteam/investbook:${env.DOCKER_IMAGE_COMMIT_ID_TAG}</tag>
                                 </tags>
                                 <publish>true</publish>
                                 <env>
