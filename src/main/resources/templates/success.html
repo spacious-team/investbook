@@ -26,15 +26,12 @@
     <link rel="stylesheet" href="/main.css">
 </head>
 <body>
-    <h1 th:text="${title ?: 'Успешно'}"></h1>
-    <p th:if="${message != null}" th:text="${message}"></p>
-    <form th:action="${backLink != null ? backLink : '#'}" method="get" class="back">
-        <button type="button"
-                th:if="${backLink == null}"
-                onclick="window.history.back()">Назад</button>
-        <button type="submit"
-                th:if="${backLink != null}">Назад</button>
-        <button type="submit" formaction="/">На главную</button>
-    </form>
+<h1 th:text="${title ?: 'Успешно'}"></h1>
+<p th:if="${message != null}" th:text="${message}"></p>
+<form th:action="${backLink != null ? backLink : '#'}" method="get" class="back">
+    <button th:if="${backLink == null}" type="button" onclick="window.history.back()">Назад</button>
+    <button th:if="${backLink != null}" type="submit">Назад</button>
+    <button type="submit" formaction="/">На главную</button>
+</form>
 </body>
 </html>

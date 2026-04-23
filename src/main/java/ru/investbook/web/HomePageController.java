@@ -24,6 +24,7 @@ import org.springframework.boot.info.BuildProperties;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.investbook.InvestbookProperties;
 import ru.investbook.parser.BrokerReportParserService;
@@ -67,7 +68,7 @@ public class HomePageController {
         return "index";
     }
 
-    @GetMapping("upload-demo")
+    @PostMapping("/portfolios/demo/upload")
     public String uploadDemo(Model model) {
         String file = "/static/demo-portfolio.xlsx";
         try (InputStream inputStream = requireNonNull(getClass().getResourceAsStream(file))) {
@@ -83,7 +84,7 @@ public class HomePageController {
         }
     }
 
-    @GetMapping("shutdown")
+    @GetMapping("/shutdown")
     public String shutdown() {
         @SuppressWarnings("resource")
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();

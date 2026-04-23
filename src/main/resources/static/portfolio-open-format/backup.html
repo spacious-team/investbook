@@ -42,7 +42,7 @@
     </li>
 </ol>
 
-<form action="/portfolio-open-format/upload" enctype="multipart/form-data" method="POST">
+<form action="/portfolio-open-format/backup/upload" enctype="multipart/form-data" method="POST">
     <label>
         Бэкап файл
         <input name="file" type="file" placeholder="Файл бекапа" required/>
@@ -52,7 +52,7 @@
     </label>
 </form>
 
-<form action="/portfolio-open-format/download" method="get" class="back">
+<form action="/portfolio-open-format/backup/download" method="get" class="back">
     <button type="button" onclick="window.history.back()">Назад</button>
     <input type="submit" value="Скачать бекап"/>
 </form>

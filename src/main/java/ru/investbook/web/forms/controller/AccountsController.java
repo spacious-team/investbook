@@ -69,7 +69,7 @@ public class AccountsController {
     public String deleteWarning(Model model) {
         Set<String> accounts = getAccounts(accountRepository);
         model.addAttribute("accounts", accounts);
-        return "accounts/delete-account";
+        return "accounts/delete";
     }
 
     @PostMapping("/delete")
@@ -83,10 +83,10 @@ public class AccountsController {
 
     @GetMapping("/delete-all")
     public String deleteAllWarning() {
-        return "accounts/delete-all-accounts";
+        return "accounts/delete-all";
     }
 
-    @GetMapping("/delete-all-accepted")
+    @PostMapping("/delete-all")
     public String deleteAllAccepted(Model model) {
         accountRepository.deleteAll();
         securityRepository.deleteAll();
