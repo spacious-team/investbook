@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.report.FifoPositionsFactory;
 import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.repository.AccountRepository;
@@ -40,7 +41,7 @@ import static ru.investbook.web.ControllerHelper.getInactiveAccounts;
 @Controller
 @RequestMapping("/accounts")
 @RequiredArgsConstructor
-public class AccountController {
+public class AccountsController {
     private final AccountRepository accountRepository;
     private final SecurityRepository securityRepository;
     private final FifoPositionsFactory fifoPositionsFactory;
@@ -64,12 +65,28 @@ public class AccountController {
         return "success";
     }
 
-    @GetMapping("/delete-all")
-    public String deleteAllWarning() {
-        return "delete-all-accounts";
+    @GetMapping("/delete")
+    public String deleteWarning(Model model) {
+        Set<String> accounts = getAccounts(accountRepository);
+        model.addAttribute("accounts", accounts);
+        return "accounts/delete";
     }
 
-    @GetMapping("/delete-all-accepted")
+    @PostMapping("/delete")
+    public String delete(Model model, @RequestParam("account") String account) {
+        accountRepository.deleteById(account);
+        fifoPositionsFactory.invalidateCache();
+        foreignExchangeRateService.invalidateCache();
+        model.addAttribute("message", "Счет '" + account + "' удален");
+        return "success";
+    }
+
+    @GetMapping("/delete-all")
+    public String deleteAllWarning() {
+        return "accounts/delete-all";
+    }
+
+    @PostMapping("/delete-all")
     public String deleteAllAccepted(Model model) {
         accountRepository.deleteAll();
         securityRepository.deleteAll();

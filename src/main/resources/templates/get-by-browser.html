@@ -23,6 +23,7 @@
     <title th:text="${title ?: 'Успешно'}"></title>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
+    <link rel="stylesheet" href="/main.css">
 </head>
 <body>
 <script th:inline="javascript">
@@ -94,13 +95,10 @@
                 document.body.innerHTML = `
                     <h1>${result.title}</h1>
                     <p>${result.message}</p>
-                    <p>
-                        ${backLink ?
-                            `<a href="${backLink}">[назад]</a>` :
-                            `<a href="#" onclick="window.history.back()">[назад]</a>`
-                        }
-                        <a href="/">[на главную]</a>
-                    </p>
+                    <form action="${backLink ? backLink : '#'}" method="get" class="back">
+                        <button ${backLink ? `type="submit"` : `type="button" onclick="window.history.back()"` }>Назад</button>
+                        <button type="submit" formaction="/">На главную</button>
+                    </form>
                 `;
             }
 
@@ -117,13 +115,10 @@
                 document.body.innerHTML = `
                     <h1>Ошибка</h1>
                     <p>${error}</p>
-                    <p>
-                        ${backLink ?
-                            `<a href="${backLink}">[назад]</a>` :
-                            `<a href="#" onclick="window.history.back()">[назад]</a>`
-                        }
-                        <a href="/">[на главную]</a>
-                    </p>
+                    <form action="${backLink ? backLink : '#'}" method="get" class="back">
+                        <button ${backLink ? `type="submit"` : `type="button" onclick="window.history.back()"` }>Назад</button>
+                        <button type="submit" formaction="/">На главную</button>
+                    </form>
                 `;
             }
         }

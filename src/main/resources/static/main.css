@@ -52,3 +52,8 @@
     stroke: #00000008;
     stroke-width: 4px;
 }
+
+form.back {
+    display: flex;
+    justify-content: flex-end;
+}

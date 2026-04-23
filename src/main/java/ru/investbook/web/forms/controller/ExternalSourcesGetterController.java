@@ -63,4 +63,12 @@ public class ExternalSourcesGetterController {
         model.addAttribute("backLink", "/forms.html");
         return "success";
     }
+
+    public String updateSilently(Model model, String successURL) throws ExecutionException, InterruptedException {
+        model.addAttribute("successURL", successURL);
+        foreignExchangeRateController.updateForeignExchangeRateFromCbr();
+        securityQuoteController.updateQuoteFromMoexIssApi();
+        securityDescriptionController.updateSectorsFromSmartLab(false);
+        return sp500Controller.updateSp500(model);
+    }
 }

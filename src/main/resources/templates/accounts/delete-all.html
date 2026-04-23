@@ -23,20 +23,17 @@
     <title>Удаление портфеля</title>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
+    <link rel="stylesheet" href="/main.css">
 </head>
 <body>
     <h1>Внимание</h1>
     <p>
         Вы пытаетесь удалить все данные (сделки, выплаты, движения денежных средств и т.д.) для всех счетов.
-        Эта операция не обратима. Если вы все же настаиваете на удалении, то рекомендуем прежде скачать
-        <a href="/portfolio-open-format/download">бэкап</a> данных.
-        <br><br>
-        Для подтверждения удаления всех данных нажмите на ссылку
-        <a href="/accounts/delete-all-accepted">[подтверждаю]</a>.
+        Операция не обратима. Рекомендуется перед удалением сделать <a href="/portfolio-open-format/backup/download">бэкап</a>.
     </p>
-    <p>
-        <a href="#" onclick="window.history.back()">[назад]</a>
-        <a href="/">[на главную]</a>
-    </p>
+    <form th:action="@{/accounts/delete-all}" method="post" class="back">
+        <button type="button" onclick="window.history.back()">Назад</button>
+        <button type="submit">Удалить</button>
+    </form>
 </body>
 </html>

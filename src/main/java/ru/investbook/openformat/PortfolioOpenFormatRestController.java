@@ -54,7 +54,7 @@ public class PortfolioOpenFormatRestController {
     private final PortfolioOpenFormatPersister portfolioOpenFormatPersister;
     private final ValidatorService validator;
 
-    @GetMapping("download")
+    @GetMapping("/backup/download")
     public void download(HttpServletResponse response) throws IOException {
         try {
             long t0 = System.nanoTime();
@@ -74,7 +74,7 @@ public class PortfolioOpenFormatRestController {
         response.flushBuffer();
     }
 
-    @PostMapping("upload")
+    @PostMapping("/backup/upload")
     public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file) {
         try (InputStream inputStream = file.getInputStream()) { // creates new input stream
             long t0 = System.nanoTime();

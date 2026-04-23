@@ -17,21 +17,28 @@
   -->
 
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${title ?: 'Успешно'}"></title>
+    <title>Демо портфель</title>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
     <link rel="stylesheet" href="/main.css">
 </head>
 <body>
-<h1 th:text="${title ?: 'Успешно'}"></h1>
-<p th:if="${message != null}" th:text="${message}"></p>
-<form th:action="${backLink != null ? backLink : '#'}" method="get" class="back">
-    <button th:if="${backLink == null}" type="button" onclick="window.history.back()">Назад</button>
-    <button th:if="${backLink != null}" type="submit">Назад</button>
-    <button type="submit" formaction="/">На главную</button>
+<h1>Демо портфель</h1>
+<ul>
+    <li>Счет <b>"demo"</b> - рублевые акции, облигации, фьючерс и опцион;</li>
+    <li>Счет <b>"demo-us"</b> - иностранные акции;</li>
+    <li>Счет <b>"demo-gold"</b> - произвольные активы на примере инвестиционной монеты "Георгий победоносец".</li>
+</ul>
+<p>
+    Ваши счета, если имеются, будут сохранены.
+    Демо счета в последующем могут быть <a href="/accounts/delete">удалены</a>.
+</p>
+<form action="/portfolios/demo/upload" method="post" class="back">
+    <button type="button" onclick="window.history.back()">Назад</button>
+    <input type="submit" value="Посмотреть"/>
 </form>
 </body>
 </html>
