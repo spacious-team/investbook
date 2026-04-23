@@ -23,6 +23,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
+    <link rel="stylesheet" href="/main.css">
 </head>
 <body>
 <h1>Бэкап и восстановление данных</h1>
@@ -40,28 +41,22 @@
     инвестиций.
     </li>
 </ol>
-<p>
-    <a href="/">Вернуться на главную страницу</a>
-</p>
 
-<br>
-<br>
-<p>
-    1. Для того чтобы получить файл для бэкапа или экспорта в другое приложение, нажмите на ссылку
-    <a href="/portfolio-open-format/download">экспортировать данные в "Portfolio Open Format"</a>.
-</p>
-<p>
-    2. Для того чтобы восстановить данные, загрузите ранее полученный по предыдущему пункту файл бэкапа.
-<p>
 <form action="/portfolio-open-format/upload" enctype="multipart/form-data" method="POST">
     <label>
         Бэкап файл
-        <input name="file" type="file"/>
+        <input name="file" type="file" placeholder="Файл бекапа" required/>
     </label>
     <label>&nbsp;
         <input type="submit" value="Восстановить данные"/>
     </label>
 </form>
+
+<form action="/portfolio-open-format/download" method="get" class="back">
+    <button type="button" onclick="window.history.back()">Назад</button>
+    <input type="submit" value="Скачать бекап"/>
+</form>
+
 <p class="hint">
     В бэкап не включаются курсы валют ЦБ РФ и значения индекса S&P 500. После восстановления из бэкапа вы, возможно,
     захотите выгрузить эти данные через страницу <a href="/forms.html">Форм</a>.

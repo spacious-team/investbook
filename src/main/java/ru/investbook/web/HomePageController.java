@@ -26,13 +26,18 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.investbook.InvestbookProperties;
+import ru.investbook.parser.BrokerReportParserService;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.service.AssetsAndCashService;
+import ru.investbook.web.forms.controller.ExternalSourcesGetterController;
 
+import java.io.InputStream;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.Objects.requireNonNull;
 
 @Slf4j
 @Controller
@@ -43,6 +48,8 @@ public class HomePageController {
     private final BuildProperties buildProperties;
     private final TransactionRepository transactionRepository;
     private final InvestbookProperties properties;
+    private final BrokerReportParserService brokerReportParserService;
+    private final ExternalSourcesGetterController externalSourcesGetterController;
 
     @GetMapping
     public String index(Model model) {
@@ -58,6 +65,22 @@ public class HomePageController {
             model.addAttribute("altLogoUrl", "https://disk.yandex.ru/i/F7_F2K-eP7mnnQ");
         }
         return "index";
+    }
+
+    @GetMapping("upload-demo")
+    public String uploadDemo(Model model) {
+        String file = "/static/demo-portfolio.xlsx";
+        try (InputStream inputStream = requireNonNull(getClass().getResourceAsStream(file))) {
+            brokerReportParserService.parseReport(inputStream, file);
+            return externalSourcesGetterController.updateSilently(model, "/");
+        } catch (Exception e) {
+            log.error("Can't upload demo portfolio", e);
+            model.addAttribute("title", "Ошибка загрузки");
+            model.addAttribute("message", "Заведите заявку об ошибке на GitHub. " +
+                    "Диагностическая информация: " + e.getMessage());
+            model.addAttribute("backLink", "/");
+            return "success";
+        }
     }
 
     @GetMapping("shutdown")

@@ -1,6 +1,6 @@
 <!--
   ~ InvestBook
-  ~ Copyright (C) 2026  Spacious Team <spacious-team@ya.ru>
+  ~ Copyright (C) 2021  Spacious Team <spacious-team@ya.ru>
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU Affero General Public License as
@@ -20,23 +20,25 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Удаление портфеля</title>
+    <title>Демо портфель</title>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
+    <link rel="stylesheet" href="/main.css">
 </head>
 <body>
-    <h1>Внимание</h1>
-    <p>
-        Вы пытаетесь удалить все данные (сделки, выплаты, движения денежных средств и т.д.) для всех счетов.
-        Эта операция не обратима. Если вы все же настаиваете на удалении, то рекомендуем прежде скачать
-        <a href="/portfolio-open-format/download">бэкап</a> данных.
-        <br><br>
-        Для подтверждения удаления всех данных нажмите на ссылку
-        <a href="/accounts/delete-all-accepted">[подтверждаю]</a>.
-    </p>
-    <p>
-        <a href="#" onclick="window.history.back()">[назад]</a>
-        <a href="/">[на главную]</a>
-    </p>
+<h1>Демо портфель</h1>
+<ul>
+    <li>Счет <b>"demo"</b> - рублевые акции, облигации, фьючерс и опцион;</li>
+    <li>Счет <b>"demo-us"</b> - иностранные акции;</li>
+    <li>Счет <b>"demo-gold"</b> - произвольные активы на примере инвестиционной монеты "Георгий победоносец".</li>
+</ul>
+<p>
+    Ваши счета, если имеются, будут сохранены.
+    Демо счета в последующем могут быть <a href="/accounts/delete">удалены</a>.
+</p>
+<form action="/upload-demo" method="get" class="back">
+    <button type="button" onclick="window.history.back()">Назад</button>
+    <input type="submit" value="Посмотреть"/>
+</form>
 </body>
 </html>
