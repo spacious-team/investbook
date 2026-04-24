@@ -37,14 +37,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 @RestController
-@Tag(name = "Приложение")
 @RequiredArgsConstructor
 public class HomePageRestController {
     private final AssetsAndCashService assetsAndCashService;
     private final TransactionRepository transactionRepository;
 
-    @GetMapping("/portfolios/all/stats")
-    @Operation(summary = "Статистика портфеля", operationId = "portfoliosAllStats", responses = {
+    @GetMapping("/accounts/all/stats")
+    @Tag(name = "Счета")
+    @Operation(summary = "Статистика портфеля", operationId = "accountsAllStats", responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public Map<String, Object> portfolioStats() {
@@ -57,7 +57,7 @@ public class HomePageRestController {
     }
 
     @PostMapping("/app/shutdown")
-    @GetMapping("/app/shutdown")
+    @Tag(name = "Приложение")
     @Operation(summary = "Закрыть приложение", operationId = "appShutdown", responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})

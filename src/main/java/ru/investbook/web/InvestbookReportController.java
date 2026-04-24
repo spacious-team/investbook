@@ -70,7 +70,7 @@ public class InvestbookReportController {
     }
 
     /**
-     * @return null if Thymeleaf render is not required, attach response is sent already
+     * @return null if Thymeleaf render is not required, attach response has been already sent
      */
     @GetMapping("report")
     public @Nullable String buildInvestbookHtmlReportByGet(@RequestParam(name = "format", defaultValue = "excel") String format,
@@ -88,7 +88,7 @@ public class InvestbookReportController {
     }
 
     /**
-     * @return null if Thymeleaf render is not required, attach response is sent already
+     * @return null if Thymeleaf render is not required, attach response has been already sent
      */
     @PostMapping("report")
     public @Nullable String buildInvestbookReport(@RequestParam(name = "format", defaultValue = "excel") String format,
