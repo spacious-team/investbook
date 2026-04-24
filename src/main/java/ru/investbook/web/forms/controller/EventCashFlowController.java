@@ -63,7 +63,6 @@ public class EventCashFlowController {
         accounts = ControllerHelper.getAccounts(accountRepository); // update accounts for filter
         model.addAttribute("page", new PageableWrapperModel<>(data));
         model.addAttribute("accounts", accounts);
-
         return "events/table";
     }
 

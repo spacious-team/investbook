@@ -37,16 +37,16 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @RequiredArgsConstructor
 public class ExternalSourcesGetterController {
-    private static final String REDIRECT_URL = "update-fx-quote-sectors";
+    private static final String REDIRECT_URL = "/fx-quote-sectors/update";
     private final ForeignExchangeRateController foreignExchangeRateController;
     private final SecurityQuoteController securityQuoteController;
     private final Sp500Controller sp500Controller;
     private final SecurityDescriptionController securityDescriptionController;
 
 
-    @GetMapping("/get")
+    @GetMapping("/all/update")
     public String updateSp500AndCallRedirect(Model model) {
-        model.addAttribute("successURL", "/external-sources/" + REDIRECT_URL);
+        model.addAttribute("successURL", "/external-sources" + REDIRECT_URL);
         return sp500Controller.updateSp500(model);
     }
 

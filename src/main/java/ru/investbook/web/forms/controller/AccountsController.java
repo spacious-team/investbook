@@ -93,7 +93,6 @@ public class AccountsController {
         fifoPositionsFactory.invalidateCache();
         foreignExchangeRateService.invalidateCache();
         model.addAttribute("message", "Информация по всем счетам удалена");
-        model.addAttribute("backLink", "/forms.html");
         return "success";
     }
 }
