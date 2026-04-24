@@ -19,19 +19,17 @@
 package ru.investbook.web;
 
 import org.spacious_team.broker.report_parser.api.BrokerReportFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collector;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ReportControllerHelper {
 
-   static List<String> getBrokerNames(Collection<BrokerReportFactory> brokerReportFactories) {
+    static List<String> getBrokerNames(Collection<BrokerReportFactory> brokerReportFactories) {
         return brokerReportFactories.stream()
                 .map(BrokerReportFactory::getBrokerName)
                 .map(String::toLowerCase)
@@ -39,27 +37,20 @@ public class ReportControllerHelper {
                 .toList();
     }
 
-    public static ResponseEntity<String> errorPage(String title, Collection<Exception> exceptions) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(exceptions.stream()
-                        .map(e -> {
-                            StringWriter sw = new StringWriter();
-                            PrintWriter pw = new PrintWriter(sw);
-                            e.printStackTrace(pw);
-                            return sw.toString().replace("\n", "</br>");
-                        }).collect(errorMessageBuilder(title)));
+    public static String exceptionToString(Exception exception) {
+        return exceptionsToString(Set.of(exception));
     }
 
-    private static Collector<CharSequence, ?, String> errorMessageBuilder(String title) {
-        return Collectors.joining("</br></br> - ", """
-                <b>Ошибка загрузки</b> <a href="/">[на главную]</a><br><br>
-                """ + title + """
-                <br>
-                <span style="font-size: smaller; color: gray;">Вы можете
-                <a href="https://github.com/spacious-team/investbook/issues/new?labels=bug&template=bug_report.md">сообщить</a>
-                об ошибке разработчикам  или связаться с <a href="https://t.me/+zriyX7tRQOc0MDEy">технической поддержкой</a>
-                </span>
-                <br><br> -
-                """, "");
+    public static String exceptionsToString(Collection<Exception> exceptions) {
+        return exceptions.stream()
+                .map(ReportControllerHelper::exceptionToStringConverter)
+                .collect(Collectors.joining("\n\n -", "-", ""));
+    }
+
+    private static String exceptionToStringConverter(Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        return sw.toString();
     }
 }

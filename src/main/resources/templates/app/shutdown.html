@@ -1,0 +1,67 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2026  Spacious Team <spacious-team@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Investbook</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #text {
+            color: #F55;
+            background-color: #222;
+            padding: 0.3em;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+<div id="text">
+    Investbook закрывается...
+</div>
+<script>
+    const textElement = document.getElementById('text');
+    fetch('/app/shutdown', {method: 'POST',})
+        .then(response => {
+            if (response.ok) {
+                textElement.innerHTML = 'Investbook закрыт';
+            } else {
+                response.json()
+                    .then(data => {
+                        const msg = data.message || response.status;
+                        textElement.innerHTML = 'Ошибка при закрытии: ' + msg;
+                    })
+                    .catch(() => {
+                        textElement.innerHTML = 'Ошибка при закрытии';
+                    });
+            }
+        })
+        .catch(error => {
+            textElement.innerHTML = 'Ошибка при закрытии: ' + error
+        });
+</script>
+</body>
+</html>

@@ -18,22 +18,35 @@
 
 package ru.investbook.web;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.service.AssetsAndCashService;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 @RestController
+@Tag(name = "Приложение")
 @RequiredArgsConstructor
 public class HomePageRestController {
     private final AssetsAndCashService assetsAndCashService;
     private final TransactionRepository transactionRepository;
 
-    @GetMapping("/portfolio-stats")
+    @GetMapping("/portfolios/all/stats")
+    @Operation(summary = "Статистика портфеля", operationId = "portfoliosAllStats", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public Map<String, Object> portfolioStats() {
         Set<String> accounts = assetsAndCashService.getActiveAccounts();
         return Map.of(
@@ -41,5 +54,17 @@ public class HomePageRestController {
                 "total-transactions", transactionRepository.countByAccountIn(accounts),
                 "assets-value", assetsAndCashService.getTotalAssetsInRub(accounts),
                 "cash-balance", assetsAndCashService.getTotalCashInRub(accounts));
+    }
+
+    @PostMapping("/app/shutdown")
+    @GetMapping("/app/shutdown")
+    @Operation(summary = "Закрыть приложение", operationId = "appShutdown", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
+    public Map<String, String> shutdown() {
+        @SuppressWarnings("resource")
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.schedule(() -> System.exit(0), 3, SECONDS);
+        return Map.of("status", "Shutdown scheduled in 3 seconds");
     }
 }

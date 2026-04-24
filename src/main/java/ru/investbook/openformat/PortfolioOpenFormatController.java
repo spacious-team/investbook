@@ -22,12 +22,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.investbook.openformat.v1_1_0.PortfolioOpenFormatBuilder;
 import ru.investbook.openformat.v1_1_0.PortfolioOpenFormatPersister;
@@ -35,27 +36,28 @@ import ru.investbook.openformat.v1_1_0.PortfolioOpenFormatV1_1_0;
 import ru.investbook.parser.ValidatorService;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
-import java.util.Set;
 
-import static ru.investbook.web.HttpAttachResponseHelper.sendErrorPage;
+import static ru.investbook.web.HttpAttachResponseHelper.sendErrorHttpHeader;
 import static ru.investbook.web.HttpAttachResponseHelper.sendSuccessHeader;
-import static ru.investbook.web.ReportControllerHelper.errorPage;
+import static ru.investbook.web.ReportControllerHelper.exceptionToString;
 
-@RestController
+@Controller
 @RequestMapping("/portfolio-open-format")
 @RequiredArgsConstructor
 @Slf4j
-public class PortfolioOpenFormatRestController {
+public class PortfolioOpenFormatController {
     private final ObjectMapper objectMapper;
     private final PortfolioOpenFormatBuilder portfolioOpenFormatFactory;
     private final PortfolioOpenFormatPersister portfolioOpenFormatPersister;
     private final ValidatorService validator;
 
+    /**
+     * @return null if Thymeleaf render is not required, attach response is sent already
+     */
     @GetMapping("/backup/download")
-    public void download(HttpServletResponse response) throws IOException {
+    public @Nullable String download(HttpServletResponse response, Model model) {
         try {
             long t0 = System.nanoTime();
             String fileName = "portfolio.json";
@@ -67,33 +69,33 @@ public class PortfolioOpenFormatRestController {
             outputStream.writeTo(response.getOutputStream());
             log.info("Файл '{}' в формате 'Portfolio Open Format' сформирован за {}",
                     fileName, Duration.ofNanos(System.nanoTime() - t0));
+            response.flushBuffer();
+            return null;  // response is already build
         } catch (Exception e) {
             log.error("Ошибка генерации файла бэкапа", e);
-            sendErrorPage(response, e);
+            sendErrorHttpHeader(response);
+            model.addAttribute("message", "Ошибка подготовки бекапа");
+            model.addAttribute("stackTrace", exceptionToString(e));
+            return "stack-trace";
         }
-        response.flushBuffer();
     }
 
     @PostMapping("/backup/upload")
-    public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file) {
+    public String upload(@RequestParam("file") MultipartFile file, Model model) {
         try (InputStream inputStream = file.getInputStream()) { // creates new input stream
             long t0 = System.nanoTime();
             PortfolioOpenFormatV1_1_0 object = objectMapper.readValue(inputStream, PortfolioOpenFormatV1_1_0.class);
             validate(object);
             portfolioOpenFormatPersister.persist(object);
             log.info("Выполнено восстановление данных из бэкапа за {}", Duration.ofNanos(System.nanoTime() - t0));
-            return ok();
+            model.addAttribute("message", "Бекап восстановлен");
+            return "success";
         } catch (Exception e) {
             log.error("Ошибка восстановления данных из бэкапа", e);
-            return errorPage("Возможно это не файл в формате \"Open Portfolio Format\"", Set.of(e));
+            model.addAttribute("message", "Возможно это не файл в формате \"Open Portfolio Format\"");
+            model.addAttribute("stackTrace", exceptionToString(e));
+            return "stack-trace";
         }
-    }
-
-    private ResponseEntity<String> ok() {
-        return ResponseEntity.ok("""
-                Файл загружен <a href="/">[ok]</a>
-                <script type="text/javascript">document.location.href="/"</script>
-                """);
     }
 
     private void validate(PortfolioOpenFormatV1_1_0 object) {

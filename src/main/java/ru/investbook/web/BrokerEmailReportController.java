@@ -28,14 +28,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
 import ru.investbook.parser.MailboxReportParserService;
 import ru.investbook.web.model.MailboxDescriptor;
 
 import java.util.Collection;
 
-import static java.util.Collections.singleton;
-import static ru.investbook.web.ReportControllerHelper.errorPage;
+import static ru.investbook.web.ReportControllerHelper.exceptionToString;
 import static ru.investbook.web.ReportControllerHelper.getBrokerNames;
 
 @Controller
@@ -57,20 +55,19 @@ public class BrokerEmailReportController {
     }
 
     @PostMapping
-    public Object uploadBrokerReports(@ModelAttribute("mailboxDescriptor") MailboxDescriptor mailbox,
-                                      ModelAndView modelAndView) {
+    public String uploadBrokerReports(@ModelAttribute("mailboxDescriptor") MailboxDescriptor mailbox,
+                                      Model model) {
         try {
             int parsedReportCount = mailboxReportParserService.parseReports(mailbox);
-            modelAndView.addObject("message", parsedReportCount + " отчета(-ов) загружено " +
+            model.addAttribute("message", parsedReportCount + " отчета(-ов) загружено " +
                     "из почтового ящика " + mailbox.getLogin() + " на " + mailbox.getServer());
-            modelAndView.setViewName("success");
             defaultMailboxDescriptor = mailbox;
             defaultMailboxDescriptor.setPassword("");  // do not store pass in RAM
-            return modelAndView;
+            return "success";
         } catch (Exception e) {
-            return errorPage(
-                    "Возможно не удалось подключиться к почтовому серверу, проверьте параметры подключения",
-                    singleton(e));
+            model.addAttribute("message", "Возможно не удалось подключиться к почтовому серверу, проверьте параметры подключения");
+            model.addAttribute("stackTrace", exceptionToString(e));
+            return "stack-trace";
         }
     }
 }

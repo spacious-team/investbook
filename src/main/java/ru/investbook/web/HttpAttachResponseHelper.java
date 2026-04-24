@@ -21,13 +21,7 @@ package ru.investbook.web;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ContentDisposition;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.joining;
 
 public class HttpAttachResponseHelper {
 
@@ -39,30 +33,7 @@ public class HttpAttachResponseHelper {
         response.setContentType(contentType);
     }
 
-    public static void sendErrorPage(HttpServletResponse response, Exception e) throws IOException {
-        sendErrorHttpHeader(response);
-        String httpBody = getErrorHttpBody(e);
-        response.getWriter().write(httpBody);
-    }
-
-    private static String getErrorHttpBody(Exception exception) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        exception.printStackTrace(pw);
-        return Stream.of(sw.toString().split("\n"))
-                .collect(joining("</br>", """
-                        <b>Ошибка сборки отчета</b></br></br> <a href="/">[назад]</a>
-                        <br/>
-                        <span style="font-size: smaller; color: gray;">
-                            Вы можете <a href="https://github.com/spacious-team/investbook/issues">сообщить</a>
-                            об ошибке разработчикам или связаться с
-                            <a href="https://t.me/+zriyX7tRQOc0MDEy">технической поддержкой</a> 
-                        </span>
-                        </br></br> - 
-                        """, ""));
-    }
-
-    private static void sendErrorHttpHeader(HttpServletResponse response) {
+    public static void sendErrorHttpHeader(HttpServletResponse response) {
         response.setContentType("text/html; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }

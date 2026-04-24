@@ -34,9 +34,6 @@ import ru.investbook.web.forms.controller.ExternalSourcesGetterController;
 
 import java.io.InputStream;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.requireNonNull;
 
@@ -84,11 +81,8 @@ public class HomePageController {
         }
     }
 
-    @GetMapping("/shutdown")
+    @GetMapping("/app/shutdown")
     public String shutdown() {
-        @SuppressWarnings("resource")
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        executor.schedule(() -> System.exit(0), 3, TimeUnit.SECONDS);
-        return "shutdown-page";
+        return "app/shutdown";
     }
 }
