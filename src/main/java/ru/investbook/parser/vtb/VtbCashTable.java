@@ -45,7 +45,11 @@ public class VtbCashTable extends SingleAbstractReportTable<AccountCash> {
 
 
     protected VtbCashTable(SingleBrokerReport report) {
-        super(report, VtbReportHelper.findTableName(report.getReportPage(), TABLE_NAME, TABLE_NAME_WITH_YO), TABLE_FOOTER, VtbCashTableHeader.class, 3);
+        super(report,
+                cell -> cell.startsWith(TABLE_NAME) || cell.startsWith(TABLE_NAME_WITH_YO),
+                cell -> cell.startsWith(TABLE_FOOTER),
+                VtbCashTableHeader.class,
+                3);
     }
 
     @Override
