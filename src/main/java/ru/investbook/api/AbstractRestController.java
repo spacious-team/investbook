@@ -125,6 +125,8 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
                         createOrUpdate(objectWithId);
                         return ResponseEntity.noContent().build();
                     });
+        } catch (BadRequestException e) {
+            throw e;
         } catch (Exception e) {
             throw new InternalServerErrorException("Не могу создать объект", e);
         }
