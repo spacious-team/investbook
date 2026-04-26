@@ -21,6 +21,7 @@ package ru.investbook.openformat.v1_1_0;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
@@ -34,6 +35,7 @@ import static java.util.Collections.emptySet;
 @Jacksonized
 @Builder
 @Value
+@Valid
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PortfolioOpenFormatV1_1_0 {
@@ -63,39 +65,40 @@ public class PortfolioOpenFormatV1_1_0 {
     @Builder.Default
     @JsonProperty("accounts")
     @NotNull
-    Collection<AccountPof> accounts = emptySet();
+    Collection<@Valid AccountPof> accounts = emptySet();
 
     @Builder.Default
     @JsonProperty("cash-balances")
     @NotNull
-    Collection<CashBalancesPof> cashBalances = emptySet();
+    Collection<@Valid CashBalancesPof> cashBalances = emptySet();
 
     @Builder.Default
     @JsonProperty("assets")
     @NotNull
-    Collection<AssetPof> assets = emptySet();
+    Collection<@Valid AssetPof> assets = emptySet();
 
     @Builder.Default
     @JsonProperty("trades")
     @NotNull
-    Collection<TradePof> trades = emptySet();
+    Collection<@Valid TradePof> trades = emptySet();
 
     @Builder.Default
     @JsonProperty("transfers")
     @NotNull
-    Collection<TransferPof> transfer = emptySet();
+    Collection<@Valid TransferPof> transfer = emptySet();
 
     @Builder.Default
     @JsonProperty("payments")
     @NotNull
-    Collection<PaymentPof> payments = emptySet();
+    Collection<@Valid PaymentPof> payments = emptySet();
 
     @Builder.Default
     @JsonProperty("cash-flows")
     @NotNull
-    Collection<CashFlowPof> cashFlows = emptySet();
+    Collection<@Valid CashFlowPof> cashFlows = emptySet();
 
     @JsonProperty("vnd-investbook")
+    @Valid
     @Nullable
     VndInvestbookPof vndInvestbook;
 }

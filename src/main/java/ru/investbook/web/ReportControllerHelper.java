@@ -25,7 +25,8 @@ import java.io.StringWriter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.joining;
 
 public class ReportControllerHelper {
 
@@ -44,7 +45,7 @@ public class ReportControllerHelper {
     public static String exceptionsToString(Collection<Exception> exceptions) {
         return exceptions.stream()
                 .map(ReportControllerHelper::exceptionToStringConverter)
-                .collect(Collectors.joining("\n\n -", "-", ""));
+                .collect(joining("\n\n -", "-", ""));
     }
 
     private static String exceptionToStringConverter(Exception e) {
