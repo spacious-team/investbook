@@ -48,7 +48,7 @@ import ru.investbook.entity.AccountCashEntity;
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
-@Tag(name = "Информация по остатку денежных средств на счете")
+@Tag(name = "Account Balance Information")
 @RequestMapping("/api/v1/account-cash")
 public class AccountCashRestController extends AbstractRestController<Integer, AccountCash, AccountCashEntity> {
 
@@ -60,36 +60,36 @@ public class AccountCashRestController extends AbstractRestController<Integer, A
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отображает всю информацию обо всех счетах",
+    @Operation(summary = "Get all", description = "Get all records",
             operationId = "getAccountCashList",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
     public Page<AccountCash> get(@Parameter(hidden = true)
-                                   @QuerydslPredicate(root = AccountCashEntity.class)
-                                   @Nullable
-                                   Predicate predicate,
-                                   @Parameter(hidden = true)
-                                   Pageable pageable) {
+                                 @QuerydslPredicate(root = AccountCashEntity.class)
+                                 @Nullable
+                                 Predicate predicate,
+                                 @Parameter(hidden = true)
+                                 Pageable pageable) {
         return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить один", description = "Отображает информацию по идентификатору",
+    @Operation(summary = "Get one record", description = "Get record by ID",
             operationId = "getAccountCash",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<AccountCash> get(@PathVariable("id")
-                                             @Parameter(description = "Внутренний идентификатор записи")
-                                             Integer id) {
+                                           @Parameter(description = "Internal ID")
+                                           Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Добавить информацию для конкретного счета",
+    @Operation(summary = "Create", description = "Create record",
             operationId = "postAccountCash",
             responses = {
                     @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),

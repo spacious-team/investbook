@@ -50,8 +50,8 @@ public class HomePageRestController {
     private final TransactionRepository transactionRepository;
 
     @GetMapping("/accounts/all/stats")
-    @Tag(name = "Счета")
-    @Operation(summary = "Статистика портфеля", operationId = "accountsAllStats", responses = {
+    @Tag(name = "Accounts")
+    @Operation(summary = "Get statistics for all accounts", operationId = "accountsAllStats", responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public AccountStats portfolioStats() {
@@ -65,8 +65,8 @@ public class HomePageRestController {
     }
 
     @PostMapping("/app/shutdown")
-    @Tag(name = "Приложение")
-    @Operation(summary = "Закрыть приложение", operationId = "appShutdown", responses = {
+    @Tag(name = "Application")
+    @Operation(summary = "Shutdown app", operationId = "appShutdown", responses = {
             @ApiResponse(responseCode = "202"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> shutdown() {
