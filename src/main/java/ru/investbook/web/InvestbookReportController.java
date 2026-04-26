@@ -22,6 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,6 +44,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.ZoneId.systemDefault;
 import static ru.investbook.web.ControllerHelper.getAccounts;
 import static ru.investbook.web.ControllerHelper.getActiveAccounts;
@@ -107,6 +109,7 @@ public class InvestbookReportController {
 
     private void buildReport(String format, HttpServletResponse response, ViewFilter filter) throws Exception {
         if ("html".equals(format)) {
+            response.setContentType(new MediaType("text", "html", UTF_8).toString());
             htmlView.create(response.getOutputStream(), filter);
         } else {
             String fileName = getReportName(filter, "xlsx");
