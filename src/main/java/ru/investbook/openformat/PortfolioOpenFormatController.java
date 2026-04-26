@@ -20,20 +20,24 @@ package ru.investbook.openformat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import ru.investbook.openformat.v1_1_0.PortfolioOpenFormatV1_1_0;
 
 import java.io.ByteArrayOutputStream;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static ru.investbook.web.HttpAttachResponseHelper.sendErrorHttpHeader;
 import static ru.investbook.web.HttpAttachResponseHelper.sendSuccessHeader;
 import static ru.investbook.web.ReportControllerHelper.exceptionToString;
@@ -70,9 +74,9 @@ public class PortfolioOpenFormatController {
     }
 
     @PostMapping("/backup/upload")
-    public String upload(@RequestParam("file") MultipartFile file, Model model) {
+    public String upload(@RequestPart("file") @Valid PortfolioOpenFormatV1_1_0 object, Model model) {
         try {
-            portfolioOpenFormatRestController.post(file);
+            portfolioOpenFormatRestController.post(object);
             model.addAttribute("message", "Бекап восстановлен");
             return "success";
         } catch (Exception e) {
@@ -81,5 +85,18 @@ public class PortfolioOpenFormatController {
             model.addAttribute("stackTrace", exceptionToString(e));
             return "stack-trace";
         }
+    }
+
+    /**
+     * Обработает ошибки валидации ({@link @Valid}) для методов текущего контроллера
+     */
+    @SuppressWarnings("unused")
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public String handleValidationExceptions(MethodArgumentNotValidException e, Model model) {
+        log.error("Ошибка восстановления данных из бэкапа", e);
+        model.addAttribute("message",
+                "Возможно это не файл в формате \"Open Portfolio Format\": " + e.getMessage());
+        return "stack-trace";
     }
 }
