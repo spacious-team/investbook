@@ -44,14 +44,14 @@ import java.time.Duration;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Portfolio Open Format", description = "Сохранение и отображение портфеля в унифицированном формате")
+@Tag(name = "Portfolio Open Format", description = "Data exchange in unified Portfolio Open Format")
 @RequestMapping("/portfolio-open-format")
 public class PortfolioOpenFormatRestController {
     private final PortfolioOpenFormatBuilder portfolioOpenFormatFactory;
     private final PortfolioOpenFormatPersister portfolioOpenFormatPersister;
 
     @GetMapping("/records")
-    @Operation(summary = "Отобразить портфель", operationId = "getPortfolioOpenFormat", responses = {
+    @Operation(summary = "Get portfolio", operationId = "getPortfolioOpenFormat", responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public @Valid PortfolioOpenFormatV1_1_0 get() {
@@ -62,7 +62,7 @@ public class PortfolioOpenFormatRestController {
     }
 
     @PostMapping("/records")
-    @Operation(summary = "Сохранить портфель", operationId = "postPortfolioOpenFormat", responses = {
+    @Operation(summary = "Upload portfolio", operationId = "postPortfolioOpenFormat", responses = {
             @ApiResponse(responseCode = "204"),
             @ApiResponse(responseCode = "400", content = @Content),
             @ApiResponse(responseCode = "500", content = @Content)})
