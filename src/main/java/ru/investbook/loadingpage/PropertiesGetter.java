@@ -59,12 +59,12 @@ class PropertiesGetter {
         args.clear();
         args.addAll(Arrays.asList(_args));
         profiles.add("default");  // allows to read "spring.profiles.active" property from application.properties
-        String[] _profiles = getProperty("spring.profiles.active", DEFAULT_PROFILE)
+        String[] _profiles = getProperty("spring.profiles.active", "")
                 .split(",");
         profiles.clear();
         profiles.addAll(List.of(_profiles));
         Collections.reverse(profiles);  // last spring profile property should win
-        profiles.add("default");  // always read application.properties
+        profiles.add(DEFAULT_PROFILE);  // always read application.properties
     }
 
     @SuppressWarnings("SameParameterValue")
