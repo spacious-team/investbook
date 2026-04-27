@@ -39,12 +39,13 @@ import static ru.investbook.parser.vtb.VtbSecuritiesTable.VtbSecuritiesTableHead
 public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
 
     static final String TABLE_NAME = "Отчет об остатках ценных бумаг";
+    private static final String TABLE_NAME_WITH_YO = "Отчёт об остатках ценных бумаг";
     static final String TABLE_FOOTER = "ИТОГО:";
     // security registration number -> Security
     private final Map<String, Security> regNumberToSecurity = new HashMap<>();
 
     protected VtbSecuritiesTable(SingleBrokerReport report) {
-        super(report, TABLE_NAME, TABLE_FOOTER, VtbSecuritiesTableHeader.class);
+        super(report, VtbReportHelper.findTableName(report.getReportPage(), TABLE_NAME, TABLE_NAME_WITH_YO), TABLE_FOOTER, VtbSecuritiesTableHeader.class);
     }
 
     @Override
@@ -53,6 +54,9 @@ public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
             return null; // sub-header row
         }
         String description = row.getStringCellValue(NAME_REGNUMBER_ISIN);
+        if (description.split(",").length < 3) {
+            return null; // sub-header row like "АКЦИЯ" / "ПАЙ"
+        }
         Security security = VtbReportHelper.getSecurity(description);
         String isin = requireNonNull(security.getIsin());
         int securityId = getReport().getSecurityRegistrar().declareStockOrBondByIsin(isin, security::toBuilder);
@@ -73,8 +77,8 @@ public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
         NAME_REGNUMBER_ISIN("наименование", "гос. регистрации", "isin"),
         SECTION("площадка"),
         OUTGOING("исходящий остаток"),
-        CURRENCY("валюта цены", "номинала для облигаций"),
-        QUOTE("цена", "для облигаций"),
+        CURRENCY("валюта\\s+цены", "номинала\\s+для\\s+облигаций"),
+        QUOTE("цена", "для\\s+облигаций"),
         FACE_VALUE("номинал"),
         ACCRUED_INTEREST("НКД в валюте номинала");
 

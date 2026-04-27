@@ -54,6 +54,9 @@ public class CashFlowEventTable extends SingleAbstractReportTable<CashFlowEventT
         if (operation == null) {
             return null;
         }
+        if (!(row.getCellValue(DATE) instanceof Number)) {
+            return null;
+        }
         return CashFlowEvent.builder()
                 .date(row.getInstantCellValue(DATE))
                 .operation(operation.toLowerCase().trim())

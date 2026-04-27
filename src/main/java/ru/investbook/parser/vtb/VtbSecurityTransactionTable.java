@@ -92,16 +92,16 @@ public class VtbSecurityTransactionTable extends SingleAbstractReportTable<Secur
 
     @RequiredArgsConstructor
     enum VtbSecurityTransactionTableHeader implements TableHeaderColumn {
-        DATE("плановая дата поставки"),
-        TRADE_ID("№ сделки"),
+        DATE("плановая\\s+дата\\s+поставки"),
+        TRADE_ID("№\\s+сделки"),
         NAME_AND_ISIN("наименование", "isin"),
-        DIRECTION("вид сделки"),
+        DIRECTION("вид\\s+сделки"),
         COUNT("количество"),
-        VALUE_WITH_ACCRUED_INTEREST("сумма сделки в валюте расчетов", "с учетом НКД"),
-        ACCRUED_INTEREST("НКД", "по сделке в валюте расчетов"),
-        VALUE_CURRENCY("Валюта расчетов"),
-        MARKET_COMMISSION("Комиссия Банка за расчет по сделке"),
-        BROKER_COMMISSION("Комиссия Банка за заключение сделки");
+        VALUE_WITH_ACCRUED_INTEREST("сумма\\s+сделки\\s+в\\s+валюте\\s+расч[её]тов", "с\\s+уч[её]том\\s+НКД"),
+        ACCRUED_INTEREST("НКД", "по\\s+сделке\\s+в\\s+валюте\\s+расч[её]тов"),
+        VALUE_CURRENCY("Валюта\\s+расч[её]тов"),
+        MARKET_COMMISSION("Комиссия\\s+Банка\\s+за\\s+расч[её]т\\s+по\\s+сделке"),
+        BROKER_COMMISSION("Комиссия\\s+Банка\\s+за\\s+заключение\\s+сделки");
 
         @Getter
         private final TableColumn column;
