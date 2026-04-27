@@ -45,7 +45,10 @@ public class VtbSecuritiesTable extends SingleAbstractReportTable<Security> {
     private final Map<String, Security> regNumberToSecurity = new HashMap<>();
 
     protected VtbSecuritiesTable(SingleBrokerReport report) {
-        super(report, VtbReportHelper.findTableName(report.getReportPage(), TABLE_NAME, TABLE_NAME_WITH_YO), TABLE_FOOTER, VtbSecuritiesTableHeader.class);
+        super(report,
+                cell -> cell.startsWith(TABLE_NAME) || cell.startsWith(TABLE_NAME_WITH_YO),
+                cell -> cell.startsWith(TABLE_FOOTER),
+                VtbSecuritiesTableHeader.class);
     }
 
     @Override

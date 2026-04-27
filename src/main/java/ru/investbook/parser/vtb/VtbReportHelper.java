@@ -21,19 +21,8 @@ package ru.investbook.parser.vtb;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityType;
-import org.spacious_team.table_wrapper.api.ReportPage;
-import org.spacious_team.table_wrapper.api.TableCellAddress;
 
 class VtbReportHelper {
-
-    static String findTableName(ReportPage reportPage, String... tableNames) {
-        for (String tableName : tableNames) {
-            if (reportPage.findByPrefix(tableName) != TableCellAddress.NOT_FOUND) {
-                return tableName;
-            }
-        }
-        return tableNames[0];
-    }
 
     static Security getSecurity(String description) {
         String[] parts = description.split(",");
