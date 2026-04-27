@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
@@ -92,6 +93,7 @@ class PropertiesGetter {
     static String getProperty(String property, String defaultValue) {
         try {
             return readPropertyFromArgs(property)
+                    .or(() -> readPropertyFromJvmArgs(property))
                     .or(() -> readPropertyFromEnv(property))
                     .or(() -> readPropertyFromFile(property))
                     .orElse(defaultValue);
@@ -109,6 +111,16 @@ class PropertiesGetter {
                         .replace("=", "")
                         .trim();
                 return Optional.of(value);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> readPropertyFromJvmArgs(String property) {
+        for (Entry<Object, Object> e : System.getProperties().entrySet()) {
+            if (Objects.equals(e.getKey(), property)) {
+                Object value = e.getValue();
+                return Optional.of(value.toString());
             }
         }
         return Optional.empty();
