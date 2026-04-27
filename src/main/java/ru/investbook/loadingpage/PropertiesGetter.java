@@ -91,25 +91,14 @@ class PropertiesGetter {
 
     static String getProperty(String property, String defaultValue) {
         try {
-            return readPropertyFromEnv(property)
-                    .or(() -> readPropertyFromArgs(property))
+            return readPropertyFromArgs(property)
+                    .or(() -> readPropertyFromEnv(property))
                     .or(() -> readPropertyFromFile(property))
                     .orElse(defaultValue);
         } catch (Exception e) {
             log.warn("Can't find '{}' property, fallback to default value: '{}'", property, defaultValue, e);
             return defaultValue;
         }
-    }
-
-    private static Optional<String> readPropertyFromEnv(String property) {
-        String varName = convertPropertyNameToEnvVarName(property);
-        return Optional.ofNullable(System.getenv(varName));
-    }
-
-    private static String convertPropertyNameToEnvVarName(String property) {
-        return property.toUpperCase()
-                .replace("_", "")
-                .replace(".", "_");
     }
 
     private static Optional<String> readPropertyFromArgs(String property) {
@@ -123,6 +112,17 @@ class PropertiesGetter {
             }
         }
         return Optional.empty();
+    }
+
+    private static Optional<String> readPropertyFromEnv(String property) {
+        String varName = convertPropertyNameToEnvVarName(property);
+        return Optional.ofNullable(System.getenv(varName));
+    }
+
+    private static String convertPropertyNameToEnvVarName(String property) {
+        return property.toUpperCase()
+                .replace("_", "")
+                .replace(".", "_");
     }
 
     private static Optional<String> readPropertyFromFile(String key) {
