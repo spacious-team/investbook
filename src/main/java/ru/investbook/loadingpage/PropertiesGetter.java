@@ -51,7 +51,7 @@ class PropertiesGetter {
             "./app",                                       // windows
             "/opt/investbook/lib/app",                     // unix
             "/Applications/Investbook.app/Contents/app"};  // mac
-    private static final String DEFAULT_PROFILE = "conf";
+    private static final String DEFAULT_PROFILE = "default";
     private static final List<String> args = new CopyOnWriteArrayList<>();
     private static final List<String> profiles = new CopyOnWriteArrayList<>();
 
