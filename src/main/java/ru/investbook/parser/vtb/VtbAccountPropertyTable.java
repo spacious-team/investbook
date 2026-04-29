@@ -36,6 +36,7 @@ public class VtbAccountPropertyTable extends SingleInitializableReportTable<Acco
 
     private static final String TOTAL_ASSETS1 = "ОЦЕНКА активов (по курсу ЦБ с учётом незавершенных сделок)";
     private static final String TOTAL_ASSETS2 = "ОЦЕНКА активов по Kурсу с учётом незавершенных сделок";
+    private static final String TOTAL_ASSETS3 = "ОЦЕНКА активов по Курсу с учетом незавершенных сделок";
 
     public VtbAccountPropertyTable(SingleBrokerReport report) {
         super(report);
@@ -61,6 +62,9 @@ public class VtbAccountPropertyTable extends SingleInitializableReportTable<Acco
         @Nullable Object value = getReport().getReportPage().getNextColumnValue(TOTAL_ASSETS1);
         if (value == null) {
             value = getReport().getReportPage().getNextColumnValue(TOTAL_ASSETS2);
+        }
+        if (value == null) {
+            value = getReport().getReportPage().getNextColumnValue(TOTAL_ASSETS3);
         }
         return BigDecimal.valueOf(
                 Double.parseDouble(String.valueOf(value)));

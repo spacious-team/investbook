@@ -49,7 +49,7 @@ public class VtbCashTable extends SingleAbstractReportTable<AccountCash> {
                 cell -> cell.startsWith(TABLE_NAME) || cell.startsWith(TABLE_NAME_WITH_YO),
                 cell -> cell.startsWith(TABLE_FOOTER),
                 VtbCashTableHeader.class,
-                3);
+                2);
     }
 
     @Override
