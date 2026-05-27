@@ -59,7 +59,7 @@ public class Sp500OfficialService implements Sp500Service {
     private void updateBy(InputStream inputStream) throws IOException {
         Workbook book = new HSSFWorkbook(inputStream);
         new ExcelSheet(book.getSheetAt(0))
-                .createNameless("Effective date", TableHeader.class)
+                .createNamelessTable("SP500 Table", "Effective date", null, TableHeader.class, 1)
                 .stream()
                 .filter(Objects::nonNull)
                 .map(Sp500OfficialService::getIndexValue)

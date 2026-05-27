@@ -76,7 +76,7 @@ public class CbrForeignExchangeRateServiceExcelImpl extends AbstractCbrForeignEx
         requireNonNull(resource, "Не удалось скачать курсы валют");
         Workbook book = new XSSFWorkbook(resource.getInputStream());
         new ExcelSheet(book.getSheetAt(0))
-                .createNameless("data", TableHeader.class)
+                .createNamelessTable("CBR FX Rate", "data", null, TableHeader.class, 1)
                 .stream()
                 .filter(Objects::nonNull)
                 .map(row -> getRate(requireNonNull(row), currencyPair))
