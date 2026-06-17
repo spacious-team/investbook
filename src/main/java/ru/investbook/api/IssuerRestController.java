@@ -48,8 +48,8 @@ import ru.investbook.entity.IssuerEntity;
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
-@Tag(name = "Эмитенты", description = "Информация об эмитентах")
-@RequestMapping("/api/v1/issuers")
+@Tag(name = "Issuer information")
+@RequestMapping("/api/issuers")
 public class IssuerRestController extends AbstractRestController<Integer, Issuer, IssuerEntity> {
 
     public IssuerRestController(JpaRepository<IssuerEntity, Integer> repository, EntityConverter<IssuerEntity, Issuer> converter) {
@@ -59,11 +59,9 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить всех",
-            operationId = "getIssuers",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "getIssuers", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public Page<Issuer> get(@Parameter(hidden = true)
                             @QuerydslPredicate(root = IssuerEntity.class)
                             @Nullable
@@ -75,20 +73,18 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить одного", description = "Отобразить информацию об эмитенте по его номеру",
-            operationId = "getIssuer",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "getIssuer", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Issuer> get(@PathVariable("id")
-                                      @Parameter(description = "Внутренний идентификатор эмитента")
+                                      @Parameter
                                       Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", operationId = "postIssuer", responses = {
+    @Operation(operationId = "postIssuer", responses = {
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "409"),
             @ApiResponse(responseCode = "500", content = @Content)})
@@ -98,12 +94,12 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить сведения", operationId = "putIssuer", responses = {
+    @Operation(operationId = "putIssuer", responses = {
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "204"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
-                                    @Parameter(description = "Внутренний идентификатор эмитента")
+                                    @Parameter
                                     Integer id,
                                     @RequestBody
                                     @Valid
@@ -113,13 +109,11 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удаляет сведения об эмитенте из БД",
-            operationId = "deleteIssuer",
-            responses = {
-                    @ApiResponse(responseCode = "204"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "deleteIssuer", responses = {
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
-                                       @Parameter(description = "Внутренний идентификатор эмитента")
+                                       @Parameter
                                        Integer id) {
         return super.delete(id);
     }
@@ -132,10 +126,5 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     @Override
     protected Issuer updateId(Integer id, Issuer object) {
         return object.toBuilder().id(id).build();
-    }
-
-    @Override
-    protected String getLocation() {
-        return "/issuers";
     }
 }

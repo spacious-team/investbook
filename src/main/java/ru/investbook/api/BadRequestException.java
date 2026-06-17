@@ -18,10 +18,11 @@
 
 package ru.investbook.api;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
+@ResponseStatus(value = BAD_REQUEST)
 public class BadRequestException extends IllegalArgumentException {
     public BadRequestException(String s) {
         super(s);

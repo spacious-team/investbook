@@ -48,8 +48,8 @@ import ru.investbook.entity.AccountCashEntity;
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
-@Tag(name = "Информация по остатку денежных средств на счете")
-@RequestMapping("/api/v1/account-cash")
+@Tag(name = "Account balance information")
+@RequestMapping("/api/account-cash")
 public class AccountCashRestController extends AbstractRestController<Integer, AccountCash, AccountCashEntity> {
 
     public AccountCashRestController(JpaRepository<AccountCashEntity, Integer> repository,
@@ -60,55 +60,47 @@ public class AccountCashRestController extends AbstractRestController<Integer, A
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отображает всю информацию обо всех счетах",
-            operationId = "getAccountCashList",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "getAccountCashList", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public Page<AccountCash> get(@Parameter(hidden = true)
-                                   @QuerydslPredicate(root = AccountCashEntity.class)
-                                   @Nullable
-                                   Predicate predicate,
-                                   @Parameter(hidden = true)
-                                   Pageable pageable) {
+                                 @QuerydslPredicate(root = AccountCashEntity.class)
+                                 @Nullable
+                                 Predicate predicate,
+                                 @Parameter(hidden = true)
+                                 Pageable pageable) {
         return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить один", description = "Отображает информацию по идентификатору",
-            operationId = "getAccountCash",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
-    public ResponseEntity<AccountCash> get(@PathVariable("id")
-                                             @Parameter(description = "Внутренний идентификатор записи")
-                                             Integer id) {
+    @Operation(operationId = "getAccountCash", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
+    public ResponseEntity<AccountCash> get(@PathVariable("id") 
+                                           @Parameter
+                                           Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Добавить информацию для конкретного счета",
-            operationId = "postAccountCash",
-            responses = {
-                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-                    @ApiResponse(responseCode = "409"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "postAccountCash", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "409"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> post(@RequestBody @Valid AccountCash property) {
         return super.post(property);
     }
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", description = "Обновить информацию для счета",
-            operationId = "putAccountCash",
-            responses = {
-                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-                    @ApiResponse(responseCode = "204"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "putAccountCash", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
-                                    @Parameter(description = "Внутренний идентификатор записи")
+                                    @Parameter
                                     Integer id,
                                     @RequestBody
                                     @Valid
@@ -118,13 +110,11 @@ public class AccountCashRestController extends AbstractRestController<Integer, A
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить",
-            operationId = "deleteAccountCash",
-            responses = {
-                    @ApiResponse(responseCode = "204"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "deleteAccountCash", responses = {
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
-                                       @Parameter(description = "Внутренний идентификатор записи")
+                                       @Parameter
                                        Integer id) {
         return super.delete(id);
     }
@@ -137,10 +127,5 @@ public class AccountCashRestController extends AbstractRestController<Integer, A
     @Override
     protected AccountCash updateId(Integer id, AccountCash object) {
         return object.toBuilder().id(id).build();
-    }
-
-    @Override
-    protected String getLocation() {
-        return "/account-cash";
     }
 }

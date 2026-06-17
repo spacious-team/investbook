@@ -48,8 +48,8 @@ import ru.investbook.entity.AccountPropertyEntity;
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
-@Tag(name = "Информация по счетам")
-@RequestMapping("/api/v1/account-properties")
+@Tag(name = "Account information except balance")
+@RequestMapping("/api/account-properties")
 public class AccountPropertyRestController extends AbstractRestController<Integer, AccountProperty, AccountPropertyEntity> {
 
     public AccountPropertyRestController(JpaRepository<AccountPropertyEntity, Integer> repository,
@@ -60,55 +60,47 @@ public class AccountPropertyRestController extends AbstractRestController<Intege
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отображает всю имеющуюся информацию обо всех счетах",
-            operationId = "getAccountProperties",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "getAccountProperties", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public Page<AccountProperty> get(@Parameter(hidden = true)
-                                       @QuerydslPredicate(root = AccountPropertyEntity.class)
-                                       @Nullable
-                                       Predicate predicate,
-                                       @Parameter(hidden = true)
-                                       Pageable pageable) {
+                                     @QuerydslPredicate(root = AccountPropertyEntity.class)
+                                     @Nullable
+                                     Predicate predicate,
+                                     @Parameter(hidden = true)
+                                     Pageable pageable) {
         return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить один", description = "Отображает информацию по идентификатору",
-            operationId = "getAccountProperty",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "getAccountProperty", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<AccountProperty> get(@PathVariable("id")
-                                                 @Parameter(description = "Внутренний идентификатор записи")
-                                                 Integer id) {
+                                               @Parameter
+                                               Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Добавить информацию для конкретного счета",
-            operationId = "postAccountProperty",
-            responses = {
-                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-                    @ApiResponse(responseCode = "409"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "postAccountProperty", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "409"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> post(@RequestBody @Valid AccountProperty property) {
         return super.post(property);
     }
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", description = "Обновить информацию для счета",
-            operationId = "putAccountProperty",
-            responses = {
-                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-                    @ApiResponse(responseCode = "204"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "putAccountProperty", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
-                                    @Parameter(description = "Внутренний идентификатор записи")
+                                    @Parameter
                                     Integer id,
                                     @RequestBody
                                     @Valid
@@ -118,13 +110,12 @@ public class AccountPropertyRestController extends AbstractRestController<Intege
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить",
-            operationId = "deleteAccountProperty",
+    @Operation(operationId = "deleteAccountProperty",
             responses = {
                     @ApiResponse(responseCode = "204"),
                     @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
-                                       @Parameter(description = "Внутренний идентификатор записи")
+                                       @Parameter
                                        Integer id) {
         return super.delete(id);
     }
@@ -137,10 +128,5 @@ public class AccountPropertyRestController extends AbstractRestController<Intege
     @Override
     protected AccountProperty updateId(Integer id, AccountProperty object) {
         return object.toBuilder().id(id).build();
-    }
-
-    @Override
-    protected String getLocation() {
-        return "/account-properties";
     }
 }

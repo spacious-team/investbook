@@ -21,7 +21,6 @@ package ru.investbook.web;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.spacious_team.broker.report_parser.api.BrokerReportFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,8 +38,9 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static java.util.Objects.requireNonNull;
+import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasLength;
-import static ru.investbook.web.ReportControllerHelper.errorPage;
+import static ru.investbook.web.ReportControllerHelper.exceptionsToString;
 import static ru.investbook.web.ReportControllerHelper.getBrokerNames;
 
 @Controller
@@ -60,8 +60,9 @@ public class BrokerFileReportController {
     }
 
     @PostMapping
-    public ResponseEntity<String> uploadBrokerReports(@RequestParam("reports") MultipartFile[] reports,
-                                                      @RequestParam(name = "broker", required = false) String broker) {
+    public String uploadBrokerReports(@RequestParam("reports") MultipartFile[] reports,
+                                      @RequestParam(name = "broker", required = false) String broker,
+                                      Model model) {
         Collection<Exception> exceptions = new ConcurrentLinkedQueue<>();
         Arrays.stream(reports)
                 .parallel()
@@ -70,10 +71,15 @@ public class BrokerFileReportController {
                 .forEach(report -> {
                     uploadReport(report, broker, exceptions);
                 });
-        if (exceptions.isEmpty()) {
-            return ok();
+        if (isEmpty(exceptions)) {
+            return "redirect:/";
         } else {
-            return errorPage(hasLength(broker) ? "" : "Попробуйте повторить загрузку, указав Брокера", exceptions);
+            String message = hasLength(broker) ?
+                    "Отчет брокера " + broker + " не распознан"
+                    : "Попробуйте повторить загрузку, указав Брокера";
+            model.addAttribute("message", message);
+            model.addAttribute("stackTrace", exceptionsToString(exceptions));
+            return "stack-trace";
         }
     }
 
@@ -83,12 +89,5 @@ public class BrokerFileReportController {
         } catch (Exception e) {
             exceptions.add(e);
         }
-    }
-
-    private ResponseEntity<String> ok() {
-        return ResponseEntity.ok("""
-                Отчеты загружены <a href="/">[ok]</a>
-                <script type="text/javascript">document.location.href="/"</script>
-                """);
     }
 }

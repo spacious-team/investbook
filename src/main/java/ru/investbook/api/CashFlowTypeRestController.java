@@ -39,20 +39,18 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Типы событий")
-@RequestMapping("/api/v1/cash-flow-types")
+@Tag(name = "Cash flow event types")
+@RequestMapping("/api/cash-flow-types")
 public class CashFlowTypeRestController {
 
     private final CashFlowTypeRepository cashFlowTypeRepository;
     private final CashFlowTypeConverter cashFlowTypeConverter;
 
     @GetMapping
-    @Operation(summary = "Отобразить все",
-            operationId = "getCashFlowTypes",
-            responses = {
-                    @ApiResponse(responseCode = "200", content = @Content(
-                            array = @ArraySchema(schema = @Schema(implementation = CashFlowType.class)))),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "getCashFlowTypes", responses = {
+            @ApiResponse(responseCode = "200", content = @Content(
+                    array = @ArraySchema(schema = @Schema(implementation = CashFlowType.class)))),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public Iterable<CashFlowType> getCashFlowType() {
         return cashFlowTypeRepository.findAll()
                 .stream()
@@ -61,13 +59,11 @@ public class CashFlowTypeRestController {
     }
 
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить по идентификатору",
-            operationId = "getCashFlowType",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "getCashFlowType", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<CashFlowType> getCashFlowType(@PathVariable("id")
-                                                        @Parameter(description = "Идентификатор типа")
+                                                        @Parameter
                                                         Integer id) {
         Optional<CashFlowType> result = cashFlowTypeRepository.findById(id)
                 .map(cashFlowTypeConverter::fromEntity);

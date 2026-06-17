@@ -56,8 +56,8 @@ import static java.util.Objects.isNull;
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
-@Tag(name = "Движения ДС по сделкам", description = "Уплаченные и вырученные суммы в сделках")
-@RequestMapping("/api/v1/transaction-cash-flows")
+@Tag(name = "Transaction cash flows", description = "Amounts paid and received in transactions")
+@RequestMapping("/api/transaction-cash-flows")
 public class TransactionCashFlowRestController extends AbstractRestController<Integer, TransactionCashFlow, TransactionCashFlowEntity> {
     private final TransactionCashFlowRepository repository;
     private final TransactionCashFlowConverter converter;
@@ -74,14 +74,12 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
 
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить по фильтру", description = "Отобразить информацию о сделках",
-            operationId = "getTransactionCashFlows",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "getTransactionCashFlows", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     protected Page<TransactionCashFlow> get(
             @RequestParam(value = "event-type", required = false)
-            @Parameter(description = "Тип (стоимость/комиссия/НКД)", example = "Смотреть API \"Типы событий\"")
+            @Parameter(description = "Type (price / fee / accrued interest)")
             @Nullable
             Integer eventType,
             @Parameter(hidden = true)
@@ -124,25 +122,21 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить одну", description = "Отобразить информацию о конкретной сделке",
-            operationId = "getTransactionCashFlow",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "getTransactionCashFlow", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<TransactionCashFlow> get(@PathVariable("id")
-                                                   @Parameter(description = "Внутренний идентификатор сделки")
+                                                   @Parameter
                                                    Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Добавить информацию об об объемах движения ДС по сделке",
-            operationId = "postTransactionCashFlow",
-            responses = {
-                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-                    @ApiResponse(responseCode = "409"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "postTransactionCashFlow", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "409"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> post(@RequestBody @Valid TransactionCashFlow object) {
         return super.post(object);
     }
@@ -152,14 +146,12 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
      */
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", description = "Обновить информацию об об объемах движения ДС по сделке",
-            operationId = "putTransactionCashFlow",
-            responses = {
-                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-                    @ApiResponse(responseCode = "204"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "putTransactionCashFlow", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
-                                    @Parameter(description = "Внутренний идентификатор сделки")
+                                    @Parameter
                                     Integer id,
                                     @RequestBody
                                     @Valid
@@ -172,15 +164,12 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
      */
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = """
-            Удалить информацию об об объемах движения ДС по сделке. Сама сделка не удаляется, ее нужно удалить своим API
-            """,
-            operationId = "deleteTransactionCashFlow",
-            responses = {
-                    @ApiResponse(responseCode = "204"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(description = "Removes cash flow information for the transaction, the transaction itself is not deleted",
+            operationId = "deleteTransactionCashFlow", responses = {
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
-                                       @Parameter(description = "Внутренний идентификатор сделки")
+                                       @Parameter
                                        Integer id) {
         return super.delete(id);
     }
@@ -195,10 +184,5 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
         return object.toBuilder()
                 .id(id)
                 .build();
-    }
-
-    @Override
-    protected String getLocation() {
-        return "/transaction-cash-flows";
     }
 }

@@ -91,7 +91,7 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>3bac204a7e</version>
+            <version>234a6196b6</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
@@ -115,6 +115,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -174,7 +178,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.8.13</version>
+            <version>2.8.17</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>

@@ -48,8 +48,8 @@ import ru.investbook.repository.AccountRepository;
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
-@Tag(name = "Счета")
-@RequestMapping("/api/v1/accounts")
+@Tag(name = "Accounts")
+@RequestMapping("/api/accounts")
 public class AccountRestController extends AbstractRestController<String, Account, AccountEntity> {
 
     public AccountRestController(AccountRepository repository, AccountConverter converter) {
@@ -59,32 +59,32 @@ public class AccountRestController extends AbstractRestController<String, Accoun
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", operationId = "getAccounts", responses = {
+    @Operation(operationId = "getAccounts", responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public Page<Account> get(@Parameter(hidden = true)
-                               @QuerydslPredicate(root = AccountEntity.class)
-                               @Nullable
-                               Predicate predicate,
-                               @Parameter(hidden = true)
-                               Pageable pageable) {
+                             @QuerydslPredicate(root = AccountEntity.class)
+                             @Nullable
+                             Predicate predicate,
+                             @Parameter(hidden = true)
+                             Pageable pageable) {
         return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить один", operationId = "getAccount", responses = {
+    @Operation(operationId = "getAccount", responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Account> get(@PathVariable("id")
-                                         @Parameter(description = "Номер счета")
-                                         String id) {
+                                       @Parameter
+                                       String id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", operationId = "postAccount", responses = {
+    @Operation(operationId = "postAccount", responses = {
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "409"),
             @ApiResponse(responseCode = "500", content = @Content)})
@@ -94,12 +94,12 @@ public class AccountRestController extends AbstractRestController<String, Accoun
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", operationId = "putAccount", responses = {
+    @Operation(operationId = "putAccount", responses = {
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "204"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
-                                    @Parameter(description = "Номер счета")
+                                    @Parameter
                                     String id,
                                     @RequestBody
                                     @Valid
@@ -109,13 +109,12 @@ public class AccountRestController extends AbstractRestController<String, Accoun
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удалить счет и все связанные с ним данные",
-            operationId = "deleteAccount",
-            responses = {
-                    @ApiResponse(responseCode = "204"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(description = "Deletes the account and all associated data, including all transactions",
+            operationId = "deleteAccount", responses = {
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
-                                       @Parameter(description = "Номер счета")
+                                       @Parameter
                                        String id) {
         return super.delete(id);
     }
@@ -128,10 +127,5 @@ public class AccountRestController extends AbstractRestController<String, Accoun
     @Override
     protected Account updateId(String id, Account object) {
         return object.toBuilder().id(id).build();
-    }
-
-    @Override
-    protected String getLocation() {
-        return "/accounts";
     }
 }
