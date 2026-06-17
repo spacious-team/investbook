@@ -35,6 +35,7 @@ import ru.investbook.parser.SingleBrokerReport;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
 @Slf4j
 public class VtbCashTable extends SingleAbstractReportTable<AccountCash> {
@@ -47,9 +48,10 @@ public class VtbCashTable extends SingleAbstractReportTable<AccountCash> {
     protected VtbCashTable(SingleBrokerReport report) {
         super(report,
                 cell -> cell.startsWith(TABLE_NAME) || cell.startsWith(TABLE_NAME_WITH_YO),
+                1,
+                cell -> Objects.equals(cell, "RUR"),
                 cell -> cell.startsWith(TABLE_FOOTER),
-                VtbCashTableHeader.class,
-                3);
+                VtbCashTableHeader.class);
     }
 
     @Override
@@ -83,16 +85,19 @@ public class VtbCashTable extends SingleAbstractReportTable<AccountCash> {
         STOCK_MARKET(
                 OptionalTableColumn.of(
                         AnyOfTableColumn.of(
+                                MultiLineTableColumn.of("Исходящий остаток", "основной рынок"),
                                 MultiLineTableColumn.of("Исходящий остаток", "", "основной рынок"),
                                 MultiLineTableColumn.of("Исходящий остаток", "площадка", "основной рынок")))),
         FORTS_MARKET(
                 OptionalTableColumn.of(
                         AnyOfTableColumn.of(
+                                MultiLineTableColumn.of("Исходящий остаток", "срочный рынок"),
                                 MultiLineTableColumn.of("Исходящий остаток", "", "срочный рынок"),
                                 MultiLineTableColumn.of("Исходящий остаток", "площадка", "срочный рынок")))),
         NON_MARKET(
                 OptionalTableColumn.of(
                         AnyOfTableColumn.of(
+                                MultiLineTableColumn.of("Исходящий остаток", "внебирж. рынок"),
                                 MultiLineTableColumn.of("Исходящий остаток", "", "внебирж. рынок"),
                                 MultiLineTableColumn.of("Исходящий остаток", "площадка", "внебирж. рынок"))));
 

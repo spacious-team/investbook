@@ -60,8 +60,8 @@ public class DerivativeCashFlowTable extends SingleAbstractReportTable<SecurityE
 
     private boolean hasOpenContract() {
         contractCount = getReport().getReportPage()
-                .create(TABLE2_NAME, TABLE_END_TEXT, ContractCountTableHeader.class)
-                .excludeTotalRow()
+                .createTable(TABLE2_NAME, 1, TABLE_END_TEXT, ContractCountTableHeader.class, 1)
+                .excludeLastRow()
                 .getData(getReport(), DerivativeCashFlowTable::getCount)
                 .stream()
                 .filter(e -> e.getValue() != 0)

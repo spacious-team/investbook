@@ -59,7 +59,7 @@ public class VtbForeignExchangeTransactionTable extends SingleInitializableRepor
 
     private Collection<ForeignExchangeTransaction> parseTable(String tableName) {
         return getReport().getReportPage()
-                .create(tableName, FxTransactionTableHeader.class)
+                .createTable(tableName, 1, null, FxTransactionTableHeader.class, 1)
                 .getData(getReport(), this::parseRow);
     }
 

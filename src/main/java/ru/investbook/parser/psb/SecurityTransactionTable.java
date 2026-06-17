@@ -73,8 +73,8 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
 
     private List<SecurityTransaction> parseTable(String tableName) {
         return getReport().getReportPage()
-                .create(tableName, TABLE_END_TEXT, TransactionTableHeader.class)
-                .excludeTotalRow()
+                .createTable(tableName, 1, TABLE_END_TEXT, TransactionTableHeader.class, 1)
+                .excludeLastRow()
                 .getData(getReport(), this::getTransaction);
     }
 

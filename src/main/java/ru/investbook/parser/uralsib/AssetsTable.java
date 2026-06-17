@@ -62,10 +62,10 @@ public class AssetsTable extends SingleInitializableReportTable<AccountProperty>
         try {
             SingleBrokerReport report = getReport();
             Table table = report.getReportPage()
-                    .createNameless(ASSETS_TABLE, TABLE_FIRST_HEADER_LINE, SummaryTableHeader.class, 3);
+                    .createNamelessTable(ASSETS_TABLE, TABLE_FIRST_HEADER_LINE, null, SummaryTableHeader.class, 3);
             if (table.isEmpty()) {
                 table = report.getReportPage()
-                        .createNameless(ASSETS_TABLE, TABLE_SECOND_HEADER_LINE, SummaryTableHeader.class, 2);
+                        .createNamelessTable(ASSETS_TABLE, TABLE_SECOND_HEADER_LINE, null, SummaryTableHeader.class, 2);
             }
             if (table.isEmpty()) {
                 log.debug("Таблица '{}' не найдена", ASSETS_TABLE);

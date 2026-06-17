@@ -25,7 +25,7 @@ import org.spacious_team.table_wrapper.api.Table;
 import org.spacious_team.table_wrapper.api.TableRow;
 import ru.investbook.parser.SingleBrokerReport;
 import ru.investbook.parser.SingleInitializableReportTable;
-import ru.investbook.parser.psb.AccountPropertyTable;
+import ru.investbook.parser.psb.AccountPropertyTable.SummaryTableHeader;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ import static ru.investbook.parser.psb.foreignmarket.ForeignExchangeAccountPrope
 @Slf4j
 public class ForeignExchangeCashTable extends SingleInitializableReportTable<AccountCash> {
 
-    private final AccountPropertyTable.SummaryTableHeader[] CURRENCIES = new AccountPropertyTable.SummaryTableHeader[]{ RUB, USD, EUR, GBP, CHF };
+    private final SummaryTableHeader[] CURRENCIES = new SummaryTableHeader[]{ RUB, USD, EUR, GBP, CHF };
 
     public ForeignExchangeCashTable(SingleBrokerReport report) {
         super(report);
@@ -53,7 +53,7 @@ public class ForeignExchangeCashTable extends SingleInitializableReportTable<Acc
             return emptyList();
         }
         Collection<AccountCash> cashes = new ArrayList<>();
-        for (AccountPropertyTable.SummaryTableHeader currency : CURRENCIES) {
+        for (SummaryTableHeader currency : CURRENCIES) {
             @Nullable BigDecimal cash = row.getBigDecimalCellValueOrDefault(currency, null);
             if (cash != null) {
                 cashes.add(AccountCash.builder()
@@ -70,7 +70,7 @@ public class ForeignExchangeCashTable extends SingleInitializableReportTable<Acc
 
     private Table getSummaryTable() {
         Table table = getReport().getReportPage()
-                .create(SUMMARY_TABLE, ASSETS, AccountPropertyTable.SummaryTableHeader.class);
+                .createTable(SUMMARY_TABLE, 1, ASSETS, SummaryTableHeader.class, 1);
         if (table.isEmpty()) {
             throw new IllegalArgumentException("Таблица '" + SUMMARY_TABLE + "' не найдена");
         }

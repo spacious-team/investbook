@@ -63,7 +63,7 @@ public class AccountPropertyTable extends SingleInitializableReportTable<Account
 
     public static Table getSummaryTable(BrokerReport report, String tableFooterString) {
         Table table = report.getReportPage()
-                .create(SUMMARY_TABLE, tableFooterString, SummaryTableHeader.class);
+                .createTable(SUMMARY_TABLE, 1, tableFooterString, SummaryTableHeader.class, 1);
         if (table.isEmpty()) {
             throw new IllegalArgumentException("Таблица '" + SUMMARY_TABLE + "' не найдена");
         }

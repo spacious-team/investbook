@@ -151,7 +151,7 @@ public class BrokerReportParserServiceImpl implements BrokerReportParserService 
                         .stream())
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Файл " + fileName +
-                        " не является отчетом брокера " + providedByBroker));
+                        " не является отчетом брокера '" + providedByBroker + "'"));
     }
 
     private Collection<BrokerReportFactory> findBrokerReportFactory(String broker) {
