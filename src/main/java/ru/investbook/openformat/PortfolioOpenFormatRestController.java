@@ -1,4 +1,3 @@
-
 /*
  * InvestBook
  * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>

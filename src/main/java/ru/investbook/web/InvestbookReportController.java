@@ -75,18 +75,11 @@ public class InvestbookReportController {
      * @return null if Thymeleaf render is not required, attach response has been already sent
      */
     @GetMapping("report")
-    public @Nullable String buildInvestbookHtmlReportByGet(@RequestParam(name = "format", defaultValue = "excel") String format,
-                                                           HttpServletResponse response,
-                                                           Model model) {
-
-        try {
-            ViewFilter filter = getViewFilter(getViewFilterModel());
-            buildReport(format, response, filter);
-            return null;  // response is already build
-        } catch (Exception e) {
-            logAndBuildStackTraceModel(response, model, e);
-            return "stack-trace";
-        }
+    public @Nullable String buildInvestbookReportWithDefaultFilter(@RequestParam(name = "format", defaultValue = "excel") String format,
+                                                                   HttpServletResponse response,
+                                                                   Model model) {
+        ViewFilterModel defaultViewFilter = getViewFilterModel();
+        return buildInvestbookReport(format, defaultViewFilter, response, model);
     }
 
     /**
@@ -94,9 +87,9 @@ public class InvestbookReportController {
      */
     @PostMapping("report")
     public @Nullable String buildInvestbookReport(@RequestParam(name = "format", defaultValue = "excel") String format,
-                                        @ModelAttribute("viewFilter") ViewFilterModel viewFilter,
-                                        HttpServletResponse response,
-                                        Model model) {
+                                                  @ModelAttribute("viewFilter") ViewFilterModel viewFilter,
+                                                  HttpServletResponse response,
+                                                  Model model) {
         try {
             ViewFilter filter = getViewFilter(viewFilter);
             buildReport(format, response, filter);
