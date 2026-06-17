@@ -27,8 +27,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 import ru.investbook.converter.EntityConverter;
 
@@ -37,8 +37,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
+import static java.util.Objects.*;
 import static org.springframework.http.HttpStatus.CREATED;
 
 public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractEntityRepositoryService<ID, Pojo, Entity> {
@@ -91,7 +90,6 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
         }
     }
 
-    @NonNull
     private ResponseEntity<Void> createConflictResponse(Pojo object) {
         ResponseEntity.BodyBuilder response = ResponseEntity.status(HttpStatus.CONFLICT);
         getLocationURI(object)
@@ -156,11 +154,18 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
         if (isNull(id)) {
             return Optional.empty();
         }
-        URI uri = new URI(UriUtils.encodePath(getLocation() + "/" + id, UTF_8));
+        URI uri = new URI(UriUtils.encodePath(getLocation(String.valueOf(id)), UTF_8));
         return Optional.of(uri);
     }
 
-    protected abstract String getLocation();
+    protected String getLocation(String id) {
+        @Nullable String path = MvcUriComponentsBuilder
+                .fromMethodName(this.getClass(), "post", new Object())
+                .pathSegment(id)
+                .build()
+                .getPath();
+        return requireNonNull(path, "Can't find resource location");
+    }
 
     /**
      * Returns new object with updated ID

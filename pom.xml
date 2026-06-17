@@ -91,7 +91,7 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>3bac204a7e</version>
+            <version>234a6196b6</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>

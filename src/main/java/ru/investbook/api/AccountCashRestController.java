@@ -128,9 +128,4 @@ public class AccountCashRestController extends AbstractRestController<Integer, A
     protected AccountCash updateId(Integer id, AccountCash object) {
         return object.toBuilder().id(id).build();
     }
-
-    @Override
-    protected String getLocation() {
-        return "/account-cash";
-    }
 }

@@ -127,9 +127,4 @@ public class IssuerRestController extends AbstractRestController<Integer, Issuer
     protected Issuer updateId(Integer id, Issuer object) {
         return object.toBuilder().id(id).build();
     }
-
-    @Override
-    protected String getLocation() {
-        return "/issuers";
-    }
 }

@@ -128,9 +128,4 @@ public class AccountRestController extends AbstractRestController<String, Accoun
     protected Account updateId(String id, Account object) {
         return object.toBuilder().id(id).build();
     }
-
-    @Override
-    protected String getLocation() {
-        return "/accounts";
-    }
 }

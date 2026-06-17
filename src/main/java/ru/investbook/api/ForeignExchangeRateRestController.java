@@ -193,12 +193,7 @@ public class ForeignExchangeRateRestController extends AbstractRestController<Fo
     @Override
     @SneakyThrows
     protected Optional<URI> getLocationURI(ForeignExchangeRate object) {
-        URI uri = new URI(getLocation() + "/currency-pairs/" + object.getCurrencyPair() + "/dates/" + object.getDate());
+        URI uri = new URI(getLocation("currency-pairs") + "/" + object.getCurrencyPair() + "/dates/" + object.getDate());
         return Optional.of(uri);
-    }
-
-    @Override
-    protected String getLocation() {
-        return "/foreign-exchange-rates";
     }
 }

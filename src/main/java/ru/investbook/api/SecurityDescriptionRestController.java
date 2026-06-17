@@ -129,9 +129,4 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     protected SecurityDescription updateId(Integer id, SecurityDescription object) {
         return object.toBuilder().security(id).build();
     }
-
-    @Override
-    protected String getLocation() {
-        return "/securities";
-    }
 }

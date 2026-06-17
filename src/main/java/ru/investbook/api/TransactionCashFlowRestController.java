@@ -185,9 +185,4 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
                 .id(id)
                 .build();
     }
-
-    @Override
-    protected String getLocation() {
-        return "/transaction-cash-flows";
-    }
 }

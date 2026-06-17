@@ -145,9 +145,4 @@ public class TransactionRestController extends AbstractRestController<Integer, T
                 .id(id)
                 .build();
     }
-
-    @Override
-    protected String getLocation() {
-        return "/transactions";
-    }
 }

@@ -139,9 +139,4 @@ public class SecurityEventCashFlowRestController extends AbstractRestController<
     protected SecurityEventCashFlow updateId(Integer id, SecurityEventCashFlow object) {
         return object.toBuilder().id(id).build();
     }
-
-    @Override
-    protected String getLocation() {
-        return "/security-event-cash-flows";
-    }
 }

@@ -130,9 +130,4 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     protected Security updateId(Integer id, Security object) {
         return object.toBuilder().id(id).build();
     }
-
-    @Override
-    protected String getLocation() {
-        return "/securities";
-    }
 }

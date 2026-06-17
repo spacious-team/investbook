@@ -129,9 +129,4 @@ public class SecurityQuoteRestController extends AbstractRestController<Integer,
     protected SecurityQuote updateId(Integer id, SecurityQuote object) {
         return object.toBuilder().id(id).build();
     }
-
-    @Override
-    protected String getLocation() {
-        return "/security-quotes";
-    }
 }

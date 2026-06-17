@@ -129,9 +129,4 @@ public class AccountPropertyRestController extends AbstractRestController<Intege
     protected AccountProperty updateId(Integer id, AccountProperty object) {
         return object.toBuilder().id(id).build();
     }
-
-    @Override
-    protected String getLocation() {
-        return "/account-properties";
-    }
 }
