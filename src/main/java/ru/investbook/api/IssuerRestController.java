@@ -49,7 +49,7 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Issuer information")
-@RequestMapping("/api/v1/issuers")
+@RequestMapping("/api/issuers")
 public class IssuerRestController extends AbstractRestController<Integer, Issuer, IssuerEntity> {
 
     public IssuerRestController(JpaRepository<IssuerEntity, Integer> repository, EntityConverter<IssuerEntity, Issuer> converter) {

@@ -57,7 +57,7 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Transaction cash flows", description = "Amounts paid and received in transactions")
-@RequestMapping("/api/v1/transaction-cash-flows")
+@RequestMapping("/api/transaction-cash-flows")
 public class TransactionCashFlowRestController extends AbstractRestController<Integer, TransactionCashFlow, TransactionCashFlowEntity> {
     private final TransactionCashFlowRepository repository;
     private final TransactionCashFlowConverter converter;

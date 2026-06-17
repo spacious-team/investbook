@@ -49,7 +49,7 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Information about instruments (securities and derivatives)", description = "Economic sector, issuer")
-@RequestMapping("/api/v1/security-descriptions")
+@RequestMapping("/api/security-descriptions")
 public class SecurityDescriptionRestController extends AbstractRestController<Integer, SecurityDescription, SecurityDescriptionEntity> {
 
     public SecurityDescriptionRestController(SecurityDescriptionRepository repository, SecurityDescriptionConverter converter) {

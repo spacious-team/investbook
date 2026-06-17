@@ -49,7 +49,7 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Account balance information")
-@RequestMapping("/api/v1/account-cash")
+@RequestMapping("/api/account-cash")
 public class AccountCashRestController extends AbstractRestController<Integer, AccountCash, AccountCashEntity> {
 
     public AccountCashRestController(JpaRepository<AccountCashEntity, Integer> repository,

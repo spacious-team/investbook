@@ -49,7 +49,7 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Securities and assets", description = "Stocks, bonds, derivatives, currency pairs and custom assets")
-@RequestMapping("/api/v1/securities")
+@RequestMapping("/api/securities")
 public class SecurityRestController extends AbstractRestController<Integer, Security, SecurityEntity> {
 
     public SecurityRestController(SecurityRepository repository, SecurityConverter converter) {

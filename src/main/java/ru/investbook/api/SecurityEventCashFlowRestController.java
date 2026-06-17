@@ -52,9 +52,9 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 @RestController
 @Tag(name = "Security-related cash flow events", description = """
         Dividends, coupons, amortizations, variation margin, fees, and taxes.
-        Payments transferred (paid out) to another account are accounted for in /api/v1/event-cash-flows
+        Payments transferred (paid out) to another account are accounted for in /api/event-cash-flows
         """)
-@RequestMapping("/api/v1/security-event-cash-flows")
+@RequestMapping("/api/security-event-cash-flows")
 public class SecurityEventCashFlowRestController extends AbstractRestController<Integer, SecurityEventCashFlow, SecurityEventCashFlowEntity> {
     private final FifoPositionsFactory positionsFactory;
 

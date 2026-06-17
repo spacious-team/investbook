@@ -50,7 +50,7 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Transactions")
-@RequestMapping("/api/v1/transactions")
+@RequestMapping("/api/transactions")
 public class TransactionRestController extends AbstractRestController<Integer, Transaction, TransactionEntity> {
     private final FifoPositionsFactory positionsFactory;
 

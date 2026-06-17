@@ -49,7 +49,7 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Accounts")
-@RequestMapping("/api/v1/accounts")
+@RequestMapping("/api/accounts")
 public class AccountRestController extends AbstractRestController<String, Account, AccountEntity> {
 
     public AccountRestController(AccountRepository repository, AccountConverter converter) {

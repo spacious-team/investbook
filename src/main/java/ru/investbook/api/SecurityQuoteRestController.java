@@ -49,7 +49,7 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Quotes and valuations", description = "Quotes for traded instruments and valuations for custom assets")
-@RequestMapping("/api/v1/security-quotes")
+@RequestMapping("/api/security-quotes")
 public class SecurityQuoteRestController extends AbstractRestController<Integer, SecurityQuote, SecurityQuoteEntity> {
 
     public SecurityQuoteRestController(JpaRepository<SecurityQuoteEntity, Integer> repository,

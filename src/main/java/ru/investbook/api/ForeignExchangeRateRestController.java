@@ -59,7 +59,7 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
 @Tag(name = "Currency exchange rates", description = "Currency exchange rate history")
-@RequestMapping("/api/v1/foreign-exchange-rates")
+@RequestMapping("/api/foreign-exchange-rates")
 public class ForeignExchangeRateRestController extends AbstractRestController<ForeignExchangeRateEntityPk, ForeignExchangeRate, ForeignExchangeRateEntity> {
     private final ForeignExchangeRateRepository foreignExchangeRateRepository;
     private final ForeignExchangeRateConverter foreignExchangeRateConverter;

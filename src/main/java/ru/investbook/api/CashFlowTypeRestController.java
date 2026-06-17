@@ -40,7 +40,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Cash flow event types")
-@RequestMapping("/api/v1/cash-flow-types")
+@RequestMapping("/api/cash-flow-types")
 public class CashFlowTypeRestController {
 
     private final CashFlowTypeRepository cashFlowTypeRepository;

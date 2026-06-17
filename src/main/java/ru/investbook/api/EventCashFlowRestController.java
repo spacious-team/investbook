@@ -51,9 +51,9 @@ import static org.springframework.http.HttpHeaders.LOCATION;
 @Tag(name = "Account cash activities", description = """
         Deposits, withdrawals, taxes, and fees, as well as dividends, coupons, and amortizations transferred (paid out)
         from another account. Dividends, coupons, and amortizations credited to the account where the securities
-        are held are accounted for in /api/v1/security-event-cash-flows
+        are held are accounted for in /api/security-event-cash-flows
         """)
-@RequestMapping("/api/v1/event-cash-flows")
+@RequestMapping("/api/event-cash-flows")
 public class EventCashFlowRestController extends AbstractRestController<Integer, EventCashFlow, EventCashFlowEntity> {
 
     public EventCashFlowRestController(JpaRepository<EventCashFlowEntity, Integer> repository,
