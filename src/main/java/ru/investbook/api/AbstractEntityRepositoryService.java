@@ -121,6 +121,7 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
     }
 
     @Override
+    @Transactional
     public CreateResult<Pojo> createIfAbsentAndGet(Pojo object) {
         return createIfAbsentAndGetInternal(object);
     }
@@ -209,6 +210,7 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
     }
 
     @Override
+    @Transactional
     public void deleteById(ID id) {
         repository.deleteById(id);
     }
