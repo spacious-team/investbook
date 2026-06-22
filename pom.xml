@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.13</version>  <!-- remove spring-boot-maven-plugin's includeOptional after update to 4.0.0+ -->
+        <version>4.1.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.investbook</groupId>
@@ -64,8 +64,8 @@
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
         <app.version>26.1</app.version>
         <java.version>26</java.version>  <!-- update lombok when java is updated -->
-        <lombok.version>edge-SNAPSHOT</lombok.version> <!-- java 26 dep, remove repositories.repository projectlombok.org after update to >= 1.18.45 -->
-        <checkerframework.version>4.0.0</checkerframework.version>
+        <lombok.version>1.18.46</lombok.version>
+        <checkerframework.version>4.2.0</checkerframework.version>
         <jpackage.version>1.7.4</jpackage.version>
         <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
         <extension.loader.path>./extensions</extension.loader.path>  <!-- overridden by installer-* profiles -->
@@ -85,17 +85,13 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
-        <repository> <!-- java 26 dep, remove repositories.repository projectlombok.org after update to lombok >= 1.18.45 -->
-            <id>projectlombok.org</id>
-            <url>https://projectlombok.org/edge-releases</url>
-        </repository>
     </repositories>
 
     <dependencies>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>234a6196b6</version>
+            <version>52f34e9bc2</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
@@ -108,7 +104,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-restclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
@@ -116,9 +116,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- Return to 'spring-boot-starter-undertow' when support is returned. Consumes less memory -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-undertow</artifactId>
+            <artifactId>spring-boot-starter-jetty</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -142,14 +143,8 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.junit.vintage</groupId>
-                    <artifactId>junit-vintage-engine</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -162,6 +157,10 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jackson</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
@@ -172,8 +171,8 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -182,7 +181,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.8.17</version>
+            <version>3.0.3</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
@@ -235,7 +234,7 @@
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>4.4.2</version>
+            <version>4.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -258,7 +257,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.5</version> <!-- JUnit 5 requirement -->
+                    <version>3.5.6</version> <!-- JUnit 5 requirement -->
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -343,11 +342,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <includeOptional>false</includeOptional>
                     <!-- use org.springframework.boot.loader.PropertiesLauncher instead of JarLauncher
                     (https://docs.spring.io/spring-boot/docs/current/maven-plugin/usage.html).
                     PropertiesLauncher reads settings from resources/loader.properties
-                    (https://docs.spring.io/spring-boot/docs/current/reference/html/executable-jar.html#executable-jar-property-launcher-features) -->
+                    (https://docs.spring.io/spring-boot/specification/executable-jar/property-launcher.html) -->
                     <layout>ZIP</layout>
                 </configuration>
             </plugin>
@@ -369,7 +367,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.14</version>
+                <version>0.8.15</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>

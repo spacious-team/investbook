@@ -30,6 +30,8 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 
+import static java.util.Objects.requireNonNull;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -42,7 +44,7 @@ public class SqlDataExporter {
 
     @PreDestroy
     public void preDestroy() {
-        String version = buildProperties.getVersion();
+        String version = requireNonNull(buildProperties.getVersion(), "Investbook version not defined");
         if (version.startsWith(INVESTBOOK_VERSION_PREFIX_FOR_EXPORT)) {
             Path file = investbookProperties.getDataPath()
                     .resolve(EXPORT_FILE_NAME)
