@@ -402,7 +402,7 @@
                 <!-- Классы [.]Q[^.]+Entity(Pk)? сгенерированы querydsl-apt -->
                 <!-- Escaping '\' doesn't work: use '[.]' instead of '\.' -->
                 <checkerframework.skipDefs>
-                    -AskipDefs=(Test$|V2022_1_0_1|Entity(Pk)?_$|[.]Q[^.]+Entity(Pk)?$|^generated[.]ValCurs$)
+                    -AskipDefs=(Test$|V2022_1_0_1|Entity(Pk)?_$|[.]Q[^.]+Entity(Pk)?$|^generated[.]ValCurs|^org[.]junit[.].*$)
                 </checkerframework.skipDefs>
             </properties>
         </profile>
