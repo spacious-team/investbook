@@ -84,16 +84,23 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
     }
 
     /**
-     * @implNote Method performance is the same as {@link #createIfAbsent(Object)} for H2 2.2.224 and MariaDB 11.2
+     * @implNote Performance comparison:
+     * <p> - If an entity with the same key already exists, {@link #createIfAbsent(Object)} is faster
+     * than this method.
+     * <p> - If the entity is new, this method is faster than {@link #createIfAbsent(Object)}.
+     * <p>
+     * The performance difference is negligible for H2 2.2.224 and MariaDB 11.2 in Spring Boot 3
+     * and for H2 2.4.240 in Spring Boot 4.1.0.
+     * <p>
+     * See test class {@code AbstractEntityRepositoryServiceTest} for more details.
      */
     @Override
-    @SuppressWarnings("deprecation")
     public boolean insert(Pojo object) {
         if (entityManager instanceof Session hibernateSpecificSession) {
             try {
                 Entity entity = converter.toEntity(object);
-                // Hibernate save() method does sql INSERT
-                transactionTemplateRequiresNew.executeWithoutResult(_ -> hibernateSpecificSession.save(entity));
+                // Hibernate persist() method does sql INSERT
+                transactionTemplateRequiresNew.executeWithoutResult(_ -> hibernateSpecificSession.persist(entity));
                 return true;
             } catch (Exception e) {
                 if (isUniqIndexViolationException(e)) {
