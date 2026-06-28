@@ -66,7 +66,7 @@
         <java.version>26</java.version>  <!-- update lombok when java is updated -->
         <lombok.version>1.18.46</lombok.version>
         <checkerframework.version>4.2.0</checkerframework.version>
-        <jpackage.version>1.7.4</jpackage.version>
+        <jpackage.version>1.8.0</jpackage.version>
         <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
         <extension.loader.path>./extensions</extension.loader.path>  <!-- overridden by installer-* profiles -->
         <checkerframework.skipDefs>-AskipDefs=.*</checkerframework.skipDefs>  <!-- overridden by 'nullcheck' profile -->
@@ -91,12 +91,12 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>52f34e9bc2</version>
+            <version>2026.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-spring-boot-starter</artifactId>
-            <version>2025.2</version>  <!-- if changed, update the version of poi-scratchpad -->
+            <version>2026.1</version>  <!-- if changed, update the version of poi-scratchpad -->
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -196,7 +196,7 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.22.1</version>
+            <version>1.22.2</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -213,7 +213,7 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-scratchpad</artifactId>
-            <version>5.4.1</version>  <!-- use same version as Apache POI from table-wrapper-spring-boot-starter -->
+            <version>5.5.1</version>  <!-- use same version as Apache POI from table-wrapper-spring-boot-starter -->
         </dependency>
         <dependency>
             <groupId>org.checkerframework</groupId>
@@ -576,6 +576,7 @@
                                     <arguments>
                                         <argument>--spring.config.additional-location=file:./app/</argument>
                                     </arguments>
+                                    <destination/>
                                 </configuration>
                             </execution>
                         </executions>
@@ -619,6 +620,7 @@
                                             --spring.config.additional-location=file:/opt/investbook/lib/app/
                                         </argument>
                                     </arguments>
+                                    <destination/>
                                 </configuration>
                             </execution>
                             <execution>
@@ -636,6 +638,7 @@
                                             --spring.config.additional-location=file:/opt/investbook/lib/app/
                                         </argument>
                                     </arguments>
+                                    <destination/>
                                 </configuration>
                             </execution>
                         </executions>
@@ -677,6 +680,7 @@
                                             --spring.config.additional-location=file:/Applications/Investbook.app/Contents/app/
                                         </argument>
                                     </arguments>
+                                    <destination/>
                                 </configuration>
                             </execution>
                         </executions>
@@ -711,12 +715,12 @@
                                     <BPE_DEFAULT_LANG>C.UTF-8</BPE_DEFAULT_LANG>
                                     <BPE_DEFAULT_SPRING_PROFILES_ACTIVE>prod</BPE_DEFAULT_SPRING_PROFILES_ACTIVE>
                                 </env>
-                                <!-- Replace with 'paketobuildpacks/builder-jammy-java-tiny' if resolved
+                                <!-- Doesn't use 'paketobuildpacks/builder-jammy-java-tiny'
                                      https://github.com/paketo-buildpacks/jammy-tiny-stack/issues/202 -->
                                 <!-- Defines available bellsoft-liberica java versions from
                                      https://github.com/paketo-buildpacks/builder-jammy-base/releases
                                      JRE with ${java.version} will be selected automatically when available -->
-                                <builder>paketobuildpacks/builder-jammy-base:0.4.563</builder>
+                                <builder>paketobuildpacks/builder-jammy-base:0.4.593</builder>
                             </image>
                             <docker>
                                 <publishRegistry>
