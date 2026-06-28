@@ -28,7 +28,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 import ru.investbook.converter.EntityConverter;
 
@@ -39,6 +40,7 @@ import java.util.Optional;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.*;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.util.StringUtils.hasLength;
 
 public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractEntityRepositoryService<ID, Pojo, Entity> {
 
@@ -159,12 +161,28 @@ public abstract class AbstractRestController<ID, Pojo, Entity> extends AbstractE
     }
 
     protected String getLocation(String id) {
-        @Nullable String path = MvcUriComponentsBuilder
-                .fromMethodName(this.getClass(), "post", new Object())
+        String basePath = getBasePathFromRequestMappingClassAnnotation();
+        @Nullable String path = UriComponentsBuilder.fromPath(basePath)
                 .pathSegment(id)
                 .build()
                 .getPath();
         return requireNonNull(path, "Can't find resource location");
+    }
+
+    private String getBasePathFromRequestMappingClassAnnotation() {
+        @Nullable RequestMapping annotation = getClass().getAnnotation(RequestMapping.class);
+        if (annotation != null) {
+            String[] paths = annotation.value();
+            if (paths.length > 0 && hasLength(paths[0])) {
+                return paths[0];
+            }
+            // Проверяем также поле path, если value пустое
+            paths = annotation.path();
+            if (paths.length > 0 && hasLength(paths[0])) {
+                return paths[0];
+            }
+        }
+        throw new IllegalStateException("No @RequestMapping annotation found on " + getClass());
     }
 
     /**
