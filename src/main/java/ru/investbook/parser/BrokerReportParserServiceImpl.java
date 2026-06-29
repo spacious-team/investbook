@@ -35,13 +35,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
 import static org.springframework.util.StringUtils.hasLength;
 
 @Service
@@ -58,6 +59,7 @@ public class BrokerReportParserServiceImpl implements BrokerReportParserService 
     @SneakyThrows
     @Override
     public void parseReport(InputStream inputStream, String fileName, @Nullable String broker) {
+        fileName = requireNonNull(Paths.get(fileName).getFileName()).toString();
         ByteArrayInputStream is = castToByteArrayInputStream(inputStream);
         long t0 = System.nanoTime();
         is.mark(Integer.MAX_VALUE);
@@ -106,7 +108,7 @@ public class BrokerReportParserServiceImpl implements BrokerReportParserService 
      */
     @SneakyThrows
     private Path saveToBackup(InputStream inputStream, String fileName, String brokerName) {
-        Objects.requireNonNull(brokerName, "Наименование брокера, предоставившего отчет, не определено");
+        requireNonNull(brokerName, "Наименование брокера, предоставившего отчет, не определено");
         Path backupPath = investbookProperties.getReportBackupPath().resolve(brokerName);
         Files.createDirectories(backupPath);
         Path path = backupPath.resolve(fileName);
