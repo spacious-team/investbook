@@ -56,6 +56,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import static java.util.Objects.requireNonNull;
 import static org.spacious_team.broker.pojo.CashFlowType.DERIVATIVE_PRICE;
 import static org.spacious_team.broker.pojo.CashFlowType.PRICE;
 import static org.spacious_team.broker.pojo.SecurityType.CURRENCY_PAIR;
@@ -208,11 +209,11 @@ public class PortfolioOpenFormatBuilder {
     private Optional<SecurityEventCashFlowEntity> getPaymentTax(SecurityEventCashFlowEntity cashFlow) {
         if (cashFlow.getCashFlowType().getId() != CashFlowType.TAX.getId()) {
             return securityEventCashFlowRepository.findByAccountIdAndSecurityIdAndCashFlowTypeIdAndTimestampAndCount(
-                            cashFlow.getAccount().getId(),
-                            cashFlow.getSecurity().getId(),
-                            CashFlowType.TAX.getId(),
-                            cashFlow.getTimestamp(),
-                            cashFlow.getCount());
+                    cashFlow.getAccount().getId(),
+                    cashFlow.getSecurity().getId(),
+                    CashFlowType.TAX.getId(),
+                    cashFlow.getTimestamp(),
+                    cashFlow.getCount());
         }
         return Optional.empty();
     }
@@ -225,8 +226,9 @@ public class PortfolioOpenFormatBuilder {
     }
 
     private VndInvestbookPof getVndInvestbook() {
+        String version = requireNonNull(buildProperties.getVersion(), "Investbook version not defined");
         return VndInvestbookPof.builder()
-                .version(buildProperties.getVersion())
+                .version(version)
                 .accountCash(accountCashRestController.get(Pageable.unpaged()).getContent())
                 .accountProperties(accountPropertyRestController.get(Pageable.unpaged()).getContent())
                 .securityDescriptions(securityDescriptionRestController.get(Pageable.unpaged()).getContent())

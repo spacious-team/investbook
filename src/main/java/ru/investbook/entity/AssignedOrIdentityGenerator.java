@@ -19,24 +19,51 @@
 package ru.investbook.entity;
 
 import jakarta.persistence.Id;
-import org.hibernate.id.Assigned;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.generator.GeneratorCreationContext;
 import org.hibernate.id.IdentityGenerator;
+
+import java.util.Objects;
+import java.util.Properties;
 
 /**
  * If Entity ID is not null, then this ID is stored to DB.
  * If Entity ID is null, then RDBMS should generate ID itself.
  * <p>
- * In other words: this generator behaves like {@link org.hibernate.id.Assigned} generator if entity's field,
+ * In other words: this generator behaves like {@link org.hibernate.generator.Assigned} generator if entity's field,
  * marked by {@link Id} annotation, is not null, or like {@link org.hibernate.id.IdentityGenerator} if this field is null.
  * <p>
  * Applicable only for INSERT operations.
  */
-public class AssignedOrIdentityGenerator extends BeforeOrOnExecutionGenerator {
+public class AssignedOrIdentityGenerator extends IdentityGenerator {
 
-    @SuppressWarnings("unused")
-    public AssignedOrIdentityGenerator() {
-        // IdentityGenerator can be replaced by SelectGenerator
-        // if RDBMS doesn't support AUTO_INCREMENT/IDENTITY fields
-        super(new Assigned(), new IdentityGenerator());
+    /**
+     * The configuration parameter holding the entity name
+     */
+    private static final String ENTITY_NAME = "entity_name";
+    private @Nullable String entityName = null;
+
+    @Override
+    public boolean allowAssignedIdentifiers() {
+        return true;  // разрешаем сохранение идентификаторов, установленных в Entity объектах
+    }
+
+    @Override
+    public boolean generatedOnExecution(Object entity, SharedSessionContractImplementor session) {
+        // указываем генерировать идентификатор на стороне БД, если отсутствует в Entity объекте
+        @Nullable Object id = getEntityIdentifier(entity, session);
+        return Objects.isNull(id);
+    }
+
+    private @Nullable Object getEntityIdentifier(Object entity, SharedSessionContractImplementor session) {
+        return session.getEntityPersister(entityName, entity)
+                .getIdentifier(entity, session);
+    }
+
+    @Override
+    public void configure(GeneratorCreationContext creationContext, Properties parameters) {
+        super.configure(creationContext, parameters);
+        entityName = parameters.getProperty(ENTITY_NAME);
     }
 }
