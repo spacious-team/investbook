@@ -42,7 +42,7 @@ sudo usermod --append --groups docker $(whoami)
 mkdir ~/investbook
 ```
 #### Запуск Investbook
-1. Если используется Windows, запустите Powershell и запустите
+1. Если используется Windows, запустите PowerShell и запустите
    ```shell
    docker run --rm -d -p 2030:2030 -v /c/users/<имя-windows-пользователя>/investbook:/home/cnb/investbook spaciousteam/investbook
    ```
