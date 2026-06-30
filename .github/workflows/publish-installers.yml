@@ -100,7 +100,7 @@ jobs:
 
     # macos-13 is run on Intel's CPU
     # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#standard-github-hosted-runners-for-public-repositories
-    runs-on: macos-13
+    runs-on: macos-15-intel
 
     steps:
       - uses: actions/checkout@v7
