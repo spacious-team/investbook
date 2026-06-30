@@ -59,9 +59,9 @@ public class PortfolioOpenFormatPersister {
 
         object.getAccounts()
                 .stream()
-                .map(AccountPof::toPortfolio)
+                .map(AccountPof::toAccount)
                 .flatMap(Optional::stream)
-                .forEach(api::addPortfolio);
+                .forEach(api::addAccount);
 
         Map<Integer, Integer> assetToSecurityId = object.getAssets()
                 .parallelStream()
@@ -69,7 +69,7 @@ public class PortfolioOpenFormatPersister {
                 .flatMap(Optional::stream)
                 .collect(toMap(SecurityIdentifierMap::assetId, SecurityIdentifierMap::securityId));
 
-        Map<Integer, String> accountToPortfolioId = object.getAccounts()
+        Map<Integer, String> accountToAccNumber = object.getAccounts()
                 .stream()
                 .collect(toMap(
                         AccountPof::getId,
@@ -80,38 +80,38 @@ public class PortfolioOpenFormatPersister {
 
         tasks.add(() -> getTradesWithUniqTradeId(object.getTrades(), assetToSecurityId)
                 .parallelStream()
-                .map(t -> t.toTransaction(accountToPortfolioId, assetToSecurityId, assetTypes))
+                .map(t -> t.toTransaction(accountToAccNumber, assetToSecurityId, assetTypes))
                 .flatMap(Optional::stream)
                 .forEach(api::addTransaction));
 
         tasks.add(() -> getTransfersWithUniqTransferId(object.getTransfer(), assetToSecurityId)
                 .parallelStream()
-                .map(t -> t.toTransaction(accountToPortfolioId, assetToSecurityId))
+                .map(t -> t.toTransaction(accountToAccNumber, assetToSecurityId))
                 .flatMap(Optional::stream)
                 .forEach(api::addTransaction));
 
         tasks.add(() -> object.getTransfer()
                 .parallelStream()
-                .map(t -> t.getSecurityEventCashFlow(accountToPortfolioId, assetToSecurityId))
+                .map(t -> t.getSecurityEventCashFlow(accountToAccNumber, assetToSecurityId))
                 .flatMap(Collection::stream)
                 .forEach(api::addSecurityEventCashFlow));
 
         tasks.add(() -> object.getPayments()
                 .parallelStream()
-                .map(t -> t.getSecurityEventCashFlow(accountToPortfolioId, assetToSecurityId, assetTypes))
+                .map(t -> t.getSecurityEventCashFlow(accountToAccNumber, assetToSecurityId, assetTypes))
                 .flatMap(Collection::stream)
                 .forEach(api::addSecurityEventCashFlow));
 
         tasks.add(() -> object.getCashFlows()
                 .parallelStream()
-                .map(c -> c.toEventCashFlow(accountToPortfolioId))
+                .map(c -> c.toEventCashFlow(accountToAccNumber))
                 .flatMap(Optional::stream)
                 .forEach(api::addEventCashFlow));
 
         @Nullable VndInvestbookPof vndInvestbook = object.getVndInvestbook();
         if (vndInvestbook != null) {
-            tasks.add(() -> vndInvestbook.getPortfolioCash().forEach(api::addPortfolioCash));
-            tasks.add(() -> vndInvestbook.getPortfolioProperties().forEach(api::addPortfolioProperty));
+            tasks.add(() -> vndInvestbook.getAccountCash().forEach(api::addAccountCash));
+            tasks.add(() -> vndInvestbook.getAccountProperties().forEach(api::addAccountProperty));
             tasks.add(() -> vndInvestbook.getSecurityDescriptions()
                     .forEach(security -> persistSecurityDescription(security, assetToSecurityId)));
             tasks.add(() -> vndInvestbook.getSecurityQuotes()
@@ -119,7 +119,7 @@ public class PortfolioOpenFormatPersister {
         }
 
         if (!Objects.equals(object.getGeneratedBy(), GENERATED_BY_INVESTBOOK)) {
-            tasks.add(() -> persistTotalAssetsAndPortfolioCash(object, accountToPortfolioId));
+            tasks.add(() -> persistTotalAssetsAndAccountCash(object, accountToAccNumber));
         }
 
         runTasks(tasks);
@@ -215,20 +215,20 @@ public class PortfolioOpenFormatPersister {
         return Objects.requireNonNull(assetToSecurityId.get(asset));
     }
 
-    private void persistTotalAssetsAndPortfolioCash(PortfolioOpenFormatV1_1_0 object,
-                                                    Map<Integer, String> accountToPortfolioId) {
+    private void persistTotalAssetsAndAccountCash(PortfolioOpenFormatV1_1_0 object,
+                                                  Map<Integer, String> accountToAccountId) {
         try {
             Instant end = Instant.ofEpochSecond(object.getEnd());
             object.getCashBalances()
                     .stream()
-                    .map(cash -> cash.toPortfolioCash(accountToPortfolioId, end))
+                    .map(cash -> cash.toAccountCash(accountToAccountId, end))
                     .flatMap(Collection::stream)
-                    .forEach(api::addPortfolioCash);
+                    .forEach(api::addAccountCash);
             object.getAccounts()
                     .stream()
                     .map(a -> a.toTotalAssets(end))
                     .flatMap(Optional::stream)
-                    .forEach(api::addPortfolioProperty);
+                    .forEach(api::addAccountProperty);
         } catch (Exception e) {
             log.error("Не могу сохранить оценку активов или остаток денежных средств", e);
         }

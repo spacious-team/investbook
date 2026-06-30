@@ -59,10 +59,10 @@ public class InvestmentProportionService {
     /**
      * Sector name -> value in rub
      */
-    public Map<String, Float> getSectorsProportion(Set<String> portfolios) {
+    public Map<String, Float> getSectorsProportion(Set<String> accounts) {
         try {
             long t0 = nanoTime();
-            FifoPositionsFilter filter = FifoPositionsFilter.of(portfolios);
+            FifoPositionsFilter filter = FifoPositionsFilter.of(accounts);
             Map<String, Float> result = getSecurityInvestmentStream(filter)
                     .collect(groupingBy(this::getEconomicSector,
                             mapping(SecurityInvestment::getInvestment, reducing(0f, Float::sum))));
@@ -78,10 +78,10 @@ public class InvestmentProportionService {
     /**
      * Security name -> value in rub
      */
-    public Map<String, Float> getSecuritiesProportion(Set<String> portfolios) {
+    public Map<String, Float> getSecuritiesProportion(Set<String> accounts) {
         try {
             long t0 = nanoTime();
-            FifoPositionsFilter filter = FifoPositionsFilter.of(portfolios);
+            FifoPositionsFilter filter = FifoPositionsFilter.of(accounts);
             Map<String, Float> result = getSecurityInvestmentStream(filter)
                     .collect(toMap(this::getSecurityDescription, SecurityInvestment::getInvestment));
             log.info("Рассчитаны объемы инвестиций в бумаги за {}", Duration.ofNanos(nanoTime() - t0));

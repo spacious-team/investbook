@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.3</version>
+        <version>4.1.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.investbook</groupId>
@@ -62,13 +62,14 @@
 
     <properties>
         <!-- Valid version is (0-255).(0-255).(0-65535) -->
-        <app.version>25.2</app.version>
-        <java.version>24</java.version>
-        <lombok.version>1.18.38</lombok.version>
-        <checkerframework.version>3.49.5</checkerframework.version>
-        <jpackage.version>1.6.6</jpackage.version>
-        <checkerframework.skipDefs>-AskipDefs=.*</checkerframework.skipDefs>  <!-- overridden by 'nullcheck' profile -->
+        <app.version>26.1</app.version>
+        <java.version>26</java.version>  <!-- update lombok when java is updated -->
+        <lombok.version>1.18.46</lombok.version>
+        <checkerframework.version>4.2.0</checkerframework.version>
+        <jpackage.version>1.8.0</jpackage.version>
+        <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
         <extension.loader.path>./extensions</extension.loader.path>  <!-- overridden by installer-* profiles -->
+        <checkerframework.skipDefs>-AskipDefs=.*</checkerframework.skipDefs>  <!-- overridden by 'nullcheck' profile -->
     </properties>
 
     <repositories>
@@ -90,12 +91,12 @@
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>broker-report-parser-api</artifactId>
-            <version>2025.1</version>
+            <version>2026.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.spacious-team</groupId>
             <artifactId>table-wrapper-spring-boot-starter</artifactId>
-            <version>2025.2</version>  <!-- if changed, update the version of poi-scratchpad -->
+            <version>2026.1</version>  <!-- if changed, update the version of poi-scratchpad -->
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -103,7 +104,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-restclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
@@ -111,9 +116,14 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- Return to 'spring-boot-starter-undertow' when support is returned. Consumes less memory -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-undertow</artifactId>
+            <artifactId>spring-boot-starter-jetty</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -133,14 +143,8 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.junit.vintage</groupId>
-                    <artifactId>junit-vintage-engine</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -153,6 +157,10 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jackson</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
@@ -163,8 +171,8 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -173,12 +181,12 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.8.8</version>
+            <version>3.0.3</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
-            <version>2.0.1</version>
+            <version>2.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.decampo</groupId>
@@ -188,14 +196,13 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.20.1</version>
+            <version>1.22.2</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
-            <scope>provided</scope>
-            <optional>true</optional>
+            <!-- scope compile and optional false is required for @SneakyThrows -->
         </dependency>
         <dependency>
             <groupId>com.github.albfernandez</groupId>
@@ -205,7 +212,7 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-scratchpad</artifactId>
-            <version>5.4.1</version>  <!-- use same version as Apache POI from table-wrapper-spring-boot-starter -->
+            <version>5.5.1</version>  <!-- use same version as Apache POI from table-wrapper-spring-boot-starter -->
         </dependency>
         <dependency>
             <groupId>org.checkerframework</groupId>
@@ -226,8 +233,21 @@
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>4.0.4</version>
+            <version>4.5</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-jpa</artifactId>
+            <version>${querydsl.version}</version>
+            <classifier>jakarta</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-apt</artifactId>
+            <version>${querydsl.version}</version>
+            <classifier>jakarta</classifier>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -236,7 +256,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.3</version> <!-- JUnit 5 requirement -->
+                    <version>3.5.6</version> <!-- JUnit 5 requirement -->
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -244,6 +264,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.15.0</version>
                 <configuration>
                     <fork>true</fork> <!-- Must fork or else JVM arguments are ignored -->
                     <showDeprecation>true</showDeprecation>
@@ -260,6 +281,17 @@
                             <version>${hibernate.version}</version>
                         </path>
                         <path>
+                            <groupId>com.querydsl</groupId>
+                            <artifactId>querydsl-apt</artifactId>
+                            <version>${querydsl.version}</version>
+                            <classifier>jakarta</classifier>
+                        </path>
+                        <path>
+                            <groupId>jakarta.persistence</groupId>
+                            <artifactId>jakarta.persistence-api</artifactId>
+                            <version>${jakarta-persistence.version}</version>
+                        </path>
+                        <path>
                             <groupId>org.checkerframework</groupId>
                             <artifactId>checker</artifactId>
                             <version>${checkerframework.version}</version>
@@ -271,6 +303,9 @@
                         </annotationProcessor>
                         <annotationProcessor>
                             org.hibernate.processor.HibernateProcessor
+                        </annotationProcessor>
+                        <annotationProcessor>
+                            com.querydsl.apt.jpa.JPAAnnotationProcessor
                         </annotationProcessor>
                         <annotationProcessor>
                             org.checkerframework.checker.nullness.NullnessChecker
@@ -287,6 +322,7 @@
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
                         <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
@@ -305,16 +341,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
                     <!-- use org.springframework.boot.loader.PropertiesLauncher instead of JarLauncher
                     (https://docs.spring.io/spring-boot/docs/current/maven-plugin/usage.html).
                     PropertiesLauncher reads settings from resources/loader.properties
-                    (https://docs.spring.io/spring-boot/docs/current/reference/html/executable-jar.html#executable-jar-property-launcher-features) -->
+                    (https://docs.spring.io/spring-boot/specification/executable-jar/property-launcher.html) -->
                     <layout>ZIP</layout>
                 </configuration>
             </plugin>
@@ -323,7 +353,7 @@
                      Maven -> Plugins -> jaxb2 -> jaxb2:xjc -> mouse right click -> Execute Before Build -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>4.1.0</version>
                 <executions>
                     <execution>
                         <id>xsd-to-java</id>
@@ -336,7 +366,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.13</version>
+                <version>0.8.15</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -365,10 +395,13 @@
                 </property>
             </activation>
             <properties>
-                <!-- V2022_1_0_1.class нельзя изменять, чтобы не менялась чек сумма миграции -->
+                <!-- Классы, которые исключаем из проверки (regex для fully-qualified java class names) -->
+                <!-- V2022_1_0_1 нельзя изменять, чтобы не менялась чек сумма миграции -->
                 <!-- Классы Entity(Pk)?_ сгенерированы hibernate-jpamodelgen -->
+                <!-- Классы [.]Q[^.]+Entity(Pk)? сгенерированы querydsl-apt -->
+                <!-- Escaping '\' doesn't work: use '[.]' instead of '\.' -->
                 <checkerframework.skipDefs>
-                    -AskipDefs=(Test$|V2022_1_0_1|Entity(Pk)?_$|generated.ValCurs)
+                    -AskipDefs=(Test$|V2022_1_0_1|Entity(Pk)?_$|[.]Q[^.]+Entity(Pk)?$|^generated[.]ValCurs|^org[.]junit[.].*$)
                 </checkerframework.skipDefs>
             </properties>
         </profile>
@@ -420,6 +453,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
+                        <version>${maven-assembly-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>zip</id>
@@ -442,6 +476,7 @@
         </profile>
         <profile>
             <id>installer-prepare</id>
+            <!-- Is required for installer-widows, installer-linux, installer-mac profiles -->
             <activation>
                 <property>
                     <name>!no-installer</name>
@@ -452,6 +487,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
+                        <version>${maven-assembly-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>copy installer files</id>
@@ -539,6 +575,7 @@
                                     <arguments>
                                         <argument>--spring.config.additional-location=file:./app/</argument>
                                     </arguments>
+                                    <destination/>
                                 </configuration>
                             </execution>
                         </executions>
@@ -582,6 +619,7 @@
                                             --spring.config.additional-location=file:/opt/investbook/lib/app/
                                         </argument>
                                     </arguments>
+                                    <destination/>
                                 </configuration>
                             </execution>
                             <execution>
@@ -599,6 +637,7 @@
                                             --spring.config.additional-location=file:/opt/investbook/lib/app/
                                         </argument>
                                     </arguments>
+                                    <destination/>
                                 </configuration>
                             </execution>
                         </executions>
@@ -640,6 +679,7 @@
                                             --spring.config.additional-location=file:/Applications/Investbook.app/Contents/app/
                                         </argument>
                                     </arguments>
+                                    <destination/>
                                 </configuration>
                             </execution>
                         </executions>
@@ -665,6 +705,8 @@
                                 <tags>
                                     <!--suppress UnresolvedMavenProperty -->
                                     <tag>spaciousteam/investbook:${project.version}${env.DOCKER_IMAGE_LATEST_TAG_SUFFIX}</tag>
+                                    <!--suppress UnresolvedMavenProperty -->
+                                    <tag>spaciousteam/investbook:${env.DOCKER_IMAGE_COMMIT_ID_TAG}</tag>
                                 </tags>
                                 <publish>true</publish>
                                 <env>
@@ -672,12 +714,12 @@
                                     <BPE_DEFAULT_LANG>C.UTF-8</BPE_DEFAULT_LANG>
                                     <BPE_DEFAULT_SPRING_PROFILES_ACTIVE>prod</BPE_DEFAULT_SPRING_PROFILES_ACTIVE>
                                 </env>
-                                <!-- Replace with 'paketobuildpacks/builder-jammy-java-tiny' if resolved
+                                <!-- Doesn't use 'paketobuildpacks/builder-jammy-java-tiny'
                                      https://github.com/paketo-buildpacks/jammy-tiny-stack/issues/202 -->
                                 <!-- Defines available bellsoft-liberica java versions from
                                      https://github.com/paketo-buildpacks/builder-jammy-base/releases
                                      JRE with ${java.version} will be selected automatically when available -->
-                                <builder>paketobuildpacks/builder-jammy-base:0.4.418</builder>
+                                <builder>paketobuildpacks/builder-jammy-base:0.4.593</builder>
                             </image>
                             <docker>
                                 <publishRegistry>

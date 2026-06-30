@@ -147,7 +147,7 @@ public class TradePof {
                 .id(transaction.getId())
                 .tradeId(transaction.getTradeId())
                 .settlement(transaction.getTimestamp().getEpochSecond())
-                .account(AccountPof.getAccountId(transaction.getPortfolio()))
+                .account(AccountPof.getAccountId(transaction.getAccount()))
                 .asset(transaction.getSecurity().getId())
                 .count(BigDecimal.valueOf(count));
         transactionCashFlows.stream()
@@ -179,7 +179,7 @@ public class TradePof {
         Assert.isTrue(redemption.getCashFlowType().getId() == REDEMPTION.getId(),
                 () -> "ожидается событие погашения облигации: " + redemption);
         long settlement = redemption.getTimestamp().getEpochSecond();
-        int account = AccountPof.getAccountId(redemption.getPortfolio().getId());
+        int account = AccountPof.getAccountId(redemption.getAccount().getId());
         int count = -Math.abs(redemption.getCount());
         return TradePof.builder()
                 .id(id)
@@ -203,7 +203,7 @@ public class TradePof {
         return e.getValue().divide(BigDecimal.valueOf(Math.abs(e.getCount())), 6, HALF_UP);
     }
 
-    Optional<AbstractTransaction> toTransaction(Map<Integer, String> accountToPortfolioId,
+    Optional<AbstractTransaction> toTransaction(Map<Integer, String> accountToAccountId,
                                                 Map<Integer, Integer> assetToSecurityId,
                                                 Map<Integer, SecurityType> assetTypes) {
         try {
@@ -226,7 +226,7 @@ public class TradePof {
             long ts = requireNonNull(getSettlementOrTimestamp());
             return Optional.of(builder
                     .tradeId(tradeId)
-                    .portfolio(requireNonNull(accountToPortfolioId.get(account)))
+                    .account(requireNonNull(accountToAccountId.get(account)))
                     .security(getSecurityId(assetToSecurityId))
                     .count(count.intValueExact())
                     .timestamp(Instant.ofEpochSecond(ts))

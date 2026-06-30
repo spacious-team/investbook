@@ -106,7 +106,7 @@ public class PaymentPof {
     static PaymentPof of(SecurityEventCashFlowEntity cashFlow, Optional<SecurityEventCashFlowEntity> tax) {
         return PaymentPof.builder()
                 .id(cashFlow.getId())
-                .account(AccountPof.getAccountId(cashFlow.getPortfolio().getId()))
+                .account(AccountPof.getAccountId(cashFlow.getAccount().getId()))
                 .asset(cashFlow.getSecurity().getId())
                 .type(PaymentTypePof.valueOf(CashFlowType.valueOf(cashFlow.getCashFlowType().getId())))
                 .count(cashFlow.getCount() == null ? BigDecimal.ZERO : BigDecimal.valueOf(cashFlow.getCount())) // опциональное для деривативов
@@ -120,7 +120,7 @@ public class PaymentPof {
                 .build();
     }
 
-    Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId,
+    Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToAccountId,
                                                                Map<Integer, Integer> assetToSecurityId,
                                                                Map<Integer, SecurityType> assetTypes) {
         try {
@@ -130,7 +130,7 @@ public class PaymentPof {
                 eventType = CashFlowType.COUPON; // izi-invest.ru fix: не различает дивиденды и купоны (type = other)
             }
             SecurityEventCashFlow cashFlow = SecurityEventCashFlow.builder()
-                    .portfolio(Objects.requireNonNull(accountToPortfolioId.get(account)))
+                    .account(Objects.requireNonNull(accountToAccountId.get(account)))
                     .security(getSecurityId(assetToSecurityId))
                     .eventType(eventType)
                     .count(count.intValueExact())

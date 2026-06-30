@@ -83,12 +83,12 @@ public class InvestbookTransactionTable extends AbstractSecurityAwareInvestbookT
                     .value(value)
                     .valueCurrency(row.getStringCellValue(CURRENCY));
         };
-        String portfolio = row.getStringCellValue(PORTFOLIO);
+        String account = row.getStringCellValue(ACCOUNT);
         Instant timestamp = parseEventInstant(row);
         int securityId = getSecurityIdForTransaction(securityTickerNameOrIsin, securityType);
         return builder
-                .tradeId(getTradeId(portfolio, securityId, timestamp))
-                .portfolio(portfolio)
+                .tradeId(getTradeId(account, securityId, timestamp))
+                .account(account)
                 .timestamp(timestamp)
                 .security(securityId)
                 .count(count * (isBuy ? 1 : -1))

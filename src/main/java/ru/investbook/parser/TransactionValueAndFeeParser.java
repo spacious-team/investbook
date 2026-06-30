@@ -170,11 +170,11 @@ public class TransactionValueAndFeeParser {
             log.warn("""
                     Сделка {} счета {} имеет комиссии в разных валютах, обменный курс не известен на дату сделки, \
                     поэтому часть комиссии ({} {}), совпадающей с валютой сделки ({}), включена в сумму сделки ({} {})
-                    """, arg.tradeId, arg.portfolio, fee, feeCurrency, valueCurrency, value, valueCurrency);
+                    """, arg.tradeId, arg.account, fee, feeCurrency, valueCurrency, value, valueCurrency);
             return value.subtract(fee);
         }
         throw new IllegalArgumentException("Не удалось сохранить комиссию сделки, валюта комиссии. Сделка " +
-                arg.tradeId + " счета " + arg.portfolio + " имеет комиссии в разных валютах, " +
+                arg.tradeId + " счета " + arg.account + " имеет комиссии в разных валютах, " +
                 "обменный курс не известен на дату сделки.");
     }
 
@@ -189,7 +189,7 @@ public class TransactionValueAndFeeParser {
     @SuppressWarnings("type.anno.before.modifier")
     public static class Arguments {
         TableRow row;
-        String portfolio;
+        String account;
         String tradeId;
         Instant transactionInstant;
         ExchangeRateProvider exchangeRateProvider;

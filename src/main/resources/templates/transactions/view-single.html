@@ -31,7 +31,7 @@
     <span th:case="BUY">Покупка</span>
     <span th:case="CELL">Продажа</span>
 </h2>
-<p th:text="'Счет: ' +  ${transaction.portfolio}"/>
+<p th:text="'Счет: ' +  ${transaction.account}"/>
 <p th:text="'Дата исполнения: ' + ${transaction.date}"/>
 <p th:text="'Номер сделки: ' +  ${transaction.tradeId}" th:if="${transaction.tradeId != null && transaction.tradeId != ''}"/>
 <p th:text="'Инструмент: ' +  ${transaction.security}" />

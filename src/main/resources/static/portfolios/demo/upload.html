@@ -1,0 +1,44 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Spacious Team <spacious-team@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Демо портфель</title>
+    <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
+    <link rel="stylesheet" href="/water-wrapper.css">
+    <link rel="stylesheet" href="/main.css">
+</head>
+<body>
+<h1>Демо портфель</h1>
+<ul>
+    <li>Счет <b>"demo"</b> - рублевые акции, облигации, фьючерс и опцион;</li>
+    <li>Счет <b>"demo-us"</b> - иностранные акции;</li>
+    <li>Счет <b>"demo-gold"</b> - произвольные активы на примере инвестиционной монеты "Георгий победоносец".</li>
+</ul>
+<p>
+    Ваши счета, если имеются, будут сохранены.
+    Демо счета в последующем могут быть <a href="/accounts/delete">удалены</a>.
+</p>
+<form action="/portfolios/demo/upload" method="post" class="back">
+    <button type="button" onclick="window.history.back()">Назад</button>
+    <input type="submit" value="Посмотреть"/>
+</form>
+</body>
+</html>

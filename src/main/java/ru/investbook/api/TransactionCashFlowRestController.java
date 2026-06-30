@@ -18,6 +18,7 @@
 
 package ru.investbook.api;
 
+import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -33,6 +34,7 @@ import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,8 +56,8 @@ import static java.util.Objects.isNull;
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
-@Tag(name = "Движения ДС по сделкам", description = "Уплаченные и вырученные суммы в сделках")
-@RequestMapping("/api/v1/transaction-cash-flows")
+@Tag(name = "Transaction cash flows", description = "Amounts paid and received in transactions")
+@RequestMapping("/api/transaction-cash-flows")
 public class TransactionCashFlowRestController extends AbstractRestController<Integer, TransactionCashFlow, TransactionCashFlowEntity> {
     private final TransactionCashFlowRepository repository;
     private final TransactionCashFlowConverter converter;
@@ -72,36 +74,32 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
 
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить по фильтру", description = "Отобразить информацию о сделках",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "getTransactionCashFlows", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     protected Page<TransactionCashFlow> get(
-            @RequestParam(value = "portfolio", required = false)
-            @Parameter(description = "Номер счета")
-            @Nullable
-            String portfolio,
-            @RequestParam(value = "trade-id", required = false)
-            @Parameter(description = "Номер сделки в системе учета брокера")
-            @Nullable
-            String tradeId,
             @RequestParam(value = "event-type", required = false)
-            @Parameter(description = "Тип (стоимость/комиссия/НКД)", example = "Смотреть API \"Типы событий\"")
+            @Parameter(description = "Type (price / fee / accrued interest)")
             @Nullable
             Integer eventType,
             @Parameter(hidden = true)
+            @QuerydslPredicate(root = TransactionCashFlowEntity.class)
+            @Nullable
+            Predicate predicate,
+            @Parameter(hidden = true)
             Pageable pageable
     ) {
-        if (portfolio == null && tradeId == null && eventType == null) {
-            return super.get(pageable);
+        if (eventType != null) {
+            return filterByEventType(
+                    transactionRestController.get(predicate, Pageable.unpaged()),
+                    eventType);
         }
-        return filterByEventType(
-                transactionRestController.get(portfolio, tradeId, Pageable.unpaged()),
-                eventType);
+
+        return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 
     private Page<TransactionCashFlow> filterByEventType(Page<Transaction> transactions,
-                                                        @Nullable Integer eventType) {
+                                                        Integer eventType) {
 
         List<TransactionCashFlow> transactionCashFlows = transactions
                 .stream()
@@ -112,35 +110,33 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
     }
 
     private Stream<TransactionCashFlowEntity> findTransactionCashFlow(Transaction transaction,
-                                                                      @Nullable Integer eventType) {
+                                                                      Integer eventType) {
         @Nullable Integer id = transaction.getId();
         if (isNull(id)) {
             return Stream.empty();
         }
-        return isNull(eventType) ?
-                repository.findByTransactionId(id).stream() :
-                repository.findByTransactionIdAndCashFlowType(id, CashFlowType.valueOf(eventType)).stream();
+        CashFlowType cashFlowType = CashFlowType.valueOf(eventType);
+        return repository.findByTransactionIdAndCashFlowType(id, cashFlowType)
+                .stream();
     }
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить одну", description = "Отобразить информацию о конкретной сделке",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "getTransactionCashFlow", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<TransactionCashFlow> get(@PathVariable("id")
-                                                   @Parameter(description = "Внутренний идентификатор сделки")
+                                                   @Parameter
                                                    Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Добавить информацию об об объемах движения ДС по сделке",
-            responses = {
-                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-                    @ApiResponse(responseCode = "409"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "postTransactionCashFlow", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "409"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> post(@RequestBody @Valid TransactionCashFlow object) {
         return super.post(object);
     }
@@ -150,13 +146,12 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
      */
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", description = "Обновить информацию об об объемах движения ДС по сделке",
-            responses = {
-                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-                    @ApiResponse(responseCode = "204"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "putTransactionCashFlow", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
-                                    @Parameter(description = "Внутренний идентификатор сделки")
+                                    @Parameter
                                     Integer id,
                                     @RequestBody
                                     @Valid
@@ -169,14 +164,12 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
      */
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = """
-            Удалить информацию об об объемах движения ДС по сделке. Сама сделка не удаляется, ее нужно удалить своим API
-            """,
-            responses = {
-                    @ApiResponse(responseCode = "204"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(description = "Removes cash flow information for the transaction, the transaction itself is not deleted",
+            operationId = "deleteTransactionCashFlow", responses = {
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
-                                       @Parameter(description = "Внутренний идентификатор сделки")
+                                       @Parameter
                                        Integer id) {
         return super.delete(id);
     }
@@ -191,10 +184,5 @@ public class TransactionCashFlowRestController extends AbstractRestController<In
         return object.toBuilder()
                 .id(id)
                 .build();
-    }
-
-    @Override
-    protected String getLocation() {
-        return "/transaction-cash-flows";
     }
 }

@@ -48,7 +48,7 @@ public class VtbDerivativeCashFlowTable extends AbstractVtbCashFlowTable<Securit
         @SuppressWarnings("method.invocation")
         SingleBrokerReport report = getReport();
         List<String> contracts = report.getReportPage()
-                .create(TABLE_NAME, OpenContractsTableHeader.class)
+                .createTable(TABLE_NAME, 1, null, OpenContractsTableHeader.class, 1)
                 .getData(row -> row.getStringCellValue(CONTRACT));
         this.contractId = (contracts.size() == 1) ?
                 report.getSecurityRegistrar().declareDerivative(requireNonNull(contracts.getFirst())) :
@@ -76,7 +76,7 @@ public class VtbDerivativeCashFlowTable extends AbstractVtbCashFlowTable<Securit
             return Collections.emptyList();
         }
         return singletonList(SecurityEventCashFlow.builder()
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .timestamp(event.getDate())
                 .security(requireNonNull(contractId))
                 .eventType(eventType)

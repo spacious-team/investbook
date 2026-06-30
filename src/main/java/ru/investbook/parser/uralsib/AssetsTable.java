@@ -22,8 +22,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.PortfolioProperty;
-import org.spacious_team.broker.pojo.PortfolioPropertyType;
+import org.spacious_team.broker.pojo.AccountProperty;
+import org.spacious_team.broker.pojo.AccountPropertyType;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
 import org.spacious_team.table_wrapper.api.PatternTableColumn;
@@ -43,11 +43,11 @@ import static java.util.Objects.requireNonNull;
 import static ru.investbook.parser.uralsib.AssetsTable.SummaryTableHeader.RUB;
 
 /**
- * Shows total assets value (sum of cash and security), but Assets table is empty if no security in portfolio.
+ * Shows total assets value (sum of cash and security), but Assets table is empty if no security in account.
  * In that case assets should be calculated by {@link CashTable}.
  */
 @Slf4j
-public class AssetsTable extends SingleInitializableReportTable<PortfolioProperty> {
+public class AssetsTable extends SingleInitializableReportTable<AccountProperty> {
     private static final String ASSETS_TABLE = "ОЦЕНКА АКТИВОВ";
     private static final String TABLE_FIRST_HEADER_LINE = "На конец отчетного периода";
     private static final String TABLE_SECOND_HEADER_LINE = "по цене закрытия";
@@ -58,14 +58,14 @@ public class AssetsTable extends SingleInitializableReportTable<PortfolioPropert
     }
 
     @Override
-    protected Collection<PortfolioProperty> parseTable() {
+    protected Collection<AccountProperty> parseTable() {
         try {
             SingleBrokerReport report = getReport();
             Table table = report.getReportPage()
-                    .createNameless(ASSETS_TABLE, TABLE_FIRST_HEADER_LINE, SummaryTableHeader.class, 3);
+                    .createNamelessTable(ASSETS_TABLE, TABLE_FIRST_HEADER_LINE, null, SummaryTableHeader.class, 3);
             if (table.isEmpty()) {
                 table = report.getReportPage()
-                        .createNameless(ASSETS_TABLE, TABLE_SECOND_HEADER_LINE, SummaryTableHeader.class, 2);
+                        .createNamelessTable(ASSETS_TABLE, TABLE_SECOND_HEADER_LINE, null, SummaryTableHeader.class, 2);
             }
             if (table.isEmpty()) {
                 log.debug("Таблица '{}' не найдена", ASSETS_TABLE);
@@ -79,10 +79,10 @@ public class AssetsTable extends SingleInitializableReportTable<PortfolioPropert
                     .orElse(null);
 
             return (row == null) ? emptyList() :
-                    singletonList(PortfolioProperty.builder()
-                            .portfolio(report.getPortfolio())
+                    singletonList(AccountProperty.builder()
+                            .account(report.getAccount())
                             .timestamp(report.getReportEndDateTime())
-                            .property(PortfolioPropertyType.TOTAL_ASSETS_RUB)
+                            .property(AccountPropertyType.TOTAL_ASSETS_RUB)
                             .value(row.getBigDecimalCellValue(RUB).toString())
                             .build());
         } catch (Exception e) {

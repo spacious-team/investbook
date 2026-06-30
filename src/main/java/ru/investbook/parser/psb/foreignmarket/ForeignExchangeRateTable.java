@@ -21,7 +21,7 @@ package ru.investbook.parser.psb.foreignmarket;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
 import org.spacious_team.table_wrapper.api.Table;
 import ru.investbook.parser.SingleBrokerReport;
-import ru.investbook.parser.psb.PortfolioPropertyTable;
+import ru.investbook.parser.psb.AccountPropertyTable;
 
 import java.util.Collection;
 
@@ -33,7 +33,7 @@ public class ForeignExchangeRateTable extends ru.investbook.parser.psb.ForeignEx
 
     @Override
     protected Collection<ForeignExchangeRate> parseTable() {
-        Table table = PortfolioPropertyTable.getSummaryTable(getReport(), ForeignExchangePortfolioPropertyTable.ASSETS);
+        Table table = AccountPropertyTable.getSummaryTable(getReport(), ForeignExchangeAccountPropertyTable.ASSETS);
         return getExchangeRate(table);
     }
 }

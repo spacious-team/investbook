@@ -21,6 +21,7 @@ package ru.investbook.repository;
 import org.spacious_team.broker.pojo.CashFlowType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.ListQuerydslPredicateExecutor;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.TransactionCashFlowEntity;
 
@@ -30,7 +31,9 @@ import java.util.Optional;
 import java.util.Set;
 
 @Transactional(readOnly = true)
-public interface TransactionCashFlowRepository extends JpaRepository<TransactionCashFlowEntity, Integer> {
+public interface TransactionCashFlowRepository extends
+        JpaRepository<TransactionCashFlowEntity, Integer>,
+        ListQuerydslPredicateExecutor<TransactionCashFlowEntity> {
 
     default boolean isDepositOrWithdrawal(int transactionId) {
         return countByTransactionId(transactionId) == 0;
@@ -58,19 +61,19 @@ public interface TransactionCashFlowRepository extends JpaRepository<Transaction
             SELECT distinct c.currency
             FROM transaction t JOIN transaction_cash_flow c
                 ON t.id = c.transaction_id
-            WHERE t.portfolio = :portfolio AND c.type = :#{#cashFlowType.id}
+            WHERE t.account = :account AND c.type = :#{#cashFlowType.id}
             """)
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
-    List<String> findDistinctCurrencyByPortfolioAndCashFlowType(String portfolio, CashFlowType cashFlowType);
+    List<String> findDistinctCurrencyByAccountAndCashFlowType(String account, CashFlowType cashFlowType);
 
     @Query(nativeQuery = true, value = """
             SELECT distinct c.currency
             FROM transaction t JOIN transaction_cash_flow c
                 ON t.id = c.transaction_id
-            WHERE t.portfolio IN (:portfolios) AND c.type in (:#{#cashFlowTypes})
+            WHERE t.account IN (:accounts) AND c.type in (:#{#cashFlowTypes})
             """)
     @SuppressWarnings("SpringDataRepositoryMethodReturnTypeInspection")
-    List<String> findDistinctCurrencyByPortfolioInAndCashFlowTypeIn(Collection<String> portfolios,
+    List<String> findDistinctCurrencyByAccountInAndCashFlowTypeIn(Collection<String> accounts,
                                                                     Set<Integer> cashFlowTypes);
 
     @Query(nativeQuery = true, value = """

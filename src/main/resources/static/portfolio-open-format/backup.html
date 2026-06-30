@@ -1,0 +1,70 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Бэкап и восстановление данных</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
+    <link rel="stylesheet" href="/water-wrapper.css">
+    <link rel="stylesheet" href="/main.css">
+</head>
+<body>
+<h1>Бэкап и восстановление данных</h1>
+<p class="hint">
+    Бэкап данных может пригодиться, если вы хотите защитить данные от сбоев вашего компьютера.
+</p>
+<p class="hint"> На этой странице вы можете: </p>
+<ol class="hint">
+    <li> Выполнить бэкап и восстановление данных.</li>
+    <li> Импортировать в Investbook портфель из другого приложения учета инвестиций, если оно
+        <a href="https://github.com/spacious-team/portfolio-open-format">поддерживает</a> "Portfolio Open Format"
+        (за инструкцией по получению файла в указанном формате обратитесь к документации или разработчикам этих приложений).
+    </li>
+    <li> Выполнить экспорт данных в формате "Portfolio Open Format" для переноса портфеля в другое приложение учета
+    инвестиций.
+    </li>
+</ol>
+
+<form action="/portfolio-open-format/backup/upload" enctype="multipart/form-data" method="POST">
+    <label>
+        Бэкап файл
+        <input name="file" type="file" placeholder="Файл бекапа" required/>
+    </label>
+    <label>&nbsp;
+        <input type="submit" value="Восстановить данные"/>
+    </label>
+</form>
+
+<form action="/portfolio-open-format/backup/download" method="get" class="back">
+    <button type="button" onclick="window.history.back()">Назад</button>
+    <input type="submit" value="Скачать бекап"/>
+</form>
+
+<p class="hint">
+    В бэкап не включаются курсы валют ЦБ РФ и значения индекса S&P 500. После восстановления из бэкапа вы, возможно,
+    захотите выгрузить эти данные через страницу <a href="/forms.html">Форм</a>.
+</p>
+<p class="hint">
+    Если счет уже существует в БД, то отсутствующие сделки будут добавлены из бэкапа в существующий счет, дублирование
+    сделок не произойдет. При желании перед восстановлением можно <a href="/accounts/delete-all">удалить имеющиеся счета</a>.
+</p>
+
+</body>
+</html>

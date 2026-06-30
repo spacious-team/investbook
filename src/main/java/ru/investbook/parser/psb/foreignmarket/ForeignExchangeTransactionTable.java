@@ -58,7 +58,7 @@ public class ForeignExchangeTransactionTable extends SingleAbstractReportTable<A
         return ForeignExchangeTransaction.builder()
                 .timestamp(transactionInstant)
                 .tradeId(tradeId)
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .security(securityId)
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)

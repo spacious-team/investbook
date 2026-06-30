@@ -39,7 +39,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.OutputStream;
-import java.util.concurrent.ExecutionException;
 
 import static java.util.Objects.requireNonNull;
 import static ru.investbook.report.html.ExcelFormulaEvaluatorHelper.evaluateFormulaCells;
@@ -48,7 +47,7 @@ import static ru.investbook.report.html.ExcelFormulaEvaluatorHelper.evaluateForm
 @RequiredArgsConstructor
 @Slf4j
 public class HtmlView {
-    private static final String EXCEL_REPORT_LINK = "/portfolio/report?format=excel";
+    private static final String EXCEL_REPORT_LINK = "/accounts/report?format=excel";
     private static final String PDF_REPORT_LINK = "window.print()";
     private static final String DOC_LINK = "/user-guide/investbook-report.html";
     private final ExcelView excelView;
@@ -63,7 +62,7 @@ public class HtmlView {
         }
     }
 
-    private HSSFWorkbook createWorkbook(ViewFilter filter) throws InterruptedException, ExecutionException {
+    private HSSFWorkbook createWorkbook(ViewFilter filter) {
         HSSFWorkbook workbook = new HSSFWorkbook();
         excelView.writeTo(workbook, filter, new HtmlCellStyles(workbook));
         evaluateFormulaCells(workbook);

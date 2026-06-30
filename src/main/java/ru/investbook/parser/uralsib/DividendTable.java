@@ -66,7 +66,7 @@ public class DividendTable extends PaymentsTable {
                 .add(tax.abs());
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .security(requireNonNull(security.getId()))
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .count(getSecurityCount(security, timestamp))
                 .eventType(CashFlowType.DIVIDEND)
                 .timestamp(timestamp)

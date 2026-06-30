@@ -34,7 +34,7 @@ import java.time.LocalTime;
 @Data
 public class SplitModel {
 
-    private @NotEmpty String portfolio;
+    private @NotEmpty String account;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private @NotNull LocalDate date = LocalDate.now();
@@ -68,7 +68,7 @@ public class SplitModel {
     public String getTradeId(int securityId) {
         String tradeId = String.valueOf(securityId) +
                 date.toEpochDay() +
-                portfolio.replaceAll(" ", "");
+                account.replaceAll(" ", "");
         return tradeId.substring(0, Math.min(32, tradeId.length()));
     }
 }

@@ -81,9 +81,18 @@ public class SecurityDescriptionController {
         }
     }
 
+
+    // TODO Поле filter сейчас не передается с html страницы, объект создается с помощью new,
+    //      т.е. фильтрация сбрасывается при вызове GET /security-descriptions/update.
+    //      Это поведение можно доработать через POST /security-descriptions/update (см. связку методов search() + get())
+    //      Аннотация @ModelAttribute неявно выполняет `model.addAttribute("filter", filter)`.
+    //      Это важно для отрисовки страницы методом get(), который вызывается текущим методом.
+    //      Без аннотации или явного `model.addAttribute("filter", filter)` падает отрисовка на этапе Thymeleaf,
+    //      т.к. аттрибута filter в модели не находится.
     @GetMapping("update")
     public String updateFromSmartLab(@RequestParam(name = "security-id", required = false) Integer securityId,
                                      @RequestParam(name = "force", defaultValue = "false") boolean forceUpdate,
+                                     @ModelAttribute("filter") SecurityDescriptionFormFilterModel filter,
                                      Model model) {
         if (securityId == null) {
             String message = updateSectorsFromSmartLab(forceUpdate);
@@ -92,7 +101,7 @@ public class SecurityDescriptionController {
             return "success";
         } else {
             securitySectorService.uploadAndUpdateSecuritySector(securityId, forceUpdate);
-            return get(new SecurityDescriptionFormFilterModel(), model);
+            return get(filter, model);
         }
     }
 

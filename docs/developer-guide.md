@@ -36,18 +36,23 @@ dotnet tool list --global
 ```
 Если Wix не установлен, то его требуется установить по [инструкции](https://docs.firegiant.com/wix/using-wix/)
 ```shell
-dotnet tool install --global wix
+dotnet tool install --global wix --version 7.0.0
+wix eula accept wix7
 wix --version
 ```
 Также требуется установить расширения Wix, без которых сборка завершается с
-[ошибкой](https://github.com/petr-panteleyev/jpackage-gradle-plugin/issues/38)
+[ошибкой](https://github.com/petr-panteleyev/jpackage-gradle-plugin/issues/38).
+Проверьте и удалите предыдущие версии, если они есть
+если имеются предыдущие версии, то их можно проверить и удалить командой
 ```shell
-wix extension add -g WixToolset.Util.wixext/6.0.1
-wix extension add -g WixToolset.Ui.wixext/6.0.1
+wix extension list -g
+wix extension remove -g WixToolset.Util.wixext
+wix extension remove -g WixToolset.Ui.wixext
 ```
-где 6.0.1 - это версия Wix, которая указана в выводе команды
+И установите требуемые версии
 ```shell
-dotnet tool list --global
+wix extension add -g WixToolset.Util.wixext/7.0.0
+wix extension add -g WixToolset.Ui.wixext/7.0.0
 ```
 
 ### Компиляция

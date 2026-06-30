@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.converter.SecurityQuoteConverter;
 import ru.investbook.entity.SecurityEntity;
+import ru.investbook.entity.SecurityEntity_;
 import ru.investbook.entity.SecurityQuoteEntity;
 import ru.investbook.entity.SecurityQuoteEntity_;
 import ru.investbook.repository.SecurityQuoteRepository;
@@ -60,7 +61,9 @@ public class SecurityQuoteFormsService {
         SecurityQuoteSearchSpecification spec = SecurityQuoteSearchSpecification.of(
                 filter.getSecurity(), filter.getCurrency(), filter.getDate());
 
-        Sort sort = Sort.by(desc(SecurityQuoteEntity_.TIMESTAMP), asc("security.name"));
+        Sort sort = Sort.by(
+                desc(SecurityQuoteEntity_.TIMESTAMP),
+                asc(SecurityQuoteEntity_.SECURITY + "." + SecurityEntity_.NAME));
         PageRequest page = PageRequest.of(filter.getPage(), filter.getPageSize(), sort);
 
         return securityQuoteRepository.findAll(spec, page)
@@ -93,8 +96,8 @@ public class SecurityQuoteFormsService {
         m.setCurrency(e.getCurrency());
         SecurityEntity securityEntity = e.getSecurity();
         SecurityType securityType = e.getAccruedInterest() == null ?
-            SecurityType.valueOf(securityEntity.getType()) :
-            SecurityType.BOND;
+                SecurityType.valueOf(securityEntity.getType()) :
+                SecurityType.BOND;
         m.setSecurity(
                 securityEntity.getIsin(),
                 ofNullable(securityEntity.getName()).orElse(securityEntity.getTicker()),

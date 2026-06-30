@@ -73,8 +73,8 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
 
     private List<SecurityTransaction> parseTable(String tableName) {
         return getReport().getReportPage()
-                .create(tableName, TABLE_END_TEXT, TransactionTableHeader.class)
-                .excludeTotalRow()
+                .createTable(tableName, 1, TABLE_END_TEXT, TransactionTableHeader.class, 1)
+                .excludeLastRow()
                 .getData(getReport(), this::getTransaction);
     }
 
@@ -97,7 +97,7 @@ public class SecurityTransactionTable extends SingleInitializableReportTable<Sec
         return SecurityTransaction.builder()
                 .timestamp(getReport().convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .tradeId(String.valueOf(row.getLongCellValue(TRADE_ID))) // may be double numbers in future
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .security(securityId)
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)

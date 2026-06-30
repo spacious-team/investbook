@@ -55,7 +55,7 @@ public class VtbDerivativeTransactionTable extends SingleAbstractReportTable<Der
         return DerivativeTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .tradeId(row.getStringCellValue(TRADE_ID))
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .security(securityId)
                 .count((isBuy ? 1 : -1) * count)
                 .valueInPoints(valueInPoints)

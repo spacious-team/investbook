@@ -73,25 +73,25 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
 
     @Override
     public Optional<Instant> getLastEventTimestamp(
-            Collection<String> portfolios, Security security, Set<Integer> events, Instant from, Instant to) {
+            Collection<String> accounts, Security security, Set<Integer> events, Instant from, Instant to) {
 
         Integer securityId = requireNonNull(security.getId());
-        Optional<SecurityEventCashFlowEntity> optional = portfolios.isEmpty() ?
+        Optional<SecurityEventCashFlowEntity> optional = accounts.isEmpty() ?
                 securityEventCashFlowRepository
                         .findFirstBySecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
                                 securityId, events, from, to) :
                 securityEventCashFlowRepository
-                        .findFirstByPortfolioIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
-                                portfolios, securityId, events, from, to);
+                        .findFirstByAccountIdInAndSecurityIdAndCashFlowTypeIdInAndTimestampBetweenOrderByTimestampDesc(
+                                accounts, securityId, events, from, to);
         return optional.map(SecurityEventCashFlowEntity::getTimestamp);
     }
 
     @Override
-    public BigDecimal getGrossProfit(Collection<String> portfolios, Security security, FifoPositions positions, String toCurrency) {
+    public BigDecimal getGrossProfit(Collection<String> accounts, Security security, FifoPositions positions, String toCurrency) {
         return switch (security.getType()) {
             case STOCK, BOND, STOCK_OR_BOND, ASSET -> getPurchaseCost(security, positions, toCurrency)
                     .add(getPurchaseAccruedInterest(security, positions, toCurrency));
-            case DERIVATIVE -> sumPaymentsForType(portfolios, security, CashFlowType.DERIVATIVE_PROFIT, toCurrency);
+            case DERIVATIVE -> sumPaymentsForType(accounts, security, CashFlowType.DERIVATIVE_PROFIT, toCurrency);
             case CURRENCY_PAIR -> getPurchaseCost(security, positions, toCurrency);
         };
     }
@@ -150,8 +150,8 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
         }
         LocalDate transactionDay = LocalDate.ofInstant(transaction.getTimestamp(), zoneId);
         Collection<TransactionEntity> depositAndWithdrawalDuringTheDay =
-                transactionRepository.findByPortfolioAndSecurityIdAndTimestampBetweenDepositAndWithdrawalTransactions(
-                        transaction.getPortfolio(),
+                transactionRepository.findByAccountAndSecurityIdAndTimestampBetweenDepositAndWithdrawalTransactions(
+                        transaction.getAccount(),
                         transaction.getSecurity(),
                         transactionDay.atStartOfDay(zoneId).toInstant(),
                         transactionDay.atTime(LocalTime.MAX).atZone(zoneId).toInstant());
@@ -213,18 +213,18 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
     }
 
     @Override
-    public BigDecimal sumPaymentsForType(Collection<String> portfolios, Security security, CashFlowType cashFlowType, String toCurrency) {
-        return getSecurityEventCashFlowEntities(portfolios, security, cashFlowType)
+    public BigDecimal sumPaymentsForType(Collection<String> accounts, Security security, CashFlowType cashFlowType, String toCurrency) {
+        return getSecurityEventCashFlowEntities(accounts, security, cashFlowType)
                 .stream()
                 .map(entity -> convertToCurrency(entity.getValue(), entity.getCurrency(), toCurrency))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> portfolios,
+    private List<SecurityEventCashFlowEntity> getSecurityEventCashFlowEntities(Collection<String> accounts,
                                                                                Security security,
                                                                                CashFlowType cashFlowType) {
         Integer securityId = requireNonNull(security.getId());
-        return portfolios.isEmpty() ?
+        return accounts.isEmpty() ?
                 securityEventCashFlowRepository
                         .findBySecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
                                 securityId,
@@ -232,8 +232,8 @@ public class SecurityProfitServiceImpl implements SecurityProfitService {
                                 ViewFilter.get().getFromDate(),
                                 ViewFilter.get().getToDate()) :
                 securityEventCashFlowRepository
-                        .findByPortfolioIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
-                                portfolios,
+                        .findByAccountIdInAndSecurityIdAndCashFlowTypeIdAndTimestampBetweenOrderByTimestampAsc(
+                                accounts,
                                 securityId,
                                 cashFlowType.getId(),
                                 ViewFilter.get().getFromDate(),

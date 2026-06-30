@@ -24,14 +24,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Account;
 import ru.investbook.report.Table;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public class ExcelTable {
-    private final @Nullable Portfolio portfolio;
+    private final @Nullable Account account;
     private final String sheetName;
     private final Table table;
     private final ExcelTableView creator;
@@ -41,12 +41,12 @@ public class ExcelTable {
         return new ExcelTable(null, sheetName, table, creator);
     }
 
-    static ExcelTable of(Portfolio portfolio, String sheetName, Table table, ExcelTableView creator) {
+    static ExcelTable of(Account account, String sheetName, Table table, ExcelTableView creator) {
         log.debug("Обработка данных для таблицы '{}' завершена", sheetName);
-        return new ExcelTable(portfolio, sheetName, table, creator);
+        return new ExcelTable(account, sheetName, table, creator);
     }
 
     void writeTo(Workbook book, CellStyles cellStyles) {
-        creator.createSheet(portfolio, book, sheetName, table, cellStyles);
+        creator.createSheet(account, book, sheetName, table, cellStyles);
     }
 }

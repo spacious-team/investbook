@@ -39,19 +39,24 @@ class AbstractEntityRepositoryServiceTest {
     SecurityRestController service;
 
     @Test
-    void insert() {
-        test("insert()", service::insert, false);
-        test("insert()", service::insert, false);
-        test("insert()", service::insert, true);
-        test("insert()", service::insert, true);
+    void createNewInstanceTest() {
+        // вызываем несколько раз, чтобы нивелировать кеширование
+        for (int i = 0; i < 50; i++) {
+            test("createIfAbsent()", service::createIfAbsent, true);
+            test("insert()", service::insert, true);
+            System.out.println();
+        }
+
     }
 
     @Test
-    void createIfAbsent() {
-        test("createIfAbsent()", service::createIfAbsent, false);
-        test("createIfAbsent()", service::createIfAbsent, false);
-        test("createIfAbsent()", service::createIfAbsent, true);
-        test("createIfAbsent()", service::createIfAbsent, true);
+    void constraintViolationTest() {
+        // вызываем несколько раз, чтобы нивелировать кеширование
+        for (int i = 0; i < 50; i++) {
+            test("createIfAbsent()", service::createIfAbsent, false);
+            test("insert()", service::insert, false);
+            System.out.println();
+        }
     }
 
     void test(String name, Consumer<Security> consumer, boolean isIdNull) {

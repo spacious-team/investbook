@@ -52,7 +52,7 @@ public class TinkoffDerivativeCashFlowTable extends SingleAbstractReportTable<Se
             Math.abs(row.getIntCellValueOrDefault(INCOMING_COUNT, 0)),
             Math.abs(row.getIntCellValueOrDefault(OUTGOING_COUNT, 0)));
         return SecurityEventCashFlow.builder()
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .timestamp(getReport().convertToInstant(row.getStringCellValue(DATE)))
                 .security(getReport().getSecurityRegistrar().declareDerivative(contract))
                 .count(count)

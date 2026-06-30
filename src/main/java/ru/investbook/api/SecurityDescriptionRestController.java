@@ -18,6 +18,7 @@
 
 package ru.investbook.api;
 
+import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -25,10 +26,12 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.SecurityDescription;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,8 +48,8 @@ import ru.investbook.repository.SecurityDescriptionRepository;
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
-@Tag(name = "Информация по инструментам", description = "Сектор экономики, эмитент")
-@RequestMapping("/api/v1/security-descriptions")
+@Tag(name = "Information about instruments (securities and derivatives)", description = "Economic sector, issuer")
+@RequestMapping("/api/security-descriptions")
 public class SecurityDescriptionRestController extends AbstractRestController<Integer, SecurityDescription, SecurityDescriptionEntity> {
 
     public SecurityDescriptionRestController(SecurityDescriptionRepository repository, SecurityDescriptionConverter converter) {
@@ -56,25 +59,26 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отобразить информацию по всем инструментам",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "getSecurityDescriptions", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public Page<SecurityDescription> get(@Parameter(hidden = true)
+                                         @QuerydslPredicate(root = SecurityDescriptionEntity.class)
+                                         @Nullable
+                                         Predicate predicate,
+                                         @Parameter(hidden = true)
                                          Pageable pageable) {
-        return super.get(pageable);
+        return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить один", description = "Отобразить информацию по инструменту",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "getSecurityDescription", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<SecurityDescription> get(@PathVariable("id")
-                                                   @Parameter(description = "Идентификатор",
-                                                           example = "123", required = true)
+                                                   @Parameter
                                                    Integer id) {
         return super.get(id);
     }
@@ -82,24 +86,22 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре",
-            responses = {
-                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-                    @ApiResponse(responseCode = "409"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "postSecurityDescription", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "409"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> post(@RequestBody @Valid SecurityDescription security) {
         return super.post(security);
     }
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре",
-            responses = {
-                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-                    @ApiResponse(responseCode = "204"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "putSecurityDescription", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
-                                    @Parameter(description = "Идентификатор", example = "123", required = true)
+                                    @Parameter
                                     Integer id,
                                     @RequestBody
                                     @Valid
@@ -109,12 +111,11 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удалить информацию по инструменту",
-            responses = {
-                    @ApiResponse(responseCode = "204"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "deleteSecurityDescription", responses = {
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
-                                       @Parameter(description = "Идентификатор", example = "123", required = true)
+                                       @Parameter
                                        Integer id) {
         return super.delete(id);
     }
@@ -127,10 +128,5 @@ public class SecurityDescriptionRestController extends AbstractRestController<In
     @Override
     protected SecurityDescription updateId(Integer id, SecurityDescription object) {
         return object.toBuilder().security(id).build();
-    }
-
-    @Override
-    protected String getLocation() {
-        return "/securities";
     }
 }

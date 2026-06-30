@@ -53,7 +53,7 @@ class LoadingPageHttpServerTest {
             properties.when(() -> PropertiesGetter.getIntProperty(eq("server.port"), anyInt()))
                     .thenReturn(port);
             properties.when(() -> getBooleanProperty(eq("investbook.open-home-page-after-start"), anyBoolean()))
-                            .thenReturn(true);
+                    .thenReturn(true);
 
             loadingPageHttpServer.start();
 

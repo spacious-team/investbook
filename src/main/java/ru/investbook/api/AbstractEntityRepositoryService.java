@@ -18,6 +18,7 @@
 
 package ru.investbook.api;
 
+import com.querydsl.core.types.Predicate;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -75,17 +77,30 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
                 .map(converter::fromEntity);
     }
 
+    @Override
+    public Page<Pojo> getPage(Predicate predicate, Pageable pageable) {
+        return ((QuerydslPredicateExecutor<Entity>) repository).findAll(predicate, pageable)
+                .map(converter::fromEntity);
+    }
+
     /**
-     * @implNote Method performance is the same as {@link #createIfAbsent(Object)} for H2 2.2.224 and MariaDB 11.2
+     * @implNote Performance comparison:
+     * <p> - If an entity with the same key already exists, {@link #createIfAbsent(Object)} is faster
+     * than this method.
+     * <p> - If the entity is new, this method is faster than {@link #createIfAbsent(Object)}.
+     * <p>
+     * The performance difference is negligible for H2 2.2.224 and MariaDB 11.2 in Spring Boot 3
+     * and for H2 2.4.240 in Spring Boot 4.1.0.
+     * <p>
+     * See test class {@code AbstractEntityRepositoryServiceTest} for more details.
      */
     @Override
-    @SuppressWarnings("deprecation")
     public boolean insert(Pojo object) {
         if (entityManager instanceof Session hibernateSpecificSession) {
             try {
                 Entity entity = converter.toEntity(object);
-                // Hibernate save() method does sql INSERT
-                transactionTemplateRequiresNew.executeWithoutResult(_ -> hibernateSpecificSession.save(entity));
+                // Hibernate persist() method does sql INSERT
+                transactionTemplateRequiresNew.executeWithoutResult(_ -> hibernateSpecificSession.persist(entity));
                 return true;
             } catch (Exception e) {
                 if (isUniqIndexViolationException(e)) {
@@ -113,6 +128,7 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
     }
 
     @Override
+    @Transactional
     public CreateResult<Pojo> createIfAbsentAndGet(Pojo object) {
         return createIfAbsentAndGetInternal(object);
     }
@@ -201,6 +217,7 @@ public abstract class AbstractEntityRepositoryService<ID, Pojo, Entity> implemen
     }
 
     @Override
+    @Transactional
     public void deleteById(ID id) {
         repository.deleteById(id);
     }

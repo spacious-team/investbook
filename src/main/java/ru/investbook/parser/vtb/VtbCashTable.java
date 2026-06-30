@@ -21,7 +21,7 @@ package ru.investbook.parser.vtb;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.spacious_team.broker.pojo.PortfolioCash;
+import org.spacious_team.broker.pojo.AccountCash;
 import org.spacious_team.table_wrapper.api.AnyOfTableColumn;
 import org.spacious_team.table_wrapper.api.MultiLineTableColumn;
 import org.spacious_team.table_wrapper.api.OptionalTableColumn;
@@ -35,31 +35,38 @@ import ru.investbook.parser.SingleBrokerReport;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
 @Slf4j
-public class VtbCashTable extends SingleAbstractReportTable<PortfolioCash> {
+public class VtbCashTable extends SingleAbstractReportTable<AccountCash> {
 
     private static final String TABLE_NAME = "Отчет об остатках денежных средств";
+    private static final String TABLE_NAME_WITH_YO = "Отчёт об остатках денежных средств";
     private static final String TABLE_FOOTER = "Сумма денежных средств";
 
 
     protected VtbCashTable(SingleBrokerReport report) {
-        super(report, TABLE_NAME, TABLE_FOOTER, VtbCashTableHeader.class, 3);
+        super(report,
+                cell -> cell.startsWith(TABLE_NAME) || cell.startsWith(TABLE_NAME_WITH_YO),
+                1,
+                cell -> Objects.equals(cell, "RUR"),
+                cell -> cell.startsWith(TABLE_FOOTER),
+                VtbCashTableHeader.class);
     }
 
     @Override
-    protected Collection<PortfolioCash> parseRowToCollection(TableRow row) {
-        Collection<PortfolioCash> cashes = new ArrayList<>();
-        cashes.addAll(getPortfolioCash(row, VtbCashTableHeader.STOCK_MARKET, "основной рынок"));
-        cashes.addAll(getPortfolioCash(row, VtbCashTableHeader.FORTS_MARKET, "срочный рынок"));
-        cashes.addAll(getPortfolioCash(row, VtbCashTableHeader.NON_MARKET, "внебирж. рынок"));
+    protected Collection<AccountCash> parseRowToCollection(TableRow row) {
+        Collection<AccountCash> cashes = new ArrayList<>();
+        cashes.addAll(getAccountCash(row, VtbCashTableHeader.STOCK_MARKET, "основной рынок"));
+        cashes.addAll(getAccountCash(row, VtbCashTableHeader.FORTS_MARKET, "срочный рынок"));
+        cashes.addAll(getAccountCash(row, VtbCashTableHeader.NON_MARKET, "внебирж. рынок"));
         return cashes;
     }
 
-    private Collection<PortfolioCash> getPortfolioCash(TableRow row, VtbCashTableHeader column, String section) {
+    private Collection<AccountCash> getAccountCash(TableRow row, VtbCashTableHeader column, String section) {
         try {
-            return Collections.singleton(PortfolioCash.builder()
-                    .portfolio(getReport().getPortfolio())
+            return Collections.singleton(AccountCash.builder()
+                    .account(getReport().getAccount())
                     .timestamp(getReport().getReportEndDateTime())
                     .currency(VtbBrokerReport.convertToCurrency(row.getStringCellValue(VtbCashTableHeader.CURRENCY)))
                     .market(section)
@@ -78,16 +85,19 @@ public class VtbCashTable extends SingleAbstractReportTable<PortfolioCash> {
         STOCK_MARKET(
                 OptionalTableColumn.of(
                         AnyOfTableColumn.of(
+                                MultiLineTableColumn.of("Исходящий остаток", "основной рынок"),
                                 MultiLineTableColumn.of("Исходящий остаток", "", "основной рынок"),
                                 MultiLineTableColumn.of("Исходящий остаток", "площадка", "основной рынок")))),
         FORTS_MARKET(
                 OptionalTableColumn.of(
                         AnyOfTableColumn.of(
+                                MultiLineTableColumn.of("Исходящий остаток", "срочный рынок"),
                                 MultiLineTableColumn.of("Исходящий остаток", "", "срочный рынок"),
                                 MultiLineTableColumn.of("Исходящий остаток", "площадка", "срочный рынок")))),
         NON_MARKET(
                 OptionalTableColumn.of(
                         AnyOfTableColumn.of(
+                                MultiLineTableColumn.of("Исходящий остаток", "внебирж. рынок"),
                                 MultiLineTableColumn.of("Исходящий остаток", "", "внебирж. рынок"),
                                 MultiLineTableColumn.of("Исходящий остаток", "площадка", "внебирж. рынок"))));
 

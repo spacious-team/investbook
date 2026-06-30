@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.investbook.report.FifoPositionsFactory;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.SecurityRepository;
 import ru.investbook.web.ControllerHelper;
 import ru.investbook.web.forms.model.PageableWrapperModel;
@@ -46,25 +46,25 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class SecurityEventCashFlowController {
     private final SecurityEventCashFlowFormsService securityEventCashFlowFormsService;
-    private final PortfolioRepository portfolioRepository;
+    private final AccountRepository accountRepository;
     private final SecurityRepository securityRepository;
     private final FifoPositionsFactory fifoPositionsFactory;
     private volatile Collection<String> securities;
-    private volatile Collection<String> portfolios;
-    private volatile String selectedPortfolio;
+    private volatile Collection<String> accounts;
+    private volatile String selectedAccount;
 
     @PostConstruct
     public void start() {
-        portfolios = ControllerHelper.getPortfolios(portfolioRepository);
+        accounts = ControllerHelper.getAccounts(accountRepository);
         securities = ControllerHelper.getSecuritiesDescriptions(securityRepository);
     }
 
     @GetMapping
     public String get(@ModelAttribute("filter") SecurityEventCashFlowFormFilterModel filter, Model model) {
         Page<SecurityEventCashFlowModel> data = securityEventCashFlowFormsService.getPage(filter);
-        portfolios = ControllerHelper.getPortfolios(portfolioRepository); // update portfolios for filter
+        accounts = ControllerHelper.getAccounts(accountRepository); // update accounts for filter
         model.addAttribute("page", new PageableWrapperModel<>(data));
-        model.addAttribute("portfolios", portfolios);
+        model.addAttribute("accounts", accounts);
 
         return "security-events/table";
     }
@@ -80,7 +80,7 @@ public class SecurityEventCashFlowController {
     public String getEditForm(@RequestParam(name = "id", required = false) Integer id, Model model) {
         model.addAttribute("event", getSecurityEventCashFlow(id));
         model.addAttribute("securities", securities);
-        model.addAttribute("portfolios", portfolios);
+        model.addAttribute("accounts", accounts);
         return "security-events/edit-form";
     }
 
@@ -90,14 +90,14 @@ public class SecurityEventCashFlowController {
                     .orElseGet(SecurityEventCashFlowModel::new);
         } else {
             SecurityEventCashFlowModel event = new SecurityEventCashFlowModel();
-            event.setPortfolio(selectedPortfolio);
+            event.setAccount(selectedAccount);
             return event;
         }
     }
 
     @PostMapping
     public String postSecurityEventCashFlow(@ModelAttribute("event") @Valid SecurityEventCashFlowModel event) {
-        selectedPortfolio = event.getPortfolio();
+        selectedAccount = event.getAccount();
         securityEventCashFlowFormsService.save(event);
         fifoPositionsFactory.invalidateCache();
         return "security-events/view-single";

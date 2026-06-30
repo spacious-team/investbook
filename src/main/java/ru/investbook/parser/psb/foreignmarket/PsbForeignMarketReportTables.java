@@ -18,10 +18,10 @@
 
 package ru.investbook.parser.psb.foreignmarket;
 
+import org.spacious_team.broker.pojo.AccountCash;
+import org.spacious_team.broker.pojo.AccountProperty;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
-import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
@@ -39,12 +39,12 @@ public class PsbForeignMarketReportTables extends AbstractReportTables<PsbBroker
     }
 
     @Override
-    public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
-        return new ForeignExchangePortfolioPropertyTable(report);
+    public ReportTable<AccountProperty> getAccountPropertyTable() {
+        return new ForeignExchangeAccountPropertyTable(report);
     }
 
     @Override
-    public ReportTable<PortfolioCash> getPortfolioCashTable() {
+    public ReportTable<AccountCash> getAccountCashTable() {
         return new ForeignExchangeCashTable(report);
     }
 

@@ -1,8 +1,8 @@
 [<img src="https://github.com/spacious-team/investbook/assets/11336712/7b16c124-5230-403e-8df9-7652132e76dd" align="right"/>](README-en.md)
 [<img src="https://github.com/spacious-team/investbook/assets/11336712/14847ff5-827e-4d0f-a4e9-882cb0d1397c" align="right"/>](README.md)<br/>
 
-[![java-version](https://img.shields.io/badge/java-24-brightgreen?style=flat-square)](https://openjdk.org/)
-[![spring-boot-version](https://img.shields.io/badge/spring--boot-3.5.3-brightgreen?style=flat-square)](https://github.com/spring-projects/spring-boot/releases)
+[![java-version](https://img.shields.io/badge/java-26-brightgreen?style=flat-square)](https://openjdk.org/)
+[![spring-boot-version](https://img.shields.io/badge/spring--boot-4.1.0-brightgreen?style=flat-square)](https://github.com/spring-projects/spring-boot/releases)
 [![hits-of-code](https://img.shields.io/badge/dynamic/json?style=flat-square&color=lightblue&label=hits-of-code&url=https://hitsofcode.com/github/spacious-team/investbook/json?branch=develop&query=$.count)](https://hitsofcode.com/github/spacious-team/investbook/view?branch=develop)
 [![github-closed-pull-requests](https://img.shields.io/github/issues-pr-closed/spacious-team/investbook?style=flat-square&color=brightgreen)](https://github.com/spacious-team/investbook/pulls?q=is%3Apr+is%3Aclosed)
 [![Unit tests](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fspacious-team%2Finvestbook%2Fbadge%3Fref%3Ddevelop&style=flat-square&label=test&logo=none)](
@@ -11,9 +11,9 @@ https://github.com/spacious-team/investbook/actions/workflows/unit-tests.yml)
 [![github-action-installer-build-status](https://img.shields.io/github/actions/workflow/status/spacious-team/investbook/publish-docker.yml?style=flat-square&branch=master&label=installers%20build)](https://github.com/spacious-team/investbook/actions/workflows/publish-installers.yml)
 [![github-all-releases](https://img.shields.io/github/downloads/spacious-team/investbook/total?style=flat-square&logo=github&color=lightblue)](https://github.com/spacious-team/investbook/releases/latest)
 [![docker-pulls](https://img.shields.io/docker/pulls/spaciousteam/investbook?style=flat-square&logo=docker&color=lightblue&logoColor=white)](https://hub.docker.com/r/spaciousteam/investbook)
-[![telegram-channel](https://img.shields.io/endpoint?style=flat-square&color=2ca5e0&label=news&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Finvestbook_official)](https://t.me/investbook_official)
+[![telegram-channel](https://img.shields.io/badge/channel-join-2ca5e0?style=flat-square&logo=telegram)](https://t.me/+3ETAs2BxzWE3NDNi)
 [![telegram-group](https://img.shields.io/badge/chat-private-2ca5e0?style=flat-square&logo=telegram)](https://t.me/+IzYUY5hyvZtmOTIy)
-[![telegram-support](https://img.shields.io/badge/support-online-2ca5e0?style=flat-square&logo=telegram)](https://t.me/investbook_official)
+[![telegram-support](https://img.shields.io/badge/support-online-2ca5e0?style=flat-square&logo=telegram)](https://t.me/+yEKD309wU-NhYjhi)
 
 <img src="https://user-images.githubusercontent.com/11336712/85948992-b1d6de00-b95c-11ea-8edc-4d5e7dfc8210.png" width="100%"/>
 
@@ -53,27 +53,27 @@ https://github.com/spacious-team/investbook/actions/workflows/unit-tests.yml)
 информацию. При этом вся информация сохраняется на вашем компьютере, в облако данные не уходят, для работы интернет не требуется.
 
 По каждому счету в отдельности и подводя единый итог по всем счетам, будет доступна следующая информация:
-- [обзор](src/main/asciidoc/portfolio-analysis.adoc) роста активов, рассчитанного по методике S&P 500,
+- [обзор](src/main/asciidoc/account-analysis.adoc) роста активов, рассчитанного по методике S&P 500,
   в сравнении с S&P 500, история инвестиций и остатка денежных средств;  
-  ![portfolio-analysis](https://user-images.githubusercontent.com/11336712/102415874-fd17a280-4009-11eb-9bff-232975adf21b.png)
+  ![account-analysis](https://user-images.githubusercontent.com/11336712/102415874-fd17a280-4009-11eb-9bff-232975adf21b.png)
   <img src="https://user-images.githubusercontent.com/11336712/102416414-d4dc7380-400a-11eb-95b1-8ff8ae37bd17.png" width="32%"/>
   <img src="https://user-images.githubusercontent.com/11336712/149419132-cad11fc3-fdaa-4572-882b-4ed49b937afe.png" width="32%"/>
   <img src="https://user-images.githubusercontent.com/11336712/102419341-9a75d500-4010-11eb-817a-a9b322237dd2.png" width="32%"/>
-- [портфель](src/main/asciidoc/portfolio-status.adoc) ценных бумаг с информацией о текущей позиции, усредненной цене
+- [портфель](src/main/asciidoc/account-status.adoc) ценных бумаг с информацией о текущей позиции, усредненной цене
   покупок и доходности ценных бумаг (ЧИСТВНДОХ/XIRR) с учетом хеджирующих позиций на срочном рынке и усредненной цены покупки валюты;  
-  ![portfolio](https://user-images.githubusercontent.com/11336712/104820094-af2dce80-5843-11eb-8083-6521ea537334.png)
-- доля ценной бумаги в [портфеле](src/main/asciidoc/portfolio-status.adoc);  
+  ![account-status](https://user-images.githubusercontent.com/11336712/104820094-af2dce80-5843-11eb-8083-6521ea537334.png)
+- доля ценной бумаги в [портфеле](src/main/asciidoc/account-status.adoc);  
   ![current-proportion](https://user-images.githubusercontent.com/11336712/88717010-8cd6b600-d128-11ea-901f-2b3fcee96f07.png)
 - [портфель трейдера](src/main/asciidoc/derivatives-market-total-profit.adoc) с информацией о доходности
   сделок на срочном рынке в разрезе группы контрактов (например, по всем фьючерсам и опционам Si, то же по BR и т.д.);  
   ![derivatives-marker-total-profit](https://user-images.githubusercontent.com/11336712/119887746-30f1df00-bf3d-11eb-9c52-713093ae4d72.png)
 - распределение прибыли по группам срочных контрактов в [портфеле трейдера](src/main/asciidoc/derivatives-market-total-profit.adoc);  
   ![derivatives-profit-proportion](https://user-images.githubusercontent.com/11336712/120565530-fb099a80-c415-11eb-82bb-8288ed9b7806.png)
-- детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/portfolio-payment.adoc);  
-  ![portfolio-payment](https://user-images.githubusercontent.com/11336712/88460806-93a2c600-cea7-11ea-8ac9-95406fd6cec8.png)
-- детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/foreign-portfolio-payment.adoc),
+- детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/account-payment.adoc);  
+  ![account-payment](https://user-images.githubusercontent.com/11336712/88460806-93a2c600-cea7-11ea-8ac9-95406fd6cec8.png)
+- детализация дивидендных, купонных и амортизационных [выплат](src/main/asciidoc/foreign-account-payment.adoc),
   начисленные по акциям и облигациям со связанного счета ИИС;  
-  ![foreign-portfolio-payment](https://user-images.githubusercontent.com/11336712/87988115-7907d000-cae8-11ea-9ec7-d56a120aac89.png)
+  ![foreign-account-payment](https://user-images.githubusercontent.com/11336712/87988115-7907d000-cae8-11ea-9ec7-d56a120aac89.png)
 - доходность сделок на [фондовом](src/main/asciidoc/stock-market-profit.adoc) рынке (метод FIFO);  
   ![stock-market](https://user-images.githubusercontent.com/11336712/78156498-8de02b00-7447-11ea-833c-cfc755bd7558.png)
 - доходность сделок на [срочном](src/main/asciidoc/derivatives-market-profit.adoc) рынке;  
@@ -213,7 +213,7 @@ Investbook в сравнении с [Intelinvest](https://intelinvest.ru) и [Sn
 ознакомьтесь, пожалуйста, со следующей [информацией](docs/CONTRIBUTING.md).
 
 ### Контакты
-- Телеграм [канал](https://t.me/investbook_official), [чат](https://t.me/+IzYUY5hyvZtmOTIy) пользователей,
+- Телеграм [канал](https://t.me/+3ETAs2BxzWE3NDNi), [чат](https://t.me/+IzYUY5hyvZtmOTIy) пользователей,
   техническая поддержка оказывается в директ сообщениях телеграм канала (кнопка внизу слева канала);
 - Обсуждение на форуме [banki.ru](https://www.banki.ru/forum/?PAGE_NAME=read&FID=21&TID=380178);
 - Страница приложения на [smart-lab.ru](https://smart-lab.ru/trading-software/Investbook) и

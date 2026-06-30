@@ -24,12 +24,12 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Account;
 import org.springframework.stereotype.Component;
-import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.converter.AccountConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 
 import java.util.Optional;
 import java.util.function.UnaryOperator;
@@ -45,12 +45,12 @@ public class SecuritiesDepositAndWithdrawalExcelTableView extends ExcelTableView
     @Getter
     private final int sheetOrder = 8;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> portfolio + " (ввод-вывод цб)";
+    private final UnaryOperator<String> sheetNameCreator = account -> account + " (ввод-вывод цб)";
 
-    public SecuritiesDepositAndWithdrawalExcelTableView(PortfolioRepository portfolioRepository,
+    public SecuritiesDepositAndWithdrawalExcelTableView(AccountRepository accountRepository,
                                                         SecuritiesDepositAndWithdrawalExcelTableFactory tableFactory,
-                                                        PortfolioConverter portfolioConverter) {
-        super(portfolioRepository, tableFactory, portfolioConverter);
+                                                        AccountConverter accountConverter) {
+        super(accountRepository, tableFactory, accountConverter);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class SecuritiesDepositAndWithdrawalExcelTableView extends ExcelTableView
     }
 
     @Override
-    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
+    protected Table.Record getTotalRow(Table table, Optional<Account> account) {
         Table.Record total = Table.newRecord();
         total.put(SECURITY, "Итого:");
         total.put(COUNT, "=SUM(" + COUNT.getRange(3, table.size() + 2) + ")");

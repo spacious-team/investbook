@@ -13,26 +13,27 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set Up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
-          java-version: '24'
+          java-version: '26'
           distribution: 'liberica'
           cache: maven
 
       - name: Set Up Wix
         run: |
-          dotnet tool install --global wix --version 6.0.1
-          wix extension add -g WixToolset.Util.wixext/6.0.1
-          wix extension add -g WixToolset.Ui.wixext/6.0.1
+          dotnet tool install --global wix --version 7.0.0
+          wix eula accept wix7
+          wix extension add -g WixToolset.Util.wixext/7.0.0
+          wix extension add -g WixToolset.Ui.wixext/7.0.0
 
       - name: Build
         run: mvn --batch-mode package
 
       - name: Attach MSI and ZIP to Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             target/*.zip
@@ -43,12 +44,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set Up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
-          java-version: '24'
+          java-version: '26'
           distribution: 'liberica'
           cache: maven
 
@@ -56,7 +57,7 @@ jobs:
         run: mvn --batch-mode --define no-zip package
 
       - name: Attach DEB and RPM to Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             target/installer/output/*.deb 
@@ -69,12 +70,12 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set Up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
-          java-version: '24'
+          java-version: '26'
           distribution: 'liberica'
           cache: maven
 
@@ -90,7 +91,7 @@ jobs:
           done
 
       - name: Attach PKG to Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             target/installer/output/*.pkg 
@@ -99,15 +100,15 @@ jobs:
 
     # macos-13 is run on Intel's CPU
     # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#standard-github-hosted-runners-for-public-repositories
-    runs-on: macos-13
+    runs-on: macos-15-intel
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set Up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
-          java-version: '24'
+          java-version: '26'
           distribution: 'liberica'
           cache: maven
 
@@ -123,7 +124,7 @@ jobs:
           done
 
       - name: Attach PKG to Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             target/installer/output/*.pkg

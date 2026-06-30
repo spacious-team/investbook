@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
@@ -51,7 +52,7 @@ class PropertiesGetter {
             "./app",                                       // windows
             "/opt/investbook/lib/app",                     // unix
             "/Applications/Investbook.app/Contents/app"};  // mac
-    private static final String DEFAULT_PROFILE = "conf";
+    private static final String DEFAULT_PROFILE = "default";
     private static final List<String> args = new CopyOnWriteArrayList<>();
     private static final List<String> profiles = new CopyOnWriteArrayList<>();
 
@@ -59,12 +60,12 @@ class PropertiesGetter {
         args.clear();
         args.addAll(Arrays.asList(_args));
         profiles.add("default");  // allows to read "spring.profiles.active" property from application.properties
-        String[] _profiles = getProperty("spring.profiles.active", DEFAULT_PROFILE)
+        String[] _profiles = getProperty("spring.profiles.active", "")
                 .split(",");
         profiles.clear();
         profiles.addAll(List.of(_profiles));
         Collections.reverse(profiles);  // last spring profile property should win
-        profiles.add("default");  // always read application.properties
+        profiles.add(DEFAULT_PROFILE);  // always read application.properties
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -91,25 +92,15 @@ class PropertiesGetter {
 
     static String getProperty(String property, String defaultValue) {
         try {
-            return readPropertyFromEnv(property)
-                    .or(() -> readPropertyFromArgs(property))
+            return readPropertyFromArgs(property)
+                    .or(() -> readPropertyFromJvmArgs(property))
+                    .or(() -> readPropertyFromEnv(property))
                     .or(() -> readPropertyFromFile(property))
                     .orElse(defaultValue);
         } catch (Exception e) {
             log.warn("Can't find '{}' property, fallback to default value: '{}'", property, defaultValue, e);
             return defaultValue;
         }
-    }
-
-    private static Optional<String> readPropertyFromEnv(String property) {
-        String varName = convertPropertyNameToEnvVarName(property);
-        return Optional.ofNullable(System.getenv(varName));
-    }
-
-    private static String convertPropertyNameToEnvVarName(String property) {
-        return property.toUpperCase()
-                .replace("_", "")
-                .replace(".", "_");
     }
 
     private static Optional<String> readPropertyFromArgs(String property) {
@@ -123,6 +114,27 @@ class PropertiesGetter {
             }
         }
         return Optional.empty();
+    }
+
+    private static Optional<String> readPropertyFromJvmArgs(String property) {
+        for (Entry<Object, Object> e : System.getProperties().entrySet()) {
+            if (Objects.equals(e.getKey(), property)) {
+                Object value = e.getValue();
+                return Optional.of(value.toString());
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> readPropertyFromEnv(String property) {
+        String varName = convertPropertyNameToEnvVarName(property);
+        return Optional.ofNullable(System.getenv(varName));
+    }
+
+    private static String convertPropertyNameToEnvVarName(String property) {
+        return property.toUpperCase()
+                .replace("_", "")
+                .replace(".", "_");
     }
 
     private static Optional<String> readPropertyFromFile(String key) {

@@ -18,6 +18,7 @@
 
 package ru.investbook.api;
 
+import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -30,6 +31,7 @@ import org.spacious_team.broker.pojo.Security;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,8 +48,8 @@ import ru.investbook.repository.SecurityRepository;
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
-@Tag(name = "Инструменты", description = "Акции, облигации, деривативы и валютные пары")
-@RequestMapping("/api/v1/securities")
+@Tag(name = "Securities and assets", description = "Stocks, bonds, derivatives, currency pairs and custom assets")
+@RequestMapping("/api/securities")
 public class SecurityRestController extends AbstractRestController<Integer, Security, SecurityEntity> {
 
     public SecurityRestController(SecurityRepository repository, SecurityConverter converter) {
@@ -57,24 +59,26 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отобразить все биржевые инструменты",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "getSecurities", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public Page<Security> get(@Parameter(hidden = true)
+                              @QuerydslPredicate(root = SecurityEntity.class)
+                              @Nullable
+                              Predicate predicate,
+                              @Parameter(hidden = true)
                               Pageable pageable) {
-        return super.get(pageable);
+        return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить один", description = "Отобразить биржевой инструмент по внутреннему идентификатору",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "getSecurity", responses = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Security> get(@PathVariable("id")
-                                        @Parameter(description = "Идентификатор", example = "123", required = true)
+                                        @Parameter
                                         Integer id) {
         return super.get(id);
     }
@@ -82,24 +86,22 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре",
-            responses = {
-                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-                    @ApiResponse(responseCode = "409"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "postSecurity", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "409"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> post(@RequestBody @Valid Security security) {
         return super.post(security);
     }
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", description = "Добавить информацию об акции, облигации, деривативе или валютной паре",
-            responses = {
-                    @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
-                    @ApiResponse(responseCode = "204"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(operationId = "putSecurity", responses = {
+            @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
-                                    @Parameter(description = "Идентификатор", example = "123", required = true)
+                                    @Parameter
                                     Integer id,
                                     @RequestBody
                                     @Valid
@@ -109,12 +111,12 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удалить сведения о биржевом инструменте и всех его сделках по всем счетам",
-            responses = {
-                    @ApiResponse(responseCode = "204"),
-                    @ApiResponse(responseCode = "500", content = @Content)})
+    @Operation(description = "Deletes all security-related transactions across all accounts",
+            operationId = "deleteSecurity", responses = {
+            @ApiResponse(responseCode = "204"),
+            @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
-                                       @Parameter(description = "Идентификатор", example = "123", required = true)
+                                       @Parameter
                                        Integer id) {
         return super.delete(id);
     }
@@ -127,10 +129,5 @@ public class SecurityRestController extends AbstractRestController<Integer, Secu
     @Override
     protected Security updateId(Integer id, Security object) {
         return object.toBuilder().id(id).build();
-    }
-
-    @Override
-    protected String getLocation() {
-        return "/securities";
     }
 }

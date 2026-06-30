@@ -21,6 +21,8 @@ package ru.investbook.web;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import ru.investbook.report.ViewFilter;
 import ru.investbook.report.excel.ExcelView;
 import ru.investbook.report.html.HtmlView;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.web.model.ViewFilterModel;
 
 import java.io.ByteArrayOutputStream;
@@ -42,48 +44,65 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.ZoneId.systemDefault;
-import static ru.investbook.web.ControllerHelper.getActivePortfolios;
-import static ru.investbook.web.ControllerHelper.getPortfolios;
-import static ru.investbook.web.HttpAttachResponseHelper.sendErrorPage;
+import static ru.investbook.web.ControllerHelper.getAccounts;
+import static ru.investbook.web.ControllerHelper.getActiveAccounts;
+import static ru.investbook.web.HttpAttachResponseHelper.sendErrorHttpHeader;
 import static ru.investbook.web.HttpAttachResponseHelper.sendSuccessHeader;
+import static ru.investbook.web.ReportControllerHelper.exceptionToString;
 
 @Controller
-@RequestMapping("/portfolio")
+@RequestMapping("/accounts")
 @RequiredArgsConstructor
 @Slf4j
 public class InvestbookReportController {
 
     private static final String REPORT_NAME = "investbook";
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    private final PortfolioRepository portfolioRepository;
+    private final AccountRepository accountRepository;
     private final ExcelView excelView;
     private final HtmlView htmlView;
 
     @GetMapping("select-period")
     public String getPage(Model model, @ModelAttribute("viewFilter") ViewFilterModel viewFilter) {
-        viewFilter.setPortfolios(getActivePortfolios(portfolioRepository));
-        model.addAttribute("allPortfolios", getPortfolios(portfolioRepository));
+        viewFilter.setAccounts(getActiveAccounts(accountRepository));
+        model.addAttribute("allAccounts", getAccounts(accountRepository));
         return "select-period";
     }
 
+    /**
+     * @return null if Thymeleaf render is not required, attach response has been already sent
+     */
     @GetMapping("report")
-    public void buildInvestbookHtmlReportByGet(@RequestParam(name = "format", defaultValue = "excel") String format,
-                                               HttpServletResponse response) throws Exception {
-        ViewFilter filter = getViewFilter(getViewFilterModel());
-        buildReport(format, response, filter);
+    public @Nullable String buildInvestbookReportWithDefaultFilter(@RequestParam(name = "format", defaultValue = "excel") String format,
+                                                                   HttpServletResponse response,
+                                                                   Model model) {
+        ViewFilterModel defaultViewFilter = getViewFilterModel();
+        return buildInvestbookReport(format, defaultViewFilter, response, model);
     }
 
+    /**
+     * @return null if Thymeleaf render is not required, attach response has been already sent
+     */
     @PostMapping("report")
-    public void buildInvestbookReport(@RequestParam(name = "format", defaultValue = "excel") String format,
-                                      @ModelAttribute("viewFilter") ViewFilterModel viewFilter,
-                                      HttpServletResponse response) throws Exception {
-        ViewFilter filter = getViewFilter(viewFilter);
-        buildReport(format, response, filter);
+    public @Nullable String buildInvestbookReport(@RequestParam(name = "format", defaultValue = "excel") String format,
+                                                  @ModelAttribute("viewFilter") ViewFilterModel viewFilter,
+                                                  HttpServletResponse response,
+                                                  Model model) {
+        try {
+            ViewFilter filter = getViewFilter(viewFilter);
+            buildReport(format, response, filter);
+            return null;  // response is already build
+        } catch (Exception e) {
+            logAndBuildStackTraceModel(response, model, e);
+            return "stack-trace";
+        }
     }
 
     private void buildReport(String format, HttpServletResponse response, ViewFilter filter) throws Exception {
         if ("html".equals(format)) {
+            response.setContentType(new MediaType("text", "html", UTF_8).toString());
             htmlView.create(response.getOutputStream(), filter);
         } else {
             String fileName = getReportName(filter, "xlsx");
@@ -94,14 +113,9 @@ public class InvestbookReportController {
     private void sendFileOrShowErrorPage(String fileName,
                                          Consumer<OutputStream> fileWriter,
                                          HttpServletResponse response) throws IOException {
-        try {
-            long t0 = System.nanoTime();
-            sendFile(fileName, fileWriter, response);
-            log.info("Отчет '{}' сформирован за {}", fileName, Duration.ofNanos(System.nanoTime() - t0));
-        } catch (Exception e) {
-            log.error("Ошибка сборки отчета", e);
-            sendErrorPage(response, e);
-        }
+        long t0 = System.nanoTime();
+        sendFile(fileName, fileWriter, response);
+        log.info("Отчет '{}' сформирован за {}", fileName, Duration.ofNanos(System.nanoTime() - t0));
         response.flushBuffer();
     }
 
@@ -125,11 +139,18 @@ public class InvestbookReportController {
 
     private ViewFilterModel getViewFilterModel() {
         ViewFilterModel viewFilter = new ViewFilterModel();
-        viewFilter.setPortfolios(getActivePortfolios(portfolioRepository));
+        viewFilter.setAccounts(getActiveAccounts(accountRepository));
         return viewFilter;
     }
 
     private ViewFilter getViewFilter(ViewFilterModel viewFilterModel) {
-        return ViewFilter.of(viewFilterModel, () -> getPortfolios(portfolioRepository));
+        return ViewFilter.of(viewFilterModel, () -> getAccounts(accountRepository));
+    }
+
+    private void logAndBuildStackTraceModel(HttpServletResponse response, Model model, Exception e) {
+        sendErrorHttpHeader(response);
+        log.error("Ошибка сборки отчета", e);
+        model.addAttribute("message", "Ошибка сборки отчета");
+        model.addAttribute("stackTrace", exceptionToString(e));
     }
 }

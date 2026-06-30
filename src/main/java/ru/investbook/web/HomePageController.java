@@ -24,15 +24,18 @@ import org.springframework.boot.info.BuildProperties;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.investbook.InvestbookProperties;
+import ru.investbook.parser.BrokerReportParserService;
 import ru.investbook.repository.TransactionRepository;
 import ru.investbook.service.AssetsAndCashService;
+import ru.investbook.web.forms.controller.ExternalSourcesGetterController;
 
+import java.io.InputStream;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+
+import static java.util.Objects.requireNonNull;
 
 @Slf4j
 @Controller
@@ -43,14 +46,16 @@ public class HomePageController {
     private final BuildProperties buildProperties;
     private final TransactionRepository transactionRepository;
     private final InvestbookProperties properties;
+    private final BrokerReportParserService brokerReportParserService;
+    private final ExternalSourcesGetterController externalSourcesGetterController;
 
     @GetMapping
     public String index(Model model) {
-        Set<String> portfolios = assetsAndCashService.getActivePortfolios();
-        model.addAttribute("transactionsCount", transactionRepository.countByPortfolioIn(portfolios));
-        model.addAttribute("portfolios", portfolios);
-        model.addAttribute("assets", assetsAndCashService.getTotalAssetsInRub(portfolios));
-        model.addAttribute("cashBalance", assetsAndCashService.getTotalCashInRub(portfolios));
+        Set<String> accounts = assetsAndCashService.getActiveAccounts();
+        model.addAttribute("transactionsCount", transactionRepository.countByAccountIn(accounts));
+        model.addAttribute("accounts", accounts);
+        model.addAttribute("assets", assetsAndCashService.getTotalAssetsInRub(accounts));
+        model.addAttribute("cashBalance", assetsAndCashService.getTotalCashInRub(accounts));
         model.addAttribute("buildProperties", buildProperties);
         model.addAttribute("logoUrl",
                 "https://github.com/spacious-team/investbook/assets/11336712/97828ac2-c52f-4c6e-8c3a-8a16f2c3fa3a");
@@ -60,11 +65,24 @@ public class HomePageController {
         return "index";
     }
 
-    @GetMapping("shutdown")
+    @PostMapping("/portfolios/demo/upload")
+    public String uploadDemo(Model model) {
+        String file = "/static/demo-portfolio.xlsx";
+        try (InputStream inputStream = requireNonNull(getClass().getResourceAsStream(file))) {
+            brokerReportParserService.parseReport(inputStream, file);
+            return externalSourcesGetterController.updateSilently(model, "/");
+        } catch (Exception e) {
+            log.error("Can't upload demo portfolio", e);
+            model.addAttribute("title", "Ошибка загрузки");
+            model.addAttribute("message", "Заведите заявку об ошибке на GitHub. " +
+                    "Диагностическая информация: " + e.getMessage());
+            model.addAttribute("backLink", "/");
+            return "success";
+        }
+    }
+
+    @GetMapping("/app/shutdown")
     public String shutdown() {
-        @SuppressWarnings("resource")
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        executor.schedule(() -> System.exit(0), 3, TimeUnit.SECONDS);
-        return "shutdown-page";
+        return "app/shutdown";
     }
 }

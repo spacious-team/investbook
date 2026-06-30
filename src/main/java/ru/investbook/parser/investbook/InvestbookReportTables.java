@@ -18,10 +18,10 @@
 
 package ru.investbook.parser.investbook;
 
+import org.spacious_team.broker.pojo.AccountCash;
+import org.spacious_team.broker.pojo.AccountProperty;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
-import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
@@ -50,13 +50,13 @@ public class InvestbookReportTables extends AbstractReportTables<InvestbookBroke
     }
 
     @Override
-    public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
-        return new InvestbookPortfolioPropertyTable(getReport());
+    public ReportTable<AccountProperty> getAccountPropertyTable() {
+        return new InvestbookAccountPropertyTable(getReport());
     }
 
     @Override
-    public ReportTable<PortfolioCash> getPortfolioCashTable() {
-        return new InvestbookPortfolioCashTable(getReport());
+    public ReportTable<AccountCash> getAccountCashTable() {
+        return new InvestbookAccountCashTable(getReport());
     }
 
     @Override

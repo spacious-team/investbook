@@ -37,7 +37,7 @@ public class SecurityEventCashFlowModel {
 
     private @Nullable Integer taxId;
 
-    private @NotEmpty String portfolio;
+    private @NotEmpty String account;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private @NotNull LocalDate date = LocalDate.now();

@@ -32,14 +32,14 @@ import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
 import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
 import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.springframework.stereotype.Component;
-import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.converter.AccountConverter;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
 import ru.investbook.report.ViewFilter;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.repository.TransactionCashFlowRepository;
 
 import java.util.ArrayList;
@@ -68,16 +68,16 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
     @Getter
     private final int sheetOrder = 2;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Портфель трейдера (" + portfolio + ")";
+    private final UnaryOperator<String> sheetNameCreator = account -> "Портфель трейдера (" + account + ")";
 
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final Set<Integer> types = Set.of(CashFlowType.DERIVATIVE_PRICE.getId());
 
-    public DerivativesMarketTotalProfitExcelTableView(PortfolioRepository portfolioRepository,
+    public DerivativesMarketTotalProfitExcelTableView(AccountRepository accountRepository,
                                                       DerivativesMarketTotalProfitExcelTableFactory tableFactory,
-                                                      PortfolioConverter portfolioConverter,
+                                                      AccountConverter accountConverter,
                                                       TransactionCashFlowRepository transactionCashFlowRepository) {
-        super(portfolioRepository, tableFactory, portfolioConverter);
+        super(accountRepository, tableFactory, accountConverter);
         this.transactionCashFlowRepository = transactionCashFlowRepository;
     }
 
@@ -92,15 +92,15 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
 
     private Collection<ExcelTable> createExcelTablesByCurrencies() {
         ViewFilter filter = ViewFilter.get();
-        Collection<String> portfolios = filter.getPortfolios();
-        if (showOnlySummary(filter) || isManyPortfolioRequested(portfolios)) {
+        Collection<String> accounts = filter.getAccounts();
+        if (showOnlySummary(filter) || isManyAccountRequested(accounts)) {
             Collection<ExcelTable> tables = new ArrayList<>();
-            List<String> currencies = portfolios.isEmpty() ?
+            List<String> currencies = accounts.isEmpty() ?
                     transactionCashFlowRepository.findDistinctCurrencyByCashFlowTypeIn(types) :
-                    transactionCashFlowRepository.findDistinctCurrencyByPortfolioInAndCashFlowTypeIn(portfolios, types);
+                    transactionCashFlowRepository.findDistinctCurrencyByAccountInAndCashFlowTypeIn(accounts, types);
             if (!currencies.contains(RUB)) currencies.add(RUB);
             for (String currency : currencies) {
-                Table table = tableFactory.create(portfolios, currency);
+                Table table = tableFactory.create(accounts, currency);
                 String sheetName = "Портфель трейдера (все) " + currency;
                 tables.add(ExcelTable.of(sheetName, table, this));
             }
@@ -109,8 +109,8 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
         return emptyList();
     }
 
-    private boolean isManyPortfolioRequested(Collection<String> portfolios) {
-        return portfolios.size() > 1 || (portfolios.isEmpty() && portfolioRepository.count() > 1);
+    private boolean isManyAccountRequested(Collection<String> accounts) {
+        return accounts.size() > 1 || (accounts.isEmpty() && accountRepository.count() > 1);
     }
 
     private static boolean showOnlySummary(ViewFilter filter) {
@@ -118,19 +118,19 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Collection<ExcelTable> createExcelTables(Portfolio portfolio, String sheetName) {
-        List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByPortfolioInAndCashFlowTypeIn(
-                singleton(portfolio.getId()), types);
+    protected Collection<ExcelTable> createExcelTables(Account account, String sheetName) {
+        List<String> currencies = transactionCashFlowRepository.findDistinctCurrencyByAccountInAndCashFlowTypeIn(
+                singleton(account.getId()), types);
         if (!currencies.contains(RUB)) currencies.add(RUB);
         return currencies.stream()
-                .map(currency -> createExcelTables(portfolio, sheetName, currency))
+                .map(currency -> createExcelTables(account, sheetName, currency))
                 .collect(toList());
     }
 
-    private ExcelTable createExcelTables(Portfolio portfolio, String sheetName, String currency) {
-        Table table = tableFactory.create(portfolio, currency);
+    private ExcelTable createExcelTables(Account account, String sheetName, String currency) {
+        Table table = tableFactory.create(account, currency);
         String sheetNameWithCurrency = sheetName + " " + currency;
-        return ExcelTable.of(portfolio, sheetNameWithCurrency, table, this);
+        return ExcelTable.of(account, sheetNameWithCurrency, table, this);
     }
 
     @Override
@@ -145,7 +145,7 @@ public class DerivativesMarketTotalProfitExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
+    protected Table.Record getTotalRow(Table table, Optional<Account> account) {
         Table.Record totalRow = Table.newRecord();
         for (DerivativesMarketTotalProfitExcelTableHeader column : DerivativesMarketTotalProfitExcelTableHeader.values()) {
             totalRow.put(column, "=SUM(" + column.getRange(3, table.size() + 2) + ")");

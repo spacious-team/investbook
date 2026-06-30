@@ -20,6 +20,7 @@ package ru.investbook.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.querydsl.ListQuerydslPredicateExecutor;
 import org.springframework.transaction.annotation.Transactional;
 import ru.investbook.entity.SecurityQuoteEntity;
 
@@ -29,7 +30,8 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public interface SecurityQuoteRepository extends
         JpaRepository<SecurityQuoteEntity, Integer>,
-        JpaSpecificationExecutor<SecurityQuoteEntity> {
+        JpaSpecificationExecutor<SecurityQuoteEntity>,
+        ListQuerydslPredicateExecutor<SecurityQuoteEntity> {
 
     Optional<SecurityQuoteEntity> findFirstBySecurityIdAndTimestampLessThanOrderByTimestampDesc(
             Integer securityId,

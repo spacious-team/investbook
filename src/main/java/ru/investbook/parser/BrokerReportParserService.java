@@ -18,6 +18,8 @@
 
 package ru.investbook.parser;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.io.InputStream;
 
 public interface BrokerReportParserService {
@@ -28,8 +30,20 @@ public interface BrokerReportParserService {
      *
      * @param inputStream      file content
      * @param fileName         file name
+     * @throws RuntimeException if report has broken format or parser not found
+     */
+    default void parseReport(InputStream inputStream, String fileName) {
+        parseReport(inputStream, fileName, null);
+    }
+
+    /**
+     * Parse and backups report.
+     * Method does not close input stream.
+     *
+     * @param inputStream      file content
+     * @param fileName         file name
      * @param providedByBroker broker what generates report, may be null if unknown
      * @throws RuntimeException if report has broken format or parser not found
      */
-    void parseReport(InputStream inputStream, String fileName, String providedByBroker);
+    void parseReport(InputStream inputStream, String fileName, @Nullable String providedByBroker);
 }

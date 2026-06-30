@@ -20,6 +20,7 @@ package ru.investbook.repository;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.SnapshotIsolationException;
 
 import java.sql.SQLException;
 import java.util.Objects;
@@ -52,6 +53,11 @@ public class RepositoryHelper {
                     }
                 }
                 return true;  // other databases
+            } else if (t instanceof SnapshotIsolationException) {
+                // MariaDB error code = 1020:
+                // Текущая запись с таким же Primary key или Uniq Key была создана в параллельном потоке
+                // в момент работы текущей транзакции
+                return true;
             }
         } while (nonNull(t) && nonNull(t = t.getCause()));
         return false;

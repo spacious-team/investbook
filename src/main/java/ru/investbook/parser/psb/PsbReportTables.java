@@ -19,10 +19,10 @@
 package ru.investbook.parser.psb;
 
 import lombok.Getter;
+import org.spacious_team.broker.pojo.AccountCash;
+import org.spacious_team.broker.pojo.AccountProperty;
 import org.spacious_team.broker.pojo.EventCashFlow;
 import org.spacious_team.broker.pojo.ForeignExchangeRate;
-import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioProperty;
 import org.spacious_team.broker.pojo.Security;
 import org.spacious_team.broker.pojo.SecurityEventCashFlow;
 import org.spacious_team.broker.pojo.SecurityQuote;
@@ -49,12 +49,12 @@ public class PsbReportTables extends AbstractReportTables<PsbBrokerReport> {
     }
 
     @Override
-    public ReportTable<PortfolioProperty> getPortfolioPropertyTable() {
-        return new PortfolioPropertyTable(report);
+    public ReportTable<AccountProperty> getAccountPropertyTable() {
+        return new AccountPropertyTable(report);
     }
 
     @Override
-    public ReportTable<PortfolioCash> getPortfolioCashTable() {
+    public ReportTable<AccountCash> getAccountCashTable() {
         return new CashTable(report);
     }
 

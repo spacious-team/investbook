@@ -44,7 +44,7 @@ public class VtbCashFlowTable extends AbstractVtbCashFlowTable<EventCashFlow> {
         }
         String description = event.getDescription();
         return singletonList(EventCashFlow.builder()
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .eventType(type)
                 .timestamp(event.getDate())
                 .value(event.getValue())

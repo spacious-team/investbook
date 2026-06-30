@@ -23,14 +23,15 @@
     <title th:text="${title ?: 'Успешно'}"></title>
     <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
     <link rel="stylesheet" href="/water-wrapper.css">
+    <link rel="stylesheet" href="/main.css">
 </head>
 <body>
-    <h1 th:text="${title ?: 'Успешно'}"></h1>
-    <p th:if="${message != null}" th:utext="${message}"></p>
-    <p>
-        <a th:if="${backLink == null}" href="#" onclick="window.history.back()">[назад]</a>
-        <a th:if="${backLink != null}" th:href="${backLink}">[назад]</a>
-        <a href="/">[на главную]</a>
-    </p>
+<h1 th:text="${title ?: 'Успешно'}"></h1>
+<p th:if="${message != null}" th:text="${message}"></p>
+<form th:action="${backLink != null ? backLink : '#'}" method="get" class="back">
+    <button th:if="${backLink == null}" type="button" onclick="window.history.back()">Назад</button>
+    <button th:if="${backLink != null}" type="submit">Назад</button>
+    <button type="submit" formaction="/">На главную</button>
+</form>
 </body>
 </html>

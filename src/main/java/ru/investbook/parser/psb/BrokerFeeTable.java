@@ -25,7 +25,7 @@ import org.spacious_team.table_wrapper.api.TableRow;
 import org.springframework.util.StringUtils;
 import ru.investbook.parser.SingleAbstractReportTable;
 import ru.investbook.parser.SingleBrokerReport;
-import ru.investbook.parser.psb.PortfolioPropertyTable.SummaryTableHeader;
+import ru.investbook.parser.psb.AccountPropertyTable.SummaryTableHeader;
 
 import java.math.BigDecimal;
 import java.util.AbstractMap;
@@ -34,7 +34,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static ru.investbook.parser.psb.PortfolioPropertyTable.SummaryTableHeader.*;
+import static ru.investbook.parser.psb.AccountPropertyTable.SummaryTableHeader.*;
 
 @Slf4j
 public class BrokerFeeTable extends SingleAbstractReportTable<EventCashFlow> {
@@ -42,7 +42,7 @@ public class BrokerFeeTable extends SingleAbstractReportTable<EventCashFlow> {
     private boolean initialized = false;
 
     public BrokerFeeTable(SingleBrokerReport report) {
-        super(report, PortfolioPropertyTable.SUMMARY_TABLE, LAST_ROW, SummaryTableHeader.class);
+        super(report, AccountPropertyTable.SUMMARY_TABLE, LAST_ROW, SummaryTableHeader.class);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class BrokerFeeTable extends SingleAbstractReportTable<EventCashFlow> {
 
     private EventCashFlow toFee(BigDecimal fee, String currency, String description) {
         return EventCashFlow.builder()
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .timestamp(getReport().getReportEndDateTime())
                 .eventType(CashFlowType.FEE)
                 .value(fee)

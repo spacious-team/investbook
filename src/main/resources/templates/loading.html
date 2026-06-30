@@ -1,21 +1,3 @@
-<!--
-  ~ InvestBook
-  ~ Copyright (C) 2024  Spacious Team <spacious-team@ya.ru>
-  ~
-  ~ This program is free software: you can redistribute it and/or modify
-  ~ it under the terms of the GNU Affero General Public License as
-  ~ published by the Free Software Foundation, either version 3 of the
-  ~ License, or (at your option) any later version.
-  ~
-  ~ This program is distributed in the hope that it will be useful,
-  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ~ GNU Affero General Public License for more details.
-  ~
-  ~ You should have received a copy of the GNU Affero General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  -->
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -45,27 +27,28 @@
         }
     </style>
     <script type = "module">
-        function checkMainApp() {
+        async function checkMainApp() {
             let port = {{ server.port }}  // replaced by java's LoadingPageHandler.class
             let homePageUrl = location.protocol + '//' + location.hostname + ":" +  port
             // checkPage доступен только после загрузки основного http сервера
             let checkPage = homePageUrl + '/broker-file-reports'
             console.info("Check main server page: " + checkPage)
-            fetch(checkPage)
+            await fetch(checkPage)
                 .then(response => {
                     if (response && response.ok) {
                         console.info("Redirect to: " + homePageUrl);
                         window.location.href = homePageUrl;
                     } else {
                         console.info("Main server is not ready")
+                        setTimeout(checkMainApp, 500);  // (1/2)
                     }
                 })
                 .catch(error => {
                     console.error("Error checking main app:", error);
+                    setTimeout(checkMainApp, 500);  // (2/2)
                 });
         }
-
-        setInterval(checkMainApp, 500);
+        checkMainApp();
     </script>
 </head>
 <body>

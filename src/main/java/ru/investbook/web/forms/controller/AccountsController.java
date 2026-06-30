@@ -1,0 +1,98 @@
+/*
+ * InvestBook
+ * Copyright (C) 2022  Spacious Team <spacious-team@ya.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package ru.investbook.web.forms.controller;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import ru.investbook.report.FifoPositionsFactory;
+import ru.investbook.report.ForeignExchangeRateService;
+import ru.investbook.repository.AccountRepository;
+import ru.investbook.repository.SecurityRepository;
+import ru.investbook.web.forms.model.ArchivedAccountModel;
+
+import java.util.Set;
+
+import static ru.investbook.web.ControllerHelper.getAccounts;
+import static ru.investbook.web.ControllerHelper.getInactiveAccounts;
+
+@Controller
+@RequestMapping("/accounts")
+@RequiredArgsConstructor
+public class AccountsController {
+    private final AccountRepository accountRepository;
+    private final SecurityRepository securityRepository;
+    private final FifoPositionsFactory fifoPositionsFactory;
+    private final ForeignExchangeRateService foreignExchangeRateService;
+
+    @GetMapping("/archive")
+    public String get(Model model, @ModelAttribute("archive") ArchivedAccountModel archive) {
+        Set<String> allAccounts = getAccounts(accountRepository);
+        model.addAttribute("allAccounts", allAccounts);
+        archive.setAccounts(getInactiveAccounts(accountRepository));
+        return "accounts/archive";
+    }
+
+    @PostMapping("/archive")
+    public String postEventCashFlow(@ModelAttribute("archive") @Valid ArchivedAccountModel archive) {
+        getAccounts(accountRepository)
+                .forEach(account -> {
+                    boolean isEnabled = !archive.getAccounts().contains(account);
+                    accountRepository.setEnabledForAccount(account, isEnabled);
+                });
+        return "success";
+    }
+
+    @GetMapping("/delete")
+    public String deleteWarning(Model model) {
+        Set<String> accounts = getAccounts(accountRepository);
+        model.addAttribute("accounts", accounts);
+        return "accounts/delete";
+    }
+
+    @PostMapping("/delete")
+    public String delete(Model model, @RequestParam("account") String account) {
+        accountRepository.deleteById(account);
+        fifoPositionsFactory.invalidateCache();
+        foreignExchangeRateService.invalidateCache();
+        model.addAttribute("message", "Счет '" + account + "' удален");
+        return "success";
+    }
+
+    @GetMapping("/delete-all")
+    public String deleteAllWarning() {
+        return "accounts/delete-all";
+    }
+
+    @PostMapping("/delete-all")
+    public String deleteAllAccepted(Model model) {
+        accountRepository.deleteAll();
+        securityRepository.deleteAll();
+        fifoPositionsFactory.invalidateCache();
+        foreignExchangeRateService.invalidateCache();
+        model.addAttribute("message", "Информация по всем счетам удалена");
+        return "success";
+    }
+}

@@ -29,13 +29,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.decampo.xirr.NewtonRaphson;
 import org.decampo.xirr.Transaction;
 import org.decampo.xirr.Xirr;
-import org.spacious_team.broker.pojo.Portfolio;
+import org.spacious_team.broker.pojo.Account;
 import org.springframework.stereotype.Component;
-import ru.investbook.converter.PortfolioConverter;
+import ru.investbook.converter.AccountConverter;
 import ru.investbook.report.ForeignExchangeRateService;
 import ru.investbook.report.Table;
 import ru.investbook.report.TableHeader;
-import ru.investbook.repository.PortfolioRepository;
+import ru.investbook.repository.AccountRepository;
 import ru.investbook.service.AssetsAndCashService;
 
 import java.math.BigDecimal;
@@ -61,17 +61,17 @@ public class CashFlowExcelTableView extends ExcelTableView {
     @Getter
     private final int sheetOrder = 9;
     @Getter(AccessLevel.PROTECTED)
-    private final UnaryOperator<String> sheetNameCreator = portfolio -> "Доходность (" + portfolio + ")";
+    private final UnaryOperator<String> sheetNameCreator = account -> "Доходность (" + account + ")";
     private final AssetsAndCashService assetsAndCashService;
     private final Xirr.Builder xirrBuilder = Xirr.builder()
             .withNewtonRaphsonBuilder(NewtonRaphson.builder().withTolerance(0.001)); // in currency units (RUB, USD)
 
-    public CashFlowExcelTableView(PortfolioRepository portfolioRepository,
+    public CashFlowExcelTableView(AccountRepository accountRepository,
                                   CashFlowExcelTableFactory tableFactory,
-                                  PortfolioConverter portfolioConverter,
+                                  AccountConverter accountConverter,
                                   AssetsAndCashService assetsAndCashService,
                                   ForeignExchangeRateService foreignExchangeRateService) {
-        super(portfolioRepository, tableFactory, portfolioConverter);
+        super(accountRepository, tableFactory, accountConverter);
         this.assetsAndCashService = assetsAndCashService;
         this.foreignExchangeRateService = foreignExchangeRateService;
     }
@@ -91,12 +91,12 @@ public class CashFlowExcelTableView extends ExcelTableView {
     }
 
     @Override
-    protected Table.Record getTotalRow(Table table, Optional<Portfolio> portfolio) {
+    protected Table.Record getTotalRow(Table table, Optional<Account> account) {
         Table.Record total = Table.newRecord();
-        String _portfolio = portfolio
+        String _account = account
                 .orElseThrow(() -> new IllegalArgumentException("Ожидается портфель"))
                 .getId();
-        BigDecimal liquidationValueRub = assetsAndCashService.getTotalAssetsInRub(_portfolio).orElse(BigDecimal.ZERO);
+        BigDecimal liquidationValueRub = assetsAndCashService.getTotalAssetsInRub(_account).orElse(BigDecimal.ZERO);
         total.put(DATE, "Итого:");
         total.put(CASH_RUB, "=SUM(" +
                 CASH_RUB.getRange(3, table.size() + 2) + ")+" +
@@ -134,6 +134,7 @@ public class CashFlowExcelTableView extends ExcelTableView {
         @Nullable Transaction transaction = (cashInRub != null && date instanceof Instant instant) ?
                 new Transaction(cashInRub, LocalDate.ofInstant(instant, ZoneId.systemDefault())) :
                 null;
+        //noinspection NullableProblems
         return Optional.ofNullable(transaction);
     }
 

@@ -22,12 +22,12 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.report_parser.api.BrokerReport;
 import org.spacious_team.broker.report_parser.api.BrokerReportFactory;
 import org.spacious_team.broker.report_parser.api.ReportTables;
 import org.spacious_team.broker.report_parser.api.ReportTablesFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import ru.investbook.InvestbookProperties;
 
 import java.io.ByteArrayInputStream;
@@ -35,13 +35,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
+import static org.springframework.util.StringUtils.hasLength;
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +58,8 @@ public class BrokerReportParserServiceImpl implements BrokerReportParserService 
 
     @SneakyThrows
     @Override
-    public void parseReport(InputStream inputStream, String fileName, String broker) {
+    public void parseReport(InputStream inputStream, String fileName, @Nullable String broker) {
+        fileName = requireNonNull(Paths.get(fileName).getFileName()).toString();
         ByteArrayInputStream is = castToByteArrayInputStream(inputStream);
         long t0 = System.nanoTime();
         is.mark(Integer.MAX_VALUE);
@@ -88,7 +91,7 @@ public class BrokerReportParserServiceImpl implements BrokerReportParserService 
      * @return the exact name of the broker providing the report
      * @throws RuntimeException if report has broken format or parser not found
      */
-    private String parseReport0(ByteArrayInputStream inputStream, String fileName, String providedByBroker) {
+    private String parseReport0(ByteArrayInputStream inputStream, String fileName, @Nullable String providedByBroker) {
         try (BrokerNameAndReport brokerNameAndReport = getBrokerReport(inputStream, fileName, providedByBroker)) {
             ReportTables reportTables = getReportTables(brokerNameAndReport.getBrokerReport());
             reportParserService.parse(reportTables);
@@ -105,26 +108,22 @@ public class BrokerReportParserServiceImpl implements BrokerReportParserService 
      */
     @SneakyThrows
     private Path saveToBackup(InputStream inputStream, String fileName, String brokerName) {
-        Objects.requireNonNull(brokerName, "Наименование брокера, предоставившего отчет, не определено");
+        requireNonNull(brokerName, "Наименование брокера, предоставившего отчет, не определено");
         Path backupPath = investbookProperties.getReportBackupPath().resolve(brokerName);
         Files.createDirectories(backupPath);
-        Path path = backupPath.resolve((fileName != null) ?
-                fileName :
-                UUID.randomUUID().toString());
+        Path path = backupPath.resolve(fileName);
         for (int i = 1; i < 1e6; i++) {
             if (!Files.exists(path)) {
                 break;
             }
-            path = backupPath.resolve((fileName != null) ?
-                    "Копия " + i + " - " + (fileName) :
-                    UUID.randomUUID().toString());
+            path = backupPath.resolve("Копия " + i + " - " + (fileName));
         }
         Files.copy(inputStream, path);
         return path;
     }
 
-    private BrokerNameAndReport getBrokerReport(ByteArrayInputStream inputStream, String fileName, String providedByBroker) {
-        if (StringUtils.hasLength(providedByBroker)) {
+    private BrokerNameAndReport getBrokerReport(ByteArrayInputStream inputStream, String fileName, @Nullable String providedByBroker) {
+        if (hasLength(providedByBroker)) {
             return getReportOfKnownBroker(inputStream, fileName, providedByBroker);
         } else {
             return getReportOfUnknownBroker(inputStream, fileName);
@@ -154,7 +153,7 @@ public class BrokerReportParserServiceImpl implements BrokerReportParserService 
                         .stream())
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Файл " + fileName +
-                        " не является отчетом брокера " + providedByBroker));
+                        " не является отчетом брокера '" + providedByBroker + "'"));
     }
 
     private Collection<BrokerReportFactory> findBrokerReportFactory(String broker) {

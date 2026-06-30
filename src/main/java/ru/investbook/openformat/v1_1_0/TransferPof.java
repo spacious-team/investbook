@@ -100,19 +100,19 @@ public class TransferPof {
         return TransferPof.builder()
                 .id(transaction.getId())
                 .transferId(transaction.getTradeId())
-                .account(AccountPof.getAccountId(transaction.getPortfolio()))
+                .account(AccountPof.getAccountId(transaction.getAccount()))
                 .timestamp(transaction.getTimestamp().getEpochSecond())
                 .asset(transaction.getSecurity().getId())
                 .count(BigDecimal.valueOf(transaction.getCount()))
                 .build();
     }
 
-    Optional<Transaction> toTransaction(Map<Integer, String> accountToPortfolioId,
+    Optional<Transaction> toTransaction(Map<Integer, String> accountToAccountId,
                                         Map<Integer, Integer> assetToSecurityId) {
         try {
             return Optional.of(Transaction.builder()
                     .tradeId(requireNonNull(transferId))
-                    .portfolio(requireNonNull(accountToPortfolioId.get(account)))
+                    .account(requireNonNull(accountToAccountId.get(account)))
                     .timestamp(Instant.ofEpochSecond(timestamp))
                     .security(getSecurityId(assetToSecurityId))
                     .count(count.intValueExact())
@@ -123,13 +123,13 @@ public class TransferPof {
         }
     }
 
-    Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToPortfolioId,
+    Collection<SecurityEventCashFlow> getSecurityEventCashFlow(Map<Integer, String> accountToAccountId,
                                                                Map<Integer, Integer> assetToSecurityId) {
         try {
             if (fee != null && feeCurrency != null) {
                 return Set.of(
                         SecurityEventCashFlow.builder()
-                                .portfolio(requireNonNull(accountToPortfolioId.get(account)))
+                                .account(requireNonNull(accountToAccountId.get(account)))
                                 .timestamp(Instant.ofEpochSecond(timestamp))
                                 .security(getSecurityId(assetToSecurityId))
                                 .count(count.intValueExact())

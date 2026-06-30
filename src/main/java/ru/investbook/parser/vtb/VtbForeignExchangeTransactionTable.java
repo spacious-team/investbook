@@ -59,7 +59,7 @@ public class VtbForeignExchangeTransactionTable extends SingleInitializableRepor
 
     private Collection<ForeignExchangeTransaction> parseTable(String tableName) {
         return getReport().getReportPage()
-                .create(tableName, FxTransactionTableHeader.class)
+                .createTable(tableName, 1, null, FxTransactionTableHeader.class, 1)
                 .getData(getReport(), this::parseRow);
     }
 
@@ -82,7 +82,7 @@ public class VtbForeignExchangeTransactionTable extends SingleInitializableRepor
         return ForeignExchangeTransaction.builder()
                 .timestamp(row.getInstantCellValue(DATE_TIME))
                 .tradeId(row.getStringCellValue(TRADE_ID))
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .security(securityId)
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(value)

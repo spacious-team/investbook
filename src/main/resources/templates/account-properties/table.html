@@ -1,0 +1,80 @@
+<!--
+  ~ InvestBook
+  ~ Copyright (C) 2021  Spacious Team <spacious-team@ya.ru>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as
+  ~ published by the Free Software Foundation, either version 3 of the
+  ~ License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Информация по счету</title>
+    <link rel="stylesheet" href="/water-light.css"> <!-- https://cdn.jsdelivr.net/npm/water.css@2/out/light.css -->
+    <link rel="stylesheet" href="/water-wrapper.css">
+    <style>
+        table {
+            min-width: 800px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Информация по счету</h1>
+<a href="/account-properties/edit-form/total-assets">Добавить оценку стоимости активов</a><br>
+<a href="/forms.html">На главную</a><br>
+
+<p class="hint">
+    Для редактирования свойства кликните по его номеру, для удаления - на крестик.
+</p>
+
+<form action="#" th:action="@{/account-properties/search}" th:object="${filter}" method="post" class="search-filter">
+    <div th:replace="~{fragments/search :: account (selected='*{account}', accounts=${accounts})}"></div>
+    <div th:replace="~{fragments/search :: date ('*{date}')}"></div>
+    <div th:replace="~{fragments/search :: account-property-type ('*{property}')}"></div>
+    <div th:replace="~{fragments/search :: page-size ('*{pageSize}')}"></div>
+</form>
+
+<table>
+    <tr>
+        <th>Счет</th>
+        <th>Номер записи</th>
+        <th>Дата</th>
+        <th>Свойство</th>
+        <th class="value">Значение</th>
+        <th></th>
+    </tr>
+    <th:block th:each="property : ${page.content}">
+        <tr th:if="${property instanceof T(ru.investbook.web.forms.model.AccountPropertyTotalAssetsModel)}">
+            <td th:text="${property.account}"/>
+            <td><a th:href="@{/account-properties/edit-form/total-assets(id=${property.id})}" th:text="${property.id}"/></td>
+            <td th:text="${property.date}"/>
+            <td>Активы</td>
+            <td th:text="${property.totalAssets.setScale(2, T(java.math.RoundingMode).HALF_UP)} + '&emsp;' + ${property.totalAssetsCurrency}" class="value"/>
+            <td class="table-row-control"><a th:href="@{/account-properties/delete(id=${property.id})}" title="Удалить">&#x274c;</a></td>
+        </tr>
+    </th:block>
+</table>
+
+<div th:insert="~{fragments/navigation :: navigation-bar (
+        endpoint='account-properties',
+        params='account=${filter.account},
+                date=${filter.date},
+                property=${filter.property},
+                pageSize=${filter.pageSize}'
+    )}">
+</div>
+
+</body>
+</html>

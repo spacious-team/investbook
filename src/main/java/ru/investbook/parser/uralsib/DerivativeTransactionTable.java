@@ -89,7 +89,7 @@ public class DerivativeTransactionTable extends SingleAbstractReportTable<Deriva
         return DerivativeTransaction.builder()
                 .timestamp(convertToInstant(row.getStringCellValue(DATE_TIME)))
                 .tradeId(tradeId)
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .security(securityId)
                 .count((isBuy ? 1 : -1) * count)
                 .valueInPoints(valueInPoints)

@@ -25,8 +25,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
-import org.spacious_team.broker.pojo.PortfolioCash;
-import org.spacious_team.broker.pojo.PortfolioProperty;
+import org.spacious_team.broker.pojo.AccountCash;
+import org.spacious_team.broker.pojo.AccountProperty;
 import org.spacious_team.broker.pojo.SecurityDescription;
 import org.spacious_team.broker.pojo.SecurityQuote;
 
@@ -46,15 +46,15 @@ public class VndInvestbookPof {
 
     @Builder.Default
     @JsonIgnoreProperties(value = {"id"})
-    @JsonProperty("portfolio-cash")
+    @JsonProperty("account-cash")
     @NotNull
-    Collection<PortfolioCash> portfolioCash = Collections.emptySet();
+    Collection<AccountCash> accountCash = Collections.emptySet();
 
     @Builder.Default
     @JsonIgnoreProperties(value = {"id"})
-    @JsonProperty("portfolio-properties")
+    @JsonProperty("account-properties")
     @NotNull
-    Collection<PortfolioProperty> portfolioProperties = Collections.emptySet();
+    Collection<AccountProperty> accountProperties = Collections.emptySet();
 
     @Builder.Default
     @JsonIgnoreProperties(value = {"issuer"})

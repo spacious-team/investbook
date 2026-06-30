@@ -28,9 +28,9 @@ import jakarta.persistence.metamodel.SingularAttribute;
 import lombok.NoArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spacious_team.broker.pojo.CashFlowType;
+import ru.investbook.entity.AccountEntity;
+import ru.investbook.entity.AccountEntity_;
 import ru.investbook.entity.CashFlowTypeEntity;
-import ru.investbook.entity.PortfolioEntity;
-import ru.investbook.entity.PortfolioEntity_;
 import ru.investbook.entity.SecurityEntity;
 import ru.investbook.entity.SecurityEntity_;
 
@@ -131,42 +131,42 @@ class SpecificationHelper {
                 endOfDay);
     }
 
-    static <T> Predicate filterByPortfolio(Root<T> root,
-                                           CriteriaBuilder builder,
-                                           SingularAttribute<T, PortfolioEntity> attribute,
-                                           @Nullable String portfolio) {
-        if (hasText(portfolio)) {
+    static <T> Predicate filterByAccount(Root<T> root,
+                                         CriteriaBuilder builder,
+                                         SingularAttribute<T, AccountEntity> attribute,
+                                         @Nullable String account) {
+        if (hasText(account)) {
             Path<String> path = root.get(attribute)
-                    .get(PortfolioEntity_.ID);
-            return builder.equal(path, portfolio);
+                    .get(AccountEntity_.ID);
+            return builder.equal(path, account);
         }
         Path<Boolean> path = root.get(attribute)
-                .get(PortfolioEntity_.enabled);
+                .get(AccountEntity_.enabled);
         return builder.isTrue(path);
     }
 
-    static <T> Predicate filterByPortfolioName(Root<T> root,
-                                               CriteriaBuilder builder,
-                                               SingularAttribute<T, String> attribute,
-                                               @Nullable String portfolio,
-                                               CriteriaQuery<?> query) {
-        Path<String> transactionPortfolioPath = root.get(attribute);
-        if (hasText(portfolio)) {
-            return builder.equal(transactionPortfolioPath, portfolio);
+    static <T> Predicate filterByAccountName(Root<T> root,
+                                             CriteriaBuilder builder,
+                                             SingularAttribute<T, String> attribute,
+                                             @Nullable String account,
+                                             CriteriaQuery<?> query) {
+        Path<String> transactionAccountPath = root.get(attribute);
+        if (hasText(account)) {
+            return builder.equal(transactionAccountPath, account);
         }
-        // Do sub-query because <...>Entity is not related to PortfolioEntity in Java model, so
+        // Do sub-query because <...>Entity is not related to AccountEntity in Java model, so
         // can not do join query in Criteria API
         Subquery<String> subQuery = query.subquery(String.class);
-        Root<PortfolioEntity> portfolios = subQuery.from(PortfolioEntity.class);
+        Root<AccountEntity> accounts = subQuery.from(AccountEntity.class);
 
-        Path<String> portfolioId = portfolios.get(PortfolioEntity_.id);
-        Path<Boolean> portfolioEnabled = portfolios.get(PortfolioEntity_.enabled);
+        Path<String> accountId = accounts.get(AccountEntity_.id);
+        Path<Boolean> isAccountEnabled = accounts.get(AccountEntity_.enabled);
 
-        Subquery<String> enabledPortfolioIds = subQuery.select(portfolioId)
-                .where(builder.isTrue(portfolioEnabled));
+        Subquery<String> enabledAccountIds = subQuery.select(accountId)
+                .where(builder.isTrue(isAccountEnabled));
 
-        return builder.in(transactionPortfolioPath)
-                .value(enabledPortfolioIds);
+        return builder.in(transactionAccountPath)
+                .value(enabledAccountIds);
     }
 
     static <X> @Nullable Predicate filterByEquals(Root<X> root,

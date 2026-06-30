@@ -20,8 +20,8 @@ package ru.investbook.report.excel;
 
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spacious_team.broker.pojo.Account;
 import org.spacious_team.broker.pojo.CashFlowType;
-import org.spacious_team.broker.pojo.Portfolio;
 import org.spacious_team.broker.pojo.Transaction;
 import org.springframework.stereotype.Component;
 import ru.investbook.report.ClosedPosition;
@@ -54,13 +54,13 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
     private final TransactionCashFlowRepository transactionCashFlowRepository;
     private final FifoPositionsFactory positionsFactory;
 
-    public Table create(Portfolio portfolio) {
-        return create(portfolio, getCurrencyPairs(portfolio));
+    public Table create(Account account) {
+        return create(account, getCurrencyPairs(account));
     }
 
-    public Table create(Portfolio portfolio, Collection<String> currencyPairs) {
+    public Table create(Account account, Collection<String> currencyPairs) {
         ViewFilter f = ViewFilter.get();
-        FifoPositionsFilter positionsFilter = FifoPositionsFilter.of(portfolio, f.getFromDate(), f.getToDate());
+        FifoPositionsFilter positionsFilter = FifoPositionsFilter.of(account, f.getFromDate(), f.getToDate());
         Table openPositionsProfit = new Table();
         Table closedPositionsProfit = new Table();
         for (String currencyPair : currencyPairs) {
@@ -79,10 +79,10 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
     /**
      * Returns currency pairs, for example USDRUB, EURRUB
      */
-    private Collection<String> getCurrencyPairs(Portfolio portfolio) {
+    private Collection<String> getCurrencyPairs(Account account) {
         Collection<Integer> fxContracts = transactionRepository
-                .findDistinctFxContractByPortfolioInAndTimestampBetweenOrderByTimestampDesc(
-                        singleton(portfolio.getId()),
+                .findDistinctFxContractByAccountInAndTimestampBetweenOrderByTimestampDesc(
+                        singleton(account.getId()),
                         ViewFilter.get().getFromDate(),
                         ViewFilter.get().getToDate());
         return securityRepository.findDistinctCurrencyPair(fxContracts);
@@ -105,12 +105,9 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
         Transaction transaction = position.getOpenTransaction();
         row.put(OPEN_DATE, transaction.getTimestamp());
         row.put(COUNT, Math.abs(position.getCount()) * Integer.signum(transaction.getCount()));
-        //noinspection DataFlowIssue
         row.put(OPEN_PRICE, getTransactionCashFlow(transaction, CashFlowType.PRICE, 1d / transaction.getCount()));
         double multiplier = Math.abs(1d * position.getCount() / transaction.getCount());
-        //noinspection DataFlowIssue
         row.put(OPEN_AMOUNT, getTransactionCashFlow(transaction, CashFlowType.PRICE, multiplier));
-        //noinspection DataFlowIssue
         row.put(OPEN_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.FEE, multiplier));
         return row;
     }
@@ -130,7 +127,6 @@ public class ForeignMarketProfitExcelTableFactory implements TableFactory {
                     " не может быть закрыта событием типа " + position.getClosingEvent());
         }
         row.put(CLOSE_AMOUNT, closeAmount);
-        //noinspection DataFlowIssue
         row.put(CLOSE_COMMISSION, getTransactionCashFlow(transaction, CashFlowType.FEE, multiplier));
         boolean isLongPosition = isLongPosition(position);
         row.put(FORECAST_TAX, getForecastTax(isLongPosition));

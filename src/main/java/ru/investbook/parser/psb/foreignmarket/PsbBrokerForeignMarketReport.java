@@ -45,7 +45,7 @@ public class PsbBrokerForeignMarketReport extends AbstractBrokerReport {
 
     private static final DateTimeFormatter dateFormatterWithSlash = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-    private static final String PORTFOLIO_MARKER = "Договор №:";
+    private static final String ACCOUNT_MARKER = "Договор №:";
     private static final String REPORT_DATE_MARKER = "ОТЧЕТ БРОКЕРА";
 
     public PsbBrokerForeignMarketReport(String excelFileName, InputStream is, SecurityRegistrar securityRegistrar) {
@@ -60,7 +60,7 @@ public class PsbBrokerForeignMarketReport extends AbstractBrokerReport {
                 reportPage,
                 excelFileName,
                 getReportEndDateTime(reportPage),
-                getPortfolio(reportPage));
+                getAccount(reportPage));
     }
 
     private static Workbook getWorkbook(InputStream is) {
@@ -84,13 +84,13 @@ public class PsbBrokerForeignMarketReport extends AbstractBrokerReport {
         return bais;
     }
 
-    private static String getPortfolio(ReportPage reportPage) {
+    private static String getAccount(ReportPage reportPage) {
         try {
-            String value = String.valueOf(reportPage.getNextColumnValue(PORTFOLIO_MARKER));
+            String value = String.valueOf(reportPage.getNextColumnValue(ACCOUNT_MARKER));
             return (value.contains("/") ? value.split("/")[0] : value) + "V";
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    "В отчете не найден номер договора по заданному шаблону '" + PORTFOLIO_MARKER + " XXX'");
+                    "В отчете не найден номер договора по заданному шаблону '" + ACCOUNT_MARKER + " XXX'");
         }
     }
 

@@ -18,6 +18,7 @@
 
 package ru.investbook.api;
 
+import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -31,6 +32,7 @@ import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,10 +48,12 @@ import ru.investbook.entity.EventCashFlowEntity;
 import static org.springframework.http.HttpHeaders.LOCATION;
 
 @RestController
-@Tag(name = "Движения ДС по счету", description = """
-        Ввод, вывод ДС, налоги, комиссии, а также дивиденды, купоны, амортизации по бумагам другого счета
+@Tag(name = "Account cash activities", description = """
+        Deposits, withdrawals, taxes, and fees, as well as dividends, coupons, and amortizations transferred (paid out)
+        from another account. Dividends, coupons, and amortizations credited to the account where the securities
+        are held are accounted for in /api/security-event-cash-flows
         """)
-@RequestMapping("/api/v1/event-cash-flows")
+@RequestMapping("/api/event-cash-flows")
 public class EventCashFlowRestController extends AbstractRestController<Integer, EventCashFlow, EventCashFlowEntity> {
 
     public EventCashFlowRestController(JpaRepository<EventCashFlowEntity, Integer> repository,
@@ -60,28 +64,32 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     @Override
     @GetMapping
     @PageableAsQueryParam
-    @Operation(summary = "Отобразить все", description = "Отображает все выплаты по всем счетам", responses = {
+    @Operation(operationId = "getEventCashFlows", responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public Page<EventCashFlow> get(@Parameter(hidden = true)
+                                   @QuerydslPredicate(root = EventCashFlowEntity.class)
+                                   @Nullable
+                                   Predicate predicate,
+                                   @Parameter(hidden = true)
                                    Pageable pageable) {
-        return super.get(pageable);
+        return (predicate == null) ? super.get(pageable) : super.get(predicate, pageable);
     }
 
     @Override
     @GetMapping("{id}")
-    @Operation(summary = "Отобразить одну", description = "Отобразить выплату по ее номеру", responses = {
+    @Operation(operationId = "getEventCashFlow", responses = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<EventCashFlow> get(@PathVariable("id")
-                                             @Parameter(description = "Номер события")
+                                             @Parameter
                                              Integer id) {
         return super.get(id);
     }
 
     @Override
     @PostMapping
-    @Operation(summary = "Добавить", description = "Сохранить информацию", responses = {
+    @Operation(operationId = "postEventCashFlow", responses = {
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "409"),
             @ApiResponse(responseCode = "500", content = @Content)})
@@ -91,12 +99,12 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
 
     @Override
     @PutMapping("{id}")
-    @Operation(summary = "Обновить", description = "Модифицировать информацию", responses = {
+    @Operation(operationId = "putEventCashFlow", responses = {
             @ApiResponse(responseCode = "201", headers = @Header(name = LOCATION)),
             @ApiResponse(responseCode = "204"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> put(@PathVariable("id")
-                                    @Parameter(description = "Номер события")
+                                    @Parameter
                                     Integer id,
                                     @RequestBody
                                     @Valid
@@ -106,11 +114,11 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
 
     @Override
     @DeleteMapping("{id}")
-    @Operation(summary = "Удалить", description = "Удалить информацию из БД", responses = {
+    @Operation(operationId = "deleteEventCashFlow", responses = {
             @ApiResponse(responseCode = "204"),
             @ApiResponse(responseCode = "500", content = @Content)})
     public ResponseEntity<Void> delete(@PathVariable("id")
-                                       @Parameter(description = "Номер события")
+                                       @Parameter
                                        Integer id) {
         return super.delete(id);
     }
@@ -123,10 +131,5 @@ public class EventCashFlowRestController extends AbstractRestController<Integer,
     @Override
     protected EventCashFlow updateId(Integer id, EventCashFlow object) {
         return object.toBuilder().id(id).build();
-    }
-
-    @Override
-    protected String getLocation() {
-        return "/event-cash-flows";
     }
 }

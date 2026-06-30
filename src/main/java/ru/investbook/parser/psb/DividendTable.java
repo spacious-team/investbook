@@ -52,7 +52,7 @@ public class DividendTable extends SingleAbstractReportTable<SecurityEventCashFl
                 .name(row.getStringCellValue(STOCK_NAME)));
         SecurityEventCashFlow.SecurityEventCashFlowBuilder builder = SecurityEventCashFlow.builder()
                 .security(securityId)
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .count(row.getIntCellValue(COUNT))
                 .eventType(CashFlowType.DIVIDEND)
                 .timestamp(convertToInstant(row.getStringCellValue(DATE)))

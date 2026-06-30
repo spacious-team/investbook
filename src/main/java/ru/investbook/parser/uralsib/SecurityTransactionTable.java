@@ -88,7 +88,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
         TransactionValueAndFeeParser.Result valueAndFee = transactionValueAndFeeParser.parse(
                 transactionValueAndFeeParser.argumentsBuilder()
                         .row(row)
-                        .portfolio(getReport().getPortfolio())
+                        .account(getReport().getAccount())
                         .tradeId(tradeId)
                         .value(value)
                         .valueCurrencyColumn(VALUE_CURRENCY)
@@ -103,7 +103,7 @@ public class SecurityTransactionTable extends SingleAbstractReportTable<Security
         return SecurityTransaction.builder()
                 .timestamp(timestamp)
                 .tradeId(tradeId)
-                .portfolio(getReport().getPortfolio())
+                .account(getReport().getAccount())
                 .security(requireNonNull(security.getId()))
                 .count((isBuy ? 1 : -1) * row.getIntCellValue(COUNT))
                 .value(valueAndFee.value())
