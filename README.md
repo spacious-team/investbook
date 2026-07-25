@@ -138,7 +138,7 @@ Investbook в сравнении с [Intelinvest](https://intelinvest.ru) и [Sn
 или можете запустить Investbook в [docker](docs/run-by-docker.md).
 
 ### Работа с приложением
-Запустите приложение через ярлык на рабочем столе Windows, в браузере перейдите по адресу http://localhost:2030
+Run the application, for example, in Windows via a shortcut on the desktop. In the browser http://localhost:2030
 и загрузите отчеты брокера (с локального компьютера или из email ящика).
 
 Для удобства приложение допускает:
