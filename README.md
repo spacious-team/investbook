@@ -140,7 +140,6 @@ Investbook в сравнении с [Intelinvest](https://intelinvest.ru) и [Sn
 ### Работа с приложением
 Run the application, for example, in Windows via a shortcut on the desktop. In the browser http://localhost:2030
 и загрузите отчеты брокера (с локального компьютера или из email ящика).
-
 Для удобства приложение допускает:
 1. Многократную загрузку одного и того же отчета (полезно, если вы не помните, загрузили конкретный отчет или нет),
    дублирования данных не произойдет.
