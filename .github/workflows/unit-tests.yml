@@ -36,11 +36,9 @@ jobs:
 
       - name: SonarCloud Analyze
         run: >
-          mvn --batch-mode --define no-doc sonar:sonar
+          mvn --batch-mode --define no-doc org.sonarsource.scanner.maven:sonar-maven-plugin:5.7.0.6970:sonar
           -Dsonar.projectKey=spacious-team_investbook
           -Dsonar.organization=spacious-team
-          -Dsonar.host.url=https://sonarcloud.io
-          -Dsonar.login=$SONAR_TOKEN
           -Dsonar.coverage.jacoco.xmlReportPaths=./target/site/jacoco/jacoco.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
